@@ -131,6 +131,7 @@ function App() {
                     <Route path="/roles" element={<Roles />} />
                     <Route path="/maintenance" element={<Maintenance />} />
                     <Route path="/work-assignment" element={<WorkAssignment />} />
+                    <Route path="/dashboard-coordinator" element={<DashboardCoordinator />} />
                   </Routes>
                 </main>
               </div>
