@@ -1,0 +1,27 @@
+.GoogleMapsPrincipal {
+    display: flex;
+    width: auto;
+  }
+  
+  .GoogleMapsPrincipalMapaParent {
+    flex-grow: 1;
+  }
+  
+  .GoogleMapsPrincipalPanoramaParent {
+    flex-grow: 1;
+  }
+  
+  .GoogleMapsPrincipalMapa,
+  .GoogleMapsPrincipalPanorama {
+    float: left;
+    width: 100%;
+    height: 394px;
+  }
+  
+  .GoogleMapsPrincipalMapa {
+    /* inline-size: auto; */
+  }
+  
+  .GoogleMapsPrincipalPanorama {
+    /* inline-size: auto; */
+  }

@@ -1,0 +1,65 @@
+.PaginaCartaInvitacion {
+  background-color: #FFF;
+  color: var(--color-background-table);
+  font-family: 'Arial';
+  padding: 40px;
+  width: 612px;
+  height: 1092px;
+  /* 2550 x 4191  */
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  font-size: var(--table-font-size);
+}
+
+.PaginaCartaInvitacion {
+  font-size: 10px;
+}
+
+.carta-invitacion-cabezera {
+  position: absolute;
+  right: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: right;
+}
+
+.carta-invitacion-cabezera p {
+  margin: 0;
+}
+
+
+
+.PaginaCartaInvitacion .text {
+  margin: 0;
+  /* font-size: 11px; */
+}
+
+.icon-naucalpan {
+  width: 100px;
+}
+
+.Carta-invitacion-direccion {
+  text-align: left;
+  margin-top: 10px;
+}
+
+/* PaginaCartaInvitacion */
+.carta-invitacion-base {
+  position: relative;
+  /* height: 100%; */
+  /* width: 100%; */
+  bottom: -120px;
+  font-weight: 800;
+}
+
+.carta-invitacion-despedida {
+  bottom: -70px;
+  position: relative;
+}
+
+.carta-invitacion-despedida-contacto {
+  font-weight: 100;
+  opacity: 0.6  ;
+
+}

@@ -156,6 +156,7 @@ const Sidebar = () => {
 
   useEffect(() => {
     if (menus && menus.length > 0) {
+      console.log(menus);
       const mainMenu = menus.filter((m) => m.parent_menu_id === 0);
       const subMenus = menus.filter((sm) => sm.parent_menu_id > 0);
 

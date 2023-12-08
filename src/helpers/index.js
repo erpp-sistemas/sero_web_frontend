@@ -28,10 +28,44 @@ const getFechaFormat = (e) => {
     return `${year}-${month}-${day}`
 }
 
+const formatDate =(dateString, format) =>{
+    const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+    const formattedDate = new Date(dateString).toLocaleString('es-MX', options);
+    
+    switch (format) {
+      case 'date':
+        return formattedDate.split(',')[0]; // Get only the date part
+      case 'time':
+        return formattedDate.split(',')[1].trim(); // Get only the time part
+      case 'full':
+        return formattedDate; // Get the complete date and time
+      default:
+        return 'Invalid format';
+    }
+  }
+
+  function formatNumberWithCommas(number) {
+    // Asegurarse de que la entrada sea un número
+    if (typeof number !== 'number') {
+      return 'Invalid input';
+    }
+  
+    // Convertir el número a una cadena y dividirlo en partes por el punto decimal
+    const parts = number.toString().split('.');
+  
+    // Formatear la parte entera (antes del punto decimal) con comas
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  
+    // Unir las partes de nuevo
+    return parts.join('.');
+  }
+
 const functionsCustom = {
     barajar,
     generarAleatorios,
-    getFechaFormat
+    getFechaFormat,
+    formatDate,
+    formatNumberWithCommas,
 }
 
 

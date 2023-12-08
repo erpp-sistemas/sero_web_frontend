@@ -1,0 +1,16 @@
+.busquedaContribuyenteGraficas {
+  display: inline;
+}
+
+.busquedaContribuyenteGraficasTitulo {
+  display: inline;
+}
+
+.busquedaContribuyenteGraficasGraficas {
+  display: flex;
+}
+
+.busquedaContribuyenteGraficasGrafica {
+  flex-grow: 1;
+  max-width: 49%;
+}

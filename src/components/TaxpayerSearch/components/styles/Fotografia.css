@@ -1,0 +1,63 @@
+.fotografias-tomadas {
+  display: flex;
+  gap: 20px;
+  padding-left: 10px;
+  padding-right: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  /* padding-top: 3em; */
+}
+
+.fotografias-tomada {
+  display: flex;
+  width: 250px;
+  flex-direction: column;
+  /* gap: 10px; */
+  text-wrap: balance;
+}
+
+.fotografias-tomada div {
+  text-wrap: inherit;
+}
+
+
+/* 
+ max-width: 300px;
+*/
+
+.fotografias-tomada .icon {
+  background-color: #024;
+  border-radius: 50%;
+  box-shadow: 0px 0px 1px 1px;
+}
+
+.fotografias-tomada .icons {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  flex-direction: column;
+  background-color: #aaa1;
+  padding: 10px;
+  justify-content: space-evenly;
+  box-shadow: 0px 0px 1px 0px inset;
+  border-end-end-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+.fotografias-tomada .imagen {
+  width: 100%;
+  height: auto;
+  /* max-width: 200px; */
+  /* display: initial; */
+  object-fit: contain;
+  margin: 0 auto;
+}
+
+.fotografias-tomada .like {
+  display: initial;
+}
+
+.fotografias-tomada .dislike {
+  display: initial;
+}

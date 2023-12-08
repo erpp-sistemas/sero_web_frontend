@@ -1,0 +1,14 @@
+.PDFFromNodes {
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+}
+
+.PDFFromNodes.hide {
+  z-index: -100;
+  position: absolute;
+  overflow: hidden;
+  left: 0;
+  top: 0;
+  height: 10px;
+}

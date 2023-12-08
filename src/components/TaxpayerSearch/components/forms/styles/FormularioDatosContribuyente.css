@@ -1,0 +1,19 @@
+.FormularioDatosContribuyentePrincipal {
+  display: initial;
+  box-shadow: 0px 0px 4px -2px #4af;
+  padding: 10px;
+  color: var(--color-text);
+}
+
+.FormularioDatosContribuyente {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.FormularioDatosContribuyenteInput {
+  display: initial;
+  max-width: 200px;
+}

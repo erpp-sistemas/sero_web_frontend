@@ -1,0 +1,26 @@
+:root {
+  /* --color-text: rgb(35, 97, 152) */
+  /* --color-text: #44aaff; */
+  --color-text: #1d4e77;
+  --color-background-table: #253F60;
+  --table-font-size: 9px;
+}
+
+.block{
+  display: block;
+}
+.flex {
+  display: flex;
+}
+
+.flex-grow-1 {
+  flex-grow: 1;
+}
+
+.width-fit {
+  width: fit-content;
+}
+
+.capitalize {
+  text-transform: capitalize;
+}

@@ -1,0 +1,205 @@
+/** WidthPoints: 612, // 8.5 x 72 */
+/** HeightPoints: 792, // 11 x 72 */
+
+.PDFInformacionGeneral {
+  background-color: #FFF;
+  color: var(--color-background-table);
+  font-family: 'Arial';
+  padding: 40px;
+  width: 612px;
+  height: 792px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  font-size: var(--table-font-size);
+
+  /* font-family: 'Montserrat'; */
+  font-size: 9px;
+  text-align: center;
+}
+
+/* Apoyame con un elemento tsx que contenga, un  boton deslizante, este elemento deslizante se ocupara del tamaño relativo de sus nodos children, usa material ui
+*/
+.PDFInformacionGeneral .title {
+  text-shadow: none;
+  box-shadow: none;
+  color: inherit;
+  font-weight: 700;
+  font-size: 20px;
+  margin-bottom: 0px;
+  margin-top: 0;
+}
+
+.PDFInformacionGeneral .subtitle {
+  position: relative;
+  top: 5px;
+  margin-top: 0px;
+  font-size: 11px;
+  /* bottom: -10px; */
+  /* margin-bottom: 30px;  */
+}
+
+.PDFInformacionGeneral .icon_top_left {
+  position: absolute;
+  top: 20px;
+  left: 30px;
+  width: 150px;
+}
+
+.PDFInformacionGeneral .icon_top_right {
+  position: absolute;
+  top: 40px;
+  right: 40px;
+  width: 130px;
+  height: 90px;
+}
+
+.PDFInformacionGeneral .container-fol {
+  position: relative;
+
+}
+
+.PDFInformacionGeneral .fol {
+  font-size: 11px;
+  position: absolute;
+  right: 0;
+  bottom: -25px;
+}
+
+.PDFInformacionGeneral .celda {
+  border: 1px solid var(--color-background-table);
+  font-size: var(--table-font-size);
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
+.PDFInformacionGeneral .small-bold {
+  font-size: 11px;
+  font-weight: bold;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+}
+
+.PDFInformacionGeneral .tr-pair {
+  background-color: #E6E6E6;
+
+}
+
+.PDFInformacionGeneral .tr-odd {
+  background-color: #FDFDFD;
+  /* index % 2 === 0 ? '#E6E6E6' : '#FDFDFD'  */
+}
+
+.PDFInformacionGeneral .tabla-datos-contribuyente {
+  /* margin-top: 20px; */
+  font-size: 11px;
+  border-collapse: collapse;
+  /* border-collapse: separate; */
+  width: 100%;
+  border-color: #253F60;
+}
+
+.PDFInformacionGeneral th {
+  font-weight: 500;
+  font-size: 13px;
+}
+
+
+.PDFInformacionGeneral .tabla-datos-geolocalizacion {
+  font-size: var(--table-font-size);
+  border-collapse: collapse;
+  /* border-collapse: separate; */
+  width: 100%;
+  border-color: #253F60;
+  position: relative;
+}
+
+.tabla-datos-geolocalizacion .evidencia-contenedor {
+  position: relative;
+}
+
+.tabla-datos-geolocalizacion .evidencia {
+  height: 174px;
+  max-width: 100%;
+  margin: 0;
+  max-height: 210px; 
+  height: 100%; 
+}
+
+.tabla-datos-geolocalizacion .celda {
+  font-size: var(--table-font-size);
+
+}
+
+/* 
+
+'
+-- Selecciona una Plaza --
+Zinacantepec
+Cuautitlan Izcalli
+Demo
+Naucalpan
+Lektor Cuautitlan Izcalli\n\n'
+
+*/
+
+.tabla-acciones-contribuyente .celda {
+  font-size: var(--table-font-size);
+  padding-top: 3px;
+  padding-bottom: 2px;
+}
+
+.PDFInformacionGeneral .firma-jhovany {
+  position: absolute;
+  bottom: 50px;
+  left: 90px;
+  /* font-size: inherit; */
+  font-weight: 800;
+  font-size: 9px;
+}
+
+.firma-jhovany-firma {
+  position: relative;
+  left: 0;
+  bottom: -30px;
+  /* width: 150px; */
+  /* height: 70px; */
+}
+
+.firma-jhovany-texto {
+  position: relative;
+  bottom: 0;
+  border-top: 4px solid #44aaff80;
+}
+
+.firma-jhovany-nombre {
+  position: relative;
+  bottom: 10px;
+  left: 0;
+}
+
+.firma-jhovany-descripcion {
+  position: relative;
+  /* font-size: 11px; */
+  bottom: 20px;
+}
+
+.pdf-informacion-pagina-contenedor {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  font-size: 9px;
+}
+
+.pdf-informacion-pagina p {
+  margin: 0;
+}
+
+
+.pdf-informacion-pagina {
+  border-top: 1px solid var(--color-background-table);
+  /* width: 200px; */
+  position: relative;
+  /* bottom: -170px; */
+}

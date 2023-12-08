@@ -1,0 +1,33 @@
+.FormUplodadImage {
+  color: inherit;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  flex-direction: column;
+}
+
+.BoxUploadImage {
+  display: none;
+}
+
+.FormUploadImageDragging {
+  display: none;
+}
+
+.WhenFormUploadImageDragging {
+  display: flex;
+  flex-direction: column;
+  color: inherit;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  background-color: #1c5792;
+  left: 0;
+  top: 0;
+  border: 5px dashed #92e47ef5;
+  color: white;
+}

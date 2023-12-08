@@ -1,0 +1,12 @@
+.PDFGeneratorTable {
+  background-color: rgb(7 42 70);
+}
+
+.PDFGeneratorTable td {
+  outline: none;
+  border: 1px solid #ffffff4d;
+  border: none;
+  font-size: 12px;
+  padding-left: 10px;
+  padding-right: 10px;
+}

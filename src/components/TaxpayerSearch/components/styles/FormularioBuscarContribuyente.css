@@ -1,0 +1,19 @@
+.contenedor-formulario-buscar-cuenta {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+  margin-left: 30px;
+  margin-right: 30px;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  
+}
+
+.hijo-formulario-buscar-cuenta {
+  flex-grow: 1;
+  max-width: 33%;
+}
+
+.caja-buscar-cuenta input {
+  padding-top: 10px;
+}
