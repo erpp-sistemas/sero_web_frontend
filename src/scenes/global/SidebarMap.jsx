@@ -19,46 +19,6 @@ import SeroOscuro from '../../assets/sero-logo.png'
 import { Marker } from "mapbox-gl";
 
 
-const Item = ({ title, to, icon, selected, setSelected, color, isCollapsed = false }) => {
-
-    const theme = useTheme();
-
-    return (
-        <>
-            {isCollapsed ? (
-                <Tooltip title={title} placement="right" arrow={true} >
-                    <MenuItem
-                        active={selected === title}
-                        style={{
-                            color: color
-                        }}
-                        onClick={() => setSelected(title)}
-                        icon={icon}
-                    >
-                        <Typography>{title}</Typography>
-                        <Link to={to} />
-                    </MenuItem>
-                </Tooltip>
-            ) : (
-                <MenuItem
-                    active={selected === title}
-                    style={{
-                        color: color
-                    }}
-                    onClick={() => setSelected(title)}
-                    icon={icon}
-                >
-                    <Typography>{title}</Typography>
-                    <Link to={to} />
-                </MenuItem>
-            )}
-        </>
-
-
-    );
-};
-
-
 
 const Sidebar = () => {
 
@@ -86,12 +46,13 @@ const Sidebar = () => {
 
     useEffect(() => {
         if (serviciosMapa.length > 0) {
-            console.log(serviciosMapa)
             serviciosMapa.forEach(servicio => {
                 if (servicio.service_id === 7) fillCartografia(servicio)
             })
         }
     }, [serviciosMapa])
+
+
 
     useEffect(() => {
 
@@ -99,9 +60,16 @@ const Sidebar = () => {
 
             if (marker !== null) marker.remove()
 
-            setMarker(new Marker({
+            let longitud = features.coordinates[0]
+            let latitud = features.coordinates[1]
+
+            const m = new Marker({
                 color: colors.greenAccent[500],
-            }).setLngLat(features.coordinates).addTo(mapa_activo.mapa));
+            }).setLngLat([longitud, latitud]).addTo(mapa_activo.mapa)
+
+
+            setMarker(m)
+
         } else {
             if (marker !== null) marker.remove()
         }
@@ -125,7 +93,7 @@ const Sidebar = () => {
         const layers_mapa = getLayersMapByIdPlaza(mapa_seleccionado.place_id)
 
         const promise = await Promise.all([servicios_mapa, layers_mapa])
-        console.log(promise)
+        //console.log(promise)
 
         setServiciosMapa(promise[0])
         setLayersMapa(promise[1])
@@ -385,7 +353,7 @@ const Sidebar = () => {
                                     />
                                     <CardContent
                                         sx={{ backgroundColor: theme.palette.mode === 'dark' ? colors.primary[500] : colors.primary[400] }} >
-                                        {Object.keys(features.features_layer).length > 0 && (features.features_layer.cuenta ||  features.features_layer.municipio || features.features_layer.ide) ? Object.keys(features.features_layer).map(f => (
+                                        {Object.keys(features.features_layer).length > 0 && (features.features_layer.cuenta || features.features_layer.municipio || features.features_layer.ide) ? Object.keys(features.features_layer).map(f => (
                                             <Button sx={{ width: '100%', backgroundColor: theme.palette.mode === 'dark' ? colors.primary[500] : colors.primary[400], color: colors.grey[100] }}>
                                                 {`${f.replaceAll('_', ' ')} : ${features.features_layer[f]}`}
                                             </Button>

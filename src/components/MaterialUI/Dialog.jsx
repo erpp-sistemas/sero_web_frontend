@@ -30,7 +30,7 @@ const Transition = forwardRef(function Transition(props, ref) {
 });
 
 const colors_palette = [
-    '#0000ff', '#5f9ea0', '#d2691e', '#008b8b', '#006400', '#8b008b', '#8b0000', '#483d8b', '#2f4f4f', '#ffd700', '#ff69b4', '#f08080', '#add8e6', '#20b2aa', '#32cd32', '#ff00ff', '#800000', '#9370db', '#7b68ee', '#ffdead', '#ffa500', '#afeeee', '#800080', '#4169e1', '#fa8072', '#4682b4', '#40e0d0', '#f5f5f5', '#ffff00', '#9acd32', '#ff0000', '#00fffb', '#ff00d4', '#bf00ff', '#00ffa6'
+    '#0000ff', '#5f9ea0', '#d2691e', '#008b8b', '#006400', '#8b008b', '#8b0000', '#483d8b', '#2f4f4f', '#ffd600', '#ff69b4', '#f08080', '#add8e6', '#20b2aa', '#32cd32', '#ff00ff', '#800000', '#9370db', '#7b68ee', '#ffdead', '#ffa500', '#afeeee', '#800080', '#4169e1', '#fa8072', '#4682b4', '#40e0d0', '#f5f5f5', '#ffff00', '#9acd32', '#ff0000', '#00fffb', '#ff00d4', '#bf00ff', '#00ffa6'
 ];
 
 
@@ -40,8 +40,8 @@ export default function AlertDialogSlide() {
 
     const mapa_activo = useSelector((state) => state.mapa)
     const features = useSelector((state) => state.features)
-
-
+    
+    
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
 
@@ -67,11 +67,12 @@ export default function AlertDialogSlide() {
     };
 
     const handleButtonHerramienta = (herramienta) => {
-
         if (herramienta === 'Dibujar poligono') {
-            features.draw.changeMode('draw_polygon');
-            setOpen(false);
-            return
+            if (features) {
+                features.draw.changeMode('draw_polygon');
+                setOpen(false);
+                return
+            }
         }
 
         setShowButtonsHerramientas(false)
@@ -232,7 +233,13 @@ export default function AlertDialogSlide() {
                     {showButtonsHerramientas && (
                         <>
                             <Box sx={{ marginBottom: '10px' }}>
-                                <Button sx={{ backgroundColor: colors.greenAccent[900], width: '300px' }} variant="outlined" startIcon={<ColorLensIcon />}
+                                <Button sx={{
+                                    backgroundColor: colors.greenAccent[600], width: '300px',
+                                    ":hover": {
+                                        bgcolor: colors.greenAccent[300],
+                                        color: "white"
+                                    }
+                                }} variant="outlined" startIcon={<ColorLensIcon />}
                                     onClick={() => handleButtonHerramienta('Cambio de color')}
                                 >
                                     Cambio de color
@@ -240,7 +247,13 @@ export default function AlertDialogSlide() {
                             </Box>
 
                             <Box sx={{ marginBottom: '10px' }}>
-                                <Button sx={{ backgroundColor: colors.greenAccent[900], width: '300px' }} variant="outlined" startIcon={<PolylineIcon />}
+                                <Button sx={{
+                                    backgroundColor: colors.greenAccent[600], width: '300px',
+                                    ":hover": {
+                                        bgcolor: colors.greenAccent[300],
+                                        color: "white"
+                                    }
+                                }} variant="outlined" startIcon={<PolylineIcon />}
                                     onClick={() => handleButtonHerramienta('Dibujar poligono')}
                                 >
                                     Poligono de selección
@@ -248,7 +261,13 @@ export default function AlertDialogSlide() {
                             </Box>
                             {features.puntos_in_poligono.length > 0 && (
                                 <Box sx={{ marginBottom: '10px' }}>
-                                    <Button sx={{ backgroundColor: colors.greenAccent[900], width: '300px' }} variant="outlined" startIcon={<ContactPageIcon />}
+                                    <Button sx={{
+                                        backgroundColor: colors.greenAccent[600], width: '300px',
+                                        ":hover": {
+                                            bgcolor: colors.greenAccent[300],
+                                            color: "white"
+                                        }
+                                    }} variant="outlined" startIcon={<ContactPageIcon />}
                                         onClick={() => handleButtonHerramienta('ver información')}
                                     >
                                         Ver información
@@ -257,7 +276,13 @@ export default function AlertDialogSlide() {
                             )}
 
                             <Box sx={{ marginBottom: '10px' }}>
-                                <Button sx={{ backgroundColor: colors.greenAccent[900], width: '300px' }} variant="outlined" startIcon=
+                                <Button sx={{
+                                    backgroundColor: colors.greenAccent[600], width: '300px',
+                                    ":hover": {
+                                        bgcolor: colors.greenAccent[300],
+                                        color: "white"
+                                    }
+                                }} variant="outlined" startIcon=
                                     {<FiberSmartRecordIcon />}
                                     onClick={() => handleButtonHerramienta('Mapa de calor')}
                                 >
@@ -266,12 +291,37 @@ export default function AlertDialogSlide() {
                             </Box>
 
                             <Box sx={{ marginBottom: '10px' }}>
-                                <Button sx={{ backgroundColor: colors.greenAccent[900], width: '300px' }} variant="outlined" startIcon={<GpsFixedIcon />}>
+                                <Button sx={{
+                                    backgroundColor: colors.greenAccent[600], width: '300px',
+                                    ":hover": {
+                                        bgcolor: colors.greenAccent[300],
+                                        color: "white"
+                                    }
+                                }} variant="outlined" startIcon={<GpsFixedIcon />}>
                                     Tracking a operadores
                                 </Button>
                             </Box>
+
                             <Box sx={{ marginBottom: '10px' }}>
-                                <Button sx={{ backgroundColor: colors.greenAccent[900], width: '300px' }} variant="outlined" startIcon={<FilterAltIcon />}>
+                                <Button sx={{
+                                    backgroundColor: colors.greenAccent[600], width: '300px',
+                                    ":hover": {
+                                        bgcolor: colors.greenAccent[300],
+                                        color: "white"
+                                    }
+                                }} variant="outlined" startIcon={<GpsFixedIcon />}>
+                                    Asignación
+                                </Button>
+                            </Box>
+
+                            <Box sx={{ marginBottom: '10px' }}>
+                                <Button sx={{
+                                    backgroundColor: colors.greenAccent[600], width: '300px',
+                                    ":hover": {
+                                        bgcolor: colors.greenAccent[300],
+                                        color: "white"
+                                    }
+                                }} variant="outlined" startIcon={<FilterAltIcon />}>
                                     Filtros
                                 </Button>
                             </Box>
@@ -334,11 +384,11 @@ export default function AlertDialogSlide() {
                                 </NativeSelect>
 
                                 {mapaCalorCreado && showButtonsHerramientas === false && (<Typography sx={{ margin: '10px', textAlign: 'center', display: 'inline-block' }}>
-                                    Capa creada: <Typography sx={{ display: 'inline-block', color: colors.greenAccent[700], marginLeft: '5px' }}> {nombreLayerSeleccionado} </Typography>
+                                    Capa creada: <Typography sx={{ display: 'inline-block', color: colors.greenAccent[600], marginLeft: '5px' }}> {nombreLayerSeleccionado} </Typography>
                                 </Typography>)}
 
                                 {mapaCalorCreado === false && showButtonsHerramientas === false && (
-                                    <Button sx={{ backgroundColor: colors.greenAccent[700], marginTop: '10px' }}
+                                    <Button sx={{ backgroundColor: colors.greenAccent[600], marginTop: '10px' }}
                                         onClick={handleActivaCluster}
                                     >
                                         Generar
@@ -366,11 +416,11 @@ export default function AlertDialogSlide() {
                                 {console.log(features.puntos_in_poligono)}
                             </>
                             <Typography sx={{ display: 'inline-block' }}>
-                                Número de registros: <Typography sx={{ display: 'inline-block', color: colors.greenAccent[700], marginLeft: '7px' }}> {features.puntos_in_poligono.length}  </Typography>
+                                Número de registros: <Typography sx={{ display: 'inline-block', color: colors.greenAccent[600], marginLeft: '7px' }}> {features.puntos_in_poligono.length}  </Typography>
                             </Typography>
                             <CSVLink data={generateCSV()}
                                 style={{
-                                    display: 'block', width: '200px', color: 'black', backgroundColor: colors.greenAccent[700],
+                                    display: 'block', width: '200px', color: 'black', backgroundColor: colors.greenAccent[600],
                                     padding: '5px', borderRadius: '5px', marginTop: '10px', paddingLeft: '10px'
                                 }}
                                 filename="registros_seleccionados" >Descargar datos</CSVLink>

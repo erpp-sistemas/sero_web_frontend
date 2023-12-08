@@ -8,7 +8,8 @@ import { PersistGate } from 'redux-persist/integration/react';
 import { Provider } from 'react-redux'
 import { store, persistor } from './redux/store'
 
-mapboxgl.accessToken = 'pk.eyJ1IjoibGVzdGF0eCIsImEiOiJjbDRxNGxvazMwMTVzM2RyemtzbDBvZnFoIn0.1Z-Eve85dnZLmkCs6BQ5Tw';
+mapboxgl.accessToken = 'pk.eyJ1IjoibGVzdGF0eCIsImEiOiJjbDJoMzJrbmYwYTNrM2NteGVtMzBsODFvIn0.lTrpDiiVnBWEv141_PnuUg';
+//mapboxgl.accessToken = 'pk.eyJ1IjoibGVzdGF0eCIsImEiOiJjbDRxNGxvazMwMTVzM2RyemtzbDBvZnFoIn0.1Z-Eve85dnZLmkCs6BQ5Tw';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   // <React.StrictMode>

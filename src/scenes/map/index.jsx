@@ -8,7 +8,11 @@ import { setDraw } from '../../redux/featuresSlice'
 import { setPlazaMapa } from '../../redux/plazaMapa.Slice'
 import { setMapa } from '../../redux/mapaSlice'
 import { setFeatures, setCoordinates, setPuntosInPoligono } from '../../redux/featuresSlice'
+
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
+import ModalNamePolygon from '../../components/ModalNamePolygon'
+import ModalInfoPolygon from '../../components/ModalInfoPolygons'
+import { Button } from '@mui/material'
 
 import * as turf from '@turf/turf'
 
@@ -32,7 +36,14 @@ const Mapa = () => {
     const { place_id } = useParams();
 
     const [plaza, setPlaza] = useState([])
-    const [poligonosDibujados, setPoligonosDibujados] = useState([]);
+    const [poligonosDibujados, setPoligonosDibujados] = useState('');
+    const [poligonoSeleccionado, setPoligonoSeleccionado] = useState(null)
+    const [puntosInPoligonoSeleccionado, setPuntosInPoligonoSeleccionado] = useState(0)
+    const [showModalFeaturePolygon, setShowModalFeaturePolygon] = useState(false)
+    const [nombrePoligonoSeleccionado, setNombrePoligonoSeleccionado] = useState('')
+    const [poligonoSelected, setPoligonoSelected] = useState(false)
+    const [showModalInfoPolygon, setShowModalInfoPolygon] = useState(false)
+
     const [seleccionPoligonoPuntos, setSeleccionPoligonoPuntos] = useState([]);
     const [ultimoPoligonoCreado, setUltimoPoligonoCreado] = useState('');
 
@@ -46,30 +57,32 @@ const Mapa = () => {
         }
     }, [plaza])
 
+
+
     const getPlazaById = async () => {
 
         const res = await getPlaceById(place_id)
-        console.log(res[0])
         dispatch(setPlazaMapa(res[0]))
         setPlaza(res[0])
-  
+
     }
 
     const generarMapa = () => {
         const mapa = new Map({
             container: mapDiv.current,
-            style: 'mapbox://styles/mapbox/streets-v11?optimize=true',
-            center: [plaza.longitud, plaza.latitud],
+            style: 'mapbox://styles/mapbox/streets-v12?optimize=true',
+            center: [Number(plaza.longitud), Number(plaza.latitud)],
             zoom: 12
         })
 
         dispatch(setMapa(mapa))
 
+
         const draw = new MapboxDraw({
             displayControlsDefault: false,
             controls: {
-                polygon: true,
-                trash: true
+                polygon: false,
+                trash: false
             },
         })
 
@@ -77,17 +90,16 @@ const Mapa = () => {
 
         dispatch(setDraw(draw))
 
+
         mapa.on('draw.create', (e) => {
             setSeleccionPoligonoPuntos([]);
-            const data = draw.getAll();
-            if (data.features.length > 0) {
-                let idPoligono = data.features[0].id
-                setUltimoPoligonoCreado(idPoligono);
-                setPoligonosDibujados([...poligonosDibujados, idPoligono]);
-            } else {
-                if (e.type !== 'draw.delete')
-                    alert('Click the map to draw a polygon.');
-            }
+
+            // if (data.features.length > 0) {
+            //     addNamePolygon(draw)
+            // } else {
+            //     if (e.type !== 'draw.delete')
+            //         alert('Click the map to draw a polygon.');
+            // }
         })
 
         mapa.on('draw.delete', (e) => {
@@ -95,9 +107,9 @@ const Mapa = () => {
             const data = draw.getAll();
             dispatch(setPuntosInPoligono([]))
             if (data.features.length > 0) {
-                let idPoligono = data.features[0].id
-                setUltimoPoligonoCreado(idPoligono);
-                setPoligonosDibujados([...poligonosDibujados, idPoligono]);
+                // let idPoligono = data.features[0].id
+                // setUltimoPoligonoCreado(idPoligono);
+                // setPoligonosDibujados([...poligonosDibujados, idPoligono]);
             } else {
                 if (e.type !== 'draw.delete')
                     alert('Click the map to draw a polygon.');
@@ -105,6 +117,8 @@ const Mapa = () => {
         })
 
         mapa.on('click', e => {
+
+            setPoligonoSelected(false)
 
             setSeleccionPoligonoPuntos([]);
 
@@ -129,18 +143,24 @@ const Mapa = () => {
                     var southWestPointPixel = mapa.project(northEast);
 
                     var featuresB = mapa.queryRenderedFeatures([southWestPointPixel, northEastPointPixel])
+                    console.log(featuresB)
 
+                    let poligono_info = featuresB.filter(f => f.source === 'mapbox-gl-draw-cold')
+                   
+                    if (poligono_info.length > 0) {
+                        setPoligonoSelected(true)
+                    }
+
+                    setPoligonoSeleccionado(poligono_info[0])
 
                     let puntos = featuresB.filter((f) => f.layer.type === 'circle')
-                    puntos.forEach(p => {
-                        p.id = ultimoPoligonoCreado
-                    })
 
                     puntos = quitarDuplicados(puntos);
-                    console.log(puntos)
+                    setPuntosInPoligonoSeleccionado(puntos)
 
                     dispatch(setPuntosInPoligono(puntos))
                     dispatch(setFeatures(features[0].properties))
+
                     if (features[0].geometry.type === 'Polygon') {
                         let coordenadasArray = [];
                         let latitud = features[0].properties.latitud;
@@ -173,15 +193,65 @@ const Mapa = () => {
         //console.log(array)
         var hash = {};
         let arrayTemp = array.filter(function (current) {
-            var exists = !hash[current.properties.id_contribuyente];
-            hash[current.properties.id_contribuyente] = true;
+            var exists = !hash[current.properties.cuenta];
+            hash[current.properties.id_cuenta] = true;
             return exists;
         });
         return arrayTemp;
     }
 
+    const mostrarIdsPoligonos = () => {
+        setShowModalInfoPolygon(true)
+        alert(poligonosDibujados)
+    }
+
+
+    const addNamePolygonSelected = () => {
+        setPoligonosDibujados([...poligonosDibujados, {
+            name_polygon: nombrePoligonoSeleccionado,
+            cuentas: puntosInPoligonoSeleccionado,
+            id: poligonoSeleccionado.properties.id
+        }])
+        setShowModalFeaturePolygon(false)
+    }
+
     return (
         <div ref={mapDiv} style={stylesMap}>
+
+            {showModalFeaturePolygon && <ModalNamePolygon
+                setShowModal={setShowModalFeaturePolygon}
+                setNombrePoligono={setNombrePoligonoSeleccionado}
+                aceptName={addNamePolygonSelected}
+            />}
+
+            {showModalInfoPolygon && <ModalInfoPolygon 
+            setShowModal={setShowModalInfoPolygon} poligonosDibujados={poligonosDibujados} />}
+
+            {poligonoSelected && (
+                <Button variant="contained"
+                    onClick={() => setShowModalFeaturePolygon(true)}
+                    sx={{
+                        zIndex: '100',
+                        position: 'absolute',
+                        left: '300px',
+                        bottom: '70px',
+                        width: '250px',
+                    }}
+                >Agregar feature</Button>
+            )}
+
+            {poligonosDibujados && poligonosDibujados.length > 0 && (
+                <Button variant="contained"
+                    onClick={mostrarIdsPoligonos}
+                    sx={{
+                        zIndex: '100',
+                        position: 'absolute',
+                        left: '300px',
+                        bottom: '30px',
+                        width: '250px'
+                    }}
+                >Mostrar información poligonos</Button>
+            )}
 
         </div>
     )
