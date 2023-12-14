@@ -1,9 +1,5 @@
 import axios from 'axios'
 
-const instance = axios.create({
-    baseURL: 'http://localhost:3000/api',
-    //baseURL: 'https://erpp.center/sero-web/api',
-    //withCredentials: true
-})
+const instance = axios.create({ baseURL: import.meta.env.VITE_BASE_URL})
 
 export default instance
