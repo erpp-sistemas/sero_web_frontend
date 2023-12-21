@@ -1,4 +1,5 @@
 import {
+  Box,
   Button,
   Dialog,
   DialogActions,
@@ -23,6 +24,8 @@ import useAccountData from "../../../../hooks/accountDataHook";
 import useCombinedSlices from "../../../../hooks/useCombinedSlices";
 import PropTypes from 'prop-types';
 import { withErrorBoundary } from '@sentry/react';
+import PlaceSelect from "../../../PlaceSelect";
+
 /**
  * Componente de búsqueda que permite buscar información por cuenta y realizar búsquedas personalizadas.
  *
@@ -131,12 +134,18 @@ function Search({
    * @param {Object} e - Evento de cambio.
    * @param {string} controlName - Nombre del control.
    */
-  const changeControl = (e, controlName) => {
+  
+
+  const handlePlaceChange = (e)=>{
     setPlazaNumber(e.target.value);
-  };
+
+  }
   return (
     <>
-      <TextField
+    <Box sx={{width:"35%"}}>
+    <PlaceSelect handlePlaceChange={handlePlaceChange}/>
+    </Box>
+    {/*   <TextField
         color="secondary"
         id="filled-select-currency"
         select
@@ -169,7 +178,7 @@ function Search({
           {" "}
           Cuautitlan Mèxico
         </MenuItem>
-      </TextField>
+      </TextField> */}
 
       <TextField
         color="secondary"
