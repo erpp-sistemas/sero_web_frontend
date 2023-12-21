@@ -131,9 +131,10 @@ function App() {
                     <Route path="/map-list" element={<MapList />} />
                     <Route path="/map/:place_id" element={<Map />} />
                     <Route path="/roles" element={<Roles />} />
-                    <Route path="/maintenance" element={<AcountHistory />} />
+                    <Route path="/maintenance" element={<Maintenance />} />
                     <Route path="/work-assignment" element={<WorkAssignment />} />
                     <Route path="/dashboard-coordinator" element={<DashboardCoordinator />} />
+                    <Route path="/acount-history" element={<AcountHistory/>}/>
                   </Routes>
                 </main>
               </div>
