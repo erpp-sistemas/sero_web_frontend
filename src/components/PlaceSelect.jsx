@@ -24,7 +24,7 @@ function PlaceSelect({ selectedPlace, handlePlaceChange }) {
       select
       label="Plazas"
       variant="filled"
-      sx={{ width: '45%' }}
+      sx={{ width: '100%' }}
       value={selectedPlace}
       onChange={handlePlaceChange}
     >
