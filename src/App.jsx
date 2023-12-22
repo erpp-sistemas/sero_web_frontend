@@ -38,6 +38,7 @@ import Cookies from 'js-cookie'
 import { verifyTokenRequest } from "./api/auth";
 import AcountHistory from "./scenes/acount-history";
 import SheetGenerator from "./scenes/sheet-generator";
+import ValidPayment from './scenes/valid-payment'
 
 
 function App() {
@@ -135,6 +136,7 @@ function App() {
                     <Route path="/work-assignment" element={<WorkAssignment />} />
                     <Route path="/dashboard-coordinator" element={<DashboardCoordinator />} />
                     <Route path="/acount-history" element={<AcountHistory/>}/>
+                    <Route path="/valid-payment" element={< ValidPayment/>}/>
                   </Routes>
                 </main>
               </div>
