@@ -26,7 +26,7 @@ function ServiceSelect({ selectedPlace, selectedService, handleServiceChange }) 
       select
       label="Servicio"
       variant="filled"
-      sx={{ width: '45%' }}
+      sx={{ width: '100%' }}
       value={selectedService}
       onChange={handleServiceChange}
     >
