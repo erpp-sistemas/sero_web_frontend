@@ -4,7 +4,7 @@ import axios from './axios'; // Asegúrate de que el path sea correcto
 // Función para obtener todas las tareas de un servicio por ID
 export const getAllTasksByServiceId = async (serviceId) => {
     try {
-      const response = await axios.get(`/services/${serviceId}`);
+      const response = await axios.get(`/api/services/${serviceId}`);
       // Podrías realizar operaciones adicionales aquí antes de retornar los datos
       return response.data;
     } catch (error) {
@@ -16,7 +16,7 @@ export const getAllTasksByServiceId = async (serviceId) => {
   // Función para actualizar una tarea por su ID
 export const updateTaskById = async (taskId, updatedTaskData) => {
     try {
-      const response = await axios.put(`/tasks/${taskId}`, updatedTaskData);
+      const response = await axios.put(`/api/tasks/${taskId}`, updatedTaskData);
       // Podrías realizar operaciones adicionales aquí después de la actualización
       return response.data;
     } catch (error) {
@@ -29,7 +29,7 @@ export const updateTaskById = async (taskId, updatedTaskData) => {
 // Función para eliminar una tarea por su ID
 export const deleteTaskById = async (taskId) => {
     try {
-      const response = await axios.delete(`/tasks/${taskId}`);
+      const response = await axios.delete(`/api/tasks/${taskId}`);
       // Podrías realizar operaciones adicionales aquí después de la eliminación
       return response.data;
     } catch (error) {
@@ -41,7 +41,7 @@ export const deleteTaskById = async (taskId) => {
   // Función para crear una nueva tarea
   export const createTask = async (taskData) => {
     try {
-      const response = await axios.post('/task', taskData);
+      const response = await axios.post('/api/task', taskData);
       // Podrías realizar operaciones adicionales aquí después de la creación
       return response.data;
     } catch (error) {
