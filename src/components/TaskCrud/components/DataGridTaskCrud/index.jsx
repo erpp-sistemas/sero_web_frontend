@@ -5,18 +5,15 @@ import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import { IconButton } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
+import { getAllProcesses } from "../../../../api/process";
 
-const processes = [
-  { id_proceso: 1, nombre: "Carta Invitacion" },
-  { id_proceso: 2, nombre: "Notificacion" },
-  { id_proceso: 3, nombre: "Inspeccion" },
-  { id_proceso: 4, nombre: "Requerimiento 1" },
-  { id_proceso: 5, nombre: "Requerimiento 2" },
-  { id_proceso: 6, nombre: "Ejecucion fiscal" },
-  { id_proceso: 7, nombre: "Cortes" },
-  { id_proceso: 8, nombre: "Encuesta" },
-  { id_proceso: 10, nombre: "Lecturas" },
-];
+
+
+
+
+
+
+
 /**
  * Componente funcional que representa una celda de verificación.
  *
@@ -60,6 +57,11 @@ const CheckCell = ({ data }) => {
  * <DataGridTaskCrud />
  */
 function DataGridTaskCrud() {
+
+
+
+
+  
   /**
    * Estado para almacenar las filas de datos.
    *
@@ -68,6 +70,7 @@ function DataGridTaskCrud() {
    * @private
    */
   const [rows, setRows] = React.useState([]);
+  const [getProcesses,setProcesses]=React.useState([])
   /**
    * Construye y devuelve la configuración de columnas para el DataGrid.
    *
@@ -113,14 +116,14 @@ function DataGridTaskCrud() {
         headerAlign: "left",
         editable: true,
         valueGetter: ({ row }) => {
-          const targetProcess = processes.find(
+          const targetProcess = getProcesses.find(
             (process) => process.id_proceso === row.id_proceso
           );
           return targetProcess ? targetProcess.nombre : "";
         },
-        valueOptions: () => processes.map((process) => process.nombre),
+        valueOptions: () => getProcesses.map((process) => process.nombre),
         valueParser: (newValue) => {
-          const targetProcess = processes.find(
+          const targetProcess = getProcesses.find(
             (process) => process.nombre === newValue
           );
           return targetProcess ? targetProcess.id_proceso : "";
@@ -154,6 +157,40 @@ function DataGridTaskCrud() {
 
     return columns;
   };
+
+
+
+
+  React.useEffect(() => {
+    /**
+    * Función asíncrona para obtener y establecer los datos de las tareas.
+    *
+    * @function
+    * @async
+    * @private
+    */
+   const fetchData = async () => {
+     try {
+       // Aquí deberías hacer tu solicitud de red para obtener los datos
+       // Reemplaza 'TU_URL_DE_DATOS' con la URL real de tus datos
+       const response = await getAllTasks();
+  
+       
+  
+       // Agrega el campo 'id_tarea' a cada fila usando el índice como valor único si no no se ven en la datagrid
+       const rowsWithId = response.map((row, index) => ({
+         ...row,
+         id: row.id_tarea || index.toString(),
+       }));
+  
+       setRows(rowsWithId);
+     } catch (error) {
+       console.error("Error fetching data:", error);
+     }
+   };
+  
+   fetchData();
+  }, []);
   /**
    * Hook de efecto para cargar datos iniciales al montar el componente.
    *
@@ -173,15 +210,21 @@ function DataGridTaskCrud() {
       try {
         // Aquí deberías hacer tu solicitud de red para obtener los datos
         // Reemplaza 'TU_URL_DE_DATOS' con la URL real de tus datos
-        const response = await getAllTasks();
+        const response = await getAllProcesses();
 
         // Agrega el campo 'id_tarea' a cada fila usando el índice como valor único si no no se ven en la datagrid
         const rowsWithId = response.map((row, index) => ({
           ...row,
           id: row.id_tarea || index.toString(),
-        }));
+        })).filter((row)=>{
+          return row.activo
+        });
 
-        setRows(rowsWithId);
+
+       
+
+
+        setProcesses(rowsWithId);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
