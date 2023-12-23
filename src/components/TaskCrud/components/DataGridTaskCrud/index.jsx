@@ -1,6 +1,6 @@
 import React from "react";
 import { getAllTasks } from "../../../../api/task";
-import { DataGrid, GridActionsCellItem } from "@mui/x-data-grid";
+import { DataGrid, GridActionsCellItem, GridToolbarColumnsButton, GridToolbarContainer, GridToolbarDensitySelector, GridToolbarExport, GridToolbarFilterButton } from "@mui/x-data-grid";
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import { IconButton } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
@@ -233,12 +233,54 @@ function DataGridTaskCrud() {
     fetchData();
   }, []);
 
-   /**
+   
+
+
+/**
+ * Componente funcional que representa una barra de herramientas personalizada para un DataGrid.
+ *
+ * @component
+ * @example
+ * // Uso en un DataGrid
+ * <DataGrid components={{ Toolbar: CustomToolbar }} />
+ */
+   function CustomToolbar() {
+     /**
+   * Renderiza una barra de herramientas con botones para gestionar las columnas, filtros, densidad y exportación de un DataGrid.
+   *
+   * @returns {JSX.Element} - Elemento JSX que representa la barra de herramientas personalizada.
+   */
+    
+
+ 
+    return (
+      <GridToolbarContainer>
+        <GridToolbarColumnsButton color="secondary" />
+        <GridToolbarFilterButton color="secondary" />
+        <GridToolbarDensitySelector color="secondary" />
+        <GridToolbarExport color="secondary" />
+        {/* <Button
+          color="secondary"
+          startIcon={<FaTasks />}
+          onClick={handleOpenDialog}
+        >
+          Agregar Nueva Tarea
+        </Button> */}
+      </GridToolbarContainer>
+    );
+  }
+
+  /**
    * Renderiza el componente DataGrid con las filas y columnas configuradas.
    *
    * @returns {JSX.Element} - Elemento JSX que representa el DataGrid.
    */
-  return <DataGrid rows={rows} columns={buildColumns()} />;
+  return <DataGrid rows={rows} columns={buildColumns()}   slots={{ toolbar: CustomToolbar }}  localeText={{
+    toolbarColumns: "Columnas",
+    toolbarFilters: "Filtros",
+    toolbarDensity: "Tamaño Celda",
+    toolbarExport: "Exportar",
+  }}/>;
 }
 
 export default DataGridTaskCrud;
