@@ -1,4 +1,5 @@
-import React from 'react'
+import React from "react";
+import Container from "../Container";
 
 /**
  * TaskCrud component for managing tasks.
@@ -8,9 +9,7 @@ import React from 'react'
  */
 
 function TaskCrud() {
-  return (
-    <div>TaskCrud</div>
-  )
+  return <Container>TaskCrud</Container>;
 }
 
-export default TaskCrud
+export default TaskCrud;
