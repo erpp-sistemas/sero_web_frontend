@@ -39,6 +39,7 @@ import { verifyTokenRequest } from "./api/auth";
 import AcountHistory from "./scenes/acount-history";
 import SheetGenerator from "./scenes/sheet-generator";
 import ValidPayment from './scenes/valid-payment'
+import Task from "./scenes/task";
 
 
 function App() {
@@ -137,6 +138,7 @@ function App() {
                     <Route path="/dashboard-coordinator" element={<DashboardCoordinator />} />
                     <Route path="/acount-history" element={<AcountHistory/>}/>
                     <Route path="/valid-payment" element={< ValidPayment/>}/>
+                    <Route path="/task" element={<Task/>}/>
                   </Routes>
                 </main>
               </div>
