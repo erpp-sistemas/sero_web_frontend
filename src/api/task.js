@@ -2,9 +2,9 @@
 import axios from './axios'; // Asegúrate de que el path sea correcto
 
 // Función para obtener todas las tareas de un servicio por ID
-export const getAllTasksByServiceId = async (serviceId) => {
+export const getAllTasks = async () => {
     try {
-      const response = await axios.get(`/api/services/${serviceId}`);
+      const response = await axios.get(`/tasks`);
       // Podrías realizar operaciones adicionales aquí antes de retornar los datos
       return response.data;
     } catch (error) {
