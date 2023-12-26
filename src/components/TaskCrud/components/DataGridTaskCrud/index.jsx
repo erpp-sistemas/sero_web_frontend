@@ -1,5 +1,10 @@
 import React from "react";
-import { deleteTaskById, getAllTasks, updateTaskById } from "../../../../api/task";
+import {
+  createTask,
+  deleteTaskById,
+  getAllTasks,
+  updateTaskById,
+} from "../../../../api/task";
 import {
   DataGrid,
   GridActionsCellItem,
@@ -12,18 +17,34 @@ import {
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import {
   Alert,
+  AppBar,
   Box,
   Button,
+  Checkbox,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControl,
   IconButton,
+  InputAdornment,
+  InputLabel,
+  NativeSelect,
+  Paper,
   Snackbar,
+  Stack,
+  TextField,
+  Toolbar,
+  Typography,
 } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
 import { getAllProcesses } from "../../../../api/process";
+import CloseIcon from "@mui/icons-material/Close";
+import AddIcon from "@mui/icons-material/Add";
+import { FaTasks } from "react-icons/fa";
+import { FaRegCircleCheck } from "react-icons/fa6";
+import { TbZoomCancel } from "react-icons/tb";
 
 /**
  * Hook personalizado para simular una mutación asincrónica con datos ficticios.
@@ -175,6 +196,24 @@ function DataGridTaskCrud() {
   const noButtonRef = React.useRef(null);
   const [promiseArguments, setPromiseArguments] = React.useState(null);
   const [snackbar, setSnackbar] = React.useState(null);
+  const [openNewTaskDialog, setOpenNewTaskDialog] = React.useState(false);
+  const [verificationInputs, setVerificationInputs] = React.useState({
+    nameInput: false,
+    processInput: false,
+  });
+  const [formDataFromInputs, setFormDataFromInputs] = React.useState({
+    name: "",
+    active: false,
+    process: "",
+  });
+
+  const handleClickOpenNewTaskDialog = () => {
+    setOpenNewTaskDialog(true);
+  };
+
+  const handleCloseNewTaskDialog = () => {
+    setOpenNewTaskDialog(false);
+  };
   /**
    * Función que cierra el componente Snackbar.
    *
@@ -262,7 +301,7 @@ function DataGridTaskCrud() {
             <GridActionsCellItem
               icon={<DeleteIcon />}
               label="Delete"
-              onClick={() => handleDeleteClick(id)} 
+              onClick={() => handleDeleteClick(id)}
               color="inherit"
             />,
           ];
@@ -342,42 +381,42 @@ function DataGridTaskCrud() {
   }, []);
 
   /**
- * Maneja el evento de clic para eliminar una tarea.
- *
- * @async
- * @function
- * @name handleDeleteClick
- *
- * @param {string} id - El identificador único de la tarea que se va a eliminar.
- * @returns {Promise<void>} - Una promesa que se resuelve después de intentar eliminar la tarea.
- *
- * @throws {Error} - Se lanza un error si hay un problema al intentar eliminar la tarea.
- *
- * @description Esta función realiza una solicitud HTTP para eliminar la tarea con el identificador proporcionado.
- * Si la solicitud tiene éxito, muestra un mensaje en el Snackbar indicando que la tarea se ha eliminado correctamente.
- * Si hay un error durante el proceso, muestra un mensaje de error en el Snackbar.
- */
-const handleDeleteClick = async (id) => {
-  try {
-    // Realizar la solicitud HTTP para eliminar la tarea en el backend
-    const response = await deleteTaskById(id);
-    console.log(response);
+   * Maneja el evento de clic para eliminar una tarea.
+   *
+   * @async
+   * @function
+   * @name handleDeleteClick
+   *
+   * @param {string} id - El identificador único de la tarea que se va a eliminar.
+   * @returns {Promise<void>} - Una promesa que se resuelve después de intentar eliminar la tarea.
+   *
+   * @throws {Error} - Se lanza un error si hay un problema al intentar eliminar la tarea.
+   *
+   * @description Esta función realiza una solicitud HTTP para eliminar la tarea con el identificador proporcionado.
+   * Si la solicitud tiene éxito, muestra un mensaje en el Snackbar indicando que la tarea se ha eliminado correctamente.
+   * Si hay un error durante el proceso, muestra un mensaje de error en el Snackbar.
+   */
+  const handleDeleteClick = async (id) => {
+    try {
+      // Realizar la solicitud HTTP para eliminar la tarea en el backend
+      const response = await deleteTaskById(id);
+      console.log(response);
 
-    // Mostrar un mensaje en el Snackbar después de la eliminación exitosa
-    setSnackbar({
-      children: "Tarea eliminada exitosamente",
-      severity: "success",
-    });
-  } catch (error) {
-    // Mostrar un mensaje de error en el Snackbar si hay un problema al eliminar la tarea
-    setSnackbar({
-      children: "Error al eliminar la tarea",
-      severity: "error",
-    });
-    console.error("Error al eliminar la tarea:", error);
-    throw error; // Relanzar el error para que pueda ser manejado en otras partes de la aplicación si es necesario
-  }
-};
+      // Mostrar un mensaje en el Snackbar después de la eliminación exitosa
+      setSnackbar({
+        children: "Tarea eliminada exitosamente",
+        severity: "success",
+      });
+    } catch (error) {
+      // Mostrar un mensaje de error en el Snackbar si hay un problema al eliminar la tarea
+      setSnackbar({
+        children: "Error al eliminar la tarea",
+        severity: "error",
+      });
+      console.error("Error al eliminar la tarea:", error);
+      throw error; // Relanzar el error para que pueda ser manejado en otras partes de la aplicación si es necesario
+    }
+  };
   /**
    * Función que maneja la acción "No" en el contexto de una promesa.
    *
@@ -501,13 +540,13 @@ const handleDeleteClick = async (id) => {
         <GridToolbarFilterButton color="secondary" />
         <GridToolbarDensitySelector color="secondary" />
         <GridToolbarExport color="secondary" />
-        {/* <Button
+        <Button
           color="secondary"
-          startIcon={<FaTasks />}
-          onClick={handleOpenDialog}
+          startIcon={<AddIcon />}
+          onClick={handleClickOpenNewTaskDialog}
         >
           Agregar Nueva Tarea
-        </Button> */}
+        </Button>
       </GridToolbarContainer>
     );
   }
@@ -543,7 +582,136 @@ const handleDeleteClick = async (id) => {
       }),
     []
   );
+  const label = "switch";
 
+  /**
+ * Maneja la lógica para agregar una nueva tarea.
+ *
+ * @function
+ * @async
+ * @throws {Error} Si los campos requeridos no están completos.
+ * @fires setSnackbar
+ *
+ * @returns {void}
+ */
+const handleAddTask = async () => {
+  const { name, active, process } = formDataFromInputs;
+
+  // Define tu condición aquí
+  if (name) {
+    try {
+      // Realiza la solicitud POST con Axios
+      const response = await createTask({
+        nombre: name,
+        activo: active,
+        id_proceso: Number(process),
+      });
+
+      // Maneja la respuesta según tus necesidades
+      console.log("Respuesta del servidor:", response.data);
+
+      // Muestra un mensaje de éxito
+      setSnackbar({
+        children: "Registro agregado exitosamente",
+        severity: "success",
+      });
+
+      // Cierre del diálogo u otras acciones después de agregar el registro
+      handleCloseNewTaskDialog();
+    } catch (error) {
+      console.error("Error al agregar el registro:", error);
+
+      // Muestra un mensaje de error
+      setSnackbar({
+        children: "Error al agregar el registro. Por favor, inténtalo de nuevo.",
+        severity: "error",
+      });
+    }
+  } else {
+    // Muestra un mensaje de error si la condición no se cumple
+    setSnackbar({
+      children: "Los campos requeridos no están completos. Por favor, completa todos los campos.",
+      severity: "error",
+    });
+
+    // Lanza un error si la condición no se cumple
+    throw new Error(
+      "Los campos requeridos no están completos. Por favor, completa todos los campos."
+    );
+  }
+};
+
+ /**
+ * Maneja el cambio en el estado de un checkbox y actualiza los estados correspondientes.
+ *
+ * @function
+ * @param {Object} e - Evento de cambio del checkbox.
+ * @param {string} e.name - Nombre del checkbox.
+ * @param {boolean} e.checked - Estado actual del checkbox (marcado o no marcado).
+ * 
+ * @returns {void}
+ */
+const handleChangeCheckbox = (e) => {
+  const { name, checked } = e.target;
+
+  // Actualiza el estado de verificationInputs utilizando la función de actualización previa
+  setVerificationInputs((prev) => ({
+    ...prev,
+    [name]: checked,
+  }));
+
+  // Actualiza el estado de formDataFromInputs utilizando el spread operator
+  setFormDataFromInputs({
+    ...formDataFromInputs,
+    [name]: checked,
+  });
+};
+
+
+
+/**
+ * Maneja el cambio en el estado de un campo de entrada y actualiza los estados correspondientes.
+ *
+ * @function
+ * @param {Object} e - Evento de cambio del campo de entrada.
+ * @param {string} e.name - Nombre del campo de entrada.
+ * @param {string} e.value - Valor actual del campo de entrada.
+ * 
+ * @returns {void}
+ */
+const handleChangeInput = (e) => {
+  const { name, value } = e.target;
+
+  // Actualiza el estado de verificationInputs utilizando la función de actualización previa y un switch
+  setVerificationInputs((prev) => {
+    switch (name) {
+      case "name":
+        return {
+          ...prev,
+          [name]: !!value,
+          nameInput: value.length > 0 ? true : false,
+        };
+
+      case "process":
+        return {
+          ...prev,
+          [name]: value !== "0",
+          processInput: value !== "0",
+        };
+      
+      // Agrega más casos según sea necesario
+
+      default:
+        return prev;
+    }
+  });
+
+  // Actualiza el estado de formDataFromInputs utilizando el spread operator
+  setFormDataFromInputs({
+    ...formDataFromInputs,
+    [name]: value,
+  });
+};
   /**
    * Renderiza el componente DataGrid con las filas y columnas configuradas.
    *
@@ -569,6 +737,149 @@ const handleDeleteClick = async (id) => {
         <Snackbar open onClose={handleCloseSnackbar} autoHideDuration={6000}>
           <Alert {...snackbar} onClose={handleCloseSnackbar} />
         </Snackbar>
+      )}
+      {openNewTaskDialog && (
+        <Dialog
+          fullScreen
+          open={openNewTaskDialog}
+          onClose={handleCloseNewTaskDialog}
+        >
+          <AppBar sx={{ position: "relative" }}>
+            <Toolbar>
+              <IconButton
+                edge="start"
+                color="inherit"
+                onClick={handleCloseNewTaskDialog}
+                aria-label="close"
+              >
+                <CloseIcon />
+              </IconButton>
+              {/*  <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
+                Agrega nueva tarea
+              </Typography> */}
+              {/*  <Button autoFocus color="inherit"  onClick={handleClose}>
+                Guardar
+              </Button> */}
+            </Toolbar>
+          </AppBar>
+          {/* Aqui va el contenido */}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "100%", // Ajusta según sea necesario
+            }}
+          >
+            <Paper
+              sx={{
+                width: "40%",
+                height: "70%",
+                boxShadow: 3,
+                padding: "2rem",
+                borderRadius: 1,
+              }}
+            >
+              {/* Contenido real del Paper */}
+              <Typography variant="body1" sx={{ mb: "2rem" }}>
+                Agregar Nueva Tarea
+              </Typography>
+              <TextField
+                color="secondary"
+                sx={{ marginBottom: "2rem", width: "100%" }}
+                id="input-with-icon-textfield-name"
+                label="Nombre de la Tarea"
+                 onChange={handleChangeInput}
+                value={formDataFromInputs.name} 
+           
+                type="text"
+                name="name"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <FaTasks />
+                    </InputAdornment>
+                  ),
+                }}
+                variant="standard"
+              />
+                {verificationInputs.name ? (
+                    <Stack  direction="row">
+                    <FaRegCircleCheck style={{ color: "#14B814" }} />{" "}
+                    <Typography color={"secondary"} variant="caption">
+                        ¡Gracias por ingresar una tarea!
+                    </Typography>
+                    </Stack>
+                ) : (
+                    /* TbZoomCancel */
+                    <Stack  direction="row">
+                    <TbZoomCancel style={{ color: "red" }} />{" "}
+                    <Typography sx={{ color: "red" }} variant="caption">
+                        * ¡Por favor, ingresa una tarea!
+                    </Typography>
+                    </Stack>
+                )}
+
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "row",
+                  alignContent: "center",
+                  marginBottom: "2rem",
+                }}
+              >
+                <InputLabel sx={{ alignSelf: "center" }}>Activo</InputLabel>
+                <Checkbox
+                  {...label}
+                   onChange={(e) => handleChangeCheckbox(e)}  name="active"
+                  size="small"
+                  color="secondary"
+                />
+              </Box>
+
+              <NativeSelect
+                sx={{ marginBottom: "2rem", width: "100%  " }}
+                color="secondary"
+                defaultValue={30}
+                 onChange={handleChangeInput} 
+                inputProps={{
+                  name: "process",
+                  id: "uncontrolled-native",
+                }}
+              >
+                <option value={0}>Ingresa un proceso</option>
+                {getProcesses.map((process) => {
+                  return (
+                    <option key={process.name} value={process.id_proceso}>
+                      {process.nombre}
+                    </option>
+                  );
+                })}
+              </NativeSelect>
+              {verificationInputs.process ? (
+                    <Stack  direction="row">
+                    <FaRegCircleCheck style={{ color: "#14B814" }} />{" "}
+                    <Typography color={"secondary"} variant="caption">
+                        ¡Gracias por ingresar una proceso!
+                    </Typography>
+                    </Stack>
+                ) : (
+                    /* TbZoomCancel */
+                    <Stack  direction="row">
+                    <TbZoomCancel style={{ color: "red" }} />{" "}
+                    <Typography sx={{ color: "red" }} variant="caption">
+                        * ¡Por favor, ingresa un proceso!
+                    </Typography>
+                    </Stack>
+                )}
+              <Box sx={{ display: "flex", justifyContent: "end" }}>
+                <Button color="secondary" variant="contained" onClick={handleAddTask}>
+                  Guardar Tarea
+                </Button>
+              </Box>
+            </Paper>
+          </Box>
+        </Dialog>
       )}
     </Box>
   );
