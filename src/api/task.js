@@ -44,7 +44,7 @@ export const deleteTaskById = async (taskId) => {
   // Función para crear una nueva tarea
   export const createTask = async (taskData) => {
     try {
-      const response = await axios.post('/api/task', taskData);
+      const response = await axios.post('/task', taskData);
       // Podrías realizar operaciones adicionales aquí después de la creación
       return response.data;
     } catch (error) {
