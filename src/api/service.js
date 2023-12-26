@@ -43,7 +43,8 @@ const handleError = (error) => {
   export const getAllServices = async () => {
     try {
       const response = await axios.get(`/services`);
-      return response.data;
+      console.log(response.data.services);
+      return response.data.services;
     } catch (error) {
       handleError(error);
     }

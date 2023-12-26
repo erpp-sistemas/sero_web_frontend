@@ -1,5 +1,6 @@
 import React from 'react'
 import Container from '../Container'
+import DataGridServiceCrud from './components/DataGridServiceCrud'
 
 /**
  * componente para administrar servicios .
@@ -11,7 +12,7 @@ import Container from '../Container'
 function ServiceCrud() {
   return (
     <Container>
-        ServiceCrud
+        <DataGridServiceCrud/>
     </Container>
   )
 }
