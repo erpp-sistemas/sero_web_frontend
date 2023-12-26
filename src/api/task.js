@@ -16,7 +16,7 @@ export const getAllTasks = async () => {
   // Función para actualizar una tarea por su ID
 export const updateTaskById = async (taskId, updatedTaskData) => {
     try {
-      const response = await axios.put(`/api/tasks/${taskId}`, updatedTaskData);
+      const response = await axios.put(`/tasks/${taskId}`, updatedTaskData);
       // Podrías realizar operaciones adicionales aquí después de la actualización
       return response.data;
     } catch (error) {
