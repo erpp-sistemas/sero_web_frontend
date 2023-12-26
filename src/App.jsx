@@ -40,6 +40,7 @@ import AcountHistory from "./scenes/acount-history";
 import SheetGenerator from "./scenes/sheet-generator";
 import ValidPayment from './scenes/valid-payment'
 import Task from "./scenes/task";
+import Service from "./scenes/service";
 
 
 function App() {
@@ -139,6 +140,7 @@ function App() {
                     <Route path="/acount-history" element={<AcountHistory/>}/>
                     <Route path="/valid-payment" element={< ValidPayment/>}/>
                     <Route path="/task" element={<Task/>}/>
+                    <Route path="/service" element={<Service/>}/>
                   </Routes>
                 </main>
               </div>
