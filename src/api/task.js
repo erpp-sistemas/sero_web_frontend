@@ -28,8 +28,11 @@ export const updateTaskById = async (taskId, updatedTaskData) => {
 
 // Función para eliminar una tarea por su ID
 export const deleteTaskById = async (taskId) => {
+
+  
+           
     try {
-      const response = await axios.delete(`/api/tasks/${taskId}`);
+      const response = await axios.delete(`/tasks/${taskId}`);
       // Podrías realizar operaciones adicionales aquí después de la eliminación
       return response.data;
     } catch (error) {
