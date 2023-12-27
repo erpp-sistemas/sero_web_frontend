@@ -89,9 +89,10 @@ function DataGridServiceCrud() {
     data,
     setGetRowData,
     getDataRow,
-    field
+    field,
+    setUrl
     /*  handleClickOpen,
-      setUrl,
+      ,
       ,
       ,
       , */
@@ -102,7 +103,7 @@ function DataGridServiceCrud() {
       return (
         <IconButton
              onClick={() => {
-              handleClickOpen();
+              handleOpenImageDialog();
               switch (field) {
                 case "imagen":
                   setGetRowData({ ...getDataRow, field: field });
@@ -146,7 +147,7 @@ function DataGridServiceCrud() {
               } 
           }}
           alt="Remy Sharp"
-          src={data}
+          src={data }
         />
       );
     }
@@ -242,11 +243,12 @@ function DataGridServiceCrud() {
             setGetRowData={setGetRowData}
             getDataRow={params.row}
             field={"imagen"} 
+            setUrl={setUrl}
             /*  
               
               
               handleClickOpen={handleClickOpen}
-              setUrl={setUrl}
+              
               */
           />
         ),
