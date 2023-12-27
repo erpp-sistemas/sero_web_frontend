@@ -46,7 +46,7 @@ export const uploadToS3 = async (file) => {
     const command = new PutObjectCommand(params);
     await client.send(command);
 
-    // Firmar la URL con una vigencia de una semana (604800 segundos)
+     // Firmar la URL con una vigencia de un año (31536000 segundos)
     const signer = await getSignedUrl(client, new GetObjectCommand({ Bucket: AWS_BUCKET_NAME, Key: file.name }), { expiresIn: 604800 });
 
     // Construir y devolver la URL del objeto subido

@@ -11,7 +11,15 @@ import {
   Toolbar,
   Typography,
 } from "@mui/material";
-import { DataGrid, GridActionsCellItem } from "@mui/x-data-grid";
+import {
+  DataGrid,
+  GridActionsCellItem,
+  GridToolbarColumnsButton,
+  GridToolbarContainer,
+  GridToolbarDensitySelector,
+  GridToolbarExport,
+  GridToolbarFilterButton,
+} from "@mui/x-data-grid";
 import React from "react";
 import { getAllServices, updateService } from "../../../../api/service";
 
@@ -29,10 +37,10 @@ function DataGridServiceCrud() {
   );
   const [rows, setRows] = React.useState([]);
   const [isImageDialogOpen, setIsImageDialogOpen] = React.useState(false);
-   // Estado para almacenar la imagen seleccionada
-   const [selectedImage, setSelectedImage] = React.useState('');
-   const [getRowData,setGetRowData] = React.useState()
-   const [singnedUrl, setSignedUrl] = React.useState(null);
+  // Estado para almacenar la imagen seleccionada
+  const [selectedImage, setSelectedImage] = React.useState("");
+  const [getRowData, setGetRowData] = React.useState();
+  const [singnedUrl, setSignedUrl] = React.useState(null);
   const [serviceData, setServiceData] = React.useState({
     nombre: "",
     imagen: "",
@@ -59,16 +67,13 @@ function DataGridServiceCrud() {
       setSignedUrl(fileUrl);
       // Configura el mensaje de Snackbar en caso de éxito
       setSnackbar({
-       
-        children: 'Archivo subido exitosamente',
-        severity: 'success',
+        children: "Archivo subido exitosamente",
+        severity: "success",
       });
     } catch (error) {
-
       setSnackbar({
-    
-        children: 'Error al subir archivo. Por favor, inténtalo de nuevo.',
-        severity: 'error',
+        children: "Error al subir archivo. Por favor, inténtalo de nuevo.",
+        severity: "error",
       });
       console.error("Error al subir archivo:", error.message);
       // Handle the error according to your requirements
@@ -90,7 +95,7 @@ function DataGridServiceCrud() {
     setGetRowData,
     getDataRow,
     field,
-    setUrl
+    setUrl,
     /*  handleClickOpen,
       ,
       ,
@@ -98,27 +103,27 @@ function DataGridServiceCrud() {
       , */
   }) => {
     console.log(getDataRow);
-   
+
     if (!data) {
       return (
         <IconButton
-             onClick={() => {
-              handleOpenImageDialog();
-              switch (field) {
-                case "imagen":
-                  setGetRowData({ ...getDataRow, field: field });
-    
-                  break;
-    
-                case "icono_app_movil":
-                  setGetRowData({ ...getDataRow, field: field });
-    
-                  break;
-    
-                default:
-                  break;
-              }
-            }}
+          onClick={() => {
+            handleOpenImageDialog();
+            switch (field) {
+              case "imagen":
+                setGetRowData({ ...getDataRow, field: field });
+
+                break;
+
+              case "icono_app_movil":
+                setGetRowData({ ...getDataRow, field: field });
+
+                break;
+
+              default:
+                break;
+            }
+          }}
           aria-label="delete"
         >
           <BiSolidImageAdd />
@@ -130,24 +135,24 @@ function DataGridServiceCrud() {
           onClick={(e) => {
             handleOpenImageDialog();
             setUrl(e.target.src);
-             
-              switch (field) {
-                case "imagen":
-                  setGetRowData({ ...getDataRow, field: field });
-    
-                  break;
-    
-                case "icono_app_movil":
-                  setGetRowData({ ...getDataRow, field: field });
-    
-                  break;
-    
-                default:
-                  break;
-              } 
+
+            switch (field) {
+              case "imagen":
+                setGetRowData({ ...getDataRow, field: field });
+
+                break;
+
+              case "icono_app_movil":
+                setGetRowData({ ...getDataRow, field: field });
+
+                break;
+
+              default:
+                break;
+            }
           }}
           alt="Remy Sharp"
-          src={data }
+          src={data}
         />
       );
     }
@@ -242,7 +247,7 @@ function DataGridServiceCrud() {
             data={params.row.imagen}
             setGetRowData={setGetRowData}
             getDataRow={params.row}
-            field={"imagen"} 
+            field={"imagen"}
             setUrl={setUrl}
             /*  
               
@@ -267,13 +272,13 @@ function DataGridServiceCrud() {
         editable: true,
         renderCell: (params) => (
           <AvatarImage
-          data={params.row.icono_app_movil}
-              setGetRowData={setGetRowData}
-              getDataRow={params.row}
-           /*    data={params.row.icono_app_movil} */
-              /* handleClickOpen={handleClickOpen} */
-              setUrl={setUrl}
-              field={"icono_app_movil"} 
+            data={params.row.icono_app_movil}
+            setGetRowData={setGetRowData}
+            getDataRow={params.row}
+            /*    data={params.row.icono_app_movil} */
+            /* handleClickOpen={handleClickOpen} */
+            setUrl={setUrl}
+            field={"icono_app_movil"}
           />
         ),
       },
@@ -362,8 +367,6 @@ function DataGridServiceCrud() {
     }
   };
 
-
-
   /**
    * Handles the save operation for the updated row data.
    *
@@ -379,9 +382,6 @@ function DataGridServiceCrud() {
    */
 
   const handleSave = async () => {
-
-
-    
     /**
      * The updated row data object.
      *
@@ -392,7 +392,7 @@ function DataGridServiceCrud() {
      * @property {string} icono_app_movil - The updated icon URL for the mobile app.
      * @property {string} ... - Other properties of the row data.
      */
-     console.log(getRowData);
+    console.log(getRowData);
     if (getRowData) {
       try {
         // Assuming getRowData is an object you want to update and getUrl is the API endpoint
@@ -420,9 +420,9 @@ function DataGridServiceCrud() {
         // Make a PUT request using the updatedRowData
         /*    console.log(updatedRowData);
          */
-        
-        const response = await updateService(getRowData.id, updatedRowData)
-        
+
+        const response = await updateService(getRowData.id, updatedRowData);
+
         // You can handle the response as needed
         console.log("Save successful:", response.data);
         // If you want to close something after successful save, uncomment the following line
@@ -433,9 +433,64 @@ function DataGridServiceCrud() {
     }
   };
 
+  /**
+   * Custom toolbar component for the service grid. It includes various actions like column selection,
+   * filtering, density selector, and export. Additionally, it provides a button to open a dialog
+   * for adding a new service.
+   *
+   * @component
+   * @param {Object} props - The properties passed to the component.
+   * @param {Function} props.handleOpenDialog - The function to handle opening the dialog for adding a new service.
+   * @returns {React.ReactElement} The rendered component.
+   *
+   * @example
+   * // Usage example
+   * const handleOpenDialogFunc = () => {
+   *   // Implement the logic to open the dialog for adding a new service
+   * };
+   *
+   * // Render the CustomToolbar component with the handleOpenDialog function
+   * <CustomToolbar handleOpenDialog={handleOpenDialogFunc} />
+   */
+  function CustomToolbar() {
+    return (
+      <GridToolbarContainer>
+        <GridToolbarColumnsButton color="secondary" />
+        <GridToolbarFilterButton color="secondary" />
+        <GridToolbarDensitySelector color="secondary" />
+
+        <GridToolbarExport color="secondary" />
+        {/*    <Button
+          color="secondary"
+          startIcon={<FaTasks />}
+          onClick={handleOpenDialog}
+        >
+          Agregar Nueva Tarea
+        </Button> */}
+        {/*  <Button
+          color="secondary"
+          onClick={handleOpenDialogForm}
+          startIcon={<AddOutlinedIcon />}
+        >
+          Agregar Nuevo Servicio
+        </Button> */}
+      </GridToolbarContainer>
+    );
+  }
+
   return (
     <Box style={{ height: 400, width: "100%" }}>
-      <DataGrid rows={rows} columns={buildColumns()} />
+      <DataGrid
+        localeText={{
+          toolbarColumns: "Columnas",
+          toolbarFilters: "Filtros",
+          toolbarDensity: "Tamaño Celda",
+          toolbarExport: "Exportar",
+        }}
+        rows={rows}
+        columns={buildColumns()}
+        slots={{ toolbar: CustomToolbar }}
+      />
       {isImageDialogOpen && (
         <Dialog
           fullScreen
@@ -485,40 +540,60 @@ function DataGridServiceCrud() {
                 <Grid container spacing={2}>
                   <Grid
                     item
-                    xs={6}
+                    xs={12}
                     sx={{
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                     }}
-                  ><Box sx={{display:"felx",flexDirection:"column"}}>
-                    <img
-                      className="rounded-full h-36 w-36 object-cover"
-                      src={selectedImage || url}
-                    />
-                      <TextField
-                  type="file"
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                  InputProps={{
-                    inputProps: {
-                      accept: "image/*", // specify accepted file types if needed
-                    },
-                  }}
-                  onChange={handleFileChange}
-                />
-                </Box>
-                  </Grid>
+                  >
+                    {" "}
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Box>
+                        <img
+                          className="rounded-full h-36 w-36 object-cover"
+                          src={selectedImage || url}
+                          alt="Your Image"
+                        />
+                      </Box>
 
+                      <TextField
+                        type="file"
+                        InputLabelProps={{
+                          shrink: true,
+                        }}
+                        InputProps={{
+                          inputProps: {
+                            accept: "image/*", // specify accepted file types if needed
+                          },
+                        }}
+                        onChange={handleFileChange}
+                      />
+                    </Box>
+                  </Grid>
+                  {/* 
                   <Grid item xs={6}>
                     Caracteristicas
-                  </Grid>
+                  </Grid> */}
                 </Grid>
               </Box>
 
-              <Box sx={{ display: "flex", justifyContent: "end" }}>
-                <Button onClick={handleSave}
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "end",
+                  marginTop: "1rem",
+                }}
+              >
+                <Button
+                  onClick={handleSave}
                   color="secondary"
                   variant="contained" /* onClick={handleAddTask} */
                 >
