@@ -26,7 +26,7 @@ import {
   GridToolbarFilterButton,
 } from "@mui/x-data-grid";
 import React from "react";
-import { getAllServices, updateService } from "../../../../api/service";
+import { deleteService, getAllServices, updateService } from "../../../../api/service";
 
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import { BiSolidImageAdd } from "react-icons/bi";
@@ -222,6 +222,44 @@ function DataGridServiceCrud() {
     );
   };
 
+  /**
+   * Maneja el evento de clic para eliminar una tarea.
+   *
+   * @async
+   * @function
+   * @name handleDeleteClick
+   *
+   * @param {string} id - El identificador único de la tarea que se va a eliminar.
+   * @returns {Promise<void>} - Una promesa que se resuelve después de intentar eliminar la tarea.
+   *
+   * @throws {Error} - Se lanza un error si hay un problema al intentar eliminar la tarea.
+   *
+   * @description Esta función realiza una solicitud HTTP para eliminar la tarea con el identificador proporcionado.
+   * Si la solicitud tiene éxito, muestra un mensaje en el Snackbar indicando que la tarea se ha eliminado correctamente.
+   * Si hay un error durante el proceso, muestra un mensaje de error en el Snackbar.
+   */
+  const handleDeleteClick = async (id) => {
+    try {
+      // Realizar la solicitud HTTP para eliminar la tarea en el backend
+      const response = await deleteService(id);
+      console.log(response);
+
+      // Mostrar un mensaje en el Snackbar después de la eliminación exitosa
+      setSnackbar({
+        children: "Tarea eliminada exitosamente",
+        severity: "success",
+      });
+    } catch (error) {
+      // Mostrar un mensaje de error en el Snackbar si hay un problema al eliminar la tarea
+      setSnackbar({
+        children: "Error al eliminar la tarea",
+        severity: "error",
+      });
+      console.error("Error al eliminar la tarea:", error);
+      throw error; // Relanzar el error para que pueda ser manejado en otras partes de la aplicación si es necesario
+    }
+  };
+
 
   const handleEntered = () => {
     // The `autoFocus` is not used because, if used, the same Enter that saves
@@ -337,7 +375,7 @@ function DataGridServiceCrud() {
     }
   };
 
-  console.log(serviceData);
+
 
   const handleOpenImageDialog = () => {
     setIsImageDialogOpen(true);
@@ -359,7 +397,7 @@ function DataGridServiceCrud() {
       ,
       , */
   }) => {
-    console.log(getDataRow);
+   
 
     if (!data) {
       return (
@@ -585,7 +623,7 @@ function DataGridServiceCrud() {
             <GridActionsCellItem
               icon={<DeleteIcon />}
               label="Delete"
-              /*   onClick={() => handleDeleteClick(id)} */
+                onClick={() => handleDeleteClick(id)} 
               color="inherit"
             />,
           ];

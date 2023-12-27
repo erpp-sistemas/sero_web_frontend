@@ -79,6 +79,7 @@ const handleError = (error) => {
   export const deleteService = async (id) => {
     try {
       const response = await axios.delete(`/services/${id}`);
+    
       return response.data;
     } catch (error) {
       handleError(error);
