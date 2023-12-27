@@ -1,5 +1,6 @@
 import React from 'react'
 import Container from '../Container'
+import DataGridProcess from './components/DataGridProcessCrud'
 
 /**
  * Componente que representa la sección de CRUD (Crear, Leer, Actualizar, Eliminar) de la gestión de procesos.
@@ -10,7 +11,7 @@ import Container from '../Container'
 function ProcessCrud() {
   return (
     <Container>
-      ProcessCrud
+      <DataGridProcess/>
     </Container>
   )
 }
