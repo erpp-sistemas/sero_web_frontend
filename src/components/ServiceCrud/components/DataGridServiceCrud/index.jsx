@@ -4,14 +4,18 @@ import {
   Avatar,
   Box,
   Button,
+  Checkbox,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   Grid,
   IconButton,
+  InputAdornment,
+  InputLabel,
   Paper,
   Snackbar,
+  Stack,
   TextField,
   Toolbar,
   Typography,
@@ -26,18 +30,26 @@ import {
   GridToolbarFilterButton,
 } from "@mui/x-data-grid";
 import React from "react";
-import { deleteService, getAllServices, updateService } from "../../../../api/service";
+import {
+  createService,
+  deleteService,
+  getAllServices,
+  updateService,
+} from "../../../../api/service";
 
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import { BiSolidImageAdd } from "react-icons/bi";
 import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
 import CloseIcon from "@mui/icons-material/Close";
-import EmptyImage from "../../../../assets/image/empty-image.jpg";
+
 import { uploadToS3 } from "../../../../services/s3.service";
+import { FaRegCircleCheck } from "react-icons/fa6";
+import { TbZoomCancel } from "react-icons/tb";
 
-
-
+import { AddOutlined, Sync, SyncAltOutlined } from "@mui/icons-material";
+import { FaTasks } from "react-icons/fa";
+import { GrServices } from "react-icons/gr";
 
 /**
  * Hook personalizado para simular una mutación asincrónica con datos ficticios.
@@ -72,7 +84,7 @@ const useFakeMutation = () => {
       // Simulando una pausa de 200 ms con setTimeout
       await new Promise((timeoutResolve) => setTimeout(timeoutResolve, 200));
 
-      const response = updateService(service.id,service);
+      const response = updateService(service.id, service);
 
       return response.data;
     } catch (error) {
@@ -83,8 +95,7 @@ const useFakeMutation = () => {
   }, []);
 };
 
-
-  /**
+/**
  * Computes a mutation description based on the changes between the new and old row data.
  *
  * @function
@@ -102,23 +113,23 @@ const useFakeMutation = () => {
  * }
  */
 
-  function computeMutation(newRow, oldRow) {
-    if (newRow.nombre !== oldRow.nombre) {
-      return `Nombre de '${oldRow.nombre}' a '${newRow.nombre}'`;
-    }
+function computeMutation(newRow, oldRow) {
+  if (newRow.nombre !== oldRow.nombre) {
+    return `Nombre de '${oldRow.nombre}' a '${newRow.nombre}'`;
+  }
 
-    if (newRow.fecha_ingreso !== oldRow.fecha_ingreso) {
-      return `Name from '${oldRow.fecha_ingreso}' to '${newRow.fecha_ingreso}'`;
-    }
+  if (newRow.fecha_ingreso !== oldRow.fecha_ingreso) {
+    return `Name from '${oldRow.fecha_ingreso}' to '${newRow.fecha_ingreso}'`;
+  }
 
-    if (newRow.activo !== oldRow.activo) {
-      return `Name from '${oldRow.activo}' to '${newRow.activo}'`;
-    }
+  if (newRow.activo !== oldRow.activo) {
+    return `Name from '${oldRow.activo}' to '${newRow.activo}'`;
+  }
 
-    if (newRow.orden !== oldRow.orden) {
-      return `Orden de '${oldRow.orden}' a '${newRow.orden}'`;
-    }
-    /*  if (newRow.activo !== oldRow.activo) {
+  if (newRow.orden !== oldRow.orden) {
+    return `Orden de '${oldRow.orden}' a '${newRow.orden}'`;
+  }
+  /*  if (newRow.activo !== oldRow.activo) {
       return `¿Realmente deseas cambiar el estado de 'Activo' de '${
         oldRow.activo ? "✅" : "❎" || ""
       }' a '${newRow.activo ? "✅" : "❎" || ""}'?`;
@@ -129,8 +140,8 @@ const useFakeMutation = () => {
         newRow.id_proceso || ""
       }'`;
     } */
-    return null;
-  }
+  return null;
+}
 
 function DataGridServiceCrud() {
   // Estado para almacenar la URL
@@ -140,10 +151,15 @@ function DataGridServiceCrud() {
   const [rows, setRows] = React.useState([]);
   const [isImageDialogOpen, setIsImageDialogOpen] = React.useState(false);
   const mutateRow = useFakeMutation();
+  const [isNewServiceDialogOpen, setNewServiceDialogOpen] =
+    React.useState(false);
+
   // Estado para almacenar la imagen seleccionada
   const [promiseArguments, setPromiseArguments] = React.useState(null);
   const [snackbar, setSnackbar] = React.useState(null);
   const [selectedImage, setSelectedImage] = React.useState("");
+  const [selectedAppIcon, setSelectedAppIcon] = React.useState(null);
+  const [selectedWebImage, setSelectedWebImage] = React.useState(null);
   const [getRowData, setGetRowData] = React.useState();
   const [singnedUrl, setSignedUrl] = React.useState(null);
   const noButtonRef = React.useRef(null);
@@ -154,9 +170,53 @@ function DataGridServiceCrud() {
     orden: Number(""),
     icono_app_movil: "",
   });
+  const [validateInputs, setValidateInputs] = React.useState({
+    nombre: false,
+    orden: false,
+  });
+  /**
+   * Maneja los cambios en los campos de entrada y actualiza el estado correspondiente.
+   *
+   * @param {Object} event - Objeto del evento que desencadena la función.
+   * @param {Object} event.target - El elemento que disparó el evento.
+   * @param {string} event.target.name - El nombre del campo de entrada.
+   * @param {string|boolean} event.target.value - El valor del campo de entrada.
+   * @param {string} event.target.type - El tipo del campo de entrada.
+   * @param {boolean} event.target.checked - El estado de la casilla de verificación (solo para campos de tipo checkbox).
+   */
+  const handleInputOnChange = (event) => {
+    const { name, value, type, checked } = event.target;
 
+    // Actualiza el estado serviceData con el nuevo valor del campo Servicio
+    const newValue = type === "checkbox" ? checked : value;
+    setServiceData((prevState) => ({
+      ...prevState,
+      [name]: newValue,
+    }));
 
-   /**
+    switch (name) {
+      case "nombre":
+        setValidateInputs((prevValidateInputs) => ({
+          ...prevValidateInputs,
+          [name]: value.length > 0,
+        }));
+
+        break;
+
+      case "orden":
+        setValidateInputs((prevValidateInputs) => ({
+          ...prevValidateInputs,
+          [name]: value.length > 0,
+        }));
+
+        break;
+
+      default:
+        break;
+    }
+  };
+
+  /**
    * Función que cierra el componente Snackbar.
    *
    * @function
@@ -166,11 +226,31 @@ function DataGridServiceCrud() {
    *
    * @returns {void}
    */
-   const handleCloseSnackbar = () => setSnackbar(null);
+  const handleCloseSnackbar = () => setSnackbar(null);
 
+  /**
+   * Abre el diálogo para crear un nuevo servicio.
+   *
+   * @function
+   * @name handleOpenNewServiceDialog
+   * @returns {void}
+   */
+  const handleOpenNewServiceDialog = () => {
+    setNewServiceDialogOpen(true);
+  };
 
-   
- /**
+  /**
+   * Cierra el diálogo para crear un nuevo servicio.
+   *
+   * @function
+   * @name handleCloseNewServiceDialog
+   * @returns {void}
+   */
+  const handleCloseNewServiceDialog = () => {
+    setNewServiceDialogOpen(false);
+  };
+
+  /**
    * Función que maneja la acción "No" en el contexto de una promesa.
    *
    * @function
@@ -180,12 +260,11 @@ function DataGridServiceCrud() {
    *
    * @returns {void}
    */
- const handleNo = () => {
-  const { oldRow, resolve } = promiseArguments;
-  resolve(oldRow); // Resolve with the old row to not update the internal state
-  setPromiseArguments(null);
-};
-
+  const handleNo = () => {
+    const { oldRow, resolve } = promiseArguments;
+    resolve(oldRow); // Resolve with the old row to not update the internal state
+    setPromiseArguments(null);
+  };
 
   const renderConfirmDialog = () => {
     if (!promiseArguments) {
@@ -260,7 +339,6 @@ function DataGridServiceCrud() {
     }
   };
 
-
   const handleEntered = () => {
     // The `autoFocus` is not used because, if used, the same Enter that saves
     // the cell triggers "No". Instead, we manually focus the "No" button once
@@ -268,24 +346,23 @@ function DataGridServiceCrud() {
     // noButtonRef.current?.focus();
   };
 
-
-   /**
- * Handles the user's confirmation to update a row.
- *
- * @function
- * @async
- * @throws {Error} Throws an error if the update request fails.
- * @returns {Promise<void>} A Promise that resolves when the update is successful.
- *
- * @example
- * // Usage example
- * try {
- *   await handleYes();
- *   console.log("Update successful");
- * } catch (error) {
- *   console.error("Update failed:", error.message);
- * }
- */
+  /**
+   * Handles the user's confirmation to update a row.
+   *
+   * @function
+   * @async
+   * @throws {Error} Throws an error if the update request fails.
+   * @returns {Promise<void>} A Promise that resolves when the update is successful.
+   *
+   * @example
+   * // Usage example
+   * try {
+   *   await handleYes();
+   *   console.log("Update successful");
+   * } catch (error) {
+   *   console.error("Update failed:", error.message);
+   * }
+   */
 
   const handleYes = async () => {
     const { newRow, oldRow, reject, resolve } = promiseArguments;
@@ -294,7 +371,10 @@ function DataGridServiceCrud() {
       // Make the HTTP request to save in the backend
       const response = await mutateRow(newRow, "update");
 
-      setSnackbar({ children: "Servicio guardado con exito ", severity: "success" });
+      setSnackbar({
+        children: "Servicio guardado con exito ",
+        severity: "success",
+      });
       resolve(response);
       setPromiseArguments(null);
     } catch (error) {
@@ -302,32 +382,30 @@ function DataGridServiceCrud() {
       reject(oldRow);
       setPromiseArguments(null);
     }
-  
   };
 
-
   /**
- * Process row update by computing the mutation and returning a Promise.
- *
- * @function
- * @param {Object} newRow - The updated row data.
- * @param {Object} oldRow - The original row data.
- * @returns {Promise<Object>} A Promise that resolves with the updated row data or rejects with the original row data if nothing was changed.
- *
- * @example
- * // Usage example
- * const updatedRow = await processRowUpdate(newData, oldData);
- * console.log("Row updated:", updatedRow);
- *
- * @example
- * // Usage example with error handling
- * try {
- *   const updatedRow = await processRowUpdate(newData, oldData);
- *   console.log("Row updated:", updatedRow);
- * } catch (error) {
- *   console.error("Update failed:", error.message);
- * }
- */
+   * Process row update by computing the mutation and returning a Promise.
+   *
+   * @function
+   * @param {Object} newRow - The updated row data.
+   * @param {Object} oldRow - The original row data.
+   * @returns {Promise<Object>} A Promise that resolves with the updated row data or rejects with the original row data if nothing was changed.
+   *
+   * @example
+   * // Usage example
+   * const updatedRow = await processRowUpdate(newData, oldData);
+   * console.log("Row updated:", updatedRow);
+   *
+   * @example
+   * // Usage example with error handling
+   * try {
+   *   const updatedRow = await processRowUpdate(newData, oldData);
+   *   console.log("Row updated:", updatedRow);
+   * } catch (error) {
+   *   console.error("Update failed:", error.message);
+   * }
+   */
 
   const processRowUpdate = React.useCallback(
     (newRow, oldRow) =>
@@ -342,7 +420,6 @@ function DataGridServiceCrud() {
       }),
     []
   );
-
 
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
@@ -375,16 +452,114 @@ function DataGridServiceCrud() {
     }
   };
 
+  const handleFileChangeWebImage = async (event) => {
+    const file = event.target.files[0];
 
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setSelectedWebImage(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
 
+    try {
+      const fileUrl = await uploadToS3(file);
+      console.log("URL del archivo subido:", fileUrl);
+
+      setServiceData((prevData) => {
+        // Update the 'imagen' property in the state with the new fileUrl
+        return { ...prevData, imagen: fileUrl };
+      });
+
+      setSignedUrl(fileUrl);
+      // Configura el mensaje de Snackbar en caso de éxito
+      setSnackbar({
+        children: "Archivo subido exitosamente",
+        severity: "success",
+      });
+    } catch (error) {
+      setSnackbar({
+        children: "Error al subir archivo. Por favor, inténtalo de nuevo.",
+        severity: "error",
+      });
+      console.error("Error al subir archivo:", error.message);
+      // Handle the error according to your requirements
+    }
+  };
+  /**
+   * Maneja el cambio de un archivo para el icono de la aplicación y realiza acciones relacionadas.
+   *
+   * @param {Object} event - Objeto del evento que desencadena la función.
+   * @param {FileList} event.target.files - Lista de archivos seleccionados.
+   * @throws {Error} Lanza un error si hay un problema al subir el archivo.
+   * @returns {Promise<void>} Una promesa que se resuelve cuando se completa el proceso de manejo del archivo.
+   */
+  const handleFileChangeAppIcon = async (event) => {
+    const file = event.target.files[0];
+
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setSelectedAppIcon(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    try {
+      const fileUrl = await uploadToS3(file);
+      console.log("URL del archivo subido:", fileUrl);
+
+      setServiceData((prevData) => {
+        // Update the 'imagen' property in the state with the new fileUrl
+        return { ...prevData, icono_app_movil: fileUrl };
+      });
+
+      setSignedUrl(fileUrl);
+      // Configura el mensaje de Snackbar en caso de éxito
+      setSnackbar({
+        children: "Archivo subido exitosamente",
+        severity: "success",
+      });
+    } catch (error) {
+      setSnackbar({
+        children: "Error al subir archivo. Por favor, inténtalo de nuevo.",
+        severity: "error",
+      });
+      console.error("Error al subir archivo:", error.message);
+      // Handle the error according to your requirements
+    }
+  };
+/**
+ * Abre el diálogo de imagen.
+ *
+ * @returns {void}
+ */
   const handleOpenImageDialog = () => {
     setIsImageDialogOpen(true);
   };
+  
+/**
+ * Cierra el diálogo de imagen.
+ *
+ * @returns {void}
+ */
 
   const handleCloseImageDialog = () => {
     setIsImageDialogOpen(false);
   };
-
+/**
+ * Componente que muestra una imagen en forma de Avatar.
+ *
+ * @component
+ * @param {Object} props - Propiedades del componente.
+ * @param {string|null} props.data - URL de la imagen o nulo si no hay imagen.
+ * @param {Function} props.setGetRowData - Función para actualizar datos del componente padre.
+ * @param {Object} props.getDataRow - Datos de la fila asociada a la imagen.
+ * @param {string} props.field - Nombre del campo asociado a la imagen ("imagen" o "icono_app_movil").
+ * @param {Function} props.setUrl - Función para actualizar la URL de la imagen en el componente padre.
+ * @returns {JSX.Element} El componente AvatarImage.
+ */
   const AvatarImage = ({
     data,
     setGetRowData,
@@ -397,8 +572,6 @@ function DataGridServiceCrud() {
       ,
       , */
   }) => {
-   
-
     if (!data) {
       return (
         <IconButton
@@ -623,7 +796,7 @@ function DataGridServiceCrud() {
             <GridActionsCellItem
               icon={<DeleteIcon />}
               label="Delete"
-                onClick={() => handleDeleteClick(id)} 
+              onClick={() => handleDeleteClick(id)}
               color="inherit"
             />,
           ];
@@ -687,7 +860,7 @@ function DataGridServiceCrud() {
      * @property {string} icono_app_movil - The updated icon URL for the mobile app.
      * @property {string} ... - Other properties of the row data.
      */
-  
+
     if (getRowData) {
       try {
         // Assuming getRowData is an object you want to update and getUrl is the API endpoint
@@ -721,7 +894,6 @@ function DataGridServiceCrud() {
         // You can handle the response as needed
         console.log("Save successful:", response.data);
         setSnackbar({
-      
           children: "Guardado exitoso",
           severity: "success",
         });
@@ -729,12 +901,11 @@ function DataGridServiceCrud() {
         handleCloseImageDialog();
       } catch (error) {
         console.error("Error al cargar la imagen:", error);
-         // Show an error notification
-      setSnackbar({
-      
-        mchildren: "Error al guardar la imagen",
-        severity: "error",
-      });
+        // Show an error notification
+        setSnackbar({
+          mchildren: "Error al guardar la imagen",
+          severity: "error",
+        });
       }
     }
   };
@@ -766,32 +937,83 @@ function DataGridServiceCrud() {
         <GridToolbarDensitySelector color="secondary" />
 
         <GridToolbarExport color="secondary" />
-        {/*    <Button
+
+        <Button
           color="secondary"
-          startIcon={<FaTasks />}
-          onClick={handleOpenDialog}
-        >
-          Agregar Nueva Tarea
-        </Button> */}
-        {/*  <Button
-          color="secondary"
-          onClick={handleOpenDialogForm}
-          startIcon={<AddOutlinedIcon />}
+          onClick={handleOpenNewServiceDialog}
+          startIcon={<AddOutlined />}
         >
           Agregar Nuevo Servicio
-        </Button> */}
+        </Button>
       </GridToolbarContainer>
     );
   }
+
+  /**
+   * Handle the process of saving data.
+   *
+   * @function
+   * @async
+   * @returns {Promise<void>} A Promise that resolves once the data is successfully saved or rejects if an error occurs.
+   *
+   * @example
+   * // Usage example
+   * try {
+   *   await handleAddService();
+   *   console.log("Data saved successfully!");
+   * } catch (error) {
+   *   console.error("Error saving data:", error.message);
+   * }
+   */
+
+  const handleAddService = async () => {
+    // Verificar si todos los campos están validados
+    const isFormValid = Object.values(validateInputs).every(
+      (isValid) => isValid
+    );
+
+    if (isFormValid) {
+      try {
+        /*  const response = await axios.post(
+         "http://localhost:3000/api/services",
+         serviceData
+       ); */
+
+        const response = await createService(serviceData);
+
+        // Aquí puedes manejar la respuesta de la solicitud si es necesario
+        console.log("Respuesta de la API:", response.data);
+
+        // Mostrar Snackbar de éxito
+        setSnackbar({
+          children: "Servicio añadido correctamente",
+          severity: "success",
+        });
+
+        // Cerrar el diálogo, actualizar el estado, o realizar otras acciones necesarias
+        handleCloseNewServiceDialog();
+      } catch (error) {
+        console.error("Error al guardar datos:", error);
+        setSnackbar({ children: "Error al guardar datos", severity: "error" });
+        // Aquí puedes manejar el error según tus necesidades
+      }
+    } else {
+      console.log(
+        "Formulario no válido. Por favor, completa todos los campos correctamente."
+      );
+      setSnackbar({
+        children: "Completa todos los campos correctamente",
+        severity: "warning",
+      });
+      // Puedes mostrar un mensaje al usuario indicando que debe completar todos los campos correctamente.
+    }
+  };
 
   return (
     <Box style={{ height: 400, width: "100%" }}>
       {renderConfirmDialog()}
       <DataGrid
-
-processRowUpdate={processRowUpdate}
-
-      
+        processRowUpdate={processRowUpdate}
         localeText={{
           toolbarColumns: "Columnas",
           toolbarFilters: "Filtros",
@@ -803,7 +1025,7 @@ processRowUpdate={processRowUpdate}
         slots={{ toolbar: CustomToolbar }}
       />
 
-{!!snackbar && (
+      {!!snackbar && (
         <Snackbar open onClose={handleCloseSnackbar} autoHideDuration={6000}>
           <Alert {...snackbar} onClose={handleCloseSnackbar} />
         </Snackbar>
@@ -915,6 +1137,246 @@ processRowUpdate={processRowUpdate}
                   variant="contained" /* onClick={handleAddTask} */
                 >
                   Guardar Imagen
+                </Button>
+              </Box>
+            </Paper>
+          </Box>
+        </Dialog>
+      )}
+
+      {isNewServiceDialogOpen && (
+        <Dialog
+          fullScreen
+          open={isNewServiceDialogOpen}
+          onClose={handleCloseNewServiceDialog}
+        >
+          <AppBar sx={{ position: "relative" }}>
+            <Toolbar>
+              <IconButton
+                edge="start"
+                color="inherit"
+                onClick={handleCloseNewServiceDialog}
+                aria-label="close"
+              >
+                <CloseIcon />
+              </IconButton>
+              {/*  <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
+                Agrega nueva tarea
+              </Typography> */}
+              {/*  <Button autoFocus color="inherit"  onClick={handleClose}>
+                Guardar
+              </Button> */}
+            </Toolbar>
+          </AppBar>
+          {/* Aqui va el contenido */}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "100%", // Ajusta según sea necesario
+            }}
+          >
+            <Paper
+              sx={{
+                width: "70%",
+                height: "85%",
+                boxShadow: 3,
+                padding: "2rem",
+                borderRadius: 1,
+              }}
+            >
+              {/* Contenido real del Paper */}
+              <Typography variant="body1" sx={{ mb: "2rem" }}>
+                Agregar Nuevo Servicio
+              </Typography>
+              {/* nombre, :imagen, :activo, :orden, :icono_app_movil */}
+              <Grid container spacing={2}>
+                <Grid
+                  item
+                  xs={3}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  {" "}
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Typography variant="caption" sx={{ mb: "2rem" }}>
+                      Imagen
+                    </Typography>
+                    <Box sx={{ marginBottom: "0.5rem" }}>
+                      <img
+                        className="rounded-full h-36 w-36 object-cover border-solid border-2 border-white"
+                        src={selectedWebImage || url}
+                        alt="Your Image"
+                      />
+                    </Box>
+
+                    <TextField
+                      type="file"
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      InputProps={{
+                        inputProps: {
+                          accept: "image/*", // specify accepted file types if needed
+                        },
+                      }}
+                      onChange={handleFileChangeWebImage}
+                      name="imagen"
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <TextField
+                    color="secondary"
+                    sx={{ marginBottom: "2rem", width: "100%" }}
+                    id="input-with-icon-textfield-nombre"
+                    label="Nombre del servicio"
+                    onChange={handleInputOnChange}
+                    value={serviceData.nombre}
+                    type="text"
+                    name="nombre"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <GrServices />
+                        </InputAdornment>
+                      ),
+                    }}
+                    variant="standard"
+                  />
+                  {validateInputs.nombre ? (
+                    <Stack sx={{ marginTop: "0.2rem" }} direction="row">
+                      <FaRegCircleCheck style={{ color: "#14B814" }} />{" "}
+                      <Typography color={"secondary"} variant="caption">
+                        ¡Gracias por ingresar un servicio!
+                      </Typography>
+                    </Stack>
+                  ) : (
+                    <Typography sx={{ color: "red" }} variant="caption">
+                      * ¡Por favor, ingresa un servicio!
+                    </Typography>
+                  )}
+
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "row",
+                      alignContent: "center",
+                      marginBottom: "2rem",
+                    }}
+                  >
+                    <InputLabel sx={{ alignSelf: "center" }}>Activo</InputLabel>
+                    <Checkbox
+                      {..."label"}
+                      onChange={handleInputOnChange}
+                      name="activo"
+                      size="small"
+                      color="secondary"
+                    />
+                  </Box>
+
+                  <TextField
+                    color="secondary"
+                    sx={{ marginBottom: "2rem", width: "100%" }}
+                    id="input-with-icon-textfield-order"
+                    label="Orden"
+                    onChange={handleInputOnChange}
+                    value={serviceData.orden}
+                    type="text"
+                    name="orden"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <GrServices />
+                        </InputAdornment>
+                      ),
+                    }}
+                    variant="standard"
+                  />
+                  {validateInputs.orden ? (
+                    <Stack sx={{ marginTop: "0.2rem" }} direction="row">
+                      <FaRegCircleCheck style={{ color: "#14B814" }} />{" "}
+                      <Typography color={"secondary"} variant="caption">
+                        ¡Gracias por ingresar un orden valido!
+                      </Typography>
+                    </Stack>
+                  ) : (
+                    <Typography sx={{ color: "red" }} variant="caption">
+                      * ¡Por favor, ingresa un orden valido !
+                    </Typography>
+                  )}
+                </Grid>
+
+                <Grid
+                  item
+                  xs={3}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  {" "}
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Typography variant="caption" sx={{ mb: "2rem" }}>
+                      Icono de la app
+                    </Typography>
+                    <Box sx={{ marginBottom: "0.5rem" }}>
+                      <img
+                        className="rounded-full h-36 w-36 object-cover border-solid border-2 border-white"
+                        src={selectedAppIcon || url}
+                        alt="Your Image"
+                      />
+                    </Box>
+
+                    <TextField
+                      type="file"
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      InputProps={{
+                        inputProps: {
+                          accept: "image/*", // specify accepted file types if needed
+                        },
+                      }}
+                      onChange={handleFileChangeAppIcon}
+                    />
+                  </Box>
+                </Grid>
+              </Grid>
+
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "end",
+                  marginTop: "2.5rem",
+                }}
+              >
+                <Button
+                  endIcon={<Sync />}
+                  color="secondary"
+                  variant="contained"
+                  onClick={handleAddService}
+                >
+                  Guardar Servicio
                 </Button>
               </Box>
             </Paper>
