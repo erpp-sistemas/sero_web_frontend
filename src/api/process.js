@@ -46,6 +46,7 @@ export const createProcess = async (processData) => {
    * @throws {Error} - Error en caso de fallo durante la actualización del proceso.
    */
   export const updateProcess = async (processId, updatedData) => {
+    console.log(updatedData);
     try {
       const response = await axios.put(`/processes/${processId}`, updatedData);
       return response.data;
