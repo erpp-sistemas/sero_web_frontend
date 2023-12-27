@@ -87,9 +87,10 @@ const useFakeMutation = () => {
       const response = updateService(service.id, service);
 
       return response.data;
+      
     } catch (error) {
       // Maneja errores de Axios o errores de validación
-      console.error(error);
+     
       throw error;
     }
   }, []);
@@ -321,14 +322,17 @@ function DataGridServiceCrud() {
     try {
       // Realizar la solicitud HTTP para eliminar la tarea en el backend
       const response = await deleteService(id);
-      console.log(response);
+      
 
       // Mostrar un mensaje en el Snackbar después de la eliminación exitosa
       setSnackbar({
         children: "Tarea eliminada exitosamente",
         severity: "success",
       });
+
+      fetchData()
     } catch (error) {
+      fetchData()
       // Mostrar un mensaje de error en el Snackbar si hay un problema al eliminar la tarea
       setSnackbar({
         children: "Error al eliminar la tarea",
@@ -530,36 +534,36 @@ function DataGridServiceCrud() {
       // Handle the error according to your requirements
     }
   };
-/**
- * Abre el diálogo de imagen.
- *
- * @returns {void}
- */
+  /**
+   * Abre el diálogo de imagen.
+   *
+   * @returns {void}
+   */
   const handleOpenImageDialog = () => {
     setIsImageDialogOpen(true);
   };
-  
-/**
- * Cierra el diálogo de imagen.
- *
- * @returns {void}
- */
+
+  /**
+   * Cierra el diálogo de imagen.
+   *
+   * @returns {void}
+   */
 
   const handleCloseImageDialog = () => {
     setIsImageDialogOpen(false);
   };
-/**
- * Componente que muestra una imagen en forma de Avatar.
- *
- * @component
- * @param {Object} props - Propiedades del componente.
- * @param {string|null} props.data - URL de la imagen o nulo si no hay imagen.
- * @param {Function} props.setGetRowData - Función para actualizar datos del componente padre.
- * @param {Object} props.getDataRow - Datos de la fila asociada a la imagen.
- * @param {string} props.field - Nombre del campo asociado a la imagen ("imagen" o "icono_app_movil").
- * @param {Function} props.setUrl - Función para actualizar la URL de la imagen en el componente padre.
- * @returns {JSX.Element} El componente AvatarImage.
- */
+  /**
+   * Componente que muestra una imagen en forma de Avatar.
+   *
+   * @component
+   * @param {Object} props - Propiedades del componente.
+   * @param {string|null} props.data - URL de la imagen o nulo si no hay imagen.
+   * @param {Function} props.setGetRowData - Función para actualizar datos del componente padre.
+   * @param {Object} props.getDataRow - Datos de la fila asociada a la imagen.
+   * @param {string} props.field - Nombre del campo asociado a la imagen ("imagen" o "icono_app_movil").
+   * @param {Function} props.setUrl - Función para actualizar la URL de la imagen en el componente padre.
+   * @returns {JSX.Element} El componente AvatarImage.
+   */
   const AvatarImage = ({
     data,
     setGetRowData,
@@ -626,6 +630,24 @@ function DataGridServiceCrud() {
     }
   };
 
+  const fetchData = async () => {
+    try {
+      // Aquí deberías hacer tu solicitud de red para obtener los datos
+      // Reemplaza 'TU_URL_DE_DATOS' con la URL real de tus datos
+      const response = await getAllServices();
+
+      // Agrega el campo 'id_tarea' a cada fila usando el índice como valor único si no no se ven en la datagrid
+      const rowsWithId = response.map((row, index) => ({
+        ...row,
+        id: row.id_servicio || index.toString(),
+      }));
+
+      setRows(rowsWithId);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
   React.useEffect(() => {
     /**
      * Función asíncrona para obtener y establecer los datos de las tareas.
@@ -634,23 +656,6 @@ function DataGridServiceCrud() {
      * @async
      * @private
      */
-    const fetchData = async () => {
-      try {
-        // Aquí deberías hacer tu solicitud de red para obtener los datos
-        // Reemplaza 'TU_URL_DE_DATOS' con la URL real de tus datos
-        const response = await getAllServices();
-
-        // Agrega el campo 'id_tarea' a cada fila usando el índice como valor único si no no se ven en la datagrid
-        const rowsWithId = response.map((row, index) => ({
-          ...row,
-          id: row.id_servicio || index.toString(),
-        }));
-
-        setRows(rowsWithId);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
 
     fetchData();
   }, []);
@@ -991,6 +996,7 @@ function DataGridServiceCrud() {
         });
 
         // Cerrar el diálogo, actualizar el estado, o realizar otras acciones necesarias
+        fetchData();
         handleCloseNewServiceDialog();
       } catch (error) {
         console.error("Error al guardar datos:", error);
