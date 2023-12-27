@@ -1,9 +1,9 @@
 import React from "react";
 import { getAllProcesses } from "../../../../api/process";
-import { Avatar, IconButton } from "@mui/material";
+import { Avatar, Box, IconButton } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
-import { DataGrid, GridActionsCellItem } from "@mui/x-data-grid";
+import { DataGrid, GridActionsCellItem, GridToolbarColumnsButton, GridToolbarContainer, GridToolbarDensitySelector, GridToolbarExport, GridToolbarFilterButton } from "@mui/x-data-grid";
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 function DataGridProcess() {
   const [rows, setRows] = React.useState([]);
@@ -249,11 +249,60 @@ function DataGridProcess() {
   
       return columns;
     };
-  return  <DataGrid
+
+
+     /**
+   * Cierra la notificación (snackbar) actualmente abierta.
+   *
+   * @function
+   * @name handleCloseSnackbar
+   */
+  const handleCloseSnackbar = () => setSnackbar(null);
+  /**
+   * Componente que representa la barra de herramientas personalizada para la tabla.
+   *
+   * @component
+   * @name CustomToolbar
+   * @returns {JSX.Element} JSX que renderiza la barra de herramientas personalizada.
+   */
+  function CustomToolbar() {
+    /*   console.log(handleOpenDialog); */
+    return (
+      <GridToolbarContainer>
+        <GridToolbarColumnsButton color="secondary" />
+        <GridToolbarFilterButton color="secondary" />
+        <GridToolbarDensitySelector color="secondary" />
+
+        <GridToolbarExport color="secondary" />
+        {/*  <Button
+          color="secondary"
+          startIcon={<FaTasks />}
+          onClick={handleOpenDialog}
+        >
+          Agregar Nueva Tarea
+        </Button> */}
+      {/*   <Button
+          color="secondary"
+          onClick={handleOpenDialogForm}
+          startIcon={<AddOutlinedIcon />}
+        >
+          Agregar Nuevo Proceso
+        </Button> */}
+      </GridToolbarContainer>
+    );
+  }
+  return <Box sx={{ width: "100%" }}> <DataGrid
   rows={rows}
   columns={buildColumns()}
+  localeText={{
+    toolbarColumns: "Columnas",
+    toolbarFilters: "Filtros",
+    toolbarDensity: "Tamaño Celda",
+    toolbarExport: "Exportar",
+  }}
+  slots={{ toolbar: CustomToolbar }}
  
-/>;
+/></Box>
 }
 
 export default DataGridProcess;
