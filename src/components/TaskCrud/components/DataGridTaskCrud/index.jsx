@@ -287,15 +287,13 @@ function DataGridTaskCrud() {
           return targetProcess ? targetProcess.id_proceso : "";
         },
       },
-      {
+     /*  {
         field: "actions",
         type: "actions",
         renderHeader: () => (
           <strong style={{ color: "#5EBFFF" }}>
             {"Proceso"}
-            {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
-                  📃
-                  </span> */}
+           
           </strong>
         ),
         width: 100,
@@ -310,7 +308,7 @@ function DataGridTaskCrud() {
             />,
           ];
         },
-      },
+      }, */
     ];
 
     return columns;
