@@ -385,7 +385,7 @@ function DataGridServiceCrud() {
         children: "Servicio guardado con exito ",
         severity: "success",
       });
-      resolve(response);
+      resolve(newRow);
       setPromiseArguments(null);
     } catch (error) {
       setSnackbar({ children: `${error}`, severity: "error" });
@@ -808,15 +808,13 @@ const handleFileChangeWebImage = async (event) => {
         width: 100,
         editable: true,
       },
-      {
+     /*  {
         field: "actions",
         type: "actions",
         renderHeader: () => (
           <strong style={{ color: "#5EBFFF" }}>
             {"Acciones"}
-            {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
-              📃
-              </span> */}
+           
           </strong>
         ),
         width: 100,
@@ -831,7 +829,7 @@ const handleFileChangeWebImage = async (event) => {
             />,
           ];
         },
-      },
+      }, */
     ];
 
     return columns;
@@ -1042,7 +1040,9 @@ const handleFileChangeWebImage = async (event) => {
   };
 
   return (
-    <Box style={{ height: 400, width: "100%" }}>
+    <Box sx={{ height: 400, width: "100%",'.css-196n7va-MuiSvgIcon-root': {
+      fill:"white"
+    }  }}>
       {renderConfirmDialog()}
       <DataGrid
         processRowUpdate={processRowUpdate}
