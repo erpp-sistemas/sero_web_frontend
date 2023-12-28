@@ -312,31 +312,33 @@ function DataGridTaskCrud() {
     return columns;
   };
 
-  React.useEffect(() => {
-    /**
+   /**
      * Función asíncrona para obtener y establecer los datos de las tareas.
      *
      * @function
      * @async
      * @private
      */
-    const fetchData = async () => {
-      try {
-        // Aquí deberías hacer tu solicitud de red para obtener los datos
-        // Reemplaza 'TU_URL_DE_DATOS' con la URL real de tus datos
-        const response = await getAllTasks();
+   const fetchData = async () => {
+    try {
+      // Aquí deberías hacer tu solicitud de red para obtener los datos
+      // Reemplaza 'TU_URL_DE_DATOS' con la URL real de tus datos
+      const response = await getAllTasks();
 
-        // Agrega el campo 'id_tarea' a cada fila usando el índice como valor único si no no se ven en la datagrid
-        const rowsWithId = response.map((row, index) => ({
-          ...row,
-          id: row.id_tarea || index.toString(),
-        }));
+      // Agrega el campo 'id_tarea' a cada fila usando el índice como valor único si no no se ven en la datagrid
+      const rowsWithId = response.map((row, index) => ({
+        ...row,
+        id: row.id_tarea || index.toString(),
+      }));
 
-        setRows(rowsWithId);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
+      setRows(rowsWithId);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
+  React.useEffect(() => {
+   
 
     fetchData();
   }, []);
@@ -407,6 +409,8 @@ function DataGridTaskCrud() {
         children: "Tarea eliminada exitosamente",
         severity: "success",
       });
+
+      fetchData()
     } catch (error) {
       // Mostrar un mensaje de error en el Snackbar si hay un problema al eliminar la tarea
       setSnackbar({
@@ -544,6 +548,7 @@ function DataGridTaskCrud() {
           color="secondary"
           startIcon={<AddIcon />}
           onClick={handleClickOpenNewTaskDialog}
+          size="small"
         >
           Agregar Nueva Tarea
         </Button>
@@ -618,6 +623,7 @@ const handleAddTask = async () => {
 
       // Cierre del diálogo u otras acciones después de agregar el registro
       handleCloseNewTaskDialog();
+      fetchData()
     } catch (error) {
       console.error("Error al agregar el registro:", error);
 
@@ -721,7 +727,7 @@ const handleChangeInput = (e) => {
     <Box style={{ height: 400, width: "100%" }}>
       {renderConfirmDialog()}
       <DataGrid
-        checkboxSelection
+        
         rows={rows}
         columns={buildColumns()}
         slots={{ toolbar: CustomToolbar }}
