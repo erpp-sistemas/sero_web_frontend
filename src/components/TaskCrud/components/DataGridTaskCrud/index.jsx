@@ -8,6 +8,8 @@ import {
 import {
   DataGrid,
   GridActionsCellItem,
+  GridCellEditStopReasons,
+  GridCellModes,
   GridToolbarColumnsButton,
   GridToolbarContainer,
   GridToolbarDensitySelector,
@@ -45,6 +47,7 @@ import AddIcon from "@mui/icons-material/Add";
 import { FaTasks } from "react-icons/fa";
 import { FaRegCircleCheck } from "react-icons/fa6";
 import { TbZoomCancel } from "react-icons/tb";
+import { row } from "mathjs";
 
 /**
  * Hook personalizado para simular una mutación asincrónica con datos ficticios.
@@ -82,6 +85,7 @@ const useFakeMutation = () => {
       const response = updateTaskById(task.id_tarea, task);
 
       return response.data;
+      
     } catch (error) {
       // Maneja errores de Axios o errores de validación
       console.error(error);
@@ -455,12 +459,13 @@ function DataGridTaskCrud() {
     try {
       // Make the HTTP request to save in the backend
       const response = await mutateRow(newRow, "update");
-
+      
+    
       setSnackbar({
         children: "Tarea guardada exitosamente",
         severity: "success",
       });
-      resolve(response);
+      resolve(newRow);
       setPromiseArguments(null);
     } catch (error) {
       setSnackbar({ children: "Name can't be empty", severity: "error" });
@@ -470,10 +475,12 @@ function DataGridTaskCrud() {
   };
 
   const handleEntered = () => {
+    noButtonRef.current?.focus();
+  
     // The `autoFocus` is not used because, if used, the same Enter that saves
     // the cell triggers "No". Instead, we manually focus the "No" button once
     // the dialog is fully open.
-    // noButtonRef.current?.focus();
+    // 
   };
 
   /**
@@ -724,10 +731,24 @@ const handleChangeInput = (e) => {
    * @returns {JSX.Element} - Elemento JSX que representa el DataGrid.
    */
   return (
-    <Box style={{ height: 400, width: "100%" }}>
+    <Box sx={{ height: 400, width: "100%",'.css-196n7va-MuiSvgIcon-root': {
+      fill:"white"
+    } }}>
       {renderConfirmDialog()}
       <DataGrid
+    
+   
+      /*   onCellEditStop={(params, event) => {
         
+          if (params.row.id_tarea === 1 && params.cellMode==="edit") {
+            params.cellMode="view"
+            
+          }
+          
+          console.log(event);
+         
+         console.log(params);
+        }} */
         rows={rows}
         columns={buildColumns()}
         slots={{ toolbar: CustomToolbar }}
@@ -738,6 +759,7 @@ const handleChangeInput = (e) => {
           toolbarExport: "Exportar",
         }}
         processRowUpdate={processRowUpdate}
+        
       />
       {!!snackbar && (
         <Snackbar open onClose={handleCloseSnackbar} autoHideDuration={6000}>
