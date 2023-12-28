@@ -1,19 +1,28 @@
 import React from "react";
-import { deleteProcess, getAllProcesses, updateProcess } from "../../../../api/process";
+import {
+  createProcess,
+  deleteProcess,
+  getAllProcesses,
+  updateProcess,
+} from "../../../../api/process";
 import {
   Alert,
   AppBar,
   Avatar,
   Box,
   Button,
+  Checkbox,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   Grid,
   IconButton,
+  InputAdornment,
+  InputLabel,
   Paper,
   Snackbar,
+  Stack,
   TextField,
   Toolbar,
   Typography,
@@ -32,6 +41,9 @@ import {
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import CloseIcon from "@mui/icons-material/Close";
 import { uploadToS3 } from "../../../../services/s3.service";
+import { AddOutlined, Sync, SyncAltOutlined } from "@mui/icons-material";
+import { GrServices } from "react-icons/gr";
+import { FaRegCircleCheck } from "react-icons/fa6";
 
 /**
  * Hook personalizado para simular una mutación asincrónica con datos ficticios.
@@ -147,9 +159,12 @@ function DataGridProcess() {
   const mutateRow = useFakeMutation();
   const [promiseArguments, setPromiseArguments] = React.useState(null);
   const [singnedUrl, setSignedUrl] = React.useState(null);
+  const [isNewProcessDialogOpen, setNewProcessDialogOpen] =
+    React.useState(false);
   const [snackbar, setSnackbar] = React.useState(null);
   const [getRowData, setGetRowData] = React.useState();
   const noButtonRef = React.useRef(null);
+  const [selectedWebImage, setSelectedWebImage] = React.useState(null);
   const [processData, setProcessData] = React.useState({
     nombre: "",
     imagen: "",
@@ -167,6 +182,104 @@ function DataGridProcess() {
     tabla_gestion: false,
     url_aplicacion_movil: false,
   });
+
+  /**
+   * Maneja el cambio de entrada de datos en los campos del formulario.
+   *
+   * @function
+   * @name handleInputOnChange
+   * @param {object} event - Objeto de evento que representa el cambio de entrada.
+   * @returns {void}
+   */
+  const handleInputOnChange = (event) => {
+    const { name, value, type, checked } = event.target;
+    // Actualiza el estado serviceData con el nuevo valor del campo Servicio
+    const newValue = type === "checkbox" ? checked : value;
+    setProcessData((prevState) => ({
+      ...prevState,
+      [name]: newValue,
+    }));
+
+    // Utilizing switch to handle different fields
+    switch (name) {
+      case "nombre":
+        // Validation logic for the 'name' field
+        const isValidName = value.length > 0;
+
+        // Update the validation state for the 'name' field
+        setValidateInputs((prevValidateInputs) => ({
+          ...prevValidateInputs,
+          [name]: isValidName,
+        }));
+        break;
+
+      case "procedimiento_almacenado_gestion":
+        // Validation logic for the 'stored_procedure_management' field
+        const isValidStoredProcedureManagement = value.length > 0;
+
+        // Update the validation state for the 'stored_procedure_management' field
+        setValidateInputs((prevValidateInputs) => ({
+          ...prevValidateInputs,
+          [name]: isValidStoredProcedureManagement,
+        }));
+        break;
+
+      case "procedimiento_almacenado_gestion_grafico":
+        // Validation logic for the 'stored_procedure_management_chart' field
+        const isValidStoredProcedureManagementChart = value.length > 0;
+
+        // Update the validation state for the 'stored_procedure_management_chart' field
+        setValidateInputs((prevValidateInputs) => ({
+          ...prevValidateInputs,
+          [name]: isValidStoredProcedureManagementChart,
+        }));
+        break;
+
+      case "tabla_gestion":
+        // Validation logic for the 'table_management' field
+        const isValidTableManagement = value.length > 0;
+
+        // Update the validation state for the 'table_management' field
+        setValidateInputs((prevValidateInputs) => ({
+          ...prevValidateInputs,
+          [name]: isValidTableManagement,
+        }));
+        break;
+
+      case "url_aplicacion_movil":
+        // Validation logic for the 'mobile_application_url' field
+        const isValidMobileApplicationUrl = value.length > 0;
+
+        // Update the validation state for the 'mobile_application_url' field
+        setValidateInputs((prevValidateInputs) => ({
+          ...prevValidateInputs,
+          [name]: isValidMobileApplicationUrl,
+        }));
+        break;
+
+      default:
+        // Default logic (can be empty if no additional logic is needed)
+        break;
+    }
+  };
+
+  /**
+   * Manejador para abrir el diálogo de nuevo proceso.
+   * @function
+   * @returns {void}
+   */
+  const handleOpenNewProcessDialog = () => {
+    setNewProcessDialogOpen(true);
+  };
+
+  /**
+   * Manejador para cerrar el diálogo de nuevo proceso.
+   * @function
+   * @returns {void}
+   */
+  const handleCloseNewProcessDialog = () => {
+    setNewProcessDialogOpen(false);
+  };
 
   /**
    * Abre el diálogo de imagen.
@@ -542,7 +655,7 @@ function DataGridProcess() {
             <GridActionsCellItem
               icon={<DeleteIcon />}
               label="Delete"
-                  onClick={() => handleDeleteClick(id)} 
+              onClick={() => handleDeleteClick(id)}
               color="inherit"
             />,
           ];
@@ -599,13 +712,14 @@ function DataGridProcess() {
         >
           Agregar Nueva Tarea
         </Button> */}
-        {/*   <Button
+        <Button
           color="secondary"
-          onClick={handleOpenDialogForm}
-          startIcon={<AddOutlinedIcon />}
+          onClick={handleOpenNewProcessDialog}
+          startIcon={<AddOutlined />}
+          size="small"
         >
           Agregar Nuevo Proceso
-        </Button> */}
+        </Button>
       </GridToolbarContainer>
     );
   }
@@ -679,8 +793,6 @@ function DataGridProcess() {
 
         updatedRowData = { ...getRowData, imagen: singnedUrl };
 
-      
-
         // Make a PUT request using the updatedRowData
         /*    console.log(updatedRowData);
          */
@@ -707,7 +819,7 @@ function DataGridProcess() {
     }
   };
 
-   /**
+  /**
    * Maneja el clic en el botón de eliminación y realiza la eliminación de la fila con el ID proporcionado.
    *
    * @async
@@ -716,21 +828,18 @@ function DataGridProcess() {
    * @param {string} id - El ID de la fila a eliminar.
    * @returns {Promise<void>} - Una promesa que se resuelve después de la eliminación exitosa.
    */
-   const handleDeleteClick = async (id) => {
-    
-
+  const handleDeleteClick = async (id) => {
     try {
       // Make the HTTP request to save in the backend
-     /*  const response = await axios.delete(
+      /*  const response = await axios.delete(
         `http://localhost:3000/api/processes/${id}`
       ); */
 
-      const response = await deleteProcess(id)
-    
+      const response = await deleteProcess(id);
 
       setSnackbar({ children: `Se borro exitosamente`, severity: "warning" });
-      fetchProcesses()
-      return response
+      fetchProcesses();
+      return response;
     } catch (error) {
       console.log(error);
       setSnackbar({ children: `${error}`, severity: "error" });
@@ -740,9 +849,123 @@ function DataGridProcess() {
     }
   };
 
+  /**
+   * Manejador de cambio de archivo para la carga de imágenes web.
+   * @async
+   * @param {Event} event - Objeto de evento que representa el cambio de archivo.
+   * @returns {Promise<void>} - Promesa que se resuelve después de la carga y procesamiento del archivo.
+   */
+  const handleFileChangeWebImage = async (event) => {
+    // Obtiene el primer archivo seleccionado
+    const file = event.target.files[0];
+
+    // Verifica si se seleccionó un archivo
+    if (file) {
+      const reader = new FileReader();
+
+      // Configura el callback cuando la lectura del archivo se completa
+      reader.onload = () => {
+        // Actualiza el estado con la imagen seleccionada
+        setSelectedWebImage(reader.result);
+      };
+
+      // Lee el contenido del archivo como una URL de datos (data URL)
+      reader.readAsDataURL(file);
+    }
+
+    try {
+      // Intenta cargar el archivo a Amazon S3 y obtén la URL del archivo cargado
+      const fileUrl = await uploadToS3(file);
+      console.log("URL del archivo subido:", fileUrl);
+
+      // Actualiza el estado 'imagen' en serviceData con la nueva URL del archivo
+      setProcessData((prevData) => ({
+        ...prevData,
+        imagen: fileUrl,
+      }));
+
+      // Establece la URL firmada para la imagen (si es necesario)
+      setSignedUrl(fileUrl);
+
+      // Configura el mensaje de Snackbar en caso de éxito
+      setSnackbar({
+        children: "Archivo subido exitosamente",
+        severity: "success",
+      });
+    } catch (error) {
+      // Configura el mensaje de Snackbar en caso de error
+      setSnackbar({
+        children: "Error al subir archivo. Por favor, inténtalo de nuevo.",
+        severity: "error",
+      });
+
+      console.error("Error al subir archivo:", error.message);
+      // Maneja el error según tus requisitos
+    }
+  };
+
+
+  
+  /**
+   * Handle the process of saving data.
+   *
+   * @function
+   * @async
+   * @returns {Promise<void>} A Promise that resolves once the data is successfully saved or rejects if an error occurs.
+   *
+   * @example
+   * // Usage example
+   * try {
+   *   await handleAddProcess();
+   *   console.log("Data saved successfully!");
+   * } catch (error) {
+   *   console.error("Error saving data:", error.message);
+   * }
+   */
+
+  const handleAddProcess = async () => {
+    // Verificar si todos los campos están validados
+    const isFormValid = Object.values(validateInputs).every(
+      (isValid) => isValid
+    );
+
+    if (isFormValid) {
+      try {
+      
+        const response = await createProcess(processData);
+
+        // Aquí puedes manejar la respuesta de la solicitud si es necesario
+        console.log("Respuesta de la API:", response.data);
+
+        // Mostrar Snackbar de éxito
+        setSnackbar({
+          children: "Proceso añadido correctamente",
+          severity: "success",
+        });
+
+        // Cerrar el diálogo, actualizar el estado, o realizar otras acciones necesarias
+        fetchProcesses();
+        handleCloseNewProcessDialog()
+      } catch (error) {
+        console.error("Error al guardar datos:", error);
+        setSnackbar({ children: "Error al guardar datos", severity: "error" });
+        // Aquí puedes manejar el error según tus necesidades
+      }
+    } else {
+      console.log(
+        "Formulario no válido. Por favor, completa todos los campos correctamente."
+      );
+      setSnackbar({
+        children: "Completa todos los campos correctamente",
+        severity: "warning",
+      });
+      // Puedes mostrar un mensaje al usuario indicando que debe completar todos los campos correctamente.
+    }
+  };
+
   return (
     <Box sx={{ width: "100%" }}>
-         {renderConfirmDialog()}
+      {renderConfirmDialog()}
       <DataGrid
         rows={rows}
         columns={buildColumns()}
@@ -867,6 +1090,337 @@ function DataGridProcess() {
                   variant="contained"
                 >
                   Guardar Imagen
+                </Button>
+              </Box>
+            </Paper>
+          </Box>
+        </Dialog>
+      )}
+      {isNewProcessDialogOpen && (
+        <Dialog
+          fullScreen
+          open={isNewProcessDialogOpen}
+          onClose={handleCloseNewProcessDialog}
+        >
+          <AppBar sx={{ position: "relative" }}>
+            <Toolbar>
+              <IconButton
+                edge="start"
+                color="inherit"
+                onClick={handleCloseNewProcessDialog}
+                aria-label="close"
+              >
+                <CloseIcon />
+              </IconButton>
+              {/*  <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
+                Agrega nueva tarea
+              </Typography> */}
+              {/*  <Button autoFocus color="inherit"  onClick={handleClose}>
+                Guardar
+              </Button> */}
+            </Toolbar>
+          </AppBar>
+          {/* Aqui va el contenido */}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "100%", // Ajusta según sea necesario
+            }}
+          >
+            <Paper
+              sx={{
+                width: "70%",
+                height: "95%",
+                boxShadow: 3,
+                padding: "2rem",
+                borderRadius: 1,
+              }}
+            >
+              {/* Contenido real del Paper */}
+              <Typography variant="body1" sx={{ mb: "1rem" }}>
+                Agregar Nuevo Proceso
+              </Typography>
+
+              <Grid container spacing={2}>
+                <Grid
+                  item
+                  xs={6}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  {" "}
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Typography variant="caption" sx={{ mb: "2rem" }}>
+                      Imagen
+                    </Typography>
+                    <Box sx={{ marginBottom: "0.5rem" }}>
+                      <img
+                        className="rounded-full h-36 w-36 object-cover border-solid border-2 border-white"
+                          src={selectedWebImage || url} 
+                        alt="Your Image"
+                      />
+                    </Box>
+
+                    <TextField
+                      type="file"
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      InputProps={{
+                        inputProps: {
+                          accept: "image/*", // specify accepted file types if needed
+                        },
+                      }}
+                       onChange={handleFileChangeWebImage} 
+                      name="imagen"
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <TextField
+                    color="secondary"
+                    sx={{ marginBottom: "0.5rem", width: "100%" }}
+                    id="input-with-icon-textfield-nombre"
+                    label="Nombre del proceso"
+                    onChange={handleInputOnChange}
+                    value={processData.nombre}
+                    type="text"
+                    name="nombre"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <GrServices />
+                        </InputAdornment>
+                      ),
+                    }}
+                    variant="standard"
+                  />
+                  {validateInputs.nombre ? (
+                    <Stack
+                      sx={{ marginTop: "0.2rem", marginBottom: "1rem" }}
+                      direction="row"
+                    >
+                      <FaRegCircleCheck style={{ color: "#14B814" }} />{" "}
+                      <Typography color={"secondary"} variant="caption">
+                        ¡Gracias por ingresar un proceso!
+                      </Typography>
+                    </Stack>
+                  ) : (
+                    <Typography sx={{ color: "red" }} variant="caption">
+                      * ¡Por favor, ingresa un proceso!
+                    </Typography>
+                  )}
+
+                  <TextField
+                    color="secondary"
+                    sx={{ marginBottom: "0.5rem", width: "100%" }}
+                    id="input-with-icon-textfield-proccedure-managment"
+                    label="Procedimiento Almacenado Gestiòn"
+                    onChange={handleInputOnChange}
+                    value={processData.procedimiento_almacenado_gestion}
+                    type="text"
+                    name="procedimiento_almacenado_gestion"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <GrServices />
+                        </InputAdornment>
+                      ),
+                    }}
+                    variant="standard"
+                  />
+                  {validateInputs.procedimiento_almacenado_gestion ? (
+                    <Stack
+                      sx={{ marginTop: "0.2rem", marginBottom: "0.5rem" }}
+                      direction="row"
+                    >
+                      <FaRegCircleCheck style={{ color: "#14B814" }} />{" "}
+                      <Typography color={"secondary"} variant="caption">
+                        ¡Gracias por ingresar un proceso almacenado de gestion!
+                      </Typography>
+                    </Stack>
+                  ) : (
+                    <Typography sx={{ color: "red" }} variant="caption">
+                      * ¡Por favor, ingresa un proceso almacenado de gestion!
+                    </Typography>
+                  )}
+
+                  <TextField
+                    color="secondary"
+                    sx={{ marginBottom: "0.5rem", width: "100%" }}
+                    id="input-with-icon-textfield-proccedure-managment-chart"
+                    label="Procedimiento Almacenado Gestiòn Grafico"
+                    onChange={handleInputOnChange}
+                    value={processData.procedimiento_almacenado_gestion_grafico}
+                    type="text"
+                    name="procedimiento_almacenado_gestion_grafico"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <GrServices />
+                        </InputAdornment>
+                      ),
+                    }}
+                    variant="standard"
+                  />
+                  {validateInputs.procedimiento_almacenado_gestion_grafico ? (
+                    <Stack
+                      sx={{ marginTop: "0.2rem", marginBottom: "1rem" }}
+                      direction="row"
+                    >
+                      <FaRegCircleCheck style={{ color: "#14B814" }} />{" "}
+                      <Typography color={"secondary"} variant="caption">
+                        ¡Gracias por ingresar un proceso almacenado de la
+                        gestion del grafico!
+                      </Typography>
+                    </Stack>
+                  ) : (
+                    <Typography sx={{ color: "red" }} variant="caption">
+                      * ¡Por favor, ingresa un proceso almacenado de la gestion
+                      del grafico!
+                    </Typography>
+                  )}
+
+                  <TextField
+                    color="secondary"
+                    sx={{ marginBottom: "0.5rem", width: "100%" }}
+                    id="input-with-icon-textfield-managment-table"
+                    label="Tabla Gestion"
+                    onChange={handleInputOnChange}
+                    value={processData.tabla_gestion}
+                    type="text"
+                    name="tabla_gestion"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <GrServices />
+                        </InputAdornment>
+                      ),
+                    }}
+                    variant="standard"
+                  />
+
+                  {validateInputs.tabla_gestion ? (
+                    <Stack
+                      sx={{ marginTop: "0.2rem", marginBottom: "1rem" }}
+                      direction="row"
+                    >
+                      <FaRegCircleCheck style={{ color: "#14B814" }} />{" "}
+                      <Typography color={"secondary"} variant="caption">
+                        ¡Gracias por ingresar una tabla gestion!
+                      </Typography>
+                    </Stack>
+                  ) : (
+                    <Typography sx={{ color: "red" }} variant="caption">
+                      * ¡Por favor, ingresa una tabla gestion!
+                    </Typography>
+                  )}
+
+                  <TextField
+                    color="secondary"
+                    sx={{ marginBottom: "1rem", width: "100%" }}
+                    id="input-with-icon-textfield-url"
+                    label="Url Aplicacion Movil"
+                    onChange={handleInputOnChange}
+                    value={processData.url_aplicacion_movil}
+                    type="text"
+                    name="url_aplicacion_movil"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <GrServices />
+                        </InputAdornment>
+                      ),
+                    }}
+                    variant="standard"
+                  />
+                  {validateInputs.url_aplicacion_movil ? (
+                    <Stack
+                      sx={{ marginTop: "0.2rem", marginBottom: "1rem" }}
+                      direction="row"
+                    >
+                      <FaRegCircleCheck style={{ color: "#14B814" }} />{" "}
+                      <Typography color={"secondary"} variant="caption">
+                        ¡Gracias por ingresar una url valida!
+                      </Typography>
+                    </Stack>
+                  ) : (
+                    <Typography sx={{ color: "red" }} variant="caption">
+                      * ¡Por favor, ingresa una url valida!
+                    </Typography>
+                  )}
+                  {/*  {validateInputs.nombre ? (
+                    <Stack sx={{ marginTop: "0.2rem" }} direction="row">
+                      <FaRegCircleCheck style={{ color: "#14B814" }} />{" "}
+                      <Typography color={"secondary"} variant="caption">
+                        ¡Gracias por ingresar un servicio!
+                      </Typography>
+                    </Stack>
+                  ) : (
+                    <Typography sx={{ color: "red" }} variant="caption">
+                      * ¡Por favor, ingresa un servicio!
+                    </Typography>
+                  )} */}
+
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "row",
+                      alignContent: "center",
+                      marginBottom: "2rem",
+                    }}
+                  >
+                    <InputLabel sx={{ alignSelf: "center" }}>Activo</InputLabel>
+                    <Checkbox
+                      {..."label"}
+                      onChange={handleInputOnChange}
+                      name="activo"
+                      size="small"
+                      color="secondary"
+                    />
+                  </Box>
+
+                  {/*      {validateInputs.orden ? (
+                    <Stack sx={{ marginTop: "0.2rem" }} direction="row">
+                      <FaRegCircleCheck style={{ color: "#14B814" }} />{" "}
+                      <Typography color={"secondary"} variant="caption">
+                        ¡Gracias por ingresar un orden valido!
+                      </Typography>
+                    </Stack>
+                  ) : (
+                    <Typography sx={{ color: "red" }} variant="caption">
+                      * ¡Por favor, ingresa un orden valido !
+                    </Typography>
+                  )} */}
+                </Grid>
+              </Grid>
+
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "end",
+                  marginBottom: "1rem",
+                }}
+              >
+                <Button
+                  endIcon={<Sync />}
+                  color="secondary"
+                  variant="contained"
+                  onClick={handleAddProcess}
+                >
+                  Guardar Proceso
                 </Button>
               </Box>
             </Paper>

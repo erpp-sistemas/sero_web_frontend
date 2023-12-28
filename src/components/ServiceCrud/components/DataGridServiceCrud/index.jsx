@@ -266,7 +266,13 @@ function DataGridServiceCrud() {
     resolve(oldRow); // Resolve with the old row to not update the internal state
     setPromiseArguments(null);
   };
-
+/**
+ * Renderiza un cuadro de diálogo de confirmación para la acción de guardar cambios.
+ *
+ * @function
+ * @name renderConfirmDialog
+ * @returns {JSX.Element|null} Elemento JSX que representa el cuadro de diálogo de confirmación.
+ */
   const renderConfirmDialog = () => {
     if (!promiseArguments) {
       return null;
@@ -456,41 +462,60 @@ function DataGridServiceCrud() {
     }
   };
 
-  const handleFileChangeWebImage = async (event) => {
-    const file = event.target.files[0];
+  /**
+ * Manejador de cambio de archivo para la carga de imágenes web.
+ * @async
+ * @param {Event} event - Objeto de evento que representa el cambio de archivo.
+ * @returns {Promise<void>} - Promesa que se resuelve después de la carga y procesamiento del archivo.
+ */
+const handleFileChangeWebImage = async (event) => {
+  // Obtiene el primer archivo seleccionado
+  const file = event.target.files[0];
 
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        setSelectedWebImage(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
+  // Verifica si se seleccionó un archivo
+  if (file) {
+    const reader = new FileReader();
 
-    try {
-      const fileUrl = await uploadToS3(file);
-      console.log("URL del archivo subido:", fileUrl);
+    // Configura el callback cuando la lectura del archivo se completa
+    reader.onload = () => {
+      // Actualiza el estado con la imagen seleccionada
+      setSelectedWebImage(reader.result);
+    };
 
-      setServiceData((prevData) => {
-        // Update the 'imagen' property in the state with the new fileUrl
-        return { ...prevData, imagen: fileUrl };
-      });
+    // Lee el contenido del archivo como una URL de datos (data URL)
+    reader.readAsDataURL(file);
+  }
 
-      setSignedUrl(fileUrl);
-      // Configura el mensaje de Snackbar en caso de éxito
-      setSnackbar({
-        children: "Archivo subido exitosamente",
-        severity: "success",
-      });
-    } catch (error) {
-      setSnackbar({
-        children: "Error al subir archivo. Por favor, inténtalo de nuevo.",
-        severity: "error",
-      });
-      console.error("Error al subir archivo:", error.message);
-      // Handle the error according to your requirements
-    }
-  };
+  try {
+    // Intenta cargar el archivo a Amazon S3 y obtén la URL del archivo cargado
+    const fileUrl = await uploadToS3(file);
+    console.log("URL del archivo subido:", fileUrl);
+
+    // Actualiza el estado 'imagen' en serviceData con la nueva URL del archivo
+    setServiceData((prevData) => ({
+      ...prevData,
+      imagen: fileUrl,
+    }));
+
+    // Establece la URL firmada para la imagen (si es necesario)
+    setSignedUrl(fileUrl);
+
+    // Configura el mensaje de Snackbar en caso de éxito
+    setSnackbar({
+      children: "Archivo subido exitosamente",
+      severity: "success",
+    });
+  } catch (error) {
+    // Configura el mensaje de Snackbar en caso de error
+    setSnackbar({
+      children: "Error al subir archivo. Por favor, inténtalo de nuevo.",
+      severity: "error",
+    });
+
+    console.error("Error al subir archivo:", error.message);
+    // Maneja el error según tus requisitos
+  }
+};
   /**
    * Maneja el cambio de un archivo para el icono de la aplicación y realiza acciones relacionadas.
    *
