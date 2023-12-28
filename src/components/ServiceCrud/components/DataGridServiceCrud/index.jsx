@@ -972,6 +972,7 @@ const handleFileChangeWebImage = async (event) => {
           color="secondary"
           onClick={handleOpenNewServiceDialog}
           startIcon={<AddOutlined />}
+          size="small"
         >
           Agregar Nuevo Servicio
         </Button>
@@ -1406,6 +1407,7 @@ const handleFileChangeWebImage = async (event) => {
                   color="secondary"
                   variant="contained"
                   onClick={handleAddService}
+                 
                 >
                   Guardar Servicio
                 </Button>
