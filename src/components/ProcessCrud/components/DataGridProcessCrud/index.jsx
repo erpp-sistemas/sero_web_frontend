@@ -1,12 +1,142 @@
 import React from "react";
 import { getAllProcesses, updateProcess } from "../../../../api/process";
-import { Alert, AppBar, Avatar, Box, Button, Dialog, Grid, IconButton, Paper, Snackbar, TextField, Toolbar, Typography } from "@mui/material";
+import {
+  Alert,
+  AppBar,
+  Avatar,
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  IconButton,
+  Paper,
+  Snackbar,
+  TextField,
+  Toolbar,
+  Typography,
+} from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
-import { DataGrid, GridActionsCellItem, GridToolbarColumnsButton, GridToolbarContainer, GridToolbarDensitySelector, GridToolbarExport, GridToolbarFilterButton } from "@mui/x-data-grid";
+import {
+  DataGrid,
+  GridActionsCellItem,
+  GridToolbarColumnsButton,
+  GridToolbarContainer,
+  GridToolbarDensitySelector,
+  GridToolbarExport,
+  GridToolbarFilterButton,
+} from "@mui/x-data-grid";
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import CloseIcon from "@mui/icons-material/Close";
 import { uploadToS3 } from "../../../../services/s3.service";
+
+/**
+ * Hook personalizado para simular una mutación asincrónica con datos ficticios.
+ *
+ * @param {Function} updateProcess - Función para actualizar un proceso por ID utilizando la API.
+ * @returns {Function} - Función de retorno que realiza la mutación asincrónica.
+ *
+ * @throws {Error} - Se lanza un error si hay un problema durante la actualización.
+ *
+ * @async
+ * @function
+ * @name useFakeMutation
+ *
+ * @param {Object} process - Datos del progreso para la mutación.
+ * @param {string} _action - Acción a realizar ("update", "delete", o "create").
+ * @returns {Promise<Object>} - Promesa que se resuelve con los datos resultantes de la mutación.
+ */
+const useFakeMutation = () => {
+  /**
+   * Función que realiza la mutación asincrónica.
+   *
+   * @async
+   *
+   * @param {Object} process - Datos del progreso para la mutación.
+   * @param {string} _action - Acción a realizar ("update", "delete", o "create").
+   * @returns {Promise<Object>} - Promesa que se resuelve con los datos resultantes de la mutación.
+   *
+   * @throws {Error} - Se lanza un error si hay un problema durante la actualización.
+   */
+  return React.useCallback(async (process, _action) => {
+    try {
+      // Simulando una pausa de 200 ms con setTimeout
+      await new Promise((timeoutResolve) => setTimeout(timeoutResolve, 200));
+
+      const response = updateProcess(process.id, process);
+
+      return response.data;
+    } catch (error) {
+      // Maneja errores de Axios o errores de validación
+
+      throw error;
+    }
+  }, []);
+};
+
+/**
+ * Computes a mutation description based on the changes between the new and old row data.
+ *
+ * @function
+ * @param {Object} newRow - The new row data.
+ * @param {Object} oldRow - The old row data.
+ * @returns {string|null} - A string describing the mutation or null if no changes detected.
+ *
+ * @example
+ * // Usage example
+ * const mutationDescription = computeMutation(newRow, oldRow);
+ * if (mutationDescription) {
+ *   console.log("Mutation:", mutationDescription);
+ * } else {
+ *   console.log("No changes detected.");
+ * }
+ */
+
+function computeMutation(newRow, oldRow) {
+  if (newRow.nombre !== oldRow.nombre) {
+    return `Name from '${oldRow.nombre}' to '${newRow.nombre}'`;
+  }
+  if (newRow.activo !== oldRow.activo) {
+    return `¿Realmente deseas cambiar el estado de 'Activo' de '${
+      oldRow.activo ? "✅" : "❎" || ""
+    }' a '${newRow.activo ? "✅" : "❎" || ""}'?`;
+  }
+
+  if (
+    newRow.procedimiento_almacenado_gestion !==
+    oldRow.procedimiento_almacenado_gestion
+  ) {
+    return `Proceso from '${
+      oldRow.procedimiento_almacenado_gestion || ""
+    }' to '${newRow.procedimiento_almacenado_gestion || ""}'`;
+  }
+
+  if (
+    newRow.procedimiento_almacenado_gestion_grafico !==
+    oldRow.procedimiento_almacenado_gestion_grafico
+  ) {
+    return `Proceso from '${
+      oldRow.procedimiento_almacenado_gestion_grafico || ""
+    }' to '${newRow.procedimiento_almacenado_gestion_grafico || ""}'`;
+  }
+
+  if (newRow.tabla_gestion !== oldRow.tabla_gestion) {
+    return `Proceso from '${oldRow.tabla_gestion || ""}' to '${
+      newRow.tabla_gestion || ""
+    }'`;
+  }
+
+  if (newRow.url_aplicacion_movil !== oldRow.url_aplicacion_movil) {
+    return `Proceso from '${oldRow.url_aplicacion_movil || ""}' to '${
+      newRow.url_aplicacion_movil || ""
+    }'`;
+  }
+
+  return null;
+}
 function DataGridProcess() {
   const [rows, setRows] = React.useState([]);
   const [isImageDialogOpen, setIsImageDialogOpen] = React.useState(false);
@@ -14,10 +144,12 @@ function DataGridProcess() {
   const [url, setUrl] = React.useState(
     "https://www.generationsforpeace.org/wp-content/uploads/2018/03/empty.jpg"
   );
-
+  const mutateRow = useFakeMutation();
+  const [promiseArguments, setPromiseArguments] = React.useState(null);
   const [singnedUrl, setSignedUrl] = React.useState(null);
   const [snackbar, setSnackbar] = React.useState(null);
   const [getRowData, setGetRowData] = React.useState();
+  const noButtonRef = React.useRef(null);
   const [processData, setProcessData] = React.useState({
     nombre: "",
     imagen: "",
@@ -28,13 +160,20 @@ function DataGridProcess() {
     url_aplicacion_movil: "",
   });
 
+  const [validateInputs, setValidateInputs] = React.useState({
+    nombre: false,
+    procedimiento_almacenado_gestion: false,
+    procedimiento_almacenado_gestion_grafico: false,
+    tabla_gestion: false,
+    url_aplicacion_movil: false,
+  });
 
-   /**
+  /**
    * Abre el diálogo de imagen.
    *
    * @returns {void}
    */
-   const handleOpenImageDialog = () => {
+  const handleOpenImageDialog = () => {
     setIsImageDialogOpen(true);
   };
 
@@ -48,6 +187,146 @@ function DataGridProcess() {
     setIsImageDialogOpen(false);
   };
 
+  /**
+   * Función que maneja la acción "No" en el contexto de una promesa.
+   *
+   * @function
+   * @name handleNo
+   *
+   * @description Esta función resuelve la promesa con la fila antigua para evitar la actualización del estado interno.
+   *
+   * @returns {void}
+   */
+  const handleNo = () => {
+    const { oldRow, resolve } = promiseArguments;
+    resolve(oldRow); // Resolve with the old row to not update the internal state
+    setPromiseArguments(null);
+  };
+
+  /**
+   * Renderiza un cuadro de diálogo de confirmación para la acción de guardar cambios.
+   *
+   * @function
+   * @name renderConfirmDialog
+   * @returns {JSX.Element|null} Elemento JSX que representa el cuadro de diálogo de confirmación.
+   */
+  const renderConfirmDialog = () => {
+    if (!promiseArguments) {
+      return null;
+    }
+
+    const { newRow, oldRow } = promiseArguments;
+    const mutation = computeMutation(newRow, oldRow);
+
+    return (
+      <Dialog
+        maxWidth="xs"
+        TransitionProps={{ onEntered: handleEntered }}
+        open={!!promiseArguments}
+      >
+        <DialogTitle>¿Esta usted seguro?</DialogTitle>
+        <DialogContent dividers>
+          {`Presiona 'Ok' , si  ${mutation}.`}
+        </DialogContent>
+        <DialogActions>
+          <Button
+            endIcon={<ClearIcon />}
+            color="secondary"
+            ref={noButtonRef}
+            onClick={handleNo}
+          >
+            No
+          </Button>
+          <Button endIcon={<CheckIcon />} color="secondary" onClick={handleYes}>
+            Ok
+          </Button>
+        </DialogActions>
+      </Dialog>
+    );
+  };
+
+  const handleEntered = () => {
+    // The `autoFocus` is not used because, if used, the same Enter that saves
+    // the cell triggers "No". Instead, we manually focus the "No" button once
+    // the dialog is fully open.
+    // noButtonRef.current?.focus();
+  };
+
+  /**
+   * Handles the user's confirmation to update a row.
+   *
+   * @function
+   * @async
+   * @throws {Error} Throws an error if the update request fails.
+   * @returns {Promise<void>} A Promise that resolves when the update is successful.
+   *
+   * @example
+   * // Usage example
+   * try {
+   *   await handleYes();
+   *   console.log("Update successful");
+   * } catch (error) {
+   *   console.error("Update failed:", error.message);
+   * }
+   */
+
+  const handleYes = async () => {
+    const { newRow, oldRow, reject, resolve } = promiseArguments;
+
+    try {
+      // Make the HTTP request to save in the backend
+      const response = await mutateRow(newRow, "update");
+
+      setSnackbar({
+        children: "Proceso guardado con exito ",
+        severity: "success",
+      });
+      resolve(response);
+      setPromiseArguments(null);
+    } catch (error) {
+      setSnackbar({ children: `${error}`, severity: "error" });
+      reject(oldRow);
+      setPromiseArguments(null);
+    }
+  };
+
+  /**
+   * Process row update by computing the mutation and returning a Promise.
+   *
+   * @function
+   * @param {Object} newRow - The updated row data.
+   * @param {Object} oldRow - The original row data.
+   * @returns {Promise<Object>} A Promise that resolves with the updated row data or rejects with the original row data if nothing was changed.
+   *
+   * @example
+   * // Usage example
+   * const updatedRow = await processRowUpdate(newData, oldData);
+   * console.log("Row updated:", updatedRow);
+   *
+   * @example
+   * // Usage example with error handling
+   * try {
+   *   const updatedRow = await processRowUpdate(newData, oldData);
+   *   console.log("Row updated:", updatedRow);
+   * } catch (error) {
+   *   console.error("Update failed:", error.message);
+   * }
+   */
+
+  const processRowUpdate = React.useCallback(
+    (newRow, oldRow) =>
+      new Promise((resolve, reject) => {
+        const mutation = computeMutation(newRow, oldRow);
+        if (mutation) {
+          // Save the arguments to resolve or reject the promise later
+          setPromiseArguments({ resolve, reject, newRow, oldRow });
+        } else {
+          resolve(oldRow); // Nothing was changed
+        }
+      }),
+    []
+  );
+
   const fetchProcesses = async () => {
     try {
       // Aquí deberías hacer tu solicitud de red para obtener los datos
@@ -57,7 +336,7 @@ function DataGridProcess() {
       // Agrega el campo 'id_tarea' a cada fila usando el índice como valor único si no no se ven en la datagrid
       const rowsWithId = response.map((row, index) => ({
         ...row,
-        id: row.id_proceso ,
+        id: row.id_proceso,
       }));
 
       setRows(rowsWithId);
@@ -78,7 +357,7 @@ function DataGridProcess() {
     fetchProcesses();
   }, []);
 
-   /**
+  /**
    * Componente funcional que representa una imagen de avatar con funcionalidad adicional.
    *
    * @component
@@ -89,16 +368,14 @@ function DataGridProcess() {
    * @param {Function} props.getDataRow - Función para obtener datos de una fila.
    * @returns {JSX.Element} Elemento JSX que representa la imagen de avatar.
    */
-   const AvatarImage = ({ data, handleClickOpen, getDataRow }) => {
-
-    
+  const AvatarImage = ({ data, handleClickOpen, getDataRow }) => {
     return (
       <Avatar
         onClick={() => {
           console.log(data);
           handleOpenImageDialog();
-           setGetRowData(getDataRow); 
-        }} 
+          setGetRowData(getDataRow);
+        }}
         alt="Remy Sharp"
         src={data}
       />
@@ -138,142 +415,141 @@ function DataGridProcess() {
    * @returns {Promise<void>} Una promesa que se resuelve después de realizar la operación.
    */
 
-    /**
+  /**
    * Construye y devuelve las columnas para la tabla de procesos.
    *
    * @function
    * @name buildColumns
    * @returns {Array} - Un array de objetos que representa las columnas de la tabla.
    */
-    const buildColumns = () => {
-      const columns = [
-        {
-          field: "nombre",
-          renderHeader: () => (
-            <strong style={{ color: "#5EBFFF" }}>
-              {"Nombre"}
-              {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
+  const buildColumns = () => {
+    const columns = [
+      {
+        field: "nombre",
+        renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>
+            {"Nombre"}
+            {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
               📃
               </span> */}
-            </strong>
-          ),
-          width: 130,
-          editable: true,
-        },
-        {
-          field: "imagen",
-          renderHeader: () => (
-            <strong style={{ color: "#5EBFFF" }}>
-              {"Imagen"}
-              {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
+          </strong>
+        ),
+        width: 130,
+        editable: true,
+      },
+      {
+        field: "imagen",
+        renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>
+            {"Imagen"}
+            {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
               📃
               </span> */}
-            </strong>
-          ),
-          width: 100,
-          editable: false,
-          renderCell: (params) => (
-        
-            <AvatarImage
-             /*  handleClickOpen={handleClickOpen}*/
-              getDataRow={params.row}
-              data={params.row.imagen}
-            />
-          ),
-        },
-        {
-          field: "activo",
-          type: "boolean",
-          renderHeader: () => (
-            <strong style={{ color: "#5EBFFF" }}>
-              {"Estado"}
-              {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
+          </strong>
+        ),
+        width: 100,
+        editable: false,
+        renderCell: (params) => (
+          <AvatarImage
+            /*  handleClickOpen={handleClickOpen}*/
+            getDataRow={params.row}
+            data={params.row.imagen}
+          />
+        ),
+      },
+      {
+        field: "activo",
+        type: "boolean",
+        renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>
+            {"Estado"}
+            {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
               📃
               </span> */}
-            </strong>
-          ),
-          width: 80,
-          editable: true,
-          renderCell: (params) => <CheckCell data={params.row.activo} />,
-        },
-        {
-          field: "procedimiento_almacenado_gestion",
-          renderHeader: () => (
-            <strong style={{ color: "#5EBFFF" }}>
-              {"Procedimiento Almacenado"}
-              {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
+          </strong>
+        ),
+        width: 80,
+        editable: true,
+        renderCell: (params) => <CheckCell data={params.row.activo} />,
+      },
+      {
+        field: "procedimiento_almacenado_gestion",
+        renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>
+            {"Procedimiento Almacenado"}
+            {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
               📃
               </span> */}
-            </strong>
-          ),
-          width: 200,
-          editable: true,
-        },
-        {
-          field: "procedimiento_almacenado_gestion_grafico",
-          renderHeader: () => (
-            <strong style={{ color: "#5EBFFF" }}>
-              {"Procedimiento Almacenado Gestion Grafico"}
-              {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
+          </strong>
+        ),
+        width: 200,
+        editable: true,
+      },
+      {
+        field: "procedimiento_almacenado_gestion_grafico",
+        renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>
+            {"Procedimiento Almacenado Gestion Grafico"}
+            {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
               📃
               </span> */}
-            </strong>
-          ),
-          width: 300,
-          editable: true,
-        },
-        {
-          field: "tabla_gestion",
-          renderHeader: () => (
-            <strong style={{ color: "#5EBFFF" }}>
-              {"Tabla Gestion"}
-              {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
+          </strong>
+        ),
+        width: 300,
+        editable: true,
+      },
+      {
+        field: "tabla_gestion",
+        renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>
+            {"Tabla Gestion"}
+            {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
               📃
               </span> */}
-            </strong>
-          ),
-          width: 180,
-          editable: true,
-        },
-        {
-          field: "url_aplicacion_movil",
-          renderHeader: () => (
-            <strong style={{ color: "#5EBFFF" }}>
-              {"Url Aplicacion Movil"}
-              {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
+          </strong>
+        ),
+        width: 180,
+        editable: true,
+      },
+      {
+        field: "url_aplicacion_movil",
+        renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>
+            {"Url Aplicacion Movil"}
+            {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
               📃
               </span> */}
-            </strong>
-          ),
-          width: 180,
-          editable: true,
-        },
-        {
-          field: "actions",
-          type: "actions",
-          renderHeader: () => (
-            <strong style={{ color: "#5EBFFF" }}>
-              {"Acciones"}
-              {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
+          </strong>
+        ),
+        width: 180,
+        editable: true,
+      },
+      {
+        field: "actions",
+        type: "actions",
+        renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>
+            {"Acciones"}
+            {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
               📃
               </span> */}
-            </strong>
-          ),
-          width: 100,
-          cellClassName: "actions",
-          getActions: ({ id }) => {
-            return [
-              <GridActionsCellItem
-                icon={<DeleteIcon />}
-                label="Delete"
-             /*    onClick={() => handleDeleteClick(id)} */
-                color="inherit"
-              />,
-            ];
-          },
+          </strong>
+        ),
+        width: 100,
+        cellClassName: "actions",
+        getActions: ({ id }) => {
+          return [
+            <GridActionsCellItem
+              icon={<DeleteIcon />}
+              label="Delete"
+              /*    onClick={() => handleDeleteClick(id)} */
+              color="inherit"
+            />,
+          ];
         },
-  
-        /*  {
+      },
+
+      /*  {
               field: "fecha_ingreso",
               type: "dateTime",
               renderHeader: () => (
@@ -288,13 +564,12 @@ function DataGridProcess() {
               width: 180,
               editable: true,
             }, */
-      ];
-  
-      return columns;
-    };
+    ];
 
+    return columns;
+  };
 
-     /**
+  /**
    * Cierra la notificación (snackbar) actualmente abierta.
    *
    * @function
@@ -324,7 +599,7 @@ function DataGridProcess() {
         >
           Agregar Nueva Tarea
         </Button> */}
-      {/*   <Button
+        {/*   <Button
           color="secondary"
           onClick={handleOpenDialogForm}
           startIcon={<AddOutlinedIcon />}
@@ -334,7 +609,6 @@ function DataGridProcess() {
       </GridToolbarContainer>
     );
   }
-
 
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
@@ -367,8 +641,6 @@ function DataGridProcess() {
     }
   };
 
-
-  
   /**
    * Handles the save operation for the updated row data.
    *
@@ -404,11 +676,10 @@ function DataGridProcess() {
         console.log(getRowData);
 
         let updatedRowData;
-       
-            updatedRowData = { ...getRowData, imagen: singnedUrl };
 
-            console.log(updatedRowData);
-        
+        updatedRowData = { ...getRowData, imagen: singnedUrl };
+
+        console.log(updatedRowData);
 
         // Make a PUT request using the updatedRowData
         /*    console.log(updatedRowData);
@@ -423,7 +694,7 @@ function DataGridProcess() {
           severity: "success",
         });
         // If you want to close something after successful save, uncomment the following line
-        fetchProcesses()
+        fetchProcesses();
         handleCloseImageDialog();
       } catch (error) {
         console.error("Error al cargar la imagen:", error);
@@ -446,24 +717,28 @@ function DataGridProcess() {
    *
    * @returns {void}
    */
- 
 
-  return <Box sx={{ width: "100%" }}> <DataGrid
-  rows={rows}
-  columns={buildColumns()}
-  localeText={{
-    toolbarColumns: "Columnas",
-    toolbarFilters: "Filtros",
-    toolbarDensity: "Tamaño Celda",
-    toolbarExport: "Exportar",
-  }}
-  slots={{ toolbar: CustomToolbar }}
- 
-/> {!!snackbar && (
+  return (
+    <Box sx={{ width: "100%" }}>
+         {renderConfirmDialog()}
+      <DataGrid
+        rows={rows}
+        columns={buildColumns()}
+        localeText={{
+          toolbarColumns: "Columnas",
+          toolbarFilters: "Filtros",
+          toolbarDensity: "Tamaño Celda",
+          toolbarExport: "Exportar",
+        }}
+        slots={{ toolbar: CustomToolbar }}
+        processRowUpdate={processRowUpdate}
+      />{" "}
+      {!!snackbar && (
         <Snackbar open onClose={handleCloseSnackbar} autoHideDuration={6000}>
           <Alert {...snackbar} onClose={handleCloseSnackbar} />
         </Snackbar>
-      )}{isImageDialogOpen && (
+      )}
+      {isImageDialogOpen && (
         <Dialog
           fullScreen
           open={isImageDialogOpen}
@@ -528,7 +803,7 @@ function DataGridProcess() {
                         alignItems: "center",
                       }}
                     >
-                      <Box sx={{marginBottom:"1rem"}}>
+                      <Box sx={{ marginBottom: "1rem" }}>
                         <img
                           className="rounded-full h-36 w-36 object-cover border-solid border-2 border-white"
                           src={selectedImage || url}
@@ -565,9 +840,9 @@ function DataGridProcess() {
                 }}
               >
                 <Button
-                  onClick={handleSave} 
+                  onClick={handleSave}
                   color="secondary"
-                  variant="contained" 
+                  variant="contained"
                 >
                   Guardar Imagen
                 </Button>
@@ -575,7 +850,9 @@ function DataGridProcess() {
             </Paper>
           </Box>
         </Dialog>
-      )}</Box>
+      )}
+    </Box>
+  );
 }
 
 export default DataGridProcess;
