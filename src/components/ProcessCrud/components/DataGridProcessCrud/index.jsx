@@ -1,5 +1,5 @@
 import React from "react";
-import { getAllProcesses, updateProcess } from "../../../../api/process";
+import { deleteProcess, getAllProcesses, updateProcess } from "../../../../api/process";
 import {
   Alert,
   AppBar,
@@ -97,7 +97,7 @@ const useFakeMutation = () => {
 
 function computeMutation(newRow, oldRow) {
   if (newRow.nombre !== oldRow.nombre) {
-    return `Name from '${oldRow.nombre}' to '${newRow.nombre}'`;
+    return `¿Realmente quieres cambiar el nombre de '${oldRow.nombre}' a '${newRow.nombre}'`;
   }
   if (newRow.activo !== oldRow.activo) {
     return `¿Realmente deseas cambiar el estado de 'Activo' de '${
@@ -542,7 +542,7 @@ function DataGridProcess() {
             <GridActionsCellItem
               icon={<DeleteIcon />}
               label="Delete"
-              /*    onClick={() => handleDeleteClick(id)} */
+                  onClick={() => handleDeleteClick(id)} 
               color="inherit"
             />,
           ];
@@ -679,7 +679,7 @@ function DataGridProcess() {
 
         updatedRowData = { ...getRowData, imagen: singnedUrl };
 
-        console.log(updatedRowData);
+      
 
         // Make a PUT request using the updatedRowData
         /*    console.log(updatedRowData);
@@ -707,16 +707,38 @@ function DataGridProcess() {
     }
   };
 
-  /**
-   * Función que cierra el componente Snackbar.
+   /**
+   * Maneja el clic en el botón de eliminación y realiza la eliminación de la fila con el ID proporcionado.
    *
+   * @async
    * @function
-   * @name handleCloseSnackbar
-   *
-   * @description Esta función actualiza el estado del componente Snackbar para ocultarlo.
-   *
-   * @returns {void}
+   * @name handleDeleteClick
+   * @param {string} id - El ID de la fila a eliminar.
+   * @returns {Promise<void>} - Una promesa que se resuelve después de la eliminación exitosa.
    */
+   const handleDeleteClick = async (id) => {
+    
+
+    try {
+      // Make the HTTP request to save in the backend
+     /*  const response = await axios.delete(
+        `http://localhost:3000/api/processes/${id}`
+      ); */
+
+      const response = await deleteProcess(id)
+    
+
+      setSnackbar({ children: `Se borro exitosamente`, severity: "warning" });
+      fetchProcesses()
+      return response
+    } catch (error) {
+      console.log(error);
+      setSnackbar({ children: `${error}`, severity: "error" });
+      throw error;
+      /*  reject(oldRow); 
+       setPromiseArguments(null); */
+    }
+  };
 
   return (
     <Box sx={{ width: "100%" }}>
