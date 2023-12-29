@@ -1,4 +1,4 @@
-import React from 'react'
+/* import React from 'react'
 
 import { useNavigate } from 'react-router-dom'
 
@@ -152,4 +152,26 @@ const index = () => {
     )
 }
 
-export default index
+export default index */
+
+
+import { Box, useTheme } from '@mui/material';
+import React from 'react'
+import Header from '../../components/Header';
+import { useSelector } from 'react-redux';
+import { tokens } from '../../theme';
+
+function Roles() {
+    const user = useSelector((state) => state.user);
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
+  return (
+    <Box m="20px">
+    <Header title="Gestiòn de Roles" subtitle="Operaciones de Crear, Leer, Actualizar y Eliminar Roles en el Sistema" />
+ ServiceCrud
+    
+  </Box>
+  )
+}
+
+export default Roles
