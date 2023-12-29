@@ -160,7 +160,19 @@ import React from 'react'
 import Header from '../../components/Header';
 import { useSelector } from 'react-redux';
 import { tokens } from '../../theme';
-
+import RolCrud from '../../components/RolCrud';
+/**
+ * Componente que representa la gestión de roles en el sistema.
+ *
+ * @component
+ * @example
+ * // Uso del componente 'Roles' en otro componente o archivo.
+ * import Roles from './Roles';
+ * // ...
+ * <Roles />
+ *
+ * @returns {JSX.Element} Elemento JSX que contiene la interfaz de usuario para la gestión de roles.
+ */
 function Roles() {
     const user = useSelector((state) => state.user);
   const theme = useTheme();
@@ -168,7 +180,7 @@ function Roles() {
   return (
     <Box m="20px">
     <Header title="Gestiòn de Roles" subtitle="Operaciones de Crear, Leer, Actualizar y Eliminar Roles en el Sistema" />
- ServiceCrud
+ <RolCrud/>
     
   </Box>
   )

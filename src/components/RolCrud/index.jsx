@@ -1,5 +1,6 @@
-import { Container } from '@mui/material'
+
 import React from 'react'
+import Container from '../Container'
 /**
  * Componente que representa la funcionalidad CRUD para roles.
  * Este componente utiliza un contenedor para organizar su contenido.
