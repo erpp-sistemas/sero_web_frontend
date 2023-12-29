@@ -1,18 +1,32 @@
 import React from "react";
-import { getAllRoles, updateRolById } from "../../../../api/rol";
+import { createRol, getAllRoles, updateRolById } from "../../../../api/rol";
 import {
   Alert,
+  AppBar,
   Box,
   Button,
+  Checkbox,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
+  Grid,
   IconButton,
+  InputAdornment,
+  InputLabel,
+  Paper,
   Snackbar,
+  Stack,
+  TextField,
+  Toolbar,
+  Typography,
 } from "@mui/material";
+import { AddOutlined, Sync, SyncAltOutlined } from "@mui/icons-material";
+import { GrServices } from "react-icons/gr";
 import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
+import CloseIcon from "@mui/icons-material/Close";
+import { FaRegCircleCheck } from "react-icons/fa6";
 import {
   DataGrid,
   GridToolbarColumnsButton,
@@ -134,10 +148,84 @@ function computeMutation(newRow, oldRow) {
  */
 function DataGridRolCrud() {
   const [rows, setRows] = React.useState([]);
+  const [isNewRolDialogOpen, setIsNewRolDialogOpen] = React.useState(false);
   const mutateRow = useFakeMutation();
   const [promiseArguments, setPromiseArguments] = React.useState(null);
   const [snackbar, setSnackbar] = React.useState(null);
   const noButtonRef = React.useRef(null);
+  const [rolData, setRolData] = React.useState({
+    nombre: "",
+    activo: Boolean(""),
+  });
+  const [validateInputs, setValidateInputs] = React.useState({
+    nombre: false,
+  });
+
+/**
+ * Manejador de eventos que se ejecuta cuando se produce un cambio en los campos de entrada del formulario.
+ *
+ * @param {Object} event - Objeto del evento que contiene información sobre el cambio.
+ * @param {string} event.target.name - Nombre del campo que ha cambiado.
+ * @param {string} event.target.value - Valor actual del campo que ha cambiado.
+ * @param {string} event.target.type - Tipo del campo que ha cambiado.
+ * @param {boolean} event.target.checked - Estado de verificación en caso de un campo de tipo checkbox.
+ *
+ * @function
+ */
+  const handleInputOnChange = (event) => {
+     /**
+   * Desestructura las propiedades del objeto event.target para obtener información sobre el cambio.
+   *
+   * @type {Object}
+   * @property {string} name - Nombre del campo que ha cambiado.
+   * @property {string} value - Valor actual del campo que ha cambiado.
+   * @property {string} type - Tipo del campo que ha cambiado.
+   * @property {boolean} checked - Estado de verificación en caso de un campo de tipo checkbox.
+   */
+    const { name, value, type, checked } = event.target;
+
+    // Actualiza el estado serviceData con el nuevo valor del campo Servicio
+    const newValue = type === "checkbox" ? checked : value;
+    setRolData((prevState) => ({
+      ...prevState,
+      [name]: newValue,
+    }));
+
+    switch (name) {
+      case "nombre":
+        setValidateInputs((prevValidateInputs) => ({
+          ...prevValidateInputs,
+          [name]: value.length > 0,
+        }));
+
+        break;
+
+      default:
+        break;
+    }
+  };
+
+
+
+
+
+   /**
+   * Manejador que abre el diálogo de creación de un nuevo rol.
+   *
+   * @function
+   */
+   const handleOpenNewRolDialog = () => {
+    setIsNewRolDialogOpen(true);
+  };
+
+  /**
+   * Manejador que cierra el diálogo de creación de un nuevo rol.
+   *
+   * @function
+   */
+  const handleCloseNewRolDialog = () => {
+    setIsNewRolDialogOpen(false);
+  };
 
   /**
    * Función que cierra el componente Snackbar.
@@ -383,17 +471,71 @@ function DataGridRolCrud() {
 
         <GridToolbarExport color="secondary" />
 
-        {/*   <Button
+         <Button
           color="secondary"
-          onClick={handleOpenNewServiceDialog}
+          onClick={handleOpenNewRolDialog}
           startIcon={<AddOutlined />}
           size="small"
         >
-          Agregar Nuevo Servicio
-        </Button> */}
+          Agregar Nuevo Rol
+        </Button> 
       </GridToolbarContainer>
     );
   }
+
+
+
+  /**
+ * Manejador de eventos que se ejecuta al intentar agregar un nuevo rol.
+ * Verifica la validez de los campos del formulario y realiza la acción correspondiente.
+ *
+ * @async
+ * @function
+ */
+  const handleAddRol = async () => {
+    /**
+   * Verifica si todos los campos del formulario están validados.
+   *
+   * @type {boolean} Indica si todos los campos están validados.
+   */
+    const isFormValid = Object.values(validateInputs).every(
+      (isValid) => isValid
+    );
+
+    if (isFormValid) {
+      try {
+      
+
+        const response = await createRol(rolData);
+
+        // Aquí puedes manejar la respuesta de la solicitud si es necesario
+        console.log("Respuesta de la API:", response.data);
+
+        // Mostrar Snackbar de éxito
+        setSnackbar({
+          children: "Rol añadido correctamente",
+          severity: "success",
+        });
+
+        // Cerrar el diálogo, actualizar el estado, o realizar otras acciones necesarias
+        fetchRoles();
+        handleCloseNewRolDialog();
+      } catch (error) {
+        console.error("Error al guardar datos:", error);
+        setSnackbar({ children: "Error al guardar datos", severity: "error" });
+        // Aquí puedes manejar el error según tus necesidades
+      }
+    } else {
+      console.log(
+        "Formulario no válido. Por favor, completa todos los campos correctamente."
+      );
+      setSnackbar({
+        children: "Completa todos los campos correctamente",
+        severity: "warning",
+      });
+      // Puedes mostrar un mensaje al usuario indicando que debe completar todos los campos correctamente.
+    }
+  };
   return (
     <Box
       sx={{
@@ -422,6 +564,131 @@ function DataGridRolCrud() {
         <Snackbar open onClose={handleCloseSnackbar} autoHideDuration={6000}>
           <Alert {...snackbar} onClose={handleCloseSnackbar} />
         </Snackbar>
+      )}
+        {isNewRolDialogOpen && (
+        <Dialog
+          fullScreen
+          open={isNewRolDialogOpen}
+          onClose={handleCloseNewRolDialog}
+        >
+          <AppBar sx={{ position: "relative" }}>
+            <Toolbar>
+              <IconButton
+                edge="start"
+                color="inherit"
+                onClick={handleCloseNewRolDialog}
+                aria-label="close"
+              >
+                <CloseIcon />
+              </IconButton>
+              {/*  <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
+                Agrega nueva tarea
+              </Typography> */}
+              {/*  <Button autoFocus color="inherit"  onClick={handleClose}>
+                Guardar
+              </Button> */}
+            </Toolbar>
+          </AppBar>
+          {/* Aqui va el contenido */}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "100%", // Ajusta según sea necesario
+            }}
+          >
+            <Paper
+              sx={{
+                width: "40%",
+                height: "auto",
+                boxShadow: 3,
+                padding: "2rem",
+                borderRadius: 1,
+              }}
+            >
+              {/* Contenido real del Paper */}
+              <Typography variant="body1" sx={{ mb: "2rem" }}>
+                Agregar Nuevo Rol
+              </Typography>
+              {/* nombre, :imagen, :activo, :orden, :icono_app_movil */}
+              <Grid container spacing={2}>
+               
+                <Grid item xs={12}>
+                  <TextField
+                    color="secondary"
+                    sx={{ marginBottom: "2rem", width: "100%" }}
+                    id="input-with-icon-textfield-nombre"
+                    label="Nombre del rol"
+                     onChange={handleInputOnChange}
+                    value={rolData.nombre} 
+                    type="text"
+                    name="nombre"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <GrServices />
+                        </InputAdornment>
+                      ),
+                    }}
+                    variant="standard"
+                  />
+                   {validateInputs.nombre ? (
+                    <Stack sx={{ marginTop: "0.2rem" }} direction="row">
+                      <FaRegCircleCheck style={{ color: "#14B814" }} />{" "}
+                      <Typography color={"secondary"} variant="caption">
+                        ¡Gracias por ingresar un rol!
+                      </Typography>
+                    </Stack>
+                  ) : (
+                    <Typography sx={{ color: "red" }} variant="caption">
+                      * ¡Por favor, ingresa un rol!
+                    </Typography>
+                  )} 
+
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "row",
+                      alignContent: "center",
+                      marginBottom: "2rem",
+                    }}
+                  >
+                    <InputLabel sx={{ alignSelf: "center" }}>Activo</InputLabel>
+                    <Checkbox
+                      {..."label"}
+                     onChange={handleInputOnChange}
+                      name="activo"
+                      size="small"
+                      color="secondary"
+                    />
+                  </Box>
+
+               
+                 
+                </Grid>
+              </Grid>
+
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "end",
+                  marginTop: "2.5rem",
+                }}
+              >
+                <Button
+                  endIcon={<Sync />}
+                  color="secondary"
+                  variant="contained"
+                  onClick={handleAddRol} 
+                 
+                >
+                  Guardar Rol
+                </Button>
+              </Box>
+            </Paper>
+          </Box>
+        </Dialog>
       )}
     </Box>
   );

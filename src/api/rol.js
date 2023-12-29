@@ -7,9 +7,9 @@ import axios from './axios'; // Asegúrate de que el path sea correcto
  * @returns {Promise} Promesa que se resuelve con los datos del nuevo rol creado.
  * @throws {Error} Error que indica el motivo del fallo en la creación del rol.
  */
-export const createRol = async () => {
+export const createRol = async (rolData) => {
     try {
-      const response = await axios.post('/roles');
+      const response = await axios.post('/roles',rolData);
       // Podrías realizar operaciones adicionales aquí después de la creación del rol
       return response.data;
     } catch (error) {
