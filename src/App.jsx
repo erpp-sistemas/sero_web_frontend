@@ -21,7 +21,6 @@ import Login from './scenes/login'
 import NewUser from './scenes/new-user'
 import MapList from './scenes/maps'
 import Map from './scenes/map'
-import Roles from './scenes/roles'
 import Maintenance from './scenes/maintenance'
 import WorkAssignment from './scenes/work-assignment'
 import DashboardCoordinator from './scenes/dashboard-coordinacion'
@@ -42,6 +41,7 @@ import ValidPayment from './scenes/valid-payment'
 import Task from "./scenes/task";
 import Service from "./scenes/service";
 import Process from "./scenes/process";
+import Roles from "./scenes/roles"
 
 
 
@@ -135,7 +135,7 @@ function App() {
                     <Route path="/new-user" element={<NewUser />} />
                     <Route path="/map-list" element={<MapList />} />
                     <Route path="/map/:place_id" element={<Map />} />
-                    <Route path="/roles" element={<Roles />} />
+                    <Route path="/roles" element={<Roles/>} />
                     <Route path="/maintenance" element={<Maintenance />} />
                     <Route path="/work-assignment" element={<WorkAssignment />} />
                     <Route path="/dashboard-coordinator" element={<DashboardCoordinator />} />
