@@ -1,5 +1,7 @@
-import { Container } from '@mui/material'
+
 import React from 'react'
+import DataGridMenuCrud from './components/DataGridMenuCrud'
+import Container from '../Container'
 /**
  * Componente que representa la funcionalidad CRUD para menus.
  * Este componente utiliza un contenedor para organizar su contenido.
@@ -9,7 +11,7 @@ import React from 'react'
 function MenuCrud() {
   return (
     <Container>
-        DataGridMenuRol
+        <DataGridMenuCrud/>
     </Container>
   )
 }
