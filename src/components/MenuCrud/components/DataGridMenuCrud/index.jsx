@@ -134,19 +134,6 @@ function DataGridMenuCrud() {
       editable: true,
     },
     {
-      field: "url",
-      renderHeader: () => (
-        <strong style={{ color: "#5EBFFF" }}>
-          {"Url"}
-          {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
-        📃
-        </span> */}
-        </strong>
-      ),
-      width: 180,
-      editable: true,
-    },
-    {
       field: "activo",
       renderHeader: () => (
         <strong style={{ color: "#5EBFFF" }}>
