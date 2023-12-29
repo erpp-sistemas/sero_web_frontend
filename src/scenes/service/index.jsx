@@ -14,7 +14,7 @@ function Service() {
   const user = useSelector((state) => state.user);
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-console.log("prueba");
+
   return (
     <Box m="20px">
     <Header title="Gestiòn de Servicios" subtitle="Operaciones de Crear, Leer, Actualizar y Eliminar Servicios en el Sistema" />
