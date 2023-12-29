@@ -1,9 +1,26 @@
 import React from "react";
 import { getAllRoles, updateRolById } from "../../../../api/rol";
-import { Alert, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Snackbar } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  Snackbar,
+} from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
-import { DataGrid } from "@mui/x-data-grid";
+import {
+  DataGrid,
+  GridToolbarColumnsButton,
+  GridToolbarContainer,
+  GridToolbarDensitySelector,
+  GridToolbarExport,
+  GridToolbarFilterButton,
+} from "@mui/x-data-grid";
 /**
  * Componente de celda que muestra un ícono de verificación o de cruz según el valor de la propiedad 'data'.
  *
@@ -33,8 +50,6 @@ const CheckCell = ({ data }) => {
   }
 };
 
-
-
 /**
  * Hook personalizado para simular una mutación asincrónica con datos ficticios.
  *
@@ -52,34 +67,32 @@ const CheckCell = ({ data }) => {
  * @returns {Promise<Object>} - Promesa que se resuelve con los datos resultantes de la mutación.
  */
 const useFakeMutation = () => {
-    /**
-     * Función que realiza la mutación asincrónica.
-     *
-     * @async
-     *
-     * @param {Object} rol - Datos del rol para la mutación.
-     * @param {string} _action - Acción a realizar ("update", "delete", o "create").
-     * @returns {Promise<Object>} - Promesa que se resuelve con los datos resultantes de la mutación.
-     *
-     * @throws {Error} - Se lanza un error si hay un problema durante la actualización.
-     */
-    return React.useCallback(async (rol, _action) => {
-      try {
-        // Simulando una pausa de 200 ms con setTimeout
-        await new Promise((timeoutResolve) => setTimeout(timeoutResolve, 200));
-  
-        const response = updateRolById(rol.id, rol);
-  
-        return response.data;
-        
-      } catch (error) {
-        // Maneja errores de Axios o errores de validación
-       
-        throw error;
-      }
-    }, []);
-  };
+  /**
+   * Función que realiza la mutación asincrónica.
+   *
+   * @async
+   *
+   * @param {Object} rol - Datos del rol para la mutación.
+   * @param {string} _action - Acción a realizar ("update", "delete", o "create").
+   * @returns {Promise<Object>} - Promesa que se resuelve con los datos resultantes de la mutación.
+   *
+   * @throws {Error} - Se lanza un error si hay un problema durante la actualización.
+   */
+  return React.useCallback(async (rol, _action) => {
+    try {
+      // Simulando una pausa de 200 ms con setTimeout
+      await new Promise((timeoutResolve) => setTimeout(timeoutResolve, 200));
 
+      const response = updateRolById(rol.id, rol);
+
+      return response.data;
+    } catch (error) {
+      // Maneja errores de Axios o errores de validación
+
+      throw error;
+    }
+  }, []);
+};
 
 /**
  * Función para calcular una mutación basada en las diferencias entre la fila nueva y la fila antigua.
@@ -89,30 +102,30 @@ const useFakeMutation = () => {
  * @returns {string|null} Mensaje de confirmación de mutación o null si no hay cambios significativos.
  */
 function computeMutation(newRow, oldRow) {
-    /**
-     * Compara los nombres de la fila nueva y la fila antigua.
-     *
-     * @returns {string|null} Mensaje de confirmación de mutación para el nombre o null si no hay cambios.
-     */
-    if (newRow.nombre !== oldRow.nombre) {
-      return `¿Realmente quieres cambiar el estado del nombre de '${oldRow.nombre}' a '${newRow.nombre}'?`;
-    }
-  
-    /**
-     * Compara el estado 'activo' de la fila nueva y la fila antigua.
-     *
-     * @returns {string|null} Mensaje de confirmación de mutación para el estado 'activo' o null si no hay cambios.
-     */
-    if (newRow.activo !== oldRow.activo) {
-      return `¿Realmente deseas cambiar el estado de 'Activo' de '${
-        oldRow.activo ? "✅" : "❎" || ""
-      }' a '${newRow.activo ? "✅" : "❎" || ""}'?`;
-    }
-  
-    // Si no hay cambios significativos, devuelve null
-    return null;
+  /**
+   * Compara los nombres de la fila nueva y la fila antigua.
+   *
+   * @returns {string|null} Mensaje de confirmación de mutación para el nombre o null si no hay cambios.
+   */
+  if (newRow.nombre !== oldRow.nombre) {
+    return `¿Realmente quieres cambiar el estado del nombre de '${oldRow.nombre}' a '${newRow.nombre}'?`;
   }
-  
+
+  /**
+   * Compara el estado 'activo' de la fila nueva y la fila antigua.
+   *
+   * @returns {string|null} Mensaje de confirmación de mutación para el estado 'activo' o null si no hay cambios.
+   */
+  if (newRow.activo !== oldRow.activo) {
+    return `¿Realmente deseas cambiar el estado de 'Activo' de '${
+      oldRow.activo ? "✅" : "❎" || ""
+    }' a '${newRow.activo ? "✅" : "❎" || ""}'?`;
+  }
+
+  // Si no hay cambios significativos, devuelve null
+  return null;
+}
+
 /**
  * Componente que muestra una tabla de roles utilizando la biblioteca Material-UI DataGrid.
  *
@@ -126,9 +139,7 @@ function DataGridRolCrud() {
   const [snackbar, setSnackbar] = React.useState(null);
   const noButtonRef = React.useRef(null);
 
-
-
-    /**
+  /**
    * Función que cierra el componente Snackbar.
    *
    * @function
@@ -138,9 +149,9 @@ function DataGridRolCrud() {
    *
    * @returns {void}
    */
-    const handleCloseSnackbar = () => setSnackbar(null);
+  const handleCloseSnackbar = () => setSnackbar(null);
 
-     /**
+  /**
    * Función que maneja la acción "No" en el contexto de una promesa.
    *
    * @function
@@ -156,15 +167,14 @@ function DataGridRolCrud() {
     setPromiseArguments(null);
   };
 
-
- /**
- * Maneja el evento cuando se selecciona la opción "Sí" en un diálogo de confirmación.
- * 
- * @async
- * @function
- * @throws {Error} Error al intentar realizar la solicitud HTTP para actualizar la fila en el backend.
- */
-const handleYes = async () => {
+  /**
+   * Maneja el evento cuando se selecciona la opción "Sí" en un diálogo de confirmación.
+   *
+   * @async
+   * @function
+   * @throws {Error} Error al intentar realizar la solicitud HTTP para actualizar la fila en el backend.
+   */
+  const handleYes = async () => {
     /**
      * Obtiene los argumentos de la promesa, incluyendo las filas nuevas y antiguas, así como las funciones de resolución y rechazo.
      *
@@ -175,41 +185,38 @@ const handleYes = async () => {
      * @property {Function} resolve - Función de resolución de la promesa.
      */
     const { newRow, oldRow, reject, resolve } = promiseArguments;
-  
+
     try {
       // Realiza la solicitud HTTP para guardar en el backend
       const response = await mutateRow(newRow, "update");
-  
+
       // Muestra un mensaje de éxito en una barra de notificaciones
       setSnackbar({
         children: "Rol guardado con éxito",
         severity: "success",
       });
-  
+
       // Resuelve la promesa con la fila actualizada
       resolve(newRow);
       setPromiseArguments(null);
     } catch (error) {
       // Muestra un mensaje de error en una barra de notificaciones
       setSnackbar({ children: `${error}`, severity: "error" });
-  
+
       // Rechaza la promesa con la fila original en caso de error
       reject(oldRow);
       setPromiseArguments(null);
     }
   };
-  
 
-
-
-/**
- * Maneja el evento cuando el diálogo está completamente abierto.
- * 
- * La propiedad `autoFocus` no se utiliza porque, si se usa, la misma tecla Enter que guarda
- * la celda activa desencadena la opción "No". En su lugar, se enfoca manualmente el botón "No"
- * una vez que el diálogo está completamente abierto.
- */
-const handleEntered = () => {
+  /**
+   * Maneja el evento cuando el diálogo está completamente abierto.
+   *
+   * La propiedad `autoFocus` no se utiliza porque, si se usa, la misma tecla Enter que guarda
+   * la celda activa desencadena la opción "No". En su lugar, se enfoca manualmente el botón "No"
+   * una vez que el diálogo está completamente abierto.
+   */
+  const handleEntered = () => {
     // La propiedad `autoFocus` no se utiliza porque, si se usa, la misma tecla Enter que guarda
     // la celda activa desencadena la opción "No". En su lugar, enfocamos manualmente el botón "No"
     // una vez que el diálogo está completamente abierto.
@@ -217,12 +224,12 @@ const handleEntered = () => {
   };
 
   /**
- * Renderiza un cuadro de diálogo de confirmación para la acción de guardar cambios.
- *
- * @function
- * @name renderConfirmDialog
- * @returns {JSX.Element|null} Elemento JSX que representa el cuadro de diálogo de confirmación.
- */
+   * Renderiza un cuadro de diálogo de confirmación para la acción de guardar cambios.
+   *
+   * @function
+   * @name renderConfirmDialog
+   * @returns {JSX.Element|null} Elemento JSX que representa el cuadro de diálogo de confirmación.
+   */
   const renderConfirmDialog = () => {
     if (!promiseArguments) {
       return null;
@@ -258,15 +265,14 @@ const handleEntered = () => {
     );
   };
 
-
-/**
- * Proceso de actualización de fila para la función de confirmación antes de realizar una actualización.
- *
- * @function
- * @param {Object} newRow - Datos actualizados de la fila.
- * @param {Object} oldRow - Datos originales de la fila.
- * @returns {Promise} Promesa que se resuelve con la fila actualizada o se rechaza con la fila original si no hay cambios significativos.
- */
+  /**
+   * Proceso de actualización de fila para la función de confirmación antes de realizar una actualización.
+   *
+   * @function
+   * @param {Object} newRow - Datos actualizados de la fila.
+   * @param {Object} oldRow - Datos originales de la fila.
+   * @returns {Promise} Promesa que se resuelve con la fila actualizada o se rechaza con la fila original si no hay cambios significativos.
+   */
   const processRowUpdate = React.useCallback(
     (newRow, oldRow) =>
       new Promise((resolve, reject) => {
@@ -361,6 +367,33 @@ const handleEntered = () => {
 
     return columns;
   };
+
+  /**
+   * Componente que define la barra de herramientas personalizada para la tabla de roles.
+   *
+   * @component
+   * @returns {JSX.Element} Elemento JSX que representa la barra de herramientas personalizada.
+   */
+  function CustomToolbar() {
+    return (
+      <GridToolbarContainer>
+        <GridToolbarColumnsButton color="secondary" />
+        <GridToolbarFilterButton color="secondary" />
+        <GridToolbarDensitySelector color="secondary" />
+
+        <GridToolbarExport color="secondary" />
+
+        {/*   <Button
+          color="secondary"
+          onClick={handleOpenNewServiceDialog}
+          startIcon={<AddOutlined />}
+          size="small"
+        >
+          Agregar Nuevo Servicio
+        </Button> */}
+      </GridToolbarContainer>
+    );
+  }
   return (
     <Box
       sx={{
@@ -371,8 +404,20 @@ const handleEntered = () => {
         },
       }}
     >
-        {renderConfirmDialog()}
-      <DataGrid rows={rows} columns={buildColumns()}  processRowUpdate={processRowUpdate}/>
+      {renderConfirmDialog()}
+      <DataGrid
+        rows={rows}
+        columns={buildColumns()}
+        processRowUpdate={processRowUpdate}
+        localeText={{
+          toolbarColumns: "Columnas",
+          toolbarFilters: "Filtros",
+          toolbarDensity: "Tamaño Celda",
+          toolbarExport: "Exportar",
+        }}
+
+        slots={{ toolbar: CustomToolbar }}
+      />
       {!!snackbar && (
         <Snackbar open onClose={handleCloseSnackbar} autoHideDuration={6000}>
           <Alert {...snackbar} onClose={handleCloseSnackbar} />
