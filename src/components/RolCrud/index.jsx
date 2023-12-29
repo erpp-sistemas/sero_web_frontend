@@ -1,6 +1,7 @@
 
 import React from 'react'
 import Container from '../Container'
+import DataGridRolCrud from './components/DataGridRolCrud'
 /**
  * Componente que representa la funcionalidad CRUD para roles.
  * Este componente utiliza un contenedor para organizar su contenido.
@@ -10,7 +11,7 @@ import Container from '../Container'
 function RolCrud() {
   return (
     <Container>
-        RolCrud
+        <DataGridRolCrud/>
     </Container>
   )
 }
