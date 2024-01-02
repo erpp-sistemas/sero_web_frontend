@@ -15,6 +15,8 @@ import {
   IconButton,
   InputAdornment,
   InputLabel,
+  Menu,
+  MenuItem,
   Paper,
   Snackbar,
   Stack,
@@ -38,6 +40,13 @@ import { TbZoomCancel } from "react-icons/tb";
 import { GrServices } from "react-icons/gr";
 import CloseIcon from "@mui/icons-material/Close";
 import { Sync, SyncAltOutlined } from "@mui/icons-material";
+import * as MUIIcons from '@mui/icons-material';
+import * as faIcons from '@fortawesome/free-solid-svg-icons'
+import { faClosedCaptioning } from "@fortawesome/free-regular-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
+
+const ITEMS_PER_PAGE = 10;
 /**
  * CheckCell component for rendering an IconButton with check or clear icon based on data.
  *
@@ -66,8 +75,98 @@ const CheckCell = ({ data }) => {
   }
 };
 
-const AvatarImage = ({ data }) => {
-  return <Avatar alt="Remy Sharp" src={data} />;
+const FaIcon = ({data})=>{
+  const [iconNames, setIconNames] = React.useState([]);
+  const [randomColor, setRandomColor] = React.useState('');
+
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const open = Boolean(anchorEl);
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  React.useEffect(() => {
+    // Obtener los nombres de los iconos al montar el componente
+    const names = Object.keys(faIcons);
+    console.log(names);
+    setIconNames(names);
+
+    // Generar el color aleatorio y establecerlo solo durante el montaje
+    const letters = '0123456789ABCDEF';
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    setRandomColor(color);
+  }, []); 
+
+  const getFilteredIconName = (data) => {
+    return iconNames.find((iconName) =>{ 
+     
+      
+      return iconName === data});
+  };
+
+  const filteredIconName = getFilteredIconName(data);
+  console.log(filteredIconName);
+
+  return filteredIconName ? (<>
+    <IconButton  onClick={handleClick} sx={{ bgcolor: randomColor }} size="small">
+      {<FontAwesomeIcon icon={faIcons[`${filteredIconName}`]} /> }
+    </IconButton>
+     <Menu
+     id="basic-menu"
+     anchorEl={anchorEl}
+     open={open}
+     onClose={handleClose}
+     MenuListProps={{
+       'aria-labelledby': 'basic-button',
+     }}
+   >
+     <MenuItem>Profile</MenuItem>
+     <MenuItem >My account</MenuItem>
+     <MenuItem >Logout</MenuItem>
+   </Menu>
+   </>
+    
+  ) : data;
+
+}
+
+const MUIcon = ({ data }) => {
+
+
+
+  const [iconNames, setIconNames] = React.useState([]);
+  const [randomColor, setRandomColor] = React.useState('');
+  React.useEffect(() => {
+    // Obtener los nombres de los iconos al montar el componente
+    const names = Object.keys(MUIIcons);
+    setIconNames(names);
+
+     // Generar el color aleatorio y establecerlo solo durante el montaje
+     const letters = '0123456789ABCDEF';
+     let color = '#';
+     for (let i = 0; i < 6; i++) {
+       color += letters[Math.floor(Math.random() * 16)];
+     }
+     setRandomColor(color);
+  }, []); 
+  
+  const getFilteredIconName = (data) => {
+    return iconNames.find((iconName) => iconName === data);
+  };
+
+  const filteredIconName = getFilteredIconName(data);
+ 
+ 
+
+  return filteredIconName?  <IconButton sx={{bgcolor:randomColor}} size="small">
+   {filteredIconName && React.createElement(MUIIcons[filteredIconName])}
+</IconButton>:null
 };
 
 /**
@@ -582,6 +681,13 @@ function DataGridMenuCrud() {
         </span> */}
           </strong>
         ),
+        renderCell: (params) => (
+          <FaIcon
+            data={params.row.icono}
+           
+            
+          />
+        ), 
         width: 180,
         editable: true,
       },
@@ -612,13 +718,13 @@ function DataGridMenuCrud() {
         ),
         width: 180,
         editable: true,
-        /* renderCell: (params) => (
-          <AvatarImage
+         renderCell: (params) => (
+          <MUIcon
             data={params.row.icon_mui}
            
             
           />
-        ), */
+        ), 
       },
       {
         field: "route",
@@ -699,7 +805,7 @@ function DataGridMenuCrud() {
   return (
     <Box
       sx={{
-        height: 400,
+        height: "auto",
         width: "100%",
         ".css-196n7va-MuiSvgIcon-root": {
           fill: "white",
