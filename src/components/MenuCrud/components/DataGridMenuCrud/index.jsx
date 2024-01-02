@@ -14,7 +14,8 @@ import {
 } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
-import { DataGrid } from "@mui/x-data-grid";
+import { DataGrid, GridToolbarColumnsButton, GridToolbarContainer, GridToolbarDensitySelector, GridToolbarExport, GridToolbarFilterButton } from "@mui/x-data-grid";
+import { AddOutlined } from "@mui/icons-material";
 /**
  * CheckCell component for rendering an IconButton with check or clear icon based on data.
  *
@@ -335,6 +336,47 @@ function DataGridMenuCrud() {
     fetchMenus();
   }, []);
 
+
+   /**
+   * Custom toolbar component for the service grid. It includes various actions like column selection,
+   * filtering, density selector, and export. Additionally, it provides a button to open a dialog
+   * for adding a new service.
+   *
+   * @component
+   * @param {Object} props - The properties passed to the component.
+   * @param {Function} props.handleOpenDialog - The function to handle opening the dialog for adding a new service.
+   * @returns {React.ReactElement} The rendered component.
+   *
+   * @example
+   * // Usage example
+   * const handleOpenDialogFunc = () => {
+   *   // Implement the logic to open the dialog for adding a new service
+   * };
+   *
+   * // Render the CustomToolbar component with the handleOpenDialog function
+   * <CustomToolbar handleOpenDialog={handleOpenDialogFunc} />
+   */
+   function CustomToolbar() {
+    return (
+      <GridToolbarContainer>
+        <GridToolbarColumnsButton color="secondary" />
+        <GridToolbarFilterButton color="secondary" />
+        <GridToolbarDensitySelector color="secondary" />
+
+        <GridToolbarExport color="secondary" />
+
+        <Button
+          color="secondary"
+          /* onClick={handleOpenNewServiceDialog} */
+          startIcon={<AddOutlined />}
+          size="small"
+        >
+          Agregar Nuevo Menu
+        </Button>
+      </GridToolbarContainer>
+    );
+  }
+
   const buildColumns = () => {
     const columns = [
       {
@@ -471,6 +513,16 @@ function DataGridMenuCrud() {
         processRowUpdate={processRowUpdate}
         rows={rows}
         columns={buildColumns()}
+        localeText={{
+          toolbarColumns: "Columnas",
+          toolbarFilters: "Filtros",
+          toolbarDensity: "Tamaño Celda",
+          toolbarExport: "Exportar",
+        }}
+
+
+        slots={{ toolbar: CustomToolbar }}
+        
       />
       {!!snackbar && (
         <Snackbar open onClose={handleCloseSnackbar} autoHideDuration={6000}>
