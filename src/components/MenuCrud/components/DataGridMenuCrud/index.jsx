@@ -1,21 +1,43 @@
 import React from "react";
-import { getAllMenus, updateMenu } from "../../../../api/menu";
+import { createMenu, getAllMenus, updateMenu } from "../../../../api/menu";
 import {
   Alert,
+  AppBar,
   Avatar,
   Box,
   Button,
+  Checkbox,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
+  Grid,
   IconButton,
+  InputAdornment,
+  InputLabel,
+  Paper,
   Snackbar,
+  Stack,
+  TextField,
+  Toolbar,
+  Typography,
 } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
-import { DataGrid, GridToolbarColumnsButton, GridToolbarContainer, GridToolbarDensitySelector, GridToolbarExport, GridToolbarFilterButton } from "@mui/x-data-grid";
+import {
+  DataGrid,
+  GridToolbarColumnsButton,
+  GridToolbarContainer,
+  GridToolbarDensitySelector,
+  GridToolbarExport,
+  GridToolbarFilterButton,
+} from "@mui/x-data-grid";
 import { AddOutlined } from "@mui/icons-material";
+import { FaRegCircleCheck } from "react-icons/fa6";
+import { TbZoomCancel } from "react-icons/tb";
+import { GrServices } from "react-icons/gr";
+import CloseIcon from "@mui/icons-material/Close";
+import { Sync, SyncAltOutlined } from "@mui/icons-material";
 /**
  * CheckCell component for rendering an IconButton with check or clear icon based on data.
  *
@@ -45,12 +67,7 @@ const CheckCell = ({ data }) => {
 };
 
 const AvatarImage = ({ data }) => {
-  return (
-    <Avatar
-      alt="Remy Sharp"
-      src={data}
-    />
-  );
+  return <Avatar alt="Remy Sharp" src={data} />;
 };
 
 /**
@@ -157,7 +174,131 @@ function DataGridMenuCrud() {
   const [promiseArguments, setPromiseArguments] = React.useState(null);
   const [snackbar, setSnackbar] = React.useState(null);
   const noButtonRef = React.useRef(null);
+  const [isNewMenuDialogOpen, setNewMenuDialogOpen] = React.useState(false);
+  const [menuData, setMenuData] = React.useState({
+    nombre: "",
+    descripcion: "",
+    url: "",
+    icono: "",
+    activo: Boolean(""),
+    icon_mui: "",
+    route: "",
+    id_menu_padre: "",
+  });
 
+  const [validateInputs, setValidateInputs] = React.useState({
+    nombre: false,
+    descripcion: false,
+    url: false,
+    icono: false,
+    icon_mui: false,
+    route: false,
+    id_menu_padre: false,
+  });
+
+
+  
+  /**
+   * Manejador para el cambio de entrada en los campos del formulario.
+   * @function
+   * @param {Object} event - El evento del cambio de entrada.
+   * @param {string} event.target.name - El nombre del campo cambiado.
+   * @param {string} event.target.value - El nuevo valor del campo.
+   * @param {string} event.target.type - El tipo del campo (puede ser "text", "checkbox", etc.).
+   * @param {boolean} event.target.checked - El estado de la casilla de verificación si el campo es de tipo "checkbox".
+   * @returns {void}
+   */
+  const handleInputOnChange = (event) => {
+    const { name, value, type, checked } = event.target;
+
+    // Actualiza el estado serviceData con el nuevo valor del campo Servicio
+    const newValue = type === "checkbox" ? checked : value;
+    setMenuData((prevState) => ({
+      ...prevState,
+      [name]: newValue,
+    }));
+
+    switch (name) {
+      case "nombre":
+        setValidateInputs((prevValidateInputs) => ({
+          ...prevValidateInputs,
+          [name]: value.length > 0,
+        }));
+
+        break;
+
+      case "descripcion":
+        setValidateInputs((prevValidateInputs) => ({
+          ...prevValidateInputs,
+          [name]: value.length > 0,
+        }));
+
+        break;
+
+      case "url":
+        setValidateInputs((prevValidateInputs) => ({
+          ...prevValidateInputs,
+          [name]: value.length > 0,
+        }));
+
+        break;
+
+      case "icon_mui":
+        setValidateInputs((prevValidateInputs) => ({
+          ...prevValidateInputs,
+          [name]: value.length > 0,
+        }));
+
+        break;
+
+      case "icono":
+        setValidateInputs((prevValidateInputs) => ({
+          ...prevValidateInputs,
+          [name]: value.length > 0,
+        }));
+
+        break;
+
+      case "route":
+        setValidateInputs((prevValidateInputs) => ({
+          ...prevValidateInputs,
+          [name]: value.length > 0,
+        }));
+
+        break;
+
+      case "id_menu_padre":
+        setValidateInputs((prevValidateInputs) => ({
+          ...prevValidateInputs,
+          [name]: value.length > 0,
+        }));
+
+        break;
+
+      default:
+        break;
+    }
+  };
+
+  /**
+   * Manejador para abrir el diálogo del nuevo menú.
+   * @function
+   * @name handleOpenNewMenuDialog
+   * @returns {void}
+   */
+  const handleOpenNewMenuDialog = () => {
+    setNewMenuDialogOpen(true);
+  };
+
+  /**
+   * Manejador para cerrar el diálogo del nuevo menú.
+   * @function
+   * @name handleCloseNewMenuDialog
+   * @returns {void}
+   */
+  const handleCloseNewMenuDialog = () => {
+    setNewMenuDialogOpen(false);
+  };
   /**
    * Función que cierra el componente Snackbar.
    *
@@ -336,8 +477,7 @@ function DataGridMenuCrud() {
     fetchMenus();
   }, []);
 
-
-   /**
+  /**
    * Custom toolbar component for the service grid. It includes various actions like column selection,
    * filtering, density selector, and export. Additionally, it provides a button to open a dialog
    * for adding a new service.
@@ -356,7 +496,7 @@ function DataGridMenuCrud() {
    * // Render the CustomToolbar component with the handleOpenDialog function
    * <CustomToolbar handleOpenDialog={handleOpenDialogFunc} />
    */
-   function CustomToolbar() {
+  function CustomToolbar() {
     return (
       <GridToolbarContainer>
         <GridToolbarColumnsButton color="secondary" />
@@ -367,7 +507,7 @@ function DataGridMenuCrud() {
 
         <Button
           color="secondary"
-          /* onClick={handleOpenNewServiceDialog} */
+          onClick={handleOpenNewMenuDialog}
           startIcon={<AddOutlined />}
           size="small"
         >
@@ -497,6 +637,65 @@ function DataGridMenuCrud() {
     return columns;
   };
 
+
+   /**
+   * Handle the process of saving data.
+   *
+   * @function
+   * @async
+   * @returns {Promise<void>} A Promise that resolves once the data is successfully saved or rejects if an error occurs.
+   *
+   * @example
+   * // Usage example
+   * try {
+   *   await handleAddMenu();
+   *   console.log("Data saved successfully!");
+   * } catch (error) {
+   *   console.error("Error saving data:", error.message);
+   * }
+   */
+
+   const handleAddMenu = async () => {
+    // Verificar si todos los campos están validados
+    const isFormValid = Object.values(validateInputs).every(
+      (isValid) => isValid
+    );
+
+    if (isFormValid) {
+      try {
+      
+
+        const response = await createMenu(menuData);
+
+        // Aquí puedes manejar la respuesta de la solicitud si es necesario
+        console.log("Respuesta de la API:", response.data);
+
+        // Mostrar Snackbar de éxito
+        setSnackbar({
+          children: "Menu añadido correctamente",
+          severity: "success",
+        });
+
+        // Cerrar el diálogo, actualizar el estado, o realizar otras acciones necesarias
+        fetchMenus();
+        handleCloseNewMenuDialog();
+      } catch (error) {
+        console.error("Error al guardar datos:", error);
+        setSnackbar({ children: "Error al guardar datos", severity: "error" });
+        // Aquí puedes manejar el error según tus necesidades
+      }
+    } else {
+      console.log(
+        "Formulario no válido. Por favor, completa todos los campos correctamente."
+      );
+      setSnackbar({
+        children: "Completa todos los campos correctamente",
+        severity: "warning",
+      });
+      // Puedes mostrar un mensaje al usuario indicando que debe completar todos los campos correctamente.
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -519,15 +718,330 @@ function DataGridMenuCrud() {
           toolbarDensity: "Tamaño Celda",
           toolbarExport: "Exportar",
         }}
-
-
         slots={{ toolbar: CustomToolbar }}
-        
       />
       {!!snackbar && (
         <Snackbar open onClose={handleCloseSnackbar} autoHideDuration={6000}>
           <Alert {...snackbar} onClose={handleCloseSnackbar} />
         </Snackbar>
+      )}
+
+      {isNewMenuDialogOpen && (
+        <Dialog
+          fullScreen
+          open={isNewMenuDialogOpen}
+          onClose={handleCloseNewMenuDialog}
+        >
+          <AppBar sx={{ position: "relative" }}>
+            <Toolbar>
+              <IconButton
+                edge="start"
+                color="inherit"
+                onClick={handleCloseNewMenuDialog}
+                aria-label="close"
+              >
+                <CloseIcon />
+              </IconButton>
+              {/*  <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
+                Agrega nueva tarea
+              </Typography> */}
+              {/*  <Button autoFocus color="inherit"  onClick={handleClose}>
+                Guardar
+              </Button> */}
+            </Toolbar>
+          </AppBar>
+          {/* Aqui va el contenido */}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "100%", // Ajusta según sea necesario
+            }}
+          >
+            <Paper
+              sx={{
+                width: "80%",
+                height: "auto",
+                boxShadow: 3,
+                padding: "2rem",
+                borderRadius: 1,
+              }}
+            >
+              {/* Contenido real del Paper */}
+              <Typography variant="body1" sx={{ mb: "2rem" }}>
+                Agregar Nuevo Menu
+              </Typography>
+              {/* nombre, :imagen, :activo, :orden, :icono_app_movil */}
+              <Grid container spacing={2}>
+                <Grid item xs={6}>
+                  {/*  nombre,
+        descripcion,
+        url,
+        icono,
+        activo,
+        icon_mui,
+        route,
+        id_menu_padre */}
+                  <TextField
+                    color="secondary"
+                    sx={{ marginBottom: "1rem", width: "100%" }}
+                    id="input-with-icon-textfield-nombre"
+                    label="Nombre del menu"
+                    onChange={handleInputOnChange}
+                    value={menuData.nombre}
+                    type="text"
+                    name="nombre"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <GrServices />
+                        </InputAdornment>
+                      ),
+                    }}
+                    variant="standard"
+                  />
+                  {validateInputs.nombre ? (
+                    <Stack sx={{ marginTop: "0.2rem" }} direction="row">
+                      <FaRegCircleCheck style={{ color: "#14B814" }} />{" "}
+                      <Typography color={"secondary"} variant="caption">
+                        ¡Gracias por ingresar un servicio!
+                      </Typography>
+                    </Stack>
+                  ) : (
+                    <Typography sx={{ color: "red" }} variant="caption">
+                      * ¡Por favor, ingresa un servicio!
+                    </Typography>
+                  )}
+
+                  <TextField
+                    color="secondary"
+                    sx={{ marginBottom: "1rem", width: "100%" }}
+                    id="input-with-icon-textfield-descripcion"
+                    label="Descripciòn"
+                    onChange={handleInputOnChange}
+                    value={menuData.descripcion}
+                    type="text"
+                    name="descripcion"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <GrServices />
+                        </InputAdornment>
+                      ),
+                    }}
+                    variant="standard"
+                  />
+                  {validateInputs.descripcion ? (
+                    <Stack sx={{ marginTop: "0.2rem" }} direction="row">
+                      <FaRegCircleCheck style={{ color: "#14B814" }} />{" "}
+                      <Typography color={"secondary"} variant="caption">
+                        ¡Gracias por ingresar una descripciòn!
+                      </Typography>
+                    </Stack>
+                  ) : (
+                    <Typography sx={{ color: "red" }} variant="caption">
+                      * ¡Por favor, ingresa una descripciòn!
+                    </Typography>
+                  )}
+
+                  <TextField
+                    color="secondary"
+                    sx={{ marginBottom: "1rem", width: "100%" }}
+                    id="input-with-icon-textfield-url"
+                    label="Url"
+                    onChange={handleInputOnChange}
+                    value={menuData.url}
+                    type="text"
+                    name="url"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <GrServices />
+                        </InputAdornment>
+                      ),
+                    }}
+                    variant="standard"
+                  />
+                  {validateInputs.url ? (
+                    <Stack sx={{ marginTop: "0.2rem" }} direction="row">
+                      <FaRegCircleCheck style={{ color: "#14B814" }} />{" "}
+                      <Typography color={"secondary"} variant="caption">
+                        ¡Gracias por ingresar una url!
+                      </Typography>
+                    </Stack>
+                  ) : (
+                    <Typography sx={{ color: "red" }} variant="caption">
+                      * ¡Por favor, ingresa una url!
+                    </Typography>
+                  )}
+
+                  <TextField
+                    color="secondary"
+                    sx={{ marginBottom: "1rem", width: "100%" }}
+                    id="input-with-icon-textfield-icono"
+                    label="Icono"
+                    onChange={handleInputOnChange}
+                    value={menuData.icono}
+                    type="text"
+                    name="icono"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <GrServices />
+                        </InputAdornment>
+                      ),
+                    }}
+                    variant="standard"
+                  />
+                  {validateInputs.icono ? (
+                    <Stack sx={{ marginTop: "0.2rem" }} direction="row">
+                      <FaRegCircleCheck style={{ color: "#14B814" }} />{" "}
+                      <Typography color={"secondary"} variant="caption">
+                        ¡Gracias por ingresar un icono!
+                      </Typography>
+                    </Stack>
+                  ) : (
+                    <Typography sx={{ color: "red" }} variant="caption">
+                      * ¡Por favor, ingresa un icono!
+                    </Typography>
+                  )}
+
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "row",
+                      alignContent: "center",
+                      marginBottom: "0.2rem",
+                    }}
+                  >
+                    <InputLabel sx={{ alignSelf: "center" }}>Activo</InputLabel>
+                    <Checkbox
+                      {..."label"}
+                       onChange={handleInputOnChange} 
+                      name="activo"
+                      size="small"
+                      color="secondary"
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  {/* icon_mui,
+        route,
+        id_menu_padre */}
+                  <TextField
+                    color="secondary"
+                    sx={{ marginBottom: "1rem", width: "100%" }}
+                    id="input-with-icon-textfield-icon_mui"
+                    label="Icon MUI"
+                    onChange={handleInputOnChange}
+                    value={menuData.icon_mui}
+                    type="text"
+                    name="icon_mui"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <GrServices />
+                        </InputAdornment>
+                      ),
+                    }}
+                    variant="standard"
+                  />
+                  {validateInputs.icon_mui ? (
+                    <Stack sx={{ marginTop: "0.2rem" }} direction="row">
+                      <FaRegCircleCheck style={{ color: "#14B814" }} />{" "}
+                      <Typography color={"secondary"} variant="caption">
+                        ¡Gracias por ingresar un icono!
+                      </Typography>
+                    </Stack>
+                  ) : (
+                    <Typography sx={{ color: "red" }} variant="caption">
+                      * ¡Por favor, ingresa un icono!
+                    </Typography>
+                  )}
+                  <TextField
+                    color="secondary"
+                    sx={{ marginBottom: "1rem", width: "100%" }}
+                    id="input-with-icon-textfield-route"
+                    label="Ruta"
+                    onChange={handleInputOnChange}
+                    value={menuData.route}
+                    type="text"
+                    name="route"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <GrServices />
+                        </InputAdornment>
+                      ),
+                    }}
+                    variant="standard"
+                  />
+                  {validateInputs.route ? (
+                    <Stack sx={{ marginTop: "0.2rem" }} direction="row">
+                      <FaRegCircleCheck style={{ color: "#14B814" }} />{" "}
+                      <Typography color={"secondary"} variant="caption">
+                        ¡Gracias por ingresar una ruta!
+                      </Typography>
+                    </Stack>
+                  ) : (
+                    <Typography sx={{ color: "red" }} variant="caption">
+                      * ¡Por favor, ingresa una ruta!
+                    </Typography>
+                  )}
+
+                  <TextField
+                    color="secondary"
+                    sx={{ marginBottom: "1rem", width: "100%" }}
+                    id="input-with-icon-textfield-id-menu-padre"
+                    label="Menu Padre"
+                    onChange={handleInputOnChange}
+                    value={menuData.id_menu_padre}
+                    type="text"
+                    name="id_menu_padre"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <GrServices />
+                        </InputAdornment>
+                      ),
+                    }}
+                    variant="standard"
+                  />
+                  {validateInputs.id_menu_padre ? (
+                    <Stack sx={{ marginTop: "0.2rem" }} direction="row">
+                      <FaRegCircleCheck style={{ color: "#14B814" }} />{" "}
+                      <Typography color={"secondary"} variant="caption">
+                        ¡Gracias por ingresar un menu padre!
+                      </Typography>
+                    </Stack>
+                  ) : (
+                    <Typography sx={{ color: "red" }} variant="caption">
+                      * ¡Por favor, ingresa un menu padre!
+                    </Typography>
+                  )}
+                </Grid>
+              </Grid>
+
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "end",
+                  marginTop: "0.5rem",
+                }}
+              >
+                <Button
+                  endIcon={<Sync />}
+                  color="secondary"
+                  variant="contained"
+                    onClick={handleAddMenu} 
+                >
+                  Guardar Menu
+                </Button>
+              </Box>
+            </Paper>
+          </Box>
+        </Dialog>
       )}
     </Box>
   );
