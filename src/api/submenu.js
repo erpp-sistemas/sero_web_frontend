@@ -36,10 +36,11 @@ export const createSubMenu = async (subMenuData) => {
  */
 export const getAllSubMenus = async () => {
   try {
-    const response = await axios.get('/submenus');
+    const response = await axios.get('http://localhost:3000/api/submenus');
+    
     return response.data;
   } catch (error) {
-    handleAxiosError(error);
+    console.log(error);
   }
 };
 
