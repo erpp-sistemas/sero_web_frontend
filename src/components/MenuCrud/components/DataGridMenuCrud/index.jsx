@@ -111,7 +111,7 @@ const FaIcon = ({data})=>{
   };
 
   const filteredIconName = getFilteredIconName(data);
-  console.log(filteredIconName);
+  
 
   return filteredIconName ? (<>
     <IconButton  onClick={handleClick} sx={{ bgcolor: randomColor }} size="small">
