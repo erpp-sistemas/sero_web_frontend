@@ -30,6 +30,7 @@ import {
 import { DataGrid } from "@mui/x-data-grid";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import * as faIcons from "@fortawesome/free-solid-svg-icons";
+import * as MUIIcons from "@mui/icons-material";
 /**
  * CheckCell component for rendering an IconButton with check or clear icon based on data.
  *
@@ -80,27 +81,27 @@ const FaIcon = ({
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
   /**
- * Maneja el clic del botón para abrir el menú.
- *
- * @param {Event} event - Evento de clic.
- * @returns {void}
- */
+   * Maneja el clic del botón para abrir el menú.
+   *
+   * @param {Event} event - Evento de clic.
+   * @returns {void}
+   */
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
   /**
- * Maneja el cierre del menú.
- *
- * @returns {void}
- */
+   * Maneja el cierre del menú.
+   *
+   * @returns {void}
+   */
   const handleClose = () => {
     setAnchorEl(null);
   };
-/**
- * Efecto secundario para obtener nombres de iconos y generar un color aleatorio al montar el componente.
- *
- * @returns {void}
- */
+  /**
+   * Efecto secundario para obtener nombres de iconos y generar un color aleatorio al montar el componente.
+   *
+   * @returns {void}
+   */
   React.useEffect(() => {
     // Obtener los nombres de los iconos al montar el componente
     const names = Object.keys(faIcons);
@@ -115,12 +116,13 @@ const FaIcon = ({
     }
     setRandomColor(color);
   }, []);
-/**
- * Obtiene el nombre del ícono filtrado.
- *
- * @param {string} data - Datos del ícono.
- * @returns {string|undefined} Nombre del ícono filtrado.
- */
+
+  /**
+   * Obtiene el nombre del ícono filtrado.
+   *
+   * @param {string} data - Datos del ícono.
+   * @returns {string|undefined} Nombre del ícono filtrado.
+   */
   const getFilteredIconName = (data) => {
     return iconNames.find((iconName) => {
       return iconName === data;
@@ -152,7 +154,7 @@ const FaIcon = ({
           onClick={() => {
             handleOpenFontawesomeIconCatalogDialog();
             setDataRow(row);
-            handleClose()
+            handleClose();
           }}
         >
           Catalogo de Iconos FontAwesome
@@ -161,24 +163,129 @@ const FaIcon = ({
     </>
   ) : (
     <IconButton>
-        <AddOutlined onClick={() => {
-            handleOpenFontawesomeIconCatalogDialog();
-            setDataRow(row);
-          }}/>
+      <AddOutlined
+        onClick={() => {
+          handleOpenFontawesomeIconCatalogDialog();
+          setDataRow(row);
+        }}
+      />
     </IconButton>
   );
 };
-/* const itemsPerPage = 100;  */// Número de íconos por página
+/* const itemsPerPage = 100;  */ // Número de íconos por página
+
+const MUIcon = ({ data, handleOpenMaterialUiIconCatalogDialog,setDataRowMui,row }) => {
+  const [iconNames, setIconNames] = React.useState([]);
+  const [randomColor, setRandomColor] = React.useState("");
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const open = Boolean(anchorEl);
+  /**
+   * Maneja el clic del botón para abrir el menú.
+   *
+   * @param {Event} event - Evento de clic.
+   * @returns {void}
+   */
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  /**
+   * Maneja el cierre del menú.
+   *
+   * @returns {void}
+   */
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  /**
+   * Efecto secundario para obtener nombres de iconos y generar un color aleatorio al montar el componente.
+   *
+   * @returns {void}
+   */
+  React.useEffect(() => {
+    // Obtener los nombres de los iconos al montar el componente
+    const names = Object.keys(MUIIcons);
+
+    setIconNames(names);
+
+    // Generar el color aleatorio y establecerlo solo durante el montaje
+    const letters = "0123456789ABCDEF";
+    let color = "#";
+    for (let i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    setRandomColor(color);
+  }, []);
+
+  const getFilteredIconName = (data) => {
+    return iconNames.find((iconName) => {
+      
+      return iconName === data;
+    });
+  };
+
+  const filteredIconName = getFilteredIconName(data);
+
+  return filteredIconName ? (
+    <>
+      <IconButton
+        onClick={handleClick}
+        sx={{ bgcolor: randomColor }}
+        size="small"
+      >
+        {filteredIconName && React.createElement(MUIIcons[filteredIconName])}
+      </IconButton>
+      <Menu
+        sx={{ p: 2 }}
+        id="basic-menu"
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleClose}
+        MenuListProps={{
+          "aria-labelledby": "basic-button",
+        }}
+      >
+        <MenuItem
+          onClick={() => {
+            handleOpenMaterialUiIconCatalogDialog();
+               setDataRowMui(row); 
+            handleClose();
+          }}
+        >
+          Catalogo de Iconos Material UI
+        </MenuItem>
+      </Menu>
+    </>
+  ) : (
+    <IconButton>
+      <AddOutlined
+        onClick={() => {
+          handleOpenMaterialUiIconCatalogDialog();
+           setDataRowMui(row); 
+        }}
+      />
+    </IconButton>
+  );
+};
 
 function DataGridSubMenuCrud() {
   const [rows, setRows] = React.useState([]);
   const [isOpenFontawesomeIconCatalogDialog, setFontawesomeIconCatalogDialog] =
     React.useState(false);
+
+  const [isOpenMaterialUiIconCatalogDialog, setMaterialUiIconCatalogDialog] =
+    React.useState(false);
   const [iconNames, setIconNames] = React.useState([]);
+
   const [searchQuery, setSearchQuery] = React.useState("");
   const [selectedIcon, setSelectedIcon] = React.useState("");
   const [iconColors, setIconColors] = React.useState([]);
+  const [iconNamesMui, setIconNamesMui] = React.useState([]);
+  const [searchQueryMui, setSearchQueryMui] = React.useState("");
+  const [selectedIconMui, setSelectedIconMui] = React.useState("");
+  const [iconColorsMui, setIconColorsMui] = React.useState([]);
   const [getRow, setDataRow] = React.useState("");
+  const [getRowMui, setDataRowMui] = React.useState("");
   const [snackbar, setSnackbar] = React.useState(null);
   const [subMenuData, setSubMenuData] = React.useState({
     nombre: "",
@@ -202,6 +309,24 @@ function DataGridSubMenuCrud() {
   });
 
   /**
+   * Maneja la apertura del diálogo de catálogo de iconos de Material-UI.
+   * @function
+   * @returns {void}
+   */
+  const handleOpenMaterialUiIconCatalogDialog = () => {
+    setMaterialUiIconCatalogDialog(true);
+  };
+
+  /**
+   * Maneja el cierre del diálogo de catálogo de iconos de Material-UI.
+   * @function
+   * @returns {void}
+   */
+  const handleCloseMaterialUiIconCatalogDialog = () => {
+    setMaterialUiIconCatalogDialog(false);
+  };
+
+  /**
    * Función que cierra el componente Snackbar.
    *
    * @function
@@ -212,13 +337,13 @@ function DataGridSubMenuCrud() {
    * @returns {void}
    */
   const handleCloseSnackbar = () => setSnackbar(null);
-/**
- * Maneja el cambio de ícono y realiza las acciones correspondientes.
- *
- * @param {string} selectedIcon - Ícono seleccionado.
- * @param {Function} handleCloseFontawesomeIconCatalogDialog - Función para cerrar el diálogo.
- * @returns {void}
- */
+  /**
+   * Maneja el cambio de ícono y realiza las acciones correspondientes.
+   *
+   * @param {string} selectedIcon - Ícono seleccionado.
+   * @param {Function} handleCloseFontawesomeIconCatalogDialog - Función para cerrar el diálogo.
+   * @returns {void}
+   */
   const handleChangeIcon = async (
     selectedIcon,
     handleCloseFontawesomeIconCatalogDialog
@@ -234,13 +359,11 @@ function DataGridSubMenuCrud() {
     // Aquí puedes realizar cualquier lógica adicional necesaria para manejar el cambio del icono
 
     // Muestra el objeto actualizado en la consola
-   
 
     try {
       const response = await updateSubMenu(updatedRow.id, updatedRow);
 
       // Aquí puedes manejar la respuesta de la solicitud si es necesario
-      
 
       // Mostrar Snackbar de éxito
       setSnackbar({
@@ -260,58 +383,152 @@ function DataGridSubMenuCrud() {
     // Cierra el diálogo u realiza otras acciones después de cambiar el icono
   };
 
+
+  const handleChangeIconMui = async (
+    selectedIconMui,
+    handleCloseMaterialUiIconCatalogDialog
+  ) => {
+    const currentRow = getRowMui;
+
+   
+    
+
+    // Crea un nuevo objeto con el mismo contenido que getRow, pero con el icono actualizado
+    const updatedRow = {
+      ...currentRow,
+      icon_mui: selectedIconMui,
+    };
+
+
+
   
+
+    // Aquí puedes realizar cualquier lógica adicional necesaria para manejar el cambio del icono
+
+    // Muestra el objeto actualizado en la consola
+
+    try {
+      const response = await updateSubMenu(updatedRow.id, updatedRow);
+
+      // Aquí puedes manejar la respuesta de la solicitud si es necesario
+
+      // Mostrar Snackbar de éxito
+      setSnackbar({
+        children: "Icono añadido correctamente",
+        severity: "success",
+      });
+
+      // Cerrar el diálogo, actualizar el estado, o realizar otras acciones necesarias
+      fetchSubMenus();
+      handleCloseMaterialUiIconCatalogDialog();
+    } catch (error) {
+      console.error("Error al guardar datos:", error);
+      setSnackbar({ children: "Error al guardar datos", severity: "error" });
+      // Aquí puedes manejar el error según tus necesidades
+    }
+
+    // Cierra el diálogo u realiza otras acciones después de cambiar el icono
+  };
+
   React.useEffect(() => {
     // Generar colores para todos los íconos al cargar el componente
     const colors = iconNames.map(() => getRandomColor());
     setIconColors(colors);
   }, [iconNames]);
 
+  React.useEffect(() => {
+    // Generar colores para todos los íconos al cargar el componente
+    const colors = iconNames.map(() => getRandomColor());
+    setIconColorsMui(colors);
+  }, [iconNamesMui]);
+
   const filteredIcons = iconNames.filter((icon) =>
     icon.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const filteredIconsMui = iconNamesMui.filter((icon) =>
+    icon.toLowerCase().includes(searchQueryMui.toLowerCase())
   );
 
   const itemsPerPage = 100; // Número de íconos por página
 
   const [currentPage, setCurrentPage] = React.useState(1);
-
+  const [currentPageMui, setCurrentPageMui] = React.useState(1);
   // Lógica para calcular los íconos que deben mostrarse en la página actual
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const visibleIcons = filteredIcons.slice(startIndex, endIndex);
-/**
- * Maneja el cambio de página en la paginación.
- *
- * @param {object} event - El evento del cambio de página.
- * @param {number} newPage - El número de la nueva página.
- */
+
+  // Lógica para calcular los íconos que deben mostrarse en la página actual
+  const startIndexMui = (currentPageMui - 1) * itemsPerPage;
+  const endIndexMui = startIndexMui + itemsPerPage;
+  const visibleIconsMui = filteredIconsMui.slice(startIndexMui, endIndexMui);
+  /**
+   * Maneja el cambio de página en la paginación.
+   *
+   * @param {object} event - El evento del cambio de página.
+   * @param {number} newPage - El número de la nueva página.
+   */
   const handlePageChange = (event, newPage) => {
     setCurrentPage(newPage);
   };
-/**
- * Maneja el cambio en la barra de búsqueda.
- *
- * @param {object} event - El evento del cambio en la barra de búsqueda.
- */
+
+  const handlePageChangeMui = (event, newPage) => {
+    setCurrentPageMui(newPage);
+  };
+  /**
+   * Maneja el cambio en la barra de búsqueda.
+   *
+   * @param {object} event - El evento del cambio en la barra de búsqueda.
+   */
   const handleSearchChange = (event) => {
     setSearchQuery(event.target.value);
     setCurrentPage(1); // Resetear la página al realizar una nueva búsqueda
     setSelectedIcon("");
   };
-/**
- * Maneja el clic en un icono.
- *
- * @param {string} icon - El nombre del icono seleccionado.
- */
+   /**
+   * Maneja el cambio en la barra de búsqueda.
+   *
+   * @param {object} event - El evento del cambio en la barra de búsqueda.
+   */
+   const handleSearchChangeMui = (event) => {
+    setSearchQueryMui(event.target.value);
+    setCurrentPageMui(1); // Resetear la página al realizar una nueva búsqueda
+    setSelectedIconMui("");
+  };
+  /**
+   * Maneja el clic en un icono.
+   *
+   * @param {string} icon - El nombre del icono seleccionado.
+   */
   const handleIconClick = (icon) => {
     setSelectedIcon(icon);
   };
+
+    /**
+   * Maneja el clic en un icono.
+   *
+   * @param {string} icon - El nombre del icono seleccionado.
+   */
+    const handleIconClickMui = (icon) => {
+        setSelectedIconMui(icon);
+      };
 
   React.useEffect(() => {
     // Obtener los nombres de los iconos al montar el componente
     const names = Object.keys(faIcons);
 
     setIconNames(names);
+
+    // Generar el color aleatorio y establecerlo solo durante el montaje
+    // Generar el color aleatorio y establecerlo solo durante el montaje
+  }, []);
+
+  React.useEffect(() => {
+    // Obtener los nombres de los iconos al montar el componente
+    const names = Object.keys(MUIIcons);
+
+    setIconNamesMui(names);
 
     // Generar el color aleatorio y establecerlo solo durante el montaje
     // Generar el color aleatorio y establecerlo solo durante el montaje
@@ -330,11 +547,11 @@ function DataGridSubMenuCrud() {
     setFontawesomeIconCatalogDialog(false);
   };
 
-/**
- * Genera un color aleatorio en formato hexadecimal.
- *
- * @returns {string} - Color hexadecimal generado aleatoriamente.
- */
+  /**
+   * Genera un color aleatorio en formato hexadecimal.
+   *
+   * @returns {string} - Color hexadecimal generado aleatoriamente.
+   */
   const getRandomColor = () => {
     const letters = "0123456789ABCDEF";
     let color = "#";
@@ -344,9 +561,9 @@ function DataGridSubMenuCrud() {
     return color;
   };
 
-/**
- * Realiza una solicitud para obtener datos de submenús y actualiza el estado 'rows'.
- */
+  /**
+   * Realiza una solicitud para obtener datos de submenús y actualiza el estado 'rows'.
+   */
   const fetchSubMenus = async () => {
     try {
       // Aquí deberías hacer tu solicitud de red para obtener los datos
@@ -484,13 +701,16 @@ function DataGridSubMenuCrud() {
         ),
         width: 180,
         editable: true,
-        /* renderCell: (params) => (
-          <AvatarImage
+        renderCell: (params) => (
+          <MUIcon
+          row={params.row}
+          setDataRowMui={setDataRowMui}
             data={params.row.icon_mui}
-           
-            
+            handleOpenMaterialUiIconCatalogDialog={
+              handleOpenMaterialUiIconCatalogDialog
+            }
           />
-        ), */
+        ),
       },
       {
         field: "route",
@@ -682,6 +902,132 @@ function DataGridSubMenuCrud() {
                       handleCloseFontawesomeIconCatalogDialog
                     )
                   }
+                >
+                  Cambiar Icono
+                </Button>
+              </Box>
+            </Paper>
+          </Box>
+        </Dialog>
+      )}
+      {isOpenMaterialUiIconCatalogDialog && (
+        <Dialog
+          fullScreen
+          open={isOpenMaterialUiIconCatalogDialog}
+          onClose={handleCloseMaterialUiIconCatalogDialog}
+        >
+          <AppBar sx={{ position: "relative" }}>
+            <Toolbar>
+              <IconButton
+                edge="start"
+                color="inherit"
+                onClick={handleCloseMaterialUiIconCatalogDialog}
+                aria-label="close"
+              >
+                <CloseIcon />
+              </IconButton>
+              {/*  <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
+                Agrega nueva tarea
+              </Typography> */}
+              {/*  <Button autoFocus color="inherit"  onClick={handleClose}>
+                Guardar
+              </Button> */}
+            </Toolbar>
+          </AppBar>
+          {/* Aqui va el contenido */}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "100%", // Ajusta según sea necesario
+            }}
+          >
+            <Paper
+              sx={{
+                width: "40%",
+                height: "auto",
+                boxShadow: 3,
+                padding: "2rem",
+                borderRadius: 1,
+              }}
+            >
+              {/* Contenido real del Paper */}
+              <Typography variant="body1" sx={{ mb: "2rem" }}>
+                Agregar Nuevo Icono de Material UI
+              </Typography>
+              {/* nombre, :imagen, :activo, :orden, :icono_app_movil */}
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  {/*  nombre,
+        descripcion,
+        url,
+        icono,
+        activo,
+        icon_mui,
+        route,
+        id_menu_padre */}
+                  <TextField
+                    color="secondary"
+                    sx={{ marginBottom: "1rem", width: "100%" }}
+                    id="input-with-icon-textfield-search-icon"
+                    label="Busqueda de Iconos"
+                      onChange={handleSearchChangeMui}
+                    value={searchQueryMui + selectedIconMui} 
+                    type="text"
+                    name="nombre"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <SearchIcon />
+                        </InputAdornment>
+                      ),
+                    }}
+                    variant="standard"
+                  />
+
+                  <Box>
+                    {visibleIconsMui.slice(0, 100)?.map((icon, index) => {
+                      const randomColor = getRandomColor();
+                      return (
+                        <IconButton
+                          sx={{ bgcolor: iconColorsMui[index], m: 0.2 }}
+                          size="small"
+                              onClick={() => handleIconClickMui(icon)} 
+                        >
+                          {" "}
+                          {React.createElement(MUIIcons[icon])}
+                        </IconButton>
+                      );
+                    })}
+                    <Pagination
+                      sx={{ mt: 2 }}
+                      count={Math.ceil(filteredIconsMui.length / itemsPerPage)}
+                      size="small"
+                      page={currentPageMui}
+                      onChange={handlePageChangeMui}
+                    />
+                  </Box>
+                </Grid>
+              </Grid>
+
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "end",
+                  marginTop: "0.5rem",
+                }}
+              >
+                <Button
+                  endIcon={<Sync />}
+                  color="secondary"
+                  variant="contained"
+                    onClick={() =>
+                    handleChangeIconMui(
+                      selectedIconMui,
+                      handleCloseMaterialUiIconCatalogDialog
+                    )
+                  } 
                 >
                   Cambiar Icono
                 </Button>
