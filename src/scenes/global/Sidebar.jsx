@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React from "react";
 import { ProSidebar, Menu, MenuItem } from "react-pro-sidebar";
 import { Box, IconButton, Typography, useTheme, Tooltip } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
@@ -48,7 +48,7 @@ import { useDispatch } from 'react-redux';
 import { setUser, logoutUser } from '../../features/user/userSlice'
 import HomeIcon from '@mui/icons-material/Home';
 import ScreenSearchDesktopIcon from '@mui/icons-material/ScreenSearchDesktop';
-
+import * as MUIIcons from "@mui/icons-material";
 const iconsMap = {
   "Home": <HomeIcon />,
   "DashboardIcon": <DashboardIcon />,
@@ -91,6 +91,9 @@ const Item = ({ title, to, icon, selected, setSelected, color, isCollapsed = fal
 
   const theme = useTheme();
 
+  // Check if icon is a valid string and exists in MUIIcons
+  const isValidIcon = typeof icon === 'string' && MUIIcons[icon];
+
   return (
     <>
       {isCollapsed ? (
@@ -101,7 +104,7 @@ const Item = ({ title, to, icon, selected, setSelected, color, isCollapsed = fal
               color: color
             }}
             onClick={() => setSelected(title)}
-            icon={icon}
+            icon={isValidIcon ? React.createElement(MUIIcons[icon]) : null}
           >
             <Typography>{title}</Typography>
             <Link to={to} />
@@ -114,7 +117,7 @@ const Item = ({ title, to, icon, selected, setSelected, color, isCollapsed = fal
             color: color
           }}
           onClick={() => setSelected(title)}
-          icon={icon}
+          icon={isValidIcon ? React.createElement(MUIIcons[icon]) : null}
         >
           <Typography>{title}</Typography>
           <Link to={to} />
@@ -132,17 +135,17 @@ const Sidebar = () => {
 
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [selected, setSelected] = useState("Dashboard");
+  const [isCollapsed, setIsCollapsed] = React.useState(false);
+  const [selected, setSelected] = React.useState("Dashboard");
   const user = useSelector(state => state.user)
-  const [menus, setMenus] = useState([])
-  const [menu, setMenu] = useState([])
-  const [subMenu, setSubMenu] = useState([])
+  const [menus, setMenus] = React.useState([])
+  const [menu, setMenu] = React.useState([])
+  const [subMenu, setSubMenu] = React.useState([])
   const dispatch = useDispatch();
   //console.log(user)
   //const [user, setUser] = useState(null)
 
-  useEffect(() => {
+  React.useEffect(() => {
     screen.width <= 450 ? setIsCollapsed(true) : setIsCollapsed(false)
 
     async function loadMenus() {
@@ -154,7 +157,7 @@ const Sidebar = () => {
 
   }, [])
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (menus && menus.length > 0) {
       console.log(menus);
       const mainMenu = menus.filter((m) => m.parent_menu_id === 0);
@@ -164,6 +167,8 @@ const Sidebar = () => {
       setSubMenu(subMenus);
     }
   }, [menus]);
+
+  
 
   const handleCerrarSesion = () => {
 
@@ -271,7 +276,7 @@ const Sidebar = () => {
                     <Item
                       title={submenus.name}
                       to={submenus.route}
-                      icon={iconsMap[submenus.icon_mui]}
+                      icon={submenus.icon_mui}
                       selected={selected}
                       setSelected={setSelected}
                       color={colors.grey[100]}
