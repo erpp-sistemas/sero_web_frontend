@@ -14,6 +14,7 @@ import {
   AppBar,
   Box,
   Button,
+  Checkbox,
   Dialog,
   DialogActions,
   DialogContent,
@@ -21,6 +22,7 @@ import {
   Grid,
   IconButton,
   InputAdornment,
+  InputLabel,
   Menu,
   MenuItem,
   Pagination,
@@ -34,6 +36,7 @@ import { DataGrid, GridToolbarColumnsButton, GridToolbarContainer, GridToolbarDe
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import * as faIcons from "@fortawesome/free-solid-svg-icons";
 import * as MUIIcons from "@mui/icons-material";
+import { getAllMenus } from "../../../../api/menu";
 
 
 
@@ -284,6 +287,27 @@ const MUIcon = ({ data, handleOpenMaterialUiIconCatalogDialog,setDataRowMui,row 
   const [randomColor, setRandomColor] = React.useState("");
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
+  const [openNewSubMenuDialog, setOpenNewSubMenuDialog] = React.useState(false);
+
+
+  
+  /**
+   * Función que maneja la apertura del diálogo de submenú.
+   * Cambia el estado a true para indicar que el diálogo debe abrirse.
+   * @function
+   */
+  const handleOpenNewSubMenuDialog = () => {
+    setOpenNewSubMenuDialog(true);
+  };
+
+  /**
+   * Función que maneja el cierre del diálogo de submenú.
+   * Cambia el estado a false para indicar que el diálogo debe cerrarse.
+   * @function
+   */
+  const handleCloseNewSubMenuDialog = () => {
+    setOpenNewSubMenuDialog(false);
+  };
   /**
    * Maneja el clic del botón para abrir el menú.
    *
@@ -394,6 +418,7 @@ function DataGridSubMenuCrud() {
   const [getRow, setDataRow] = React.useState("");
   const [getRowMui, setDataRowMui] = React.useState("");
   const [snackbar, setSnackbar] = React.useState(null);
+  const [getMenus, setMenus] = React.useState([]);
   const [isOpenNewSubMenuDialog, setOpenNewSubMenuDialog] = React.useState(false);
   const [subMenuData, setSubMenuData] = React.useState({
     nombre: "",
@@ -961,7 +986,7 @@ const handleOpenNewSubMenuDialog = () => {
 
          <Button
           color="secondary"
-       /*    onClick={handleOpenNewMenuDialog} */
+           onClick={handleOpenNewSubMenuDialog} 
           startIcon={<AddOutlined />}
           size="small"
         >
@@ -970,6 +995,47 @@ const handleOpenNewSubMenuDialog = () => {
       </GridToolbarContainer>
     );
   }
+
+
+  /**
+   * Hook de efecto para cargar datos iniciales al montar el componente.
+   *
+   * @effect
+   * @private
+   */
+
+  React.useEffect(() => {
+    /**
+     * Función asíncrona para obtener y establecer los datos de los menus.
+     *
+     * @function
+     * @async
+     * @private
+     */
+    const fetchMenus = async () => {
+      try {
+        // Aquí deberías hacer tu solicitud de red para obtener los datos
+        // Reemplaza 'TU_URL_DE_DATOS' con la URL real de tus datos
+        const response = await getAllMenus()
+
+        // Agrega el campo 'id_tarea' a cada fila usando el índice como valor único si no no se ven en la datagrid
+        const rowsWithId = response
+          .map((row, index) => ({
+            ...row,
+            id: row.id_menu || index.toString(),
+          }))
+          .filter((row) => {
+            return row.activo;
+          });
+
+        setMenus(rowsWithId);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchMenus();
+  }, []);
 
 
   const buildColumns = () => {
@@ -1004,6 +1070,7 @@ const handleOpenNewSubMenuDialog = () => {
 
       {
         field: "id_menu_padre",
+        type: "singleSelect",
         renderHeader: () => (
           <strong style={{ color: "#5EBFFF" }}>
             {"Menu Padre"}
@@ -1014,6 +1081,19 @@ const handleOpenNewSubMenuDialog = () => {
         ),
         width: 180,
         editable: true,
+        valueGetter: ({ row }) => {
+          const targetMenu = getMenus.find(
+            (menu) => menu.id_menu === row.id_menu_padre
+          );
+          return targetMenu ? targetMenu.nombre : "";
+        },
+        valueOptions: () => getMenus.map((menu) => menu.nombre),
+        valueParser: (newValue) => {
+          const targetMenu = getMenus.find(
+            (menu) => menu.nombre === newValue
+          );
+          return targetMenu ? targetMenu.id_menu : "";
+        },
       },
 
       {
@@ -1465,7 +1545,7 @@ const handleOpenNewSubMenuDialog = () => {
             >
               {/* Contenido real del Paper */}
               <Typography variant="body1" sx={{ mb: "2rem" }}>
-                Agregar Nuevo Menu
+                Agregar Nuevo SubMenu
               </Typography>
               {/* nombre, :imagen, :activo, :orden, :icono_app_movil */}
               <Grid container spacing={2}>
@@ -1475,9 +1555,9 @@ const handleOpenNewSubMenuDialog = () => {
                     color="secondary"
                     sx={{ marginBottom: "1rem", width: "100%" }}
                     id="input-with-icon-textfield-nombre"
-                    label="Nombre del menu"
-                    onChange={handleInputOnChange}
-                    value={subMenuData.nombre}
+                    label="Nombre del submenu"
+                /*     onChange={handleInputOnChange}
+                    value={subMenuData.nombre} */
                     type="text"
                     name="nombre"
                     InputProps={{
@@ -1489,7 +1569,7 @@ const handleOpenNewSubMenuDialog = () => {
                     }}
                     variant="standard"
                   />
-                  {validateInputs.nombre ? (
+                 {/*  {validateInputs.nombre ? (
                     <Stack sx={{ marginTop: "0.2rem" }} direction="row">
                       <FaRegCircleCheck style={{ color: "#14B814" }} />{" "}
                       <Typography color={"secondary"} variant="caption">
@@ -1500,15 +1580,15 @@ const handleOpenNewSubMenuDialog = () => {
                     <Typography sx={{ color: "red" }} variant="caption">
                       * ¡Por favor, ingresa un servicio!
                     </Typography>
-                  )}
+                  )} */}
 
                   <TextField
                     color="secondary"
                     sx={{ marginBottom: "1rem", width: "100%" }}
                     id="input-with-icon-textfield-descripcion"
                     label="Descripciòn"
-                    onChange={handleInputOnChange}
-                    value={menuData.descripcion}
+                   /*  onChange={handleInputOnChange}
+                    value={menuData.descripcion} */
                     type="text"
                     name="descripcion"
                     InputProps={{
@@ -1520,7 +1600,7 @@ const handleOpenNewSubMenuDialog = () => {
                     }}
                     variant="standard"
                   />
-                  {validateInputs.descripcion ? (
+                 {/*  {validateInputs.descripcion ? (
                     <Stack sx={{ marginTop: "0.2rem" }} direction="row">
                       <FaRegCircleCheck style={{ color: "#14B814" }} />{" "}
                       <Typography color={"secondary"} variant="caption">
@@ -1532,14 +1612,14 @@ const handleOpenNewSubMenuDialog = () => {
                       * ¡Por favor, ingresa una descripciòn!
                     </Typography>
                   )}
-
+ */}
                   <TextField
                     color="secondary"
                     sx={{ marginBottom: "1rem", width: "100%" }}
                     id="input-with-icon-textfield-url"
                     label="Url"
-                    onChange={handleInputOnChange}
-                    value={menuData.url}
+                  /*   onChange={handleInputOnChange}
+                    value={menuData.url} */
                     type="text"
                     name="url"
                     InputProps={{
@@ -1551,7 +1631,7 @@ const handleOpenNewSubMenuDialog = () => {
                     }}
                     variant="standard"
                   />
-                  {validateInputs.url ? (
+                {/*   {validateInputs.url ? (
                     <Stack sx={{ marginTop: "0.2rem" }} direction="row">
                       <FaRegCircleCheck style={{ color: "#14B814" }} />{" "}
                       <Typography color={"secondary"} variant="caption">
@@ -1562,15 +1642,15 @@ const handleOpenNewSubMenuDialog = () => {
                     <Typography sx={{ color: "red" }} variant="caption">
                       * ¡Por favor, ingresa una url!
                     </Typography>
-                  )}
+                  )} */}
 
-                  <TextField
+                {/*   <TextField
                     color="secondary"
                     sx={{ marginBottom: "1rem", width: "100%" }}
                     id="input-with-icon-textfield-icono"
                     label="Icono"
-                    onChange={handleInputOnChange}
-                    value={menuData.icono}
+                   onChange={handleInputOnChange}
+                    value={menuData.icono} 
                     type="text"
                     name="icono"
                     InputProps={{
@@ -1581,8 +1661,8 @@ const handleOpenNewSubMenuDialog = () => {
                       ),
                     }}
                     variant="standard"
-                  />
-                  {validateInputs.icono ? (
+                  /> */}
+                {/*   {validateInputs.icono ? (
                     <Stack sx={{ marginTop: "0.2rem" }} direction="row">
                       <FaRegCircleCheck style={{ color: "#14B814" }} />{" "}
                       <Typography color={"secondary"} variant="caption">
@@ -1593,7 +1673,7 @@ const handleOpenNewSubMenuDialog = () => {
                     <Typography sx={{ color: "red" }} variant="caption">
                       * ¡Por favor, ingresa un icono!
                     </Typography>
-                  )}
+                  )} */}
 
                   <Box
                     sx={{
@@ -1606,7 +1686,7 @@ const handleOpenNewSubMenuDialog = () => {
                     <InputLabel sx={{ alignSelf: "center" }}>Activo</InputLabel>
                     <Checkbox
                       {..."label"}
-                       onChange={handleInputOnChange} 
+                       /* onChange={handleInputOnChange}  */
                       name="activo"
                       size="small"
                       color="secondary"
@@ -1622,8 +1702,8 @@ const handleOpenNewSubMenuDialog = () => {
                     sx={{ marginBottom: "1rem", width: "100%" }}
                     id="input-with-icon-textfield-icon_mui"
                     label="Icon MUI"
-                    onChange={handleInputOnChange}
-                    value={menuData.icon_mui}
+                 /*    onChange={handleInputOnChange}
+                    value={menuData.icon_mui} */
                     type="text"
                     name="icon_mui"
                     InputProps={{
@@ -1635,7 +1715,7 @@ const handleOpenNewSubMenuDialog = () => {
                     }}
                     variant="standard"
                   />
-                  {validateInputs.icon_mui ? (
+                {/*   {validateInputs.icon_mui ? (
                     <Stack sx={{ marginTop: "0.2rem" }} direction="row">
                       <FaRegCircleCheck style={{ color: "#14B814" }} />{" "}
                       <Typography color={"secondary"} variant="caption">
@@ -1646,14 +1726,14 @@ const handleOpenNewSubMenuDialog = () => {
                     <Typography sx={{ color: "red" }} variant="caption">
                       * ¡Por favor, ingresa un icono!
                     </Typography>
-                  )}
+                  )} */}
                   <TextField
                     color="secondary"
                     sx={{ marginBottom: "1rem", width: "100%" }}
                     id="input-with-icon-textfield-route"
                     label="Ruta"
-                    onChange={handleInputOnChange}
-                    value={menuData.route}
+                  /*   onChange={handleInputOnChange}
+                    value={menuData.route} */
                     type="text"
                     name="route"
                     InputProps={{
@@ -1665,7 +1745,7 @@ const handleOpenNewSubMenuDialog = () => {
                     }}
                     variant="standard"
                   />
-                  {validateInputs.route ? (
+                 {/*  {validateInputs.route ? (
                     <Stack sx={{ marginTop: "0.2rem" }} direction="row">
                       <FaRegCircleCheck style={{ color: "#14B814" }} />{" "}
                       <Typography color={"secondary"} variant="caption">
@@ -1676,15 +1756,15 @@ const handleOpenNewSubMenuDialog = () => {
                     <Typography sx={{ color: "red" }} variant="caption">
                       * ¡Por favor, ingresa una ruta!
                     </Typography>
-                  )}
+                  )} */}
 
                   <TextField
                     color="secondary"
                     sx={{ marginBottom: "1rem", width: "100%" }}
                     id="input-with-icon-textfield-id-menu-padre"
                     label="Menu Padre"
-                    onChange={handleInputOnChange}
-                    value={menuData.id_menu_padre}
+                  /*   onChange={handleInputOnChange}
+                    value={menuData.id_menu_padre} */
                     type="text"
                     name="id_menu_padre"
                     InputProps={{
@@ -1696,7 +1776,7 @@ const handleOpenNewSubMenuDialog = () => {
                     }}
                     variant="standard"
                   />
-                  {validateInputs.id_menu_padre ? (
+                {/*   {validateInputs.id_menu_padre ? (
                     <Stack sx={{ marginTop: "0.2rem" }} direction="row">
                       <FaRegCircleCheck style={{ color: "#14B814" }} />{" "}
                       <Typography color={"secondary"} variant="caption">
@@ -1707,7 +1787,7 @@ const handleOpenNewSubMenuDialog = () => {
                     <Typography sx={{ color: "red" }} variant="caption">
                       * ¡Por favor, ingresa un menu padre!
                     </Typography>
-                  )}
+                  )} */}
                 </Grid>
               </Grid>
 
@@ -1722,7 +1802,7 @@ const handleOpenNewSubMenuDialog = () => {
                   endIcon={<Sync />}
                   color="secondary"
                   variant="contained"
-                    onClick={handleAddMenu} 
+                 /*    onClick={handleAddMenu}  */
                 >
                   Guardar Menu
                 </Button>
