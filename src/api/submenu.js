@@ -9,7 +9,7 @@ import axios from 'axios';
  */
 export const createSubMenu = async (subMenuData) => {
   try {
-    const response = await axios.post('/submenus', subMenuData);
+    const response = await axios.post('http://localhost:3000/api/submenus', subMenuData);
     return response.data;
   } catch (error) {
     if (error.response) {

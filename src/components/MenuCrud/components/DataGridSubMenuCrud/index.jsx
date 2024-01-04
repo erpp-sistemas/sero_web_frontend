@@ -1,5 +1,5 @@
 import React from "react";
-import { getAllSubMenus, updateSubMenu } from "../../../../api/submenu";
+import { createSubMenu, getAllSubMenus, updateSubMenu } from "../../../../api/submenu";
 import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
 import { AddOutlined } from "@mui/icons-material";
@@ -25,21 +25,27 @@ import {
   InputLabel,
   Menu,
   MenuItem,
+  NativeSelect,
   Pagination,
   Paper,
   Snackbar,
+  Stack,
   TextField,
   Toolbar,
   Typography,
 } from "@mui/material";
-import { DataGrid, GridToolbarColumnsButton, GridToolbarContainer, GridToolbarDensitySelector, GridToolbarExport, GridToolbarFilterButton } from "@mui/x-data-grid";
+import {
+  DataGrid,
+  GridToolbarColumnsButton,
+  GridToolbarContainer,
+  GridToolbarDensitySelector,
+  GridToolbarExport,
+  GridToolbarFilterButton,
+} from "@mui/x-data-grid";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import * as faIcons from "@fortawesome/free-solid-svg-icons";
 import * as MUIIcons from "@mui/icons-material";
 import { getAllMenus } from "../../../../api/menu";
-
-
-
 
 /**
  * Hook personalizado para simular una mutación asincrónica con datos ficticios.
@@ -58,87 +64,87 @@ import { getAllMenus } from "../../../../api/menu";
  * @returns {Promise<Object>} - Promesa que se resuelve con los datos resultantes de la mutación.
  */
 const useFakeMutation = () => {
-    /**
-     * Función que realiza la mutación asincrónica.
-     *
-     * @async
-     *
-     * @param {Object} submenu - Datos del submenu para la mutación.
-     * @param {string} _action - Acción a realizar ("update", "delete", o "create").
-     * @returns {Promise<Object>} - Promesa que se resuelve con los datos resultantes de la mutación.
-     *
-     * @throws {Error} - Se lanza un error si hay un problema durante la actualización.
-     */
-    return React.useCallback(async (subMenu, _action) => {
-      try {
-        // Simulando una pausa de 200 ms con setTimeout
-        await new Promise((timeoutResolve) => setTimeout(timeoutResolve, 200));
-        const response = await updateSubMenu(subMenu.id, subMenu);
-  
-        return response.data;
-      } catch (error) {
-        // Maneja errores de Axios o errores de validación
-  
-        throw error;
-      }
-    }, []);
-  };
-  
   /**
-   * Función para calcular una mutación basada en las diferencias entre la fila nueva y la fila antigua.
+   * Función que realiza la mutación asincrónica.
    *
-   * @param {Object} newRow - Datos de la fila actualizados.
-   * @param {Object} oldRow - Datos de la fila original.
-   * @returns {string|null} Mensaje de confirmación de mutación o null si no hay cambios significativos.
+   * @async
+   *
+   * @param {Object} submenu - Datos del submenu para la mutación.
+   * @param {string} _action - Acción a realizar ("update", "delete", o "create").
+   * @returns {Promise<Object>} - Promesa que se resuelve con los datos resultantes de la mutación.
+   *
+   * @throws {Error} - Se lanza un error si hay un problema durante la actualización.
    */
-  function computeMutation(newRow, oldRow) {
-    /**
-     * Compara los nombres de la fila nueva y la fila antigua.
-     *
-     * @returns {string|null} Mensaje de confirmación de mutación para el nombre o null si no hay cambios.
-     */
-    if (newRow.nombre !== oldRow.nombre) {
-      return `¿Realmente quieres cambiar el estado del nombre de '${oldRow.nombre}' a '${newRow.nombre}'?`;
+  return React.useCallback(async (subMenu, _action) => {
+    try {
+      // Simulando una pausa de 200 ms con setTimeout
+      await new Promise((timeoutResolve) => setTimeout(timeoutResolve, 200));
+      const response = await updateSubMenu(subMenu.id, subMenu);
+
+      return response.data;
+    } catch (error) {
+      // Maneja errores de Axios o errores de validación
+
+      throw error;
     }
-  
-    if (newRow.id_menu_padre !== oldRow.id_menu_padre) {
-      return `¿Realmente quieres cambiar el estado del id_menu_padre de '${oldRow.id_menu_padre}' a '${newRow.id_menu_padre}'?`;
-    }
-  
-    if (newRow.descripcion !== oldRow.descripcion) {
-      return `¿Realmente quieres cambiar el estado de la descripcion de '${oldRow.descripcion}' a '${newRow.descripcion}'?`;
-    }
-  
-    if (newRow.url !== oldRow.url) {
-      return `¿Realmente quieres cambiar el estado de la url de '${oldRow.url}' a '${newRow.url}'?`;
-    }
-  
-    if (newRow.icono !== oldRow.icono) {
-      return `¿Realmente quieres cambiar el estado del icono de '${oldRow.icono}' a '${newRow.icono}'?`;
-    }
-  
-    if (newRow.icon_mui !== oldRow.icon_mui) {
-      return `¿Realmente quieres cambiar el estado de icon_mui de '${oldRow.icon_mui}' a '${newRow.icon_mui}'?`;
-    }
-  
-    if (newRow.route !== oldRow.route) {
-      return `¿Realmente quieres cambiar el estado del route de '${oldRow.route}' a '${newRow.route}'?`;
-    }
-  
-    /**
-     * Compara el estado 'activo' de la fila nueva y la fila antigua.
-     *
-     * @returns {string|null} Mensaje de confirmación de mutación para el estado 'activo' o null si no hay cambios.
-     */
-    if (newRow.activo !== oldRow.activo) {
-      return `¿Realmente deseas cambiar el estado de 'Activo' de '${
-        oldRow.activo ? "✅" : "❎" || ""
-      }' a '${newRow.activo ? "✅" : "❎" || ""}'?`;
-    }
-  
-    // Si no hay cambios significativos, devuelve null
-    return null;
+  }, []);
+};
+
+/**
+ * Función para calcular una mutación basada en las diferencias entre la fila nueva y la fila antigua.
+ *
+ * @param {Object} newRow - Datos de la fila actualizados.
+ * @param {Object} oldRow - Datos de la fila original.
+ * @returns {string|null} Mensaje de confirmación de mutación o null si no hay cambios significativos.
+ */
+function computeMutation(newRow, oldRow) {
+  /**
+   * Compara los nombres de la fila nueva y la fila antigua.
+   *
+   * @returns {string|null} Mensaje de confirmación de mutación para el nombre o null si no hay cambios.
+   */
+  if (newRow.nombre !== oldRow.nombre) {
+    return `¿Realmente quieres cambiar el estado del nombre de '${oldRow.nombre}' a '${newRow.nombre}'?`;
   }
+
+  if (newRow.id_menu_padre !== oldRow.id_menu_padre) {
+    return `¿Realmente quieres cambiar el estado del id_menu_padre de '${oldRow.id_menu_padre}' a '${newRow.id_menu_padre}'?`;
+  }
+
+  if (newRow.descripcion !== oldRow.descripcion) {
+    return `¿Realmente quieres cambiar el estado de la descripcion de '${oldRow.descripcion}' a '${newRow.descripcion}'?`;
+  }
+
+  if (newRow.url !== oldRow.url) {
+    return `¿Realmente quieres cambiar el estado de la url de '${oldRow.url}' a '${newRow.url}'?`;
+  }
+
+  if (newRow.icono !== oldRow.icono) {
+    return `¿Realmente quieres cambiar el estado del icono de '${oldRow.icono}' a '${newRow.icono}'?`;
+  }
+
+  if (newRow.icon_mui !== oldRow.icon_mui) {
+    return `¿Realmente quieres cambiar el estado de icon_mui de '${oldRow.icon_mui}' a '${newRow.icon_mui}'?`;
+  }
+
+  if (newRow.route !== oldRow.route) {
+    return `¿Realmente quieres cambiar el estado del route de '${oldRow.route}' a '${newRow.route}'?`;
+  }
+
+  /**
+   * Compara el estado 'activo' de la fila nueva y la fila antigua.
+   *
+   * @returns {string|null} Mensaje de confirmación de mutación para el estado 'activo' o null si no hay cambios.
+   */
+  if (newRow.activo !== oldRow.activo) {
+    return `¿Realmente deseas cambiar el estado de 'Activo' de '${
+      oldRow.activo ? "✅" : "❎" || ""
+    }' a '${newRow.activo ? "✅" : "❎" || ""}'?`;
+  }
+
+  // Si no hay cambios significativos, devuelve null
+  return null;
+}
 /**
  * CheckCell component for rendering an IconButton with check or clear icon based on data.
  *
@@ -282,15 +288,18 @@ const FaIcon = ({
 };
 /* const itemsPerPage = 100;  */ // Número de íconos por página
 
-const MUIcon = ({ data, handleOpenMaterialUiIconCatalogDialog,setDataRowMui,row }) => {
+const MUIcon = ({
+  data,
+  handleOpenMaterialUiIconCatalogDialog,
+  setDataRowMui,
+  row,
+}) => {
   const [iconNames, setIconNames] = React.useState([]);
   const [randomColor, setRandomColor] = React.useState("");
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
   const [openNewSubMenuDialog, setOpenNewSubMenuDialog] = React.useState(false);
 
-
-  
   /**
    * Función que maneja la apertura del diálogo de submenú.
    * Cambia el estado a true para indicar que el diálogo debe abrirse.
@@ -348,7 +357,6 @@ const MUIcon = ({ data, handleOpenMaterialUiIconCatalogDialog,setDataRowMui,row 
 
   const getFilteredIconName = (data) => {
     return iconNames.find((iconName) => {
-      
       return iconName === data;
     });
   };
@@ -377,7 +385,7 @@ const MUIcon = ({ data, handleOpenMaterialUiIconCatalogDialog,setDataRowMui,row 
         <MenuItem
           onClick={() => {
             handleOpenMaterialUiIconCatalogDialog();
-               setDataRowMui(row); 
+            setDataRowMui(row);
             handleClose();
           }}
         >
@@ -390,7 +398,7 @@ const MUIcon = ({ data, handleOpenMaterialUiIconCatalogDialog,setDataRowMui,row 
       <AddOutlined
         onClick={() => {
           handleOpenMaterialUiIconCatalogDialog();
-           setDataRowMui(row); 
+          setDataRowMui(row);
         }}
       />
     </IconButton>
@@ -419,14 +427,13 @@ function DataGridSubMenuCrud() {
   const [getRowMui, setDataRowMui] = React.useState("");
   const [snackbar, setSnackbar] = React.useState(null);
   const [getMenus, setMenus] = React.useState([]);
-  const [isOpenNewSubMenuDialog, setOpenNewSubMenuDialog] = React.useState(false);
+  const [isOpenNewSubMenuDialog, setOpenNewSubMenuDialog] =
+    React.useState(false);
   const [subMenuData, setSubMenuData] = React.useState({
     nombre: "",
     descripcion: "",
     url: "",
-    icono: "",
     activo: Boolean(""),
-    icon_mui: "",
     route: "",
     id_menu_padre: "",
   });
@@ -435,15 +442,10 @@ function DataGridSubMenuCrud() {
     nombre: false,
     descripcion: false,
     url: false,
-    icono: false,
-    icon_mui: false,
     route: false,
     id_menu_padre: false,
   });
 
-
-
-  
   /**
    * Manejador para el cambio de entrada en los campos del formulario.
    * @function
@@ -489,22 +491,6 @@ function DataGridSubMenuCrud() {
 
         break;
 
-      case "icon_mui":
-        setValidateInputs((prevValidateInputs) => ({
-          ...prevValidateInputs,
-          [name]: value.length > 0,
-        }));
-
-        break;
-
-      case "icono":
-        setValidateInputs((prevValidateInputs) => ({
-          ...prevValidateInputs,
-          [name]: value.length > 0,
-        }));
-
-        break;
-
       case "route":
         setValidateInputs((prevValidateInputs) => ({
           ...prevValidateInputs,
@@ -526,18 +512,15 @@ function DataGridSubMenuCrud() {
     }
   };
 
-
-
-  
-/**
- * Maneja la apertura del diálogo para agregar un nuevo submenú.
- * @function
- * @returns {void}
- */
-const handleOpenNewSubMenuDialog = () => {
+  /**
+   * Maneja la apertura del diálogo para agregar un nuevo submenú.
+   * @function
+   * @returns {void}
+   */
+  const handleOpenNewSubMenuDialog = () => {
     setOpenNewSubMenuDialog(true);
   };
-  
+
   /**
    * Maneja el cierre del diálogo para agregar un nuevo submenú.
    * @function
@@ -600,7 +583,6 @@ const handleOpenNewSubMenuDialog = () => {
     setPromiseArguments(null);
   };
 
-
   /**
    * Maneja el evento cuando se selecciona la opción "Sí" en un diálogo de confirmación.
    *
@@ -643,8 +625,6 @@ const handleOpenNewSubMenuDialog = () => {
     }
   };
 
-
-
   /**
    * Maneja el evento cuando el diálogo está completamente abierto.
    *
@@ -659,15 +639,14 @@ const handleOpenNewSubMenuDialog = () => {
     noButtonRef.current?.focus();
   };
 
-
-   /**
+  /**
    * Renderiza un cuadro de diálogo de confirmación para la acción de guardar cambios.
    *
    * @function
    * @name renderConfirmDialog
    * @returns {JSX.Element|null} Elemento JSX que representa el cuadro de diálogo de confirmación.
    */
-   const renderConfirmDialog = () => {
+  const renderConfirmDialog = () => {
     if (!promiseArguments) {
       return null;
     }
@@ -702,9 +681,7 @@ const handleOpenNewSubMenuDialog = () => {
     );
   };
 
-
-
-   /**
+  /**
    * Proceso de actualización de fila para la función de confirmación antes de realizar una actualización.
    *
    * @function
@@ -712,7 +689,7 @@ const handleOpenNewSubMenuDialog = () => {
    * @param {Object} oldRow - Datos originales de la fila.
    * @returns {Promise} Promesa que se resuelve con la fila actualizada o se rechaza con la fila original si no hay cambios significativos.
    */
-   const processRowUpdate = React.useCallback(
+  const processRowUpdate = React.useCallback(
     (newRow, oldRow) =>
       new Promise((resolve, reject) => {
         const mutation = computeMutation(newRow, oldRow);
@@ -764,25 +741,17 @@ const handleOpenNewSubMenuDialog = () => {
     // Cierra el diálogo u realiza otras acciones después de cambiar el icono
   };
 
-
   const handleChangeIconMui = async (
     selectedIconMui,
     handleCloseMaterialUiIconCatalogDialog
   ) => {
     const currentRow = getRowMui;
 
-   
-    
-
     // Crea un nuevo objeto con el mismo contenido que getRow, pero con el icono actualizado
     const updatedRow = {
       ...currentRow,
       icon_mui: selectedIconMui,
     };
-
-
-
-  
 
     // Aquí puedes realizar cualquier lógica adicional necesaria para manejar el cambio del icono
 
@@ -867,12 +836,12 @@ const handleOpenNewSubMenuDialog = () => {
     setCurrentPage(1); // Resetear la página al realizar una nueva búsqueda
     setSelectedIcon("");
   };
-   /**
+  /**
    * Maneja el cambio en la barra de búsqueda.
    *
    * @param {object} event - El evento del cambio en la barra de búsqueda.
    */
-   const handleSearchChangeMui = (event) => {
+  const handleSearchChangeMui = (event) => {
     setSearchQueryMui(event.target.value);
     setCurrentPageMui(1); // Resetear la página al realizar una nueva búsqueda
     setSelectedIconMui("");
@@ -886,14 +855,14 @@ const handleOpenNewSubMenuDialog = () => {
     setSelectedIcon(icon);
   };
 
-    /**
+  /**
    * Maneja el clic en un icono.
    *
    * @param {string} icon - El nombre del icono seleccionado.
    */
-    const handleIconClickMui = (icon) => {
-        setSelectedIconMui(icon);
-      };
+  const handleIconClickMui = (icon) => {
+    setSelectedIconMui(icon);
+  };
 
   React.useEffect(() => {
     // Obtener los nombres de los iconos al montar el componente
@@ -984,18 +953,17 @@ const handleOpenNewSubMenuDialog = () => {
 
         <GridToolbarExport color="secondary" />
 
-         <Button
+        <Button
           color="secondary"
-           onClick={handleOpenNewSubMenuDialog} 
+          onClick={handleOpenNewSubMenuDialog}
           startIcon={<AddOutlined />}
           size="small"
         >
           Agregar Nuevo SubMenu
-        </Button> 
+        </Button>
       </GridToolbarContainer>
     );
   }
-
 
   /**
    * Hook de efecto para cargar datos iniciales al montar el componente.
@@ -1016,7 +984,7 @@ const handleOpenNewSubMenuDialog = () => {
       try {
         // Aquí deberías hacer tu solicitud de red para obtener los datos
         // Reemplaza 'TU_URL_DE_DATOS' con la URL real de tus datos
-        const response = await getAllMenus()
+        const response = await getAllMenus();
 
         // Agrega el campo 'id_tarea' a cada fila usando el índice como valor único si no no se ven en la datagrid
         const rowsWithId = response
@@ -1036,7 +1004,6 @@ const handleOpenNewSubMenuDialog = () => {
 
     fetchMenus();
   }, []);
-
 
   const buildColumns = () => {
     const columns = [
@@ -1089,9 +1056,7 @@ const handleOpenNewSubMenuDialog = () => {
         },
         valueOptions: () => getMenus.map((menu) => menu.nombre),
         valueParser: (newValue) => {
-          const targetMenu = getMenus.find(
-            (menu) => menu.nombre === newValue
-          );
+          const targetMenu = getMenus.find((menu) => menu.nombre === newValue);
           return targetMenu ? targetMenu.id_menu : "";
         },
       },
@@ -1161,8 +1126,8 @@ const handleOpenNewSubMenuDialog = () => {
         editable: true,
         renderCell: (params) => (
           <MUIcon
-          row={params.row}
-          setDataRowMui={setDataRowMui}
+            row={params.row}
+            setDataRowMui={setDataRowMui}
             data={params.row.icon_mui}
             handleOpenMaterialUiIconCatalogDialog={
               handleOpenMaterialUiIconCatalogDialog
@@ -1187,28 +1152,55 @@ const handleOpenNewSubMenuDialog = () => {
     return columns;
   };
 
-  const handleAddIcon = async () => {
+  /**
+   * Handle the process of saving data.
+   *
+   * @function
+   * @async
+   * @returns {Promise<void>} A Promise that resolves once the data is successfully saved or rejects if an error occurs.
+   *
+   * @example
+   * // Usage example
+   * try {
+   *   await handleAddMenu();
+   *   console.log("Data saved successfully!");
+   * } catch (error) {
+   *   console.error("Error saving data:", error.message);
+   * }
+   */
+
+  const handleAddSubMenu = async (selectedIcon, selectedIconMui) => {
     // Verificar si todos los campos están validados
     const isFormValid = Object.values(validateInputs).every(
       (isValid) => isValid
     );
 
+
+
     if (isFormValid) {
+      
+      
+
+      const updatedRow = {
+        ...subMenuData,
+        icono: selectedIcon,
+        icon_mui:selectedIconMui
+      };
       try {
-        const response = await createMenu(menuData);
+        const response = await createSubMenu(updatedRow);
 
         // Aquí puedes manejar la respuesta de la solicitud si es necesario
-        /* console.log("Respuesta de la API:", response.data); */
+        console.log("Respuesta de la API:", response.data);
 
         // Mostrar Snackbar de éxito
         setSnackbar({
-          children: "Menu añadido correctamente",
+          children: "SubMenu añadido correctamente",
           severity: "success",
         });
 
         // Cerrar el diálogo, actualizar el estado, o realizar otras acciones necesarias
-        fetchMenus();
-        handleCloseNewMenuDialog();
+        fetchSubMenus();
+        handleCloseNewSubMenuDialog();
       } catch (error) {
         console.error("Error al guardar datos:", error);
         setSnackbar({ children: "Error al guardar datos", severity: "error" });
@@ -1236,14 +1228,19 @@ const handleOpenNewSubMenuDialog = () => {
         },
       }}
     >
-   {renderConfirmDialog()}
-      <DataGrid rows={rows} columns={buildColumns()} processRowUpdate={processRowUpdate}  localeText={{
+      {renderConfirmDialog()}
+      <DataGrid
+        rows={rows}
+        columns={buildColumns()}
+        processRowUpdate={processRowUpdate}
+        localeText={{
           toolbarColumns: "Columnas",
           toolbarFilters: "Filtros",
           toolbarDensity: "Tamaño Celda",
           toolbarExport: "Exportar",
         }}
-        slots={{ toolbar: CustomToolbar }}/>
+        slots={{ toolbar: CustomToolbar }}
+      />
       {!!snackbar && (
         <Snackbar open onClose={handleCloseSnackbar} autoHideDuration={6000}>
           <Alert {...snackbar} onClose={handleCloseSnackbar} />
@@ -1436,8 +1433,8 @@ const handleOpenNewSubMenuDialog = () => {
                     sx={{ marginBottom: "1rem", width: "100%" }}
                     id="input-with-icon-textfield-search-icon"
                     label="Busqueda de Iconos"
-                      onChange={handleSearchChangeMui}
-                    value={searchQueryMui + selectedIconMui} 
+                    onChange={handleSearchChangeMui}
+                    value={searchQueryMui + selectedIconMui}
                     type="text"
                     name="nombre"
                     InputProps={{
@@ -1457,7 +1454,7 @@ const handleOpenNewSubMenuDialog = () => {
                         <IconButton
                           sx={{ bgcolor: iconColorsMui[index], m: 0.2 }}
                           size="small"
-                              onClick={() => handleIconClickMui(icon)} 
+                          onClick={() => handleIconClickMui(icon)}
                         >
                           {" "}
                           {React.createElement(MUIIcons[icon])}
@@ -1486,12 +1483,12 @@ const handleOpenNewSubMenuDialog = () => {
                   endIcon={<Sync />}
                   color="secondary"
                   variant="contained"
-                    onClick={() =>
+                  onClick={() =>
                     handleChangeIconMui(
                       selectedIconMui,
                       handleCloseMaterialUiIconCatalogDialog
                     )
-                  } 
+                  }
                 >
                   Cambiar Icono
                 </Button>
@@ -1501,7 +1498,7 @@ const handleOpenNewSubMenuDialog = () => {
         </Dialog>
       )}
 
-{isOpenNewSubMenuDialog&& (
+      {isOpenNewSubMenuDialog && (
         <Dialog
           fullScreen
           open={isOpenNewSubMenuDialog}
@@ -1536,7 +1533,7 @@ const handleOpenNewSubMenuDialog = () => {
           >
             <Paper
               sx={{
-                width: "80%",
+                width: "auto",
                 height: "auto",
                 boxShadow: 3,
                 padding: "2rem",
@@ -1549,15 +1546,14 @@ const handleOpenNewSubMenuDialog = () => {
               </Typography>
               {/* nombre, :imagen, :activo, :orden, :icono_app_movil */}
               <Grid container spacing={2}>
-                <Grid item xs={6}>
-                 
+                <Grid item xs={4}>
                   <TextField
                     color="secondary"
                     sx={{ marginBottom: "1rem", width: "100%" }}
                     id="input-with-icon-textfield-nombre"
                     label="Nombre del submenu"
-                /*     onChange={handleInputOnChange}
-                    value={subMenuData.nombre} */
+                    onChange={handleInputOnChange}
+                    value={subMenuData.nombre}
                     type="text"
                     name="nombre"
                     InputProps={{
@@ -1569,26 +1565,26 @@ const handleOpenNewSubMenuDialog = () => {
                     }}
                     variant="standard"
                   />
-                 {/*  {validateInputs.nombre ? (
+                  {validateInputs.nombre ? (
                     <Stack sx={{ marginTop: "0.2rem" }} direction="row">
                       <FaRegCircleCheck style={{ color: "#14B814" }} />{" "}
                       <Typography color={"secondary"} variant="caption">
-                        ¡Gracias por ingresar un servicio!
+                        ¡Gracias por ingresar un submenu!
                       </Typography>
                     </Stack>
                   ) : (
                     <Typography sx={{ color: "red" }} variant="caption">
-                      * ¡Por favor, ingresa un servicio!
+                      * ¡Por favor, ingresa un submenu!
                     </Typography>
-                  )} */}
+                  )}
 
                   <TextField
                     color="secondary"
                     sx={{ marginBottom: "1rem", width: "100%" }}
                     id="input-with-icon-textfield-descripcion"
                     label="Descripciòn"
-                   /*  onChange={handleInputOnChange}
-                    value={menuData.descripcion} */
+                    onChange={handleInputOnChange}
+                    value={subMenuData.descripcion}
                     type="text"
                     name="descripcion"
                     InputProps={{
@@ -1600,7 +1596,7 @@ const handleOpenNewSubMenuDialog = () => {
                     }}
                     variant="standard"
                   />
-                 {/*  {validateInputs.descripcion ? (
+                  {validateInputs.descripcion ? (
                     <Stack sx={{ marginTop: "0.2rem" }} direction="row">
                       <FaRegCircleCheck style={{ color: "#14B814" }} />{" "}
                       <Typography color={"secondary"} variant="caption">
@@ -1612,14 +1608,14 @@ const handleOpenNewSubMenuDialog = () => {
                       * ¡Por favor, ingresa una descripciòn!
                     </Typography>
                   )}
- */}
+
                   <TextField
                     color="secondary"
                     sx={{ marginBottom: "1rem", width: "100%" }}
                     id="input-with-icon-textfield-url"
                     label="Url"
-                  /*   onChange={handleInputOnChange}
-                    value={menuData.url} */
+                    onChange={handleInputOnChange}
+                    value={subMenuData.url}
                     type="text"
                     name="url"
                     InputProps={{
@@ -1631,7 +1627,8 @@ const handleOpenNewSubMenuDialog = () => {
                     }}
                     variant="standard"
                   />
-                {/*   {validateInputs.url ? (
+
+                  {validateInputs.url ? (
                     <Stack sx={{ marginTop: "0.2rem" }} direction="row">
                       <FaRegCircleCheck style={{ color: "#14B814" }} />{" "}
                       <Typography color={"secondary"} variant="caption">
@@ -1642,17 +1639,50 @@ const handleOpenNewSubMenuDialog = () => {
                     <Typography sx={{ color: "red" }} variant="caption">
                       * ¡Por favor, ingresa una url!
                     </Typography>
-                  )} */}
+                  )}
+                  <NativeSelect
+                    sx={{ marginBottom: "2rem", width: "100%  " }}
+                    color="secondary"
+                    defaultValue={30}
+                    onChange={handleInputOnChange}
+                    inputProps={{
+                      name: "id_menu_padre",
+                      id: "uncontrolled-native",
+                    }}
+                  >
+                    <option value={0}>
+                      Seleccionar Menú Padre para Asignar Submenús
+                    </option>
+                    {getMenus.map((menu) => {
+                      return (
+                        <option key={menu.name} value={menu.id_menu}>
+                          {menu.nombre}
+                        </option>
+                      );
+                    })}
+                  </NativeSelect>
+                  {validateInputs.id_menu_padre ? (
+                    <Stack sx={{ marginTop: "0.2rem" }} direction="row">
+                      <FaRegCircleCheck style={{ color: "#14B814" }} />{" "}
+                      <Typography color={"secondary"} variant="caption">
+                        ¡Gracias por ingresar una ruta!
+                      </Typography>
+                    </Stack>
+                  ) : (
+                    <Typography sx={{ color: "red" }} variant="caption">
+                      * ¡Por favor, ingresa una ruta!
+                    </Typography>
+                  )}
 
-                {/*   <TextField
+                  <TextField
                     color="secondary"
                     sx={{ marginBottom: "1rem", width: "100%" }}
-                    id="input-with-icon-textfield-icono"
-                    label="Icono"
-                   onChange={handleInputOnChange}
-                    value={menuData.icono} 
+                    id="input-with-icon-textfield-route"
+                    label="Ruta"
+                    onChange={handleInputOnChange}
+                    value={subMenuData.route}
                     type="text"
-                    name="icono"
+                    name="route"
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
@@ -1661,19 +1691,19 @@ const handleOpenNewSubMenuDialog = () => {
                       ),
                     }}
                     variant="standard"
-                  /> */}
-                {/*   {validateInputs.icono ? (
+                  />
+                  {validateInputs.route ? (
                     <Stack sx={{ marginTop: "0.2rem" }} direction="row">
                       <FaRegCircleCheck style={{ color: "#14B814" }} />{" "}
                       <Typography color={"secondary"} variant="caption">
-                        ¡Gracias por ingresar un icono!
+                        ¡Gracias por ingresar una ruta!
                       </Typography>
                     </Stack>
                   ) : (
                     <Typography sx={{ color: "red" }} variant="caption">
-                      * ¡Por favor, ingresa un icono!
+                      * ¡Por favor, ingresa una ruta!
                     </Typography>
-                  )} */}
+                  )}
 
                   <Box
                     sx={{
@@ -1686,108 +1716,95 @@ const handleOpenNewSubMenuDialog = () => {
                     <InputLabel sx={{ alignSelf: "center" }}>Activo</InputLabel>
                     <Checkbox
                       {..."label"}
-                       /* onChange={handleInputOnChange}  */
+                      onChange={handleInputOnChange}
                       name="activo"
                       size="small"
                       color="secondary"
                     />
                   </Box>
                 </Grid>
-                <Grid item xs={6}>
-                  {/* icon_mui,
-        route,
-        id_menu_padre */}
+                <Grid item xs={4}>
                   <TextField
                     color="secondary"
                     sx={{ marginBottom: "1rem", width: "100%" }}
-                    id="input-with-icon-textfield-icon_mui"
-                    label="Icon MUI"
-                 /*    onChange={handleInputOnChange}
-                    value={menuData.icon_mui} */
+                    id="input-with-icon-textfield-search-icon"
+                    label="Busqueda de Material Icons"
+                    onChange={handleSearchChangeMui}
+                    value={searchQueryMui + selectedIconMui}
                     type="text"
-                    name="icon_mui"
+                    name="nombre"
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
-                          <GrServices />
+                          <SearchIcon />
                         </InputAdornment>
                       ),
                     }}
                     variant="standard"
                   />
-                {/*   {validateInputs.icon_mui ? (
-                    <Stack sx={{ marginTop: "0.2rem" }} direction="row">
-                      <FaRegCircleCheck style={{ color: "#14B814" }} />{" "}
-                      <Typography color={"secondary"} variant="caption">
-                        ¡Gracias por ingresar un icono!
-                      </Typography>
-                    </Stack>
-                  ) : (
-                    <Typography sx={{ color: "red" }} variant="caption">
-                      * ¡Por favor, ingresa un icono!
-                    </Typography>
-                  )} */}
+                  <Box>
+                    {visibleIconsMui.slice(0, 100)?.map((icon, index) => {
+                      return (
+                        <IconButton
+                          sx={{ bgcolor: iconColorsMui[index], m: 0.2 }}
+                          size="small"
+                          onClick={() => handleIconClickMui(icon)}
+                        >
+                          {" "}
+                          {React.createElement(MUIIcons[icon])}
+                        </IconButton>
+                      );
+                    })}
+                    <Pagination
+                      sx={{ mt: 2 }}
+                      count={Math.ceil(filteredIconsMui.length / itemsPerPage)}
+                      size="small"
+                      page={currentPageMui}
+                      onChange={handlePageChangeMui}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={4}>
                   <TextField
                     color="secondary"
                     sx={{ marginBottom: "1rem", width: "100%" }}
-                    id="input-with-icon-textfield-route"
-                    label="Ruta"
-                  /*   onChange={handleInputOnChange}
-                    value={menuData.route} */
+                    id="input-with-icon-textfield-search-icon"
+                    label="Busqueda de FontAwesome Iconos"
+                    onChange={handleSearchChange}
+                    value={searchQuery + selectedIcon}
                     type="text"
-                    name="route"
+                    name="nombre"
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
-                          <GrServices />
+                          <SearchIcon />
                         </InputAdornment>
                       ),
                     }}
                     variant="standard"
                   />
-                 {/*  {validateInputs.route ? (
-                    <Stack sx={{ marginTop: "0.2rem" }} direction="row">
-                      <FaRegCircleCheck style={{ color: "#14B814" }} />{" "}
-                      <Typography color={"secondary"} variant="caption">
-                        ¡Gracias por ingresar una ruta!
-                      </Typography>
-                    </Stack>
-                  ) : (
-                    <Typography sx={{ color: "red" }} variant="caption">
-                      * ¡Por favor, ingresa una ruta!
-                    </Typography>
-                  )} */}
 
-                  <TextField
-                    color="secondary"
-                    sx={{ marginBottom: "1rem", width: "100%" }}
-                    id="input-with-icon-textfield-id-menu-padre"
-                    label="Menu Padre"
-                  /*   onChange={handleInputOnChange}
-                    value={menuData.id_menu_padre} */
-                    type="text"
-                    name="id_menu_padre"
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <GrServices />
-                        </InputAdornment>
-                      ),
-                    }}
-                    variant="standard"
-                  />
-                {/*   {validateInputs.id_menu_padre ? (
-                    <Stack sx={{ marginTop: "0.2rem" }} direction="row">
-                      <FaRegCircleCheck style={{ color: "#14B814" }} />{" "}
-                      <Typography color={"secondary"} variant="caption">
-                        ¡Gracias por ingresar un menu padre!
-                      </Typography>
-                    </Stack>
-                  ) : (
-                    <Typography sx={{ color: "red" }} variant="caption">
-                      * ¡Por favor, ingresa un menu padre!
-                    </Typography>
-                  )} */}
+                  <Box>
+                    {visibleIcons.slice(0, 100)?.map((icon, index) => {
+                      const randomColor = getRandomColor();
+                      return (
+                        <IconButton
+                          sx={{ bgcolor: iconColors[index], m: 0.2 }}
+                          size="small"
+                          onClick={() => handleIconClick(icon)}
+                        >
+                          {<FontAwesomeIcon icon={faIcons[`${icon}`]} />}
+                        </IconButton>
+                      );
+                    })}
+                    <Pagination
+                      sx={{ mt: 2 }}
+                      count={Math.ceil(filteredIcons.length / itemsPerPage)}
+                      size="small"
+                      page={currentPage}
+                      onChange={handlePageChange}
+                    />
+                  </Box>
                 </Grid>
               </Grid>
 
@@ -1802,9 +1819,14 @@ const handleOpenNewSubMenuDialog = () => {
                   endIcon={<Sync />}
                   color="secondary"
                   variant="contained"
-                 /*    onClick={handleAddMenu}  */
+                  onClick={() => handleAddSubMenu(selectedIcon, selectedIconMui)}
+                  /* () =>
+                    handleChangeIconMui(
+                      selectedIconMui,
+                      handleCloseMaterialUiIconCatalogDialog
+                    ) */
                 >
-                  Guardar Menu
+                  Guardar SubMenu
                 </Button>
               </Box>
             </Paper>
