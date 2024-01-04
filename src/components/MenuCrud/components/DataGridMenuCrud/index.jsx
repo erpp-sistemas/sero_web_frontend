@@ -1031,32 +1031,28 @@ function DataGridMenuCrud() {
         width: 180,
         editable: true,
       },
-      {
+      /* {
         field: "id_menu_padre",
         renderHeader: () => (
           <strong style={{ color: "#5EBFFF" }}>
             {"Menu Padre"}
-            {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
-        📃
-        </span> */}
+        
           </strong>
         ),
         width: 180,
         editable: true,
-      },
-      {
+      }, */
+     /*  {
         field: "descripcion",
         renderHeader: () => (
           <strong style={{ color: "#5EBFFF" }}>
             {"Descripción"}
-            {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
-        📃
-        </span> */}
+    
           </strong>
         ),
         width: 180,
         editable: true,
-      },
+      }, */
 
       {
         field: "url",
@@ -1094,29 +1090,25 @@ function DataGridMenuCrud() {
         width: 180,
         editable: true,
       },
-      {
+    /*   {
         field: "activo",
         renderHeader: () => (
           <strong style={{ color: "#5EBFFF" }}>
             {"Estado"}
-            {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
-        📃
-        </span> */}
+     
           </strong>
         ),
         width: 80,
         type: "boolean",
         editable: true,
         renderCell: (params) => <CheckCell data={params.row.activo} />,
-      },
-      {
+      }, */
+      /* {
         field: "icon_mui",
         renderHeader: () => (
           <strong style={{ color: "#5EBFFF" }}>
             {"Icon Mui"}
-            {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
-        📃
-        </span> */}
+          
           </strong>
         ),
         width: 180,
@@ -1131,20 +1123,18 @@ function DataGridMenuCrud() {
             }
           />
         ),
-      },
-      {
+      }, */
+     /*  {
         field: "route",
         renderHeader: () => (
           <strong style={{ color: "#5EBFFF" }}>
             {"Ruta"}
-            {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
-        📃
-        </span> */}
+           
           </strong>
         ),
         width: 180,
         editable: true,
-      },
+      }, */
     ];
     return columns;
   };
