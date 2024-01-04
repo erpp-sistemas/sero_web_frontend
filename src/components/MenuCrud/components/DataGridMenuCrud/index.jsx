@@ -46,7 +46,7 @@ import { faClosedCaptioning } from "@fortawesome/free-regular-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 
-const ITEMS_PER_PAGE = 10;
+
 /**
  * CheckCell component for rendering an IconButton with check or clear icon based on data.
  *
@@ -91,7 +91,7 @@ const FaIcon = ({data})=>{
   React.useEffect(() => {
     // Obtener los nombres de los iconos al montar el componente
     const names = Object.keys(faIcons);
-    console.log(names);
+ 
     setIconNames(names);
 
     // Generar el color aleatorio y establecerlo solo durante el montaje
