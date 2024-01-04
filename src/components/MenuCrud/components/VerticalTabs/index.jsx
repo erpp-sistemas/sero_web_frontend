@@ -57,6 +57,21 @@ function VerticalTabs() {
           icon={<MenuIcon />}
           indicatorColor={"secondary"}
           textColor="secondary"
+          sx={{
+            "&:hover": {
+              color: "#9298E3", // Cambia "yourHoverColor" al color deseado
+            },
+            "&:visited": {
+              color: "#9298E3", // Cambia "yourVisitedColor" al color deseado después de visitar el enlace
+            },
+
+            "&:active": {
+              color: "#9298E3", // Cambia "yourActiveColor" al color deseado cuando está activa
+            },
+            "&:focus": {
+              color: "#00FF00", // Cambia "yourFocusColor" al color deseado cuando está enfocada
+            },
+          }}
         />
         <Tab
           label="SubMenus"
@@ -64,6 +79,21 @@ function VerticalTabs() {
           icon={<DragHandleIcon />}
           indicatorColor={"secondary"}
           textColor="secondary"
+          sx={{
+            "&:hover": {
+              color: "#9298E3", // Cambia "yourHoverColor" al color deseado
+            },
+            "&:visited": {
+              color: "#9298E3", // Cambia "yourVisitedColor" al color deseado después de visitar el enlace
+            },
+
+            "&:active": {
+              color: "#9298E3", // Cambia "yourActiveColor" al color deseado cuando está activa
+            },
+            "&:focus": {
+              color: "#00FF00", // Cambia "yourFocusColor" al color deseado cuando está enfocada
+            },
+          }}
         />
         {/*  <Tab label="Item Three" {...a11yProps(2)} />
         <Tab label="Item Four" {...a11yProps(3)} />
