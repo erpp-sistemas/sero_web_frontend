@@ -1021,19 +1021,15 @@ function DataGridSubMenuCrud() {
         editable: true,
       },
 
-      {
+     /*  {
         field: "descripcion",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>
-            {"Descripción"}
-            {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
-        📃
-        </span> */}
+    
           </strong>
         ),
         width: 180,
         editable: true,
-      },
+      }, */
 
       {
         field: "id_menu_padre",
@@ -1061,27 +1057,22 @@ function DataGridSubMenuCrud() {
         },
       },
 
-      {
+      /* {
         field: "url",
         renderHeader: () => (
           <strong style={{ color: "#5EBFFF" }}>
-            {"Url"}
-            {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
-        📃
-        </span> */}
+        
           </strong>
         ),
         width: 180,
         editable: true,
-      },
-      {
+      }, */
+     /*  {
         field: "icono",
         renderHeader: () => (
           <strong style={{ color: "#5EBFFF" }}>
             {"Icono"}
-            {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
-        📃
-        </span> */}
+           
           </strong>
         ),
         width: 180,
@@ -1096,7 +1087,7 @@ function DataGridSubMenuCrud() {
             }
           />
         ),
-      },
+      }, */
       {
         field: "activo",
         renderHeader: () => (
