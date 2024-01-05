@@ -43,6 +43,7 @@ import Service from "./scenes/service";
 import Process from "./scenes/process";
 import Roles from "./scenes/roles"
 import Menu from "./scenes/menu";
+import Permission from "./scenes/permission";
 
 
 
@@ -146,6 +147,7 @@ function App() {
                     <Route path="/service" element={<Service/>}/>
                     <Route path="/process" element={<Process/>}/>
                     <Route path="/menu" element={<Menu/>}/>
+                    <Route path="/permission" element={<Permission/>}/>
                   </Routes>
                 </main>
               </div>

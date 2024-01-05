@@ -1,5 +1,6 @@
 import React from 'react'
 import Container from '../Container'
+import VerticalTabs from './components/VerticalTabs'
 /**
  * Modulo
  * @component
@@ -8,7 +9,7 @@ import Container from '../Container'
 function PermissionModule() {
   return (
     <Container>
-   Prueba
+   <VerticalTabs/>
   </Container>
   )
 }
