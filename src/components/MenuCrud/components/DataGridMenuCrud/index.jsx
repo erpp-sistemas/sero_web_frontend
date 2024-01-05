@@ -1028,7 +1028,7 @@ function DataGridMenuCrud() {
         </span> */}
           </strong>
         ),
-        width: 180,
+        width: 300,
         editable: true,
       },
       /* {
@@ -1064,7 +1064,7 @@ function DataGridMenuCrud() {
         </span> */}
           </strong>
         ),
-        width: 180,
+        width: 300,
         editable: true,
       },
       {
@@ -1087,7 +1087,7 @@ function DataGridMenuCrud() {
             }
           />
         ),
-        width: 180,
+        width: 200,
         editable: true,
       },
     /*   {
