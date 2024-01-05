@@ -229,5 +229,84 @@ export const createMenuRolUsuario = async (menuRolUsuarioData) => {
   };
 
 
+  /**
+ * Crea un nuevo elemento de sub_menu_rol_usuario.
+ *
+ * @param {Object} subMenuRolUsuarioData - Datos del nuevo elemento de sub_menu_rol_usuario.
+ * @returns {Promise} Una promesa que se resuelve con los datos creados o se rechaza con un error.
+ */
+export const createSubMenuRolUsuario = async (subMenuRolUsuarioData) => {
+    try {
+      const response = await axios.post('/sub_menu_rol_usuario', subMenuRolUsuarioData);
+      // Podrías realizar operaciones adicionales aquí después de la creación
+      return response.data;
+    } catch (error) {
+      /**
+       * @typedef {Object} ErrorResponse
+       * @property {string} message - Mensaje de error.
+       */
+  
+      console.error("Error al crear un nuevo elemento de sub_menu_rol_usuario:", error.response?.data || error.message);
+      throw /** @type {ErrorResponse} */ (error.response?.data || error);
+    }
+  };
+  
+  /**
+   * Obtiene todos los elementos de sub_menu_rol_usuario.
+   *
+   * @returns {Promise} Una promesa que se resuelve con los datos de sub_menu_rol_usuario o se rechaza con un error.
+   */
+  export const getAllSubMenuRolUsuario = async () => {
+    try {
+      const response = await axios.get('/sub_menu_rol_usuario');
+      // Podrías realizar operaciones adicionales aquí antes de retornar los datos
+      return response.data;
+    } catch (error) {
+      /**
+       * @typedef {Object} ErrorResponse
+       * @property {string} message - Mensaje de error.
+       */
+  
+      console.error("Error al obtener todos los elementos de sub_menu_rol_usuario:", error.response?.data || error.message);
+      throw /** @type {ErrorResponse} */ (error.response?.data || error);
+    }
+  };
+  
+  /**
+   * Actualiza un elemento de sub_menu_rol_usuario por su ID.
+   *
+   * @param {string} subMenuRolUsuarioId - ID del elemento de sub_menu_rol_usuario que se actualizará.
+   * @param {Object} updatedSubMenuRolUsuarioData - Datos actualizados del elemento de sub_menu_rol_usuario.
+   * @returns {Promise} Una promesa que se resuelve con los datos actualizados o se rechaza con un error.
+   */
+  export const updateSubMenuRolUsuarioById = async (subMenuRolUsuarioId, updatedSubMenuRolUsuarioData) => {
+    try {
+      const response = await axios.put(`/sub_menu_rol_usuario/${subMenuRolUsuarioId}`, updatedSubMenuRolUsuarioData);
+      // Podrías realizar operaciones adicionales aquí después de la actualización
+      return response.data;
+    } catch (error) {
+      console.error("Error al actualizar el elemento de sub_menu_rol_usuario por ID:", error.response?.data || error.message);
+      throw error.response?.data || error;
+    }
+  };
+  
+  /**
+   * Elimina un elemento de sub_menu_rol_usuario por su ID.
+   *
+   * @param {string} subMenuRolUsuarioId - ID del elemento de sub_menu_rol_usuario que se eliminará.
+   * @returns {Promise} Una promesa que se resuelve con los datos eliminados o se rechaza con un error.
+   */
+  export const deleteSubMenuRolUsuarioById = async (subMenuRolUsuarioId) => {
+    try {
+      const response = await axios.delete(`/sub_menu_rol_usuario/${subMenuRolUsuarioId}`);
+      // Podrías realizar operaciones adicionales aquí después de la eliminación
+      return response.data;
+    } catch (error) {
+      console.error("Error al eliminar el elemento de sub_menu_rol_usuario por ID:", error.response?.data || error.message);
+      throw error.response?.data || error;
+    }
+  };
+
+
 
   
