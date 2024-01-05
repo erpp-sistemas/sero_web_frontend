@@ -1,180 +1,181 @@
-import { Box, Tab, Tabs, Typography } from '@mui/material';
-import React from 'react'
+import { Box, Tab, Tabs, Typography } from "@mui/material";
+import React from "react";
 import MenuIcon from "@mui/icons-material/Menu";
 import DragHandleIcon from "@mui/icons-material/DragHandle";
-
-
-
+import MenuList from "../MenuList";
+import { getAllMenuRol } from "../../../../api/permission";
 
 function TabPanel(props) {
-    const { children, value, index, ...other } = props;
-  
-    return (
-      <div
-        style={{ height: "auto" }}
-        role="tabpanel"
-        hidden={value !== index}
-        id={`vertical-tabpanel-${index}`}
-        aria-labelledby={`vertical-tab-${index}`}
-        {...other}
-      >
-        {value === index && (
-          <Box sx={{ width: "850px", p: 3 }}>
-            {/*   <Typography>{children}</Typography> */}
-  
-            {children}
-          </Box>
-        )}
-      </div>
-    );
-  }
+  const { children, value, index, ...other } = props;
 
+  return (
+    <div
+      style={{ height: "auto" }}
+      role="tabpanel"
+      hidden={value !== index}
+      id={`vertical-tabpanel-${index}`}
+      aria-labelledby={`vertical-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box sx={{ width: "850px", p: 3 }}>
+          {/*   <Typography>{children}</Typography> */}
 
+          {children}
+        </Box>
+      )}
+    </div>
+  );
+}
 
-  function a11yProps(index) {
-    return {
-      id: `vertical-tab-${index}`,
-      "aria-controls": `vertical-tabpanel-${index}`,
-    };
-  }
+function a11yProps(index) {
+  return {
+    id: `vertical-tab-${index}`,
+    "aria-controls": `vertical-tabpanel-${index}`,
+  };
+}
 
 function VerticalTabs() {
-    const [value, setValue] = React.useState(0);
+  const [value, setValue] = React.useState(0);
+  
 
-    const handleChange = (event, newValue) => {
-      setValue(newValue);
-    };
-    return (
-      <Box sx={{ flexGrow: 1, display: "flex", height: "auto" }}>
-        <Tabs
-          orientation="vertical"
-          variant="scrollable"
-          value={value}
-          onChange={handleChange}
-          aria-label="Vertical tabs example"
-          sx={{ borderRight: 1, borderColor: "divider" }}
-        >
-          <Tab
-            label="Permiso Menus"
-            {...a11yProps(0)}
-            icon={<MenuIcon />}
-            indicatorColor={"secondary"}
-            textColor="secondary"
-            sx={{
-              "&:hover": {
-                color: "#9298E3", // Cambia "yourHoverColor" al color deseado
-              },
-              "&:visited": {
-                color: "#9298E3", // Cambia "yourVisitedColor" al color deseado después de visitar el enlace
-              },
-  
-              "&:active": {
-                color: "#9298E3", // Cambia "yourActiveColor" al color deseado cuando está activa
-              },
-              "&:focus": {
-                color: "#00FF00", // Cambia "yourFocusColor" al color deseado cuando está enfocada
-              },
-            }}
-          />
-          <Tab
-            label="Permisos SubMenus"
-            {...a11yProps(1)}
-            icon={<DragHandleIcon />}
-            indicatorColor={"secondary"}
-            textColor="secondary"
-            sx={{
-              "&:hover": {
-                color: "#9298E3", // Cambia "yourHoverColor" al color deseado
-              },
-              "&:visited": {
-                color: "#9298E3", // Cambia "yourVisitedColor" al color deseado después de visitar el enlace
-              },
-  
-              "&:active": {
-                color: "#9298E3", // Cambia "yourActiveColor" al color deseado cuando está activa
-              },
-              "&:focus": {
-                color: "#00FF00", // Cambia "yourFocusColor" al color deseado cuando está enfocada
-              },
-            }}
-          />
-            <Tab
-            label="Permisos Menu Usuario"
-            {...a11yProps(2)}
-            icon={<DragHandleIcon />}
-            indicatorColor={"secondary"}
-            textColor="secondary"
-            sx={{
-              "&:hover": {
-                color: "#9298E3", // Cambia "yourHoverColor" al color deseado
-              },
-              "&:visited": {
-                color: "#9298E3", // Cambia "yourVisitedColor" al color deseado después de visitar el enlace
-              },
-  
-              "&:active": {
-                color: "#9298E3", // Cambia "yourActiveColor" al color deseado cuando está activa
-              },
-              "&:focus": {
-                color: "#00FF00", // Cambia "yourFocusColor" al color deseado cuando está enfocada
-              },
-            }}
-          />
+  const handleChange = (event, newValue) => {
+    setValue(newValue);
+  };
 
 
-<Tab
-            label="Permisos SubMenu Usuario"
-            {...a11yProps(3)}
-            icon={<DragHandleIcon />}
-            indicatorColor={"secondary"}
-            textColor="secondary"
-            sx={{
-              "&:hover": {
-                color: "#9298E3", // Cambia "yourHoverColor" al color deseado
-              },
-              "&:visited": {
-                color: "#9298E3", // Cambia "yourVisitedColor" al color deseado después de visitar el enlace
-              },
-  
-              "&:active": {
-                color: "#9298E3", // Cambia "yourActiveColor" al color deseado cuando está activa
-              },
-              "&:focus": {
-                color: "#00FF00", // Cambia "yourFocusColor" al color deseado cuando está enfocada
-              },
-            }}
-          />
-          {/*  <Tab label="Item Three" {...a11yProps(2)} />
+
+
+  return (
+    <Box sx={{ flexGrow: 1, display: "flex", height: "auto" }}>
+      <Tabs
+        orientation="vertical"
+        variant="scrollable"
+        value={value}
+        onChange={handleChange}
+        aria-label="Vertical tabs example"
+        sx={{ borderRight: 1, borderColor: "divider" }}
+      >
+        <Tab
+          label="Permiso Menus"
+          {...a11yProps(0)}
+          icon={<MenuIcon />}
+          indicatorColor={"secondary"}
+          textColor="secondary"
+          sx={{
+            "&:hover": {
+              color: "#9298E3", // Cambia "yourHoverColor" al color deseado
+            },
+            "&:visited": {
+              color: "#9298E3", // Cambia "yourVisitedColor" al color deseado después de visitar el enlace
+            },
+
+            "&:active": {
+              color: "#9298E3", // Cambia "yourActiveColor" al color deseado cuando está activa
+            },
+            "&:focus": {
+              color: "#00FF00", // Cambia "yourFocusColor" al color deseado cuando está enfocada
+            },
+          }}
+        />
+        <Tab
+          label="Permisos SubMenus"
+          {...a11yProps(1)}
+          icon={<DragHandleIcon />}
+          indicatorColor={"secondary"}
+          textColor="secondary"
+          sx={{
+            "&:hover": {
+              color: "#9298E3", // Cambia "yourHoverColor" al color deseado
+            },
+            "&:visited": {
+              color: "#9298E3", // Cambia "yourVisitedColor" al color deseado después de visitar el enlace
+            },
+
+            "&:active": {
+              color: "#9298E3", // Cambia "yourActiveColor" al color deseado cuando está activa
+            },
+            "&:focus": {
+              color: "#00FF00", // Cambia "yourFocusColor" al color deseado cuando está enfocada
+            },
+          }}
+        />
+        <Tab
+          label="Permisos Menu Usuario"
+          {...a11yProps(2)}
+          icon={<DragHandleIcon />}
+          indicatorColor={"secondary"}
+          textColor="secondary"
+          sx={{
+            "&:hover": {
+              color: "#9298E3", // Cambia "yourHoverColor" al color deseado
+            },
+            "&:visited": {
+              color: "#9298E3", // Cambia "yourVisitedColor" al color deseado después de visitar el enlace
+            },
+
+            "&:active": {
+              color: "#9298E3", // Cambia "yourActiveColor" al color deseado cuando está activa
+            },
+            "&:focus": {
+              color: "#00FF00", // Cambia "yourFocusColor" al color deseado cuando está enfocada
+            },
+          }}
+        />
+
+        <Tab
+          label="Permisos SubMenu Usuario"
+          {...a11yProps(3)}
+          icon={<DragHandleIcon />}
+          indicatorColor={"secondary"}
+          textColor="secondary"
+          sx={{
+            "&:hover": {
+              color: "#9298E3", // Cambia "yourHoverColor" al color deseado
+            },
+            "&:visited": {
+              color: "#9298E3", // Cambia "yourVisitedColor" al color deseado después de visitar el enlace
+            },
+
+            "&:active": {
+              color: "#9298E3", // Cambia "yourActiveColor" al color deseado cuando está activa
+            },
+            "&:focus": {
+              color: "#00FF00", // Cambia "yourFocusColor" al color deseado cuando está enfocada
+            },
+          }}
+        />
+        {/*  <Tab label="Item Three" {...a11yProps(2)} />
           <Tab label="Item Four" {...a11yProps(3)} />
           <Tab label="Item Five" {...a11yProps(4)} />
           <Tab label="Item Six" {...a11yProps(5)} />
           <Tab label="Item Seven" {...a11yProps(6)} /> */}
-        </Tabs>
-        <TabPanel value={value} index={0}>
-          <Typography variant="button" gutterBottom sx={{ color: "#9298E3" }}>
-            Administraciòn de Permisos Menu
-          </Typography>
-  
-       
-        </TabPanel>
-        <TabPanel value={value} index={1}>
-          <Typography variant="button" gutterBottom sx={{ color: "#9298E3" }}>
-            Administraciòn de Permisos SubMenu
-          </Typography>
+      </Tabs>
+      <TabPanel value={value} index={0}>
+        <Typography variant="button" gutterBottom sx={{ color: "#9298E3" }}>
+          Administraciòn de Permisos Menu
+        </Typography>
+        
+          <MenuList />;
     
-        </TabPanel>
-        <TabPanel value={value} index={2}>
+      </TabPanel>
+      <TabPanel value={value} index={1}>
         <Typography variant="button" gutterBottom sx={{ color: "#9298E3" }}>
-            Administraciòn de Permisos Menu Usuario
-          </Typography>
-        </TabPanel>
+          Administraciòn de Permisos SubMenu
+        </Typography>
+      </TabPanel>
+      <TabPanel value={value} index={2}>
+        <Typography variant="button" gutterBottom sx={{ color: "#9298E3" }}>
+          Administraciòn de Permisos Menu Usuario
+        </Typography>
+      </TabPanel>
 
-        <TabPanel value={value} index={3}>
+      <TabPanel value={value} index={3}>
         <Typography variant="button" gutterBottom sx={{ color: "#9298E3" }}>
-            Administraciòn de Permisos SubMenu Usuario
-          </Typography>
-        </TabPanel>
-        {/* <TabPanel value={value} index={3}>
+          Administraciòn de Permisos SubMenu Usuario
+        </Typography>
+      </TabPanel>
+      {/* <TabPanel value={value} index={3}>
           Item Four
         </TabPanel>
         <TabPanel value={value} index={4}>
@@ -186,8 +187,8 @@ function VerticalTabs() {
         <TabPanel value={value} index={6}>
           Item Seven
         </TabPanel> */}
-      </Box>
-    );
+    </Box>
+  );
 }
 
-export default VerticalTabs
+export default VerticalTabs;
