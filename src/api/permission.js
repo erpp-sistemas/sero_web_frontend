@@ -230,6 +230,27 @@ export const createMenuRolUsuario = async (menuRolUsuarioData) => {
 
 
   /**
+ * Obtiene información de menu_rol_usuario por id_usuario.
+ *
+ * @param {number} userId - ID del usuario para filtrar la información.
+ * @returns {Promise<Object>} - Una promesa que resuelve con los datos de menu_rol_usuario.
+ * @throws {Error} - Error al obtener información de menu_rol_usuario por id_usuario.
+ */
+export const getMenuRolUsuarioByUserId = async (userId) => {
+    try {
+      // Realiza una solicitud GET a la ruta específica de la API para obtener información por id_usuario
+      const response = await axios.get(`/menu-rol-usuario/by-user/${userId}`);
+      
+      // Retorna los datos obtenidos de menu_rol_usuario
+      return response.data;
+    } catch (error) {
+      // Captura y lanza un error en caso de que ocurra un problema en la solicitud
+      throw new Error(`Error al obtener información de menu_rol_usuario por id_usuario: ${error.message}`);
+    }
+  };
+
+
+  /**
  * Crea un nuevo elemento de sub_menu_rol_usuario.
  *
  * @param {Object} subMenuRolUsuarioData - Datos del nuevo elemento de sub_menu_rol_usuario.
