@@ -50,7 +50,7 @@ function ContributorInfo() {
         sx={{marginBottom:"1rem"}}
         id="input-with-icon-textfield"
         label="Cuenta"
-        value={informationContributor?.account || "" }
+        value={(informationContributor && informationContributor.length > 0) ? informationContributor[0]?.["account"] || "" : ""}
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
@@ -68,7 +68,7 @@ function ContributorInfo() {
         sx={{width:"13rem"}}
         id="input-with-icon-textfield"
         label="Propietario"
-        value={informationContributor?.["owner_name"] || ""}
+        value={(informationContributor && informationContributor.length > 0) ? informationContributor[0]?.["owner_name"] || "" : ""}
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
@@ -94,7 +94,7 @@ function ContributorInfo() {
         sx={{marginBottom:"1rem"}}
         id="input-with-icon-textfield"
         label="Servicio"
-        value={informationContributor?.["type_service"] || ""}
+        value={(informationContributor && informationContributor.length > 0) ? informationContributor[0]?.["type_service"] || "" : ""}
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
@@ -112,7 +112,7 @@ function ContributorInfo() {
         sx={{width:"13rem"}}
         id="input-with-icon-textfield"
         label="Tipo de tarifa"
-        value={informationContributor?.["rate_type"] || ""}
+        value={(informationContributor && informationContributor.length > 0) ? informationContributor[0]?.["rate_type"] || "" : ""}
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
@@ -132,7 +132,7 @@ function ContributorInfo() {
         sx={{marginBottom:"1rem"}}
         id="input-with-icon-textfield"
         label="Turno"
-        value={informationContributor?.turn || ""}
+        value={(informationContributor && informationContributor.length > 0) ? informationContributor[0]?.["turn"] || "" : ""}
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
@@ -150,7 +150,7 @@ function ContributorInfo() {
         sx={{width:"13rem"}}
         id="input-with-icon-textfield"
         label="Serie de Medidor"
-        value={informationContributor?.["meter_series"] || ""}
+        value={(informationContributor && informationContributor.length > 0) ? informationContributor[0]?.["meter_series"] || "" : ""}
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">

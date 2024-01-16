@@ -14,10 +14,13 @@ import { withErrorBoundary } from '@sentry/react';
  */
 function ContributorSection() {
   const {informationContributor}=useCombinedSlices()
+
+  console.log(informationContributor[0]);
   
 
-  const latitude =informationContributor?.latitude
-  const longitude = informationContributor?.longitude
+  const latitude =informationContributor[0]?.latitude
+  
+  const longitude = informationContributor[0]?.longitude
     const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   return (

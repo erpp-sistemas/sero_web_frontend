@@ -204,9 +204,9 @@ function ImageCard({ photoObject }) {
       return;
     }
     const ImageData = {
-      imageId: photoObject.imageId,
+      imageId: photoObject.image_id,
       account: informationContributorPersonalData.account,
-      type: photoObject.imageType,
+      type: photoObject.image_type,
       user_id: selectedUserId,
       date_capture: valueDateTime.format("YYYY-MM-DD HH:mm:ss"),
       session_user_id: store.getState().user.user_id,
@@ -368,7 +368,7 @@ function ImageCard({ photoObject }) {
             onClick={() => {
               setVisibleAvatar(true);
             }}
-            src={photoObject.photoPersonWhoCapture}
+            src={photoObject.photo_person_who_capture}
             aria-label="recipe"
           >
             R
@@ -400,8 +400,8 @@ function ImageCard({ photoObject }) {
             </Menu>
           </>
         }
-        title={photoObject.personWhoCapture}
-        subheader={functionsCustom.formatDate(photoObject.synchronizationDate, "full")}
+        title={photoObject.person_who_capture}
+        subheader={functionsCustom.formatDate(photoObject.synchronization_date, "full")}
         /* subheader={functionsCustom.formatDate(photoObject.dateCapture, "full")} */
       />
       <Viewer
@@ -411,8 +411,8 @@ function ImageCard({ photoObject }) {
         }}
         images={[
           {
-            src: photoObject.photoPersonWhoCapture,
-            alt: photoObject.imageType,
+            src: photoObject.photo_person_who_capture,
+            alt: photoObject.image_type,
           },
         ]}
       />
@@ -443,8 +443,8 @@ function ImageCard({ photoObject }) {
         />
         <CardMedia
           component="img"
-          image={photoObject.imageUrl}
-          alt={photoObject.imageType}
+          image={photoObject.image_url}
+          alt={photoObject.image_type}
           sx={{ height: "150px" }}
           onClick={() => {
             setVisible(true);
@@ -455,7 +455,7 @@ function ImageCard({ photoObject }) {
           onClose={() => {
             setVisible(false);
           }}
-          images={[{ src: photoObject.imageUrl, alt: photoObject.imageType }]}
+          images={[{ src: photoObject.image_url, alt: photoObject.image_type }]}
         />
       </Box>
       <CardContent>
@@ -467,7 +467,7 @@ function ImageCard({ photoObject }) {
             <ListItemText
               sx={{ color: "#5EBFFF" }}
               primary="Tipo de Imagen"
-              secondary={`${photoObject.imageType}`}
+              secondary={`${photoObject.image_type}`}
             />
           </ListItem>
           <ListItem>
@@ -477,7 +477,7 @@ function ImageCard({ photoObject }) {
             <ListItemText
               sx={{ color: "#5EBFFF" }}
               primary="Tarea"
-              secondary={`${photoObject.taskDone}`}
+              secondary={`${photoObject.task_done}`}
             />
           </ListItem>
           <ListItem>
@@ -495,20 +495,20 @@ function ImageCard({ photoObject }) {
                 "full"
               )}`} */
               secondary={`${functionsCustom.formatDate(
-                photoObject.dateCapture,
+                photoObject.date_capture,
                 "full"
               )}`}
             />
           </ListItem>
           <ListItem>
             <ListItemIcon sx={{ color: "#5EBFFF" }}>
-              {photoObject.typeLoad === "0" ? <FaMobile /> : <IoLaptop />}
+              {photoObject.type_load === "0" ? <FaMobile /> : <IoLaptop />}
             </ListItemIcon>
             <ListItemText
               sx={{ color: "#5EBFFF" }}
               primary="Plataforma"
               secondary={
-                photoObject.typeLoad === "0" ? "SER0 MOBIL" : "SER0 WEB"
+                photoObject.type_load === "0" ? "SER0 MOBIL" : "SER0 WEB"
               }
             />
           </ListItem>
@@ -679,7 +679,7 @@ function ImageCard({ photoObject }) {
               // Ejecuta la acción al confirmar
               const newCheckedState = !checked; // Invierte el estado actual
               handleCheckboxChange(
-                photoObject.imageId,
+                photoObject.image_id,
                 newCheckedState,
                 store.getState().user.user_id,
                 setChecked

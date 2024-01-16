@@ -23,6 +23,8 @@ const classNames = {
  * @returns {JSX.Element} - Elemento JSX que representa el componente GoogleMaps.
  */
 function GoogleMaps({latitude,longitude}) {
+
+
   const lat =latitude?latitude: 19.6593364
   const lng =longitude?longitude: -99.2093698
   const mapRef = React.useRef(null);

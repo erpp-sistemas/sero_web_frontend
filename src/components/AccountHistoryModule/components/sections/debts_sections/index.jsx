@@ -1,6 +1,6 @@
 import { DataGrid, GridToolbarColumnsButton, GridToolbarContainer, GridToolbarDensitySelector, GridToolbarExport, GridToolbarFilterButton } from "@mui/x-data-grid";
 import React from "react";
-import { useStoreZustand } from "../../../../../zustan_store/useStoreZustand";
+
 import { Box } from "@mui/material";
 import functionsCustom from "../../../../../helpers";
 import useCombinedSlices from "../../../../../hooks/useCombinedSlices";
@@ -8,121 +8,110 @@ import useCombinedSlices from "../../../../../hooks/useCombinedSlices";
 function DebtsSections() {
   const { debts } = useCombinedSlices();
   /* console.log("Esto es un gran comentario"); */
+  console.log(debts);
 
-  const columns = [];
-  debts?.forEach((debtObject, index) => {
-    if (index === 0) {
-      for (const key in debtObject) {
-        switch (key) {
-          
-          case "lastPaymentDate":
-            columns.push({
-              field: key,
-              renderHeader: () => (
-                <strong style={{color:"#5EBFFF"}}>
-                  {"Fecha Ultimo Pago "}
-               {/*    <span role="img" aria-label="gestor" style={{color:"#5EBFFF"}}>
-                    🧑
-                  </span> */}
-                </strong>
-              ),
-              width: 150,
-              editable: true,
-              type:'dateTime',
-              valueGetter:({ value }) => {
-                return new Date(value)
-              }
-           
-              
-            });
-            break;
-          case "updateDate":
-            columns.push({
-              field: key,
-              renderHeader: () => (
-                <strong style={{color:"#5EBFFF"}}>
-                  {"Fecha Actualizaciòn "}
-               {/*    <span role="img" aria-label="gestor" style={{color:"#5EBFFF"}}>
-                    🧑
-                  </span> */}
-                </strong>
-              ),
-              width: 150,
-              editable: true,
-              type:'dateTime',
-              valueGetter:({ value }) => {
-                return new Date(value)
-              }
-            });
-            break;
-          case "cutoffDate":
-            columns.push({
-              field: key,
-              renderHeader: () => (
-                <strong style={{color:"#5EBFFF"}}>
-                  {"Fecha de Corte "}
-               {/*    <span role="img" aria-label="gestor" style={{color:"#5EBFFF"}}>
-                    🧑
-                  </span> */}
-                </strong>
-              ),
-              width: 150,
-              editable: true,
-              type:'dateTime',
-              valueGetter:({ value }) => {
-                return new Date(value)
-              }
-            });
-            break;
-          case "lasTwoMonthPayment":
-            columns.push({
-              field: key,
-              renderHeader: () => (
-                <strong style={{color:"#5EBFFF"}}>
-                  {"Pago Ultimo Bimestre"}
-               {/*    <span role="img" aria-label="gestor" style={{color:"#5EBFFF"}}>
-                    🧑
-                  </span> */}
-                </strong>
-              ),
-              width: 150,
-              editable: true,
-              type:'string',
-              valueGetter:({ value }) => {
-                return value?`$ ${value}.00`:`$ 00.00`
-              }
-            });
-            break;
-            case "debtAmount":
-            columns.push({
-              field: key,
-              renderHeader: () => (
-                <strong style={{color:"#5EBFFF"}}>
-                  {"Deuda "}
-               {/*    <span role="img" aria-label="gestor" style={{color:"#5EBFFF"}}>
-                    🧑
-                  </span> */}
-                </strong>
-              ),
-              width: 150,
-              editable: true,
-              type:'string',
-              valueGetter:({ value }) => {
-                return value
-                ? `$ ${functionsCustom.formatNumberWithCommas(value)}`
-                : `$ 00.00`;
-              }
+  const buildColumns = ()=>{
 
-            });
-
-            break;
-
-          default:
-            break;
+    const columns =[
+      {
+        field: "debt_amount",
+        renderHeader: () => (
+          <strong style={{color:"#5EBFFF"}}>
+            {"Deuda "}
+         {/*    <span role="img" aria-label="gestor" style={{color:"#5EBFFF"}}>
+              🧑
+            </span> */}
+          </strong>
+        ),
+        width: 150,
+        editable: true,
+        type:'string',
+        valueGetter:({ value }) => {
+          return value
+          ? `$ ${functionsCustom.formatNumberWithCommas(value)}`
+          : `$ 00.00`;
         }
-      }
-    }
-  });
+
+      },
+
+      {
+        field: "last_payment_date",
+        renderHeader: () => (
+          <strong style={{color:"#5EBFFF"}}>
+            {"Fecha Ultimo Pago "}
+         {/*    <span role="img" aria-label="gestor" style={{color:"#5EBFFF"}}>
+              🧑
+            </span> */}
+          </strong>
+        ),
+        width: 150,
+        editable: true,
+        type:'dateTime',
+        valueGetter:({ value }) => {
+          return new Date(value)
+        }
+     
+        
+      },
+      {
+        field: "update_date",
+        renderHeader: () => (
+          <strong style={{color:"#5EBFFF"}}>
+            {"Fecha Actualizaciòn "}
+         {/*    <span role="img" aria-label="gestor" style={{color:"#5EBFFF"}}>
+              🧑
+            </span> */}
+          </strong>
+        ),
+        width: 150,
+        editable: true,
+        type:'dateTime',
+        valueGetter:({ value }) => {
+          return new Date(value)
+        }
+      },
+     
+      {
+        field: "cutoff_date",
+        renderHeader: () => (
+          <strong style={{color:"#5EBFFF"}}>
+            {"Fecha de Corte "}
+         {/*    <span role="img" aria-label="gestor" style={{color:"#5EBFFF"}}>
+              🧑
+            </span> */}
+          </strong>
+        ),
+        width: 150,
+        editable: true,
+        type:'dateTime',
+        valueGetter:({ value }) => {
+          return new Date(value)
+        }
+      },
+      {
+        field: "last_two_month_payment",
+        renderHeader: () => (
+          <strong style={{color:"#5EBFFF"}}>
+            {"Pago Ultimo Bimestre"}
+         {/*    <span role="img" aria-label="gestor" style={{color:"#5EBFFF"}}>
+              🧑
+            </span> */}
+          </strong>
+        ),
+        width: 150,
+        editable: true,
+        type:'string',
+        valueGetter:({ value }) => {
+          return value?`$ ${value}.00`:`$ 00.00`
+        }
+      },
+
+    ]
+
+    return columns
+  }
+
+
   
   /* const columns = [
         { field: 'id', headerName: 'ID', width: 90 },
@@ -192,24 +181,30 @@ function DebtsSections() {
    
   })
    */
+  const buildRows = ()=>{
+    const rows = [];
 
-  const rows = [];
+    debts?.forEach((debtObject, index) => {
+      // Verificar si todas las propiedades del objeto son undefined
+      const allUndefined = Object.values(debtObject).every(value => value === undefined);
+    
+      if (debtObject && !allUndefined) {
+       /*  console.log(debtObject); */
+        debtObject = { ...debtObject, id: index + 1 };
+        rows.push(debtObject);
+      }
+    });
+
+    return rows
+  }
+  
   /* debts?.forEach((debtObject,index)=>{
     debtObject={...debtObject,id: index + 1}
     rows.push(debtObject)
    
 
   }) */
-  debts?.forEach((debtObject, index) => {
-    // Verificar si todas las propiedades del objeto son undefined
-    const allUndefined = Object.values(debtObject).every(value => value === undefined);
   
-    if (debtObject && !allUndefined) {
-     /*  console.log(debtObject); */
-      debtObject = { ...debtObject, id: index + 1 };
-      rows.push(debtObject);
-    }
-  });
 
   function CustomToolbar() {
     return (
@@ -254,8 +249,8 @@ function DebtsSections() {
       toolbarExport: "Exportar"
     }}
       color
-      rows={rows?rows:null}
-      columns={columns}
+      rows={buildRows()}
+      columns={buildColumns()}
       initialState={{
         pagination: {
           paginationModel: {

@@ -136,226 +136,44 @@ function AccountHistoryModule() {
   // useEffect for processing account data and updating states
 
   React.useEffect(() => {
-    let accountDataIndexes = {
-      userProfileContributor: { index: [] },
-      debtInfoContributor: { index: [] },
-      paymentInfoContributor: { index: [] },
-      dateCaptureInfoContributor: { index: [] },
-      imageUrlInfoContributor: { index: [] },
-    };
 
-    const keyMapping = {
-      account: "userProfileContributor",
-      debt_amount: "debtInfoContributor",
-      reference: "paymentInfoContributor",
-      date_capture: "dateCaptureInfoContributor",
-      image_url: "imageUrlInfoContributor",
-    };
 
-    if (accountData) {
-      accountData.forEach((el, i) => {
-        console.log(el);
-        for (const key in el) {
-          const prop = keyMapping[key];
-          if (prop !== undefined) {
-            accountDataIndexes[prop].index.push(i);
-          }
-        }
+
+    function filterObjectsByProperties(arrayOfObjects, expectedProperties) {
+      return arrayOfObjects?.filter((object) => {
+        const keys = Object.keys(object);
+        
+        // Verificar si las propiedades coinciden exactamente y en el mismo orden
+        return keys.length === expectedProperties.length && keys.every((key, index) => key === expectedProperties[index]);
       });
     }
 
-    let data = {};
+    const expectedPropertiesOfTheProfile = ["account","owner_name", "type_service", "rate_type", "turn","meter_series","street","outdoor_number","interior_number","cologne","square","allotment","between_street_1","between_street_2","reference","town","poastal_code","latitude","longitude"];
+    const filteredObjectsOfTheProfile = filterObjectsByProperties(accountData, expectedPropertiesOfTheProfile);
+    setInformationContributor(filteredObjectsOfTheProfile);
 
-    console.log(accountDataIndexes);
+    
+    const expectedPropertiesOfTheDebts = ["debt_amount","last_payment_date", "update_date", "cutoff_date", "last_two_month_payment"];
+    const filteredObjectsOfTheDebts = filterObjectsByProperties(accountData, expectedPropertiesOfTheDebts);
+    setDebts(filteredObjectsOfTheDebts);
 
-    if (accountDataIndexes.userProfileContributor.index.length > 1) {
-      accountDataIndexes.userProfileContributor.index.forEach(
-        (iteration, index) => {
-          for (const key in accountData[iteration]) {
-            data = {
-              ...data,
-              [`${key}_${index + 1}`]: accountData?.[iteration][key],
-            };
-          }
-        }
-      );
-    } else {
-      const iteration = accountDataIndexes.userProfileContributor.index;
-      if (iteration !== undefined && accountData) {
-        let arrayInformationContributorPersonalData = [{}];
-        for (const key in accountData[iteration]) {
-          // Hace push de los datos al array
-          arrayInformationContributorPersonalData[key] =
-            accountData[iteration][key];
+    const expectedPropertiesOfThePayments = ["reference","description", "amount_paid", "payment_date", "payment_period"];
+    const filteredObjectsOfThePayments = filterObjectsByProperties(accountData, expectedPropertiesOfThePayments);
+    setPayments(filteredObjectsOfThePayments);
 
-          // Hace push de los datos al objeto data
 
-          data = {
-            ...data,
-            [key]: accountData?.[iteration][key],
-          };
-        }
-        console.log(arrayInformationContributorPersonalData);
 
-        setInformationContributor(arrayInformationContributorPersonalData);
-      }
-    }
+    
+    const expectedPropertiesOfTheActions = ["date_capture", "task_done", "person_who_capture", "photo_person_who_capture"];
+    const filteredObjectsOfTheActions = filterObjectsByProperties(accountData, expectedPropertiesOfTheActions);
 
-    if (accountDataIndexes.debtInfoContributor.index.length > 1) {
-      accountDataIndexes.debtInfoContributor.index.forEach(
-        (iteration, index) => {
-          for (const key in accountData[iteration]) {
-            data = {
-              ...data,
-              [`${key}_${index + 1}`]: accountData?.[iteration][key],
-            };
-          }
-        }
-      );
-    }
-    if (accountDataIndexes.paymentInfoContributor.index.length > 1) {
-      accountDataIndexes.paymentInfoContributor.index
-        .slice(1)
-        .forEach((iteration, index) => {
-          for (const key in accountData[iteration]) {
-            data = {
-              ...data,
-              [`${key}_${index + 1}`]: accountData?.[iteration][key],
-            };
-          }
-        });
-    }
+    
+    setActions(filteredObjectsOfTheActions);
+     
+    const expectedPropertiesOfThePhotos = ["image_id","image_url", "image_type", "date_capture", "task_done","person_who_capture","photo_person_who_capture","synchronization_date","active","type_load"]
+    const filteredObjectsOfThePhotos = filterObjectsByProperties(accountData, expectedPropertiesOfThePhotos);
 
-    if (accountDataIndexes.dateCaptureInfoContributor.index.length > 1) {
-      accountDataIndexes.dateCaptureInfoContributor.index.forEach(
-        (iteration, index) => {
-          for (const key in accountData[iteration]) {
-            data = {
-              ...data,
-              [`${key}_capture_info_${index + 1}`]:
-                accountData?.[iteration][key],
-            };
-          }
-        }
-      );
-    }
-    if (accountDataIndexes.imageUrlInfoContributor.index.length > 1) {
-      accountDataIndexes.imageUrlInfoContributor.index.forEach(
-        (iteration, index) => {
-          for (const key in accountData?.[iteration]) {
-            data = {
-              ...data,
-              [`${key}_${index + 1}`]: accountData?.[iteration][key],
-            };
-          }
-        }
-      );
-    } else if (accountDataIndexes.imageUrlInfoContributor.index.length === 1) {
-      accountDataIndexes.imageUrlInfoContributor.index.forEach(
-        (iteration, index) => {
-          for (const key in accountData?.[iteration]) {
-            data = {
-              ...data,
-              [`${key}_${index + 1}`]: accountData?.[iteration][key],
-            };
-          }
-          console.log(iteration);
-          /*   for (const key in accountData?.[iteration]) {
-            data = {
-              ...data,
-              [`${key}_${index + 1}`]: accountData?.[iteration][key],
-            };
-          } */
-        }
-      );
-    }
-
-    /*  console.log(data); */
-
-    const arrayDebts = [];
-
-    for (
-      let i = 1;
-      i <= accountDataIndexes.debtInfoContributor.index.length;
-      i++
-    ) {
-      const debt = {
-        debtAmount: data?.[`debt_amount_${i}`],
-        lastPaymentDate: data?.[`last_payment_date_${i}`],
-        updateDate: data?.[`update_date_${i}`],
-        cutoffDate: data?.[`cutoff_date_${i}`],
-        lasTwoMonthPayment: data?.[`last_two_month_payment_${i}`],
-      };
-
-      arrayDebts.push(debt);
-    }
-
-    setDebts(arrayDebts);
-
-    const arrayPayments = [];
-
-    for (
-      let i = 1;
-      i <= accountDataIndexes.paymentInfoContributor.index.length;
-      i++
-    ) {
-      const payment = {
-        referencia: data?.[`reference_${i}`],
-        fechaDePago: data?.[`payment_date_${i}`],
-        descripcion: data?.[`description_${i}`],
-        montoPagado: data?.[`amount_paid_${i}`],
-        paymentPeriod: data?.[`payment_period_${i}`],
-      };
-
-      arrayPayments.push(payment);
-    }
-    setPayments(arrayPayments);
-
-    const arrayActions = [];
-    for (
-      let i = 1;
-      i <= accountDataIndexes.dateCaptureInfoContributor.index.length;
-      i++
-    ) {
-      const action = {
-        dateCapture: data?.[`date_capture_capture_info_${i}`],
-        taskDone: data?.[`task_done_capture_info_${i}`],
-        personWhoCapture: data?.[`person_who_capture_capture_info_${i}`],
-        photoPersonWhoCapture:
-          data?.[`photo_person_who_capture_capture_info_${i}`],
-      };
-
-      arrayActions.push(action);
-    }
-    console.log(arrayActions);
-    setActions(arrayActions);
-
-    const arrayPhotos = [];
-    for (
-      let i = 1;
-      i <= accountDataIndexes.dateCaptureInfoContributor.index.length;
-      i++
-    ) {
-      const photo = {
-        imageId: data?.[`image_id_${i}`],
-        imageUrl: data?.[`image_url_${i}`],
-        imageType: data?.[`image_type_${i}`],
-        dateCapture: data?.[`date_capture_${i}`],
-        taskDone: data?.[`task_done_${i}`],
-        personWhoCapture: data?.[`person_who_capture_${i}`],
-        synchronizationDate: data?.[`synchronization_date_${i}`],
-        photoPersonWhoCapture: data?.[`photo_person_who_capture_${i}`],
-        active: data?.[`active_${i}`],
-        typeLoad: data?.[`type_load_${i}`],
-      };
-      if (photo.imageId != undefined) {
-        arrayPhotos.push(photo);
-      }
-    }
-
-    console.log(arrayPhotos);
-
-    setPhotos(arrayPhotos);
+    setPhotos(filteredObjectsOfThePhotos);
   }, [accountData, alertInfo]);
 
   return (
