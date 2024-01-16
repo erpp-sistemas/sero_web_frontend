@@ -5,6 +5,7 @@ import {
   Dialog,
   IconButton,
   InputAdornment,
+  Paper,
   Stack,
   TextField,
   Toolbar,
@@ -88,12 +89,20 @@ function DialogSearch({ handleCloseDialog }) {
           }; */
       }
     });
-    setFormDataFromInputs({
-      ...formDataFromInputs,
-      [name]: value,
-    });
+    setFormDataFromInputs((prev) => ({
+      ...prev,
+      [name]:value,
+    }));
   };
+
+  
   const handleSearch = async () => {
+    for (const key in formDataFromInputs) {
+      // Verificar si el valor es una cadena vacía y cambiarlo por "vacio"
+      if (formDataFromInputs[key] === "") {
+        formDataFromInputs[key] = "vacio";
+      }
+    }
     const apiUrl = `http://localhost:3000/api/AccountHistoryByParameters/${plazaNumber}/${formDataFromInputs.account}/${formDataFromInputs.owner_name}/${formDataFromInputs.street}/${formDataFromInputs.cologne}`;
     try {
       const response = await axios.get(apiUrl);
@@ -233,8 +242,9 @@ function DialogSearch({ handleCloseDialog }) {
           </Button> */}
         </Toolbar>
       </AppBar>
-      <Stack direction="row" spacing={2}>
-        <Box sx={{ p: 2,pr:2 }}>
+      <Box sx={{padding:"30px"}}>
+      <Stack direction="row" spacing={4}>
+        <Box sx={{ p: 2}}  >
           <TextField
             color="secondary"
             sx={{ marginBottom: "1rem", width: "400px" }}
@@ -370,7 +380,7 @@ function DialogSearch({ handleCloseDialog }) {
             </Stack>
           )}
           <Box sx={{ display: "flex", justifyContent: "end" }}>
-            <Button onClick={handleSearch} variant="contained">
+            <Button onClick={handleSearch} variant="contained" color="secondary">
               Buscar
             </Button>
           </Box>
@@ -438,6 +448,7 @@ function DialogSearch({ handleCloseDialog }) {
           />{" "}
         </Box>
       </Stack>
+      </Box>
     </Dialog>
   );
 }
