@@ -13,6 +13,7 @@ import BackDrop from "./components/backdrop";
 import AlertAccountHistory from "./components/alert";
 import Charts from "./components/sections/charts";
 import useCombinedSlices from "../../hooks/useCombinedSlices";
+import DialogSearch from "./components/full-screen-dialog-search";
 /**
  * Represents the main module for displaying and managing account history.
  *
@@ -378,7 +379,8 @@ function AccountHistoryModule() {
         <NavTabs value={selectedTab} handleChange={handleTabChange} />
       </Container>
       {accountData && <Container>{renderContent(selectedTab)}</Container>}
-      {openDialog && <SearchDialog handleCloseDialog={handleCloseDialog} />}
+      {/* {openDialog && <SearchDialog handleCloseDialog={handleCloseDialog} />} */}
+      {openDialog && <DialogSearch handleCloseDialog={handleCloseDialog} />}
       {openBackDrop && <BackDrop openBackDrop={openBackDrop} />}
     </>
   );

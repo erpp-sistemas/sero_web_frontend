@@ -439,6 +439,7 @@ function SearchDialog({ handleCloseDialog }) {
                   label="Igual"
                 />
               </FormGroup> */}
+              
             </Box>
           </Box>
         </Container>
@@ -506,6 +507,7 @@ function SearchDialog({ handleCloseDialog }) {
             checkboxSelection
             disableRowSelectionOnClick
           />
+          
         ) : (
           <Box sx={{ textAlign: "center", padding: "20px" }}>
             <CircularProgress color="secondary" />
@@ -516,8 +518,10 @@ function SearchDialog({ handleCloseDialog }) {
           Let Google help apps determine location. This means sending anonymous
           location data to Google, even when no apps are running.
         </DialogContentText> */}
+
       </DialogContent>
       <DialogActions sx={{ backgroundColor: colors.primary[400] }}>
+      
         <Button
           autoFocus
           onClick={handleCloseDialog}
