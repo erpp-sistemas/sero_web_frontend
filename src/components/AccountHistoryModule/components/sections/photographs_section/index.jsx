@@ -497,7 +497,7 @@ function PhotographsSections() {
       >
         {photos.length > 0 ? (
           photos.map((photo, index) => (
-            <ImageCard key={photo.imageUrl} photoObject={photo} />
+            <ImageCard key={photo.image_url} photoObject={photo} />
           ))
         ) : (
           <Typography variant="h3" gutterBottom>

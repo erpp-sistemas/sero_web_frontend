@@ -22,3 +22,96 @@ export class SystemVariableService {
     }
   };
 }
+
+
+
+
+
+ actions?.forEach((actionObject, index) => {
+   
+    actionObject = { ...actionObject, avatar: "avatar" };
+    
+      for (const key in actionObject) {
+
+        console.log(key);
+        switch (key) {
+          case "taskDone":
+            columns.push({
+              field: key,
+              renderHeader: () => (
+                <strong style={{color:"#5EBFFF"}}>
+                  {"Tarea Gestionada "}
+               {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
+                  📃
+                  </span> */}
+                </strong>
+              ),
+              width: 150,
+              editable: true,
+            });
+
+            break;
+
+          case "dateCapture":
+            columns.push({
+              field: key,
+              renderHeader: () => (
+                <strong  style={{color:"#5EBFFF"}}>
+                  {"Fecha de Captura "}
+             {/*      <span role="img" aria-label="fecha" style={{color:"#5EBFFF"}}>
+                    📆
+                  </span> */}
+                </strong>
+              ),
+              width: 150,
+              editable: true,
+              type: "dateTime",
+              valueGetter: ({ value }) => {
+                if (value) {
+                  return new Date(value);
+                } else {
+                  return "";
+                }
+              },
+            });
+            break;
+
+          case "personWhoCapture":
+            columns.push({
+              field: key,
+              renderHeader: () => (
+                <strong style={{color:"#5EBFFF"}}>
+                  {"Gestor "}
+                  <span role="img" aria-label="gestor" style={{color:"#5EBFFF"}}>
+                    🧑
+                  </span>
+                </strong>
+              ),
+              width: 300,
+              editable: true,
+            });
+            break;
+          case "avatar":
+            columns.push({
+              field: key,
+              renderHeader: () => (
+                <strong style={{color:"#5EBFFF"}}>
+                  {"Imagen "}
+                  <span role="img" aria-label="img" style={{color:"#5EBFFF"}}>
+                  
+                  </span>
+                </strong>
+              ),
+
+              renderCell: (params) => (
+                <AvatarImage image={params.row.photoPersonWhoCapture} />
+              ),
+            });
+            break;
+
+          default:
+            break;
+        }
+      }
+    
+  });

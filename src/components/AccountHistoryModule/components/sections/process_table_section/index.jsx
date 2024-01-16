@@ -1,6 +1,6 @@
 import { DataGrid, GridToolbar, GridToolbarColumnsButton, GridToolbarContainer, GridToolbarDensitySelector, GridToolbarExport, GridToolbarFilterButton } from "@mui/x-data-grid";
 import React from "react";
-import { useStoreZustand } from "../../../../../zustan_store/useStoreZustand";
+
 import { Avatar, Box } from "@mui/material";
 import Viewer from "react-viewer";
 import useCombinedSlices from "../../../../../hooks/useCombinedSlices";
@@ -51,100 +51,94 @@ const column = {
     }
   };
 
-  const columns = [];
-  actions?.forEach((actionObject, index) => {
-    console.log(actionObject);
-    actionObject = { ...actionObject, avatar: "avatar" };
-    if (index === 0) {
-      for (const key in actionObject) {
-        switch (key) {
-          case "taskDone":
-            columns.push({
-              field: key,
-              renderHeader: () => (
-                <strong style={{color:"#5EBFFF"}}>
-                  {"Tarea Gestionada "}
-               {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
-                  📃
-                  </span> */}
-                </strong>
-              ),
-              width: 150,
-              editable: true,
-            });
+  
 
-            break;
+  const buildColumns = ()=>{
 
-          case "dateCapture":
-            columns.push({
-              field: key,
-              renderHeader: () => (
-                <strong  style={{color:"#5EBFFF"}}>
-                  {"Fecha de Captura "}
-             {/*      <span role="img" aria-label="fecha" style={{color:"#5EBFFF"}}>
-                    📆
-                  </span> */}
-                </strong>
-              ),
-              width: 150,
-              editable: true,
-              type: "dateTime",
-              valueGetter: ({ value }) => {
-                if (value) {
-                  return new Date(value);
-                } else {
-                  return "";
-                }
-              },
-            });
-            break;
+    const columns = [
 
-          case "personWhoCapture":
-            columns.push({
-              field: key,
-              renderHeader: () => (
-                <strong style={{color:"#5EBFFF"}}>
-                  {"Gestor "}
-                  <span role="img" aria-label="gestor" style={{color:"#5EBFFF"}}>
-                    🧑
-                  </span>
-                </strong>
-              ),
-              width: 300,
-              editable: true,
-            });
-            break;
-          case "avatar":
-            columns.push({
-              field: key,
-              renderHeader: () => (
-                <strong style={{color:"#5EBFFF"}}>
-                  {"Imagen "}
-                  <span role="img" aria-label="img" style={{color:"#5EBFFF"}}>
-                  
-                  </span>
-                </strong>
-              ),
+    
+        {
+          field: "task_done",
+          renderHeader: () => (
+            <strong style={{ color: "#5EBFFF" }}>
+              {"Tarea"}
+              {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
+                    📃
+                    </span> */}
+            </strong>
+          ),
+          width: 300,
+          editable: true,
+        },
+        {
+          field: "avatar",
+          renderHeader: () => (
+            <strong style={{color:"#5EBFFF"}}>
+              {"Imagen "}
+              <span role="img" aria-label="img" style={{color:"#5EBFFF"}}>
+              
+              </span>
+            </strong>
+          ),
 
-              renderCell: (params) => (
-                <AvatarImage image={params.row.photoPersonWhoCapture} />
-              ),
-            });
-            break;
+          renderCell: (params) => (
+            <AvatarImage image={params.row.photo_person_who_capture} />
+          ),
+        },
+        {
+          field: "person_who_capture",
+          renderHeader: () => (
+            <strong style={{ color: "#5EBFFF" }}>
+              {"Nombre Gestor"}
+              {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
+                    📃
+                    </span> */}
+            </strong>
+          ),
+          width: 160,
+          editable: true,
+        },
+        {
+          field: "date_capture",
+          type:'dateTime',
+          renderHeader: () => (
+            <strong style={{ color: "#5EBFFF" }}>
+              {"Fecha de Captura"}
+              {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
+                    📃
+                    </span> */}
+            </strong>
+          ),
+          width: 160,
+     
+          valueGetter: ({ value }) => value && new Date(value),
+        },
+    
+    ];
+    return columns
 
-          default:
-            break;
-        }
-      }
-    }
-  });
 
-  const rows = [];
+  }
+  const buildRows = ()=>{
 
-  actions?.forEach((debtObject, index) => {
-    debtObject = { ...debtObject, id: index + 1 };
-    rows.push(debtObject);
-  });
+
+    const rows = [];
+    actions?.forEach((debtObject, index) => {
+      debtObject = { ...debtObject, id: index + 1 };
+      rows.push(debtObject);
+    });
+
+    return rows
+
+
+
+  }
+ 
+
+  
+
+
 
 
 
@@ -189,8 +183,8 @@ const column = {
         toolbarDensity: "Tamaño Celda",
         toolbarExport: "Exportar"
       }}
-        rows={rows.filter((row) => row !== undefined)}
-        columns={columns}
+        rows={buildRows()}
+        columns={buildColumns()}
         initialState={{
           pagination: {
             paginationModel: {

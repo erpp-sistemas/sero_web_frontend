@@ -103,8 +103,8 @@ const totalPayments=(array)=>{
 
   let totalCount = 0
   array.forEach((payments)=>{
-    if (payments.montoPagado != undefined) {
-      totalCount+=Number(payments.montoPagado)
+    if (payments.amount_paid != undefined) {
+      totalCount+=Number(payments.amount_paid)
     }
 
     
@@ -250,6 +250,8 @@ const styles = StyleSheet.create({
 
 function Pdf({ ownerDetails, ownerHomeImages, ownerDebts,ownerPayments }) {
 
+  console.log(ownerDetails[0].account);
+
  /*  console.log(ownerHomeImages); */
   
 
@@ -318,26 +320,27 @@ function Pdf({ ownerDetails, ownerHomeImages, ownerDebts,ownerPayments }) {
               <View style={styles.tableRow}>
                 <View style={styles.tableCol}>
                   <Text style={styles.tableCell}>
-                    {ownerDetails.account || ""}{" "}
+                    {ownerDetails[0].account || ""}{" "}
                   </Text>
                 </View>
                 <View style={styles.tableCol}>
                   <Text style={styles.tableCell}>
-                    {ownerDetails["owner_name"] || ""}{" "}
+                    {ownerDetails[0]["owner_name"] || ""}{" "}
                   </Text>
                 </View>
                 <View style={styles.tableCol}>
                   <Text style={styles.tableCell}>
-                    {ownerDetails["type_service"] || ""}
+                    {ownerDetails[0]["type_service"] || ""}
                   </Text>
                 </View>
                 <View style={styles.tableCol}>
                   <Text style={styles.tableCell}>
-                    {ownerDetails["rate_type"] || ""}
+                    {ownerDetails[0]["rate_type"] || ""}
                   </Text>
                 </View>
-              </View>
-              {/* ------------------------------ */}
+                
+              </View> 
+            
               <View style={styles.tableRow}>
                 <View style={styles.tableColHeader}>
                   <Text style={styles.tableCell}>Giro</Text>
@@ -358,11 +361,11 @@ function Pdf({ ownerDetails, ownerHomeImages, ownerDebts,ownerPayments }) {
                     {ownerDetails.turn || ""}{" "}
                   </Text>
                 </View>
-                <View style={styles.tableCol}>
+                 <View style={styles.tableCol}>
                   <Text style={styles.tableCell}>
-                    {ownerDetails["meter_series"] || ""}{" "}
+                    {ownerDetails[0]["meter_series"] || ""}{" "}
                   </Text>
-                </View>
+                </View> 
                 <View style={styles.tableCol}>
                   <Text style={styles.tableCell}>{""}</Text>
                 </View>
@@ -379,7 +382,7 @@ function Pdf({ ownerDetails, ownerHomeImages, ownerDebts,ownerPayments }) {
               </View>
               <View style={styles.tableRow}>
                 <View style={styles.tableColContentTitle}>
-                  <Text style={styles.tableCell}>{ownerDetails.street}</Text>
+                  <Text style={styles.tableCell}>{ownerDetails[0].street}</Text>
                 </View>
               </View>
               //!----------------------
@@ -400,22 +403,22 @@ function Pdf({ ownerDetails, ownerHomeImages, ownerDebts,ownerPayments }) {
               <View style={styles.tableRow}>
                 <View style={styles.tableCol}>
                   <Text style={styles.tableCell}>
-                    {ownerDetails["outdoor_number"] || ""}{" "}
+                    {ownerDetails[0]["outdoor_number"] || ""}{" "}
                   </Text>
                 </View>
                 <View style={styles.tableCol}>
                   <Text style={styles.tableCell}>
-                    {ownerDetails["interior_number"] || ""}{" "}
+                    {ownerDetails[0]["interior_number"] || ""}{" "}
                   </Text>
                 </View>
                 <View style={styles.tableCol}>
                   <Text style={styles.tableCell}>
-                    {ownerDetails["cologne"] || ""}
+                    {ownerDetails[0]["cologne"] || ""}
                   </Text>
                 </View>
                 <View style={styles.tableCol}>
                   <Text style={styles.tableCell}>
-                    {ownerDetails["square"] || ""}
+                    {ownerDetails[0]["square"] || ""}
                   </Text>
                 </View>
               </View>
@@ -437,22 +440,22 @@ function Pdf({ ownerDetails, ownerHomeImages, ownerDebts,ownerPayments }) {
               <View style={styles.tableRow}>
                 <View style={styles.tableCol}>
                   <Text style={styles.tableCell}>
-                    {ownerDetails["between_street_1"] || ""}{" "}
+                    {ownerDetails[0]["between_street_1"] || ""}{" "}
                   </Text>
                 </View>
                 <View style={styles.tableCol}>
                   <Text style={styles.tableCell}>
-                    {ownerDetails["between_street_2"] || ""}{" "}
+                    {ownerDetails[0]["between_street_2"] || ""}{" "}
                   </Text>
                 </View>
                 <View style={styles.tableCol}>
                   <Text style={styles.tableCell}>
-                    {ownerDetails["town"] || ""}
+                    {ownerDetails[0]["town"] || ""}
                   </Text>
                 </View>
                 <View style={styles.tableCol}>
                   <Text style={styles.tableCell}>
-                    {ownerDetails["poastal_code"] || ""}
+                    {ownerDetails[0]["poastal_code"] || ""}
                   </Text>
                 </View>
               </View>
@@ -479,31 +482,41 @@ function Pdf({ ownerDetails, ownerHomeImages, ownerDebts,ownerPayments }) {
                   <Text style={styles.tableCell}>Imagenes</Text>
                 </View>
               </View>
-             {/*  {ownerHomeImages?.map((dataImage)=>{
+              {ownerHomeImages?.map((dataImage)=>{
                 console.log(dataImage);
-              })} */}
-              <View style={styles.tableRow}>
+              })} 
+               <View style={styles.tableRow}>
                 {
                   ownerHomeImages.slice(0,3).map((image, index) => (
                     <View style={styles.tableColHeaderImages}>
-                      <Text style={styles.tableCell}>{image.imageType}</Text>
+                      <Text style={styles.tableCell}>{image.image_type}</Text>
+                     
                     </View>
                   ))
                 }
              
                 
+                </View> 
+                <View style={styles.tableRow}>
+                {ownerHomeImages.slice(0,3).map((image, index) => (
+    <View key={index} style={styles.tableColImage}>
+      <Image style={styles.image} src={{ uri: image.image_url, method: "GET", headers: { "Cache-Control": "no-cache" }, body: "" }} />
+    </View>
+  ))} 
+             
+
                 </View>
-              <View style={styles.tableRow}>
-              {/* <View style={styles.tableColImage}>
+              {/* <View style={styles.tableRow}>
+               <View style={styles.tableColImage}>
               <Image style={styles.image} src={image}/>
-                    </View> */}
-                    {ownerHomeImages.slice(0,1).map((image, index) => (
+                    </View> 
+                   {ownerHomeImages.slice(0,1).map((image, index) => (
     <View key={index} style={styles.tableColImage}>
       <Image style={styles.image} src={image.imageUrl} />
     </View>
-  ))}
+  ))} 
                 
-              </View>
+              </View> */}
               <View style={styles.tableRow}>
                 <View style={styles.tableColTitle}>
                   <Text style={styles.tableCell}>Adeudos</Text>
@@ -523,33 +536,33 @@ function Pdf({ ownerDetails, ownerHomeImages, ownerDebts,ownerPayments }) {
                   <Text style={styles.tableCell}>Fecha de Corte</Text>
                 </View>
               </View>
-              {ownerDebts.map((debt, index) => {
+               {ownerDebts.map((debt, index) => {
                 return (
                   <View style={styles.tableRow}>
                     {" "}
                     <View style={styles.tableCol}>
                       <Text style={styles.tableCell}>
-                        {formatCurrency(debt.debtAmount)  || ""}{" "}
+                        {formatCurrency(debt.debt_amount)  || ""}{" "}
                       </Text>
                     </View>
                     <View style={styles.tableCol}>
                       <Text style={styles.tableCell}>
-                        {formatDate(debt.lastPaymentDate, "full")  || ""}{" "}
+                        {formatDate(debt.last_payment_date, "full")  || ""}{" "}
                       </Text>
                     </View>
                     <View style={styles.tableCol}>
                       <Text style={styles.tableCell}>
-                        {formatDate(debt.updateDate ,"full") || ""}{" "}
+                        {formatDate(debt.update_date ,"full") || ""}{" "}
                       </Text>
                     </View>
                     <View style={styles.tableCol}>
                       <Text style={styles.tableCell}>
-                        { formatDate(debt.cutoffDate,"full")  || ""}{" "}
+                        { formatDate(debt.cutoff_date,"full")  || ""}{" "}
                       </Text>
                     </View>
                   </View>
                 );
-              })}
+              })} 
               
             
               
@@ -594,7 +607,7 @@ function Pdf({ ownerDetails, ownerHomeImages, ownerDebts,ownerPayments }) {
                   <Text style={styles.tableCell}>Monto a pagar</Text>
                 </View>
               </View>
-              {ownerPayments.map((payments, index) => {
+             {ownerPayments.map((payments, index) => {
                 for (const key in payments) {
                   if (payments[key]!=undefined) {
                     return (
@@ -602,22 +615,22 @@ function Pdf({ ownerDetails, ownerHomeImages, ownerDebts,ownerPayments }) {
                         {" "}
                         <View style={styles.tableCol}>
                           <Text style={styles.tableCell}>
-                            {payments.referencia|| ""}{" "}
+                            {payments.reference|| ""}{" "}
                           </Text>
                         </View>
                         <View style={styles.tableCol}>
                           <Text style={styles.tableCell}>
-                            {payments.descripcion  || ""}{" "}
+                            {payments.description  || ""}{" "}
                           </Text>
                         </View>
                         <View style={styles.tableCol}>
                           <Text style={styles.tableCell}>
-                            {formatDate(payments.fechaDePago ,"full") || ""}{" "}
+                            {formatDate(payments.payment_date ,"full") || ""}{" "}
                           </Text>
                         </View>
                         <View style={styles.tableCol}>
                           <Text style={styles.tableCell}>
-                            { formatCurrency(payments.montoPagado)    || ""}{" "}
+                            { formatCurrency(payments.amount_paid)    || ""}{" "}
                           </Text>
                         </View>
                       </View>
@@ -628,7 +641,7 @@ function Pdf({ ownerDetails, ownerHomeImages, ownerDebts,ownerPayments }) {
                 }
                 
              
-              })}
+              })} 
                <View style={styles.tableRow}>
                 <View style={styles.tableCol}>
                   <Text style={styles.tableCell}>
@@ -645,11 +658,11 @@ function Pdf({ ownerDetails, ownerHomeImages, ownerDebts,ownerPayments }) {
                     Total
                   </Text>
                 </View>
-                <View style={styles.tableCol}>
+                 <View style={styles.tableCol}>
                   <Text style={styles.tableCell}>
                     {totalPayments(ownerPayments) || ""}
                   </Text>
-                </View> 
+                </View>  
               </View>
             
                </View>

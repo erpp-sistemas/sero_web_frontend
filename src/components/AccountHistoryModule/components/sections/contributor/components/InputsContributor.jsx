@@ -46,7 +46,7 @@ function InputsContributor() {
         sx={{marginBottom:"1rem",marginRight:"1rem",width:"92%"}}
         id="input-with-icon-textfield"
         label="Direccion"
-        value={informationContributor?.street || ""}
+        value={informationContributor[0]?.street || ""}
         multiline
         InputProps={{
           startAdornment: (
@@ -65,7 +65,7 @@ function InputsContributor() {
         sx={{marginBottom:"1rem",marginRight:"1rem"}}
         id="input-with-icon-textfield"
         label="Num. Ext."
-        value={informationContributor?.["outdoor_number"] || ""}
+        value={informationContributor[0]?.["outdoor_number"] || ""}
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
@@ -83,7 +83,7 @@ function InputsContributor() {
         sx={{marginBottom:"1rem",marginRight:"1rem"}}
         id="input-with-icon-textfield"
         label="Num. Int."
-        value={ informationContributor?.["interior_number"] || "" }
+        value={ informationContributor[0]?.["interior_number"] || "" }
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
@@ -101,7 +101,7 @@ function InputsContributor() {
         sx={{marginBottom:"1rem",marginRight:"1rem",width:"92%"}}
         id="input-with-icon-textfield"
         label="Colonia"
-        value={informationContributor?.cologne || ""}
+        value={informationContributor[0]?.cologne || ""}
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
@@ -119,7 +119,7 @@ function InputsContributor() {
         sx={{marginBottom:"1rem",marginRight:"1rem"}}
         id="input-with-icon-textfield"
         label="Manzana"
-        value={informationContributor?.square || ""}
+        value={informationContributor[0]?.square || ""}
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
@@ -137,7 +137,7 @@ function InputsContributor() {
         sx={{marginBottom:"1rem",marginRight:"1rem"}}
         id="input-with-icon-textfield"
         label="Lote"
-        value={informationContributor?.allotment || ""}
+        value={informationContributor[0]?.allotment || ""}
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
@@ -156,7 +156,7 @@ function InputsContributor() {
         sx={{marginBottom:"1rem",marginRight:"1rem"}}
         id="input-with-icon-textfield"
         label="Entre Calle"
-        value={informationContributor?.["between_street_1"] || ""}
+        value={informationContributor[0]?.["between_street_1"] || ""}
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
@@ -174,7 +174,7 @@ function InputsContributor() {
         sx={{marginBottom:"1rem",marginRight:"1rem"}}
         id="input-with-icon-textfield"
         label="Entre Calle 2"
-        value={informationContributor?.["between_street_2"] || ""}
+        value={informationContributor[0]?.["between_street_2"] || ""}
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
@@ -192,7 +192,7 @@ function InputsContributor() {
         sx={{marginBottom:"1rem",marginRight:"1rem"}}
         id="input-with-icon-textfield"
         label="Referencia"
-        value={ informationContributor?.reference || ""}
+        value={ informationContributor[0]?.reference || ""}
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
@@ -210,7 +210,7 @@ function InputsContributor() {
         sx={{marginBottom:"1rem",marginRight:"1rem"}}
         id="input-with-icon-textfield"
         label="Poblaciòn"
-        value={informationContributor?.town || ""}
+        value={informationContributor[0]?.town || ""}
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
@@ -228,7 +228,7 @@ function InputsContributor() {
         sx={{marginBottom:"1rem",marginRight:"1rem"}}
         id="input-with-icon-textfield"
         label="Codigo Postal"
-        value={informationContributor?.poastal_code || ""}
+        value={informationContributor[0]?.poastal_code || ""}
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
