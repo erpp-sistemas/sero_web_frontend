@@ -4,10 +4,12 @@ import ExpandMore from '@mui/icons-material/ExpandMore';
 import { Collapse, List, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
 import InboxIcon from '@mui/icons-material/MoveToInbox';
 import MenuTransferList from '../../../MenuTransferList';
-function ListMenuButton({data,menus}) {
+function ListMenuButton({data,menus,subMenus}) {
 
-    console.log(data);
-    console.log(menus);
+  console.log(subMenus);
+  console.log(menus);
+
+    
 
    
    
@@ -16,7 +18,7 @@ function ListMenuButton({data,menus}) {
     const handleClick = () => {
       setOpen(!open);
     };
-
+     console.log(menus);
     const menuData = menus.find(menu => menu.id_menu === data.id_menu);
       return (
         <>
@@ -30,7 +32,7 @@ function ListMenuButton({data,menus}) {
       </ListItemButton>
       <Collapse in={open} timeout="auto" unmountOnExit>
         <List component="div" sx={{ p: 3 }}>
-          <MenuTransferList />
+          <MenuTransferList subMenus={subMenus} menus={menus} menuData={menuData}/>
         </List>
       </Collapse>
     </>
