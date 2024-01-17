@@ -39,6 +39,26 @@ export const updateMenuRolById = async (menuRolId, updatedMenuRolData) => {
   }
 };
 
+
+
+/**
+ * Obtiene las entradas de menu_rol por ID de rol desde la API.
+ *
+ * @param {number} rolId - El ID del rol para el cual se obtendrán las entradas de menu_rol.
+ * @returns {Promise<Array>} - Una promesa que se resuelve con los datos de las entradas de menu_rol.
+ * @throws {Error} - Lanza un error si hay algún problema al realizar la solicitud.
+ */
+export const getMenuRolByIdRol = async (rolId) => {
+  try {
+    const response = await axios.get(`http://localhost:3000/api/menu_rol/rol/${rolId}`);
+    
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener menu_rol entries por ID de rol:', error);
+    throw error;
+  }
+};
+
 /**
  * Elimina un elemento de menu_rol por su ID.
  *
@@ -129,6 +149,24 @@ export const getAllSubMenuRol = async () => {
       throw error.response?.data || error;
     }
   };
+
+
+  /**
+ * Obtiene las entradas de sub_menu_rol por ID de rol desde la API.
+ *
+ * @param {number} id - El ID del rol para el cual se obtendrán las entradas de sub_menu_rol.
+ * @returns {Promise<Array>} - Una promesa que se resuelve con los datos de las entradas de sub_menu_rol.
+ * @throws {Error} - Lanza un error si hay algún problema al realizar la solicitud.
+ */
+export const getSubMenuRolByIdRol = async (id) => {
+  try {
+    const response = await axios.get(`/sub_menu_rol/rol/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener sub_menu_rol por ID de rol:', error);
+    throw error;
+  }
+};
   
   /**
    * Crea un nuevo subelemento de sub_menu_rol.
