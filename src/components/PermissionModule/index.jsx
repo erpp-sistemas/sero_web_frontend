@@ -26,7 +26,13 @@ import {
 import { getAllMenus, updateMenu } from "../../api/menu";
 import { getAllSubMenus } from "../../api/submenu";
 import { getAllRoles } from "../../api/rol";
-import { createMenuRol, getMenuRolByIdRol, updateMenuRolById } from "../../api/permission";
+import {
+  createMenuRol,
+  getMenuRolByIdRol,
+  getSubMenuRolByIdRol,
+  updateMenuRolById,
+  updateSubMenuRolById,
+} from "../../api/permission";
 import CloseIcon from "@mui/icons-material/Close";
 import { GrServices } from "react-icons/gr";
 import { FaRegCircleCheck } from "react-icons/fa6";
@@ -45,6 +51,7 @@ function PermissionModule() {
   const [roles, setRoles] = React.useState([]);
   const [selectedRole, setSelectedRole] = React.useState("");
   const [menuRols, setMenuRols] = React.useState([]);
+  const [subMenuRols, setSubMenuRols] = React.useState([]);
   const [checkedItems, setCheckedItems] = React.useState({});
   const [snackbar, setSnackbar] = React.useState(null);
   const [isNewMenuRolDialogOpen, setIsNewMenuRolDialogOpen] =
@@ -251,6 +258,16 @@ function PermissionModule() {
       // Maneja el error según sea necesario
     }
   };
+
+  const fetchSubMenuByRolId = async () => {
+    try {
+      const data = await getSubMenuRolByIdRol(selectedRole);
+      setSubMenuRols(data);
+    } catch (error) {
+      console.error("Error al obtener menu_rol entries por ID de rol:", error);
+      // Maneja el error según sea necesario
+    }
+  };
   /**
    * Realiza una solicitud para obtener datos de submenús y actualiza el estado 'rows'.
    */
@@ -281,16 +298,23 @@ function PermissionModule() {
      * @private
      */
     fetchMenuByRolId();
+    fetchSubMenuByRolId()
     fetchMenus();
     fetchSubMenus();
     fetchRoles();
   }, [selectedRole]);
+  const filteredSubMenusByRole = (menuId) => {
+    // Filtrar submenús basados en el menú padre (menuId)
+    const subMenusForMenu = subMenus.filter((subMenu) => subMenu.id_menu_padre === menuId);
+  
+    // Filtrar los submenús que están asociados al rol actual
+    return subMenusForMenu.filter((subMenu) => {
+      const subMenuRol = subMenuRols.find((subMenuRol) => subMenuRol.id_sub_menu === subMenu.id);
+      return subMenuRol && subMenuRol.activo;
+    });
+  };
 
-  const filteredSubMenus = subMenus.filter((subMenu) => {
-    return subMenu.id_menu_padre === 1;
-  });
-
-  /*   const children = (
+ /*  const children = (
     <Box sx={{ display: "flex", flexDirection: "column", ml: 3 }}>
       <FormControlLabel
         label="Child 1"
@@ -301,9 +325,9 @@ function PermissionModule() {
         control={<Checkbox checked={checked[1]} onChange={handleChange3} />}
       />
     </Box>
-  ); */
+  );
 
-  console.log(menuRolData);
+  console.log(menuRolData); */
 
   /**
    * Manejador de eventos que se ejecuta al intentar agregar un nuevo rol.
@@ -341,15 +365,82 @@ function PermissionModule() {
     }
   };
 
+
+
+  const handleSubMenuCheckboxChange = async (subMenuId, checked) => {
+    console.log(subMenuId);
+    console.log(checked);
+    try {
+      // Find the corresponding menuRol entry
+      const subMenuRol = subMenuRols.find((mr) => mr.id_sub_menu === subMenuId);
+
+      if (subMenuRol) {
+
+        subMenuRol.activo = checked;
+        setSubMenuRols([...subMenuRols]); 
+
+        if (checked) {
+          await updateSubMenuRolById(subMenuId, {
+            id_sub_menu_rol: subMenuRol.id_sub_menu_rol,
+            id_sub_menu: subMenuRol.id_sub_menu,
+            id_rol: selectedRole,
+            activo: checked,
+            // Include any other data you need to update
+          });
+    
+        
+          fetchSubMenuByRolId();
+    
+              setSnackbar({
+                children: "El submenu se asocio exitosamente al rol ",
+                severity: "success",
+              });
+          
+        } else {
+          await updateSubMenuRolById(subMenuId, {
+            id_sub_menu_rol: subMenuRol.id_sub_menu_rol,
+            id_sub_menu: subMenuRol.id_sub_menu,
+            id_rol: selectedRole,
+            activo: checked,
+            // Include any other data you need to update
+          });
+      
+          // Perform any additional actions based on the change
+          fetchSubMenuByRolId();
+      
+          setSnackbar({
+            children: "El submenu se desasocio al rol ",
+            severity: "error",
+          });
+          
+        }
+
+    
+    }else {
+      // Manejar el caso donde el menú no está asociado y tampoco hay registro en la base de datos
+      setSnackbar({
+        children:
+          "No se pudo asociar o desasociar el submenú al rol porque la asociaciòn  no existe debes crear una nueva",
+        severity: "warning",
+      });
+    }
+ 
+    } catch (error) {
+      console.error("Error updating menu_rol entry:", error);
+      // Handle the error as needed
+    }
+   
+  };
+
   return (
     <Container>
       {/*  <VerticalTabs/> */}
 
-      <Stack direction="row" spacing={1} sx={{ p: 2 }}>
+      <Stack direction="row" spacing={1} sx={{ p: 1 }}>
         <FormControl variant="filled" sx={{ m: 1, minWidth: 300 }}>
           <InputLabel id="demo-simple-select-filled-label">Rol</InputLabel>
           <Select
-            sx={{ width: 650 }}
+            sx={{ width: 550 }}
             labelId="demo-simple-select-filled-label"
             id="demo-simple-select-filled"
             value={selectedRole}
@@ -372,11 +463,10 @@ function PermissionModule() {
             variant="outlined"
             size="small"
             color="secondary"
-            startIcon={ <AddOutlined />}
-            endIcon={<PiTreeStructureFill/>} 
-            
+            startIcon={<AddOutlined />}
+            endIcon={<PiTreeStructureFill />}
           >
-          Ligar Rol-Menu
+            Ligar Rol-Menu
           </Button>
           {menus.map((menu) => {
             const menuRol = menuRols.find((mr) => mr.id_menu === menu.id);
@@ -397,44 +487,22 @@ function PermissionModule() {
                   }
                   label={menu.nombre}
                 />
+                {filteredSubMenusByRole(menu.id).map((subMenuRol) => (
+        <FormControlLabel
+          key={subMenuRol.id}
+          sx={{ marginLeft: "2rem" }}
+          control={<Checkbox defaultChecked={subMenuRol.activo}   onChange={(event) => {
+            // Handle checkbox change here
+            handleSubMenuCheckboxChange(subMenuRol.id, event.target.checked);
+          }} color="secondary" />}
+          label={`${subMenuRol.nombre}`}
+        />
+      ))}
               </FormGroup>
             );
           })}
-          {/*   {menuRols.map((menuRol)=>{
-            console.log(menuRol);
-
-            console.log(menus);
-            const menuNames = menus.filter((menu)=>{
-              return menuRol.id_menu === menu.id_menu 
-            })
-           
-          
-           
-          })} */}
-          {/*  {menus.map((menu) => {
-            if (menu.activo) {
-              const filteredSubMenus = subMenus.filter((subMenu) => {
-                return subMenu.id_menu_padre === menu.id;
-              });
-
-              return (
-                <FormGroup key={menu.id}>
-                  <FormControlLabel
-                    control={<Checkbox defaultChecked />}
-                    label={`${menu.nombre}`}
-                  />
-                  {filteredSubMenus.map((subMenu) => (
-                    <FormControlLabel sx={{marginLeft:"2rem"}}
-                      key={subMenu.id}
-                      control={<Checkbox defaultChecked />}
-                      label={`${subMenu.nombre}`}
-                    />
-                  ))}
-                </FormGroup>
-              );
-            }
-            return null;
-          })} */}
+       
+        
         </Box>
       </Stack>
 
