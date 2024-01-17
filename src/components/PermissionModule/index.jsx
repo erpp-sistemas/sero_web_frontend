@@ -2,21 +2,36 @@ import React from "react";
 import Container from "../Container";
 import {
   Alert,
+  AppBar,
   Box,
+  Button,
   Checkbox,
+  Dialog,
   FormControl,
   FormControlLabel,
   FormGroup,
+  Grid,
+  IconButton,
+  InputAdornment,
   InputLabel,
   MenuItem,
+  Paper,
   Select,
   Snackbar,
   Stack,
+  TextField,
+  Toolbar,
+  Typography,
 } from "@mui/material";
 import { getAllMenus, updateMenu } from "../../api/menu";
 import { getAllSubMenus } from "../../api/submenu";
 import { getAllRoles } from "../../api/rol";
-import { getMenuRolByIdRol, updateMenuRolById } from "../../api/permission";
+import { createMenuRol, getMenuRolByIdRol, updateMenuRolById } from "../../api/permission";
+import CloseIcon from "@mui/icons-material/Close";
+import { GrServices } from "react-icons/gr";
+import { FaRegCircleCheck } from "react-icons/fa6";
+import { AddOutlined, Sync, SyncAltOutlined } from "@mui/icons-material";
+import { PiTreeStructureFill } from "react-icons/pi";
 
 /**
  * Modulo
@@ -32,9 +47,55 @@ function PermissionModule() {
   const [menuRols, setMenuRols] = React.useState([]);
   const [checkedItems, setCheckedItems] = React.useState({});
   const [snackbar, setSnackbar] = React.useState(null);
+  const [isNewMenuRolDialogOpen, setIsNewMenuRolDialogOpen] =
+    React.useState(false);
+  const [menuRolData, setMenuRolData] = React.useState({
+    id_menu: "",
+    id_rol: "",
+    activo: "",
+  });
 
+  /**
+   * Manejador de eventos que se ejecuta cuando se produce un cambio en los campos de entrada del formulario.
+   *
+   * @param {Object} event - Objeto del evento que contiene información sobre el cambio.
+   * @param {string} event.target.name - Nombre del campo que ha cambiado.
+   * @param {string} event.target.value - Valor actual del campo que ha cambiado.
+   * @param {string} event.target.type - Tipo del campo que ha cambiado.
+   * @param {boolean} event.target.checked - Estado de verificación en caso de un campo de tipo checkbox.
+   *
+   * @function
+   */
+  const handleInputOnChange = (event) => {
+    const { name, value, type, checked } = event.target;
 
-   /**
+    // Actualiza el estado serviceData con el nuevo valor del campo Servicio
+    const newValue = type === "checkbox" ? checked : value;
+    setMenuRolData((prevState) => ({
+      ...prevState,
+      [name]: newValue,
+    }));
+  };
+
+  /**
+   * Maneja la apertura del diálogo para la creación de un nuevo menú_rol.
+   * @function
+   * @returns {void}
+   */
+  const handleOpenNewMenuRolDialog = () => {
+    setIsNewMenuRolDialogOpen(true);
+  };
+
+  /**
+   * Maneja el cierre del diálogo para la creación de un nuevo menú_rol.
+   * @function
+   * @returns {void}
+   */
+  const handleCloseNewMenuRolDialog = () => {
+    setIsNewMenuRolDialogOpen(false);
+  };
+
+  /**
    * Función que cierra el componente Snackbar.
    *
    * @function
@@ -44,7 +105,7 @@ function PermissionModule() {
    *
    * @returns {void}
    */
-   const handleCloseSnackbar = () => setSnackbar(null);
+  const handleCloseSnackbar = () => setSnackbar(null);
 
   const handleCheckboxChange = async (menuId, checked) => {
     try {
@@ -60,41 +121,43 @@ function PermissionModule() {
         if (checked) {
           await updateMenuRolById(menuId, {
             id_menu_rol: menuRol.id_menu_rol,
-            id_menu:  menuRol.id_menu,
+            id_menu: menuRol.id_menu,
             id_rol: selectedRole,
             activo: checked,
             // Include any other data you need to update
           });
-  
+
           // Perform any additional actions based on the change
-          fetchMenuByRolId()
-  
+          fetchMenuByRolId();
+
           setSnackbar({
             children: "El menu se asocio exitosamente al rol ",
             severity: "success",
           });
-          
-        }else{
-
+        } else {
           await updateMenuRolById(menuId, {
             id_menu_rol: menuRol.id_menu_rol,
-            id_menu:  menuRol.id_menu,
+            id_menu: menuRol.id_menu,
             id_rol: selectedRole,
             activo: checked,
             // Include any other data you need to update
           });
-  
+
           // Perform any additional actions based on the change
-          fetchMenuByRolId()
-  
+          fetchMenuByRolId();
+
           setSnackbar({
             children: "El menu se desasocio al rol ",
             severity: "error",
           });
-          
         }
-       
-
+      } else {
+        // Manejar el caso donde el menú no está asociado y tampoco hay registro en la base de datos
+        setSnackbar({
+          children:
+            "No se pudo asociar o desasociar el menú al rol porque la asociaciòn  no existe debes crear una nueva",
+          severity: "warning",
+        });
       }
     } catch (error) {
       console.error("Error updating menu_rol entry:", error);
@@ -239,14 +302,54 @@ function PermissionModule() {
       />
     </Box>
   ); */
- 
+
+  console.log(menuRolData);
+
+  /**
+   * Manejador de eventos que se ejecuta al intentar agregar un nuevo rol.
+   * Verifica la validez de los campos del formulario y realiza la acción correspondiente.
+   *
+   * @async
+   * @function
+   */
+  const handleAddMenuRol = async () => {
+    /**
+     * Verifica si todos los campos del formulario están validados.
+     *
+     * @type {boolean} Indica si todos los campos están validados.
+     */
+
+    try {
+      const response = await createMenuRol(menuRolData);
+
+      // Aquí puedes manejar la respuesta de la solicitud si es necesario
+      console.log("Respuesta de la API:", response.data);
+
+      // Mostrar Snackbar de éxito
+      setSnackbar({
+        children: "Asociaciòn entre menu y rol exitoso",
+        severity: "success",
+      });
+
+      // Cerrar el diálogo, actualizar el estado, o realizar otras acciones necesarias
+      fetchMenuByRolId();
+      handleCloseNewMenuRolDialog();
+    } catch (error) {
+      console.error("Error al guardar datos:", error);
+      setSnackbar({ children: "Error al guardar datos", severity: "error" });
+      // Aquí puedes manejar el error según tus necesidades
+    }
+  };
+
   return (
     <Container>
       {/*  <VerticalTabs/> */}
-      <Stack direction="row" spacing={1}>
+
+      <Stack direction="row" spacing={1} sx={{ p: 2 }}>
         <FormControl variant="filled" sx={{ m: 1, minWidth: 300 }}>
           <InputLabel id="demo-simple-select-filled-label">Rol</InputLabel>
           <Select
+            sx={{ width: 650 }}
             labelId="demo-simple-select-filled-label"
             id="demo-simple-select-filled"
             value={selectedRole}
@@ -264,6 +367,17 @@ function PermissionModule() {
           </Select>
         </FormControl>
         <Box>
+          <Button
+            onClick={handleOpenNewMenuRolDialog}
+            variant="outlined"
+            size="small"
+            color="secondary"
+            startIcon={ <AddOutlined />}
+            endIcon={<PiTreeStructureFill/>} 
+            
+          >
+          Ligar Rol-Menu
+          </Button>
           {menus.map((menu) => {
             const menuRol = menuRols.find((mr) => mr.id_menu === menu.id);
             const isChecked = menuRol ? menuRol.activo : false;
@@ -328,6 +442,159 @@ function PermissionModule() {
         <Snackbar open onClose={handleCloseSnackbar} autoHideDuration={6000}>
           <Alert {...snackbar} onClose={handleCloseSnackbar} />
         </Snackbar>
+      )}
+
+      {isNewMenuRolDialogOpen && (
+        <Dialog
+          fullScreen
+          open={isNewMenuRolDialogOpen}
+          onClose={handleCloseNewMenuRolDialog}
+        >
+          <AppBar sx={{ position: "relative" }}>
+            <Toolbar>
+              <IconButton
+                edge="start"
+                color="inherit"
+                onClick={handleCloseNewMenuRolDialog}
+                aria-label="close"
+              >
+                <CloseIcon />
+              </IconButton>
+              {/*  <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
+                Agrega nueva tarea
+              </Typography> */}
+              {/*  <Button autoFocus color="inherit"  onClick={handleClose}>
+                Guardar
+              </Button> */}
+            </Toolbar>
+          </AppBar>
+          {/* Aqui va el contenido */}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "100%", // Ajusta según sea necesario
+            }}
+          >
+            <Paper
+              sx={{
+                width: "40%",
+                height: "auto",
+                boxShadow: 3,
+                padding: "2rem",
+                borderRadius: 1,
+              }}
+            >
+              {/* Contenido real del Paper */}
+              <Typography variant="body1" sx={{ mb: "2rem" }}>
+                Agregar nueva asociaciòn menu rol
+              </Typography>
+              {/* nombre, :imagen, :activo, :orden, :icono_app_movil */}
+              <Grid container spacing={2}>
+                <Grid item xs={12} sx={{ p: 2 }}>
+                  <FormControl variant="filled" sx={{ m: 1, minWidth: 300 }}>
+                    <InputLabel id="demo-simple-select-filled-label">
+                      Rol
+                    </InputLabel>
+                    <Select
+                      sx={{ width: 450 }}
+                      color="secondary"
+                      labelId="demo-simple-select-filled-label-id-rol"
+                      id="demo-simple-select-filled-id-rol"
+                      name="id_rol"
+                      value={menuRolData.id_rol}
+                      onChange={handleInputOnChange}
+                    >
+                      <MenuItem value="">
+                        <em>Ningun</em>
+                      </MenuItem>
+                      {roles.map((role) => (
+                        <MenuItem key={role.id} value={role.id}>
+                          {role.nombre}{" "}
+                          {/* Replace with the actual property name from your role object */}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+
+                  <FormControl variant="filled" sx={{ m: 1, minWidth: 300 }}>
+                    <InputLabel id="demo-simple-select-filled-label">
+                      Menu
+                    </InputLabel>
+                    <Select
+                      sx={{ width: 450 }}
+                      color="secondary"
+                      labelId="demo-simple-select-filled-label-id-menu"
+                      id="demo-simple-select-filled-id-menu"
+                      name="id_menu"
+                      value={menuRolData.id_menu}
+                      onChange={handleInputOnChange}
+                    >
+                      <MenuItem value="">
+                        <em>Ningun</em>
+                      </MenuItem>
+                      {menus.map((menu) => (
+                        <MenuItem key={menu.id} value={menu.id}>
+                          {menu.nombre}{" "}
+                          {/* Replace with the actual property name from your role object */}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  {/*   {validateInputs.nombre ? (
+                    <Stack sx={{ marginTop: "0.2rem" }} direction="row">
+                      <FaRegCircleCheck style={{ color: "#14B814" }} />{" "}
+                      <Typography color={"secondary"} variant="caption">
+                        ¡Gracias por ingresar un rol!
+                      </Typography>
+                    </Stack>
+                  ) : (
+                    <Typography sx={{ color: "red" }} variant="caption">
+                      * ¡Por favor, ingresa un rol!
+                    </Typography>
+                  )}  */}
+
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "row",
+                      alignContent: "center",
+                      marginBottom: "2rem",
+                      p: 2,
+                    }}
+                  >
+                    <InputLabel sx={{ alignSelf: "center" }}>Activo</InputLabel>
+                    <Checkbox
+                      {..."label"}
+                      onChange={handleInputOnChange}
+                      name="activo"
+                      size="small"
+                      color="secondary"
+                    />
+                  </Box>
+                </Grid>
+              </Grid>
+
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "end",
+                  marginTop: "2.5rem",
+                }}
+              >
+                <Button
+                  endIcon={<Sync />}
+                  color="secondary"
+                  variant="contained"
+                  onClick={handleAddMenuRol}
+                >
+                  Guardar Asociaciòn de Rol con Menu
+                </Button>
+              </Box>
+            </Paper>
+          </Box>
+        </Dialog>
       )}
     </Container>
   );
