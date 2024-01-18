@@ -123,6 +123,8 @@ export const getAllSubMenuRol = async () => {
    * @returns {Promise} Una promesa que se resuelve con los datos actualizados o se rechaza con un error.
    */
   export const updateSubMenuRolById = async (subMenuRolId, updatedSubMenuRolData) => {
+
+    console.log(updatedSubMenuRolData);
     try {
       const response = await axios.put(`/sub_menu_rol/${subMenuRolId}`, updatedSubMenuRolData);
       // Podrías realizar operaciones adicionales aquí después de la actualización
