@@ -17,15 +17,15 @@ import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import ManageSearchIcon from "@mui/icons-material/ManageSearch";
 import { useStoreZustand } from "../../../../zustan_store/useStoreZustand";
 import axios from "axios";
-import { PDFViewer } from "@react-pdf/renderer";
+import { PDFDownloadLink, PDFViewer } from "@react-pdf/renderer";
 import Pdf from "../pdf";
 import ReactPDF from "@react-pdf/renderer";
 import useAccountData from "../../../../hooks/accountDataHook";
 import useCombinedSlices from "../../../../hooks/useCombinedSlices";
-import PropTypes from 'prop-types';
-import { withErrorBoundary } from '@sentry/react';
+import PropTypes from "prop-types";
+import { withErrorBoundary } from "@sentry/react";
 import PlaceSelect from "../../../PlaceSelect";
-
+import CancelIcon from '@mui/icons-material/Cancel';
 /**
  * Componente de búsqueda que permite buscar información por cuenta y realizar búsquedas personalizadas.
  *
@@ -48,7 +48,11 @@ function Search({
   ownerHomeImages,
   ownerDebts,
   ownerPayments,
+  ownerActions,
+  accountNumber,
 }) {
+
+
   const { setPlazaNumber, plazaNumber, setAlertInfoFromRequest } =
     useStoreZustand();
   const [searchValue, setSearchValue] = React.useState("");
@@ -56,7 +60,7 @@ function Search({
   /* const { setAccountData} = useStoreZustand(); */
   const { setAccountData, alertInfo, setAlertInfo } = useCombinedSlices();
   const [openPDF, setOpenPDF] = React.useState(false);
-  
+
   /**
    * Abre el visor de PDF.
    */
@@ -84,7 +88,6 @@ function Search({
       try {
         const response = await axios.get(apiUrl);
         const data = response.data;
-       
 
         const requestInfo = {
           url: apiUrl,
@@ -98,7 +101,7 @@ function Search({
         setAccountData(data);
       } catch (error) {
         // Manejar errores, por ejemplo, imprimir el mensaje de error en la consola
-        
+
         console.error("Error al hacer la solicitud:", error.message);
 
         const requestInfo = {
@@ -134,18 +137,16 @@ function Search({
    * @param {Object} e - Evento de cambio.
    * @param {string} controlName - Nombre del control.
    */
-  
 
-  const handlePlaceChange = (e)=>{
+  const handlePlaceChange = (e) => {
     setPlazaNumber(e.target.value);
-
-  }
+  };
   return (
     <>
-    <Box sx={{width:"35%"}}>
-    <PlaceSelect handlePlaceChange={handlePlaceChange}/>
-    </Box>
-    {/*   <TextField
+      <Box sx={{ width: "35%" }}>
+        <PlaceSelect handlePlaceChange={handlePlaceChange} />
+      </Box>
+      {/*   <TextField
         color="secondary"
         id="filled-select-currency"
         select
@@ -194,7 +195,7 @@ function Search({
         variant="filled"
         sx={{ width: "20%" }}
         onChange={(e) => setSearchValue(e.target.value)}
-        value={searchValue}
+        value={accountNumber || searchValue}
       />
       <Button
         color="secondary"
@@ -217,20 +218,34 @@ function Search({
       </Button>
       {openPDF && ownerDetails && (
         <Dialog open={openPDF} onClose={openPDF} maxWidth={true}>
-          <DialogTitle>Pdf Visualizer</DialogTitle>
+          <DialogTitle>Descarga tu Pdf</DialogTitle>
           <DialogContentText>
-            <PDFViewer width={800} height={1200}>
-              <Pdf
-                ownerDetails={ownerDetails}
-                ownerHomeImages={ownerHomeImages}
-                ownerDebts={ownerDebts}
-                ownerPayments={ownerPayments}
-              />
-            </PDFViewer>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <PDFDownloadLink
+                document={
+                  <Pdf
+                    ownerDetails={ownerDetails}
+                    ownerHomeImages={ownerHomeImages}
+                    ownerDebts={ownerDebts}
+                    ownerPayments={ownerPayments}
+                    ownerActions={ownerActions}
+                  />
+                } /*  */
+                fileName={`Cuenta_No_${ownerDetails[0].account}.pdf`}
+              >
+                <Button color="secondary"> <PictureAsPdfIcon /></Button>
+              </PDFDownloadLink>
+            </Box>
           </DialogContentText>
           <DialogActions>
             <Button onClick={handleClosePDF} color="secondary">
-              Cerrar
+            <CancelIcon/>
             </Button>
           </DialogActions>
         </Dialog>

@@ -22,7 +22,7 @@ import axios from "axios";
 import { useStoreZustand } from "../../../../zustan_store/useStoreZustand";
 import CloseIcon from '@mui/icons-material/Close';
 import useCombinedSlices from "../../../../hooks/useCombinedSlices";
-function DialogSearch({ handleCloseDialog }) {
+function DialogSearch({ handleCloseDialog,setAccountNumber }) {
   const { setRowAccount, plazaNumber, setAlertInfoFromRequest } =
     useStoreZustand();
     const { setAccountData } = useCombinedSlices();
@@ -392,6 +392,7 @@ function DialogSearch({ handleCloseDialog }) {
                 setLoading(true); // Activa el indicador de carga
                 const plaza_id = plazaNumber;
                 const account_id = params.row.account;
+                
                 const apiUrl = `http://localhost:3000/api/AccountHistoryByCount/${plaza_id}/${account_id}/`;
   
                 const fetchData = async () => {
@@ -405,6 +406,7 @@ function DialogSearch({ handleCloseDialog }) {
                       statusText: response.statusText,
                     }); */
                     setAccountData(data);
+                    setAccountNumber(account_id)
                   } catch (error) {
                     // Manejar errores, por ejemplo, imprimir el mensaje de error en la consola
                     console.error("Error al hacer la solicitud:", error.message);
