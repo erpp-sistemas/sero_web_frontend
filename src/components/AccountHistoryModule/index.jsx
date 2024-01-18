@@ -29,6 +29,7 @@ function AccountHistoryModule() {
     accountData,
     informationContributor,
     payments,
+    actions,
     setPhotos,
     setActions,
     setInformationContributor,
@@ -57,7 +58,8 @@ function AccountHistoryModule() {
 
   const [openDialog, setOpenDialog] = React.useState(false);
   const [openBackDrop, setOpenBackDrop] = React.useState(false);
-
+  const [accountNumber, setAccountNumber] = React.useState("");
+  console.log(accountNumber);
   /**
    * Opens the search dialog.
    *
@@ -188,6 +190,8 @@ function AccountHistoryModule() {
           ownerHomeImages={photos}
           ownerDebts={debts}
           ownerPayments={payments}
+          ownerActions={actions}
+          accountNumber={accountNumber}
         />
       </Container>
       <Container>
@@ -198,7 +202,7 @@ function AccountHistoryModule() {
       </Container>
       {accountData && <Container>{renderContent(selectedTab)}</Container>}
       {/* {openDialog && <SearchDialog handleCloseDialog={handleCloseDialog} />} */}
-      {openDialog && <DialogSearch handleCloseDialog={handleCloseDialog} />}
+      {openDialog && <DialogSearch handleCloseDialog={handleCloseDialog} setAccountNumber={setAccountNumber} />}
       {openBackDrop && <BackDrop openBackDrop={openBackDrop} />}
     </>
   );
