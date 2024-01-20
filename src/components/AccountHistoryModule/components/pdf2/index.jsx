@@ -247,6 +247,7 @@ const styles = StyleSheet.create({
   },
   tableColImage: {
     width: "33.33%",
+    height:80,
     borderColor: "black",
     borderStyle: "solid",
     borderWidth: 1,
@@ -255,20 +256,20 @@ const styles = StyleSheet.create({
   },
   tableColImageMap: {
     width: "100%",
-    height:150,
+    height: 150,
     borderColor: "black",
     borderStyle: "solid",
     borderWidth: 1,
     borderLeftWidth: 0,
     borderTopWidth: 0,
-    alignItems: "center",  // Center the content horizontally
-    justifyContent: "center",  // Center the content vertically
+    alignItems: "center", // Center the content horizontally
+    justifyContent: "center", // Center the content vertically
   },
-  
+
   imageMap: {
     width: "100%",
     height: "auto",
-    resizeMode: "cover",  // Adjust resizeMode based on your needs
+    resizeMode: "cover", // Adjust resizeMode based on your needs
   },
   tableColMap: {
     width: "50%",
@@ -299,12 +300,11 @@ const styles = StyleSheet.create({
     bottom: 10,
     right: 10,
   },
-  
 });
 /*  */
 /*  */
 
-function Pdf({
+function Pdf2({
   ownerDetails,
   ownerHomeImages,
   ownerDebts,
@@ -324,7 +324,6 @@ function Pdf({
 
   const qrCodeData = generateQRCodeData("https://example.com");
 
- 
   const [image, setImage] = React.useState("");
   React.useEffect(() => {
     setImage(ownerHomeImages[1]?.imageUrl);
@@ -334,6 +333,8 @@ function Pdf({
     const geo_punto = `https://api.mapbox.com/styles/v1/mapbox/light-v10/static/pin-l+000(${longitude},${latitude})/${longitude},${latitude},17,0/400x250?access_token=pk.eyJ1IjoibGVzdGF0eCIsImEiOiJjbDJoMzJrbmYwYTNrM2NteGVtMzBsODFvIn0.lTrpDiiVnBWEv141_PnuUg`;
     return geo_punto;
   }
+
+  
 
   return (
     <Document title={`Cuenta No. ${ownerDetails[0].account}`}>
@@ -351,7 +352,7 @@ function Pdf({
         >
           <Image style={styles.logoWaterMark} src={LogoCheck} />
         </View>
-        <View style={styles.header}>
+        <View  style={styles.header}>
           {/* Primer logo */}
           <Image style={styles.logo} src={LogoErpp} />
           <Image style={styles.logo} src={LogoSer0} />
@@ -558,14 +559,14 @@ function Pdf({
                 style={styles.imageMap}
               />
             </View>
-            
+
             <View style={styles.tableColCoordinates}>
-                        <Text style={styles.tableCellCoordinates}>
-                         {`Longitud: ${ownerDetails[0].longitude}   Latitud: ${ownerDetails[0].latitude}`}
-                        </Text>
-                      </View>
-           
-     {/*        <View style={styles.tableRow}>
+              <Text style={styles.tableCellCoordinates}>
+                {`Longitud: ${ownerDetails[0].longitude}   Latitud: ${ownerDetails[0].latitude}`}
+              </Text>
+            </View>
+
+            {/*        <View style={styles.tableRow}>
                     <View style={styles.tableColTitle}>
                       <Text style={styles.tableCell}>Imagenes</Text>
                     </View>
@@ -619,7 +620,7 @@ function Pdf({
   ))} 
                 
               </View> */}
-         {/*    {sortedOwnerActions.length > 0 ? (
+            {/*    {sortedOwnerActions.length > 0 ? (
               <>
                 <View style={styles.tableRow}>
                   <View style={styles.tableColTitle}>
@@ -668,7 +669,7 @@ function Pdf({
               </View>
             )} */}
 
-         {/*    {ownerDebts.length > 0 ? (
+            {/*    {ownerDebts.length > 0 ? (
               <>
                 <View style={styles.tableRow}>
                   <View style={styles.tableColTitle}>
@@ -724,7 +725,6 @@ function Pdf({
             )}
           */}
           </View>
-       
         </View>
 
         <View style={styles.footer}>
@@ -753,8 +753,12 @@ function Pdf({
           </Text>
         </View>
       </Page>
-      <Page size="A4" style={{ ...styles.body, height: "100vh" }} wrap={false}>
-         <View
+      <Page
+        size="A4"
+        style={{ ...styles.body, minHeight: "100vh" }}
+        wrap={false}
+      >
+        <View
           style={{
             position: "absolute",
             zIndex: 1,
@@ -771,53 +775,57 @@ function Pdf({
           <Image style={styles.logo} src={LogoErpp} />
           <Image style={styles.logo} src={LogoSer0} />
         </View>
-        
 
-
-        <View style={styles.tableRow}>
-                    <View style={styles.tableColTitle}>
-                      <Text style={styles.tableCell}>Imagenes</Text>
-                    </View>
-                  </View>
+        <View style={styles.section}>
+          <View style={styles.table}>
+            <View style={styles.tableRow}>
+              <View style={styles.tableColTitle}>
+                <Text style={styles.tableCell}>Imagenes</Text>
+              </View>
+            </View>
 
             {ownerHomeImages.length > 0 ? (
-              chunkArray(ownerHomeImages, 3).map((imageRow, rowIndex) => (
-                
-                <React.Fragment key={rowIndex}>
-                 
+              chunkArray(ownerHomeImages.slice(0, 9), 3).map(
+                (imageRow, rowIndex) => (
+                  <React.Fragment key={rowIndex}>
+                    <View style={styles.tableRow}>
+                      {imageRow.map((image, colIndex) => (
+                        <View
+                          key={colIndex}
+                          style={styles.tableColHeaderImages}
+                        >
+                          <Text style={styles.tableCell}>
+                            {image.image_type}
+                          </Text>
+                        </View>
+                      ))}
+                    </View>
 
-                  <View style={styles.tableRow}>
-                    {imageRow.map((image, colIndex) => (
-                      <View key={colIndex} style={styles.tableColHeaderImages}>
-                        <Text style={styles.tableCell}>{image.image_type}</Text>
-                      </View>
-                    ))}
-                  </View>
-
-                  <View style={styles.tableRow}>
-                    {imageRow.map((image, colIndex) => (
-                      <View key={colIndex} style={styles.tableColImage}>
-                        <Image
-                          style={styles.image}
-                          src={{
-                            uri: image.image_url,
-                            method: "GET",
-                            headers: { "Cache-Control": "no-cache" },
-                            body: "",
-                          }}
-                        />
-                      </View>
-                    ))}
-                  </View>
-                </React.Fragment>
-              ))
+                    <View style={styles.tableRow}>
+                      {imageRow.map((image, colIndex) => (
+                        <View key={colIndex} style={styles.tableColImage}>
+                          <Image
+                            style={styles.image}
+                            src={{
+                              uri: image.image_url,
+                              method: "GET",
+                              headers: { "Cache-Control": "no-cache" },
+                              body: "",
+                            }}
+                          />
+                        </View>
+                      ))}
+                    </View>
+                  </React.Fragment>
+                )
+              )
             ) : (
               <View style={styles.tableRow}>
                 <Text style={styles.tableCell}>{""}</Text>
               </View>
             )}
 
-{sortedOwnerActions.length > 0 ? (
+            {/* {sortedOwnerActions.length > 0 ? (
               <>
                 <View style={styles.tableRow}>
                   <View style={styles.tableColTitle}>
@@ -883,7 +891,9 @@ function Pdf({
               <View style={styles.tableRow}>
                 <Text style={styles.tableCell}>{""}</Text>
               </View>
-            )}
+            )} */}
+          </View>
+        </View>
 
         <View style={styles.footer}>
           <Text style={{ color: "#17E85D", fontFamily: "Roboto" }}>
@@ -910,11 +920,755 @@ function Pdf({
             C.P. 11510
           </Text>
         </View>
-
-
-
       </Page>
-      <Page
+      {ownerHomeImages.slice(9, 18).length > 0 ? (
+        <Page
+          size="A4"
+          style={{ ...styles.body, minHeight: "100vh" }}
+          wrap={false}
+        >
+          <View
+            style={{
+              position: "absolute",
+              zIndex: 1,
+              top: "-5%",
+              left: "-10%",
+              color: "rgba(255, 255, 255, 0.3)",
+              opacity: 0.1,
+              filter: "blur(8px)",
+            }}
+          >
+            <Image style={styles.logoWaterMark} src={LogoCheck} />
+          </View>
+          <View style={styles.header}>
+            <Image style={styles.logo} src={LogoErpp} />
+            <Image style={styles.logo} src={LogoSer0} />
+          </View>
+
+          <View style={styles.section}>
+            <View style={styles.table}>
+              <View style={styles.tableRow}>
+                <View style={styles.tableColTitle}>
+                  <Text style={styles.tableCell}>Imagenes</Text>
+                </View>
+              </View>
+
+              {ownerHomeImages.length > 0 ? (
+                chunkArray(ownerHomeImages.slice(9, 18), 3).map(
+                  (imageRow, rowIndex) => (
+                    <React.Fragment key={rowIndex}>
+                      <View style={styles.tableRow}>
+                        {imageRow.map((image, colIndex) => (
+                          <View
+                            key={colIndex}
+                            style={styles.tableColHeaderImages}
+                          >
+                            <Text style={styles.tableCell}>
+                              {image.image_type}
+                            </Text>
+                          </View>
+                        ))}
+                      </View>
+
+                      <View style={styles.tableRow}>
+                        {imageRow.map((image, colIndex) => (
+                          <View key={colIndex} style={styles.tableColImage}>
+                            <Image
+                              style={styles.image}
+                              src={{
+                                uri: image.image_url,
+                                method: "GET",
+                                headers: { "Cache-Control": "no-cache" },
+                                body: "",
+                              }}
+                            />
+                          </View>
+                        ))}
+                      </View>
+                    </React.Fragment>
+                  )
+                )
+              ) : (
+                <View style={styles.tableRow}>
+                  <Text style={styles.tableCell}>{""}</Text>
+                </View>
+              )}
+
+              {/* {sortedOwnerActions.length > 0 ? (
+              <>
+                <View style={styles.tableRow}>
+                  <View style={styles.tableColTitle}>
+                    <Text style={styles.tableCell}>Acciones Realizadas</Text>
+                  </View>
+                </View>
+                <View style={styles.tableRow}>
+                  <View style={styles.tableColHeader}>
+                    <Text style={styles.tableCell}>Tarea</Text>
+                  </View>
+                  <View style={styles.tableColHeader}>
+                    <Text style={styles.tableCell}>Gestor</Text>
+                  </View>
+                  <View style={styles.tableColHeader}>
+                    <Text style={styles.tableCell}>Fecha de captura</Text>
+                  </View>
+                  <View style={styles.tableColHeader}>
+                    <Text style={styles.tableCell}>Proceso</Text>
+                  </View>
+                </View>
+                {sortedOwnerActions.map((actions, index) => (
+                  <View style={styles.tableRow} key={index}>
+                    <View style={styles.tableCol}>
+                      <Text style={{ ...styles.tableCell, color: 'gray' }}>{actions.task_done}</Text>
+                    </View>
+                    <View style={styles.tableCol}>
+                      <Text style={{ ...styles.tableCell, color: 'gray' }}>
+                        {actions.person_who_capture}
+                      </Text>
+                    </View>
+                    <View style={styles.tableCol}>
+                      <Text style={{ ...styles.tableCell, color: 'gray' }}>
+                        {formatDate(actions.date_capture, "full") || ""}
+                      </Text>
+                    </View>
+                    <View style={styles.tableCol}>
+                      <Text style={styles.tableCell}>
+                      </Text>
+                    </View>
+                  </View>
+
+                ))}
+                  <View style={styles.tableRow}>
+                <Text style={styles.tableCell}>{""}</Text>
+              </View>
+              <View style={styles.tableRow}>
+                <Text style={styles.tableCell}>{""}</Text>
+              </View>
+              <View style={styles.tableRow}>
+                <Text style={styles.tableCell}>{""}</Text>
+              </View>
+              <View style={styles.tableRow}>
+                <Text style={styles.tableCell}>{""}</Text>
+              </View>
+              <View style={styles.tableRow}>
+                <Text style={styles.tableCell}>{""}</Text>
+              </View>
+              <View style={styles.tableRow}>
+                <Text style={styles.tableCell}>{""}</Text>
+              </View>
+              </>
+            ) : (
+              <View style={styles.tableRow}>
+                <Text style={styles.tableCell}>{""}</Text>
+              </View>
+            )} */}
+            </View>
+          </View>
+
+          <View style={styles.footer}>
+            <Text style={{ color: "#17E85D", fontFamily: "Roboto" }}>
+              www.erpp.mx
+            </Text>
+            <Text
+              style={{ fontSize: 9, color: "lightgray", fontFamily: "Roboto" }}
+            >
+              Jaimes Balmes no. 11
+            </Text>
+            <Text
+              style={{ fontSize: 9, color: "lightgray", fontFamily: "Roboto" }}
+            >
+              Polanco I Sección
+            </Text>
+            <Text
+              style={{ fontSize: 9, color: "lightgray", fontFamily: "Roboto" }}
+            >
+              Miguel Hgo. CDMX
+            </Text>
+            <Text
+              style={{ fontSize: 9, color: "lightgray", fontFamily: "Roboto" }}
+            >
+              C.P. 11510
+            </Text>
+          </View>
+        </Page>
+      ) : null}
+      {ownerHomeImages.slice(18, 27).length > 0 ? (
+        <Page
+          size="A4"
+          style={{ ...styles.body, minHeight: "100vh" }}
+          wrap={false}
+        >
+          <View
+            style={{
+              position: "absolute",
+              zIndex: 1,
+              top: "-5%",
+              left: "-10%",
+              color: "rgba(255, 255, 255, 0.3)",
+              opacity: 0.1,
+              filter: "blur(8px)",
+            }}
+          >
+            <Image style={styles.logoWaterMark} src={LogoCheck} />
+          </View>
+          <View style={styles.header}>
+            <Image style={styles.logo} src={LogoErpp} />
+            <Image style={styles.logo} src={LogoSer0} />
+          </View>
+
+          <View style={styles.section}>
+            <View style={styles.table}>
+              <View style={styles.tableRow}>
+                <View style={styles.tableColTitle}>
+                  <Text style={styles.tableCell}>Imagenes</Text>
+                </View>
+              </View>
+
+              {ownerHomeImages.length > 0 ? (
+                chunkArray(ownerHomeImages.slice(18, 27), 3).map(
+                  (imageRow, rowIndex) => (
+                    <React.Fragment key={rowIndex}>
+                      <View style={styles.tableRow}>
+                        {imageRow.map((image, colIndex) => (
+                          <View
+                            key={colIndex}
+                            style={styles.tableColHeaderImages}
+                          >
+                            <Text style={styles.tableCell}>
+                              {image.image_type}
+                            </Text>
+                          </View>
+                        ))}
+                      </View>
+
+                      <View style={styles.tableRow}>
+                        {imageRow.map((image, colIndex) => (
+                          <View key={colIndex} style={styles.tableColImage}>
+                            <Image
+                              style={styles.image}
+                              src={{
+                                uri: image.image_url,
+                                method: "GET",
+                                headers: { "Cache-Control": "no-cache" },
+                                body: "",
+                              }}
+                            />
+                          </View>
+                        ))}
+                      </View>
+                    </React.Fragment>
+                  )
+                )
+              ) : (
+                <View style={styles.tableRow}>
+                  <Text style={styles.tableCell}>{""}</Text>
+                </View>
+              )}
+
+              {/* {sortedOwnerActions.length > 0 ? (
+              <>
+                <View style={styles.tableRow}>
+                  <View style={styles.tableColTitle}>
+                    <Text style={styles.tableCell}>Acciones Realizadas</Text>
+                  </View>
+                </View>
+                <View style={styles.tableRow}>
+                  <View style={styles.tableColHeader}>
+                    <Text style={styles.tableCell}>Tarea</Text>
+                  </View>
+                  <View style={styles.tableColHeader}>
+                    <Text style={styles.tableCell}>Gestor</Text>
+                  </View>
+                  <View style={styles.tableColHeader}>
+                    <Text style={styles.tableCell}>Fecha de captura</Text>
+                  </View>
+                  <View style={styles.tableColHeader}>
+                    <Text style={styles.tableCell}>Proceso</Text>
+                  </View>
+                </View>
+                {sortedOwnerActions.map((actions, index) => (
+                  <View style={styles.tableRow} key={index}>
+                    <View style={styles.tableCol}>
+                      <Text style={{ ...styles.tableCell, color: 'gray' }}>{actions.task_done}</Text>
+                    </View>
+                    <View style={styles.tableCol}>
+                      <Text style={{ ...styles.tableCell, color: 'gray' }}>
+                        {actions.person_who_capture}
+                      </Text>
+                    </View>
+                    <View style={styles.tableCol}>
+                      <Text style={{ ...styles.tableCell, color: 'gray' }}>
+                        {formatDate(actions.date_capture, "full") || ""}
+                      </Text>
+                    </View>
+                    <View style={styles.tableCol}>
+                      <Text style={styles.tableCell}>
+                      </Text>
+                    </View>
+                  </View>
+
+                ))}
+                  <View style={styles.tableRow}>
+                <Text style={styles.tableCell}>{""}</Text>
+              </View>
+              <View style={styles.tableRow}>
+                <Text style={styles.tableCell}>{""}</Text>
+              </View>
+              <View style={styles.tableRow}>
+                <Text style={styles.tableCell}>{""}</Text>
+              </View>
+              <View style={styles.tableRow}>
+                <Text style={styles.tableCell}>{""}</Text>
+              </View>
+              <View style={styles.tableRow}>
+                <Text style={styles.tableCell}>{""}</Text>
+              </View>
+              <View style={styles.tableRow}>
+                <Text style={styles.tableCell}>{""}</Text>
+              </View>
+              </>
+            ) : (
+              <View style={styles.tableRow}>
+                <Text style={styles.tableCell}>{""}</Text>
+              </View>
+            )} */}
+            </View>
+          </View>
+
+          <View style={styles.footer}>
+            <Text style={{ color: "#17E85D", fontFamily: "Roboto" }}>
+              www.erpp.mx
+            </Text>
+            <Text
+              style={{ fontSize: 9, color: "lightgray", fontFamily: "Roboto" }}
+            >
+              Jaimes Balmes no. 11
+            </Text>
+            <Text
+              style={{ fontSize: 9, color: "lightgray", fontFamily: "Roboto" }}
+            >
+              Polanco I Sección
+            </Text>
+            <Text
+              style={{ fontSize: 9, color: "lightgray", fontFamily: "Roboto" }}
+            >
+              Miguel Hgo. CDMX
+            </Text>
+            <Text
+              style={{ fontSize: 9, color: "lightgray", fontFamily: "Roboto" }}
+            >
+              C.P. 11510
+            </Text>
+          </View>
+        </Page>
+      ) : null}
+      {ownerHomeImages.slice(27, 36).length > 0 ? (
+        <Page
+          size="A4"
+          style={{ ...styles.body, minHeight: "100vh" }}
+          wrap={false}
+        >
+          <View
+            style={{
+              position: "absolute",
+              zIndex: 1,
+              top: "-5%",
+              left: "-10%",
+              color: "rgba(255, 255, 255, 0.3)",
+              opacity: 0.1,
+              filter: "blur(8px)",
+            }}
+          >
+            <Image style={styles.logoWaterMark} src={LogoCheck} />
+          </View>
+          <View style={styles.header}>
+            <Image style={styles.logo} src={LogoErpp} />
+            <Image style={styles.logo} src={LogoSer0} />
+          </View>
+
+          <View style={styles.section}>
+            <View style={styles.table}>
+              <View style={styles.tableRow}>
+                <View style={styles.tableColTitle}>
+                  <Text style={styles.tableCell}>Imagenes</Text>
+                </View>
+              </View>
+
+              {ownerHomeImages.length > 0 ? (
+                chunkArray(ownerHomeImages.slice(27, 36), 3).map(
+                  (imageRow, rowIndex) => (
+                    <React.Fragment key={rowIndex}>
+                      <View style={styles.tableRow}>
+                        {imageRow.map((image, colIndex) => (
+                          <View
+                            key={colIndex}
+                            style={styles.tableColHeaderImages}
+                          >
+                            <Text style={styles.tableCell}>
+                              {image.image_type}
+                            </Text>
+                          </View>
+                        ))}
+                      </View>
+
+                      <View style={styles.tableRow}>
+                        {imageRow.map((image, colIndex) => (
+                          <View key={colIndex} style={styles.tableColImage}>
+                            <Image
+                              style={styles.image}
+                              src={{
+                                uri: image.image_url,
+                                method: "GET",
+                                headers: { "Cache-Control": "no-cache" },
+                                body: "",
+                              }}
+                            />
+                          </View>
+                        ))}
+                      </View>
+                    </React.Fragment>
+                  )
+                )
+              ) : (
+                <View style={styles.tableRow}>
+                  <Text style={styles.tableCell}>{""}</Text>
+                </View>
+              )}
+
+              {/* {sortedOwnerActions.length > 0 ? (
+              <>
+                <View style={styles.tableRow}>
+                  <View style={styles.tableColTitle}>
+                    <Text style={styles.tableCell}>Acciones Realizadas</Text>
+                  </View>
+                </View>
+                <View style={styles.tableRow}>
+                  <View style={styles.tableColHeader}>
+                    <Text style={styles.tableCell}>Tarea</Text>
+                  </View>
+                  <View style={styles.tableColHeader}>
+                    <Text style={styles.tableCell}>Gestor</Text>
+                  </View>
+                  <View style={styles.tableColHeader}>
+                    <Text style={styles.tableCell}>Fecha de captura</Text>
+                  </View>
+                  <View style={styles.tableColHeader}>
+                    <Text style={styles.tableCell}>Proceso</Text>
+                  </View>
+                </View>
+                {sortedOwnerActions.map((actions, index) => (
+                  <View style={styles.tableRow} key={index}>
+                    <View style={styles.tableCol}>
+                      <Text style={{ ...styles.tableCell, color: 'gray' }}>{actions.task_done}</Text>
+                    </View>
+                    <View style={styles.tableCol}>
+                      <Text style={{ ...styles.tableCell, color: 'gray' }}>
+                        {actions.person_who_capture}
+                      </Text>
+                    </View>
+                    <View style={styles.tableCol}>
+                      <Text style={{ ...styles.tableCell, color: 'gray' }}>
+                        {formatDate(actions.date_capture, "full") || ""}
+                      </Text>
+                    </View>
+                    <View style={styles.tableCol}>
+                      <Text style={styles.tableCell}>
+                      </Text>
+                    </View>
+                  </View>
+
+                ))}
+                  <View style={styles.tableRow}>
+                <Text style={styles.tableCell}>{""}</Text>
+              </View>
+              <View style={styles.tableRow}>
+                <Text style={styles.tableCell}>{""}</Text>
+              </View>
+              <View style={styles.tableRow}>
+                <Text style={styles.tableCell}>{""}</Text>
+              </View>
+              <View style={styles.tableRow}>
+                <Text style={styles.tableCell}>{""}</Text>
+              </View>
+              <View style={styles.tableRow}>
+                <Text style={styles.tableCell}>{""}</Text>
+              </View>
+              <View style={styles.tableRow}>
+                <Text style={styles.tableCell}>{""}</Text>
+              </View>
+              </>
+            ) : (
+              <View style={styles.tableRow}>
+                <Text style={styles.tableCell}>{""}</Text>
+              </View>
+            )} */}
+            </View>
+          </View>
+
+          <View style={styles.footer}>
+            <Text style={{ color: "#17E85D", fontFamily: "Roboto" }}>
+              www.erpp.mx
+            </Text>
+            <Text
+              style={{ fontSize: 9, color: "lightgray", fontFamily: "Roboto" }}
+            >
+              Jaimes Balmes no. 11
+            </Text>
+            <Text
+              style={{ fontSize: 9, color: "lightgray", fontFamily: "Roboto" }}
+            >
+              Polanco I Sección
+            </Text>
+            <Text
+              style={{ fontSize: 9, color: "lightgray", fontFamily: "Roboto" }}
+            >
+              Miguel Hgo. CDMX
+            </Text>
+            <Text
+              style={{ fontSize: 9, color: "lightgray", fontFamily: "Roboto" }}
+            >
+              C.P. 11510
+            </Text>
+          </View>
+        </Page>
+      ) : null}
+      {sortedOwnerActions.length > 0 ? (
+        <Page
+          size="A4"
+          style={{ ...styles.body, minHeight: "100vh" }}
+          wrap={false}
+      
+        >
+          <View
+            style={{
+              position: "absolute",
+              zIndex: 1,
+              top: "-5%",
+              left: "-10%",
+              color: "rgba(255, 255, 255, 0.3)",
+              opacity: 0.1,
+              filter: "blur(8px)",
+            }}
+          >
+            <Image style={styles.logoWaterMark} src={LogoCheck} />
+          </View>
+          <View style={styles.header}>
+            <Image style={styles.logo} src={LogoErpp} />
+            <Image style={styles.logo} src={LogoSer0} />
+          </View>
+
+          <View style={styles.section}>
+            <View style={styles.table}>
+              {sortedOwnerActions.length > 0 ? (
+                <>
+                  <View style={styles.tableRow}>
+                    <View style={styles.tableColTitle}>
+                      <Text style={styles.tableCell}>Acciones Realizadas</Text>
+                    </View>
+                  </View>
+                  <View style={styles.tableRow}>
+                    <View style={styles.tableColHeader}>
+                      <Text style={styles.tableCell}>Tarea</Text>
+                    </View>
+                    <View style={styles.tableColHeader}>
+                      <Text style={styles.tableCell}>Gestor</Text>
+                    </View>
+                    <View style={styles.tableColHeader}>
+                      <Text style={styles.tableCell}>Fecha de captura</Text>
+                    </View>
+                    <View style={styles.tableColHeader}>
+                      <Text style={styles.tableCell}>Proceso</Text>
+                    </View>
+                  </View>
+                  {sortedOwnerActions.map((actions, index) => (
+                    <View style={styles.tableRow} key={index}>
+                      <View style={styles.tableCol}>
+                        <Text style={{ ...styles.tableCell, color: "gray" }}>
+                          {actions.task_done}
+                        </Text>
+                      </View>
+                      <View style={styles.tableCol}>
+                        <Text style={{ ...styles.tableCell, color: "gray" }}>
+                          {actions.person_who_capture}
+                        </Text>
+                      </View>
+                      <View style={styles.tableCol}>
+                        <Text style={{ ...styles.tableCell, color: "gray" }}>
+                          {formatDate(actions.date_capture, "full") || ""}
+                        </Text>
+                      </View>
+                      <View style={styles.tableCol}>
+                        <Text style={styles.tableCell}></Text>
+                      </View>
+                    </View>
+                  ))}
+                  <View style={styles.tableRow}>
+                    <Text style={styles.tableCell}>{""}</Text>
+                  </View>
+                  <View style={styles.tableRow}>
+                    <Text style={styles.tableCell}>{""}</Text>
+                  </View>
+                  <View style={styles.tableRow}>
+                    <Text style={styles.tableCell}>{""}</Text>
+                  </View>
+                  <View style={styles.tableRow}>
+                    <Text style={styles.tableCell}>{""}</Text>
+                  </View>
+                  <View style={styles.tableRow}>
+                    <Text style={styles.tableCell}>{""}</Text>
+                  </View>
+                  <View style={styles.tableRow}>
+                    <Text style={styles.tableCell}>{""}</Text>
+                  </View>
+                </>
+              ) : null}
+
+              {ownerDebts.length > 0 ? (
+                <>
+                  <View style={styles.tableRow}>
+                    <View style={styles.tableColTitle}>
+                      <Text style={styles.tableCell}>Adeudos</Text>
+                    </View>
+                  </View>
+                  <View style={styles.tableRow}>
+                    <View style={styles.tableColHeader}>
+                      <Text style={styles.tableCell}>Monto del Adeudo </Text>
+                    </View>
+                    <View style={styles.tableColHeader}>
+                      <Text style={styles.tableCell}>Ultima Fecha de Pago</Text>
+                    </View>
+                    <View style={styles.tableColHeader}>
+                      <Text style={styles.tableCell}>
+                        Fecha de Actualizacion
+                      </Text>
+                    </View>
+                    <View style={styles.tableColHeader}>
+                      <Text style={styles.tableCell}>Fecha de Corte</Text>
+                    </View>
+                  </View>
+                  {ownerDebts.map((debt, index) => {
+                    return (
+                      <View style={styles.tableRow}>
+                        {" "}
+                        <View style={styles.tableCol}>
+                          <Text style={styles.tableCell}>
+                            {formatCurrency(debt.debt_amount) || ""}{" "}
+                          </Text>
+                        </View>
+                        <View style={styles.tableCol}>
+                          <Text style={styles.tableCell}>
+                            {formatDate(debt.last_payment_date, "full") || ""}{" "}
+                          </Text>
+                        </View>
+                        <View style={styles.tableCol}>
+                          <Text style={styles.tableCell}>
+                            {formatDate(debt.update_date, "full") || ""}{" "}
+                          </Text>
+                        </View>
+                        <View style={styles.tableCol}>
+                          <Text style={styles.tableCell}>
+                            {formatDate(debt.cutoff_date, "full") || ""}{" "}
+                          </Text>
+                        </View>
+                      </View>
+                    );
+                  })}
+                </>
+              ) : null}
+
+              {ownerPayments.length > 0 ? (
+                <>
+                  <View style={styles.tableRow}>
+                    <View style={styles.tableColTitle}>
+                      <Text style={styles.tableCell}>Pagos</Text>
+                    </View>
+                  </View>
+                  <View style={styles.tableRow}>
+                    <View style={styles.tableColHeader}>
+                      <Text style={styles.tableCell}>Referencia</Text>
+                    </View>
+                    <View style={styles.tableColHeader}>
+                      <Text style={styles.tableCell}>Descripción</Text>
+                    </View>
+                    <View style={styles.tableColHeader}>
+                      <Text style={styles.tableCell}>Fecha de Pago</Text>
+                    </View>
+                    <View style={styles.tableColHeader}>
+                      <Text style={styles.tableCell}>Monto a pagar</Text>
+                    </View>
+                  </View>
+                  {ownerPayments.map((payments, index) => (
+                    <View style={styles.tableRow} key={index}>
+                      <View style={styles.tableCol}>
+                        <Text style={styles.tableCell}>
+                          {payments.reference || ""}
+                        </Text>
+                      </View>
+                      <View style={styles.tableCol}>
+                        <Text style={styles.tableCell}>
+                          {payments.description || ""}
+                        </Text>
+                      </View>
+                      <View style={styles.tableCol}>
+                        <Text style={styles.tableCell}>
+                          {formatDate(payments.payment_date, "full") || ""}
+                        </Text>
+                      </View>
+                      <View style={styles.tableCol}>
+                        <Text style={styles.tableCell}>
+                          {formatCurrency(payments.amount_paid) || ""}
+                        </Text>
+                      </View>
+                    </View>
+                  ))}
+                  <View style={styles.tableRow}>
+                    <View style={styles.tableCol}>
+                      <Text style={styles.tableCell}></Text>
+                    </View>
+                    <View style={styles.tableCol}>
+                      <Text style={styles.tableCell}></Text>
+                    </View>
+                    <View style={styles.tableCol}>
+                      <Text style={styles.tableCell}>Total</Text>
+                    </View>
+                    <View style={styles.tableCol}>
+                      <Text style={styles.tableCell}>
+                        {totalPayments(ownerPayments) || ""}
+                      </Text>
+                    </View>
+                  </View>
+                </>
+              ) : null}
+            </View>
+          </View>
+
+          <View style={styles.footer}>
+            <Text style={{ color: "#17E85D", fontFamily: "Roboto" }}>
+              www.erpp.mx
+            </Text>
+            <Text
+              style={{ fontSize: 9, color: "lightgray", fontFamily: "Roboto" }}
+            >
+              Jaimes Balmes no. 11
+            </Text>
+            <Text
+              style={{ fontSize: 9, color: "lightgray", fontFamily: "Roboto" }}
+            >
+              Polanco I Sección
+            </Text>
+            <Text
+              style={{ fontSize: 9, color: "lightgray", fontFamily: "Roboto" }}
+            >
+              Miguel Hgo. CDMX
+            </Text>
+            <Text
+              style={{ fontSize: 9, color: "lightgray", fontFamily: "Roboto" }}
+            >
+              C.P. 11510
+            </Text>
+          </View>
+        </Page>
+      ) : null}
+      {/*  <Page
         size="A4"
         style={{ ...styles.body, minHeight: "100vh" }}
         wrap={false}
@@ -1036,9 +1790,9 @@ function Pdf({
             C.P. 11510
           </Text>
         </View>
-      </Page>
+      </Page> */}
     </Document>
   );
 }
 
-export default Pdf;
+export default Pdf2;
