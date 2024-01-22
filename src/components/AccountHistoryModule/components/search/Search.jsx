@@ -25,7 +25,9 @@ import useCombinedSlices from "../../../../hooks/useCombinedSlices";
 import PropTypes from "prop-types";
 import { withErrorBoundary } from "@sentry/react";
 import PlaceSelect from "../../../PlaceSelect";
-import CancelIcon from '@mui/icons-material/Cancel';
+import CancelIcon from "@mui/icons-material/Cancel";
+import Pdf2 from "../pdf2";
+import html2canvas from "html2canvas";
 /**
  * Componente de búsqueda que permite buscar información por cuenta y realizar búsquedas personalizadas.
  *
@@ -51,6 +53,43 @@ function Search({
   ownerActions,
   accountNumber,
 }) {
+
+
+  const pdfViewerRef = React.useRef(null);
+  const [capturedImageURL, setCapturedImageURL] = React.useState(null);
+
+  // ... (other state and useEffect)
+
+ /*  React.useEffect(() => {
+    const handleCapture = () => {
+      if (pdfViewerRef.current) {
+
+
+          // Increase pixel ratio for higher resolution
+      // Increase pixel ratio for higher resolution
+      const scale = window.devicePixelRatio || 1;
+
+      // Set canvas dimensions based on the original size and pixel ratio
+      const width = pdfViewerRef.current.offsetWidth * scale;
+      const height = pdfViewerRef.current.offsetHeight * scale;
+
+        html2canvas(pdfViewerRef.current, {    useCORS: true,
+          scale: scale,
+          width: width,
+          height: height,
+          // Set quality for better image quality (default is 0.92)
+          // Adjust this value as needed (between 0 and 1)
+          quality: 1, }).then((canvas) => {
+          const image = canvas.toDataURL("image/png");
+          setCapturedImageURL(image);
+        });
+      }
+    };
+
+    // Call the capture function when the component mounts
+    handleCapture();
+  }, []); */
+
 
 
   const { setPlazaNumber, plazaNumber, setAlertInfoFromRequest } =
@@ -213,9 +252,32 @@ function Search({
       >
         Personalizada
       </Button>
+      {/* <div>
+        <img src={geo_punto} style={{width:"400px",height:"400px"}}/>
+      </div> */}
       <Button onClick={handleOpenPDF} variant="contained">
         <PictureAsPdfIcon />
       </Button>
+
+     {/*  <div
+        ref={pdfViewerRef}
+        style={{ width: "200px", height: "150px", backgroundColor: "red" }}
+      >
+       
+        <img
+          style={{ width: "100%", height: "auto" }}
+          src={
+            "https://bucket-files-msg.s3.us-east-2.amazonaws.com/00000007-0000000719/01/2024%2C%2014%3A08%3A10?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAT5FEWJS6OYP6WLHR%2F20240119%2Fus-east-2%2Fs3%2Faws4_request&X-Amz-Date=20240119T200810Z&X-Amz-Expires=604800&X-Amz-Signature=3865c886928eee77e0ab2547ad4c638e5fcc789d6e7df187f78c38f4a335a40e&X-Amz-SignedHeaders=host"
+          }
+        />
+      </div>
+      {capturedImageURL && (
+        <img
+          style={{ width: "100%", height: "auto" }}
+          src={`${capturedImageURL}`}
+        />
+      )} */}
+
       {openPDF && ownerDetails && (
         <Dialog open={openPDF} onClose={openPDF} maxWidth={true}>
           <DialogTitle>Descarga tu Pdf</DialogTitle>
@@ -227,25 +289,68 @@ function Search({
                 alignItems: "center",
               }}
             >
-              <PDFDownloadLink
-                document={
-                  <Pdf
-                    ownerDetails={ownerDetails}
-                    ownerHomeImages={ownerHomeImages}
-                    ownerDebts={ownerDebts}
-                    ownerPayments={ownerPayments}
-                    ownerActions={ownerActions}
-                  />
-                } /*  */
-                fileName={`Cuenta_No_${ownerDetails[0].account}.pdf`}
-              >
-                <Button color="secondary"> <PictureAsPdfIcon /></Button>
-              </PDFDownloadLink>
+              {(() => {
+                const imagesLength = ownerHomeImages.length;
+
+                switch (true) {
+                  case imagesLength === 0:
+                    return null; // No PDFDownloadLink for 0 images
+                  case imagesLength <= 3:
+                    return (
+                      <PDFDownloadLink
+                        document={
+                          <Pdf
+                            ownerDetails={ownerDetails}
+                            ownerHomeImages={ownerHomeImages}
+                            ownerDebts={ownerDebts}
+                            ownerPayments={ownerPayments}
+                            ownerActions={ownerActions}
+                          />
+                        }
+                        fileName={`Cuenta_No_${ownerDetails[0].account}.pdf`}
+                      >
+                        <Button color="secondary">
+                          {" "}
+                          <PictureAsPdfIcon />
+                        </Button>
+                      </PDFDownloadLink>
+                    );
+                  case imagesLength <= 6:
+                    // Render for 4 to 6 images
+                    // ...
+                    break;
+                  case imagesLength > 6:
+                    return (
+                      <PDFDownloadLink
+                        document={
+                          <Pdf2
+                            ownerDetails={ownerDetails}
+                            ownerHomeImages={ownerHomeImages}
+                            ownerDebts={ownerDebts}
+                            ownerPayments={ownerPayments}
+                            ownerActions={ownerActions}
+                          />
+                        }
+                        fileName={`Cuenta_No_${ownerDetails[0].account}.pdf`}
+                      >
+                        <Button color="secondary">
+                          {" "}
+                          <PictureAsPdfIcon />
+                        </Button>
+                      </PDFDownloadLink>
+                    );
+                    break;
+                  // Add cases for other lengths as needed
+
+                  default:
+                    return null; // Default case (fallback)
+                }
+              })()}
             </Box>
           </DialogContentText>
           <DialogActions>
             <Button onClick={handleClosePDF} color="secondary">
-            <CancelIcon/>
+              <CancelIcon />
             </Button>
           </DialogActions>
         </Dialog>

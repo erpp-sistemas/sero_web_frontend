@@ -67,6 +67,7 @@ import { TiTick } from "react-icons/ti";
 
 import { IoDuplicate } from "react-icons/io5";
 import useAccountData from "../../../../../../hooks/accountDataHook";
+import useCombinedSlices from "../../../../../../hooks/useCombinedSlices";
 
 const tasksArray = [
   { idTask: 1, nameTask: "1ra Carta Invitación" },
@@ -114,11 +115,15 @@ function ImageCard({ photoObject }) {
   const {
     getImageData,
     setImageData,
-    informationContributorPersonalData,
    
+    
     plazaNumber,
   } = useStoreZustand();
   const{setAccountData} = useAccountData()
+  const {informationContributor}=useCombinedSlices()
+
+
+  console.log(informationContributor);
   
 
   const [checked, setChecked] = useState(photoObject.active);
@@ -205,12 +210,14 @@ function ImageCard({ photoObject }) {
     }
     const ImageData = {
       imageId: photoObject.image_id,
-      account: informationContributorPersonalData.account,
+      account: informationContributor[0].account,
       type: photoObject.image_type,
       user_id: selectedUserId,
       date_capture: valueDateTime.format("YYYY-MM-DD HH:mm:ss"),
       session_user_id: store.getState().user.user_id,
     };
+
+  
 
     try {
       const response = await axios.post(
@@ -224,7 +231,7 @@ function ImageCard({ photoObject }) {
       if (message === "Operación exitosa") {
 
         const getResponse = await axios.get(
-          `http://localhost:3000/api/AccountHistoryByCount/${plazaNumber}/${informationContributorPersonalData.account}/`
+          `http://localhost:3000/api/AccountHistoryByCount/${plazaNumber}/${informationContributor[0].account}/`
         );
 
         if (getResponse.status === 200) {

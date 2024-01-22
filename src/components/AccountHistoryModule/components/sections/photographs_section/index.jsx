@@ -44,13 +44,10 @@ import useAccountData from "../../../../../hooks/accountDataHook";
 import useCombinedSlices from "../../../../../hooks/useCombinedSlices";
 
 
-
-const AWS_BUCKET_NAME = import.meta.env.VITE_AWS_BUCKET_NAME;
-const AWS_BUCKET_REGION = import.meta.env.AWS_BUCKET_REGION;
-const AWS_PUBLIC_KEY = import.meta.env.AWS_PUBLIC_KEY;
-const AWS_SECRET_KEY = import.meta.env.AWS_SECRET_KEY;
-const AWS_EXPIRE_SECONDS = import.meta.env.AWS_EXPIRE_SECONDS;
-const AWS_LIST_MAX_KEYS = import.meta.env.AWS_LIST_MAX_KEYS;
+const AWS_BUCKET_NAME = "bucket-files-msg";
+const AWS_BUCKET_REGION = "us-east-2";
+const AWS_PUBLIC_KEY = "AKIAT5FEWJS6OYP6WLHR";
+const AWS_SECRET_KEY = "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";
 
 
 
@@ -149,12 +146,12 @@ function PhotographsSections() {
   const {
     getImageData,
     setImageData,
-    informationContributorPersonalData,
+    
     /* setAccountData, */
     plazaNumber,
     /* photos, */
   } = useStoreZustand();
-  const {photos}=useCombinedSlices()
+  const {photos,informationContributor}=useCombinedSlices()
 
   const { setAccountData } = useAccountData();
 
@@ -303,7 +300,7 @@ function PhotographsSections() {
     try {
       const fechaActual = new Date();
       const fileName = `${
-        informationContributorPersonalData.account
+        informationContributor[0].account
       }${functionsCustom.formatDate(fechaActual, "full")}`;
       const remoteFileName = fileName;
 
@@ -313,11 +310,12 @@ function PhotographsSections() {
       // Obtener la URL firmada para el archivo
       const signedUrl = await signUrl(remoteFileName);
       setSignedUrl(signedUrl);
+      
 
       // Actualizar el estado con los datos de la imagen
       setImageDataNew((prevImageData) => ({
         ...prevImageData,
-        account: informationContributorPersonalData.account,
+        account: informationContributor[0].account,
         user_id: selectedUserId,
         session_user_id: store.getState().user.user_id,
         namePhoto: remoteFileName,
@@ -331,7 +329,7 @@ function PhotographsSections() {
 
       try {
         const getResponse = await axios.get(
-          `http://localhost:3000/api/AccountHistoryByCount/${plazaNumber}/${informationContributorPersonalData.account}/`
+          `http://localhost:3000/api/AccountHistoryByCount/${plazaNumber}/${informationContributor[0].account}/`
         );
 
         if (getResponse.status === 200) {
