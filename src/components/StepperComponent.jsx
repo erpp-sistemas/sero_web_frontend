@@ -9,6 +9,7 @@ import SelectMenusCreateUser from './SelectMenusCreateUser';
 import MessageAlert from './MessageAlert';
 
 import { tokens } from "../theme";
+import { registerUser } from '../api/auth';
 
 
 
@@ -38,6 +39,9 @@ export default function HorizontalNonLinearStepper() {
         accesoSeroWeb: false,
         accesoSeroMovil: false
     })
+
+
+    console.log(datosGenerales);
 
     // PLAZAS, SERVICIOS Y PROCESOS
     const [plazasServiciosProcesos, setPlazasServiciosProcesos] = useState({
@@ -85,7 +89,7 @@ export default function HorizontalNonLinearStepper() {
         setActiveStep(step);
     };
 
-    const handleComplete = () => {
+    const handleComplete = async() => {
 
         console.log(datosGenerales)
         let { nombre, apellidoPaterno, sexo, telefonoPersonal, fechaNacimiento, foto, password, rol } = datosGenerales
@@ -93,13 +97,37 @@ export default function HorizontalNonLinearStepper() {
         if ([nombre, apellidoPaterno, sexo, telefonoPersonal, password, rol].includes('') || foto.length === 0) {
             alert("Campos incompletos")
         } else {
-            // subir la foto a firebase o al s3
+
+            try {
+
+            const response = registerUser({name:datosGenerales.nombre,
+                first_last_name:datosGenerales.apellidoPaterno,
+                second_last_name:datosGenerales.apellidoMaterno,
+                birthdate:datosGenerales.fechaNacimiento,
+                sex_id:datosGenerales.sexo,
+                user_name:datosGenerales.usuarioAcceso,
+                password:datosGenerales.password,
+                profile_id:Number(5),
+                active_web_access:datosGenerales.accesoSeroWeb,
+                active_app_movil_access:datosGenerales.accesoSeroMovil,
+                personal_phone:datosGenerales.telefonoPersonal,
+                work_phone:datosGenerales.telefonoEmpresa,
+                url_image:datosGenerales.foto})
+
+                  // subir la foto a firebase o al s3
             const newCompleted = completed;
             newCompleted[activeStep] = true;
             //console.log(newCompleted)
             setNotFormShowPlazas(false)
             setCompleted(newCompleted);
             handleNext();
+                
+            } catch (error) {
+                console.log(error);
+                
+            }
+            
+          
         }
 
     };

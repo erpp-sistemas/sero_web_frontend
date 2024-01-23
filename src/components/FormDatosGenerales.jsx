@@ -17,6 +17,7 @@ import LockResetIcon from '@mui/icons-material/LockReset';
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
 import LocalPhoneIcon from '@mui/icons-material/LocalPhone';
 import PermPhoneMsgIcon from '@mui/icons-material/PermPhoneMsg';
+import { uploadToS3 } from "../services/s3.service";
 
 
 
@@ -35,11 +36,28 @@ const FormDatosGenerales = ({ chageDatosGenerales, datosGenerales }) => {
     const [password, setPassword] = useState('');
 
 
-    const imageChange = (e) => {
+    const imageChange = async(e) => {
         if (e.target.files && e.target.files.length > 0) {
             setSelectedImage(e.target.files[0]);
+            const file = e.target.files[0];
             //console.log(e.target.files)
-            setFotoUsuario(e.target.files)
+           
+            try {
+                const fileUrl = await uploadToS3(file);
+                console.log("URL del archivo subido:", fileUrl);
+
+                setFotoUsuario(fileUrl)
+
+                chageDatosGenerales({
+                    ...datosGenerales,
+                    foto: fileUrl, // Utiliza 'fileUrl' directamente aquí
+                 
+                  });
+                
+            } catch (error) {
+                console.error("Error al subir archivo:", error.message);
+                
+            }
         }
     };
 
