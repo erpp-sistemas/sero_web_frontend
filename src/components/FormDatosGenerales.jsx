@@ -18,6 +18,7 @@ import {
   FormGroup,
   FormControlLabel,
   Switch,
+  Grid,
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 
@@ -147,6 +148,19 @@ const FormDatosGenerales = ({ chageDatosGenerales, datosGenerales }) => {
       accesoSeroMovil: e.target.checked,
     });
   };
+  const handleSwitchWhatsApp = (e) => {
+    chageDatosGenerales({
+      ...datosGenerales,
+      credencialesWhatsApp: e.target.checked,
+    });
+  };
+
+  const handleSwitchCorreo = (e) => {
+    chageDatosGenerales({
+      ...datosGenerales,
+      credencialesCorreo: e.target.checked,
+    });
+  };
 
   return (
     <>
@@ -174,6 +188,7 @@ const FormDatosGenerales = ({ chageDatosGenerales, datosGenerales }) => {
           color="success"
           sx={{ width: "31%" }}
           onChange={(e) => changeControl(e, "nombre")}
+          value={datosGenerales?.nombre}
         />
 
         <TextField
@@ -190,6 +205,7 @@ const FormDatosGenerales = ({ chageDatosGenerales, datosGenerales }) => {
           color="success"
           sx={{ width: "31%" }}
           onChange={(e) => changeControl(e, "apellidoPaterno")}
+          value={datosGenerales?.apellidoPaterno}
         />
 
         <TextField
@@ -206,6 +222,7 @@ const FormDatosGenerales = ({ chageDatosGenerales, datosGenerales }) => {
           color="success"
           sx={{ width: "31%" }}
           onChange={(e) => changeControl(e, "apellidoMaterno")}
+          value={datosGenerales?.apellidoMaterno}
         />
 
         <TextField
@@ -222,6 +239,7 @@ const FormDatosGenerales = ({ chageDatosGenerales, datosGenerales }) => {
           color="success"
           sx={{ width: "31%" }}
           onChange={(e) => changeControl(e, "telefonoPersonal")}
+          value={datosGenerales?.telefonoPersonal}
         />
 
         <TextField
@@ -238,6 +256,7 @@ const FormDatosGenerales = ({ chageDatosGenerales, datosGenerales }) => {
           color="success"
           sx={{ width: "31%" }}
           onChange={(e) => changeControl(e, "telefonoEmpresa")}
+          value={datosGenerales?.telefonoEmpresa}
         />
 
         <TextField
@@ -247,6 +266,7 @@ const FormDatosGenerales = ({ chageDatosGenerales, datosGenerales }) => {
           variant="filled"
           sx={{ width: "45%" }}
           defaultValue=""
+          value={datosGenerales?.sexo}
           onChange={(e) => changeControl(e, "sexo")}
         >
           <MenuItem key="1" value="1">
@@ -271,6 +291,7 @@ const FormDatosGenerales = ({ chageDatosGenerales, datosGenerales }) => {
           disableFuture
           label="Fecha de nacimiento"
           openTo="year"
+         
         />
 
         <Box
@@ -347,7 +368,7 @@ const FormDatosGenerales = ({ chageDatosGenerales, datosGenerales }) => {
           variant="filled"
           color="success"
           sx={{ width: "31%" }}
-          value={usuarioAcceso}
+          value={datosGenerales.usuarioAcceso}
         />
 
         <Box sx={{ width: "31%" }}>
@@ -364,7 +385,7 @@ const FormDatosGenerales = ({ chageDatosGenerales, datosGenerales }) => {
             variant="filled"
             color="success"
             sx={{ width: "75%" }}
-            value={password}
+            value={datosGenerales.password}
           />
           <Button
             variant="outline"
@@ -392,8 +413,9 @@ const FormDatosGenerales = ({ chageDatosGenerales, datosGenerales }) => {
           sx={{ width: "31%" }}
           onChange={(e) => changeControl(e, "rol")}
           defaultValue=""
+          value={datosGenerales?.rol}
         >
-        {/*   <MenuItem key={1} value="Administrador">
+          {/*   <MenuItem key={1} value="Administrador">
             {" "}
             Administrador{" "}
           </MenuItem>
@@ -413,14 +435,20 @@ const FormDatosGenerales = ({ chageDatosGenerales, datosGenerales }) => {
             {" "}
             Gestor{" "}
           </MenuItem> */}
-          {roles.map((role)=>{
-             return <MenuItem key={role.id} value={role.id}>
-             {role.nombre}
-           </MenuItem>
+          {roles.map((role) => {
+            return (
+              <MenuItem key={role.id} value={role.id}>
+                {role.nombre}
+              </MenuItem>
+            );
           })}
         </TextField>
 
         <FormGroup>
+          <Grid container spacing={2}>
+
+         <Grid item xs={6}>
+          <Box sx={{display:"flex",flexDirection:"column",width:"200px"}}>
           <FormControlLabel
             control={
               <Switch defaultChecked color="info" sx={{ width: "70px" }} />
@@ -433,6 +461,25 @@ const FormDatosGenerales = ({ chageDatosGenerales, datosGenerales }) => {
             label="Acceso ser0 móvil"
             onChange={handleSwitchSeroMovil}
           />
+          </Box>
+          </Grid>
+          <Grid item xs={6}>
+          <Box sx={{display:"flex",flexDirection:"column",width:"300px"}}>
+          <FormControlLabel
+            control={
+              <Switch  color="info" sx={{ width: "70px" }} />
+            }
+            label="Enviar acceso por WhatsApp"
+            onChange={handleSwitchWhatsApp}
+          />
+          <FormControlLabel
+            control={<Switch color="success" sx={{ width: "70px" }} />}
+            label="Enviar acceso por Correo"
+            onChange={handleSwitchCorreo}
+          />
+          </Box>
+          </Grid>
+           </Grid>
         </FormGroup>
       </Box>
     </>

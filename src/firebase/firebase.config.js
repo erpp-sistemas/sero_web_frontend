@@ -17,8 +17,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig); */
 
 import { initializeApp } from "firebase/app";
-import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
-import { doc, getFirestore, setDoc } from "firebase/firestore";
+
 // TODO: Replace the following with your app's Firebase project configuration
 const firebaseConfig = {
   apiKey: "AIzaSyCG8Ai-1wnSTdZ_0NgYDDGqBrsn0aDeFwc",
@@ -30,7 +29,10 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+
+export default app
+
+/* const auth = getAuth(app);
 const db = getFirestore(app)
 // Función para registrar un usuario
 const registerUser = async (email, password, nombre_usuario, id_usuario,) => {
@@ -106,3 +108,4 @@ const id_usuario = "200";
 registerUser(email, password, nombre_usuario, id_usuario,);
 
 
+ */
