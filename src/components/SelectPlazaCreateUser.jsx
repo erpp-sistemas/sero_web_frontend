@@ -36,6 +36,8 @@ const SelectPlazaCreateUser = () => {
     const [showProcesosAgua, setShowProcesosAgua] = useState(false)
     const [showProcesosPredio, setShowProcesosPredio] = useState(false)
 
+   
+
 
     const handleSelectionPlaza = (id_plaza) => {
         console.log(document.getElementById(id_plaza.toString()).style.backgroundColor)
@@ -54,6 +56,7 @@ const SelectPlazaCreateUser = () => {
     }
 
     const getServiciosByIdPlaza = (id_plaza) => {
+
 
     }
 

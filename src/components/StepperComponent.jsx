@@ -107,7 +107,7 @@ export default function HorizontalNonLinearStepper() {
                 sex_id:datosGenerales.sexo,
                 user_name:datosGenerales.usuarioAcceso,
                 password:datosGenerales.password,
-                profile_id:Number(5),
+                profile_id:datosGenerales.rol,
                 active_web_access:datosGenerales.accesoSeroWeb,
                 active_app_movil_access:datosGenerales.accesoSeroMovil,
                 personal_phone:datosGenerales.telefonoPersonal,
