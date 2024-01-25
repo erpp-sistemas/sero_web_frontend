@@ -45,6 +45,60 @@ const FormDatosGenerales = ({ chageDatosGenerales, datosGenerales }) => {
   const [usuarioAcceso, setUsuarioAcceso] = useState("");
   const [password, setPassword] = useState("");
   const [roles, setRoles] = React.useState([]);
+  const [services, setServices] = React.useState([]);
+  const [processes, setProcesses] = React.useState([]);
+
+  /**
+   * Función asíncrona para obtener los datos de los servicios y actualizar el estado 'rows'.
+   *
+   * @async
+   * @private
+   * @function
+   * @throws {Error} Error al intentar obtener los datos de los roles.
+   */
+  const fetchServices = async () => {
+    try {
+      // Aquí deberías hacer tu solicitud de red para obtener los datos
+      // Reemplaza 'TU_URL_DE_DATOS' con la URL real de tus datos
+      const response = await getAllServices();
+
+      // Agrega el campo 'id_tarea' a cada fila usando el índice como valor único si no no se ven en la datagrid
+      const rowsWithId = response.map((row, index) => ({
+        ...row,
+        id: row.id_servicio || index.toString(),
+      }));
+
+      setServices(rowsWithId);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
+  /**
+   * Función asíncrona para obtener los datos de los roles y actualizar el estado 'rows'.
+   *
+   * @async
+   * @private
+   * @function
+   * @throws {Error} Error al intentar obtener los datos de los roles.
+   */
+  const fetchProcesses = async () => {
+    try {
+      // Aquí deberías hacer tu solicitud de red para obtener los datos
+      // Reemplaza 'TU_URL_DE_DATOS' con la URL real de tus datos
+      const response = await getAllProcesses();
+
+      // Agrega el campo 'id_tarea' a cada fila usando el índice como valor único si no no se ven en la datagrid
+      const rowsWithId = response.map((row, index) => ({
+        ...row,
+        id: row.id_proceso,
+      }));
+
+      setProcesses(rowsWithId);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
 
   /**
    * Función asíncrona para obtener los datos de los roles y actualizar el estado 'rows'.
@@ -55,6 +109,34 @@ const FormDatosGenerales = ({ chageDatosGenerales, datosGenerales }) => {
    * @throws {Error} Error al intentar obtener los datos de los roles.
    */
   const fetchRoles = async () => {
+    try {
+      // Aquí deberías hacer tu solicitud de red para obtener los datos
+      // Reemplaza 'TU_URL_DE_DATOS' con la URL real de tus datos
+      const response = await getAllRoles();
+
+      // Agrega el campo 'id_rol' a cada fila usando el índice como valor único si no se ven en la datagrid
+      const rowsWithId = response.map((row, index) => ({
+        ...row,
+        id: row.id_rol || index.toString(),
+      }));
+
+      setRoles(rowsWithId);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
+
+
+   /**
+   * Función asíncrona para obtener los datos de las plazas y actualizar el estado .
+   *
+   * @async
+   * @private
+   * @function
+   * @throws {Error} Error al intentar obtener los datos de los roles.
+   */
+   const fetchPlaces = async () => {
     try {
       // Aquí deberías hacer tu solicitud de red para obtener los datos
       // Reemplaza 'TU_URL_DE_DATOS' con la URL real de tus datos
@@ -291,7 +373,6 @@ const FormDatosGenerales = ({ chageDatosGenerales, datosGenerales }) => {
           disableFuture
           label="Fecha de nacimiento"
           openTo="year"
-         
         />
 
         <Box
@@ -446,40 +527,53 @@ const FormDatosGenerales = ({ chageDatosGenerales, datosGenerales }) => {
 
         <FormGroup>
           <Grid container spacing={2}>
-
-         <Grid item xs={6}>
-          <Box sx={{display:"flex",flexDirection:"column",width:"200px"}}>
-          <FormControlLabel
-            control={
-              <Switch defaultChecked color="info" sx={{ width: "70px" }} />
-            }
-            label="Acceso ser0 web"
-            onChange={handleSwitchSeroWeb}
-          />
-          <FormControlLabel
-            control={<Switch color="success" sx={{ width: "70px" }} />}
-            label="Acceso ser0 móvil"
-            onChange={handleSwitchSeroMovil}
-          />
-          </Box>
+            <Grid item xs={6}>
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  width: "200px",
+                }}
+              >
+                <FormControlLabel
+                  control={
+                    <Switch
+                      defaultChecked
+                      color="info"
+                      sx={{ width: "70px" }}
+                    />
+                  }
+                  label="Acceso ser0 web"
+                  onChange={handleSwitchSeroWeb}
+                />
+                <FormControlLabel
+                  control={<Switch color="success" sx={{ width: "70px" }} />}
+                  label="Acceso ser0 móvil"
+                  onChange={handleSwitchSeroMovil}
+                />
+              </Box>
+            </Grid>
+            <Grid item xs={6}>
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  width: "300px",
+                }}
+              >
+                <FormControlLabel
+                  control={<Switch color="info" sx={{ width: "70px" }} />}
+                  label="Enviar acceso por WhatsApp"
+                  onChange={handleSwitchWhatsApp}
+                />
+                <FormControlLabel
+                  control={<Switch color="success" sx={{ width: "70px" }} />}
+                  label="Enviar acceso por Correo"
+                  onChange={handleSwitchCorreo}
+                />
+              </Box>
+            </Grid>
           </Grid>
-          <Grid item xs={6}>
-          <Box sx={{display:"flex",flexDirection:"column",width:"300px"}}>
-          <FormControlLabel
-            control={
-              <Switch  color="info" sx={{ width: "70px" }} />
-            }
-            label="Enviar acceso por WhatsApp"
-            onChange={handleSwitchWhatsApp}
-          />
-          <FormControlLabel
-            control={<Switch color="success" sx={{ width: "70px" }} />}
-            label="Enviar acceso por Correo"
-            onChange={handleSwitchCorreo}
-          />
-          </Box>
-          </Grid>
-           </Grid>
         </FormGroup>
       </Box>
     </>

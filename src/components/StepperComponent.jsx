@@ -250,7 +250,7 @@ export default function HorizontalNonLinearStepper() {
              
         
                 setSnackbar({
-                    children: "Usuario registrado con exito ",
+                    children: "Se guardaron los datos de usuario con exito ",
                     severity: "success",
                   });
                 
