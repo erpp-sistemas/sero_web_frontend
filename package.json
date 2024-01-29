@@ -48,6 +48,7 @@
     "@turf/turf": "^6.5.0",
     "animate.css": "^4.1.1",
     "antd": "^5.11.1",
+    "antd-img-crop": "^4.21.0",
     "apexcharts": "^3.44.0",
     "aws-sdk": "^2.1493.0",
     "axios": "^1.5.0",

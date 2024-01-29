@@ -12,7 +12,7 @@ const ModalNamePolygon = ({ setShowModal, poligonosDibujados }) => {
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
 
-    console.log(poligonosDibujados)
+    
 
     const style = {
         position: 'absolute',
