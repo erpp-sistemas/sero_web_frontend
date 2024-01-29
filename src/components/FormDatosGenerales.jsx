@@ -33,6 +33,9 @@ import PermPhoneMsgIcon from "@mui/icons-material/PermPhoneMsg";
 import { uploadToS3 } from "../services/s3.service";
 import { getAllRoles } from "../api/rol";
 
+import { Upload } from "antd";
+import ImgCrop from "antd-img-crop";
+
 const FormDatosGenerales = ({ chageDatosGenerales, datosGenerales }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -45,6 +48,98 @@ const FormDatosGenerales = ({ chageDatosGenerales, datosGenerales }) => {
   const [usuarioAcceso, setUsuarioAcceso] = useState("");
   const [password, setPassword] = useState("");
   const [roles, setRoles] = React.useState([]);
+  const [services, setServices] = React.useState([]);
+  const [processes, setProcesses] = React.useState([]);
+  const [places, setPlaces] = React.useState([]);
+  const [fileList, setFileList] = React.useState([]);
+
+
+  /* console.log(fileList[0].thumbUrl);
+
+
+   const base64Image = fileList[0].thumbUrl
+   const filename =fileList[0].name
+
+  async function convertBase64ToFile(base64Image, filename) {
+    const response = await fetch(base64Image);
+    const blob = await response.blob();
+    return new File([blob], filename, {type: blob.type});
+  }
+ */
+
+  
+
+    const fetchData = async () => {
+      console.log("aqui prueba 1");
+      // Fetch your base64 image URL from fileList[0].thumbUrl
+      if (!fileList || fileList.length === 0) {
+        console.error("File list is empty or undefined.");
+        return;
+      }
+      const base64Image = fileList[0]?.thumbUrl;
+      console.log(fileList[0]);
+      console.log(base64Image);
+      if (base64Image) {
+        console.log(base64Image);
+        console.log("aqui prueba 2");
+        try {
+          const file = await convertBase64ToFile(base64Image, fileList[0].name);
+          // Now you have the File object, you can do something with it
+        if (file) {
+          const fileUrl = await uploadToS3(file);
+          console.log("URL del archivo subido:", fileUrl);
+
+          setFotoUsuario(fileUrl);
+
+          chageDatosGenerales({
+            ...datosGenerales,
+            foto: fileUrl, // Utiliza 'fileUrl' directamente aquí
+          });
+          
+        }
+        } catch (error) {
+          console.error('Error converting base64 to file:', error);
+        }
+      }
+    };
+
+
+    async function convertBase64ToFile(base64Image, filename) {
+      const response = await fetch(base64Image);
+      const blob = await response.blob();
+      return new File([blob], filename, {type: blob.type});
+    }
+
+
+
+    React.useEffect(() => {
+      fetchData();
+    }, [fileList[0]?.thumbUrl]);
+
+
+  
+  
+
+  const onChange = async ({ fileList: newFileList }, e) => {
+    setFileList(newFileList);
+  };
+  const onPreview = async (file) => {
+    let src = file.url;
+
+    if (!src) {
+      src = await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file.originFileObj);
+        reader.onload = () => resolve(reader.result);
+      });
+    }
+
+    const image = new Image();
+
+    image.src = src;
+    const imgWindow = window.open(src);
+    imgWindow?.document.write(image.outerHTML);
+  };
 
   /**
    * Función asíncrona para obtener los datos de los roles y actualizar el estado 'rows'.
@@ -75,6 +170,8 @@ const FormDatosGenerales = ({ chageDatosGenerales, datosGenerales }) => {
   React.useEffect(() => {
     fetchRoles();
   }, []);
+
+ 
 
   const imageChange = async (e) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -291,7 +388,6 @@ const FormDatosGenerales = ({ chageDatosGenerales, datosGenerales }) => {
           disableFuture
           label="Fecha de nacimiento"
           openTo="year"
-         
         />
 
         <Box
@@ -302,7 +398,22 @@ const FormDatosGenerales = ({ chageDatosGenerales, datosGenerales }) => {
         >
           <Box sx={{ textAlign: "center", width: "50%" }}>
             {/* <InputLabel id="demo-simple-select-standard-label">Foto</InputLabel> */}
-            <label for="file-input">
+            <ImgCrop  style={{ width: '300px', height: '300px' }} rotationSlider>
+              <Upload
+           
+             
+                action="https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188"
+                listType="picture-card"
+                fileList={fileList}
+                onChange={onChange}
+                onPreview={onPreview}
+              >
+                {fileList.length < 1 && "+ Upload"}
+              </Upload>
+            </ImgCrop>
+
+            {/* Prueba */}
+          {/*   <label for="file-input">
               <AddAPhotoIcon
                 sx={{ color: colors.blueAccent[400], fontSize: "100px" }}
               />
@@ -324,10 +435,10 @@ const FormDatosGenerales = ({ chageDatosGenerales, datosGenerales }) => {
               type="file"
               sx={{ display: "none" }}
               onChange={imageChange}
-            />
+            /> */}
           </Box>
 
-          {selectedImage && (
+         {/*  {selectedImage && (
             <Box sx={{ width: "30%" }}>
               <img
                 src={URL.createObjectURL(selectedImage)}
@@ -341,7 +452,7 @@ const FormDatosGenerales = ({ chageDatosGenerales, datosGenerales }) => {
                 }}
               />
             </Box>
-          )}
+          )} */}
         </Box>
       </Box>
 
@@ -446,40 +557,47 @@ const FormDatosGenerales = ({ chageDatosGenerales, datosGenerales }) => {
 
         <FormGroup>
           <Grid container spacing={2}>
-
-         <Grid item xs={6}>
-          <Box sx={{display:"flex",flexDirection:"column",width:"200px"}}>
-          <FormControlLabel
-            control={
-              <Switch defaultChecked color="info" sx={{ width: "70px" }} />
-            }
-            label="Acceso ser0 web"
-            onChange={handleSwitchSeroWeb}
-          />
-          <FormControlLabel
-            control={<Switch color="success" sx={{ width: "70px" }} />}
-            label="Acceso ser0 móvil"
-            onChange={handleSwitchSeroMovil}
-          />
-          </Box>
+            <Grid item xs={6}>
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  width: "200px",
+                }}
+              >
+                <FormControlLabel
+                  control={<Switch color="info" sx={{ width: "70px" }} />}
+                  label="Acceso ser0 web"
+                  onChange={handleSwitchSeroWeb}
+                />
+                <FormControlLabel
+                  control={<Switch color="success" sx={{ width: "70px" }} />}
+                  label="Acceso ser0 móvil"
+                  onChange={handleSwitchSeroMovil}
+                />
+              </Box>
+            </Grid>
+            <Grid item xs={6}>
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  width: "300px",
+                }}
+              >
+                <FormControlLabel
+                  control={<Switch color="info" sx={{ width: "70px" }} />}
+                  label="Enviar acceso por WhatsApp"
+                  onChange={handleSwitchWhatsApp}
+                />
+                <FormControlLabel
+                  control={<Switch color="success" sx={{ width: "70px" }} />}
+                  label="Enviar acceso por Correo"
+                  onChange={handleSwitchCorreo}
+                />
+              </Box>
+            </Grid>
           </Grid>
-          <Grid item xs={6}>
-          <Box sx={{display:"flex",flexDirection:"column",width:"300px"}}>
-          <FormControlLabel
-            control={
-              <Switch  color="info" sx={{ width: "70px" }} />
-            }
-            label="Enviar acceso por WhatsApp"
-            onChange={handleSwitchWhatsApp}
-          />
-          <FormControlLabel
-            control={<Switch color="success" sx={{ width: "70px" }} />}
-            label="Enviar acceso por Correo"
-            onChange={handleSwitchCorreo}
-          />
-          </Box>
-          </Grid>
-           </Grid>
         </FormGroup>
       </Box>
     </>

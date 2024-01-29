@@ -95,3 +95,46 @@ export const getMenusByUserId = async (userId) => {
       throw error.response?.data || error;
     }
   };
+
+
+
+
+
+  /**
+   * Crea un nuevo menú utilizando los datos proporcionados.
+   *
+   * @param {Object} menuData - Datos del menú a crear.
+   * @returns {Promise<Object>} - Una promesa que se resuelve con los datos del menú creado.
+   * @throws {Error} - Se lanza un error si la solicitud falla o si hay un error en el servidor.
+   */
+  export const createMenuByUserAndRol = async (menuData) => {
+
+    console.log(menuData);
+    try {
+      const response = await axios.post('/menusByRolAndUsuario', menuData);
+      // Podrías realizar operaciones adicionales aquí después de la creación
+      return response.data;
+    } catch (error) {
+      console.error("Error al crear un nuevo menú:", error.response?.data || error.message);
+      throw error.response?.data || error;
+    }
+  };
+
+
+   /**
+   * Crea un nuevo menú utilizando los datos proporcionados.
+   *
+   * @param {Object} menuData - Datos del menú a crear.
+   * @returns {Promise<Object>} - Una promesa que se resuelve con los datos del menú creado.
+   * @throws {Error} - Se lanza un error si la solicitud falla o si hay un error en el servidor.
+   */
+   export const menuByUserAndRol = async (userId,rolId) => {
+    try {
+      const response = await axios.get(`/menuByUserAndRol/${userId}/${rolId}`);
+      // Podrías realizar operaciones adicionales aquí después de la creación
+      return response.data;
+    } catch (error) {
+      console.error("Error al crear un nuevo menú:", error.response?.data || error.message);
+      throw error.response?.data || error;
+    }
+  };

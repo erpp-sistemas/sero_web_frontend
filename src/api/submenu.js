@@ -54,7 +54,7 @@ export const getAllSubMenus = async () => {
  */
 export const updateSubMenu = async (subMenuId, updatedSubMenuData) => {
   try {
-    const response = await axios.put(`http://localhost:3000/api//submenus/${subMenuId}`, updatedSubMenuData);
+    const response = await axios.put(`http://localhost:3000/api/submenus/${subMenuId}`, updatedSubMenuData);
     return response.data;
   } catch (error) {
     handleAxiosError(error);
@@ -77,6 +77,25 @@ export const deleteSubMenu = async (subMenuId) => {
   }
 };
 
+
+
+  /**
+   * Crea un nuevo menú utilizando los datos proporcionados.
+   *
+   * @param {Object} menuData - Datos del menú a crear.
+   * @returns {Promise<Object>} - Una promesa que se resuelve con los datos del menú creado.
+   * @throws {Error} - Se lanza un error si la solicitud falla o si hay un error en el servidor.
+   */
+  export const createSubMenuByUserAndRol = async (menuData) => {
+    try {
+      const response = await axios.post('http://localhost:3000/api/submenusByRolAndUsuario', menuData);
+      // Podrías realizar operaciones adicionales aquí después de la creación
+      return response.data;
+    } catch (error) {
+      handleAxiosError(error)
+    }
+  };
+
 /**
  * Función para manejar errores de Axios de manera centralizada.
  *
@@ -95,3 +114,10 @@ const handleAxiosError = (error) => {
     throw new Error('Error durante la configuración de la solicitud');
   }
 };
+
+
+
+
+
+
+
