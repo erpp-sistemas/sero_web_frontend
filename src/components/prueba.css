@@ -1,0 +1,5 @@
+:where(.css-dev-only-do-not-override-1adbn6x).ant-upload-wrapper.ant-upload-picture-card-wrapper .ant-upload.ant-upload-select > .ant-upload,
+:where(.css-dev-only-do-not-override-1adbn6x).ant-upload-wrapper.ant-upload-picture-circle-wrapper .ant-upload.ant-upload-select > .ant-upload {
+  color: white !important;
+  /* Agrega aquí otros estilos si es necesario */
+}

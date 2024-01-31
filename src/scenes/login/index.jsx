@@ -32,6 +32,7 @@ const Login = ({ setLogin }) => {
       
       try {
         const res = await loginRequest(user)
+        console.log(res);
         if (res && res.data) {
           setIsAuthenticated(true)
           dispatch(setUser(res.data))
