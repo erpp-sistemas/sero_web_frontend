@@ -33,7 +33,7 @@ const useCombinedSlices = () => {
 
   // Acciones personalizadas para los slices
   const setAccountDataAction = (data) => {
-    dispatch(setAccountData(data));
+    (setAccountData(data));
   };
 
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 import { tokens } from "../theme";
-
+import './prueba.css'
 // helpers
 import functionsCustom from "../helpers";
 
@@ -53,7 +53,6 @@ const FormDatosGenerales = ({ chageDatosGenerales, datosGenerales }) => {
   const [places, setPlaces] = React.useState([]);
   const [fileList, setFileList] = React.useState([]);
 
-
   /* console.log(fileList[0].thumbUrl);
 
 
@@ -67,24 +66,22 @@ const FormDatosGenerales = ({ chageDatosGenerales, datosGenerales }) => {
   }
  */
 
-  
-
-    const fetchData = async () => {
-      console.log("aqui prueba 1");
-      // Fetch your base64 image URL from fileList[0].thumbUrl
-      if (!fileList || fileList.length === 0) {
-        console.error("File list is empty or undefined.");
-        return;
-      }
-      const base64Image = fileList[0]?.thumbUrl;
-      console.log(fileList[0]);
+  const fetchData = async () => {
+    console.log("aqui prueba 1");
+    // Fetch your base64 image URL from fileList[0].thumbUrl
+    if (!fileList || fileList.length === 0) {
+      console.error("File list is empty or undefined.");
+      return;
+    }
+    const base64Image = fileList[0]?.thumbUrl;
+    console.log(fileList[0]);
+    console.log(base64Image);
+    if (base64Image) {
       console.log(base64Image);
-      if (base64Image) {
-        console.log(base64Image);
-        console.log("aqui prueba 2");
-        try {
-          const file = await convertBase64ToFile(base64Image, fileList[0].name);
-          // Now you have the File object, you can do something with it
+      console.log("aqui prueba 2");
+      try {
+        const file = await convertBase64ToFile(base64Image, fileList[0].name);
+        // Now you have the File object, you can do something with it
         if (file) {
           const fileUrl = await uploadToS3(file);
           console.log("URL del archivo subido:", fileUrl);
@@ -95,30 +92,22 @@ const FormDatosGenerales = ({ chageDatosGenerales, datosGenerales }) => {
             ...datosGenerales,
             foto: fileUrl, // Utiliza 'fileUrl' directamente aquí
           });
-          
         }
-        } catch (error) {
-          console.error('Error converting base64 to file:', error);
-        }
+      } catch (error) {
+        console.error("Error converting base64 to file:", error);
       }
-    };
-
-
-    async function convertBase64ToFile(base64Image, filename) {
-      const response = await fetch(base64Image);
-      const blob = await response.blob();
-      return new File([blob], filename, {type: blob.type});
     }
+  };
 
+  async function convertBase64ToFile(base64Image, filename) {
+    const response = await fetch(base64Image);
+    const blob = await response.blob();
+    return new File([blob], filename, { type: blob.type });
+  }
 
-
-    React.useEffect(() => {
-      fetchData();
-    }, [fileList[0]?.thumbUrl]);
-
-
-  
-  
+  React.useEffect(() => {
+    fetchData();
+  }, [fileList[0]?.thumbUrl]);
 
   const onChange = async ({ fileList: newFileList }, e) => {
     setFileList(newFileList);
@@ -170,8 +159,6 @@ const FormDatosGenerales = ({ chageDatosGenerales, datosGenerales }) => {
   React.useEffect(() => {
     fetchRoles();
   }, []);
-
- 
 
   const imageChange = async (e) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -398,22 +385,23 @@ const FormDatosGenerales = ({ chageDatosGenerales, datosGenerales }) => {
         >
           <Box sx={{ textAlign: "center", width: "50%" }}>
             {/* <InputLabel id="demo-simple-select-standard-label">Foto</InputLabel> */}
-            <ImgCrop  style={{ width: '300px', height: '300px' }} rotationSlider>
+            <ImgCrop style={{ backgroundColor: "red" }} rotationSlider>
               <Upload
-           
-             
+              
+                style={{ backgroundColor: "red" }}
                 action="https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188"
                 listType="picture-card"
                 fileList={fileList}
                 onChange={onChange}
                 onPreview={onPreview}
+                
               >
-                {fileList.length < 1 && "+ Upload"}
+                {fileList.length < 1 && "+ Cargar Imagen"}
               </Upload>
             </ImgCrop>
 
             {/* Prueba */}
-          {/*   <label for="file-input">
+            {/*   <label for="file-input">
               <AddAPhotoIcon
                 sx={{ color: colors.blueAccent[400], fontSize: "100px" }}
               />
@@ -438,7 +426,7 @@ const FormDatosGenerales = ({ chageDatosGenerales, datosGenerales }) => {
             /> */}
           </Box>
 
-         {/*  {selectedImage && (
+          {/*  {selectedImage && (
             <Box sx={{ width: "30%" }}>
               <img
                 src={URL.createObjectURL(selectedImage)}

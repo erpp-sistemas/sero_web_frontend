@@ -26,6 +26,8 @@ import { getAllServices } from "../api/service";
 import { getAllProcesses } from "../api/process";
 import { createMenuByUserAndRol, getAllMenus } from "../api/menu";
 import { createSubMenuByUserAndRol, getAllSubMenus } from "../api/submenu";
+import { getUserById } from "../api/user";
+import { store } from "../redux/store";
 
 function generateCombinations(
   user_id,
@@ -121,7 +123,11 @@ const steps = [
   "Selecciona los menus",
 ];
 
-export default function HorizontalNonLinearStepper() {
+export default function HorizontalNonLinearStepper({
+  setComponentesVisibility,
+  componentName,
+  fetchUser
+}) {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
@@ -147,8 +153,6 @@ export default function HorizontalNonLinearStepper() {
     credencialesCorreo: false,
     credencialesWhatsApp: false,
   });
-
-  console.log(datosGenerales);
 
   /**
    * Cierra la notificación (snackbar) actualmente abierta.
@@ -198,6 +202,9 @@ export default function HorizontalNonLinearStepper() {
   const [places, setPlaces] = React.useState([]);
   const [menus, setMenus] = React.useState([]);
   const [submenus, setSubmenus] = React.useState([]);
+  
+
+
 
   const totalSteps = () => {
     return steps.length;
@@ -445,6 +452,7 @@ export default function HorizontalNonLinearStepper() {
     fetchPlaces();
     fetchProcesses();
     fetchServices();
+    fetchUser();
   }, []);
 
   const handleComplete = async () => {
@@ -569,11 +577,13 @@ export default function HorizontalNonLinearStepper() {
               services,
               processes
             );
+            console.log(extractedData);
             extractedData.forEach(async (data) => {
               try {
                 // Use the spread operator (...) to add id_usuario property to the data object
 
                 // Call createUserPlazaServiceProcess with the updated data object
+                console.log(data);
                 await createUserPlazaServiceProcess(data);
                 console.log(
                   "User plaza service process data created successfully"
@@ -623,7 +633,8 @@ export default function HorizontalNonLinearStepper() {
               try {
                 // Use the spread operator (...) to add id_usuario property to the data object
 
-                console.log(data);
+                
+
                 // Call createUserPlazaServiceProcess with the updated data object
                 await createSubMenuByUserAndRol(data);
                 console.log(
@@ -647,10 +658,22 @@ export default function HorizontalNonLinearStepper() {
             children: "Admin registrado con exito ",
             severity: "success",
           });
+
+          // Salir del proceso aquí si se cumple la condición
+          fetchUser()
+          setTimeout(() => {
+            setComponentesVisibility({
+              dataGridVisible: true,
+              stepperVisible: false,
+            });
+            
+          }, 2000);
+         
+          return;
         }
 
         if (activeStep === 0 && datosGenerales.rol == 5) {
-          if (!accesoSeroMovil && accesoSeroWeb) {
+          if (!accesoSeroMovil || accesoSeroWeb) {
             showSnackbarError(
               "Para el rol de gestor, asegúrate de proporcionar valores válidos para  'accesoSeroMovil' y no puedes seleccionar 'accesoSeroWeb' ya que es invalido para este rol"
             );
@@ -669,14 +692,14 @@ export default function HorizontalNonLinearStepper() {
             });
           }
         }
-          setNotFormShowPlazas(false);
+        setNotFormShowPlazas(false);
         setCompleted({
           0: true,
         });
         handleNext();
 
         setSnackbar({
-          children: `Se guardaron los datos de ${datosGenerales.rol} con exito` ,
+          children: `Se guardaron los datos de ${datosGenerales.rol} con exito`,
           severity: "success",
         });
       }
@@ -688,38 +711,65 @@ export default function HorizontalNonLinearStepper() {
         if (activeStep === 1 && datosGenerales.rol == 5) {
           try {
             // Registro de usuario en Firebase y en el sistema
-            const [firebaseRegistration, systemRegistration] = await Promise.all([
-              registerUserFirebase(usuarioAcceso, password, nombre, rol),
-              registerUser(commonUserData),
-            ]);
-        
-            if (systemRegistration.id_usuario) {
-              const objetosActualizadosMenu = agregarIdUsuarioAObjetosMenu(
+            const [firebaseRegistration, systemRegistration] =
+              await Promise.all([
+                registerUserFirebase(usuarioAcceso, password, nombre, rol),
+                registerUser(commonUserData),
+              ]);
+
+
+              
+
+
+
+           /*  if (systemRegistration.id_usuario) {
+              const objetosActualizados = agregarIdUsuarioAObjetosMenu(
                 selectedMenus,
                 systemRegistration.id_usuario
-              );
+              ); */
+
+              if (systemRegistration.id_usuario) {
+                const objetosActualizados = agregarIdUsuarioAObjetos(
+                  extractedData,
+                  systemRegistration.id_usuario
+                );
+
+                // Creación de menús en paralelo
         
-              // Creación de menús en paralelo
-              await Promise.all(
-                objetosActualizadosMenu.map(async (data) => {
+                objetosActualizados.forEach(async (data) => {
                   try {
+                    console.log(data);
                     // Use the spread operator (...) to add id_usuario property to the data object
-                    // Call createMenuByUserAndRol with the updated data object
-                    await createMenuByUserAndRol(data);
-                    console.log("User plaza service process data created successfully");
+      
+                    // Call createUserPlazaServiceProcess with the updated data object
+                    await createUserPlazaServiceProcess(data);
+                    console.log(
+                      "User plaza service process data created successfully"
+                    );
                   } catch (error) {
-                    console.error("Error creating user plaza service process data:", error);
+                    console.error(
+                      "Error creating user plaza service process data:",
+                      error
+                    );
                   }
                 })
-              );
-        
+            
+
               setNotFormShowPlazas(false);
               setCompleted({
                 0: true,
                 1: true,
                 2: true,
               });
-        
+              fetchUser()
+            setTimeout(() => {
+              setComponentesVisibility({
+                dataGridVisible: true,
+                stepperVisible: false,
+              });
+              
+            }, 2000);
+
               setSnackbar({
                 children: "Se registró gestor con éxito",
                 severity: "success",
@@ -732,23 +782,23 @@ export default function HorizontalNonLinearStepper() {
               severity: "error",
             });
           }
-        }else{
-
+          return 
+        } else {
           setNotFormShowPlazas(false);
           setCompleted({
             0: true,
             1: true,
           });
           handleNext();
-  
+
           setSnackbar({
             children: "Se seleccionaron las plazas",
             severity: "success",
           });
 
+          
         }
 
-    
         /*    extractedData?.forEach(async (data) => {
               try {
                 const updatedData = { ...data, id_usuario: 999 };
@@ -773,7 +823,10 @@ export default function HorizontalNonLinearStepper() {
       }
 
       /* Paso 3 Aqui */
-      if (activeStep === 2 && (datosGenerales.rol != 5 || datosGenerales.rol != 1)) {
+      if (
+        activeStep === 2 &&
+        (datosGenerales.rol != 5 || datosGenerales.rol != 1)
+      ) {
         if (accesoSeroMovil) {
           await registerUserFirebase(usuarioAcceso, password, nombre, rol);
         }
@@ -788,7 +841,6 @@ export default function HorizontalNonLinearStepper() {
           );
 
           objetosActualizados.forEach(async (data) => {
-          
             try {
               // Use the spread operator (...) to add id_usuario property to the data object
 
@@ -835,6 +887,15 @@ export default function HorizontalNonLinearStepper() {
           2: true,
         });
         handleNext();
+            // Salir del proceso aquí si se cumple la condición
+            fetchUser()
+            setTimeout(() => {
+              setComponentesVisibility({
+                dataGridVisible: true,
+                stepperVisible: false,
+              });
+              
+            }, 2000);
         setSnackbar({
           children: "Se registro usuario con exito",
           severity: "success",
