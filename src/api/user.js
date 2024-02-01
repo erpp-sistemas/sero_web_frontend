@@ -32,4 +32,23 @@ export const getUserById = async (userId) => {
 };
 
 
-getUserById(151)
+
+
+  // Función para actualizar una tarea por su ID
+  export const updateUser = async (userId, updatedUserData) => {
+
+    
+    try {
+      const response = await axios.put(`http://localhost:3000/api/usuarios/${userId}`, updatedUserData);
+      // Podrías realizar operaciones adicionales aquí después de la actualización
+      console.log(response);
+      return response.data;
+    } catch (error) {
+      console.error("Error al actualizar el usuario por ID:", error.response?.data || error.message);
+      throw error.response?.data || error;
+    }
+  };
+
+
+
+
