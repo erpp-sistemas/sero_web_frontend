@@ -26,6 +26,8 @@ import {
   DialogContent,
   DialogTitle,
   FormControl,
+  FormControlLabel,
+  FormGroup,
   Grid,
   IconButton,
   InputAdornment,
@@ -37,6 +39,10 @@ import {
   Select,
   Snackbar,
   Stack,
+  Step,
+  StepLabel,
+  Stepper,
+  Switch,
   TextField,
   Toolbar,
   Typography,
@@ -46,18 +52,29 @@ import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
 import PlaceIcon from "@mui/icons-material/Place";
 import VillaIcon from "@mui/icons-material/Villa";
-import { AddOutlined } from "@mui/icons-material";
+import { AddOutlined, CheckBox } from "@mui/icons-material";
 import Viewer from "react-viewer";
 import ModeEditIcon from "@mui/icons-material/ModeEdit";
 import { GrServices } from "react-icons/gr";
 import CloseIcon from "@mui/icons-material/Close";
 import { Sync } from "@mui/icons-material";
 
+import VerifiedIcon from "@mui/icons-material/Verified";
 import { Modal, Upload } from "antd";
 import { DatePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
-import { getAccessUserByUserName, updateAccessUserById } from "../../../../api/access";
+import {
+  getAccessUserByUserName,
+  updateAccessUserById,
+} from "../../../../api/access";
 import { uploadToS3 } from "../../../../services/s3.service";
+import {
+  getAllPlaces,
+  getPlaceServiceByUserId,
+  getProcessesByUserPlaceAndServiceId,
+} from "../../../../api/place";
+import { tokens } from "../../../../theme";
+import { getAllProcesses } from "../../../../api/process";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -69,6 +86,8 @@ const MenuProps = {
     },
   },
 };
+
+const steps = ["Datos Personales", "Datos de Plazas", "Datos de Menu"];
 
 const names = [
   "Cuautitlan Izcalli",
@@ -122,7 +141,6 @@ const useFakeMutation = () => {
    * @throws {Error} - Se lanza un error si hay un problema durante la actualización.
    */
   return React.useCallback(async (task, _action) => {
-    console.log(task);
     try {
       // Simulando una pausa de 200 ms con setTimeout
       await new Promise((timeoutResolve) => setTimeout(timeoutResolve, 200));
@@ -311,6 +329,8 @@ function DataGridUsers({
   fetchUser,
 }) {
   const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
+
   const [rows, setRows] = React.useState([]);
   const [idUser, setIdUser] = React.useState(null);
   const mutateRow = useFakeMutation();
@@ -320,12 +340,37 @@ function DataGridUsers({
   const [isUpdateUserDialogOpen, setIsUpdateUserDialogOpen] =
     React.useState(false);
   const [selectTheRowId, setSelectTheRowID] = React.useState();
+  const [processes, setProcesses] = React.useState([]);
+  const [getProcces, setProcces] = React.useState([]);
+  const [getProccesProperty, setProccesProperty] = React.useState([]);
   const [previewOpen, setPreviewOpen] = React.useState(false);
   const [previewImage, setPreviewImage] = React.useState("");
   const [previewTitle, setPreviewTitle] = React.useState("");
   const [fileList, setFileList] = React.useState([]);
-
+  const [places, setPlaces] = React.useState([]);
   const [personName, setPersonName] = React.useState([]);
+  const [placeServiceData, setPlaceServiceData] = React.useState([]);
+  const [selectedStep, setSelectedStep] = React.useState(0);
+  const [idSelectionedPlace,setIdSelectionedPlace] = React.useState()
+  const [showServicesByPlace, setShowServicesByPlace] = React.useState({
+    cuautitlanIzcalliServicesByPlace: false,
+    cuautitlanMexicoServicesByPlace: false,
+    demoServicesByPlace: false,
+    zinacantepecServicesByPlace: false,
+    naucalpanServicesByPlace: false,
+  });
+  const [showProccessByService, setShowProccessByService] = React.useState({
+    cuautitlanIzcalliProccessByWaterService: false,
+    cuautitlanIzcalliProccessByPropertyService: false,
+    cuautitlanMexicoProccessByPropertyService: false,
+    cuautitlanMexicoProccessByWaterService: false,
+    demoProccessByPropertyService: false,
+    demoProccessByWaterService: false,
+    naucalpanProccessByPropertyService: false,
+    naucalpanProccessByWaterService: false,
+    zinacantepecProccessByPropertyService: false,
+    zinacantepecProccessByWaterService: false,
+  });
 
   const [userData, setUserData] = React.useState({
     nombre: "",
@@ -342,13 +387,62 @@ function DataGridUsers({
     access_mobil: "",
     activo: Boolean(""),
     sexo: "",
+    places: "",
   });
 
-  console.log(userData);
+  console.log(getProcces);
 
+  /**
+   * Función asíncrona para obtener los datos de los servicios y actualizar el estado 'rows'.
+   *
+   * @async
+   * @private
+   * @function
+   * @throws {Error} Error al intentar obtener los datos de los roles.
+   */
+  const fetchPlaces = async () => {
+    try {
+      // Aquí deberías hacer tu solicitud de red para obtener los datos
+      // Reemplaza 'TU_URL_DE_DATOS' con la URL real de tus datos
+      const response = await getAllPlaces();
 
+      // Agrega el campo 'id_tarea' a cada fila usando el índice como valor único si no no se ven en la datagrid
+      const rowsWithId = response.map((row, index) => ({
+        ...row,
+        id: row.id_servicio || index.toString(),
+      }));
 
+      setPlaces(rowsWithId);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
 
+  /**
+   * Función asíncrona para obtener los datos de los roles y actualizar el estado 'rows'.
+   *
+   * @async
+   * @private
+   * @function
+   * @throws {Error} Error al intentar obtener los datos de los roles.
+   */
+  const fetchProcesses = async () => {
+    try {
+      // Aquí deberías hacer tu solicitud de red para obtener los datos
+      // Reemplaza 'TU_URL_DE_DATOS' con la URL real de tus datos
+      const response = await getAllProcesses();
+
+      // Agrega el campo 'id_tarea' a cada fila usando el índice como valor único si no no se ven en la datagrid
+      const rowsWithId = response.map((row, index) => ({
+        ...row,
+        id: row.id_proceso,
+      }));
+
+      setProcesses(rowsWithId);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
 
   /**
    * Maneja el cambio de entrada de datos en los campos del formulario.
@@ -361,12 +455,9 @@ function DataGridUsers({
   const handleInputOnChange = (event) => {
     const { name, value, type, checked } = event.target;
 
-
-
-    
     // Actualiza el estado serviceData con el nuevo valor del campo Servicio
     const newValue = type === "checkbox" ? checked : value;
-    
+
     setUserData((prevState) => ({
       ...prevState,
       [name]: newValue,
@@ -442,7 +533,6 @@ function DataGridUsers({
     setFileList((prevFileList) => [...prevFileList, newImage]);
   };
 
-
   console.log(fileList);
   const fetchImage = async () => {
     console.log("aqui prueba 1");
@@ -453,25 +543,19 @@ function DataGridUsers({
       return;
     }
     console.log("aqui prueba 2");
-   
-    
+
     if (fileList) {
-    
       console.log("aqui prueba 2");
       try {
-       
         // Now you have the File object, you can do something with it
         if (fileList[0]) {
           const fileUrl = await uploadToS3(fileList[0].originFileObj);
           console.log("URL del archivo subido:", fileUrl);
 
-      
-
           setUserData((prevState) => ({
             ...prevState,
             image_url: fileUrl,
           }));
-        
         }
       } catch (error) {
         console.error("Error converting base64 to file:", error);
@@ -488,11 +572,6 @@ function DataGridUsers({
   React.useEffect(() => {
     fetchImage();
   }, [fileList]);
-
-
-  console.log(fileList);
-
-  console.log(selectTheRowId);
 
   React.useEffect(() => {
     if (selectTheRowId && selectTheRowId.url_image) {
@@ -684,7 +763,35 @@ function DataGridUsers({
     }
   };
 
+  const getProcesosByIdPlazaServicio = async (id_plaza, id_servicio) => {
+    try {
+      const userId = 0;
+      const response = await getProcessesByUserPlaceAndServiceId(
+        userId,
+        id_plaza,
+        id_servicio
+      );
 
+      setProcces(response);
+    } catch (error) {
+      console.error("Error in getProcesosByIdPlazaServicio:", error);
+    }
+  };
+
+  const getProcesosByIdPlazaServicioProperty = async (id_plaza, id_servicio) => {
+    try {
+      const userId = 0;
+      const response = await getProcessesByUserPlaceAndServiceId(
+        userId,
+        id_plaza,
+        id_servicio
+      );
+
+      setProccesProperty(response);
+    } catch (error) {
+      console.error("Error in getProcesosByIdPlazaServicio:", error);
+    }
+  };
 
   /**
    * Custom toolbar component for the service grid. It includes various actions like column selection,
@@ -732,8 +839,256 @@ function DataGridUsers({
     );
   }
 
+
+ 
+
+  const getServiciosByIdPlaza = async (id_plaza, plaza) => {
+    const userId = 0;
+    const response = await getPlaceServiceByUserId(userId, id_plaza);
+    setPlaceServiceData(response);
+  };
+
+  const label = "prueba";
+
+  const handleSelectionPlaza = (id_plaza, plaza) => {
+    if (
+      document.getElementById(id_plaza.toString()).style.backgroundColor ===
+      "rgba(46, 124, 103, 0.3)"
+    ) {
+      document.getElementById(id_plaza.toString()).style.backgroundColor = null;
+      switch (plaza?.nombre) {
+        case "Cuautitlan Izcalli":
+          setShowServicesByPlace((prevShowServicesByPlace) => ({
+            ...prevShowServicesByPlace,
+            cuautitlanIzcalliServicesByPlace: false,
+            cuautitlanMexicoServicesByPlace: false,
+            demoServicesByPlace: false,
+            zinacantepecServicesByPlace: false,
+            naucalpanServicesByPlace: false,
+          }));
+
+          setShowProccessByService((prevShowProccessByService) => ({
+            ...prevShowProccessByService,
+            cuautitlanIzcalliProccessByWaterService: false,
+            cuautitlanIzcalliProccessByPropertyService: false,
+            cuautitlanMexicoProccessByPropertyService: false,
+            cuautitlanMexicoProccessByWaterService: false,
+            demoProccessByPropertyService: false,
+            demoProccessByWaterService: false,
+            naucalpanProccessByPropertyService: false,
+            naucalpanProccessByWaterService: false,
+            zinacantepecProccessByPropertyService: false,
+            zinacantepecProccessByWaterService: false,
+          }));
+          /* "Zinacantepec" */
+          /* Naucalpan */
+
+          break;
+
+        case "Demo":
+          setShowServicesByPlace((prevShowServicesByPlace) => ({
+            ...prevShowServicesByPlace,
+            cuautitlanIzcalliServicesByPlace: false,
+            cuautitlanMexicoServicesByPlace: false,
+            demoServicesByPlace: false,
+            zinacantepecServicesByPlace: false,
+            naucalpanServicesByPlace: false,
+          }));
+
+          setShowProccessByService((prevShowProccessByService) => ({
+            ...prevShowProccessByService,
+            cuautitlanIzcalliProccessByWaterService: false,
+            cuautitlanIzcalliProccessByPropertyService: false,
+            cuautitlanMexicoProccessByPropertyService: false,
+            cuautitlanMexicoProccessByWaterService: false,
+            demoProccessByPropertyService: false,
+            demoProccessByWaterService: false,
+            naucalpanProccessByPropertyService: false,
+            naucalpanProccessByWaterService: false,
+            zinacantepecProccessByPropertyService: false,
+            zinacantepecProccessByWaterService: false,
+          }));
+
+          break;
+
+        case "Zinacantepec":
+          setShowServicesByPlace((prevShowServicesByPlace) => ({
+            ...prevShowServicesByPlace,
+            cuautitlanIzcalliServicesByPlace: false,
+            cuautitlanMexicoServicesByPlace: false,
+            demoServicesByPlace: false,
+            zinacantepecServicesByPlace: false,
+            naucalpanServicesByPlace: false,
+          }));
+
+          setShowProccessByService((prevShowProccessByService) => ({
+            ...prevShowProccessByService,
+            cuautitlanIzcalliProccessByWaterService: false,
+            cuautitlanIzcalliProccessByPropertyService: false,
+            cuautitlanMexicoProccessByPropertyService: false,
+            cuautitlanMexicoProccessByWaterService: false,
+            demoProccessByPropertyService: false,
+            demoProccessByWaterService: false,
+            naucalpanProccessByPropertyService: false,
+            naucalpanProccessByWaterService: false,
+            zinacantepecProccessByPropertyService: false,
+            zinacantepecProccessByWaterService: false,
+          }));
+
+          break;
+        case "Cuautitlan Mexico":
+          setShowServicesByPlace((prevShowServicesByPlace) => ({
+            ...prevShowServicesByPlace,
+            cuautitlanIzcalliServicesByPlace: false,
+            cuautitlanMexicoServicesByPlace: false,
+            demoServicesByPlace: false,
+            zinacantepecServicesByPlace: false,
+            naucalpanServicesByPlace: false,
+          }));
+
+          setShowProccessByService((prevShowProccessByService) => ({
+            ...prevShowProccessByService,
+            cuautitlanIzcalliProccessByWaterService: false,
+            cuautitlanIzcalliProccessByPropertyService: false,
+            cuautitlanMexicoProccessByPropertyService: false,
+            cuautitlanMexicoProccessByWaterService: false,
+            demoProccessByPropertyService: false,
+            demoProccessByWaterService: false,
+            naucalpanProccessByPropertyService: false,
+            naucalpanProccessByWaterService: false,
+            zinacantepecProccessByPropertyService: false,
+            zinacantepecProccessByWaterService: false,
+          }));
+
+          break;
+
+        case "Naucalpan":
+          setShowServicesByPlace((prevShowServicesByPlace) => ({
+            ...prevShowServicesByPlace,
+            cuautitlanIzcalliServicesByPlace: false,
+            cuautitlanMexicoServicesByPlace: false,
+            demoServicesByPlace: false,
+            zinacantepecServicesByPlace: false,
+            naucalpanServicesByPlace: false,
+          }));
+
+          setShowProccessByService((prevShowProccessByService) => ({
+            ...prevShowProccessByService,
+            cuautitlanIzcalliProccessByWaterService: false,
+            cuautitlanIzcalliProccessByPropertyService: false,
+            cuautitlanMexicoProccessByPropertyService: false,
+            cuautitlanMexicoProccessByWaterService: false,
+            demoProccessByPropertyService: false,
+            demoProccessByWaterService: false,
+            naucalpanProccessByPropertyService: false,
+            naucalpanProccessByWaterService: false,
+            zinacantepecProccessByPropertyService: false,
+            zinacantepecProccessByWaterService: false,
+          }));
+
+          break;
+
+        default:
+          break;
+      }
+    } else {
+      document.getElementById(id_plaza.toString()).style.backgroundColor =
+        "rgba(46, 124, 103, 0.3)";
+      switch (plaza?.nombre) {
+        case "Cuautitlan Izcalli":
+          setShowServicesByPlace((prevShowServicesByPlace) => ({
+            ...prevShowServicesByPlace,
+            cuautitlanIzcalliServicesByPlace: true,
+            cuautitlanMexicoServicesByPlace: false,
+            demoServicesByPlace: false,
+            zinacantepecServicesByPlace: false,
+            naucalpanServicesByPlace: false,
+          }));
+
+          setIdSelectionedPlace(id_plaza);
+
+          /*    setSquare(plaza); */
+          /*   setIdPlazaSeleccionada(id_plaza);
+          getServiciosByIdPlaza(id_plaza, plaza);
+          getPlaza(id_plaza) */
+
+          break;
+
+        case "Cuautitlan Mexico":
+          setShowServicesByPlace((prevShowServicesByPlace) => ({
+            ...prevShowServicesByPlace,
+            cuautitlanIzcalliServicesByPlace: false,
+            cuautitlanMexicoServicesByPlace: true,
+            demoServicesByPlace: false,
+            zinacantepecServicesByPlace: false,
+            naucalpanServicesByPlace: false,
+          }));
+
+
+          setIdSelectionedPlace(id_plaza);
+
+          break;
+
+        case "Demo":
+          setShowServicesByPlace((prevShowServicesByPlace) => ({
+            ...prevShowServicesByPlace,
+            cuautitlanIzcalliServicesByPlace: false,
+            cuautitlanMexicoServicesByPlace: false,
+            demoServicesByPlace: true,
+            zinacantepecServicesByPlace: false,
+            naucalpanServicesByPlace: false,
+          }));
+
+
+          setIdSelectionedPlace(id_plaza);
+
+          break;
+
+        case "Zinacantepec":
+          setShowServicesByPlace((prevShowServicesByPlace) => ({
+            ...prevShowServicesByPlace,
+            cuautitlanIzcalliServicesByPlace: false,
+            cuautitlanMexicoServicesByPlace: false,
+            demoServicesByPlace: false,
+            zinacantepecServicesByPlace: true,
+            naucalpanServicesByPlace: false,
+          }));
+
+
+          setIdSelectionedPlace(id_plaza);
+
+          break;
+        case "Naucalpan":
+          setShowServicesByPlace((prevShowServicesByPlace) => ({
+            ...prevShowServicesByPlace,
+            cuautitlanIzcalliServicesByPlace: false,
+            cuautitlanMexicoServicesByPlace: false,
+            demoServicesByPlace: false,
+            zinacantepecServicesByPlace: false,
+            naucalpanServicesByPlace: true,
+          }));
+
+          setIdSelectionedPlace(id_plaza);
+
+          break;
+
+        default:
+          break;
+      }
+      /*     setShowServicios(true); */
+    }
+
+    // llamar a los procesos de la plaza seleccionada y mostrarlos
+    /*  setSquare(plaza);
+    setIdPlazaSeleccionada(id_plaza);
+    getServiciosByIdPlaza(id_plaza, plaza);
+    getPlaza(id_plaza); */
+  };
+
   React.useEffect(() => {
     fetchData();
+    fetchPlaces();
+    fetchProcesses();
   }, []);
 
   React.useEffect(() => {
@@ -922,42 +1277,71 @@ function DataGridUsers({
     return columns;
   };
 
-
-
   const handleUpdateUser = async () => {
-  
     try {
       const response = await updateUser(idUser.id_usuario, {
-        nombre: userData.nombre===""?selectTheRowId.name:userData.nombre,
+        nombre: userData.nombre === "" ? selectTheRowId.name : userData.nombre,
         url_image: userData?.image_url,
         activo: userData.activo,
-        apellido_paterno: userData.apellido_paterno===""?selectTheRowId.last_name:userData.apellido_paterno,
-        apellido_materno: userData.apellido_materno===""?selectTheRowId.second_last_name:userData.apellido_materno,
-        fecha_nacimiento:userData.birthdate===""?selectTheRowId.birthdate:userData.birthdate,
-        id_sexo: userData.sexo === "" ? (selectTheRowId.sex === "masculino" ? true : false) : userData.sexo,
-        telefono_personal:userData.personal_phone===""?selectTheRowId.personal_phone:userData.personal_phone,
-        telefono_empresa:userData.work_phone===""?selectTheRowId.work_phone:userData.work_phone,
-        app_version:userData.app_version===""?selectTheRowId.app_version:userData.app_version,
+        apellido_paterno:
+          userData.apellido_paterno === ""
+            ? selectTheRowId.last_name
+            : userData.apellido_paterno,
+        apellido_materno:
+          userData.apellido_materno === ""
+            ? selectTheRowId.second_last_name
+            : userData.apellido_materno,
+        fecha_nacimiento:
+          userData.birthdate === ""
+            ? selectTheRowId.birthdate
+            : userData.birthdate,
+        id_sexo:
+          userData.sexo === ""
+            ? selectTheRowId.sex === "masculino"
+              ? true
+              : false
+            : userData.sexo,
+        telefono_personal:
+          userData.personal_phone === ""
+            ? selectTheRowId.personal_phone
+            : userData.personal_phone,
+        telefono_empresa:
+          userData.work_phone === ""
+            ? selectTheRowId.work_phone
+            : userData.work_phone,
+        app_version:
+          userData.app_version === ""
+            ? selectTheRowId.app_version
+            : userData.app_version,
       });
 
-     
+      const response1 = await updateAccessUserById(idUser.id_acceso, {
+        usuario:
+          userData.username === ""
+            ? selectTheRowId.user_name
+            : userData.username,
+        password:
+          userData.password === ""
+            ? selectTheRowId.password
+            : userData.password,
+        activo_app_movil:
+          userData.access_mobil === ""
+            ? selectTheRowId.active_app_movil_access === "acceso permitido"
+              ? true
+              : false
+            : userData.access_mobil,
+        activo_app_desktop:
+          userData.access_web === ""
+            ? selectTheRowId.active_web_access === "acceso permitido"
+              ? true
+              : false
+            : userData.access_web,
+      });
 
-      const response1= await updateAccessUserById(idUser.id_acceso,{
-        usuario:userData.username===""?selectTheRowId.user_name:userData.username,
-        password:userData.password===""?selectTheRowId.password:userData.password,
-        activo_app_movil:userData.access_mobil===""?(selectTheRowId.active_app_movil_access==="acceso permitido"?true:false):userData.access_mobil,
-        activo_app_desktop:userData.access_web===""?(selectTheRowId.active_web_access==="acceso permitido"?true:false):userData.access_web,
-
-
-        
-      })
-
-
-    
-
-      setSnackbar({ children: "Se actualizo el usuario con exito", severity: "success" });
-
-
+      setSnackbar({
+        children: "Se actualizo el usuario con exito",
+        severity: "success",
+      });
     } catch (error) {
       console.log(error);
     }
@@ -968,6 +1352,13 @@ function DataGridUsers({
     setUserData((prev) => ({
       ...prev,
       birthdate: newValue.format("YYYY-MM-DD"),
+    }));
+  };
+
+  const handleSwitchChange = (event, serviceName) => {
+    setShowProccessByService((prevState) => ({
+      ...prevState,
+      [serviceName]: event.target.checked,
     }));
   };
   /*  "name": "Admin Admin Admin",
@@ -1015,6 +1406,10 @@ function DataGridUsers({
       }),
     []
   );
+
+  const handleNextStep = () => {
+    setSelectedStep(selectedStep + 1);
+  };
   return (
     <Box
       sx={{
@@ -1087,14 +1482,28 @@ function DataGridUsers({
                 borderRadius: 1,
               }}
             >
+              <Stepper
+                sx={{ marginTop: "4rem", marginBottom: "2rem" }}
+                activeStep={selectedStep}
+                alternativeLabel
+              >
+                {steps.map((label) => {
+                  return (
+                    <Step key={label}>
+                      <StepLabel color="secondary">{label}</StepLabel>
+                    </Step>
+                  );
+                })}
+              </Stepper>
               {/* Contenido real del Paper */}
               <Typography variant="body1" sx={{ mb: "2rem" }}>
                 Detalles de Usuario
               </Typography>
               {/* nombre, :imagen, :activo, :orden, :icono_app_movil */}
-              <Grid container spacing={2}>
-                <Grid item xs={4}>
-                  {/*    <TextField
+              {selectedStep === 0 && (
+                <Grid container spacing={2}>
+                  <Grid item xs={4}>
+                    {/*    <TextField
                     color="secondary"
                     sx={{ marginBottom: "2rem", width: "100%" }}
                     id="input-with-icon-textfield-nombre"
@@ -1114,68 +1523,68 @@ function DataGridUsers({
                     variant="standard"
                   /> */}
 
-                  <TextField
-                    color="secondary"
-                    sx={{ marginBottom: "2rem", width: "100%" }}
-                    id="input-with-icon-textfield-nombre"
-                    label="Nombre"
-                    onChange={handleInputOnChange}
-                    value={userData.nombre || selectTheRowId.name}
-                    type="text"
-                    name="nombre"
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <GrServices />
-                        </InputAdornment>
-                      ),
-                    }}
-                    variant="standard"
-                  />
+                    <TextField
+                      color="secondary"
+                      sx={{ marginBottom: "2rem", width: "100%" }}
+                      id="input-with-icon-textfield-nombre"
+                      label="Nombre"
+                      onChange={handleInputOnChange}
+                      value={userData.nombre || selectTheRowId.name}
+                      type="text"
+                      name="nombre"
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <GrServices />
+                          </InputAdornment>
+                        ),
+                      }}
+                      variant="standard"
+                    />
 
-                  <TextField
-                    color="secondary"
-                    sx={{ marginBottom: "2rem", width: "100%" }}
-                    id="input-with-icon-textfield-apellido-paterno"
-                    label="Apellido Paterno"
-                    onChange={handleInputOnChange}
-                    value={
-                      userData.apellido_paterno || selectTheRowId.last_name
-                    }
-                    type="text"
-                    name="apellido_paterno"
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <GrServices />
-                        </InputAdornment>
-                      ),
-                    }}
-                    variant="standard"
-                  />
-                  <TextField
-                    color="secondary"
-                    sx={{ marginBottom: "2rem", width: "100%" }}
-                    id="input-with-icon-textfield-apellido-paterno"
-                    label="Apellido Materno"
-                    onChange={handleInputOnChange}
-                    value={
-                      userData.apellido_materno ||
-                      selectTheRowId.second_last_name
-                    }
-                    type="text"
-                    name="apellido_materno"
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <GrServices />
-                        </InputAdornment>
-                      ),
-                    }}
-                    variant="standard"
-                  />
+                    <TextField
+                      color="secondary"
+                      sx={{ marginBottom: "2rem", width: "100%" }}
+                      id="input-with-icon-textfield-apellido-paterno"
+                      label="Apellido Paterno"
+                      onChange={handleInputOnChange}
+                      value={
+                        userData.apellido_paterno || selectTheRowId.last_name
+                      }
+                      type="text"
+                      name="apellido_paterno"
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <GrServices />
+                          </InputAdornment>
+                        ),
+                      }}
+                      variant="standard"
+                    />
+                    <TextField
+                      color="secondary"
+                      sx={{ marginBottom: "2rem", width: "100%" }}
+                      id="input-with-icon-textfield-apellido-paterno"
+                      label="Apellido Materno"
+                      onChange={handleInputOnChange}
+                      value={
+                        userData.apellido_materno ||
+                        selectTheRowId.second_last_name
+                      }
+                      type="text"
+                      name="apellido_materno"
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <GrServices />
+                          </InputAdornment>
+                        ),
+                      }}
+                      variant="standard"
+                    />
 
-                  {/*  <TextField
+                    {/*  <TextField
                     color="secondary"
                     sx={{ marginBottom: "2rem", width: "100%" }}
                     id="input-with-icon-textfield-apellido-materno"
@@ -1193,7 +1602,7 @@ function DataGridUsers({
                     }}
                     variant="standard"
                   /> */}
-                  {/*     {validateInputs.nombre ? (
+                    {/*     {validateInputs.nombre ? (
                     <Stack sx={{ marginTop: "0.2rem" }} direction="row">
                       <FaRegCircleCheck style={{ color: "#14B814" }} />{" "}
                       <Typography color={"secondary"} variant="caption">
@@ -1206,32 +1615,32 @@ function DataGridUsers({
                     </Typography>
                   )}  */}
 
-                  <Upload
-                    action="https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188"
-                    listType="picture-card"
-                    fileList={fileList}
-                    onPreview={handlePreview}
-                    onChange={handleChange}
-                    name="image_url"
-                  >
-                    {fileList.length >= 1 ? null : uploadButton}
-                  </Upload>
-                  <Modal
-                    open={previewOpen}
-                    title={previewTitle}
-                    footer={null}
-                    onCancel={handleCancel}
-                  >
-                    <img
-                      alt="example"
-                      style={{
-                        width: "100%",
-                      }}
-                      src={previewImage}
-                    />
-                  </Modal>
+                    <Upload
+                      action="https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188"
+                      listType="picture-card"
+                      fileList={fileList}
+                      onPreview={handlePreview}
+                      onChange={handleChange}
+                      name="image_url"
+                    >
+                      {fileList.length >= 1 ? null : uploadButton}
+                    </Upload>
+                    <Modal
+                      open={previewOpen}
+                      title={previewTitle}
+                      footer={null}
+                      onCancel={handleCancel}
+                    >
+                      <img
+                        alt="example"
+                        style={{
+                          width: "100%",
+                        }}
+                        src={previewImage}
+                      />
+                    </Modal>
 
-                  {/* <DatePicker
+                    {/* <DatePicker
           sx={{ width: "100%"}}
          onChange={(e) => changeControl(e, "fechaNacimiento")} 
           views={["year", "month", "day"]}
@@ -1240,9 +1649,9 @@ function DataGridUsers({
           label="Fecha de nacimiento"
           openTo="year"
         /> */}
-                </Grid>
-                <Grid item xs={4}>
-                  {/*    <TextField
+                  </Grid>
+                  <Grid item xs={4}>
+                    {/*    <TextField
                     color="secondary"
                     sx={{ marginBottom: "2rem", width: "100%" }}
                     id="input-with-icon-textfield-nombre"
@@ -1262,148 +1671,151 @@ function DataGridUsers({
                     variant="standard"
                   /> */}
 
-                  <TextField
-                    color="secondary"
-                    sx={{ marginBottom: "2rem", width: "100%" }}
-                    id="input-with-icon-textfield-user-name"
-                    label="Nombre Usuario"
-                    onChange={handleInputOnChange}
-                    value={userData.username || selectTheRowId.user_name}
-                    type="text"
-                    name="username"
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <GrServices />
-                        </InputAdornment>
-                      ),
-                    }}
-                    variant="standard"
-                  />
+                    <TextField
+                      color="secondary"
+                      sx={{ marginBottom: "2rem", width: "100%" }}
+                      id="input-with-icon-textfield-user-name"
+                      label="Nombre Usuario"
+                      onChange={handleInputOnChange}
+                      value={userData.username || selectTheRowId.user_name}
+                      type="text"
+                      name="username"
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <GrServices />
+                          </InputAdornment>
+                        ),
+                      }}
+                      variant="standard"
+                    />
 
-                  <TextField
-                    color="secondary"
-                    sx={{ marginBottom: "2rem", width: "100%" }}
-                    id="input-with-icon-textfield-apellido-password"
-                    label="Contraseña"
-                    onChange={handleInputOnChange}
-                    value={userData.password || selectTheRowId.password}
-                    type="text"
-                    name="password"
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <GrServices />
-                        </InputAdornment>
-                      ),
-                    }}
-                    variant="standard"
-                  />
-                  <DatePicker
-                    sx={{ width: "100%" }}
-                    defaultValue={dayjs(selectTheRowId.birthdate || null)}
-                    onChange={handleChangeDateTime}
-                    value={dayjs(
-                      userData.birthdate || selectTheRowId.birthdate
-                    )}
-                    views={["year", "month", "day"]}
-                    format="DD-MM-YYYY"
-                    disableFuture
-                    label="Fecha de nacimiento"
-                    openTo="year"
-                    name="birthdate"
-                  />
+                    <TextField
+                      color="secondary"
+                      sx={{ marginBottom: "2rem", width: "100%" }}
+                      id="input-with-icon-textfield-apellido-password"
+                      label="Contraseña"
+                      onChange={handleInputOnChange}
+                      value={userData.password || selectTheRowId.password}
+                      type="text"
+                      name="password"
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <GrServices />
+                          </InputAdornment>
+                        ),
+                      }}
+                      variant="standard"
+                    />
+                    <DatePicker
+                      sx={{ width: "100%" }}
+                      defaultValue={dayjs(selectTheRowId.birthdate || null)}
+                      onChange={handleChangeDateTime}
+                      value={dayjs(
+                        userData.birthdate || selectTheRowId.birthdate
+                      )}
+                      views={["year", "month", "day"]}
+                      format="DD-MM-YYYY"
+                      disableFuture
+                      label="Fecha de nacimiento"
+                      openTo="year"
+                      name="birthdate"
+                    />
 
-                  {/*    <InputLabel id="demo-simple-select-filled-label">
+                    {/*    <InputLabel id="demo-simple-select-filled-label">
                       SubMenu
                     </InputLabel> */}
-                  <Select
-                    sx={{ width: "100%", marginTop: "1rem" }}
-                    value={
-                      userData.sexo || selectTheRowId.sex === "masculino"
-                        ? "1"
-                        : selectTheRowId.sex === "femenino"
-                        ? "2"
-                        : null
-                    }
-                    color="secondary"
-                    labelId="demo-simple-select-filled-label-id-menu"
-                    id="demo-simple-select-filled-id-menu"
-                    name="sexo"
-                    onChange={handleInputOnChange}
-                  >
-                    <MenuItem value="">
-                      <em>Ningun</em>
-                    </MenuItem>
-                    <MenuItem value="1">
-                      <em>masculino</em>
-                    </MenuItem>
-                    <MenuItem value="2">
-                      <em>femenino</em>
-                    </MenuItem>
-                    {/*     {subMenus.map((subMenu) => (
+                    <Select
+                      sx={{ width: "100%", marginTop: "1rem" }}
+                      value={
+                        userData.sexo || selectTheRowId.sex === "masculino"
+                          ? "1"
+                          : selectTheRowId.sex === "femenino"
+                          ? "2"
+                          : null
+                      }
+                      color="secondary"
+                      labelId="demo-simple-select-filled-label-id-menu"
+                      id="demo-simple-select-filled-id-menu"
+                      name="sexo"
+                      onChange={handleInputOnChange}
+                    >
+                      <MenuItem value="">
+                        <em>Ningun</em>
+                      </MenuItem>
+                      <MenuItem value="1">
+                        <em>masculino</em>
+                      </MenuItem>
+                      <MenuItem value="2">
+                        <em>femenino</em>
+                      </MenuItem>
+                      {/*     {subMenus.map((subMenu) => (
                         <MenuItem key={subMenu.id} value={subMenu.id}>
                           {subMenu.nombre}{" "}
                        
                         </MenuItem>
                       ))} */}
-                  </Select>
+                    </Select>
 
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexDirection: "row",
-                      alignContent: "center",
-                      marginBottom: "2rem",
-                      marginTop: "2rem",
-                    }}
-                  >
-                    <InputLabel sx={{ alignSelf: "center" }}>Activo</InputLabel>
-                    <Checkbox
-                      {..."label"}
-                      onChange={handleInputOnChange}
-                      name="activo"
-                      size="small"
-                      color="secondary"
-                      defaultChecked={
-                        selectTheRowId.active === "activo" ? true : false
-                      }
-                    />
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexDirection: "row",
+                        alignContent: "center",
+                        marginBottom: "2rem",
+                        marginTop: "2rem",
+                      }}
+                    >
+                      <InputLabel sx={{ alignSelf: "center" }}>
+                        Activo
+                      </InputLabel>
+                      <Checkbox
+                        {..."label"}
+                        onChange={handleInputOnChange}
+                        name="activo"
+                        size="small"
+                        color="secondary"
+                        defaultChecked={
+                          selectTheRowId.active === "activo" ? true : false
+                        }
+                      />
 
-                    <InputLabel sx={{ alignSelf: "center" }}>
-                      Acceso SER0 Web
-                    </InputLabel>
-                    <Checkbox
-                      {..."label"}
-                      onChange={handleInputOnChange}
-                      name="access_web"
-                      size="small"
-                      color="secondary"
-                      defaultChecked={
-                        selectTheRowId.active_web_access === "acceso permitido"
-                          ? true
-                          : false
-                      }
-                    />
-                    <InputLabel sx={{ alignSelf: "center" }}>
-                      Acceso SER0 Mobil
-                    </InputLabel>
-                    <Checkbox
-                      {..."label"}
-                      onChange={handleInputOnChange}
-                      name="access_mobil"
-                      size="small"
-                      color="secondary"
-                      defaultChecked={
-                        selectTheRowId.active_app_movil_access ===
-                        "acceso permitido"
-                          ? true
-                          : false
-                      }
-                    />
-                  </Box>
+                      <InputLabel sx={{ alignSelf: "center" }}>
+                        Acceso SER0 Web
+                      </InputLabel>
+                      <Checkbox
+                        {..."label"}
+                        onChange={handleInputOnChange}
+                        name="access_web"
+                        size="small"
+                        color="secondary"
+                        defaultChecked={
+                          selectTheRowId.active_web_access ===
+                          "acceso permitido"
+                            ? true
+                            : false
+                        }
+                      />
+                      <InputLabel sx={{ alignSelf: "center" }}>
+                        Acceso SER0 Mobil
+                      </InputLabel>
+                      <Checkbox
+                        {..."label"}
+                        onChange={handleInputOnChange}
+                        name="access_mobil"
+                        size="small"
+                        color="secondary"
+                        defaultChecked={
+                          selectTheRowId.active_app_movil_access ===
+                          "acceso permitido"
+                            ? true
+                            : false
+                        }
+                      />
+                    </Box>
 
-                  {/* <DatePicker
+                    {/* <DatePicker
           sx={{ width: "100%"}}
          onChange={(e) => changeControl(e, "fechaNacimiento")} 
           views={["year", "month", "day"]}
@@ -1412,9 +1824,9 @@ function DataGridUsers({
           label="Fecha de nacimiento"
           openTo="year"
         /> */}
-                </Grid>
-                <Grid item xs={4}>
-                  {/*    <TextField
+                  </Grid>
+                  <Grid item xs={4}>
+                    {/*    <TextField
                     color="secondary"
                     sx={{ marginBottom: "2rem", width: "100%" }}
                     id="input-with-icon-textfield-nombre"
@@ -1434,74 +1846,75 @@ function DataGridUsers({
                     variant="standard"
                   /> */}
 
-                  <TextField
-                    color="secondary"
-                    sx={{ marginBottom: "2rem", width: "100%" }}
-                    id="input-with-icon-textfield-personal-phone"
-                    label="Telefono Personal"
-                    onChange={handleInputOnChange}
-                    value={
-                      userData.personal_phone || selectTheRowId.personal_phone
-                    }
-                    type="text"
-                    name="personal_phone"
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <GrServices />
-                        </InputAdornment>
-                      ),
-                    }}
-                    variant="standard"
-                  />
+                    <TextField
+                      color="secondary"
+                      sx={{ marginBottom: "2rem", width: "100%" }}
+                      id="input-with-icon-textfield-personal-phone"
+                      label="Telefono Personal"
+                      onChange={handleInputOnChange}
+                      value={
+                        userData.personal_phone || selectTheRowId.personal_phone
+                      }
+                      type="text"
+                      name="personal_phone"
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <GrServices />
+                          </InputAdornment>
+                        ),
+                      }}
+                      variant="standard"
+                    />
 
-                  <TextField
-                    color="secondary"
-                    sx={{ marginBottom: "2rem", width: "100%" }}
-                    id="input-with-icon-textfield-work-phone"
-                    label="Telefono Trabajo"
-                    onChange={handleInputOnChange}
-                    value={userData.work_phone || selectTheRowId.work_phone}
-                    type="text"
-                    name="work_phone"
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <GrServices />
-                        </InputAdornment>
-                      ),
-                    }}
-                    variant="standard"
-                  />
+                    <TextField
+                      color="secondary"
+                      sx={{ marginBottom: "2rem", width: "100%" }}
+                      id="input-with-icon-textfield-work-phone"
+                      label="Telefono Trabajo"
+                      onChange={handleInputOnChange}
+                      value={userData.work_phone || selectTheRowId.work_phone}
+                      type="text"
+                      name="work_phone"
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <GrServices />
+                          </InputAdornment>
+                        ),
+                      }}
+                      variant="standard"
+                    />
 
-                  <TextField
-                    color="secondary"
-                    sx={{ marginBottom: "2rem", width: "100%" }}
-                    id="input-with-icon-textfield-app-version"
-                    label="App Version"
-                    onChange={handleInputOnChange}
-                    value={userData.app_version || selectTheRowId.app_version}
-                    type="text"
-                    name="app_version"
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <GrServices />
-                        </InputAdornment>
-                      ),
-                    }}
-                    variant="standard"
-                  />
+                    <TextField
+                      color="secondary"
+                      sx={{ marginBottom: "2rem", width: "100%" }}
+                      id="input-with-icon-textfield-app-version"
+                      label="App Version"
+                      onChange={handleInputOnChange}
+                      value={userData.app_version || selectTheRowId.app_version}
+                      type="text"
+                      name="app_version"
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <GrServices />
+                          </InputAdornment>
+                        ),
+                      }}
+                      variant="standard"
+                    />
 
-                  <FormControl sx={{ m: 1, width: "100%" }}>
+                    {/*  <FormControl sx={{ m: 1, width: "100%" }}>
                     <InputLabel id="demo-multiple-chip-label">
                       Plazas Asignadas
                     </InputLabel>
                     <Select
+                      name="places"
                       labelId="demo-multiple-chip-label"
                       id="demo-multiple-chip"
                       multiple
-                      value={selectTheRowId.assigned_places.split(", ")}
+                      value={personName}
                       onChange={handleChangePrueba}
                       input={
                         <OutlinedInput id="select-multiple-chip" label="Chip" />
@@ -1510,9 +1923,17 @@ function DataGridUsers({
                         <Box
                           sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}
                         >
-                          {selected.map((value) => (
-                            <Chip key={value} label={value} />
-                          ))}
+                          {selected.map((value) => {
+                            return (
+                              <Chip
+                                key={value}
+                                label={value}
+                                onDelete={() => {
+                                  selected.pop();
+                                }}
+                              />
+                            );
+                          })}
                         </Box>
                       )}
                       MenuProps={MenuProps}
@@ -1527,9 +1948,9 @@ function DataGridUsers({
                         </MenuItem>
                       ))}
                     </Select>
-                  </FormControl>
+                  </FormControl> */}
 
-                  {/*     {validateInputs.nombre ? (
+                    {/*     {validateInputs.nombre ? (
                     <Stack sx={{ marginTop: "0.2rem" }} direction="row">
                       <FaRegCircleCheck style={{ color: "#14B814" }} />{" "}
                       <Typography color={"secondary"} variant="caption">
@@ -1542,7 +1963,7 @@ function DataGridUsers({
                     </Typography>
                   )}  */}
 
-                  {/* <DatePicker
+                    {/* <DatePicker
           sx={{ width: "100%"}}
          onChange={(e) => changeControl(e, "fechaNacimiento")} 
           views={["year", "month", "day"]}
@@ -1551,10 +1972,913 @@ function DataGridUsers({
           label="Fecha de nacimiento"
           openTo="year"
         /> */}
+                  </Grid>
                 </Grid>
-              </Grid>
+              )}
+
+              {selectedStep === 1 && (
+                <Box
+                  m="20px 0"
+                  sx={{ marginBottom: "20px" }}
+                  padding="30px 10px"
+                  borderRadius="7px"
+                >
+                  <Box
+                    display="flex"
+                    justifyContent="space-evenly"
+                    alignItems="center"
+                  >
+                    {places &&
+                      places?.map((plaza) => (
+                        <Box
+                          sx={{ padding: "20px", borderRadius: "7px" }}
+                          id={plaza?.id_plaza.toString()}
+                        >
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              display: "inline-block",
+                              fontSize: "14px",
+                              color: colors.greenAccent[400],
+                            }}
+                          >
+                            {plaza?.nombre}
+                          </Typography>
+                          <img
+                            src={plaza?.imagen}
+                            alt="logo imagen"
+                            style={{
+                              width: "120px",
+                              height: "120px",
+                              marginBottom: "10px",
+                            }}
+                          />
+                          <Button
+                            sx={{ width: "100%", color: colors.grey[200] }}
+                            onClick={() =>
+                              handleSelectionPlaza(plaza?.id_plaza, plaza)
+                            }
+                          >
+                            <VerifiedIcon
+                              sx={{
+                                fontSize: "36px",
+                                color: "gray",
+                              }}
+                            />
+                          </Button>
+                        </Box>
+                      ))}
+                  </Box>
+                  {showServicesByPlace.cuautitlanIzcalliServicesByPlace && (
+                    <>
+                      <Box
+                        sx={{
+                          border: "1px solid white",
+                          marginTop: "1rem",
+                          padding: "1rem",
+                        }}
+                      >
+                        <Typography sx={{ textAlign: "center" }}>
+                          Servicios de la plaza de Cuautitlàn Izcalli
+                        </Typography>
+                        <Box
+                          sx={{
+                            padding: "20px",
+                            display: "flex",
+                            flexDirection: "row",
+                            justifyContent: "center",
+                            marginTop: "-0.5rem",
+                          }}
+                        >
+                          <FormGroup
+                            sx={{ display: "flex", flexDirection: "row" }}
+                          >
+                            <FormControlLabel
+                              control={
+                                <Switch
+                                  color="secondary"
+                                  checked={
+                                    showProccessByService.cuautitlanIzcalliProccessByWaterService
+                                  }
+                                  onChange={async (event) =>{
+                                    handleSwitchChange(
+                                      event,
+                                      "cuautitlanIzcalliProccessByWaterService"
+                                    )
+
+
+                                    try {
+                                      const response = await getProcesosByIdPlazaServicio(idSelectionedPlace,1)
+                                
+                                    } catch (error) {
+                                      console.log(error);
+                                      
+                                    }
+
+                                  
+
+
+
+                                  }
+                                  
+                                  }
+                                />
+                              }
+                              label="Regularizaciòn Agua"
+                            />
+                            <FormControlLabel
+                              control={
+                                <Switch
+                                  checked={
+                                    showProccessByService.cuautitlanIzcalliProccessByPropertyService
+                                  }
+                                  onChange={async(event) =>{
+                                    handleSwitchChange(
+                                      event,
+                                      "cuautitlanIzcalliProccessByPropertyService"
+                                    )
+
+                                    
+                                    try {
+                                      const response = await getProcesosByIdPlazaServicioProperty(idSelectionedPlace,2)
+                                
+                                    } catch (error) {
+                                      console.log(error);
+                                      
+                                    }
+
+                                  }
+
+                                    
+                                  }
+                                  color="secondary"
+                                />
+                              }
+                              label="Regularizaciòn Predio"
+                            />
+                          </FormGroup>
+                        </Box>
+                      </Box>
+                    </>
+                  )}
+
+                  {showProccessByService.cuautitlanIzcalliProccessByWaterService && (
+                    <>
+                      <Box
+                        sx={{
+                          border: "1px solid white",
+                          marginTop: "1rem",
+                          padding: "1rem",
+                        }}
+                      >
+                        <Typography sx={{ textAlign: "center" }}>
+                          Procesos de Regularizacion de Agua de plaza de
+                          Cuautitlàn Izcalli
+                        </Typography>
+                        <Box
+                          sx={{
+                            padding: "20px",
+                            display: "flex",
+                            flexDirection: "row",
+                            justifyContent: "center",
+                            marginTop: "-0.5rem",
+                          }}
+                        >
+                        <FormGroup
+                            sx={{ display: "flex", flexDirection: "row" }}
+                          >
+                             {getProcces &&
+              getProcces?.map((proceso) => (
+
+                  <FormControlLabel
+                    control={<Switch color="success" sx={{ width: "70px" }} />}
+                    label={proceso.name}
+                  /*   onChange={(e) =>
+                      handleSwitchProceso(e, proceso.id_proceso, proceso)
+                    } */
+                  />
+             
+              ))}
+                         
+                          
+                          </FormGroup>
+                        </Box>
+                      </Box>
+                    </>
+                  )}
+                  {showProccessByService.cuautitlanIzcalliProccessByPropertyService && (
+                    <>
+                      <Box
+                        sx={{
+                          border: "1px solid white",
+                          marginTop: "1rem",
+                          padding: "1rem",
+                        }}
+                      >
+                        <Typography sx={{ textAlign: "center" }}>
+                          Procesos de Regularizacion de Predio de plaza de
+                          Cuautitlàn Izcalli
+                        </Typography>
+                        <Box
+                          sx={{
+                            padding: "20px",
+                            display: "flex",
+                            flexDirection: "row",
+                            justifyContent: "center",
+                            marginTop: "-0.5rem",
+                          }}
+                        >
+                       <FormGroup
+                            sx={{ display: "flex", flexDirection: "row" }}
+                          >
+                {getProccesProperty &&
+              getProccesProperty?.map((proceso) => (
+
+                  <FormControlLabel
+                    control={<Switch color="success" sx={{ width: "70px" }} />}
+                    label={proceso.name}
+                  /*   onChange={(e) =>
+                      handleSwitchProceso(e, proceso.id_proceso, proceso)
+                    } */
+                  />
+             
+              ))}
+                         
+                          
+                          </FormGroup>
+                        </Box>
+                      </Box>
+                    </>
+                  )}
+
+                  {showServicesByPlace.demoServicesByPlace && (
+                    <>
+                      <Box
+                        sx={{
+                          border: "1px solid white",
+                          marginTop: "1rem",
+                          padding: "1rem",
+                        }}
+                      >
+                        <Typography sx={{ textAlign: "center" }}>
+                          Servicios de la plaza de Demo
+                        </Typography>
+                        <Box
+                          sx={{
+                            padding: "20px",
+                            display: "flex",
+                            flexDirection: "row",
+                            justifyContent: "center",
+                            marginTop: "-0.5rem",
+                          }}
+                        >
+                          <FormGroup
+                            sx={{ display: "flex", flexDirection: "row" }}
+                          >
+                            <FormControlLabel
+                              control={
+                                <Switch
+                                  color="secondary"
+                                  checked={
+                                    showProccessByService.demoProccessByWaterService
+                                  }
+                                  onChange={async(event) =>{
+                                    handleSwitchChange(
+                                      event,
+                                      "demoProccessByWaterService"
+                                    )
+                                  
+                                  
+                                    try {
+                                      const response = await getProcesosByIdPlazaServicio(idSelectionedPlace,1)
+                                
+                                    } catch (error) {
+                                      console.log(error);
+                                      
+                                    }}
+                                  }
+                                />
+                              }
+                              label="Regularizaciòn Agua"
+                            />
+                            <FormControlLabel
+                              control={
+                                <Switch
+                                  checked={
+                                    showProccessByService.demoProccessByPropertyService
+                                  }
+                                  onChange={async(event) =>{
+                                    handleSwitchChange(
+                                      event,
+                                      "demoProccessByPropertyService"
+                                    )
+
+                                    try {
+                                      const response = await getProcesosByIdPlazaServicioProperty(idSelectionedPlace,2)
+                                
+                                    } catch (error) {
+                                      console.log(error);
+                                      
+                                    }
+
+
+
+                                  }
+                                  }
+                                  color="secondary"
+                                />
+                              }
+                              label="Regularizaciòn Predio"
+                            />
+                          </FormGroup>
+                        </Box>
+                      </Box>
+                    </>
+                  )}
+
+                  {showProccessByService.demoProccessByWaterService && (
+                    <>
+                      <Box
+                        sx={{
+                          border: "1px solid white",
+                          marginTop: "1rem",
+                          padding: "1rem",
+                        }}
+                      >
+                        <Typography sx={{ textAlign: "center" }}>
+                          Procesos de Regularizacion de Agua de la plaza demo
+                        </Typography>
+                        <Box
+                          sx={{
+                            padding: "20px",
+                            display: "flex",
+                            flexDirection: "row",
+                            justifyContent: "center",
+                            marginTop: "-0.5rem",
+                          }}
+                        >
+                          <FormGroup
+                            sx={{ display: "flex", flexDirection: "row" }}
+                          >
+                                  {getProcces &&
+              getProcces?.map((proceso) => (
+
+                  <FormControlLabel
+                    control={<Switch color="success" sx={{ width: "70px" }} />}
+                    label={proceso.name}
+                  /*   onChange={(e) =>
+                      handleSwitchProceso(e, proceso.id_proceso, proceso)
+                    } */
+                  />
+             
+              ))}
+                          
+                          </FormGroup>
+                        </Box>
+                      </Box>
+                    </>
+                  )}
+                  {showProccessByService.demoProccessByPropertyService && (
+                    <>
+                      <Box
+                        sx={{
+                          border: "1px solid white",
+                          marginTop: "1rem",
+                          padding: "1rem",
+                        }}
+                      >
+                        <Typography sx={{ textAlign: "center" }}>
+                          Procesos de Regularizacion de Predio de la plaza demo
+                        </Typography>
+                        <Box
+                          sx={{
+                            padding: "20px",
+                            display: "flex",
+                            flexDirection: "row",
+                            justifyContent: "center",
+                            marginTop: "-0.5rem",
+                          }}
+                        >
+                          <FormGroup
+                            sx={{ display: "flex", flexDirection: "row" }}
+                          >
+                             {getProccesProperty &&
+              getProccesProperty?.map((proceso) => (
+
+                  <FormControlLabel
+                    control={<Switch color="success" sx={{ width: "70px" }} />}
+                    label={proceso.name}
+                  /*   onChange={(e) =>
+                      handleSwitchProceso(e, proceso.id_proceso, proceso)
+                    } */
+                  />
+             
+              ))}
+                            
+                          </FormGroup>
+                        </Box>
+                      </Box>
+                    </>
+                  )}
+
+                  {showServicesByPlace.naucalpanServicesByPlace && (
+                    <>
+                      <Box
+                        sx={{
+                          border: "1px solid white",
+                          marginTop: "1rem",
+                          padding: "1rem",
+                        }}
+                      >
+                        <Typography sx={{ textAlign: "center" }}>
+                          Servicios de la plaza de Naucalpan
+                        </Typography>
+                        <Box
+                          sx={{
+                            padding: "20px",
+                            display: "flex",
+                            flexDirection: "row",
+                            justifyContent: "center",
+                            marginTop: "-0.5rem",
+                          }}
+                        >
+                          <FormGroup
+                            sx={{ display: "flex", flexDirection: "row" }}
+                          >
+                            <FormControlLabel
+                              control={
+                                <Switch
+                                  color="secondary"
+                                  checked={
+                                    showProccessByService.naucalpanProccessByWaterService
+                                  }
+                                  onChange={async(event) =>{
+                                    handleSwitchChange(
+                                      event,
+                                      "naucalpanProccessByWaterService"
+                                    )
+
+                                    try {
+                                      const response = await getProcesosByIdPlazaServicio(idSelectionedPlace,1)
+                                
+                                    } catch (error) {
+                                      console.log(error);
+                                      
+                                    }
+                                  }}
+                                />
+                              }
+                              label="Regularizaciòn Agua"
+                            />
+                            <FormControlLabel
+                              control={
+                                <Switch
+                                  checked={
+                                    showProccessByService.naucalpanProccessByPropertyService
+                                  }
+                                  onChange={async(event) =>{
+                                    handleSwitchChange(
+                                      event,
+                                      "naucalpanProccessByPropertyService"
+                                    )
+                                    try {
+                                      const response = await getProcesosByIdPlazaServicioProperty(idSelectionedPlace,2)
+                                
+                                    } catch (error) {
+                                      console.log(error);
+                                      
+                                    }
+                                  }
+                                  }
+                                  color="secondary"
+                                />
+                              }
+                              label="Regularizaciòn Predio"
+                            />
+                          </FormGroup>
+                        </Box>
+                      </Box>
+                    </>
+                  )}
+
+                  {showProccessByService.naucalpanProccessByWaterService && (
+                    <>
+                      <Box
+                        sx={{
+                          border: "1px solid white",
+                          marginTop: "1rem",
+                          padding: "1rem",
+                        }}
+                      >
+                        <Typography sx={{ textAlign: "center" }}>
+                          Procesos de Regularizacion de Agua de la plaza
+                          Naucalpan
+                        </Typography>
+                        <Box
+                          sx={{
+                            padding: "20px",
+                            display: "flex",
+                            flexDirection: "row",
+                            justifyContent: "center",
+                            marginTop: "-0.5rem",
+                          }}
+                        >
+                          <FormGroup
+                            sx={{ display: "flex", flexDirection: "row" }}
+                          >
+                               {getProcces &&
+              getProcces?.map((proceso) => (
+
+                  <FormControlLabel
+                    control={<Switch color="success" sx={{ width: "70px" }} />}
+                    label={proceso.name}
+                  /*   onChange={(e) =>
+                      handleSwitchProceso(e, proceso.id_proceso, proceso)
+                    } */
+                  />
+             
+              ))}
+                          
+                          </FormGroup>
+                        </Box>
+                      </Box>
+                    </>
+                  )}
+                  {showProccessByService.naucalpanProccessByPropertyService && (
+                    <>
+                      <Box
+                        sx={{
+                          border: "1px solid white",
+                          marginTop: "1rem",
+                          padding: "1rem",
+                        }}
+                      >
+                        <Typography sx={{ textAlign: "center" }}>
+                          Procesos de Regularizacion de Predio de la plaza
+                          Naucalpan
+                        </Typography>
+                        <Box
+                          sx={{
+                            padding: "20px",
+                            display: "flex",
+                            flexDirection: "row",
+                            justifyContent: "center",
+                            marginTop: "-0.5rem",
+                          }}
+                        >
+                          <FormGroup
+                            sx={{ display: "flex", flexDirection: "row" }}
+                          >
+                              {getProccesProperty &&
+              getProccesProperty?.map((proceso) => (
+
+                  <FormControlLabel
+                    control={<Switch color="success" sx={{ width: "70px" }} />}
+                    label={proceso.name}
+                  /*   onChange={(e) =>
+                      handleSwitchProceso(e, proceso.id_proceso, proceso)
+                    } */
+                  />
+             
+              ))}
+                          </FormGroup>
+                        </Box>
+                      </Box>
+                    </>
+                  )}
+
+                  {showServicesByPlace.zinacantepecServicesByPlace && (
+                    <>
+                      <Box
+                        sx={{
+                          border: "1px solid white",
+                          marginTop: "1rem",
+                          padding: "1rem",
+                        }}
+                      >
+                        <Typography sx={{ textAlign: "center" }}>
+                          Servicios de la plaza de Zinacantepec
+                        </Typography>
+                        <Box
+                          sx={{
+                            padding: "20px",
+                            display: "flex",
+                            flexDirection: "row",
+                            justifyContent: "center",
+                            marginTop: "-0.5rem",
+                          }}
+                        >
+                          <FormGroup
+                            sx={{ display: "flex", flexDirection: "row" }}
+                          >
+                            <FormControlLabel
+                              control={
+                                <Switch
+                                  color="secondary"
+                                  checked={
+                                    showProccessByService.zinacantepecProccessByWaterService
+                                  }
+                                  onChange={async(event) =>{
+                                    handleSwitchChange(
+                                      event,
+                                      "zinacantepecProccessByWaterService"
+                                    )
+
+                                    try {
+                                      const response = await getProcesosByIdPlazaServicio(idSelectionedPlace,1)
+                                
+                                    } catch (error) {
+                                      console.log(error);
+                                      
+                                    }
+
+                                  }
+                                  }
+                                />
+                              }
+                              label="Regularizaciòn Agua"
+                            />
+                            <FormControlLabel
+                              control={
+                                <Switch
+                                  checked={
+                                    showProccessByService.zinacantepecProccessByPropertyService
+                                  }
+                                  onChange={async(event) =>{
+                                    handleSwitchChange(
+                                      event,
+                                      "zinacantepecProccessByPropertyService"
+                                    )
+
+                                    try {
+                                      const response = await getProcesosByIdPlazaServicioProperty(idSelectionedPlace,2)
+                                
+                                    } catch (error) {
+                                      console.log(error);
+                                      
+                                    }
+
+                                  }
+                                  }
+                                  color="secondary"
+                                />
+                              }
+                              label="Regularizaciòn Predio"
+                            />
+                          </FormGroup>
+                        </Box>
+                      </Box>
+                    </>
+                  )}
+
+                  {showProccessByService.zinacantepecProccessByWaterService && (
+                    <>
+                      <Box
+                        sx={{
+                          border: "1px solid white",
+                          marginTop: "1rem",
+                          padding: "1rem",
+                        }}
+                      >
+                        <Typography sx={{ textAlign: "center" }}>
+                          Procesos de Regularizacion de Agua de la plaza
+                          Zinacantepec
+                        </Typography>
+                        <Box
+                          sx={{
+                            padding: "20px",
+                            display: "flex",
+                            flexDirection: "row",
+                            justifyContent: "center",
+                            marginTop: "-0.5rem",
+                          }}
+                        >
+                          <FormGroup
+                            sx={{ display: "flex", flexDirection: "row" }}
+                          >
+                              {getProcces &&
+              getProcces?.map((proceso) => (
+
+                  <FormControlLabel
+                    control={<Switch color="success" sx={{ width: "70px" }} />}
+                    label={proceso.name}
+                  /*   onChange={(e) =>
+                      handleSwitchProceso(e, proceso.id_proceso, proceso)
+                    } */
+                  />
+             
+              ))}
+                          </FormGroup>
+                        </Box>
+                      </Box>
+                    </>
+                  )}
+                  {showProccessByService.zinacantepecProccessByPropertyService && (
+                    <>
+                      <Box
+                        sx={{
+                          border: "1px solid white",
+                          marginTop: "1rem",
+                          padding: "1rem",
+                        }}
+                      >
+                        <Typography sx={{ textAlign: "center" }}>
+                          Procesos de Regularizacion de Predio de la plaza
+                          Zinacantepec
+                        </Typography>
+                        <Box
+                          sx={{
+                            padding: "20px",
+                            display: "flex",
+                            flexDirection: "row",
+                            justifyContent: "center",
+                            marginTop: "-0.5rem",
+                          }}
+                        >
+                          <FormGroup
+                            sx={{ display: "flex", flexDirection: "row" }}
+                          >
+                             {getProccesProperty &&
+              getProccesProperty?.map((proceso) => (
+
+                  <FormControlLabel
+                    control={<Switch color="success" sx={{ width: "70px" }} />}
+                    label={proceso.name}
+                  /*   onChange={(e) =>
+                      handleSwitchProceso(e, proceso.id_proceso, proceso)
+                    } */
+                  />
+             
+              ))}
+                          </FormGroup>
+                        </Box>
+                      </Box>
+                    </>
+                  )}
+                  {showServicesByPlace.cuautitlanMexicoServicesByPlace && (
+                    <>
+                      <Box
+                        sx={{
+                          border: "1px solid white",
+                          marginTop: "1rem",
+                          padding: "1rem",
+                        }}
+                      >
+                        <Typography sx={{ textAlign: "center" }}>
+                          Servicios de la plaza Cuautilan Mexico
+                        </Typography>
+                        <Box
+                          sx={{
+                            padding: "20px",
+                            display: "flex",
+                            flexDirection: "row",
+                            justifyContent: "center",
+                            marginTop: "-0.5rem",
+                          }}
+                        >
+                          <FormGroup
+                            sx={{ display: "flex", flexDirection: "row" }}
+                          >
+                            {processes?.map((process) => {
+                              return (
+                                <FormControlLabel
+                                  control={
+                                    <Switch
+                                      color="secondary"
+                                      /*    checked={
+      showProccessByService.cuautitlanIzcalliProccessByServices
+    } */
+                                      /* onChange={(event) =>
+      handleSwitchChange(
+        event,
+        "cuautitlanIzcalliProccessByServices"
+      )
+    } */
+                                    />
+                                  }
+                                  label={`${process.nombre}`}
+                                />
+                              );
+                            })}
+                          </FormGroup>
+                        </Box>
+                      </Box>
+                    </>
+                  )}
+
+                  {showProccessByService.cuautitlanMexicoProccessByWaterService && (
+                    <>
+                      <Box
+                        sx={{
+                          border: "1px solid white",
+                          marginTop: "1rem",
+                          padding: "1rem",
+                        }}
+                      >
+                        <Typography sx={{ textAlign: "center" }}>
+                          Procesos de Regularizacion de Agua de la plaza
+                          Cuautitlan Mexico
+                        </Typography>
+                        <Box
+                          sx={{
+                            padding: "20px",
+                            display: "flex",
+                            flexDirection: "row",
+                            justifyContent: "center",
+                            marginTop: "-0.5rem",
+                          }}
+                        >
+                          <FormGroup
+                            sx={{ display: "flex", flexDirection: "row" }}
+                          >
+                            <FormControlLabel
+                              control={
+                                <Switch
+                                  color="secondary"
+                                  checked={
+                                    showProccessByService.cuautitlanIzcalliProccessByServices
+                                  }
+                                  onChange={(event) =>
+                                    handleSwitchChange(
+                                      event,
+                                      "cuautitlanIzcalliProccessByServices"
+                                    )
+                                  }
+                                />
+                              }
+                              label="Regularizaciòn Agua"
+                            />
+                            <FormControlLabel
+                              control={<Switch color="secondary" />}
+                              label="Regularizaciòn Predio"
+                            />
+                          </FormGroup>
+                        </Box>
+                      </Box>
+                    </>
+                  )}
+                  {showProccessByService.cuautitlanMexicoProccessByPropertyService && (
+                    <>
+                      <Box
+                        sx={{
+                          border: "1px solid white",
+                          marginTop: "1rem",
+                          padding: "1rem",
+                        }}
+                      >
+                        <Typography sx={{ textAlign: "center" }}>
+                          Procesos de Regularizacion de Predio de la plaza
+                          Cuautilan Mexico
+                        </Typography>
+                        <Box
+                          sx={{
+                            padding: "20px",
+                            display: "flex",
+                            flexDirection: "row",
+                            justifyContent: "center",
+                            marginTop: "-0.5rem",
+                          }}
+                        >
+                          <FormGroup
+                            sx={{ display: "flex", flexDirection: "row" }}
+                          >
+                            {placeServiceData?.map((service) => (
+                              <FormControlLabel
+                                control={
+                                  <Switch color="info" sx={{ width: "70px" }} />
+                                }
+                                label={service.name}
+                                /*  onChange={(e) =>
+                      handleSwitch(e, service.service_id, service)
+                    } */
+                              />
+                            ))}
+                          </FormGroup>
+                        </Box>
+                      </Box>
+                    </>
+                  )}
+                </Box>
+              )}
 
               <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "end",
+                  marginTop: "2.5rem",
+                }}
+              >
+                <Button
+                  endIcon={<Sync />}
+                  color="secondary"
+                  variant="contained"
+                  onClick={handleNextStep}
+                >
+                  Siguiente Paso
+                </Button>
+              </Box>
+
+              {/*  <Box
                 sx={{
                   display: "flex",
                   justifyContent: "end",
@@ -1569,7 +2893,7 @@ function DataGridUsers({
                 >
                   Actualizar Usuario
                 </Button>
-              </Box>
+              </Box> */}
             </Paper>
           </Box>
         </Dialog>

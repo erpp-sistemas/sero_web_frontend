@@ -65,9 +65,7 @@ const SelectPlazaCreateUser = ({ setPlazasServiciosProcesos }) => {
   
 
   const handleSelectionPlaza = (id_plaza, plaza) => {
-    console.log(
-      document.getElementById(id_plaza.toString()).style.backgroundColor
-    );
+   
     if (
       document.getElementById(id_plaza.toString()).style.backgroundColor ===
       "rgba(46, 124, 103, 0.3)"
@@ -93,7 +91,7 @@ const SelectPlazaCreateUser = ({ setPlazasServiciosProcesos }) => {
   };
 
 
-  console.log(getProcces);
+
 
   React.useEffect(() => {
     // Solo ejecutar el efecto si idPlazaSeleccionada está definido y no es nulo y getService no es null
@@ -104,7 +102,7 @@ const SelectPlazaCreateUser = ({ setPlazasServiciosProcesos }) => {
         getService.length !== 0 &&
         getProcess.length !== 0 // Corregido a getProcess
     ) {
-        console.log(getProcess); // Corregido a getProcess
+
         setPlazasServiciosProcesos((prevState) => ({
             ...prevState,
             plazas: [
@@ -155,7 +153,7 @@ const SelectPlazaCreateUser = ({ setPlazasServiciosProcesos }) => {
         id_plaza,
         id_servicio
       );
-      console.log(response);
+    
       setProcces(response);
     } catch (error) {
       console.error("Error in getProcesosByIdPlazaServicio:", error);
@@ -279,9 +277,7 @@ const SelectPlazaCreateUser = ({ setPlazasServiciosProcesos }) => {
     fetchServices();
   }, []);
 
-  console.log(places);
-  console.log(processes);
-  console.log(services);
+
 
   return (
     <>
@@ -293,7 +289,7 @@ const SelectPlazaCreateUser = ({ setPlazasServiciosProcesos }) => {
       >
         <Box display="flex" justifyContent="space-evenly" alignItems="center">
           {places &&
-            places.map((plaza) => (
+            places?.map((plaza) => (
               <Box
                 sx={{ padding: "20px", borderRadius: "7px" }}
                 id={plaza.id_plaza.toString()}
@@ -306,10 +302,10 @@ const SelectPlazaCreateUser = ({ setPlazasServiciosProcesos }) => {
                     color: colors.greenAccent[400],
                   }}
                 >
-                  {plaza.nombre}
+                  {plaza?.nombre}
                 </Typography>
                 <img
-                  src={plaza.imagen}
+                  src={plaza?.imagen}
                   alt="logo imagen"
                   style={{
                     width: "120px",
@@ -319,7 +315,7 @@ const SelectPlazaCreateUser = ({ setPlazasServiciosProcesos }) => {
                 />
                 <Button
                   sx={{ width: "100%", color: colors.grey[200] }}
-                  onClick={() => handleSelectionPlaza(plaza.id_plaza, plaza)}
+                  onClick={() => handleSelectionPlaza(plaza?.id_plaza, plaza)}
                 >
                   <VerifiedIcon
                     sx={{
