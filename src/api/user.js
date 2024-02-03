@@ -48,6 +48,27 @@ export const getUserById = async (userId) => {
       throw error.response?.data || error;
     }
   };
+  
+
+
+  // Función para actualizar una tarea por su ID
+  export const getPlaceAndServiceAndProcessByUser = async (userId) => {
+
+    
+    try {
+      const response = await axios.get(`http://localhost:3000/api/getPlaceAndServiceAndProcessByUser/${userId}`);
+      // Podrías realizar operaciones adicionales aquí después de la actualización
+      console.log(response);
+      return response.data;
+    } catch (error) {
+      console.error("Error al actualizar el usuario por ID:", error.response?.data || error.message);
+      throw error.response?.data || error;
+    }
+  };
+
+
+
+  getPlaceAndServiceAndProcessByUser(301)
 
 
 

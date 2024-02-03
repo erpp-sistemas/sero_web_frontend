@@ -8,7 +8,7 @@ import {
   GridToolbarFilterButton,
 } from "@mui/x-data-grid";
 import React from "react";
-import { getUserById, updateUser } from "../../../../api/user";
+import { getPlaceAndServiceAndProcessByUser, getUserById, updateUser } from "../../../../api/user";
 import { store } from "../../../../redux/store";
 import { useSelector } from "react-redux";
 import MaleIcon from "@mui/icons-material/Male";
@@ -352,6 +352,7 @@ function DataGridUsers({
   const [placeServiceData, setPlaceServiceData] = React.useState([]);
   const [selectedStep, setSelectedStep] = React.useState(0);
   const [idSelectionedPlace,setIdSelectionedPlace] = React.useState()
+  const [placeAndServiceAndProcess,setPlaceAndServiceAndProcess] = React.useState([])
   const [showServicesByPlace, setShowServicesByPlace] = React.useState({
     cuautitlanIzcalliServicesByPlace: false,
     cuautitlanMexicoServicesByPlace: false,
@@ -372,6 +373,9 @@ function DataGridUsers({
     zinacantepecProccessByWaterService: false,
   });
 
+
+  console.log(placeAndServiceAndProcess[0]?.id_plaza);
+
   const [userData, setUserData] = React.useState({
     nombre: "",
     apellido_paterno: "",
@@ -390,7 +394,10 @@ function DataGridUsers({
     places: "",
   });
 
-  console.log(getProcces);
+
+  
+
+  
 
   /**
    * Función asíncrona para obtener los datos de los servicios y actualizar el estado 'rows'.
@@ -542,10 +549,10 @@ function DataGridUsers({
       console.error("File list is empty or undefined.");
       return;
     }
-    console.log("aqui prueba 2");
+
 
     if (fileList) {
-      console.log("aqui prueba 2");
+    
       try {
         // Now you have the File object, you can do something with it
         if (fileList[0]) {
@@ -578,6 +585,11 @@ function DataGridUsers({
       handleAddImage(selectTheRowId.url_image);
     }
   }, [selectTheRowId]);
+
+
+
+
+ /*  console.log(selectTheRowId); */
 
   /**
    * Maneja la apertura del diálogo de actualización de usuario.
@@ -758,6 +770,30 @@ function DataGridUsers({
         })); */
 
       setIdUser(response);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
+
+  const fetchPlaceAndServiceAndProcessByUser = async (user) => {
+
+    
+    try {
+
+    
+      // Aquí deberías hacer tu solicitud de red para obtener los datos
+      // Reemplaza 'TU_URL_DE_DATOS' con la URL real de tus datos
+      const response = await getPlaceAndServiceAndProcessByUser(user);
+      console.log(response);
+
+      // Agrega el campo 'id_tarea' a cada fila usando el índice como valor único si no no se ven en la datagrid
+      /*  const rowsWithId = response.map((row, index) => ({
+          ...row,
+          id: row.id_tarea || index.toString(),
+        })); */
+
+      setPlaceAndServiceAndProcess(response);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -1096,6 +1132,21 @@ function DataGridUsers({
       fetchUsername(selectTheRowId.user_name);
     }
   }, [selectTheRowId?.user_name]);
+
+
+  React.useEffect(() => {
+    if (selectTheRowId && selectTheRowId.id) {
+      console.log(selectTheRowId.id);
+      fetchPlaceAndServiceAndProcessByUser(selectTheRowId.id)
+      
+    }
+    
+  
+  }, [selectTheRowId?.id])
+
+
+  
+  
 
   /**
    * Construye y devuelve la configuración de columnas para el DataGrid.
@@ -2057,9 +2108,10 @@ function DataGridUsers({
                               control={
                                 <Switch
                                   color="secondary"
-                                  checked={
+                                  defaultChecked={placeAndServiceAndProcess[0]?.id_servicio === 1?true:false}
+                                /*   checked={
                                     showProccessByService.cuautitlanIzcalliProccessByWaterService
-                                  }
+                                  } */
                                   onChange={async (event) =>{
                                     handleSwitchChange(
                                       event,
@@ -2089,9 +2141,8 @@ function DataGridUsers({
                             <FormControlLabel
                               control={
                                 <Switch
-                                  checked={
-                                    showProccessByService.cuautitlanIzcalliProccessByPropertyService
-                                  }
+                            
+                                defaultChecked={placeAndServiceAndProcess[0]?.id_servicio === 2?true:false}
                                   onChange={async(event) =>{
                                     handleSwitchChange(
                                       event,
@@ -2151,7 +2202,10 @@ function DataGridUsers({
               getProcces?.map((proceso) => (
 
                   <FormControlLabel
-                    control={<Switch color="success" sx={{ width: "70px" }} />}
+                    control={<Switch
+
+                      
+                      color="secondary" sx={{ width: "70px" }} />}
                     label={proceso.name}
                   /*   onChange={(e) =>
                       handleSwitchProceso(e, proceso.id_proceso, proceso)
