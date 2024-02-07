@@ -80,7 +80,7 @@ import {
 import { tokens } from "../../../../theme";
 import { getAllProcesses } from "../../../../api/process";
 import { log } from "mathjs";
-import { menuByUserAndRol } from "../../../../api/menu";
+import { menuByUserAndRol, updateActivoInMenuRolUsuario } from "../../../../api/menu";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -2030,30 +2030,36 @@ function DataGridUsers({
   };
 
 
-  const handleOnChange = (e, menuId, menu) => {
+  const handleOnChange = async(e, menuId, menu) => {
 
     const {checked}= e.target
     
    if (checked) {
-    setMenuData((prevMenuData) => [
-      ...prevMenuData,
-      {
-        id_menu: menu.menu_id,
-        id_rol: selectTheRowId.profile_id,
-        id_usuario: idUser.id_usuario,
-        activo: 1,
-      },
-    ]);
+
+    const response =await updateActivoInMenuRolUsuario( {
+      id_menu: menu.menu_id,
+      id_rol: selectTheRowId.profile_id,
+      id_usuario: idUser.id_usuario,
+      nuevoActivo: 1,
+    })
+    setSnackbar({
+      children: "Se activo el menu con exito ",
+      severity: "success",
+    });
+  
     
    }else{
-    setMenuData((prevState) => ([
-      ...prevState,{
-      id_menu: menu.menu_id, // Assuming menuId is the correct identifier
-      id_rol:selectTheRowId.profile_id, // Make sure to provide appropriate values for these properties
-      id_usuario:idUser.id_usuario,
-      activo:0,
-    }
-    ]));
+    const response =await updateActivoInMenuRolUsuario( {
+      id_menu: menu.menu_id,
+      id_rol: selectTheRowId.profile_id,
+      id_usuario: idUser.id_usuario,
+      nuevoActivo: 0,
+    })
+
+    setSnackbar({
+      children: "Se desactivo el menu con exito ",
+      severity: "warning",
+    });
 
    }
     
