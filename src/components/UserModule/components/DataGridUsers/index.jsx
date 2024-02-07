@@ -80,6 +80,7 @@ import {
 import { tokens } from "../../../../theme";
 import { getAllProcesses } from "../../../../api/process";
 import { log } from "mathjs";
+import { menuByUserAndRol } from "../../../../api/menu";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -332,12 +333,17 @@ function DataGridUsers({
   setComponentesVisibility,
   componentesVisibility,
   fetchUser,
+  setMenuData,
+  setProcessData,
+  setServiceData,
 }) {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
   const [rows, setRows] = React.useState([]);
+
   const [idUser, setIdUser] = React.useState(null);
+
   const mutateRow = useFakeMutation();
   const noButtonRef = React.useRef(null);
   const [promiseArguments, setPromiseArguments] = React.useState(null);
@@ -354,6 +360,7 @@ function DataGridUsers({
   const [fileList, setFileList] = React.useState([]);
   const [places, setPlaces] = React.useState([]);
   const [personName, setPersonName] = React.useState([]);
+  const [menus, setMenus] = React.useState([]);
   const [placeServiceData, setPlaceServiceData] = React.useState([]);
   const [selectedStep, setSelectedStep] = React.useState(0);
   const [idSelectionedPlace, setIdSelectionedPlace] = React.useState();
@@ -378,8 +385,6 @@ function DataGridUsers({
     zinacantepecProccessByPropertyService: false,
     zinacantepecProccessByWaterService: false,
   });
-
-
 
   const [userData, setUserData] = React.useState({
     nombre: "",
@@ -540,7 +545,7 @@ function DataGridUsers({
     setFileList((prevFileList) => [...prevFileList, newImage]);
   };
 
-  console.log(fileList);
+
   const fetchImage = async () => {
     console.log("aqui prueba 1");
 
@@ -631,6 +636,35 @@ function DataGridUsers({
     resolve(oldRow); // Resolve with the old row to not update the internal state
     setPromiseArguments(null);
   };
+
+  /**
+   * Función asíncrona para obtener los datos de los roles y actualizar el estado 'rows'.
+   *
+   * @async
+   * @private
+   * @function
+   * @throws {Error} Error al intentar obtener los datos de los roles.
+   */
+  const fetchMenusByUserAndRol = async (userId, rolId) => {
+    console.log(userId);
+    console.log(rolId);
+    try {
+      // Aquí deberías hacer tu solicitud de red para obtener los datos
+      // Reemplaza 'TU_URL_DE_DATOS' con la URL real de tus datos
+      const response = await menuByUserAndRol(userId, rolId);
+
+      // Agrega el campo 'id_tarea' a cada fila usando el índice como valor único si no no se ven en la datagrid
+      const rowsWithId = response.map((row, index) => ({
+        ...row,
+        id: row.id_proceso,
+      }));
+
+      setMenus(rowsWithId);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
   /**
    * Función que maneja la acción "Sí" en el contexto de una promesa al actualizar una tarea en el backend.
    *
@@ -1113,12 +1147,23 @@ function DataGridUsers({
     fetchPlaces();
     fetchProcesses();
   }, []);
+  console.log(selectTheRowId);
 
   React.useEffect(() => {
     if (selectTheRowId && selectTheRowId.user_name) {
       fetchUsername(selectTheRowId.user_name);
     }
   }, [selectTheRowId?.user_name]);
+  React.useEffect(() => {
+    if (
+      idUser &&
+      idUser.id_usuario &&
+      selectTheRowId &&
+      selectTheRowId.profile_id
+    ) {
+      fetchMenusByUserAndRol(idUser.id_usuario, selectTheRowId.profile_id);
+    }
+  }, [idUser?.id_usuario, selectTheRowId?.profile_id]);
 
   React.useEffect(() => {
     if (selectTheRowId && selectTheRowId.id) {
@@ -1290,6 +1335,7 @@ function DataGridUsers({
               onClick={() => {
                 setFileList([]);
                 setSelectTheRowID(null);
+                handleResetStep();
 
                 setSelectTheRowID(rows[Number(id)]);
                 setTimeout(() => {
@@ -1368,143 +1414,147 @@ function DataGridUsers({
               : false
             : userData.access_web,
       });
+      setTimeout(() => {
+        fetchUser();
+      }, 3000);
 
       setSnackbar({
         children: "Se actualizo el usuario con exito",
         severity: "success",
       });
+
+      handleCloseDialog();
     } catch (error) {
       console.log(error);
     }
   };
-  const documents = ["Invitation Letter", "Notification", "Inspection", "Requirement 1", "Requirement 2", "Fiscal Execution", "Courts", "Survey", "Readings"]
+  const documents = [
+    "Invitation Letter",
+    "Notification",
+    "Inspection",
+    "Requirement 1",
+    "Requirement 2",
+    "Fiscal Execution",
+    "Courts",
+    "Survey",
+    "Readings",
+  ];
 
   const [defaultValue, setDefaultValue] = React.useState({
-    cuautitlanIzcalliWaterService:false,
-    cuautitlanIzcalliPropertyService:false,
-    cuautitlanMexicoWaterService:false,
-    cuautitlanMexicoPropertyService:false,
-    zinacantepecWaterService:false,
-    zinacantepecPropertyService:false,
-    naucalpanWaterService:false,
-    naucalpanPropertyService:false,
-    demoWaterService:false,
-    demoPropertyService:false,
-    cuautitlanIzcalliInvitationLetter:false,
-    cuautitlanIzcalliNotification:false,
-    cuautitlanIzcalliInspection:false,
-    cuautitlanIzcalliRequerimentOne:false,
-    cuautitlanIzcalliRequerimentTwo:false,
-    cuautitlanIzcalliFixcalExecution:false,
-    cuautitlanIzcalliCourts:false,
-    cuautitlanIzcalliSurvey:false,
-    cuautitlanIzcalliReadings:false,
-
-
-
+    cuautitlanIzcalliWaterService: false,
+    cuautitlanIzcalliPropertyService: false,
+    cuautitlanMexicoWaterService: false,
+    cuautitlanMexicoPropertyService: false,
+    zinacantepecWaterService: false,
+    zinacantepecPropertyService: false,
+    naucalpanWaterService: false,
+    naucalpanPropertyService: false,
+    demoWaterService: false,
+    demoPropertyService: false,
+    cuautitlanIzcalliInvitationLetter: false,
+    cuautitlanIzcalliNotification: false,
+    cuautitlanIzcalliInspection: false,
+    cuautitlanIzcalliRequerimentOne: false,
+    cuautitlanIzcalliRequerimentTwo: false,
+    cuautitlanIzcalliFixcalExecution: false,
+    cuautitlanIzcalliCourts: false,
+    cuautitlanIzcalliSurvey: false,
+    cuautitlanIzcalliReadings: false,
   });
 
-console.log(getProcces);
   React.useEffect(() => {
     // Check the condition for each element in placeAndServiceAndProcess
 
-
     const hasMatchInvitationLetter = placeAndServiceAndProcess.some(
-      item => item.id_servicio === 1 && item.id_plaza === 3 && item.id_proceso === 1
+      (item) =>
+        item.id_servicio === 1 && item.id_plaza === 3 && item.id_proceso === 1
     );
 
     const hasMatchNotification = placeAndServiceAndProcess.some(
-      item => item.id_servicio === 1 && item.id_plaza === 3 && item.id_proceso ===2
+      (item) =>
+        item.id_servicio === 1 && item.id_plaza === 3 && item.id_proceso === 2
     );
-
 
     const hasMatchInspection = placeAndServiceAndProcess.some(
-      item => item.id_servicio === 1 && item.id_plaza === 3 && item.id_proceso ===3
+      (item) =>
+        item.id_servicio === 1 && item.id_plaza === 3 && item.id_proceso === 3
     );
     const hasMatchRequerimentOne = placeAndServiceAndProcess.some(
-      item => item.id_servicio === 1 && item.id_plaza === 3 && item.id_proceso ===4
+      (item) =>
+        item.id_servicio === 1 && item.id_plaza === 3 && item.id_proceso === 4
     );
 
     const hasMatchRequerimentTwo = placeAndServiceAndProcess.some(
-      item => item.id_servicio === 1 && item.id_plaza === 3 && item.id_proceso ===5
+      (item) =>
+        item.id_servicio === 1 && item.id_plaza === 3 && item.id_proceso === 5
     );
 
-    const hasMatchFixcalExecution= placeAndServiceAndProcess.some(
-      item => item.id_servicio === 1 && item.id_plaza === 3 && item.id_proceso ===6
+    const hasMatchFixcalExecution = placeAndServiceAndProcess.some(
+      (item) =>
+        item.id_servicio === 1 && item.id_plaza === 3 && item.id_proceso === 6
     );
 
-
-    const hasMatchCourts= placeAndServiceAndProcess.some(
-      item => item.id_servicio === 1 && item.id_plaza === 3 && item.id_proceso ===7
+    const hasMatchCourts = placeAndServiceAndProcess.some(
+      (item) =>
+        item.id_servicio === 1 && item.id_plaza === 3 && item.id_proceso === 7
     );
-
-
 
     const hasMatchSurvey = placeAndServiceAndProcess.some(
-      item => item.id_servicio === 1 && item.id_plaza === 3 && item.id_proceso ===8
+      (item) =>
+        item.id_servicio === 1 && item.id_plaza === 3 && item.id_proceso === 8
     );
 
-
-   const hasMatchReadings = placeAndServiceAndProcess.some(
-      item => item.id_servicio === 1 && item.id_plaza === 3 && item.id_proceso ===9
+    const hasMatchReadings = placeAndServiceAndProcess.some(
+      (item) =>
+        item.id_servicio === 1 && item.id_plaza === 3 && item.id_proceso === 9
     );
 
-    
-
-
-    
     const hasMatchDemoProccesByWater = placeAndServiceAndProcess.some(
-      item => item.id_servicio === 1 && item.id_plaza === 3
+      (item) => item.id_servicio === 1 && item.id_plaza === 3
     );
 
     const hasMatchDemoProccessByProperty = placeAndServiceAndProcess.some(
-      item => item.id_servicio === 2 && item.id_plaza === 3 
+      (item) => item.id_servicio === 2 && item.id_plaza === 3
     );
 
+    const hasMatchCuautitlanIzcalliProccesByWater =
+      placeAndServiceAndProcess.some(
+        (item) => item.id_servicio === 1 && item.id_plaza === 2
+      );
 
-    
-    const hasMatchCuautitlanIzcalliProccesByWater = placeAndServiceAndProcess.some(
-      item => item.id_servicio === 1 && item.id_plaza === 2
-    );
+    const hasMatchCuautitlanIzcalliProccesByProperty =
+      placeAndServiceAndProcess.some(
+        (item) => item.id_servicio === 2 && item.id_plaza === 2
+      );
 
-    const hasMatchCuautitlanIzcalliProccesByProperty = placeAndServiceAndProcess.some(
-      item => item.id_servicio === 2 && item.id_plaza === 2 
-    );
+    const hasMatchCuautitlanMexicoProccesByWater =
+      placeAndServiceAndProcess.some(
+        (item) => item.id_servicio === 1 && item.id_plaza === 3
+      );
 
-
-    const hasMatchCuautitlanMexicoProccesByWater = placeAndServiceAndProcess.some(
-      item => item.id_servicio === 1 && item.id_plaza === 3
-    );
-
-    const hasMatchCuautitlanMexicoProccesByProperty = placeAndServiceAndProcess.some(
-      item => item.id_servicio === 2 && item.id_plaza === 3 
-    );
-
+    const hasMatchCuautitlanMexicoProccesByProperty =
+      placeAndServiceAndProcess.some(
+        (item) => item.id_servicio === 2 && item.id_plaza === 3
+      );
 
     const hasMatchNaucalpanProccesByWater = placeAndServiceAndProcess.some(
-      item => item.id_servicio === 1 && item.id_plaza === 4
+      (item) => item.id_servicio === 1 && item.id_plaza === 4
     );
 
     const hasMatchNaucalpanProccesByProperty = placeAndServiceAndProcess.some(
-      item => item.id_servicio === 2 && item.id_plaza === 4
+      (item) => item.id_servicio === 2 && item.id_plaza === 4
     );
-
 
     const hasMatchZinacantepecProccesByWater = placeAndServiceAndProcess.some(
-      item => item.id_servicio === 1 && item.id_plaza === 1
+      (item) => item.id_servicio === 1 && item.id_plaza === 1
     );
 
-    const hasMatchZinacantepecProccesByProperty = placeAndServiceAndProcess.some(
-      item => item.id_servicio === 2 && item.id_plaza === 1
-    );
+    const hasMatchZinacantepecProccesByProperty =
+      placeAndServiceAndProcess.some(
+        (item) => item.id_servicio === 2 && item.id_plaza === 1
+      );
 
-
-     
-
-    
-    
-
-/* 
+    /* 
       case hasMatchZinacantepecProccesByWater:
         setDefaultValue(prevState=>({
           ...prevState,
@@ -1645,302 +1695,170 @@ console.log(getProcces);
 
 
         break */
-      if (hasMatchCuautitlanIzcalliProccesByWater) {
-        setDefaultValue(prevState=>({
+    if (hasMatchCuautitlanIzcalliProccesByWater) {
+      setDefaultValue((prevState) => ({
+        ...prevState,
+        cuautitlanIzcalliWaterService: true,
+      }));
+
+      if (hasMatchInvitationLetter) {
+        setDefaultValue((prevState) => ({
           ...prevState,
-          cuautitlanIzcalliWaterService:true,
-
+          cuautitlanIzcalliInvitationLetter: true,
         }));
-  
-  
-     
-  
-  
+      }
 
+      if (hasMatchNotification) {
+        setDefaultValue((prevState) => ({
+          ...prevState,
+          cuautitlanIzcalliNotification: true,
+        }));
+      }
 
+      if (hasMatchInspection) {
+        setDefaultValue((prevState) => ({
+          ...prevState,
+          cuautitlanIzcalliInspection: true,
+        }));
+      }
 
+      setTimeout(() => {
+        setShowProccessByService((prevState) => ({
+          ...prevState,
+          cuautitlanIzcalliProccessByWaterService: true,
+        }));
+      }, 500);
+    }
 
-        if (hasMatchInvitationLetter) {
-          setDefaultValue(prevState=>({
-            ...prevState,
-            cuautitlanIzcalliInvitationLetter:true,
-  
-          }));
+    // Update the showProccessByService state
 
-   
-        }
+    if (hasMatchCuautitlanIzcalliProccesByProperty) {
+      setDefaultValue((prevState) => ({
+        ...prevState,
 
+        cuautitlanIzcalliPropertyService: true,
+      }));
 
-        if (hasMatchNotification) {
-          setDefaultValue(prevState=>({
-            ...prevState,
-            cuautitlanIzcalliNotification:true,
-  
-          }));
-
-   
-        }
-
-
-
-        
-        if (hasMatchInspection) {
-          setDefaultValue(prevState=>({
-            ...prevState,
-            cuautitlanIzcalliInspection:true,
-  
-          }));
-
-   
-        }
-
-
-        
-        setTimeout(() => {
-    
-          setShowProccessByService(prevState => ({
-            ...prevState,
-            cuautitlanIzcalliProccessByWaterService: true,
-          
-          }));
-          
-        }, 500);
-
-
-
-        
-
-
-        
-        
-      } 
-
-      
-     
-    
       // Update the showProccessByService state
-  
-        
-   
 
-       if (hasMatchCuautitlanIzcalliProccesByProperty) {
-
-        setDefaultValue(prevState=>({
+      setTimeout(() => {
+        setShowProccessByService((prevState) => ({
           ...prevState,
-   
-          cuautitlanIzcalliPropertyService:true,
-    
-    
+
+          cuautitlanIzcalliProccessByPropertyService: true,
         }));
-      
-        // Update the showProccessByService state
-    
-        setTimeout(() => {
-    
-          setShowProccessByService(prevState => ({
-            ...prevState,
-          
-            cuautitlanIzcalliProccessByPropertyService: true,
-           
-          }));
-          
-        }, 500);
+      }, 500);
+    }
 
+    if (hasMatchNaucalpanProccesByWater) {
+      setDefaultValue((prevState) => ({
+        ...prevState,
 
-        
-        
-       } 
+        naucalpanWaterService: true,
+      }));
 
+      // Update the showProccessByService state
 
-
-
-       if (hasMatchNaucalpanProccesByWater) {
-
-        setDefaultValue(prevState=>({
+      setTimeout(() => {
+        setShowProccessByService((prevState) => ({
           ...prevState,
-   
-          naucalpanWaterService:true,
-    
-    
+
+          naucalpanProccessByWaterService: true,
         }));
-      
-        // Update the showProccessByService state
-    
-        setTimeout(() => {
-    
-          setShowProccessByService(prevState => ({
-            ...prevState,
-          
-            naucalpanProccessByWaterService: true,
-           
-          }));
-          
-        }, 500);
+      }, 500);
+    }
 
+    if (hasMatchNaucalpanProccesByProperty) {
+      setDefaultValue((prevState) => ({
+        ...prevState,
 
-        
-        
-       } 
+        naucalpanPropertyService: true,
+      }));
 
+      // Update the showProccessByService state
 
-       if (hasMatchNaucalpanProccesByProperty) {
-
-        setDefaultValue(prevState=>({
+      setTimeout(() => {
+        setShowProccessByService((prevState) => ({
           ...prevState,
-   
-          naucalpanPropertyService:true,
-    
-    
+
+          naucalpanProccessByPropertyService: true,
         }));
-      
-        // Update the showProccessByService state
-    
-        setTimeout(() => {
-    
-          setShowProccessByService(prevState => ({
-            ...prevState,
-          
-            naucalpanProccessByPropertyService: true,
-           
-          }));
-          
-        }, 500);
+      }, 500);
+    }
 
+    if (hasMatchDemoProccesByWater) {
+      setDefaultValue((prevState) => ({
+        ...prevState,
 
-        
-        
-       } 
+        demoWaterService: true,
+      }));
 
+      // Update the showProccessByService state
 
-
-
-       if (hasMatchDemoProccesByWater) {
-
-        setDefaultValue(prevState=>({
+      setTimeout(() => {
+        setShowProccessByService((prevState) => ({
           ...prevState,
-   
-          demoWaterService:true,
-    
-    
+
+          demoProccessByWaterService: true,
         }));
-      
-        // Update the showProccessByService state
-    
-        setTimeout(() => {
-    
-          setShowProccessByService(prevState => ({
-            ...prevState,
-          
-            demoProccessByWaterService: true,
-           
-          }));
-          
-        }, 500);
+      }, 500);
+    }
 
+    if (hasMatchDemoProccessByProperty) {
+      setDefaultValue((prevState) => ({
+        ...prevState,
 
-        
-        
-       } 
+        demoPropertyService: true,
+      }));
 
+      // Update the showProccessByService state
 
-       
-       if (hasMatchDemoProccessByProperty) {
-
-        setDefaultValue(prevState=>({
+      setTimeout(() => {
+        setShowProccessByService((prevState) => ({
           ...prevState,
-   
-          demoPropertyService:true,
-    
-    
+
+          demoProccessByPropertyService: true,
         }));
-      
-        // Update the showProccessByService state
-    
-        setTimeout(() => {
-    
-          setShowProccessByService(prevState => ({
-            ...prevState,
-          
-            demoProccessByPropertyService: true,
-           
-          }));
-          
-        }, 500);
+      }, 500);
+    }
 
+    if (hasMatchZinacantepecProccesByWater) {
+      setDefaultValue((prevState) => ({
+        ...prevState,
 
-        
-        
-       } 
+        zinacantepecWaterService: true,
+      }));
 
+      // Update the showProccessByService state
 
-
-        
-       if (hasMatchZinacantepecProccesByWater) {
-
-        setDefaultValue(prevState=>({
+      setTimeout(() => {
+        setShowProccessByService((prevState) => ({
           ...prevState,
-   
-          zinacantepecWaterService:true,
-    
-    
+
+          zinacantepecProccessByWaterService: true,
         }));
-      
-        // Update the showProccessByService state
-    
-        setTimeout(() => {
-    
-          setShowProccessByService(prevState => ({
-            ...prevState,
-          
-            zinacantepecProccessByWaterService: true,
-           
-          }));
-          
-        }, 500);
+      }, 500);
+    }
 
+    if (hasMatchZinacantepecProccesByProperty) {
+      setDefaultValue((prevState) => ({
+        ...prevState,
 
-        
-        
-       } 
+        zinacantepecPropertyService: true,
+      }));
 
+      // Update the showProccessByService state
 
-
-
-
-       if (hasMatchZinacantepecProccesByProperty) {
-
-        setDefaultValue(prevState=>({
+      setTimeout(() => {
+        setShowProccessByService((prevState) => ({
           ...prevState,
-   
-          zinacantepecPropertyService:true,
-    
-    
+
+          zinacantepecProccessByPropertyService: true,
         }));
-      
-        // Update the showProccessByService state
-    
-        setTimeout(() => {
-    
-          setShowProccessByService(prevState => ({
-            ...prevState,
-          
-            zinacantepecProccessByPropertyService: true,
-           
-          }));
-          
-        }, 500);
+      }, 500);
+    }
 
-
-        
-        
-       } 
-
-
-
-     
-        
-
-   /*    case hasMatchDemoProccesByWater:
+    /*    case hasMatchDemoProccesByWater:
 
       setDefaultValue(prevState=>({
         ...prevState,
@@ -1971,7 +1889,7 @@ console.log(getProcces);
       }, 500);
         
         break; */
-       /*  case hasMatchDemoProccessByProperty:
+    /*  case hasMatchDemoProccessByProperty:
 
         setDefaultValue(prevState=>({
           ...prevState,
@@ -2002,35 +1920,26 @@ console.log(getProcces);
         }, 500);
         
         break; */
-    
-      /* default:
+
+    /* default:
         break; */
-    
-  
-    
-  
-    // Set the defaultValue based on the condition
-    
-   
 
     // Set the defaultValue based on the condition
-    
+
+    // Set the defaultValue based on the condition
   }, [placeAndServiceAndProcess]);
 
-
-
-  const getDefaultCheckedValue = async(id_proceso) => {
+  const getDefaultCheckedValue = async (id_proceso) => {
     try {
       const response = await getProcesosByIdPlazaServicio(
         idSelectionedPlace,
-        id_proceso)
-      }catch (error) {
-        console.log(error);
-      
+        id_proceso
+      );
+    } catch (error) {
+      console.log(error);
     }
     switch (id_proceso) {
       case 1:
-      
         return defaultValue.cuautitlanIzcalliInvitationLetter;
       case 2:
         return defaultValue.cuautitlanIzcalliNotification;
@@ -2052,13 +1961,6 @@ console.log(getProcces);
         return null;
     }
   };
-
-
-
- 
-
-
-  
 
   const handleChangeDateTime = (newValue) => {
     console.log("New Date Selected:", newValue.format("YYYY-MM-DD"));
@@ -2123,6 +2025,42 @@ console.log(getProcces);
   const handleNextStep = () => {
     setSelectedStep(selectedStep + 1);
   };
+  const handleResetStep = () => {
+    setSelectedStep(0);
+  };
+
+
+  const handleOnChange = (e, menuId, menu) => {
+
+    const {checked}= e.target
+    
+   if (checked) {
+    setMenuData((prevMenuData) => [
+      ...prevMenuData,
+      {
+        id_menu: menu.menu_id,
+        id_rol: selectTheRowId.profile_id,
+        id_usuario: idUser.id_usuario,
+        activo: 1,
+      },
+    ]);
+    
+   }else{
+    setMenuData((prevState) => ([
+      ...prevState,{
+      id_menu: menu.menu_id, // Assuming menuId is the correct identifier
+      id_rol:selectTheRowId.profile_id, // Make sure to provide appropriate values for these properties
+      id_usuario:idUser.id_usuario,
+      activo:0,
+    }
+    ]));
+
+   }
+    
+  
+    // You can perform additional actions based on the updated data if needed
+  };
+
   return (
     <Box
       sx={{
@@ -2196,7 +2134,27 @@ console.log(getProcces);
               }}
             >
               <Stepper
-                sx={{ marginTop: "4rem", marginBottom: "2rem" }}
+                sx={{
+                  marginTop: "4rem",
+                  marginBottom: "2rem",
+                  "& .MuiStepLabel-root .Mui-completed": {
+                    color: "secondary.dark", // circle color (COMPLETED)
+                  },
+                  "& .MuiStepLabel-label.Mui-completed.MuiStepLabel-alternativeLabel":
+                    {
+                      color: "grey.500", // Just text label (COMPLETED)
+                    },
+                  "& .MuiStepLabel-root .Mui-active": {
+                    color: "secondary.main", // circle color (ACTIVE)
+                  },
+                  "& .MuiStepLabel-label.Mui-active.MuiStepLabel-alternativeLabel":
+                    {
+                      color: "common.white", // Just text label (ACTIVE)
+                    },
+                  "& .MuiStepLabel-root .Mui-active .MuiStepIcon-text": {
+                    fill: "black", // circle's number (ACTIVE)
+                  },
+                }}
                 activeStep={selectedStep}
                 alternativeLabel
               >
@@ -2771,7 +2729,7 @@ console.log(getProcces);
                                 <Switch
                                   color="secondary"
                                   defaultChecked={
-                                 defaultValue.cuautitlanIzcalliWaterService
+                                    defaultValue.cuautitlanIzcalliWaterService
                                   }
                                   /*   checked={
                                     showProccessByService.cuautitlanIzcalliProccessByWaterService
@@ -2800,7 +2758,7 @@ console.log(getProcces);
                               control={
                                 <Switch
                                   defaultChecked={
-                                  defaultValue.cuautitlanIzcalliPropertyService
+                                    defaultValue.cuautitlanIzcalliPropertyService
                                   }
                                   onChange={async (event) => {
                                     handleSwitchChange(
@@ -2856,15 +2814,13 @@ console.log(getProcces);
                           >
                             {getProcces &&
                               getProcces?.map((proceso) => (
-
                                 <FormControlLabel
                                   control={
                                     <Switch
-                                    key={proceso.id_proceso} 
-                                    defaultChecked={
-                                      getDefaultCheckedValue(proceso.id_proceso)
-                                    }
-                                   
+                                      key={proceso.id_proceso}
+                                      defaultChecked={getDefaultCheckedValue(
+                                        proceso.id_proceso
+                                      )}
                                       color="secondary"
                                       sx={{ width: "70px" }}
                                     />
@@ -2906,7 +2862,7 @@ console.log(getProcces);
                             sx={{ display: "flex", flexDirection: "row" }}
                           >
                             {getProccesProperty &&
-                              getProccesProperty?.map((proceso,index) => (
+                              getProccesProperty?.map((proceso, index) => (
                                 <FormControlLabel
                                   control={
                                     <Switch
@@ -2954,7 +2910,7 @@ console.log(getProcces);
                               control={
                                 <Switch
                                   color="secondary"
-                                 defaultChecked={defaultValue.demoWaterService}
+                                  defaultChecked={defaultValue.demoWaterService}
                                   onChange={async (event) => {
                                     handleSwitchChange(
                                       event,
@@ -2978,7 +2934,9 @@ console.log(getProcces);
                             <FormControlLabel
                               control={
                                 <Switch
-                                defaultChecked={  defaultValue.demoPropertyService}
+                                  defaultChecked={
+                                    defaultValue.demoPropertyService
+                                  }
                                   onChange={async (event) => {
                                     handleSwitchChange(
                                       event,
@@ -3077,7 +3035,6 @@ console.log(getProcces);
                             {getProccesProperty &&
                               getProccesProperty?.map((proceso) => (
                                 <FormControlLabel
-                                  
                                   control={
                                     <Switch
                                       color="success"
@@ -3125,7 +3082,7 @@ console.log(getProcces);
                                 <Switch
                                   color="secondary"
                                   defaultChecked={
-                                 defaultValue.naucalpanWaterService
+                                    defaultValue.naucalpanWaterService
                                   }
                                   onChange={async (event) => {
                                     handleSwitchChange(
@@ -3150,10 +3107,9 @@ console.log(getProcces);
                             <FormControlLabel
                               control={
                                 <Switch
-                                defaultChecked={
-                                  defaultValue.naucalpanPropertyService
-                              
-                                }
+                                  defaultChecked={
+                                    defaultValue.naucalpanPropertyService
+                                  }
                                   onChange={async (event) => {
                                     handleSwitchChange(
                                       event,
@@ -3300,7 +3256,7 @@ console.log(getProcces);
                                 <Switch
                                   color="secondary"
                                   defaultChecked={
-                               defaultValue.zinacantepecWaterService
+                                    defaultValue.zinacantepecWaterService
                                   }
                                   onChange={async (event) => {
                                     handleSwitchChange(
@@ -3325,9 +3281,9 @@ console.log(getProcces);
                             <FormControlLabel
                               control={
                                 <Switch
-                                defaultChecked={
-                              defaultValue.zinacantepecPropertyService
-                                }
+                                  defaultChecked={
+                                    defaultValue.zinacantepecPropertyService
+                                  }
                                   onChange={async (event) => {
                                     handleSwitchChange(
                                       event,
@@ -3525,7 +3481,7 @@ console.log(getProcces);
                               control={
                                 <Switch
                                   color="secondary"
-                                /*   checked={
+                                  /*   checked={
                                     showProccessByService.cuautitlanIzcalliProccessByServices
                                   } */
                                   onChange={(event) =>
@@ -3591,6 +3547,43 @@ console.log(getProcces);
                 </Box>
               )}
 
+              {selectedStep === 2 && (
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "end",
+                    marginTop: "2.5rem",
+                    padding: "1rem",
+                  }}
+                >
+                  <FormGroup sx={{ display: "flex", flexDirection: "row" }}>
+                    {menus &&
+                      menus?.map((menu, index) => {
+                        console.log(menu);
+
+                        return (
+                          <FormControlLabel
+                            control={
+                              <Switch
+                                defaultChecked={true}
+                                color="secondary"
+                                onChange={(e) => handleOnChange(e, menu.id, menu)}
+                                sx={{ width: "70px" }}
+                              />
+                            }
+                            label={menu.name}
+                            /*   onChange={(e) =>
+                      handleSwitchProceso(e, proceso.id_proceso, proceso)
+                    } */
+                          />
+                        );
+                      })}
+                  </FormGroup>
+                  {/* console.log(idUser.id_usuario); */}
+                  {/* fetchMenusByUserAndRol */}
+                </Box>
+              )}
+
               <Box
                 sx={{
                   display: "flex",
@@ -3598,17 +3591,19 @@ console.log(getProcces);
                   marginTop: "2.5rem",
                 }}
               >
-                <Button
-                  endIcon={<Sync />}
-                  color="secondary"
-                  variant="contained"
-                  onClick={handleNextStep}
-                >
-                  Siguiente Paso
-                </Button>
+                {selectedStep !== 2 && (
+                  <Button
+                    endIcon={<Sync />}
+                    color="secondary"
+                    variant="contained"
+                    onClick={handleNextStep}
+                  >
+                    Siguiente Paso
+                  </Button>
+                )}
               </Box>
 
-              {/*  <Box
+              <Box
                 sx={{
                   display: "flex",
                   justifyContent: "end",
@@ -3623,7 +3618,7 @@ console.log(getProcces);
                 >
                   Actualizar Usuario
                 </Button>
-              </Box> */}
+              </Box>
             </Paper>
           </Box>
         </Dialog>

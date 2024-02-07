@@ -10,6 +10,15 @@ function UserModule() {
     stepperVisible: false,
   });
   const [users, setUsers] = React.useState();
+  const [menuData,setMenuData] = React.useState([])
+  const [processData,setProcessData] = React.useState([])
+  const[serviceData,setServiceData] = React.useState([])
+
+  console.log(menuData);
+  console.log(processData);
+  console.log(serviceData);
+  
+
 
 
     /**
@@ -43,7 +52,7 @@ function UserModule() {
 
   return (
     <Container>
-      {componentesVisibility.dataGridVisible && <DataGridUsers fetchUser={fetchUser} setComponentesVisibility={setComponentesVisibility} componentesVisibility={componentesVisibility}/>}
+      {componentesVisibility.dataGridVisible && <DataGridUsers fetchUser={fetchUser} setComponentesVisibility={setComponentesVisibility} componentesVisibility={componentesVisibility} setMenuData={setMenuData} setProcessData={setProcessData} setServiceData={setServiceData} menuData={menuData}/>}
      {componentesVisibility.stepperVisible && <HorizontalNonLinearStepper fetchUser={fetchUser} setComponentesVisibility={setComponentesVisibility} componentName="stepperVisible"/>}
       
     </Container>
