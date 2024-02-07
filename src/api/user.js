@@ -54,6 +54,9 @@ export const getUserById = async (userId) => {
   // Función para actualizar una tarea por su ID
   export const getPlaceAndServiceAndProcessByUser = async (userId) => {
 
+
+    console.log(userId);
+
     
     try {
       const response = await axios.get(`http://localhost:3000/api/getPlaceAndServiceAndProcessByUser/${userId}`);
@@ -68,7 +71,7 @@ export const getUserById = async (userId) => {
 
 
 
-  getPlaceAndServiceAndProcessByUser(301)
+
 
 
 

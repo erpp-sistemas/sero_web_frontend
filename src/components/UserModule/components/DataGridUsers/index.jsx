@@ -8,7 +8,11 @@ import {
   GridToolbarFilterButton,
 } from "@mui/x-data-grid";
 import React from "react";
-import { getPlaceAndServiceAndProcessByUser, getUserById, updateUser } from "../../../../api/user";
+import {
+  getPlaceAndServiceAndProcessByUser,
+  getUserById,
+  updateUser,
+} from "../../../../api/user";
 import { store } from "../../../../redux/store";
 import { useSelector } from "react-redux";
 import MaleIcon from "@mui/icons-material/Male";
@@ -60,7 +64,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { Sync } from "@mui/icons-material";
 
 import VerifiedIcon from "@mui/icons-material/Verified";
-import { Modal, Upload } from "antd";
+import { Modal, Upload, notification } from "antd";
 import { DatePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 import {
@@ -75,6 +79,7 @@ import {
 } from "../../../../api/place";
 import { tokens } from "../../../../theme";
 import { getAllProcesses } from "../../../../api/process";
+import { log } from "mathjs";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -351,8 +356,9 @@ function DataGridUsers({
   const [personName, setPersonName] = React.useState([]);
   const [placeServiceData, setPlaceServiceData] = React.useState([]);
   const [selectedStep, setSelectedStep] = React.useState(0);
-  const [idSelectionedPlace,setIdSelectionedPlace] = React.useState()
-  const [placeAndServiceAndProcess,setPlaceAndServiceAndProcess] = React.useState([])
+  const [idSelectionedPlace, setIdSelectionedPlace] = React.useState();
+  const [placeAndServiceAndProcess, setPlaceAndServiceAndProcess] =
+    React.useState([]);
   const [showServicesByPlace, setShowServicesByPlace] = React.useState({
     cuautitlanIzcalliServicesByPlace: false,
     cuautitlanMexicoServicesByPlace: false,
@@ -374,7 +380,6 @@ function DataGridUsers({
   });
 
 
-  console.log(placeAndServiceAndProcess[0]?.id_plaza);
 
   const [userData, setUserData] = React.useState({
     nombre: "",
@@ -393,11 +398,6 @@ function DataGridUsers({
     sexo: "",
     places: "",
   });
-
-
-  
-
-  
 
   /**
    * Función asíncrona para obtener los datos de los servicios y actualizar el estado 'rows'.
@@ -550,9 +550,7 @@ function DataGridUsers({
       return;
     }
 
-
     if (fileList) {
-    
       try {
         // Now you have the File object, you can do something with it
         if (fileList[0]) {
@@ -586,10 +584,7 @@ function DataGridUsers({
     }
   }, [selectTheRowId]);
 
-
-
-
- /*  console.log(selectTheRowId); */
+  /*  console.log(selectTheRowId); */
 
   /**
    * Maneja la apertura del diálogo de actualización de usuario.
@@ -775,13 +770,8 @@ function DataGridUsers({
     }
   };
 
-
   const fetchPlaceAndServiceAndProcessByUser = async (user) => {
-
-    
     try {
-
-    
       // Aquí deberías hacer tu solicitud de red para obtener los datos
       // Reemplaza 'TU_URL_DE_DATOS' con la URL real de tus datos
       const response = await getPlaceAndServiceAndProcessByUser(user);
@@ -814,7 +804,10 @@ function DataGridUsers({
     }
   };
 
-  const getProcesosByIdPlazaServicioProperty = async (id_plaza, id_servicio) => {
+  const getProcesosByIdPlazaServicioProperty = async (
+    id_plaza,
+    id_servicio
+  ) => {
     try {
       const userId = 0;
       const response = await getProcessesByUserPlaceAndServiceId(
@@ -874,9 +867,6 @@ function DataGridUsers({
       </GridToolbarContainer>
     );
   }
-
-
- 
 
   const getServiciosByIdPlaza = async (id_plaza, plaza) => {
     const userId = 0;
@@ -1060,7 +1050,6 @@ function DataGridUsers({
             naucalpanServicesByPlace: false,
           }));
 
-
           setIdSelectionedPlace(id_plaza);
 
           break;
@@ -1075,7 +1064,6 @@ function DataGridUsers({
             naucalpanServicesByPlace: false,
           }));
 
-
           setIdSelectionedPlace(id_plaza);
 
           break;
@@ -1089,7 +1077,6 @@ function DataGridUsers({
             zinacantepecServicesByPlace: true,
             naucalpanServicesByPlace: false,
           }));
-
 
           setIdSelectionedPlace(id_plaza);
 
@@ -1133,20 +1120,13 @@ function DataGridUsers({
     }
   }, [selectTheRowId?.user_name]);
 
-
   React.useEffect(() => {
     if (selectTheRowId && selectTheRowId.id) {
+      console.log(selectTheRowId);
       console.log(selectTheRowId.id);
-      fetchPlaceAndServiceAndProcessByUser(selectTheRowId.id)
-      
+      fetchPlaceAndServiceAndProcessByUser(selectTheRowId.id);
     }
-    
-  
-  }, [selectTheRowId?.id])
-
-
-  
-  
+  }, [selectTheRowId?.id]);
 
   /**
    * Construye y devuelve la configuración de columnas para el DataGrid.
@@ -1167,7 +1147,7 @@ function DataGridUsers({
           <strong style={{ color: "#5EBFFF" }}>{"Nombre"}</strong>
         ),
         width: 110,
-        editable: false,
+        editable: true,
       },
       {
         field: "last_name",
@@ -1397,6 +1377,688 @@ function DataGridUsers({
       console.log(error);
     }
   };
+  const documents = ["Invitation Letter", "Notification", "Inspection", "Requirement 1", "Requirement 2", "Fiscal Execution", "Courts", "Survey", "Readings"]
+
+  const [defaultValue, setDefaultValue] = React.useState({
+    cuautitlanIzcalliWaterService:false,
+    cuautitlanIzcalliPropertyService:false,
+    cuautitlanMexicoWaterService:false,
+    cuautitlanMexicoPropertyService:false,
+    zinacantepecWaterService:false,
+    zinacantepecPropertyService:false,
+    naucalpanWaterService:false,
+    naucalpanPropertyService:false,
+    demoWaterService:false,
+    demoPropertyService:false,
+    cuautitlanIzcalliInvitationLetter:false,
+    cuautitlanIzcalliNotification:false,
+    cuautitlanIzcalliInspection:false,
+    cuautitlanIzcalliRequerimentOne:false,
+    cuautitlanIzcalliRequerimentTwo:false,
+    cuautitlanIzcalliFixcalExecution:false,
+    cuautitlanIzcalliCourts:false,
+    cuautitlanIzcalliSurvey:false,
+    cuautitlanIzcalliReadings:false,
+
+
+
+  });
+
+console.log(getProcces);
+  React.useEffect(() => {
+    // Check the condition for each element in placeAndServiceAndProcess
+
+
+    const hasMatchInvitationLetter = placeAndServiceAndProcess.some(
+      item => item.id_servicio === 1 && item.id_plaza === 3 && item.id_proceso === 1
+    );
+
+    const hasMatchNotification = placeAndServiceAndProcess.some(
+      item => item.id_servicio === 1 && item.id_plaza === 3 && item.id_proceso ===2
+    );
+
+
+    const hasMatchInspection = placeAndServiceAndProcess.some(
+      item => item.id_servicio === 1 && item.id_plaza === 3 && item.id_proceso ===3
+    );
+    const hasMatchRequerimentOne = placeAndServiceAndProcess.some(
+      item => item.id_servicio === 1 && item.id_plaza === 3 && item.id_proceso ===4
+    );
+
+    const hasMatchRequerimentTwo = placeAndServiceAndProcess.some(
+      item => item.id_servicio === 1 && item.id_plaza === 3 && item.id_proceso ===5
+    );
+
+    const hasMatchFixcalExecution= placeAndServiceAndProcess.some(
+      item => item.id_servicio === 1 && item.id_plaza === 3 && item.id_proceso ===6
+    );
+
+
+    const hasMatchCourts= placeAndServiceAndProcess.some(
+      item => item.id_servicio === 1 && item.id_plaza === 3 && item.id_proceso ===7
+    );
+
+
+
+    const hasMatchSurvey = placeAndServiceAndProcess.some(
+      item => item.id_servicio === 1 && item.id_plaza === 3 && item.id_proceso ===8
+    );
+
+
+   const hasMatchReadings = placeAndServiceAndProcess.some(
+      item => item.id_servicio === 1 && item.id_plaza === 3 && item.id_proceso ===9
+    );
+
+    
+
+
+    
+    const hasMatchDemoProccesByWater = placeAndServiceAndProcess.some(
+      item => item.id_servicio === 1 && item.id_plaza === 3
+    );
+
+    const hasMatchDemoProccessByProperty = placeAndServiceAndProcess.some(
+      item => item.id_servicio === 2 && item.id_plaza === 3 
+    );
+
+
+    
+    const hasMatchCuautitlanIzcalliProccesByWater = placeAndServiceAndProcess.some(
+      item => item.id_servicio === 1 && item.id_plaza === 2
+    );
+
+    const hasMatchCuautitlanIzcalliProccesByProperty = placeAndServiceAndProcess.some(
+      item => item.id_servicio === 2 && item.id_plaza === 2 
+    );
+
+
+    const hasMatchCuautitlanMexicoProccesByWater = placeAndServiceAndProcess.some(
+      item => item.id_servicio === 1 && item.id_plaza === 3
+    );
+
+    const hasMatchCuautitlanMexicoProccesByProperty = placeAndServiceAndProcess.some(
+      item => item.id_servicio === 2 && item.id_plaza === 3 
+    );
+
+
+    const hasMatchNaucalpanProccesByWater = placeAndServiceAndProcess.some(
+      item => item.id_servicio === 1 && item.id_plaza === 4
+    );
+
+    const hasMatchNaucalpanProccesByProperty = placeAndServiceAndProcess.some(
+      item => item.id_servicio === 2 && item.id_plaza === 4
+    );
+
+
+    const hasMatchZinacantepecProccesByWater = placeAndServiceAndProcess.some(
+      item => item.id_servicio === 1 && item.id_plaza === 1
+    );
+
+    const hasMatchZinacantepecProccesByProperty = placeAndServiceAndProcess.some(
+      item => item.id_servicio === 2 && item.id_plaza === 1
+    );
+
+
+     
+
+    
+    
+
+/* 
+      case hasMatchZinacantepecProccesByWater:
+        setDefaultValue(prevState=>({
+          ...prevState,
+          zinacantepecWaterService:hasMatchZinacantepecProccesByWater,
+        zinacantepecPropertyService:false,
+    
+    
+        }));
+
+
+
+        
+      setTimeout(() => {
+  
+        setShowProccessByService(prevState => ({
+          ...prevState,
+          cuautitlanIzcalliProccessByWaterService: false,
+          cuautitlanIzcalliProccessByPropertyService: false,
+          cuautitlanMexicoProccessByPropertyService: false,
+          cuautitlanMexicoProccessByWaterService: false,
+          demoProccessByPropertyService: false,
+          demoProccessByWaterService: false,
+          naucalpanProccessByPropertyService: false,
+          naucalpanProccessByWaterService: false,
+          zinacantepecProccessByPropertyService: false,
+          zinacantepecProccessByWaterService: true,
+        }));
+        
+      }, 500);
+
+
+
+        break
+
+
+
+
+      case hasMatchZinacantepecProccesByProperty:
+        setDefaultValue(prevState=>({
+          ...prevState,
+          zinacantepecWaterService:false,
+        zinacantepecPropertyService:hasMatchZinacantepecProccesByProperty,
+    
+    
+        }));
+
+
+
+        
+      setTimeout(() => {
+  
+        setShowProccessByService(prevState => ({
+          ...prevState,
+          cuautitlanIzcalliProccessByWaterService: false,
+          cuautitlanIzcalliProccessByPropertyService: false,
+          cuautitlanMexicoProccessByPropertyService: false,
+          cuautitlanMexicoProccessByWaterService: false,
+          demoProccessByPropertyService: false,
+          demoProccessByWaterService: false,
+          naucalpanProccessByPropertyService: false,
+          naucalpanProccessByWaterService: false,
+          zinacantepecProccessByPropertyService: true,
+          zinacantepecProccessByWaterService: false,
+        }));
+        
+      }, 500);
+
+
+
+        break
+
+
+      
+      case hasMatchNaucalpanProccesByProperty:
+        setDefaultValue(prevState=>({
+          ...prevState,
+          naucalpanWaterService:false,
+        naucalpanPropertyService:hasMatchNaucalpanProccesByProperty,
+    
+    
+        }));
+
+
+
+        
+      setTimeout(() => {
+  
+        setShowProccessByService(prevState => ({
+          ...prevState,
+          cuautitlanIzcalliProccessByWaterService: false,
+          cuautitlanIzcalliProccessByPropertyService: false,
+          cuautitlanMexicoProccessByPropertyService: false,
+          cuautitlanMexicoProccessByWaterService: false,
+          demoProccessByPropertyService: false,
+          demoProccessByWaterService: false,
+          naucalpanProccessByPropertyService: true,
+          naucalpanProccessByWaterService: false,
+          zinacantepecProccessByPropertyService: false,
+          zinacantepecProccessByWaterService: false,
+        }));
+        
+      }, 500);
+
+
+
+        break
+
+      case hasMatchNaucalpanProccesByWater:
+        setDefaultValue(prevState=>({
+          ...prevState,
+          naucalpanWaterService:hasMatchNaucalpanProccesByWater,
+        naucalpanPropertyService:false,
+    
+    
+        }));
+
+
+
+        
+      setTimeout(() => {
+  
+        setShowProccessByService(prevState => ({
+          ...prevState,
+          cuautitlanIzcalliProccessByWaterService: false,
+          cuautitlanIzcalliProccessByPropertyService: false,
+          cuautitlanMexicoProccessByPropertyService: false,
+          cuautitlanMexicoProccessByWaterService: false,
+          demoProccessByPropertyService: false,
+          demoProccessByWaterService: false,
+          naucalpanProccessByPropertyService: false,
+          naucalpanProccessByWaterService: true,
+          zinacantepecProccessByPropertyService: false,
+          zinacantepecProccessByWaterService: false,
+        }));
+        
+      }, 500);
+
+
+
+        break */
+      if (hasMatchCuautitlanIzcalliProccesByWater) {
+        setDefaultValue(prevState=>({
+          ...prevState,
+          cuautitlanIzcalliWaterService:true,
+
+        }));
+  
+  
+     
+  
+  
+
+
+
+
+        if (hasMatchInvitationLetter) {
+          setDefaultValue(prevState=>({
+            ...prevState,
+            cuautitlanIzcalliInvitationLetter:true,
+  
+          }));
+
+   
+        }
+
+
+        if (hasMatchNotification) {
+          setDefaultValue(prevState=>({
+            ...prevState,
+            cuautitlanIzcalliNotification:true,
+  
+          }));
+
+   
+        }
+
+
+
+        
+        if (hasMatchInspection) {
+          setDefaultValue(prevState=>({
+            ...prevState,
+            cuautitlanIzcalliInspection:true,
+  
+          }));
+
+   
+        }
+
+
+        
+        setTimeout(() => {
+    
+          setShowProccessByService(prevState => ({
+            ...prevState,
+            cuautitlanIzcalliProccessByWaterService: true,
+          
+          }));
+          
+        }, 500);
+
+
+
+        
+
+
+        
+        
+      } 
+
+      
+     
+    
+      // Update the showProccessByService state
+  
+        
+   
+
+       if (hasMatchCuautitlanIzcalliProccesByProperty) {
+
+        setDefaultValue(prevState=>({
+          ...prevState,
+   
+          cuautitlanIzcalliPropertyService:true,
+    
+    
+        }));
+      
+        // Update the showProccessByService state
+    
+        setTimeout(() => {
+    
+          setShowProccessByService(prevState => ({
+            ...prevState,
+          
+            cuautitlanIzcalliProccessByPropertyService: true,
+           
+          }));
+          
+        }, 500);
+
+
+        
+        
+       } 
+
+
+
+
+       if (hasMatchNaucalpanProccesByWater) {
+
+        setDefaultValue(prevState=>({
+          ...prevState,
+   
+          naucalpanWaterService:true,
+    
+    
+        }));
+      
+        // Update the showProccessByService state
+    
+        setTimeout(() => {
+    
+          setShowProccessByService(prevState => ({
+            ...prevState,
+          
+            naucalpanProccessByWaterService: true,
+           
+          }));
+          
+        }, 500);
+
+
+        
+        
+       } 
+
+
+       if (hasMatchNaucalpanProccesByProperty) {
+
+        setDefaultValue(prevState=>({
+          ...prevState,
+   
+          naucalpanPropertyService:true,
+    
+    
+        }));
+      
+        // Update the showProccessByService state
+    
+        setTimeout(() => {
+    
+          setShowProccessByService(prevState => ({
+            ...prevState,
+          
+            naucalpanProccessByPropertyService: true,
+           
+          }));
+          
+        }, 500);
+
+
+        
+        
+       } 
+
+
+
+
+       if (hasMatchDemoProccesByWater) {
+
+        setDefaultValue(prevState=>({
+          ...prevState,
+   
+          demoWaterService:true,
+    
+    
+        }));
+      
+        // Update the showProccessByService state
+    
+        setTimeout(() => {
+    
+          setShowProccessByService(prevState => ({
+            ...prevState,
+          
+            demoProccessByWaterService: true,
+           
+          }));
+          
+        }, 500);
+
+
+        
+        
+       } 
+
+
+       
+       if (hasMatchDemoProccessByProperty) {
+
+        setDefaultValue(prevState=>({
+          ...prevState,
+   
+          demoPropertyService:true,
+    
+    
+        }));
+      
+        // Update the showProccessByService state
+    
+        setTimeout(() => {
+    
+          setShowProccessByService(prevState => ({
+            ...prevState,
+          
+            demoProccessByPropertyService: true,
+           
+          }));
+          
+        }, 500);
+
+
+        
+        
+       } 
+
+
+
+        
+       if (hasMatchZinacantepecProccesByWater) {
+
+        setDefaultValue(prevState=>({
+          ...prevState,
+   
+          zinacantepecWaterService:true,
+    
+    
+        }));
+      
+        // Update the showProccessByService state
+    
+        setTimeout(() => {
+    
+          setShowProccessByService(prevState => ({
+            ...prevState,
+          
+            zinacantepecProccessByWaterService: true,
+           
+          }));
+          
+        }, 500);
+
+
+        
+        
+       } 
+
+
+
+
+
+       if (hasMatchZinacantepecProccesByProperty) {
+
+        setDefaultValue(prevState=>({
+          ...prevState,
+   
+          zinacantepecPropertyService:true,
+    
+    
+        }));
+      
+        // Update the showProccessByService state
+    
+        setTimeout(() => {
+    
+          setShowProccessByService(prevState => ({
+            ...prevState,
+          
+            zinacantepecProccessByPropertyService: true,
+           
+          }));
+          
+        }, 500);
+
+
+        
+        
+       } 
+
+
+
+     
+        
+
+   /*    case hasMatchDemoProccesByWater:
+
+      setDefaultValue(prevState=>({
+        ...prevState,
+        demoWaterService:hasMatchDemoProccesByWater,
+      demoPropertyService:false,
+  
+  
+      }));
+    
+      // Update the showProccessByService state
+  
+      setTimeout(() => {
+  
+        setShowProccessByService(prevState => ({
+          ...prevState,
+          cuautitlanIzcalliProccessByWaterService: false,
+          cuautitlanIzcalliProccessByPropertyService: false,
+          cuautitlanMexicoProccessByPropertyService: false,
+          cuautitlanMexicoProccessByWaterService: false,
+          demoProccessByPropertyService: false,
+          demoProccessByWaterService: true,
+          naucalpanProccessByPropertyService: false,
+          naucalpanProccessByWaterService: false,
+          zinacantepecProccessByPropertyService: false,
+          zinacantepecProccessByWaterService: false,
+        }));
+        
+      }, 500);
+        
+        break; */
+       /*  case hasMatchDemoProccessByProperty:
+
+        setDefaultValue(prevState=>({
+          ...prevState,
+          demoWaterService:false,
+        demoPropertyService:hasMatchDemoProccessByProperty,
+    
+    
+        }));
+      
+        // Update the showProccessByService state
+    
+        setTimeout(() => {
+    
+          setShowProccessByService(prevState => ({
+            ...prevState,
+            cuautitlanIzcalliProccessByWaterService: false,
+            cuautitlanIzcalliProccessByPropertyService: false,
+            cuautitlanMexicoProccessByPropertyService: false,
+            cuautitlanMexicoProccessByWaterService: false,
+            demoProccessByPropertyService: true,
+            demoProccessByWaterService: false,
+            naucalpanProccessByPropertyService: false,
+            naucalpanProccessByWaterService: false,
+            zinacantepecProccessByPropertyService: false,
+            zinacantepecProccessByWaterService: false,
+          }));
+          
+        }, 500);
+        
+        break; */
+    
+      /* default:
+        break; */
+    
+  
+    
+  
+    // Set the defaultValue based on the condition
+    
+   
+
+    // Set the defaultValue based on the condition
+    
+  }, [placeAndServiceAndProcess]);
+
+
+
+  const getDefaultCheckedValue = async(id_proceso) => {
+    try {
+      const response = await getProcesosByIdPlazaServicio(
+        idSelectionedPlace,
+        id_proceso)
+      }catch (error) {
+        console.log(error);
+      
+    }
+    switch (id_proceso) {
+      case 1:
+      
+        return defaultValue.cuautitlanIzcalliInvitationLetter;
+      case 2:
+        return defaultValue.cuautitlanIzcalliNotification;
+      case 3:
+        return defaultValue.cuautitlanIzcalliInspection;
+      case 4:
+        return defaultValue.cuautitlanIzcalliRequerimentOne;
+      case 5:
+        return defaultValue.cuautitlanIzcalliRequerimentTwo;
+      case 6:
+        return defaultValue.cuautitlanIzcalliFixcalExecution;
+      case 7:
+        return defaultValue.cuautitlanIzcalliCourts;
+      case 8:
+        return defaultValue.cuautitlanIzcalliSurvey;
+      case 9:
+        return defaultValue.cuautitlanIzcalliReadings;
+      default:
+        return null;
+    }
+  };
+
+
+
+ 
+
+
+  
 
   const handleChangeDateTime = (newValue) => {
     console.log("New Date Selected:", newValue.format("YYYY-MM-DD"));
@@ -2108,32 +2770,28 @@ function DataGridUsers({
                               control={
                                 <Switch
                                   color="secondary"
-                                  defaultChecked={placeAndServiceAndProcess[0]?.id_servicio === 1?true:false}
-                                /*   checked={
+                                  defaultChecked={
+                                 defaultValue.cuautitlanIzcalliWaterService
+                                  }
+                                  /*   checked={
                                     showProccessByService.cuautitlanIzcalliProccessByWaterService
                                   } */
-                                  onChange={async (event) =>{
+                                  onChange={async (event) => {
                                     handleSwitchChange(
                                       event,
                                       "cuautitlanIzcalliProccessByWaterService"
-                                    )
-
+                                    );
 
                                     try {
-                                      const response = await getProcesosByIdPlazaServicio(idSelectionedPlace,1)
-                                
+                                      const response =
+                                        await getProcesosByIdPlazaServicio(
+                                          idSelectionedPlace,
+                                          1
+                                        );
                                     } catch (error) {
                                       console.log(error);
-                                      
                                     }
-
-                                  
-
-
-
-                                  }
-                                  
-                                  }
+                                  }}
                                 />
                               }
                               label="Regularizaciòn Agua"
@@ -2141,27 +2799,25 @@ function DataGridUsers({
                             <FormControlLabel
                               control={
                                 <Switch
-                            
-                                defaultChecked={placeAndServiceAndProcess[0]?.id_servicio === 2?true:false}
-                                  onChange={async(event) =>{
+                                  defaultChecked={
+                                  defaultValue.cuautitlanIzcalliPropertyService
+                                  }
+                                  onChange={async (event) => {
                                     handleSwitchChange(
                                       event,
                                       "cuautitlanIzcalliProccessByPropertyService"
-                                    )
+                                    );
 
-                                    
                                     try {
-                                      const response = await getProcesosByIdPlazaServicioProperty(idSelectionedPlace,2)
-                                
+                                      const response =
+                                        await getProcesosByIdPlazaServicioProperty(
+                                          idSelectionedPlace,
+                                          2
+                                        );
                                     } catch (error) {
                                       console.log(error);
-                                      
                                     }
-
-                                  }
-
-                                    
-                                  }
+                                  }}
                                   color="secondary"
                                 />
                               }
@@ -2195,26 +2851,30 @@ function DataGridUsers({
                             marginTop: "-0.5rem",
                           }}
                         >
-                        <FormGroup
+                          <FormGroup
                             sx={{ display: "flex", flexDirection: "row" }}
                           >
-                             {getProcces &&
-              getProcces?.map((proceso) => (
+                            {getProcces &&
+                              getProcces?.map((proceso) => (
 
-                  <FormControlLabel
-                    control={<Switch
-
-                      
-                      color="secondary" sx={{ width: "70px" }} />}
-                    label={proceso.name}
-                  /*   onChange={(e) =>
+                                <FormControlLabel
+                                  control={
+                                    <Switch
+                                    key={proceso.id_proceso} 
+                                    defaultChecked={
+                                      getDefaultCheckedValue(proceso.id_proceso)
+                                    }
+                                   
+                                      color="secondary"
+                                      sx={{ width: "70px" }}
+                                    />
+                                  }
+                                  label={proceso.name}
+                                  /*   onChange={(e) =>
                       handleSwitchProceso(e, proceso.id_proceso, proceso)
                     } */
-                  />
-             
-              ))}
-                         
-                          
+                                />
+                              ))}
                           </FormGroup>
                         </Box>
                       </Box>
@@ -2242,23 +2902,24 @@ function DataGridUsers({
                             marginTop: "-0.5rem",
                           }}
                         >
-                       <FormGroup
+                          <FormGroup
                             sx={{ display: "flex", flexDirection: "row" }}
                           >
-                {getProccesProperty &&
-              getProccesProperty?.map((proceso) => (
-
-                  <FormControlLabel
-                    control={<Switch color="success" sx={{ width: "70px" }} />}
-                    label={proceso.name}
-                  /*   onChange={(e) =>
+                            {getProccesProperty &&
+                              getProccesProperty?.map((proceso,index) => (
+                                <FormControlLabel
+                                  control={
+                                    <Switch
+                                      color="success"
+                                      sx={{ width: "70px" }}
+                                    />
+                                  }
+                                  label={proceso.name}
+                                  /*   onChange={(e) =>
                       handleSwitchProceso(e, proceso.id_proceso, proceso)
                     } */
-                  />
-             
-              ))}
-                         
-                          
+                                />
+                              ))}
                           </FormGroup>
                         </Box>
                       </Box>
@@ -2293,24 +2954,23 @@ function DataGridUsers({
                               control={
                                 <Switch
                                   color="secondary"
-                                  checked={
-                                    showProccessByService.demoProccessByWaterService
-                                  }
-                                  onChange={async(event) =>{
+                                 defaultChecked={defaultValue.demoWaterService}
+                                  onChange={async (event) => {
                                     handleSwitchChange(
                                       event,
                                       "demoProccessByWaterService"
-                                    )
-                                  
-                                  
+                                    );
+
                                     try {
-                                      const response = await getProcesosByIdPlazaServicio(idSelectionedPlace,1)
-                                
+                                      const response =
+                                        await getProcesosByIdPlazaServicio(
+                                          idSelectionedPlace,
+                                          1
+                                        );
                                     } catch (error) {
                                       console.log(error);
-                                      
-                                    }}
-                                  }
+                                    }
+                                  }}
                                 />
                               }
                               label="Regularizaciòn Agua"
@@ -2318,27 +2978,23 @@ function DataGridUsers({
                             <FormControlLabel
                               control={
                                 <Switch
-                                  checked={
-                                    showProccessByService.demoProccessByPropertyService
-                                  }
-                                  onChange={async(event) =>{
+                                defaultChecked={  defaultValue.demoPropertyService}
+                                  onChange={async (event) => {
                                     handleSwitchChange(
                                       event,
                                       "demoProccessByPropertyService"
-                                    )
+                                    );
 
                                     try {
-                                      const response = await getProcesosByIdPlazaServicioProperty(idSelectionedPlace,2)
-                                
+                                      const response =
+                                        await getProcesosByIdPlazaServicioProperty(
+                                          idSelectionedPlace,
+                                          2
+                                        );
                                     } catch (error) {
                                       console.log(error);
-                                      
                                     }
-
-
-
-                                  }
-                                  }
+                                  }}
                                   color="secondary"
                                 />
                               }
@@ -2374,19 +3030,21 @@ function DataGridUsers({
                           <FormGroup
                             sx={{ display: "flex", flexDirection: "row" }}
                           >
-                                  {getProcces &&
-              getProcces?.map((proceso) => (
-
-                  <FormControlLabel
-                    control={<Switch color="success" sx={{ width: "70px" }} />}
-                    label={proceso.name}
-                  /*   onChange={(e) =>
+                            {getProcces &&
+                              getProcces?.map((proceso) => (
+                                <FormControlLabel
+                                  control={
+                                    <Switch
+                                      color="success"
+                                      sx={{ width: "70px" }}
+                                    />
+                                  }
+                                  label={proceso.name}
+                                  /*   onChange={(e) =>
                       handleSwitchProceso(e, proceso.id_proceso, proceso)
                     } */
-                  />
-             
-              ))}
-                          
+                                />
+                              ))}
                           </FormGroup>
                         </Box>
                       </Box>
@@ -2416,19 +3074,22 @@ function DataGridUsers({
                           <FormGroup
                             sx={{ display: "flex", flexDirection: "row" }}
                           >
-                             {getProccesProperty &&
-              getProccesProperty?.map((proceso) => (
-
-                  <FormControlLabel
-                    control={<Switch color="success" sx={{ width: "70px" }} />}
-                    label={proceso.name}
-                  /*   onChange={(e) =>
+                            {getProccesProperty &&
+                              getProccesProperty?.map((proceso) => (
+                                <FormControlLabel
+                                  
+                                  control={
+                                    <Switch
+                                      color="success"
+                                      sx={{ width: "70px" }}
+                                    />
+                                  }
+                                  label={proceso.name}
+                                  /*   onChange={(e) =>
                       handleSwitchProceso(e, proceso.id_proceso, proceso)
                     } */
-                  />
-             
-              ))}
-                            
+                                />
+                              ))}
                           </FormGroup>
                         </Box>
                       </Box>
@@ -2463,21 +3124,23 @@ function DataGridUsers({
                               control={
                                 <Switch
                                   color="secondary"
-                                  checked={
-                                    showProccessByService.naucalpanProccessByWaterService
+                                  defaultChecked={
+                                 defaultValue.naucalpanWaterService
                                   }
-                                  onChange={async(event) =>{
+                                  onChange={async (event) => {
                                     handleSwitchChange(
                                       event,
                                       "naucalpanProccessByWaterService"
-                                    )
+                                    );
 
                                     try {
-                                      const response = await getProcesosByIdPlazaServicio(idSelectionedPlace,1)
-                                
+                                      const response =
+                                        await getProcesosByIdPlazaServicio(
+                                          idSelectionedPlace,
+                                          1
+                                        );
                                     } catch (error) {
                                       console.log(error);
-                                      
                                     }
                                   }}
                                 />
@@ -2487,23 +3150,25 @@ function DataGridUsers({
                             <FormControlLabel
                               control={
                                 <Switch
-                                  checked={
-                                    showProccessByService.naucalpanProccessByPropertyService
-                                  }
-                                  onChange={async(event) =>{
+                                defaultChecked={
+                                  defaultValue.naucalpanPropertyService
+                              
+                                }
+                                  onChange={async (event) => {
                                     handleSwitchChange(
                                       event,
                                       "naucalpanProccessByPropertyService"
-                                    )
+                                    );
                                     try {
-                                      const response = await getProcesosByIdPlazaServicioProperty(idSelectionedPlace,2)
-                                
+                                      const response =
+                                        await getProcesosByIdPlazaServicioProperty(
+                                          idSelectionedPlace,
+                                          2
+                                        );
                                     } catch (error) {
                                       console.log(error);
-                                      
                                     }
-                                  }
-                                  }
+                                  }}
                                   color="secondary"
                                 />
                               }
@@ -2540,19 +3205,21 @@ function DataGridUsers({
                           <FormGroup
                             sx={{ display: "flex", flexDirection: "row" }}
                           >
-                               {getProcces &&
-              getProcces?.map((proceso) => (
-
-                  <FormControlLabel
-                    control={<Switch color="success" sx={{ width: "70px" }} />}
-                    label={proceso.name}
-                  /*   onChange={(e) =>
+                            {getProcces &&
+                              getProcces?.map((proceso) => (
+                                <FormControlLabel
+                                  control={
+                                    <Switch
+                                      color="success"
+                                      sx={{ width: "70px" }}
+                                    />
+                                  }
+                                  label={proceso.name}
+                                  /*   onChange={(e) =>
                       handleSwitchProceso(e, proceso.id_proceso, proceso)
                     } */
-                  />
-             
-              ))}
-                          
+                                />
+                              ))}
                           </FormGroup>
                         </Box>
                       </Box>
@@ -2583,18 +3250,21 @@ function DataGridUsers({
                           <FormGroup
                             sx={{ display: "flex", flexDirection: "row" }}
                           >
-                              {getProccesProperty &&
-              getProccesProperty?.map((proceso) => (
-
-                  <FormControlLabel
-                    control={<Switch color="success" sx={{ width: "70px" }} />}
-                    label={proceso.name}
-                  /*   onChange={(e) =>
+                            {getProccesProperty &&
+                              getProccesProperty?.map((proceso) => (
+                                <FormControlLabel
+                                  control={
+                                    <Switch
+                                      color="success"
+                                      sx={{ width: "70px" }}
+                                    />
+                                  }
+                                  label={proceso.name}
+                                  /*   onChange={(e) =>
                       handleSwitchProceso(e, proceso.id_proceso, proceso)
                     } */
-                  />
-             
-              ))}
+                                />
+                              ))}
                           </FormGroup>
                         </Box>
                       </Box>
@@ -2629,25 +3299,25 @@ function DataGridUsers({
                               control={
                                 <Switch
                                   color="secondary"
-                                  checked={
-                                    showProccessByService.zinacantepecProccessByWaterService
+                                  defaultChecked={
+                               defaultValue.zinacantepecWaterService
                                   }
-                                  onChange={async(event) =>{
+                                  onChange={async (event) => {
                                     handleSwitchChange(
                                       event,
                                       "zinacantepecProccessByWaterService"
-                                    )
+                                    );
 
                                     try {
-                                      const response = await getProcesosByIdPlazaServicio(idSelectionedPlace,1)
-                                
+                                      const response =
+                                        await getProcesosByIdPlazaServicio(
+                                          idSelectionedPlace,
+                                          1
+                                        );
                                     } catch (error) {
                                       console.log(error);
-                                      
                                     }
-
-                                  }
-                                  }
+                                  }}
                                 />
                               }
                               label="Regularizaciòn Agua"
@@ -2655,25 +3325,25 @@ function DataGridUsers({
                             <FormControlLabel
                               control={
                                 <Switch
-                                  checked={
-                                    showProccessByService.zinacantepecProccessByPropertyService
-                                  }
-                                  onChange={async(event) =>{
+                                defaultChecked={
+                              defaultValue.zinacantepecPropertyService
+                                }
+                                  onChange={async (event) => {
                                     handleSwitchChange(
                                       event,
                                       "zinacantepecProccessByPropertyService"
-                                    )
+                                    );
 
                                     try {
-                                      const response = await getProcesosByIdPlazaServicioProperty(idSelectionedPlace,2)
-                                
+                                      const response =
+                                        await getProcesosByIdPlazaServicioProperty(
+                                          idSelectionedPlace,
+                                          2
+                                        );
                                     } catch (error) {
                                       console.log(error);
-                                      
                                     }
-
-                                  }
-                                  }
+                                  }}
                                   color="secondary"
                                 />
                               }
@@ -2710,18 +3380,21 @@ function DataGridUsers({
                           <FormGroup
                             sx={{ display: "flex", flexDirection: "row" }}
                           >
-                              {getProcces &&
-              getProcces?.map((proceso) => (
-
-                  <FormControlLabel
-                    control={<Switch color="success" sx={{ width: "70px" }} />}
-                    label={proceso.name}
-                  /*   onChange={(e) =>
+                            {getProcces &&
+                              getProcces?.map((proceso) => (
+                                <FormControlLabel
+                                  control={
+                                    <Switch
+                                      color="success"
+                                      sx={{ width: "70px" }}
+                                    />
+                                  }
+                                  label={proceso.name}
+                                  /*   onChange={(e) =>
                       handleSwitchProceso(e, proceso.id_proceso, proceso)
                     } */
-                  />
-             
-              ))}
+                                />
+                              ))}
                           </FormGroup>
                         </Box>
                       </Box>
@@ -2752,18 +3425,21 @@ function DataGridUsers({
                           <FormGroup
                             sx={{ display: "flex", flexDirection: "row" }}
                           >
-                             {getProccesProperty &&
-              getProccesProperty?.map((proceso) => (
-
-                  <FormControlLabel
-                    control={<Switch color="success" sx={{ width: "70px" }} />}
-                    label={proceso.name}
-                  /*   onChange={(e) =>
+                            {getProccesProperty &&
+                              getProccesProperty?.map((proceso) => (
+                                <FormControlLabel
+                                  control={
+                                    <Switch
+                                      color="success"
+                                      sx={{ width: "70px" }}
+                                    />
+                                  }
+                                  label={proceso.name}
+                                  /*   onChange={(e) =>
                       handleSwitchProceso(e, proceso.id_proceso, proceso)
                     } */
-                  />
-             
-              ))}
+                                />
+                              ))}
                           </FormGroup>
                         </Box>
                       </Box>
@@ -2849,9 +3525,9 @@ function DataGridUsers({
                               control={
                                 <Switch
                                   color="secondary"
-                                  checked={
+                                /*   checked={
                                     showProccessByService.cuautitlanIzcalliProccessByServices
-                                  }
+                                  } */
                                   onChange={(event) =>
                                     handleSwitchChange(
                                       event,
