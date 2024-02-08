@@ -134,6 +134,8 @@ function Search({
           statusText: response.statusText,
         };
 
+        
+
         setAlertInfo(requestInfo);
 
         // Hacer algo con los datos, por ejemplo, actualizar el estado del componente

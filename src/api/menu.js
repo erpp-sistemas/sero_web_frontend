@@ -138,3 +138,17 @@ export const getMenusByUserId = async (userId) => {
       throw error.response?.data || error;
     }
   };
+
+
+  export const updateActivoInMenuRolUsuario = async (menuData) => {
+    try {
+      const response = await axios.put(`/updateActivoInMenuRolUsuario`,menuData);
+      // Podrías realizar operaciones adicionales aquí después de la creación
+      return response.data;
+    } catch (error) {
+      console.error("Error :", error.response?.data || error.message);
+      throw error.response?.data || error;
+    }
+  };
+
+
