@@ -59,7 +59,7 @@ function GoogleMaps({latitude,longitude}) {
   }, [mapLoaded, lng, lat]);
   
 
-  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+  const apiKey = "AIzaSyBSbHAclLiEeiClEXfeZ2zn9OT850Mw55A";
   return (
     <div className={classNames.principal}>
     <LoadScript googleMapsApiKey={apiKey} onLoad={onMapLoad}>

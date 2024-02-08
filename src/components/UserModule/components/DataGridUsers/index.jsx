@@ -12,6 +12,7 @@ import {
   getPlaceAndServiceAndProcessByUser,
   getUserById,
   updateUser,
+  updateUserPlazaServicioProceso,
 } from "../../../../api/user";
 import { store } from "../../../../redux/store";
 import { useSelector } from "react-redux";
@@ -354,6 +355,7 @@ function DataGridUsers({
   const [processes, setProcesses] = React.useState([]);
   const [getProcces, setProcces] = React.useState([]);
   const [getProccesProperty, setProccesProperty] = React.useState([]);
+
   const [previewOpen, setPreviewOpen] = React.useState(false);
   const [previewImage, setPreviewImage] = React.useState("");
   const [previewTitle, setPreviewTitle] = React.useState("");
@@ -2832,9 +2834,39 @@ function DataGridUsers({
                                     />
                                   }
                                   label={proceso.name}
-                                  /*   onChange={(e) =>
-                      handleSwitchProceso(e, proceso.id_proceso, proceso)
-                    } */
+                                  onChange={async(e) =>{
+                                    const {checked} = e.target
+                                    if (checked) {
+                                      const response = await updateUserPlazaServicioProceso(
+                                        {
+                                          "userId": idUser.id_usuario,
+                                          "plazaId": 2,
+                                          "servicioId": 1,
+                                          "procesoId": proceso.process_id,
+                                          "active": 1
+
+                                        }
+                                      )
+                                      
+                                    }else{
+                                      const response = await updateUserPlazaServicioProceso(
+                                        {
+                                          "userId": idUser.id_usuario,
+                                          "plazaId": 2,
+                                          "servicioId": 1,
+                                          "procesoId": proceso.process_id,
+                                          "active": 0
+
+                                        }
+                                      )
+
+                                    }
+
+
+                                 
+
+                                    
+                                  }}
                                 />
                               ))}
                           </FormGroup>
@@ -2877,9 +2909,41 @@ function DataGridUsers({
                                     />
                                   }
                                   label={proceso.name}
-                                  /*   onChange={(e) =>
-                      handleSwitchProceso(e, proceso.id_proceso, proceso)
-                    } */
+                                    onChange={async(e) =>{
+                                      const {checked} = e.target
+                                      if (checked) {
+                                        const response = await updateUserPlazaServicioProceso(
+                                          {
+                                            "userId": idUser.id_usuario,
+                                            "plazaId": 2,
+                                            "servicioId": 2,
+                                            "procesoId": proceso.process_id,
+                                            "active": 1
+  
+                                          }
+                                        )
+                                        
+                                      }else{
+                                        const response = await updateUserPlazaServicioProceso(
+                                          {
+                                            "userId": idUser.id_usuario,
+                                            "plazaId": 2,
+                                            "servicioId": 2,
+                                            "procesoId": proceso.process_id,
+                                            "active": 0
+  
+                                          }
+                                        )
+
+                                      }
+
+
+                                   
+
+                                      
+                                    }
+                     
+                    } 
                                 />
                               ))}
                           </FormGroup>
