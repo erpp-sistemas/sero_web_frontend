@@ -2847,6 +2847,11 @@ function DataGridUsers({
 
                                         }
                                       )
+
+                                      setSnackbar({
+                                        children: "Proceso activado",
+                                        severity: "success",
+                                      });
                                       
                                     }else{
                                       const response = await updateUserPlazaServicioProceso(
@@ -2859,6 +2864,11 @@ function DataGridUsers({
 
                                         }
                                       )
+
+                                      setSnackbar({
+                                        children: "Proceso se ha desactivado",
+                                        severity: "warning",
+                                      });
 
                                     }
 

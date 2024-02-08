@@ -142,8 +142,9 @@ export const getMenusByUserId = async (userId) => {
 
   export const updateActivoInMenuRolUsuario = async (menuData) => {
     try {
-      const response = await axios.put(`/updateActivoInMenuRolUsuario`,menuData);
+      const response = await axios.put(`/updateUserPlazaServicioProceso`, menuData);
       // Podrías realizar operaciones adicionales aquí después de la creación
+      console.log("response.data -------ZZZZZ", response.data);
       return response.data;
     } catch (error) {
       console.error("Error :", error.response?.data || error.message);
@@ -151,4 +152,6 @@ export const getMenusByUserId = async (userId) => {
     }
   };
 
+
+  
 
