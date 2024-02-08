@@ -5,7 +5,7 @@ export const getUserById = async (userId) => {
   try {
     // Usa la ruta correspondiente a '/GetUserById/:id' y proporciona el userId
     const response = await axios.get(
-      `http://localhost:3000/api/GetUserById/${userId}`
+      `/GetUserById/${userId}`
     );
 
     console.log(response);
@@ -34,7 +34,7 @@ export const getUserById = async (userId) => {
 export const updateUser = async (userId, updatedUserData) => {
   try {
     const response = await axios.put(
-      `http://localhost:3000/api/usuarios/${userId}`,
+      `/usuarios/${userId}`,
       updatedUserData
     );
     // Podrías realizar operaciones adicionales aquí después de la actualización
@@ -55,7 +55,7 @@ export const getPlaceAndServiceAndProcessByUser = async (userId) => {
 
   try {
     const response = await axios.get(
-      `http://localhost:3000/api/getPlaceAndServiceAndProcessByUser/${userId}`
+      `/getPlaceAndServiceAndProcessByUser/${userId}`
     );
     // Podrías realizar operaciones adicionales aquí después de la actualización
     console.log(response);
@@ -72,7 +72,7 @@ export const getPlaceAndServiceAndProcessByUser = async (userId) => {
 export const updateUserPlazaServicioProceso = async (userData) => {
   try {
     const response = await axios.put(
-      `http://localhost:3000/api/updateUserPlazaServicioProceso`,
+      `/updateUserPlazaServicioProceso`,
       userData
     );
     // Podrías realizar operaciones adicionales aquí después de la actualización

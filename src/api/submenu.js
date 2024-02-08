@@ -9,7 +9,7 @@ import axios from 'axios';
  */
 export const createSubMenu = async (subMenuData) => {
   try {
-    const response = await axios.post('http://localhost:3000/api/submenus', subMenuData);
+    const response = await axios.post('/submenus', subMenuData);
     return response.data;
   } catch (error) {
     if (error.response) {
@@ -36,7 +36,7 @@ export const createSubMenu = async (subMenuData) => {
  */
 export const getAllSubMenus = async () => {
   try {
-    const response = await axios.get('http://localhost:3000/api/submenus');
+    const response = await axios.get('/submenus');
     
     return response.data;
   } catch (error) {
@@ -54,7 +54,7 @@ export const getAllSubMenus = async () => {
  */
 export const updateSubMenu = async (subMenuId, updatedSubMenuData) => {
   try {
-    const response = await axios.put(`http://localhost:3000/api/submenus/${subMenuId}`, updatedSubMenuData);
+    const response = await axios.put(`/submenus/${subMenuId}`, updatedSubMenuData);
     return response.data;
   } catch (error) {
     handleAxiosError(error);
@@ -88,7 +88,7 @@ export const deleteSubMenu = async (subMenuId) => {
    */
   export const createSubMenuByUserAndRol = async (menuData) => {
     try {
-      const response = await axios.post('http://localhost:3000/api/submenusByRolAndUsuario', menuData);
+      const response = await axios.post('/submenusByRolAndUsuario', menuData);
       // Podrías realizar operaciones adicionales aquí después de la creación
       return response.data;
     } catch (error) {
