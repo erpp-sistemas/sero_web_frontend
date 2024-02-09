@@ -113,7 +113,7 @@ function SwitchBox({ buttons }) {
              
               </FormGroup>
             </Box>
-            {selectedServices["1"] &&(  <Box
+            {selectedServices["1"] && buttons["button1"] &&(  <Box
               sx={{
                 border: "1px solid white",
                 margin: "1rem",
@@ -135,7 +135,7 @@ function SwitchBox({ buttons }) {
             </Box>
 
             )}
-            {selectedServices["2"] &&(  <Box
+            {selectedServices["2"] &&  buttons["button1"]&&(  <Box
               sx={{
                 border: "1px solid white",
                 margin: "1rem",
@@ -157,7 +157,7 @@ function SwitchBox({ buttons }) {
             </Box>
 
             )}
-            {selectedServices["3"] &&(  <Box
+            {selectedServices["3"] &&  buttons["button1"]&&(  <Box
               sx={{
                 border: "1px solid white",
                 margin: "1rem",
@@ -179,7 +179,275 @@ function SwitchBox({ buttons }) {
             </Box>
 
             )}
-            {selectedServices["4"] &&(  <Box
+            {selectedServices["4"] &&  buttons["button1"]&&(  <Box
+              sx={{
+                border: "1px solid white",
+                margin: "1rem",
+                width: "320px",
+                padding: "1rem",
+              }}
+            >
+              <Typography>{`Procesos de la plaza ${
+                arrayPlaces[Number(buttons?.[buttonName]) - 1]
+              } para el servicio de Licencias`}</Typography>
+              <FormGroup sx={{display:"flex",flexDirection:"row",flexWrap:"wrap"}}>
+               {processes?.map((process)=>{
+                return  <FormControlLabel
+                control={<Checkbox color="secondary" />}
+                label={`${process.nombre}`}
+              />
+               })}
+              </FormGroup>
+            </Box>
+
+            )}
+
+{selectedServices["1"] && buttons["button2"] &&(  <Box
+              sx={{
+                border: "1px solid white",
+                margin: "1rem",
+                width: "320px",
+                padding: "1rem",
+              }}
+            >
+              <Typography>{`Procesos de la plaza ${
+                arrayPlaces[Number(buttons?.[buttonName]) - 1]
+              } para el servicio de agua`}</Typography>
+              <FormGroup sx={{display:"flex",flexDirection:"row",flexWrap:"wrap"}}>
+               {processes?.map((process)=>{
+                return  <FormControlLabel
+                control={<Checkbox color="secondary" />}
+                label={`${process.nombre}`}
+              />
+               })}
+              </FormGroup>
+            </Box>
+
+            )}
+            {selectedServices["2"] &&  buttons["button2"]&&(  <Box
+              sx={{
+                border: "1px solid white",
+                margin: "1rem",
+                width: "320px",
+                padding: "1rem",
+              }}
+            >
+              <Typography>{`Procesos de la plaza ${
+                arrayPlaces[Number(buttons?.[buttonName]) - 1]
+              } para el servicio de predio`}</Typography>
+              <FormGroup sx={{display:"flex",flexDirection:"row",flexWrap:"wrap"}}>
+               {processes?.map((process)=>{
+                return  <FormControlLabel
+                control={<Checkbox color="secondary" />}
+                label={`${process.nombre}`}
+              />
+               })}
+              </FormGroup>
+            </Box>
+
+            )}
+            {selectedServices["3"] &&  buttons["button2"]&&(  <Box
+              sx={{
+                border: "1px solid white",
+                margin: "1rem",
+                width: "320px",
+                padding: "1rem",
+              }}
+            >
+              <Typography>{`Procesos de la plaza ${
+                arrayPlaces[Number(buttons?.[buttonName]) - 1]
+              } para el servicio de antenas `}</Typography>
+              <FormGroup sx={{display:"flex",flexDirection:"row",flexWrap:"wrap"}}>
+               {processes?.map((process)=>{
+                return  <FormControlLabel
+                control={<Checkbox color="secondary" />}
+                label={`${process.nombre}`}
+              />
+               })}
+              </FormGroup>
+            </Box>
+
+            )}
+            {selectedServices["4"] &&  buttons["button2"]&&(  <Box
+              sx={{
+                border: "1px solid white",
+                margin: "1rem",
+                width: "320px",
+                padding: "1rem",
+              }}
+            >
+              <Typography>{`Procesos de la plaza ${
+                arrayPlaces[Number(buttons?.[buttonName]) - 1]
+              } para el servicio de Licencias`}</Typography>
+              <FormGroup sx={{display:"flex",flexDirection:"row",flexWrap:"wrap"}}>
+               {processes?.map((process)=>{
+                return  <FormControlLabel
+                control={<Checkbox color="secondary" />}
+                label={`${process.nombre}`}
+              />
+               })}
+              </FormGroup>
+            </Box>
+
+            )}
+
+{selectedServices["1"] && buttons["button3"] &&(  <Box
+              sx={{
+                border: "1px solid white",
+                margin: "1rem",
+                width: "320px",
+                padding: "1rem",
+              }}
+            >
+              <Typography>{`Procesos de la plaza ${
+                arrayPlaces[Number(buttons?.[buttonName]) - 1]
+              } para el servicio de agua`}</Typography>
+              <FormGroup sx={{display:"flex",flexDirection:"row",flexWrap:"wrap"}}>
+               {processes?.map((process)=>{
+                return  <FormControlLabel
+                control={<Checkbox color="secondary" />}
+                label={`${process.nombre}`}
+              />
+               })}
+              </FormGroup>
+            </Box>
+
+            )}
+            {selectedServices["2"] &&  buttons["button3"]&&(  <Box
+              sx={{
+                border: "1px solid white",
+                margin: "1rem",
+                width: "320px",
+                padding: "1rem",
+              }}
+            >
+              <Typography>{`Procesos de la plaza ${
+                arrayPlaces[Number(buttons?.[buttonName]) - 1]
+              } para el servicio de predio`}</Typography>
+              <FormGroup sx={{display:"flex",flexDirection:"row",flexWrap:"wrap"}}>
+               {processes?.map((process)=>{
+                return  <FormControlLabel
+                control={<Checkbox color="secondary" />}
+                label={`${process.nombre}`}
+              />
+               })}
+              </FormGroup>
+            </Box>
+
+            )}
+            {selectedServices["3"] &&  buttons["button3"]&&(  <Box
+              sx={{
+                border: "1px solid white",
+                margin: "1rem",
+                width: "320px",
+                padding: "1rem",
+              }}
+            >
+              <Typography>{`Procesos de la plaza ${
+                arrayPlaces[Number(buttons?.[buttonName]) - 1]
+              } para el servicio de antenas `}</Typography>
+              <FormGroup sx={{display:"flex",flexDirection:"row",flexWrap:"wrap"}}>
+               {processes?.map((process)=>{
+                return  <FormControlLabel
+                control={<Checkbox color="secondary" />}
+                label={`${process.nombre}`}
+              />
+               })}
+              </FormGroup>
+            </Box>
+
+            )}
+            {selectedServices["4"] &&  buttons["button3"]&&(  <Box
+              sx={{
+                border: "1px solid white",
+                margin: "1rem",
+                width: "320px",
+                padding: "1rem",
+              }}
+            >
+              <Typography>{`Procesos de la plaza ${
+                arrayPlaces[Number(buttons?.[buttonName]) - 1]
+              } para el servicio de Licencias`}</Typography>
+              <FormGroup sx={{display:"flex",flexDirection:"row",flexWrap:"wrap"}}>
+               {processes?.map((process)=>{
+                return  <FormControlLabel
+                control={<Checkbox color="secondary" />}
+                label={`${process.nombre}`}
+              />
+               })}
+              </FormGroup>
+            </Box>
+
+            )}
+
+            
+{selectedServices["1"] && buttons["button4"] &&(  <Box
+              sx={{
+                border: "1px solid white",
+                margin: "1rem",
+                width: "320px",
+                padding: "1rem",
+              }}
+            >
+              <Typography>{`Procesos de la plaza ${
+                arrayPlaces[Number(buttons?.[buttonName]) - 1]
+              } para el servicio de agua`}</Typography>
+              <FormGroup sx={{display:"flex",flexDirection:"row",flexWrap:"wrap"}}>
+               {processes?.map((process)=>{
+                return  <FormControlLabel
+                control={<Checkbox color="secondary" />}
+                label={`${process.nombre}`}
+              />
+               })}
+              </FormGroup>
+            </Box>
+
+            )}
+            {selectedServices["2"] &&  buttons["button4"]&&(  <Box
+              sx={{
+                border: "1px solid white",
+                margin: "1rem",
+                width: "320px",
+                padding: "1rem",
+              }}
+            >
+              <Typography>{`Procesos de la plaza ${
+                arrayPlaces[Number(buttons?.[buttonName]) - 1]
+              } para el servicio de predio`}</Typography>
+              <FormGroup sx={{display:"flex",flexDirection:"row",flexWrap:"wrap"}}>
+               {processes?.map((process)=>{
+                return  <FormControlLabel
+                control={<Checkbox color="secondary" />}
+                label={`${process.nombre}`}
+              />
+               })}
+              </FormGroup>
+            </Box>
+
+            )}
+            {selectedServices["3"] &&  buttons["button4"]&&(  <Box
+              sx={{
+                border: "1px solid white",
+                margin: "1rem",
+                width: "320px",
+                padding: "1rem",
+              }}
+            >
+              <Typography>{`Procesos de la plaza ${
+                arrayPlaces[Number(buttons?.[buttonName]) - 1]
+              } para el servicio de antenas `}</Typography>
+              <FormGroup sx={{display:"flex",flexDirection:"row",flexWrap:"wrap"}}>
+               {processes?.map((process)=>{
+                return  <FormControlLabel
+                control={<Checkbox color="secondary" />}
+                label={`${process.nombre}`}
+              />
+               })}
+              </FormGroup>
+            </Box>
+
+            )}
+            {selectedServices["4"] &&  buttons["button4"]&&(  <Box
               sx={{
                 border: "1px solid white",
                 margin: "1rem",

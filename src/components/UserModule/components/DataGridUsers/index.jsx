@@ -554,10 +554,10 @@ function DataGridUsers({
     console.log("aqui prueba 1");
 
     // Fetch your base64 image URL from fileList[0].thumbUrl
-    if (!fileList || fileList.length === 0) {
+    /* if (!fileList || fileList.length === 0) {
       console.error("File list is empty or undefined.");
       return;
-    }
+    } */
 
     if (fileList) {
       try {
