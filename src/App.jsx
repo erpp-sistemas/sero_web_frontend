@@ -44,6 +44,7 @@ import Process from "./scenes/process";
 import Roles from "./scenes/roles"
 import Menu from "./scenes/menu";
 import Permission from "./scenes/permission";
+import Places from "./scenes/places";
 
 
 
@@ -148,6 +149,7 @@ function App() {
                     <Route path="/process" element={<Process/>}/>
                     <Route path="/menu" element={<Menu/>}/>
                     <Route path="/permission" element={<Permission/>}/>
+                    <Route path="/places" element={<Places/>}/>
                   </Routes>
                 </main>
                 

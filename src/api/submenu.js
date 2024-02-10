@@ -1,4 +1,5 @@
 import axios from 'axios';
+import instance from './axios';
 
 /**
  * Función para crear un nuevo submenú.
@@ -9,7 +10,7 @@ import axios from 'axios';
  */
 export const createSubMenu = async (subMenuData) => {
   try {
-    const response = await axios.post('/submenus', subMenuData);
+    const response = await instance.post('/submenus', subMenuData);
     return response.data;
   } catch (error) {
     if (error.response) {
@@ -36,7 +37,7 @@ export const createSubMenu = async (subMenuData) => {
  */
 export const getAllSubMenus = async () => {
   try {
-    const response = await axios.get('/submenus');
+    const response = await instance.get('/submenus');
     
     return response.data;
   } catch (error) {
@@ -54,7 +55,7 @@ export const getAllSubMenus = async () => {
  */
 export const updateSubMenu = async (subMenuId, updatedSubMenuData) => {
   try {
-    const response = await axios.put(`/submenus/${subMenuId}`, updatedSubMenuData);
+    const response = await instance.put(`/submenus/${subMenuId}`, updatedSubMenuData);
     return response.data;
   } catch (error) {
     handleAxiosError(error);
@@ -70,7 +71,7 @@ export const updateSubMenu = async (subMenuId, updatedSubMenuData) => {
  */
 export const deleteSubMenu = async (subMenuId) => {
   try {
-    const response = await axios.delete(`/submenus/${subMenuId}`);
+    const response = await instance.delete(`/submenus/${subMenuId}`);
     return response.data;
   } catch (error) {
     handleAxiosError(error);
@@ -88,7 +89,7 @@ export const deleteSubMenu = async (subMenuId) => {
    */
   export const createSubMenuByUserAndRol = async (menuData) => {
     try {
-      const response = await axios.post('/submenusByRolAndUsuario', menuData);
+      const response = await instance.post('/submenusByRolAndUsuario', menuData);
       // Podrías realizar operaciones adicionales aquí después de la creación
       return response.data;
     } catch (error) {

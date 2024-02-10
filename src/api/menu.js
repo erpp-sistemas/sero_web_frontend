@@ -1,8 +1,9 @@
+import instance from './axios';
 import axios from './axios'
 
 //export const loginRequest = user => axios.post(`/login`, user)
 
-export const menusUserIdRequest = (user_id) => axios.get(`/MenusUserId/${user_id}`)
+export const menusUserIdRequest = (user_id) => instance.get(`/MenusUserId/${user_id}`)
 
 
 
@@ -15,7 +16,7 @@ export const menusUserIdRequest = (user_id) => axios.get(`/MenusUserId/${user_id
  */
 export const getMenusByUserId = async (userId) => {
     try {
-      const response = await axios.get(`/MenusUserId/${userId}`);
+      const response = await instance.get(`/MenusUserId/${userId}`);
       // Podrías realizar operaciones adicionales aquí antes de retornar los datos
       return response.data;
     } catch (error) {
@@ -33,7 +34,7 @@ export const getMenusByUserId = async (userId) => {
    */
   export const createMenu = async (menuData) => {
     try {
-      const response = await axios.post('/menus', menuData);
+      const response = await instance.post('/menus', menuData);
       // Podrías realizar operaciones adicionales aquí después de la creación
       return response.data;
     } catch (error) {
@@ -50,7 +51,7 @@ export const getMenusByUserId = async (userId) => {
    */
   export const getAllMenus = async () => {
     try {
-      const response = await axios.get('/menus');
+      const response = await instance.get('/menus');
       // Podrías realizar operaciones adicionales aquí antes de retornar los datos
       return response.data;
     } catch (error) {
@@ -69,7 +70,7 @@ export const getMenusByUserId = async (userId) => {
    */
   export const updateMenu = async (menuId, updatedMenuData) => {
     try {
-      const response = await axios.put(`/menus/${menuId}`, updatedMenuData);
+      const response = await instance.put(`/menus/${menuId}`, updatedMenuData);
       // Podrías realizar operaciones adicionales aquí después de la actualización
       return response.data;
     } catch (error) {
@@ -87,7 +88,7 @@ export const getMenusByUserId = async (userId) => {
    */
   export const deleteMenu = async (menuId) => {
     try {
-      const response = await axios.delete(`/menus/${menuId}`);
+      const response = await instance.delete(`/menus/${menuId}`);
       // Podrías realizar operaciones adicionales aquí después de la eliminación
       return response.data;
     } catch (error) {
@@ -111,7 +112,7 @@ export const getMenusByUserId = async (userId) => {
 
     console.log(menuData);
     try {
-      const response = await axios.post('/menusByRolAndUsuario', menuData);
+      const response = await instance.post('/menusByRolAndUsuario', menuData);
       // Podrías realizar operaciones adicionales aquí después de la creación
       return response.data;
     } catch (error) {
@@ -130,7 +131,7 @@ export const getMenusByUserId = async (userId) => {
    */
    export const menuByUserAndRol = async (userId,rolId) => {
     try {
-      const response = await axios.get(`/menuByUserAndRol/${userId}/${rolId}`);
+      const response = await instance.get(`/menuByUserAndRol/${userId}/${rolId}`);
       // Podrías realizar operaciones adicionales aquí después de la creación
       return response.data;
     } catch (error) {
@@ -142,7 +143,7 @@ export const getMenusByUserId = async (userId) => {
 
   export const updateActivoInMenuRolUsuario = async (menuData) => {
     try {
-      const response = await axios.put(`/updateUserPlazaServicioProceso`, menuData);
+      const response = await instance.put(`/updateUserPlazaServicioProceso`, menuData);
       // Podrías realizar operaciones adicionales aquí después de la creación
       console.log("response.data -------ZZZZZ", response.data);
       return response.data;

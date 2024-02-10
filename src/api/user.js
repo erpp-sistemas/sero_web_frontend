@@ -1,11 +1,12 @@
 // Importa axios si aún no lo has hecho
 import axios from "axios";
+import instance from "./axios";
 
 export const getUserById = async (userId) => {
   try {
     // Usa la ruta correspondiente a '/GetUserById/:id' y proporciona el userId
-    const response = await axios.get(
-      `http://localhost:3000/api/GetUserById/${userId}`
+    const response = await instance.get(
+      `/GetUserById/${userId}`
     );
 
     console.log(response);
@@ -33,8 +34,8 @@ export const getUserById = async (userId) => {
 // Función para actualizar una tarea por su ID
 export const updateUser = async (userId, updatedUserData) => {
   try {
-    const response = await axios.put(
-      `http://localhost:3000/api/usuarios/${userId}`,
+    const response = await instance.put(
+      `/usuarios/${userId}`,
       updatedUserData
     );
     // Podrías realizar operaciones adicionales aquí después de la actualización
@@ -54,8 +55,8 @@ export const getPlaceAndServiceAndProcessByUser = async (userId) => {
   console.log(userId);
 
   try {
-    const response = await axios.get(
-      `http://localhost:3000/api/getPlaceAndServiceAndProcessByUser/${userId}`
+    const response = await instance.get(
+      `/getPlaceAndServiceAndProcessByUser/${userId}`
     );
     // Podrías realizar operaciones adicionales aquí después de la actualización
     console.log(response);
@@ -71,8 +72,8 @@ export const getPlaceAndServiceAndProcessByUser = async (userId) => {
 
 export const updateUserPlazaServicioProceso = async (userData) => {
   try {
-    const response = await axios.put(
-      `http://localhost:3000/api/updateUserPlazaServicioProceso`,
+    const response = await instance.put(
+      `/updateUserPlazaServicioProceso`,
       userData
     );
     // Podrías realizar operaciones adicionales aquí después de la actualización

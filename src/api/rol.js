@@ -1,3 +1,4 @@
+import instance from './axios';
 import axios from './axios'; // Asegúrate de que el path sea correcto
 
 
@@ -9,7 +10,7 @@ import axios from './axios'; // Asegúrate de que el path sea correcto
  */
 export const createRol = async (rolData) => {
     try {
-      const response = await axios.post('/roles',rolData);
+      const response = await instance.post('/roles',rolData);
       // Podrías realizar operaciones adicionales aquí después de la creación del rol
       return response.data;
     } catch (error) {
@@ -26,7 +27,7 @@ export const createRol = async (rolData) => {
    */
   export const getAllRoles = async () => {
     try {
-      const response = await axios.get('/roles');
+      const response = await instance.get('/roles');
       // Podrías realizar operaciones adicionales aquí antes de retornar los datos
       return response.data;
     } catch (error) {
@@ -45,7 +46,7 @@ export const createRol = async (rolData) => {
    */
   export const updateRolById = async (rolId, updatedRolData) => {
     try {
-      const response = await axios.put(`/roles/${rolId}`, updatedRolData);
+      const response = await instance.put(`/roles/${rolId}`, updatedRolData);
       // Podrías realizar operaciones adicionales aquí después de la actualización
       return response.data;
     } catch (error) {
@@ -63,7 +64,7 @@ export const createRol = async (rolData) => {
    */
   export const deleteRolById = async (rolId) => {
     try {
-      const response = await axios.delete(`/roles/${rolId}`);
+      const response = await instance.delete(`/roles/${rolId}`);
       // Podrías realizar operaciones adicionales aquí después de la eliminación
       return response.data;
     } catch (error) {
