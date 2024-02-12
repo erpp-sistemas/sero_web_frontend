@@ -1,3 +1,4 @@
+import instance from './axios';
 import axios from './axios'
 
 export const placeById = (place_id) => axios.get(`/PlaceById/${place_id}`)
@@ -85,6 +86,24 @@ export const createPlace = async (placeData) => {
       throw error.response?.data || error;
     }
   };
+
+
+   /**
+   * Function to get all places.
+   *
+   * @returns {Promise} Promise resolved with the data of all places.
+   * @throws {Error} Error indicating the reason for the failure in getting all places.
+   */
+   export const getPlaceAndServiceAndProcess = async (idPlaza) => {
+    try {
+      const response = await instance.get(`/plazas/${idPlaza}`);
+      // Additional operations before returning the data can be done here
+      return response.data;
+    } catch (error) {
+      console.error("Error getting all places:", error.response?.data || error.message);
+      throw error.response?.data || error;
+    }
+  };
   
   /**
    * Function to update a place by its ID.
@@ -119,4 +138,16 @@ export const createPlace = async (placeData) => {
     }
   };
 
+  /* router.post('/insertPlaceAndServiceAndProcess',  placeController.insertPlaceAndServiceAndProcess); */
+export const createPlaceAndServiceAndProcess = async(data)=>{
+try {
+  const response = await instance.post('/insertPlaceAndServiceAndProcess',data)
+  return response.data;
+ 
+  
+} catch (error) {
+  console.error("Error creating user plaza service process data:", error.response?.data || error.message);
+  throw error.response?.data || error;
+  
+}}
 

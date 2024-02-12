@@ -26,7 +26,14 @@ import PhoneIcon from "@mui/icons-material/Phone";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import PersonPinIcon from "@mui/icons-material/PersonPin";
 import { TabPanel } from "@mui/lab";
-import { getAllPlaces } from "../../../../api/place";
+import {
+  createPlaceAndServiceAndProcess,
+  getAllPlaces,
+  getPlaceAndServiceAndProcess,
+} from "../../../../api/place";
+import PlaceIcon from "@mui/icons-material/Place";
+import { getPlaceAndServiceAndProcessByUser } from "../../../../api/user";
+import { log } from "mathjs";
 function PlacesForm() {
   const [fileList, setFileList] = React.useState([]);
   const [nextStep, setNextStep] = React.useState(0);
@@ -68,12 +75,33 @@ function PlacesForm() {
   const [services, setServices] = React.useState([]);
   const [processes, setProcesses] = React.useState([]);
   const [places, setPlaces] = React.useState([]);
-  const [serviceByPlace,setServiceByPlace] = React.useState({
-    id_plaza:"",
-    id_servicio:"",
-  })
+  const [serviceByPlace, setServiceByPlace] = React.useState({
+    id_plaza: "",
+    id_servicio: "",
+  });
+  const [placesAndServicesAndProcess, setPlacesAndServicesAndProcess] =
+    React.useState([]);
 
   /* getAllPlaces */
+  /*  getPlaceAndServiceAndProcessByUser */
+  const fetchGetPlaceAndServiceAndProcess = async (idPlaza) => {
+    try {
+      // Aquí deberías hacer tu solicitud de red para obtener los datos
+      // Reemplaza 'TU_URL_DE_DATOS' con la URL real de tus datos
+      const response = await getPlaceAndServiceAndProcess(idPlaza);
+
+      // Agrega el campo 'id_tarea' a cada fila usando el índice como valor único si no no se ven en la datagrid
+      const rowsWithId = response.map((row, index) => ({
+        ...row,
+        id: row.id_servicio || index.toString(),
+      }));
+
+      setPlacesAndServicesAndProcess(rowsWithId);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+  console.log(placesAndServicesAndProcess);
 
   const fetchPlaces = async () => {
     try {
@@ -131,21 +159,58 @@ function PlacesForm() {
   React.useEffect(() => {
     fetchProcesses();
     fetchServices();
-    fetchPlaces()
+    fetchPlaces();
   }, []);
+  React.useEffect(() => {
+    const fetchData = async () => {
+      if (serviceByPlace?.id_plaza) {
+        try {
+          const response = await fetchGetPlaceAndServiceAndProcess(
+            serviceByPlace?.id_plaza
+          );
+          // Puedes realizar alguna lógica con la respuesta aquí
+        } catch (error) {
+          console.error("Error fetching data:", error);
+        }
+      }
+    };
 
-  const handleCheckboxChange = (event,service,place) => {
-   const {checked} = event.target
-   const {id_servicio}=service
-   setServiceByPlace((prevServiceByPlace) => ({
+    fetchData();
+  }, [serviceByPlace]);
+
+  const handleCheckboxChange = (event, value, service, place) => {
+    const { checked } = event.target;
+    const { id_servicio } = service;
+
+    setServiceByPlace((prevServiceByPlace) => ({
       ...prevServiceByPlace,
       id_plaza: place,
       id_servicio: checked ? id_servicio : "", // Set id_servicio if checked, otherwise clear it
     }));
   };
 
+  const handleOnChangeProcess = async(event, process) => {
+    /* id_proceso */
+    const { checked } = event.target;
 
+    if (checked) {
+      setServiceByPlace((prevState) => ({
+        ...prevState,
+        id_proceso: process?.id_proceso,
+      }));
 
+    
+      const response =await createPlaceAndServiceAndProcess({
+        id_proceso:serviceByPlace.id_proceso,
+        id_plaza:serviceByPlace.id_plaza,
+        id_servicio:serviceByPlace.id_servicio,
+      })
+
+    }
+
+    // Realiza la lógica que necesites con el cambio en el checkbox
+  };
+  console.log(serviceByPlace);
   return (
     <>
       {" "}
@@ -219,431 +284,674 @@ function PlacesForm() {
                 onChange={handleChange}
                 aria-label="icon tabs example"
               >
-                {places.map((place)=>{
-
-                  return   <Tab
-                  icon={<PhoneIcon />}
-                  aria-label="phone"
-                  label={`${place.nombre}`}
-                />
+                {places.map((place) => {
+                  return (
+                    <Tab
+                      icon={<PlaceIcon />}
+                      aria-label="phone"
+                      label={`${place.nombre}`}
+                    />
+                  );
                 })}
-              
-          
               </Tabs>
-              {value === 0 && <>   <Box
-                sx={{
-                  border: "solid white 1px",
-                  width: "100%",
-                  padding: "1rem",
-                }}
-              >
-                <Typography>{`Servicios de la plaza ${places[value].nombre}`}</Typography>
-                <FormGroup>
-                  {services.map((service,index) => {
-                    return (
-                      <FormControlLabel
-                        control={<Checkbox  onChange={()=>{
-                          handleCheckboxChange(event,service,places[value].id_plaza)
-                        }}  color="secondary" />}
-                        label={`${service.nombre}`}
-                      />
-                    );
-                  })}
-                </FormGroup>
-              </Box>
-              {serviceByPlace.id_plaza === 1 && serviceByPlace.id_servicio===1 &&(<><Box
-                sx={{
-                  border: "solid white 1px",
-                  width: "100%",
-                  padding: "1rem",
-                }}
-              >
-                 <Typography>{`Procesos para el servicio ${services[Number(serviceByPlace.id_servicio)-1].nombre}  de  la plaza ${places[value].nombre} `}</Typography>
-                <FormGroup sx={{ display: "flex", flexDirection: "row" }}>
-                  {processes.map((process) => {
-                    return (
-                      <FormControlLabel
-                        control={<Checkbox color="secondary" />}
-                        label={`${process.nombre}`}
-                      />
-                    );
-                  })}
-                </FormGroup>
-              </Box>
-              </>)}
-              {serviceByPlace.id_plaza === 1 && serviceByPlace.id_servicio===2 &&(<><Box
-                sx={{
-                  border: "solid white 1px",
-                  width: "100%",
-                  padding: "1rem",
-                }}
-              >
-                 <Typography>{`Procesos para el servicio ${services[Number(serviceByPlace.id_servicio)-1].nombre}  de  la plaza ${places[value].nombre} `}</Typography>
-                <FormGroup sx={{ display: "flex", flexDirection: "row" }}>
-                  {processes.map((process) => {
-                    return (
-                      <FormControlLabel
-                        control={<Checkbox color="secondary" />}
-                        label={`${process.nombre}`}
-                      />
-                    );
-                  })}
-                </FormGroup>
-              </Box>
-              </>)}
-
-              {serviceByPlace.id_plaza === 1 && serviceByPlace.id_servicio===3 &&(<><Box
-                sx={{
-                  border: "solid white 1px",
-                  width: "100%",
-                  padding: "1rem",
-                }}
-              >
-                 <Typography>{`Procesos para el servicio ${services[Number(serviceByPlace.id_servicio)-1].nombre}  de  la plaza ${places[value].nombre} `}</Typography>
-                <FormGroup sx={{ display: "flex", flexDirection: "row" }}>
-                  {processes.map((process) => {
-                    return (
-                      <FormControlLabel
-                        control={<Checkbox color="secondary" />}
-                        label={`${process.nombre}`}
-                      />
-                    );
-                  })}
-                </FormGroup>
-              </Box>
-              </>)}
-              {serviceByPlace.id_plaza === 1 && serviceByPlace.id_servicio===4 &&(<><Box
-                sx={{
-                  border: "solid white 1px",
-                  width: "100%",
-                  padding: "1rem",
-                }}
-              >
-                 <Typography>{`Procesos para el servicio ${services[Number(serviceByPlace.id_servicio)-1].nombre}  de  la plaza ${places[value].nombre} `}</Typography>
-                <FormGroup sx={{ display: "flex", flexDirection: "row" }}>
-                  {processes.map((process) => {
-                    return (
-                      <FormControlLabel
-                        control={<Checkbox color="secondary" />}
-                        label={`${process.nombre}`}
-                      />
-                    );
-                  })}
-                </FormGroup>
-              </Box>
-              </>)}
-              </>}
-              {value === 1 && <>   <Box
-                sx={{
-                  border: "solid white 1px",
-                  width: "100%",
-                  padding: "1rem",
-                }}
-              >
-                <Typography>{`Servicios de la plaza ${places[value].nombre}`}</Typography>
-                <FormGroup>
-                  {services.map((service,index) => {
-                    return (
-                      <FormControlLabel
-                        control={<Checkbox  onChange={()=>{
-                          handleCheckboxChange(event,service,places[value].id_plaza)
-                        }}  color="secondary" />}
-                        label={`${service.nombre}`}
-                      />
-                    );
-                  })}
-                </FormGroup>
-              </Box>
-              {serviceByPlace.id_plaza === 2 && serviceByPlace.id_servicio===1 &&(<><Box
-                sx={{
-                  border: "solid white 1px",
-                  width: "100%",
-                  padding: "1rem",
-                }}
-              >
-                 <Typography>{`Procesos para el servicio ${services[Number(serviceByPlace.id_servicio)-1].nombre}  de  la plaza ${places[value].nombre} `}</Typography>
-                <FormGroup sx={{ display: "flex", flexDirection: "row" }}>
-                  {processes.map((process) => {
-                    return (
-                      <FormControlLabel
-                        control={<Checkbox color="secondary" />}
-                        label={`${process.nombre}`}
-                      />
-                    );
-                  })}
-                </FormGroup>
-              </Box>
-              </>)}
-              {serviceByPlace.id_plaza === 2 && serviceByPlace.id_servicio===2 &&(<><Box
-                sx={{
-                  border: "solid white 1px",
-                  width: "100%",
-                  padding: "1rem",
-                }}
-              >
-                 <Typography>{`Procesos para el servicio ${services[Number(serviceByPlace.id_servicio)-1].nombre}  de  la plaza ${places[value].nombre} `}</Typography>
-                <FormGroup sx={{ display: "flex", flexDirection: "row" }}>
-                  {processes.map((process) => {
-                    return (
-                      <FormControlLabel
-                        control={<Checkbox color="secondary" />}
-                        label={`${process.nombre}`}
-                      />
-                    );
-                  })}
-                </FormGroup>
-              </Box>
-              </>)}
-
-              {serviceByPlace.id_plaza === 2 && serviceByPlace.id_servicio===3 &&(<><Box
-                sx={{
-                  border: "solid white 1px",
-                  width: "100%",
-                  padding: "1rem",
-                }}
-              >
-                 <Typography>{`Procesos para el servicio ${services[Number(serviceByPlace.id_servicio)-1].nombre}  de  la plaza ${places[value].nombre} `}</Typography>
-                <FormGroup sx={{ display: "flex", flexDirection: "row" }}>
-                  {processes.map((process) => {
-                    return (
-                      <FormControlLabel
-                        control={<Checkbox color="secondary" />}
-                        label={`${process.nombre}`}
-                      />
-                    );
-                  })}
-                </FormGroup>
-              </Box>
-              </>)}
-              {serviceByPlace.id_plaza === 2 && serviceByPlace.id_servicio===4 &&(<><Box
-                sx={{
-                  border: "solid white 1px",
-                  width: "100%",
-                  padding: "1rem",
-                }}
-              >
-                 <Typography>{`Procesos para el servicio ${services[Number(serviceByPlace.id_servicio)-1].nombre}  de  la plaza ${places[value].nombre} `}</Typography>
-                <FormGroup sx={{ display: "flex", flexDirection: "row" }}>
-                  {processes.map((process) => {
-                    return (
-                      <FormControlLabel
-                        control={<Checkbox color="secondary" />}
-                        label={`${process.nombre}`}
-                      />
-                    );
-                  })}
-                </FormGroup>
-              </Box>
-              </>)}
-              </>}
-              {value === 2 && <>   <Box
-                sx={{
-                  border: "solid white 1px",
-                  width: "100%",
-                  padding: "1rem",
-                }}
-              >
-                <Typography>{`Servicios de la plaza ${places[value].nombre}`}</Typography>
-                <FormGroup>
-                  {services.map((service,index) => {
-                    return (
-                      <FormControlLabel
-                        control={<Checkbox  onChange={()=>{
-                          handleCheckboxChange(event,service,places[value].id_plaza)
-                        }}  color="secondary" />}
-                        label={`${service.nombre}`}
-                      />
-                    );
-                  })}
-                </FormGroup>
-              </Box>
-              {serviceByPlace.id_plaza === 3 && serviceByPlace.id_servicio===1 &&(<><Box
-                sx={{
-                  border: "solid white 1px",
-                  width: "100%",
-                  padding: "1rem",
-                }}
-              >
-                 <Typography>{`Procesos para el servicio ${services[Number(serviceByPlace.id_servicio)-1].nombre}  de  la plaza ${places[value].nombre} `}</Typography>
-                <FormGroup sx={{ display: "flex", flexDirection: "row" }}>
-                  {processes.map((process) => {
-                    return (
-                      <FormControlLabel
-                        control={<Checkbox color="secondary" />}
-                        label={`${process.nombre}`}
-                      />
-                    );
-                  })}
-                </FormGroup>
-              </Box>
-              </>)}
-              {serviceByPlace.id_plaza === 3 && serviceByPlace.id_servicio===2 &&(<><Box
-                sx={{
-                  border: "solid white 1px",
-                  width: "100%",
-                  padding: "1rem",
-                }}
-              >
-                 <Typography>{`Procesos para el servicio ${services[Number(serviceByPlace.id_servicio)-1].nombre}  de  la plaza ${places[value].nombre} `}</Typography>
-                <FormGroup sx={{ display: "flex", flexDirection: "row" }}>
-                  {processes.map((process) => {
-                    return (
-                      <FormControlLabel
-                        control={<Checkbox color="secondary" />}
-                        label={`${process.nombre}`}
-                      />
-                    );
-                  })}
-                </FormGroup>
-              </Box>
-              </>)}
-
-              {serviceByPlace.id_plaza === 3 && serviceByPlace.id_servicio===3 &&(<><Box
-                sx={{
-                  border: "solid white 1px",
-                  width: "100%",
-                  padding: "1rem",
-                }}
-              >
-                 <Typography>{`Procesos para el servicio ${services[Number(serviceByPlace.id_servicio)-1].nombre}  de  la plaza ${places[value].nombre} `}</Typography>
-                <FormGroup sx={{ display: "flex", flexDirection: "row" }}>
-                  {processes.map((process) => {
-                    return (
-                      <FormControlLabel
-                        control={<Checkbox color="secondary" />}
-                        label={`${process.nombre}`}
-                      />
-                    );
-                  })}
-                </FormGroup>
-              </Box>
-              </>)}
-              {serviceByPlace.id_plaza === 3 && serviceByPlace.id_servicio===4 &&(<><Box
-                sx={{
-                  border: "solid white 1px",
-                  width: "100%",
-                  padding: "1rem",
-                }}
-              >
-                 <Typography>{`Procesos para el servicio ${services[Number(serviceByPlace.id_servicio)-1].nombre}  de  la plaza ${places[value].nombre} `}</Typography>
-                <FormGroup sx={{ display: "flex", flexDirection: "row" }}>
-                  {processes.map((process) => {
-                    return (
-                      <FormControlLabel
-                        control={<Checkbox color="secondary" />}
-                        label={`${process.nombre}`}
-                      />
-                    );
-                  })}
-                </FormGroup>
-              </Box>
-              </>)}
-              </>}
-              {value === 3 && <>   <Box
-                sx={{
-                  border: "solid white 1px",
-                  width: "100%",
-                  padding: "1rem",
-                }}
-              >
-                <Typography>{`Servicios de la plaza ${places[value].nombre}`}</Typography>
-                <FormGroup>
-                  {services.map((service,index) => {
-                    return (
-                      <FormControlLabel
-                        control={<Checkbox  onChange={()=>{
-                          handleCheckboxChange(event,service,places[value].id_plaza)
-                        }}  color="secondary" />}
-                        label={`${service.nombre}`}
-                      />
-                    );
-                  })}
-                </FormGroup>
-              </Box>
-              {serviceByPlace.id_plaza === 4 && serviceByPlace.id_servicio===1 &&(<><Box
-                sx={{
-                  border: "solid white 1px",
-                  width: "100%",
-                  padding: "1rem",
-                }}
-              >
-                 <Typography>{`Procesos para el servicio ${services[Number(serviceByPlace.id_servicio)-1].nombre}  de  la plaza ${places[value].nombre} `}</Typography>
-                <FormGroup sx={{ display: "flex", flexDirection: "row" }}>
-                  {processes.map((process) => {
-                    return (
-                      <FormControlLabel
-                        control={<Checkbox color="secondary" />}
-                        label={`${process.nombre}`}
-                      />
-                    );
-                  })}
-                </FormGroup>
-              </Box>
-              </>)}
-              {serviceByPlace.id_plaza === 4 && serviceByPlace.id_servicio===2 &&(<><Box
-                sx={{
-                  border: "solid white 1px",
-                  width: "100%",
-                  padding: "1rem",
-                }}
-              >
-                 <Typography>{`Procesos para el servicio ${services[Number(serviceByPlace.id_servicio)-1].nombre}  de  la plaza ${places[value].nombre} `}</Typography>
-                <FormGroup sx={{ display: "flex", flexDirection: "row" }}>
-                  {processes.map((process) => {
-                    return (
-                      <FormControlLabel
-                        control={<Checkbox color="secondary" />}
-                        label={`${process.nombre}`}
-                      />
-                    );
-                  })}
-                </FormGroup>
-              </Box>
-              </>)}
-
-              {serviceByPlace.id_plaza === 4 && serviceByPlace.id_servicio===3 &&(<><Box
-                sx={{
-                  border: "solid white 1px",
-                  width: "100%",
-                  padding: "1rem",
-                }}
-              >
-                 <Typography>{`Procesos para el servicio ${services[Number(serviceByPlace.id_servicio)-1].nombre}  de  la plaza ${places[value].nombre} `}</Typography>
-                <FormGroup sx={{ display: "flex", flexDirection: "row" }}>
-                  {processes.map((process) => {
-                    return (
-                      <FormControlLabel
-                        control={<Checkbox color="secondary" />}
-                        label={`${process.nombre}`}
-                      />
-                    );
-                  })}
-                </FormGroup>
-              </Box>
-              </>)}
-              {serviceByPlace.id_plaza === 4 && serviceByPlace.id_servicio===4 &&(<><Box
-                sx={{
-                  border: "solid white 1px",
-                  width: "100%",
-                  padding: "1rem",
-                }}
-              >
-                 <Typography>{`Procesos para el servicio ${services[Number(serviceByPlace.id_servicio)-1].nombre}  de  la plaza ${places[value].nombre} `}</Typography>
-                <FormGroup sx={{ display: "flex", flexDirection: "row" }}>
-                  {processes.map((process) => {
-                    return (
-                      <FormControlLabel
-                        control={<Checkbox color="secondary" />}
-                        label={`${process.nombre}`}
-                      />
-                    );
-                  })}
-                </FormGroup>
-              </Box>
-              </>)}
-              </>}
-
-           
+              {value === 0 && (
+                <>
+                  {" "}
+                  <Box
+                    sx={{
+                      border: "solid white 1px",
+                      width: "100%",
+                      padding: "1rem",
+                    }}
+                  >
+                    <Typography>{`Servicios de la plaza ${places[value]?.nombre}`}</Typography>
+                    <FormGroup>
+                      {services.map((service, index) => {
+                        return (
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                onChange={() => {
+                                  handleCheckboxChange(
+                                    event,
+                                    value,
+                                    service,
+                                    places[value].id_plaza
+                                  );
+                                }}
+                                color="secondary"
+                              />
+                            }
+                            label={`${service.nombre}`}
+                          />
+                        );
+                      })}
+                    </FormGroup>
+                  </Box>
+                  {serviceByPlace.id_plaza === 1 &&
+                    serviceByPlace.id_servicio === 1 && (
+                      <>
+                        <Box
+                          sx={{
+                            border: "solid white 1px",
+                            width: "100%",
+                            padding: "1rem",
+                          }}
+                        >
+                          <Typography>{`Procesos para el servicio ${
+                            services[Number(serviceByPlace.id_servicio) - 1]
+                              .nombre
+                          }  de  la plaza ${
+                            places[value].nombre
+                          } `}</Typography>
+                          <FormGroup
+                            sx={{ display: "flex", flexDirection: "row" }}
+                          >
+                            {processes.map((process) => {
+                              return (
+                                <FormControlLabel
+                                  control={
+                                    <Checkbox
+                                      onChange={()=>{handleOnChangeProcess(
+                                        event,
+                                        process,
+                                   
+                                      )}}
+                                      color="secondary"
+                                    />
+                                  }
+                                  label={`${process.nombre}`}
+                                />
+                              );
+                            })}
+                          </FormGroup>
+                        </Box>
+                      </>
+                    )}
+                  {serviceByPlace.id_plaza === 1 &&
+                    serviceByPlace.id_servicio === 2 && (
+                      <>
+                        <Box
+                          sx={{
+                            border: "solid white 1px",
+                            width: "100%",
+                            padding: "1rem",
+                          }}
+                        >
+                          <Typography>{`Procesos para el servicio ${
+                            services[Number(serviceByPlace.id_servicio) - 1]
+                              .nombre
+                          }  de  la plaza ${
+                            places[value].nombre
+                          } `}</Typography>
+                          <FormGroup
+                            sx={{ display: "flex", flexDirection: "row" }}
+                          >
+                            {processes.map((process) => {
+                              return (
+                                <FormControlLabel
+                                  control={<Checkbox color="secondary" />}
+                                  label={`${process.nombre}`}
+                                />
+                              );
+                            })}
+                          </FormGroup>
+                        </Box>
+                      </>
+                    )}
+                  {serviceByPlace.id_plaza === 1 &&
+                    serviceByPlace.id_servicio === 3 && (
+                      <>
+                        <Box
+                          sx={{
+                            border: "solid white 1px",
+                            width: "100%",
+                            padding: "1rem",
+                          }}
+                        >
+                          <Typography>{`Procesos para el servicio ${
+                            services[Number(serviceByPlace.id_servicio) - 1]
+                              .nombre
+                          }  de  la plaza ${
+                            places[value].nombre
+                          } `}</Typography>
+                          <FormGroup
+                            sx={{ display: "flex", flexDirection: "row" }}
+                          >
+                            {processes.map((process) => {
+                              return (
+                                <FormControlLabel
+                                  control={
+                                    <Checkbox
+                                      onChange={() => {}}
+                                      color="secondary"
+                                    />
+                                  }
+                                  label={`${process.nombre}`}
+                                />
+                              );
+                            })}
+                          </FormGroup>
+                        </Box>
+                      </>
+                    )}
+                  {serviceByPlace.id_plaza === 1 &&
+                    serviceByPlace.id_servicio === 4 && (
+                      <>
+                        <Box
+                          sx={{
+                            border: "solid white 1px",
+                            width: "100%",
+                            padding: "1rem",
+                          }}
+                        >
+                          <Typography>{`Procesos para el servicio ${
+                            services[Number(serviceByPlace.id_servicio) - 1]
+                              .nombre
+                          }  de  la plaza ${
+                            places[value].nombre
+                          } `}</Typography>
+                          <FormGroup
+                            sx={{ display: "flex", flexDirection: "row" }}
+                          >
+                            {processes.map((process) => {
+                              return (
+                                <FormControlLabel
+                                  control={<Checkbox color="secondary" />}
+                                  label={`${process.nombre}`}
+                                />
+                              );
+                            })}
+                          </FormGroup>
+                        </Box>
+                      </>
+                    )}
+                </>
+              )}
+              {value === 1 && (
+                <>
+                  {" "}
+                  <Box
+                    sx={{
+                      border: "solid white 1px",
+                      width: "100%",
+                      padding: "1rem",
+                    }}
+                  >
+                    <Typography>{`Servicios de la plaza ${places[value].nombre}`}</Typography>
+                    <FormGroup>
+                      {services.map((service, index) => {
+                        return (
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                onChange={() => {
+                                  handleCheckboxChange(
+                                    event,
+                                    value,
+                                    service,
+                                    places[value].id_plaza
+                                  );
+                                }}
+                                color="secondary"
+                              />
+                            }
+                            label={`${service.nombre}`}
+                          />
+                        );
+                      })}
+                    </FormGroup>
+                  </Box>
+                  {serviceByPlace.id_plaza === 2 &&
+                    serviceByPlace.id_servicio === 1 && (
+                      <>
+                        <Box
+                          sx={{
+                            border: "solid white 1px",
+                            width: "100%",
+                            padding: "1rem",
+                          }}
+                        >
+                          <Typography>{`Procesos para el servicio ${
+                            services[Number(serviceByPlace.id_servicio) - 1]
+                              .nombre
+                          }  de  la plaza ${
+                            places[value].nombre
+                          } `}</Typography>
+                          <FormGroup
+                            sx={{ display: "flex", flexDirection: "row" }}
+                          >
+                            {processes.map((process) => {
+                              return (
+                                <FormControlLabel
+                                  control={<Checkbox color="secondary" />}
+                                  label={`${process.nombre}`}
+                                />
+                              );
+                            })}
+                          </FormGroup>
+                        </Box>
+                      </>
+                    )}
+                  {serviceByPlace.id_plaza === 2 &&
+                    serviceByPlace.id_servicio === 2 && (
+                      <>
+                        <Box
+                          sx={{
+                            border: "solid white 1px",
+                            width: "100%",
+                            padding: "1rem",
+                          }}
+                        >
+                          <Typography>{`Procesos para el servicio ${
+                            services[Number(serviceByPlace.id_servicio) - 1]
+                              .nombre
+                          }  de  la plaza ${
+                            places[value].nombre
+                          } `}</Typography>
+                          <FormGroup
+                            sx={{ display: "flex", flexDirection: "row" }}
+                          >
+                            {processes.map((process) => {
+                              return (
+                                <FormControlLabel
+                                  control={
+                                    <Checkbox
+                                      /* onChange={handleOnChangeProcess}  */ color="secondary"
+                                    />
+                                  }
+                                  label={`${process.nombre}`}
+                                />
+                              );
+                            })}
+                          </FormGroup>
+                        </Box>
+                      </>
+                    )}
+                  {serviceByPlace.id_plaza === 2 &&
+                    serviceByPlace.id_servicio === 3 && (
+                      <>
+                        <Box
+                          sx={{
+                            border: "solid white 1px",
+                            width: "100%",
+                            padding: "1rem",
+                          }}
+                        >
+                          <Typography>{`Procesos para el servicio ${
+                            services[Number(serviceByPlace.id_servicio) - 1]
+                              .nombre
+                          }  de  la plaza ${
+                            places[value].nombre
+                          } `}</Typography>
+                          <FormGroup
+                            sx={{ display: "flex", flexDirection: "row" }}
+                          >
+                            {processes.map((process) => {
+                              return (
+                                <FormControlLabel
+                                  control={<Checkbox color="secondary" />}
+                                  label={`${process.nombre}`}
+                                />
+                              );
+                            })}
+                          </FormGroup>
+                        </Box>
+                      </>
+                    )}
+                  {serviceByPlace.id_plaza === 2 &&
+                    serviceByPlace.id_servicio === 4 && (
+                      <>
+                        <Box
+                          sx={{
+                            border: "solid white 1px",
+                            width: "100%",
+                            padding: "1rem",
+                          }}
+                        >
+                          <Typography>{`Procesos para el servicio ${
+                            services[Number(serviceByPlace.id_servicio) - 1]
+                              .nombre
+                          }  de  la plaza ${
+                            places[value].nombre
+                          } `}</Typography>
+                          <FormGroup
+                            sx={{ display: "flex", flexDirection: "row" }}
+                          >
+                            {processes.map((process) => {
+                              return (
+                                <FormControlLabel
+                                  control={<Checkbox color="secondary" />}
+                                  label={`${process.nombre}`}
+                                />
+                              );
+                            })}
+                          </FormGroup>
+                        </Box>
+                      </>
+                    )}
+                </>
+              )}
+              {value === 2 && (
+                <>
+                  {" "}
+                  <Box
+                    sx={{
+                      border: "solid white 1px",
+                      width: "100%",
+                      padding: "1rem",
+                    }}
+                  >
+                    <Typography>{`Servicios de la plaza ${places[value].nombre}`}</Typography>
+                    <FormGroup>
+                      {services.map((service, index) => {
+                        return (
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                onChange={() => {
+                                  handleCheckboxChange(
+                                    event,
+                                    value,
+                                    service,
+                                    places[value].id_plaza
+                                  );
+                                }}
+                                color="secondary"
+                              />
+                            }
+                            label={`${service.nombre}`}
+                          />
+                        );
+                      })}
+                    </FormGroup>
+                  </Box>
+                  {serviceByPlace.id_plaza === 3 &&
+                    serviceByPlace.id_servicio === 1 && (
+                      <>
+                        <Box
+                          sx={{
+                            border: "solid white 1px",
+                            width: "100%",
+                            padding: "1rem",
+                          }}
+                        >
+                          <Typography>{`Procesos para el servicio ${
+                            services[Number(serviceByPlace.id_servicio) - 1]
+                              .nombre
+                          }  de  la plaza ${
+                            places[value].nombre
+                          } `}</Typography>
+                          <FormGroup
+                            sx={{ display: "flex", flexDirection: "row" }}
+                          >
+                            {processes.map((process) => {
+                              return (
+                                <FormControlLabel
+                                  control={<Checkbox color="secondary" />}
+                                  label={`${process.nombre}`}
+                                />
+                              );
+                            })}
+                          </FormGroup>
+                        </Box>
+                      </>
+                    )}
+                  {serviceByPlace.id_plaza === 3 &&
+                    serviceByPlace.id_servicio === 2 && (
+                      <>
+                        <Box
+                          sx={{
+                            border: "solid white 1px",
+                            width: "100%",
+                            padding: "1rem",
+                          }}
+                        >
+                          <Typography>{`Procesos para el servicio ${
+                            services[Number(serviceByPlace.id_servicio) - 1]
+                              .nombre
+                          }  de  la plaza ${
+                            places[value].nombre
+                          } `}</Typography>
+                          <FormGroup
+                            sx={{ display: "flex", flexDirection: "row" }}
+                          >
+                            {processes.map((process) => {
+                              return (
+                                <FormControlLabel
+                                  control={<Checkbox color="secondary" />}
+                                  label={`${process.nombre}`}
+                                />
+                              );
+                            })}
+                          </FormGroup>
+                        </Box>
+                      </>
+                    )}
+                  {serviceByPlace.id_plaza === 3 &&
+                    serviceByPlace.id_servicio === 3 && (
+                      <>
+                        <Box
+                          sx={{
+                            border: "solid white 1px",
+                            width: "100%",
+                            padding: "1rem",
+                          }}
+                        >
+                          <Typography>{`Procesos para el servicio ${
+                            services[Number(serviceByPlace.id_servicio) - 1]
+                              .nombre
+                          }  de  la plaza ${
+                            places[value].nombre
+                          } `}</Typography>
+                          <FormGroup
+                            sx={{ display: "flex", flexDirection: "row" }}
+                          >
+                            {processes.map((process) => {
+                              return (
+                                <FormControlLabel
+                                  control={<Checkbox color="secondary" />}
+                                  label={`${process.nombre}`}
+                                />
+                              );
+                            })}
+                          </FormGroup>
+                        </Box>
+                      </>
+                    )}
+                  {serviceByPlace.id_plaza === 3 &&
+                    serviceByPlace.id_servicio === 4 && (
+                      <>
+                        <Box
+                          sx={{
+                            border: "solid white 1px",
+                            width: "100%",
+                            padding: "1rem",
+                          }}
+                        >
+                          <Typography>{`Procesos para el servicio ${
+                            services[Number(serviceByPlace.id_servicio) - 1]
+                              .nombre
+                          }  de  la plaza ${
+                            places[value].nombre
+                          } `}</Typography>
+                          <FormGroup
+                            sx={{ display: "flex", flexDirection: "row" }}
+                          >
+                            {processes.map((process) => {
+                              return (
+                                <FormControlLabel
+                                  control={<Checkbox color="secondary" />}
+                                  label={`${process.nombre}`}
+                                />
+                              );
+                            })}
+                          </FormGroup>
+                        </Box>
+                      </>
+                    )}
+                </>
+              )}
+              {value === 3 && (
+                <>
+                  {" "}
+                  <Box
+                    sx={{
+                      border: "solid white 1px",
+                      width: "100%",
+                      padding: "1rem",
+                    }}
+                  >
+                    <Typography>{`Servicios de la plaza ${places[value].nombre}`}</Typography>
+                    <FormGroup>
+                      {services.map((service, index) => {
+                        return (
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                onChange={() => {
+                                  handleCheckboxChange(
+                                    event,
+                                    value,
+                                    service,
+                                    places[value].id_plaza
+                                  );
+                                }}
+                                color="secondary"
+                              />
+                            }
+                            label={`${service.nombre}`}
+                          />
+                        );
+                      })}
+                    </FormGroup>
+                  </Box>
+                  {serviceByPlace.id_plaza === 4 &&
+                    serviceByPlace.id_servicio === 1 && (
+                      <>
+                        <Box
+                          sx={{
+                            border: "solid white 1px",
+                            width: "100%",
+                            padding: "1rem",
+                          }}
+                        >
+                          <Typography>{`Procesos para el servicio ${
+                            services[Number(serviceByPlace.id_servicio) - 1]
+                              .nombre
+                          }  de  la plaza ${
+                            places[value].nombre
+                          } `}</Typography>
+                          <FormGroup
+                            sx={{ display: "flex", flexDirection: "row" }}
+                          >
+                            {processes.map((process) => {
+                              return (
+                                <FormControlLabel
+                                  control={<Checkbox color="secondary" />}
+                                  label={`${process.nombre}`}
+                                />
+                              );
+                            })}
+                          </FormGroup>
+                        </Box>
+                      </>
+                    )}
+                  {serviceByPlace.id_plaza === 4 &&
+                    serviceByPlace.id_servicio === 2 && (
+                      <>
+                        <Box
+                          sx={{
+                            border: "solid white 1px",
+                            width: "100%",
+                            padding: "1rem",
+                          }}
+                        >
+                          <Typography>{`Procesos para el servicio ${
+                            services[Number(serviceByPlace.id_servicio) - 1]
+                              .nombre
+                          }  de  la plaza ${
+                            places[value].nombre
+                          } `}</Typography>
+                          <FormGroup
+                            sx={{ display: "flex", flexDirection: "row" }}
+                          >
+                            {processes.map((process) => {
+                              return (
+                                <FormControlLabel
+                                  control={<Checkbox color="secondary" />}
+                                  label={`${process.nombre}`}
+                                />
+                              );
+                            })}
+                          </FormGroup>
+                        </Box>
+                      </>
+                    )}
+                  {serviceByPlace.id_plaza === 4 &&
+                    serviceByPlace.id_servicio === 3 && (
+                      <>
+                        <Box
+                          sx={{
+                            border: "solid white 1px",
+                            width: "100%",
+                            padding: "1rem",
+                          }}
+                        >
+                          <Typography>{`Procesos para el servicio ${
+                            services[Number(serviceByPlace.id_servicio) - 1]
+                              .nombre
+                          }  de  la plaza ${
+                            places[value].nombre
+                          } `}</Typography>
+                          <FormGroup
+                            sx={{ display: "flex", flexDirection: "row" }}
+                          >
+                            {processes.map((process) => {
+                              return (
+                                <FormControlLabel
+                                  control={<Checkbox color="secondary" />}
+                                  label={`${process.nombre}`}
+                                />
+                              );
+                            })}
+                          </FormGroup>
+                        </Box>
+                      </>
+                    )}
+                  {serviceByPlace.id_plaza === 4 &&
+                    serviceByPlace.id_servicio === 4 && (
+                      <>
+                        <Box
+                          sx={{
+                            border: "solid white 1px",
+                            width: "100%",
+                            padding: "1rem",
+                          }}
+                        >
+                          <Typography>{`Procesos para el servicio ${
+                            services[Number(serviceByPlace.id_servicio) - 1]
+                              .nombre
+                          }  de  la plaza ${
+                            places[value].nombre
+                          } `}</Typography>
+                          <FormGroup
+                            sx={{ display: "flex", flexDirection: "row" }}
+                          >
+                            {processes.map((process) => {
+                              return (
+                                <FormControlLabel
+                                  control={<Checkbox color="secondary" />}
+                                  label={`${process.nombre}`}
+                                />
+                              );
+                            })}
+                          </FormGroup>
+                        </Box>
+                      </>
+                    )}
+                </>
+              )}
             </Box>
           </>
         )}

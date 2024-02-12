@@ -84,13 +84,13 @@ function App() {
    },[])
 
    useEffect(() => {
-    if(isAuthenticated){
+    if(!isAuthenticated){
       setLogin(false)
       navigation('/home')
-    }else{
+    }/* else{
       setLogin(true)
       navigation('/')
-    }
+    } */
   },[isAuthenticated])
 
   // useEffect(() => {
@@ -110,7 +110,7 @@ function App() {
         localeText={esES.components.MuiLocalizationProvider.defaultProps.localeText}
         adapterLocale="es"
       >
-        {login || login === null ? (
+        { login === null ? (
           <Routes>
             <Route path="/" element={<Login setLogin={setLogin} />} />
           </Routes>
