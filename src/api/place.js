@@ -13,7 +13,7 @@ export const placeByUserIdRequest = (user_id) => axios.get(`/PlaceByUserId/${use
    */
 export const getPlaceServiceByUserId = async (userId,placeId) => {
     try {
-      const response = await axios.get(`/PlaceServiceByUserId/${userId}/${placeId}`);
+      const response = await instance.get(`/PlaceServiceByUserId/${userId}/${placeId}`);
       // Additional operations after updating the place can be done here
       return response.data;
     } catch (error) {
@@ -123,6 +123,19 @@ export const createPlace = async (placeData) => {
       throw error.response?.data || error;
     }
   };
+
+
+  export const getAllPlaceAndServiceAndProcess = async (req,res)=>{
+    try {
+      const response = await instance.get('/placesAndServiceAndProcess')
+      return response.data
+      
+    } catch (error) {
+      console.error("Error updating place by ID:", error.response?.data || error.message);
+      throw error.response?.data || error;
+      
+    }
+  }
 
 
 

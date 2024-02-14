@@ -551,7 +551,7 @@ function DataGridUsers({
 
 
   const fetchImage = async () => {
-    console.log("aqui prueba 1");
+   
 
     // Fetch your base64 image URL from fileList[0].thumbUrl
     /* if (!fileList || fileList.length === 0) {
