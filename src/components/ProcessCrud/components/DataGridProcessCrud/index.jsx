@@ -107,6 +107,8 @@ const useFakeMutation = () => {
  * }
  */
 
+
+
 function computeMutation(newRow, oldRow) {
   if (newRow.nombre !== oldRow.nombre) {
     return `¿Realmente quieres cambiar el nombre de '${oldRow.nombre}' a '${newRow.nombre}'`;
@@ -181,7 +183,9 @@ function DataGridProcess() {
     procedimiento_almacenado_gestion_grafico: false,
     tabla_gestion: false,
     url_aplicacion_movil: false,
-  });
+  })
+
+  
 
   /**
    * Maneja el cambio de entrada de datos en los campos del formulario.
@@ -716,7 +720,7 @@ function DataGridProcess() {
           startIcon={<AddOutlined />}
           size="small"
         >
-          Agregar Nuevo Proceso
+          Agregar Nuevo
         </Button>
       </GridToolbarContainer>
     );

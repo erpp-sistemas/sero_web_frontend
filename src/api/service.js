@@ -1,3 +1,4 @@
+import instance from './axios';
 import axios from './axios'
 
 //export const loginRequest = user => axios.post(`/login`, user)
@@ -26,7 +27,7 @@ const handleError = (error) => {
  */
   export const createService = async (serviceData) => {
     try {
-      const response = await axios.post(`/services`, serviceData);
+      const response = await instance.post(`/services`, serviceData);
       return response.data;
     } catch (error) {
       handleError(error);
@@ -42,7 +43,7 @@ const handleError = (error) => {
  */
   export const getAllServices = async () => {
     try {
-      const response = await axios.get(`/services`);
+      const response = await instance.get(`/services`);
       console.log(response.data.services);
       return response.data.services;
     } catch (error) {
@@ -61,7 +62,7 @@ const handleError = (error) => {
  */
   export const updateService = async (id, updatedServiceData) => {
     try {
-      const response = await axios.put(`/service/${id}`, updatedServiceData);
+      const response = await instance.put(`/service/${id}`, updatedServiceData);
       return response.data;
     } catch (error) {
       handleError(error);
@@ -78,7 +79,7 @@ const handleError = (error) => {
  */
   export const deleteService = async (id) => {
     try {
-      const response = await axios.delete(`/services/${id}`);
+      const response = await instance.delete(`/services/${id}`);
     
       return response.data;
     } catch (error) {

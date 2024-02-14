@@ -82,6 +82,8 @@ import { tokens } from "../../../../theme";
 import { getAllProcesses } from "../../../../api/process";
 import { log } from "mathjs";
 import { menuByUserAndRol, updateActivoInMenuRolUsuario } from "../../../../api/menu";
+import PlaceButton from "../PlaceButton";
+import SwitchBox from "../SwitchBox";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -549,13 +551,13 @@ function DataGridUsers({
 
 
   const fetchImage = async () => {
-    console.log("aqui prueba 1");
+   
 
     // Fetch your base64 image URL from fileList[0].thumbUrl
-    if (!fileList || fileList.length === 0) {
+    /* if (!fileList || fileList.length === 0) {
       console.error("File list is empty or undefined.");
       return;
-    }
+    } */
 
     if (fileList) {
       try {
@@ -2069,6 +2071,10 @@ function DataGridUsers({
     // You can perform additional actions based on the updated data if needed
   };
 
+  const [buttons,setButtons] =React.useState()
+
+  console.log(buttons);
+
   return (
     <Box
       sx={{
@@ -2129,7 +2135,7 @@ function DataGridUsers({
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
-              height: "100%", // Ajusta según sea necesario
+              height: "auto", // Ajusta según sea necesario
             }}
           >
             <Paper
@@ -2668,8 +2674,10 @@ function DataGridUsers({
                     alignItems="center"
                   >
                     {places &&
-                      places?.map((plaza) => (
-                        <Box
+                      places?.map((plaza,index) => (
+                        <PlaceButton key={index} plaza={plaza} setButtons={setButtons}/>
+
+                       /*  <Box
                           sx={{ padding: "20px", borderRadius: "7px" }}
                           id={plaza?.id_plaza.toString()}
                         >
@@ -2705,9 +2713,10 @@ function DataGridUsers({
                               }}
                             />
                           </Button>
-                        </Box>
+                        </Box> */
                       ))}
                   </Box>
+                  <SwitchBox buttons={buttons}/>
                   {showServicesByPlace.cuautitlanIzcalliServicesByPlace && (
                     <>
                       <Box

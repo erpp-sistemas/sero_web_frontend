@@ -44,6 +44,7 @@ import Process from "./scenes/process";
 import Roles from "./scenes/roles"
 import Menu from "./scenes/menu";
 import Permission from "./scenes/permission";
+import Places from "./scenes/places";
 
 
 
@@ -83,13 +84,13 @@ function App() {
    },[])
 
    useEffect(() => {
-    if(isAuthenticated){
+    if(!isAuthenticated){
       setLogin(false)
       navigation('/home')
-    }else{
+    }/* else{
       setLogin(true)
       navigation('/')
-    }
+    } */
   },[isAuthenticated])
 
   // useEffect(() => {
@@ -109,7 +110,7 @@ function App() {
         localeText={esES.components.MuiLocalizationProvider.defaultProps.localeText}
         adapterLocale="es"
       >
-        {login || login === null ? (
+        { login === null ? (
           <Routes>
             <Route path="/" element={<Login setLogin={setLogin} />} />
           </Routes>
@@ -148,6 +149,7 @@ function App() {
                     <Route path="/process" element={<Process/>}/>
                     <Route path="/menu" element={<Menu/>}/>
                     <Route path="/permission" element={<Permission/>}/>
+                    <Route path="/places" element={<Places/>}/>
                   </Routes>
                 </main>
                 
