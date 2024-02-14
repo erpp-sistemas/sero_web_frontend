@@ -12,7 +12,7 @@ import {
   Alert,
 } from "@mui/material";
 
-import FormDatosGenerales from "./FormDatosGenerales";
+
 import SelectPlazaCreateUser from "./SelectPlazaCreateUser";
 import SelectMenusCreateUser from "./SelectMenusCreateUser";
 

@@ -10,8 +10,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.478.0",
-    "@aws-sdk/s3-request-presigner": "^3.478.0",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "@fortawesome/fontawesome-svg-core": "^6.4.2",
@@ -98,8 +96,7 @@
     "redux-persist": "^6.0.0",
     "three": "^0.151.1",
     "xlsx": "^0.18.5",
-    "yup": "^1.1.1",
-    "zustand": "^4.4.6"
+    "yup": "^1.1.1"
   },
   "devDependencies": {
     "@types/react": "^18.0.28",
