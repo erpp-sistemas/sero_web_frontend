@@ -14,9 +14,6 @@ function UserModule() {
   const [processData,setProcessData] = React.useState([])
   const[serviceData,setServiceData] = React.useState([])
 
-  console.log(menuData);
-  console.log(processData);
-  console.log(serviceData);
   
 
 

@@ -1,10 +1,12 @@
 import {
+  Alert,
   Box,
   Button,
   Checkbox,
   FormControlLabel,
   FormGroup,
   InputAdornment,
+  Snackbar,
   Stack,
   Step,
   StepLabel,
@@ -27,32 +29,97 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import PersonPinIcon from "@mui/icons-material/PersonPin";
 import { TabPanel } from "@mui/lab";
 import {
+  createPlace,
   createPlaceAndServiceAndProcess,
   getAllPlaces,
   getPlaceAndServiceAndProcess,
 } from "../../../../api/place";
 import PlaceIcon from "@mui/icons-material/Place";
 import { getPlaceAndServiceAndProcessByUser } from "../../../../api/user";
+import { uploadToS3 } from "../../../../services/s3.service";
 
 function PlacesForm() {
   const [fileList, setFileList] = React.useState([]);
   const [nextStep, setNextStep] = React.useState(0);
   const [placesAndServicesAndProcess, setPlacesAndServicesAndProcess] =
     React.useState([]);
-  const [GetProcesses,SetProcesses] = React.useState([])
+  const [GetProcesses, SetProcesses] = React.useState([]);
   const [placeData, setPlaceData] = React.useState({
     namePlace: "",
     active: "",
     imageUrl: "",
   });
   const [value, setValue] = React.useState(0);
+  const [fotoUsuario, setFotoUsuario] = React.useState("");
+  const [datosGenerales, setDatosGenerales] = React.useState({
+    nombre: "",
+    foto: "",
+    active: "",
+    latitud: "",
+    longitud: "",
+    entidad_federativa: "",
+    radio: "",
+  });
+  const [snackbar, setSnackbar] = React.useState(null);
+
+
+  const handleChangeInput = (e) => {
+    const { name, value, type, checked } = e.target;
+    // Actualiza el estado serviceData con el nuevo valor del campo Servicio
+    const newValue = type === "checkbox" ? checked : value;
+    setDatosGenerales((prevState) => ({
+      ...prevState,
+      [name]: newValue,
+    }));
+  };
+
+  const fetchImage = async () => {
+    console.log("aqui prueba 1");
+    // Fetch your base64 image URL from fileList[0].thumbUrl
+    /*  if (!fileList || fileList.length === 0) {
+      console.error("File list is empty or undefined.");
+      return;
+    } */
+    const base64Image = fileList[0]?.thumbUrl;
+ 
+    if (base64Image) {
+     
+      try {
+        const file = await convertBase64ToFile(base64Image, fileList[0].name);
+        // Now you have the File object, you can do something with it
+        if (file) {
+          const fileUrl = await uploadToS3(file);
+          console.log("URL del archivo subido:", fileUrl);
+
+          setFotoUsuario(fileUrl);
+
+          setDatosGenerales({
+            ...datosGenerales,
+            foto: fileUrl, // Utiliza 'fileUrl' directamente aquí
+          });
+        }
+      } catch (error) {
+        console.error("Error converting base64 to file:", error);
+      }
+    }
+  };
+
+  async function convertBase64ToFile(base64Image, filename) {
+    const response = await fetch(base64Image);
+    const blob = await response.blob();
+    return new File([blob], filename, { type: blob.type });
+  }
+
+  React.useEffect(() => {
+    fetchImage();
+  }, [fileList[0]?.thumbUrl]);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
 
   const handleOnChangeProcess = (event, process, value, service) => {
-    const {checked} = event.target
+    const { checked } = event.target;
     if (checked) {
       SetProcesses((prevProcesses) => [
         ...prevProcesses,
@@ -62,21 +129,15 @@ function PlacesForm() {
           id_plaza: service[0].id_plaza,
         },
       ]);
-      
     } else {
       SetProcesses((prevProcesses) =>
-      prevProcesses.filter((item) => item.id_proceso !== process.id_proceso)
-    );
-      
+        prevProcesses.filter((item) => item.id_proceso !== process.id_proceso)
+      );
     }
-    
   };
 
   console.log(GetProcesses);
 
-
- 
-  
   const steps = ["Datos de la Plaza", "Seleccion de Servicios"];
   const handleNextStep = () => {
     setNextStep((prevStep) => prevStep + 1);
@@ -255,6 +316,39 @@ function PlacesForm() {
   };
  */
 
+  const handleCloseSnackbar = () => setSnackbar(null);
+    const handleCreatePlace = async()=>{
+    
+        try {
+          console.log("Before createPlace");
+          const response = await createPlace({
+            nombre: datosGenerales.nombre,
+            imagen: datosGenerales.foto,
+            activo: datosGenerales.active,
+            latitud: datosGenerales.latitud,
+            longitud: datosGenerales.longitud,
+            estado_republica: datosGenerales.entidad_federativa,
+            radius: datosGenerales.radio,
+          });
+          console.log("After createPlace", response);
+          setSnackbar({
+            children: `Se creó la plaza ${datosGenerales.nombre} con éxito`,
+            severity: "success",
+          });
+        } catch (error) {
+          console.error("Error al crear la plaza:", error);
+          setSnackbar({
+            children: `Error al crear la plaza: ${error.message || JSON.stringify(error)}`,
+            severity: "error",
+          });
+        }
+     
+       
+       
+
+      handleNextStep();
+
+    }
   return (
     <>
       {" "}
@@ -276,9 +370,12 @@ function PlacesForm() {
           <>
             <Box sx={{ width: "50%", marginLeft: "1rem", marginRight: "1rem" }}>
               <TextField
-                sx={{ width: "100%" }}
+                sx={{ width: "100%", my: "1rem" }}
+                name="nombre"
                 id="input-with-icon-textfield"
                 label="Nombre de la nueva plaza"
+                onChange={handleChangeInput}
+                value={datosGenerales?.nombre}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -288,9 +385,74 @@ function PlacesForm() {
                 }}
                 variant="filled"
                 color="secondary"
-
-                /*   onChange={(e) => changeControl(e, "nombre")}
-  value={datosGenerales?.nombre} */
+              />
+              <TextField
+                sx={{ width: "100%", my: "1rem" }}
+                name="latitud"
+                id="input-with-icon-textfield"
+                label="Latitud"
+                onChange={handleChangeInput}
+                value={datosGenerales?.latitud}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <AccountCircle />
+                    </InputAdornment>
+                  ),
+                }}
+                variant="filled"
+                color="secondary"
+              />
+              <TextField
+                sx={{ width: "100%", my: "1rem" }}
+                name="longitud"
+                id="input-with-icon-textfield"
+                label="Longitud"
+                onChange={handleChangeInput}
+                value={datosGenerales?.longitud}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <AccountCircle />
+                    </InputAdornment>
+                  ),
+                }}
+                variant="filled"
+                color="secondary"
+              />
+              <TextField
+                sx={{ width: "100%", my: "1rem" }}
+                name="entidad_federativa"
+                id="input-with-icon-textfield"
+                label="Estado de la Republica"
+                onChange={handleChangeInput}
+                value={datosGenerales?.entidad_federativa}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <AccountCircle />
+                    </InputAdornment>
+                  ),
+                }}
+                variant="filled"
+                color="secondary"
+              />
+              <TextField
+                sx={{ width: "100%", my: "1rem" }}
+                name="radio"
+                id="input-with-icon-textfield"
+                label="Radio"
+                onChange={handleChangeInput}
+                value={datosGenerales?.radio}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <AccountCircle />
+                    </InputAdornment>
+                  ),
+                }}
+                variant="filled"
+                color="secondary"
               />
             </Box>
             <Box sx={{ width: "30%" }}>
@@ -306,7 +468,12 @@ function PlacesForm() {
                 </Upload>
               </ImgCrop>
               <Box sx={{ display: "flex", flexDirection: "row" }}>
-                <Checkbox color="secondary" {...label} />
+                <Checkbox
+                  onChange={handleChangeInput}
+                  name="active"
+                  color="secondary"
+                  {...label}
+                />
                 <Typography>Estatus de la plaza</Typography>
               </Box>
             </Box>
@@ -418,7 +585,8 @@ function PlacesForm() {
                       </>
                     )}
                   {serviceByPlace[0]?.id_plaza === 1 &&
-                    serviceByPlace[0]?.id_servicio === 2 &&  <>
+                    serviceByPlace[0]?.id_servicio === 2 && (
+                      <>
                         {" "}
                         <Box
                           sx={{
@@ -459,50 +627,53 @@ function PlacesForm() {
                             })}
                           </FormGroup>
                         </Box>
-                      </>}
+                      </>
+                    )}
                   {serviceByPlace[0]?.id_plaza === 1 &&
-                    serviceByPlace[0]?.id_servicio === 3 &&  <>
-                    {" "}
-                    <Box
-                      sx={{
-                        border: "solid white 1px",
-                        width: "100%",
-                        padding: "1rem",
-                      }}
-                    >
-                      {" "}
-                      <Typography>{`Procesos para el servicio ${
-                        services[Number(serviceByPlace[0]?.id_servicio) - 1]
-                          ?.nombre
-                      }  de  la plaza ${
-                        places[value].nombre
-                      } `}</Typography>
-                      <FormGroup
-                        sx={{ display: "flex", flexDirection: "row" }}
-                      >
-                        {processes.map((process) => {
-                          return (
-                            <FormControlLabel
-                              control={
-                                <Checkbox
-                                  onChange={() => {
-                                    handleOnChangeProcess(
-                                      event,
-                                      process,
-                                      value,
-                                      serviceByPlace
-                                    );
-                                  }}
-                                  color="secondary"
+                    serviceByPlace[0]?.id_servicio === 3 && (
+                      <>
+                        {" "}
+                        <Box
+                          sx={{
+                            border: "solid white 1px",
+                            width: "100%",
+                            padding: "1rem",
+                          }}
+                        >
+                          {" "}
+                          <Typography>{`Procesos para el servicio ${
+                            services[Number(serviceByPlace[0]?.id_servicio) - 1]
+                              ?.nombre
+                          }  de  la plaza ${
+                            places[value].nombre
+                          } `}</Typography>
+                          <FormGroup
+                            sx={{ display: "flex", flexDirection: "row" }}
+                          >
+                            {processes.map((process) => {
+                              return (
+                                <FormControlLabel
+                                  control={
+                                    <Checkbox
+                                      onChange={() => {
+                                        handleOnChangeProcess(
+                                          event,
+                                          process,
+                                          value,
+                                          serviceByPlace
+                                        );
+                                      }}
+                                      color="secondary"
+                                    />
+                                  }
+                                  label={`${process.nombre}`}
                                 />
-                              }
-                              label={`${process.nombre}`}
-                            />
-                          );
-                        })}
-                      </FormGroup>
-                    </Box>
-                  </>}
+                              );
+                            })}
+                          </FormGroup>
+                        </Box>
+                      </>
+                    )}
                   {serviceByPlace[0]?.id_plaza === 1 &&
                     serviceByPlace[0]?.id_servicio === 4 && (
                       <>
@@ -1178,13 +1349,41 @@ function PlacesForm() {
         )}
         {nextStep === 2 && (
           <>
-            <div>paso 2</div>
+            <div>
+              Se creo con exito la plaza y los procesos correspondientes{" "}
+            </div>
           </>
         )}
       </Box>
-      <Button onClick={handleNextStep} variant="contained">
-        Agregar
-      </Button>
+      <Box></Box>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "end",
+          width: "100%",
+        }}
+      >
+        <Button
+          color="secondary"
+          onClick={() => {
+          handleCreatePlace()
+          
+          }}
+          variant="contained"
+          style={{ display: nextStep > 1 ? "none" : "block" }}
+        >
+          {nextStep !== 1
+            ? "Siguiente Paso"
+            : nextStep <= 2
+            ? "Guardar Datos"
+            : null}
+        </Button>
+      </Box>
+      {!!snackbar && (
+        <Snackbar open onClose={handleCloseSnackbar} autoHideDuration={6000}>
+          <Alert {...snackbar} onClose={handleCloseSnackbar} />
+        </Snackbar>
+      )}
     </>
   );
 }
