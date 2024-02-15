@@ -76,7 +76,7 @@ function PlacesForm() {
   };
 
   const fetchImage = async () => {
-    console.log("aqui prueba 1");
+    
     // Fetch your base64 image URL from fileList[0].thumbUrl
     /*  if (!fileList || fileList.length === 0) {
       console.error("File list is empty or undefined.");
@@ -158,7 +158,7 @@ function PlacesForm() {
     }
   };
 
-  console.log(GetProcesses);
+ 
 
   const steps = ["Datos de la Plaza", "Seleccion de Servicios"];
   const handleNextStep = () => {
