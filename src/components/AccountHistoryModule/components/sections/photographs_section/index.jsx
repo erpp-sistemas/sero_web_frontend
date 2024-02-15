@@ -34,7 +34,7 @@ import { FaCloudUploadAlt } from "react-icons/fa";
 import dayjs from "dayjs";
 import axios from "axios";
 import { store } from "../../../../../redux/store";
-import AWS from "aws-sdk";
+
 import { ImCancelCircle } from "react-icons/im";
 import { FaRegCircleCheck } from "react-icons/fa6";
 import { GrUploadOption } from "react-icons/gr";
@@ -55,15 +55,15 @@ const AWS_SECRET_KEY = "Soirilyzbm7tzjzYRq/B+ZPCXMt73eTisIARzrlf";
 // Use these variables wherever needed in your application
 
 
-AWS.config.update({
+/* AWS.config.update({
   accessKeyId: AWS_PUBLIC_KEY,
   secretAccessKey: AWS_SECRET_KEY,
   region: AWS_BUCKET_REGION,
-});
-
+}); */
+/* 
 const s3 = new AWS.S3();
-const bucketName = AWS_BUCKET_NAME;
-
+const bucketName = AWS_BUCKET_NAME; */
+/* 
 const checkFileExists = async (fileName) => {
   try {
     const params = {
@@ -133,7 +133,7 @@ const signUrl = async (
     throw error;
   }
 };
-
+ */
 /* const Item = styled(Paper)(({ theme }) => ({
     backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
     ...theme.typography.body2,

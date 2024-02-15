@@ -16,7 +16,7 @@ function AcountHistory() {
     {/* <Header title="Crea un nuevo usuario" subtitle="Ingresa los datos" />  
               
     <StepperComponent /> */}
-    <AccountHistoryModule />
+   {/*  <AccountHistoryModule /> */}Prueba
     
 </Box>
 

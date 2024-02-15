@@ -43,7 +43,7 @@ export const getProcessesByUserPlaceAndServiceId = async(userId,placeId,serviceI
  */
 export const createPlace = async (placeData) => {
     try {
-      const response = await axios.post('/places', placeData);
+      const response = await instance.post('/places', placeData);
       // Additional operations after place creation can be done here
       return response.data;
     } catch (error) {
@@ -78,7 +78,8 @@ export const createPlace = async (placeData) => {
    */
   export const getAllPlaces = async () => {
     try {
-      const response = await axios.get('/places');
+      const response = await instance.get('/places');
+      console.log(response);
       // Additional operations before returning the data can be done here
       return response.data;
     } catch (error) {
@@ -163,4 +164,10 @@ try {
   throw error.response?.data || error;
   
 }}
+
+
+
+
+
+
 
