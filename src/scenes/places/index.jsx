@@ -10,7 +10,7 @@ function Places() {
     const colors = tokens(theme.palette.mode);
   return (
     <Box m="20px">
-    <Header title="Gestiòn de Plazas" subtitle="Operaciones de Crear, Leer, Actualizar y Eliminar Plazas en el Sistema" />
+    <Header title="Gestiòn de Plazas" subtitle="Operaciones de Crear, Leer, Actualizar y Eliminar Procesos en el Sistema" />
   <PlacesModule/>
     
   </Box>
