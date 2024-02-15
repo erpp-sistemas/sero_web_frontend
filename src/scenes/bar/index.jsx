@@ -13,7 +13,7 @@ const Bar = () => {
   const [tipo, setTipo] = useState(1)
 
 
-  useEffect(() => {
+  React.useEffect(() => {
     getData()
   }, [])
 
