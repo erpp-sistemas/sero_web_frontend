@@ -50,7 +50,7 @@ export const updateMenuRolById = async (menuRolId, updatedMenuRolData) => {
  */
 export const getMenuRolByIdRol = async (rolId) => {
   try {
-    const response = await axios.get(`http://localhost:3000/api/menu_rol/rol/${rolId}`);
+    const response = await axios.get(`/menu_rol/rol/${rolId}`);
     
     return response.data;
   } catch (error) {

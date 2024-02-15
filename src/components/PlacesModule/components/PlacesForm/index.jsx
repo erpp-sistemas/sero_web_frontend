@@ -189,7 +189,7 @@ function PlacesForm() {
   const [processes, setProcesses] = React.useState([]);
   const [places, setPlaces] = React.useState([]);
   const [serviceByPlace, setServiceByPlace] = React.useState([]);
- 
+   console.log(serviceByPlace);
   
 
   /* getAllPlaces */
