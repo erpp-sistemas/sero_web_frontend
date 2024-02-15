@@ -63,6 +63,8 @@ function PlacesForm() {
   const [snackbar, setSnackbar] = React.useState(null);
 
 
+ 
+
   const handleChangeInput = (e) => {
     const { name, value, type, checked } = e.target;
     // Actualiza el estado serviceData con el nuevo valor del campo Servicio
@@ -118,7 +120,7 @@ function PlacesForm() {
     setValue(newValue);
   };
 
-  const handleOnChangeProcess = (event, process, value, service) => {
+  const handleOnChangeProcess = async(event, process, value, service) => {
     const { checked } = event.target;
     if (checked) {
       SetProcesses((prevProcesses) => [
@@ -128,7 +130,27 @@ function PlacesForm() {
           id_servicio: service[0].id_servicio,
           id_plaza: service[0].id_plaza,
         },
-      ]);
+      ])
+      try {
+
+
+        const response = await createPlazaServiceProces({
+          id_proceso: process.id_proceso,
+          id_servicio: service[0].id_servicio,
+          id_plaza: service[0].id_plaza,
+        })
+
+
+
+        setSnackbar({
+          children: `Se le asignaron los servicios y procesos a la plaza  ${datosGenerales.nombre} con éxito`,
+          severity: "success",
+        });
+        
+      } catch (error) {
+        console.log(error);
+        
+      }
     } else {
       SetProcesses((prevProcesses) =>
         prevProcesses.filter((item) => item.id_proceso !== process.id_proceso)
@@ -167,6 +189,8 @@ function PlacesForm() {
   const [processes, setProcesses] = React.useState([]);
   const [places, setPlaces] = React.useState([]);
   const [serviceByPlace, setServiceByPlace] = React.useState([]);
+ 
+  
 
   /* getAllPlaces */
   /*  getPlaceAndServiceAndProcessByUser */
@@ -289,7 +313,7 @@ function PlacesForm() {
     });
   };
 
-  console.log(serviceByPlace);
+  console.log(value);
 
   /* 
   const handleOnChangeProcess = async(event, process) => {
@@ -335,6 +359,12 @@ function PlacesForm() {
             children: `Se creó la plaza ${datosGenerales.nombre} con éxito`,
             severity: "success",
           });
+          fetchPlaces()
+          setTimeout(() => {
+            handleNextStep();  
+          }, 2000);
+       
+          
         } catch (error) {
           console.error("Error al crear la plaza:", error);
           setSnackbar({
@@ -342,11 +372,7 @@ function PlacesForm() {
             severity: "error",
           });
         }
-     
        
-       
-
-      handleNextStep();
 
     }
   return (
@@ -492,6 +518,8 @@ function PlacesForm() {
             >
               <Tabs
                 value={value}
+                variant="scrollable"
+                scrollButtons
                 onChange={handleChange}
                 aria-label="icon tabs example"
               >

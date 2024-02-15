@@ -139,7 +139,18 @@ export const createPlace = async (placeData) => {
   }
 
 
+/* /placesAndServiceAndProcess */
 
+export const createPlazaServiceProcess = async (PlazaServiceProcessData) => {
+  try {
+    const response = await instance.post('/placesAndServiceAndProcess', PlazaServiceProcessData);
+    // Additional operations after user plaza service process data creation can be done here
+    return response.data;
+  } catch (error) {
+    console.error("Error creating user plaza service process data:", error.response?.data || error.message);
+    throw error.response?.data || error;
+  }
+};
 
   export const createUserPlazaServiceProcess = async (userPlazaServiceProcessData) => {
     try {
