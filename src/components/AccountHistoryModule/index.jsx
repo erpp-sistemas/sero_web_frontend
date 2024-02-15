@@ -125,8 +125,8 @@ function AccountHistoryModule() {
         return <DebtsSection /* debts={debts} */ />;
       case "PerformedActions":
         return <ProcessTableSection /* actions={actions} */ />;
-      case "CapturedPhotographs":
-        return <PhotographsSection /* photos={photos} */ />;
+ /*      case "CapturedPhotographs":
+        return <PhotographsSection  />; */
       /* case "Statistics":
         return <Charts />; */
 
