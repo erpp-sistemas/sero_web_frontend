@@ -2,7 +2,7 @@ import React from "react";
 import Container from "../Container";
 import DataGridUsers from "./components/DataGridUsers";
 import HorizontalNonLinearStepper from "../StepperComponent";
-import { getUserById } from "../../api/user";
+import { getUserById } from "../../api/user.js";
 
 function UserModule() {
   const [componentesVisibility, setComponentesVisibility] = React.useState({
@@ -13,11 +13,6 @@ function UserModule() {
   const [menuData,setMenuData] = React.useState([])
   const [processData,setProcessData] = React.useState([])
   const[serviceData,setServiceData] = React.useState([])
-
-  
-
-
-
     /**
    * Función asíncrona para obtener los datos de los servicios y actualizar el estado 'rows'.
    *
@@ -31,9 +26,9 @@ function UserModule() {
         // Aquí deberías hacer tu solicitud de red para obtener los datos
         // Reemplaza 'TU_URL_DE_DATOS' con la URL real de tus datos
   
-        const response = await getUserById(151);
+        const response = await getUserById(19);
   
-        console.log(response);
+        console.log('response',response);
   
         // Agrega el campo 'id_tarea' a cada fila usando el índice como valor único si no no se ven en la datagrid
         const rowsWithId = response.map((row, index) => ({
