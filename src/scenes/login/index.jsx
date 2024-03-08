@@ -36,45 +36,14 @@ const Login = ({ setLogin }) => {
         if (res && res.data) {
           setIsAuthenticated(true)
           dispatch(setUser(res.data))
-      
-          // const res_place = await placeByUserIdRequest(res.data.user_id);
-          // if (res_place && res_place.data) {
-          //   console.log(res_place.data);
-          //   dispatch_place(setPlace([
-          //     { place_id: 1, name: 'Zinacantepec', image: '1-zina.jpg' },
-          //     { place_id: 2, name: 'Cuautitlan Izcalli', image: '2-cuauti.jpg' },
-          //     { place_id: 3, name: 'Demo', image: '3-SER0_imagotipo_azul.png' },
-          //     { place_id: 4, name: 'Naucalpan', image: '4-logo-naucalpan.png' }
-          //   ]));
-          // } else {
-          //   console.error('La respuesta de placeByUserIdRequest no contiene datos válidos');
-          // }
-      
-          // const res_service = await placeServiceByUserIdRequest(res.data.user_id)
-          // if (res_service && res_service.data) {
-          //   console.log(res_service.data)
-          //   //dispatch(setService(res_service.data))
-          // }
-      
-          // const res_process = await placeServiceProcessByUserIdRequest(res.data.user_id)
-          // if (res_process && res_process.data) {
-          //   console.log(res_process.data)
-          //   //dispatch(setProcess(res_process.data))
-          // }
         }
 
-        
-
-        //setUser(res.data)
-        ////dispatch(setUser(res.data))
-        //authDispatch(setAuth({authenticated: isAuthenticated}))
-        //navigate('/home')
-
+      
       } catch (error) {
         if(Array.isArray(error.response.data)){
           return setSigninErrors(error.response.data)
         }
-        //console.error(error.response.data)
+      
         setSigninErrors([error.response.data.message])
       }
     }
@@ -94,8 +63,6 @@ const Login = ({ setLogin }) => {
   
        if(!cookies.token){
          setIsAuthenticated(false);
-         //setLoading(false)
-         //dispatch(setAuth({'authenticated': isAuthenticated}))
          return setUser(null);
        }
        
@@ -103,23 +70,13 @@ const Login = ({ setLogin }) => {
          const res = await verifyTokenRequest(cookies.token)
          if(!res.data){
            setIsAuthenticated(false)
-           //setLoading(false)
-           //dispatch(setAuth({'authenticated': isAuthenticated}))
            return
          }
            
          setIsAuthenticated(true)
-         //setUser(res.data)
-         //setLoading(false)
-
-         //dispatch(setAuth({'authenticated': isAuthenticated}))
          
        } catch (error) {
          setIsAuthenticated(false)
-         //setUser(null)
-         //setLoading(false)
-
-         //dispatch(setAuth({'authenticated': isAuthenticated}))
        }
        
       }

@@ -60,31 +60,40 @@ function App() {
   const mapa_seleccionado = useSelector((state) => state.plaza_mapa)
 
   useEffect(() => {
-    async function checkLogin () {
-     const cookies = Cookies.get()
-
-     if(!cookies.token){
-       setIsAuthenticated(false);       
-       return 
-     }
-     
-     try {
-       const res = await verifyTokenRequest(cookies.token)
-       if(!res.data){
-         setIsAuthenticated(false)         
-         return
-       }
-         
-       setIsAuthenticated(true)       
-       
-     } catch (error) {
-       setIsAuthenticated(false)       
-     }     
-    }
     checkLogin()
-   },[])
+  }, [])
 
-   useEffect(() => {
+  
+   async function checkLogin() {
+
+    const cookies = Cookies.get()
+    
+    if (Object.keys(cookies).length === 0) {
+      setIsAuthenticated(false);
+      return
+    }
+
+    if (!cookies.token) {
+      setIsAuthenticated(false);
+      return
+    }
+
+    try {
+      const res = await verifyTokenRequest(cookies.token)
+      console.log(res)
+      if (!res.data) {
+        setIsAuthenticated(false)
+        return
+      }
+
+      setIsAuthenticated(true)
+
+    } catch (error) {
+      setIsAuthenticated(false)
+    }
+  }
+
+  useEffect(()=>{
     console.log(isAuthenticated)
     if (!isAuthenticated) {
       setLogin(null)
@@ -93,18 +102,8 @@ function App() {
       setLogin(true)
       navigation('/home')
     }
-  },[isAuthenticated])
+  }, [isAuthenticated])
 
-  // useEffect(() => {
-  //   const user = localStorage.getItem('user');
-  //   if (user) {
-  //     setLogin(false)
-  //     navigation('/home');
-  //   } else {
-  //     setLogin(true)
-  //     navigation('/');
-  //   }
-  // }, [])  
 
   return (
     <>
@@ -112,7 +111,7 @@ function App() {
         localeText={esES.components.MuiLocalizationProvider.defaultProps.localeText}
         adapterLocale="es"
       >
-        { login === null ? (
+        {login === null ? (
           <Routes>
             <Route path="/" element={<Login setLogin={setLogin} />} />
           </Routes>
@@ -121,7 +120,7 @@ function App() {
             <ThemeProvider theme={theme}>
               <CssBaseline />
               <div className="app">
-              {location.pathname !== `/map/${mapa_seleccionado.place_id}` ? (<Sidebar isSidebar={isSidebar} />) : (<SidebarMap isSidebar={isSidebar} />)}
+                {location.pathname !== `/map/${mapa_seleccionado.place_id}` ? (<Sidebar isSidebar={isSidebar} />) : (<SidebarMap isSidebar={isSidebar} />)}
                 <main className="content">
                   <Topbar setIsSidebar={setIsSidebar} />
                   <Routes>
@@ -140,7 +139,7 @@ function App() {
                     <Route path="/new-user" element={<NewUser />} />
                     <Route path="/map-list" element={<MapList />} />
                     <Route path="/map/:place_id" element={<Map />} />
-                    <Route path="/roles" element={<Roles/>} />
+                    <Route path="/roles" element={<Roles />} />
                     <Route path="/maintenance" element={<Maintenance />} />
                     <Route path="/work-assignment" element={<WorkAssignment />} />
                     <Route path="/dashboard-coordinator" element={<DashboardCoordinator />} />
@@ -153,9 +152,17 @@ function App() {
                     <Route path="/permission" element={<Permission/>}/>
                     <Route path="/places" element={<Places/>}/>
                     <Route path="/users-list" element={<UsersList/>}/>
+                    <Route path="/acount-history" element={<AcountHistory />} />
+                    <Route path="/valid-payment" element={< ValidPayment />} />
+                    <Route path="/task" element={<Task />} />
+                    <Route path="/service" element={<Service />} />
+                    <Route path="/process" element={<Process />} />
+                    <Route path="/menu" element={<Menu />} />
+                    <Route path="/permission" element={<Permission />} />
+                    <Route path="/places" element={<Places />} />
                   </Routes>
                 </main>
-                
+
               </div>
             </ThemeProvider>
           </ColorModeContext.Provider>
