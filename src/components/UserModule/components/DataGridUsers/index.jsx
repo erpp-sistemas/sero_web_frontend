@@ -1193,7 +1193,7 @@ function DataGridUsers({
       {
         field: "name",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"Nombre"}</strong>
+          <strong style={{ color: "#5EBFFF" }}>{"NOMBRE"}</strong>
         ),
         width: 110,
         editable: true,

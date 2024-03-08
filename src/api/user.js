@@ -1,6 +1,6 @@
-// Importa axios si aún no lo has hecho
-import axios from "axios";
-import instance from "./axios";
+import axios from "./axios";
+
+export const getUsersByUserIdRequest = (user_id) => axios.get(`/GetUserById/${user_id}`)
 
 export const getUserById = async (userId) => {
   try {

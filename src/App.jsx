@@ -25,6 +25,7 @@ import Maintenance from './scenes/maintenance'
 import WorkAssignment from './scenes/work-assignment'
 import DashboardCoordinator from './scenes/dashboard-coordinacion'
 import Account from './scenes/account'
+import UsersList from './scenes/users-list'
 
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
@@ -84,13 +85,14 @@ function App() {
    },[])
 
    useEffect(() => {
-    if(!isAuthenticated){
-      setLogin(false)
-      navigation('/home')
-    }/* else{
-      setLogin(true)
+    console.log(isAuthenticated)
+    if (!isAuthenticated) {
+      setLogin(null)
       navigation('/')
-    } */
+    } else {
+      setLogin(true)
+      navigation('/home')
+    }
   },[isAuthenticated])
 
   // useEffect(() => {
@@ -150,6 +152,7 @@ function App() {
                     <Route path="/menu" element={<Menu/>}/>
                     <Route path="/permission" element={<Permission/>}/>
                     <Route path="/places" element={<Places/>}/>
+                    <Route path="/users-list" element={<UsersList/>}/>
                   </Routes>
                 </main>
                 
