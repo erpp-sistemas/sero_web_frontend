@@ -24,6 +24,7 @@ import Map from './scenes/map'
 import Maintenance from './scenes/maintenance'
 import WorkAssignment from './scenes/work-assignment'
 import DashboardCoordinator from './scenes/dashboard-coordinacion'
+import DashboardGeocidong from './scenes/dashboard-generatecor'
 import Account from './scenes/account'
 import UsersList from './scenes/users-list'
 
@@ -94,14 +95,14 @@ function App() {
   }
 
   useEffect(()=>{
-    console.log(isAuthenticated)
-    if (!isAuthenticated) {
-      setLogin(null)
-      navigation('/')
-    } else {
-      setLogin(true)
-      navigation('/home')
-    }
+    // console.log(isAuthenticated)
+    // if (!isAuthenticated) {
+    //   setLogin(null)
+    //   navigation('/')
+    // } else {
+    //   setLogin(true)
+    //   navigation('/home')
+    // }
   }, [isAuthenticated])
 
 
@@ -143,6 +144,7 @@ function App() {
                     <Route path="/maintenance" element={<Maintenance />} />
                     <Route path="/work-assignment" element={<WorkAssignment />} />
                     <Route path="/dashboard-coordinator" element={<DashboardCoordinator />} />
+                    <Route path="/dashboard-generatecor" element={<DashboardGeocidong />} />
                     <Route path="/acount-history" element={<AcountHistory/>}/>
                     <Route path="/valid-payment" element={< ValidPayment/>}/>
                     <Route path="/task" element={<Task/>}/>
