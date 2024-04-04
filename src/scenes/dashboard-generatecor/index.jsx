@@ -30,7 +30,7 @@ const index = () => {
 
     <Slide direction="up" in={apikeySlice} mountOnEnter unmountOnExit>
       <div  style={{ width:'100%',display: 'flex', justifyContent: 'center', alignItems: 'center'}}> 
-      <BoxGeoconding resetApikey={resetApikey}/>
+      <BoxGeoconding />
       </div>
     </Slide>  
     </Box>
