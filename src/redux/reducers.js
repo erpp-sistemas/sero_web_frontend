@@ -17,6 +17,7 @@ import payment from './paymentsSlice'
 import photo from './photosSlice'
 import plazaNumber from './plazaNumberSlice'
 import apikeyGeocoding from './apikeyGeocodingSlice'
+import dataGeocoding from "./dataGeocodingSlice";
 
 const rootReducer = combineReducers({
   user: userReducer,
@@ -36,7 +37,8 @@ const rootReducer = combineReducers({
   payment:payment,
   photo:photo,
   plazaNumber:plazaNumber,
-  apikeyGeocoding:apikeyGeocoding
+  apikeyGeocoding:apikeyGeocoding,
+  dataGeocoding:dataGeocoding
 
 
 

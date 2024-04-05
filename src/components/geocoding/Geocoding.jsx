@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 import { Alert, Button, Collapse, Grid, Snackbar } from '@mui/material'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { styled } from '@mui/material/styles';
 
 
@@ -26,7 +26,9 @@ import { setApikeyGeocodingSlice } from '../../redux/apikeyGeocodingSlice';
 import PropTypes from 'prop-types';
 import LinearProgress from '@mui/material/LinearProgress';
 import Typography from '@mui/material/Typography';
-
+import { setCordenadas, setCordenadasErrores, setCordenadasRestantes, setFile, setPorSubir, setResponse, valueInitCordenadas } from '../../redux/dataGeocodingSlice';
+ 
+//*Genera un div con estilos en especifico para el documento
 const Div = styled('div')(({ theme }) => ({
   ...theme.typography.button,
   backgroundColor: theme.palette.background.default,
@@ -37,7 +39,7 @@ const Div = styled('div')(({ theme }) => ({
 
 
 
-
+//*Genera la linea de progreso
 function LinearProgressWithLabel(props) {
   return (
     <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -54,11 +56,8 @@ function LinearProgressWithLabel(props) {
 }
 
 LinearProgressWithLabel.propTypes = {
-  /**
-   * The value of the progress indicator for the determinate and buffer variants.
-   * Value between 0 and 100.
-   */
   value: PropTypes.number.isRequired,
+  color:"red"
 };
 
 
@@ -78,80 +77,74 @@ function createData(id, name, total) {
 let bj = { bandera: false }; //! Variable que maneja el estado de la pausa
 
 const Geocoding = () => {
-    const [csvData, setCsvData] = useState([]); //! GUARDA LOS DATOS DEL CSV
-    const [dataCordenas, setDataCordenas] = useState([]); //!GUARDA LAS DIRECCIONES QUE SI SE LOGRARON ENCONTRAR
-    const [errorCordenadas, setErrorCordenadas] = useState([]); //! GUARDA LAS DIRECCIONES QUE NO SE ENCONTRARON
-    const [progreso, setProgreso] = useState(false); //!GUARDA EL PROGRESO
-    const [dataFile,setDataFile]=useState(false)
+    const [progreso, setProgreso] = useState(false);
     const [accionBtn,setAccionBtn]=useState(0)
     const [snackbar, setSnackbar] = useState(null);
-    const [toastad, setToastad] = useState(false);
     const dispatch=useDispatch()
     const apikeySlice=useSelector(a=>a.apikeyGeocoding)
+    const dataGeocoding=useSelector(a=>a.dataGeocoding)
+    const user=useSelector(a=>a.user)
     
-  
     const resetApikey=()=>{
         dispatch(setApikeyGeocodingSlice(null))
       }
-    const resetFile=()=>{
-        setDataFile(false)
-      }
-      const showSnackbarError = (arrayOptiones) => {
-        setSnackbar({
-          
+      //*Funcion que genera las alertas
+      const showSnackbar = (arrayOptiones) => {
+        setSnackbar({ 
           ...arrayOptiones
         });
       };
+    //* Genera el array del scv 
+    const handleFileUpload = (event) => {
+    const file = event.target.files[0];
+    Papa.parse(file, {
+        complete: (result) => {
+        let conteo = result.data.length - 1;
+        showSnackbar(
+                {children: `Archivo ${file.name} , cargado correctamente `,
+                severity: "success"}
+        )
+        dispatch(valueInitCordenadas(result.data))
+        dispatch(setFile({name:file.name,total:conteo}))
+        },
+        header: true,
+    });
+    };
 
-    const InputFileUpload=()=> {
-      
-        const handleFileUpload = (event) => {
-            const file = event.target.files[0];
-            Papa.parse(file, {
-              complete: (result) => {
-                let conteo = result.data.length - 1;
-                setCsvData(result.data)
-                showSnackbarError(
-                        {children: `Archivo ${file.name} , cargado correctamente `,
-                        severity: "success"}
-                )
-                setDataFile({name:file.name,total:conteo})
-              },
-              header: true,
-            });
-          };
+    //*Genera el boton para insertar el file
+const InputFileUpload=()=> {
     
     
-      return (
-        <Button
-          component="label"
-          role={undefined}
-          variant="contained"
-          tabIndex={-1}
-          startIcon={<CloudUploadIcon />}
-          color='secondary'
-          sx={{
-              '&.Mui-disabled': {
-                backgroundColor: '#17212fdb',
-                color: '#999',
-              },
-            }}
-          disabled={dataFile?.name}
-         
-        >
-          Selecciona un archivo
-          <VisuallyHiddenInput type="file" accept=".csv"  onChange={handleFileUpload}/>
-        </Button>
-      );
-    }
+
+    return (
+    <Button
+        component="label"
+        role={undefined}
+        variant="contained"
+        tabIndex={-1}
+        startIcon={<CloudUploadIcon />}
+        color='secondary'
+        sx={{
+            '&.Mui-disabled': {
+            backgroundColor: '#17212fdb',
+            color: '#999',
+            },
+        }}
+        disabled={dataGeocoding?.file?.name}
+        
+    >
+        Selecciona un archivo
+        <VisuallyHiddenInput type="file" accept=".csv"  onChange={handleFileUpload}/>
+    </Button>
+    );
+}
 
  //*Calcula el rogreso de el total de cuentas buscadas
  const calcularProgreso = () => {
-    const cordenadas = dataCordenas.length + errorCordenadas.length;
-    const cuentas = dataFile?.total;
+    const cordenadas = dataGeocoding?.cordenadas.length + dataGeocoding?.cordenadasErrores.length;
+    const cuentas = dataGeocoding?.file?.total;
     const total = (cordenadas * 100) / cuentas;
     setProgreso(total);
-    console.log(progreso)
   };
   //*Obtiene las cordenadas de la api
   const getCordenadas = async (address) => {
@@ -168,10 +161,7 @@ const Geocoding = () => {
       throw error;
     }
   };
-  //*Elimina la cuenta del arreglo csv una vez esta ya se haya pasado a dataCordenadas o erroresCordendas
-  const remeveCuenta = (index) => {
-    csvData.splice(index, 1);
-  };
+
   //*Pausa la busqueda del las direcciones
   const Pausa = () => {
     bj.bandera = !bj.bandera;
@@ -179,102 +169,114 @@ const Geocoding = () => {
       search();
     } else {
         setAccionBtn(2)
-        showSnackbarError(
+        showSnackbar(
             {children: `"BUSQUEDA PAUSADA"`,
             severity: "warning"}
     )
     }
   };
-  //*Empieza la usqueda y genera errores de los resultados de busqueda
+ //*Resetea solo los datos del file sin laterar las datos que ya se tenian
+  const resetFile=()=>{
+    Pausa()
+    dispatch(setFile(""))
+    dispatch(setResponse([]))
+    setAccionBtn(0)
+  }
+  //*Empieza la busqueda y genera errores de los resultados de busqueda
   const search = async () => {
-    const newArray=csvData
-    if (!csvData.length) {
-        showSnackbarError(
+    const newArray=dataGeocoding?.cordenadasRestantes
+    if (!dataGeocoding?.cordenadasRestantes.length) {
+        showSnackbar(
             {children: `"INGRESE UN ARCHIVO CSV"`,
             severity: "warning"}
-    )
+         )
     }
-    if (!csvData[0].cuenta || !csvData[0].direccion) {
-    showSnackbarError(
+    if (!dataGeocoding?.cordenadasRestantes[0].cuenta || !dataGeocoding?.cordenadasRestantes[0].direccion) {
+    showSnackbar(
         {children: `"EL ARCHIVO QUE INGRESO NO TIENE ENCABEZADOS DE CUENTA O DIRECCIÓN`,
         severity: "warning"}
-)
+    )
     } else {
         setAccionBtn(1)
-        console.log("alerta")
-        showSnackbarError(
+        showSnackbar(
             {children: `BUSCANDO`,
             severity: "success"}
     )
-      for (let index = 0; newArray.length>=0 ; index) {
+      for (let index = 0; newArray.length>=0 ; index++) {
         if (bj.bandera) {
           break;
         }
-        const cuenta = csvData[index];
-       if(cuenta.cuenta!=""){ 
+        const cuenta = dataGeocoding?.cordenadasRestantes[index];
+       if(cuenta?.cuenta!=""){ 
         try {
             const cordenadas = await getCordenadas(cuenta.direccion);
-  
+
             if (cordenadas?.lat) {
-              dataCordenas.push({
+              dispatch(setCordenadas({
                 cuenta: cuenta.cuenta,
                 direccion: cuenta.direccion,
-                lat: cordenadas.lat,
-                lng: cordenadas.lng,
-              });
-             
+                latitud: `${cordenadas.lat}`,
+                longitud: `${cordenadas.lng}`,
+                plaza:5,
+                usuario_id:user.user_id
+              }));
+              dispatch(setPorSubir({
+                cuenta: cuenta.cuenta,
+                direccion: cuenta.direccion,
+                latitud: `${cordenadas.lat}`,
+                longitud: `${cordenadas.lng}`,
+                plaza:5,
+                usuario_id:user.user_id
+              }));
             }
             if (!cordenadas) {
               console.log(">>>NO SE ENCONTRO<<<");
-              errorCordenadas.push({
+              dispatch(setCordenadasErrores({
                 cuenta: cuenta.cuenta,
                 direccion: cuenta.direccion,
-              });
-             
+              }));
             }
           } catch (error) {
-            
             console.log(">>>ERROR EN LA PETICION<<<");
-            if (error.response.status == 429) {
-              showSnackbarError(
+            if (error?.response?.status == 429) {
+              showSnackbar(
                 {children: `SE ALCANZÓ EL LÍMITE DE PETICIONES CON ESTA APIKEY`,
                 severity: "error"}
-        )
+             )
               break;
             }
-            if (error.response.status == 401) {
-              showSnackbarError(
+            if (error?.response?.status == 401) {
+              showSnackbar(
                 {children: `LA APIKEY INGRESADA NO ESTÁ AUTORIZADA`,
                 severity: "error"}
-        )
+             )
               break;
             }
-            errorCordenadas.push({
-              cuenta: cuenta.cuenta,
-              direccion: cuenta.direccion,
-            });
+            dispatch(setCordenadasErrores({
+                cuenta: cuenta.cuenta,
+                direccion: cuenta.direccion
+              }));
           }
        }
-        remeveCuenta(index);
+        dispatch(setCordenadasRestantes())
         calcularProgreso();
-        
       }
     }
   };
   //*Genera un reporte de excel de cada apartado de arreglos dinamicamente
   const dowloandData = (arrayData, BookTittle) => {
-    showSnackbarError(
+    showSnackbar(
         {children: `EMPEZANDO DESCARGA DE EXEL`,
         severity: "success"}
-)
+    )
     const exportToCsv = function (data) {
       console.log(">>> EMPEZAMOS DESCARGA <<<");
       let filas = [];
       for (let i = 0; i < data.length; i++) {
         filas.push(
           `${data[i].cuenta},${data[i].direccion},${
-            data[i].lat ? data[i].lat : ""
-          },${data[i].lng ? data[i].lng : ""}`
+            data[i].latitud ? data[i].latitud : ""
+          },${data[i].longitud ? data[i].longitud : ""}`
         );
       }
       const cvs = filas.join("\r\n");
@@ -292,60 +294,57 @@ const Geocoding = () => {
     exportar();
   };
 
-
-
     const rows = [
-        createData('1', 'TOTAL', dataFile?.total),
-        createData('2', 'RESTANTES', csvData.length),
-        createData('3', 'ENCONTRADAS', dataCordenas.length),
-        createData('4', 'ERRORES', errorCordenadas.length)
+        createData('1', 'TOTAL', dataGeocoding?.file?.total),
+        createData('2', 'RESTANTES', dataGeocoding?.cordenadasRestantes.length),
+        createData('3', 'ENCONTRADAS', dataGeocoding?.cordenadas.length),
+        createData('4', 'ERRORES', dataGeocoding?.cordenadasErrores.length)
       ];
       
-      const  StickyHeadTable=()=> {
-       
+    const  StickyHeadTable=()=> {
+    
+    
+    return (
+        <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+        <TableContainer sx={{ maxHeight: 440 }}>
+            <Table stickyHeader aria-label="sticky table">
+            <TableHead>
+                <TableRow>
+                {columns.map((column) => (
+                    <TableCell
+                    key={column.id}
+                    align={column.align}
+                    style={{ minWidth: column.minWidth }}
+                    >
+                    {column.label}
+                    </TableCell>
+                ))}
+                </TableRow>
+            </TableHead>
+            <TableBody>
+                {rows.map((row) => {
+                    return (
+                    <TableRow hover role="checkbox" tabIndex={-1} key={row.code}>
+                        {columns.map((column) => {
+                        const value = row[column.id];
+                        return (
+                            <TableCell key={column.id} align={column.align}>
+                            {column.format && typeof value === 'number'
+                                ? column.format(value)
+                                : value}
+                            </TableCell>
+                        );
+                        })}
+                    </TableRow>
+                    );
+                })}
+            </TableBody>
+            </Table>
+        </TableContainer>
+        </Paper>
+    );
+    }
       
-        return (
-          <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-            <TableContainer sx={{ maxHeight: 440 }}>
-              <Table stickyHeader aria-label="sticky table">
-                <TableHead>
-                  <TableRow>
-                    {columns.map((column) => (
-                      <TableCell
-                        key={column.id}
-                        align={column.align}
-                        style={{ minWidth: column.minWidth }}
-                      >
-                        {column.label}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {rows.map((row) => {
-                      return (
-                        <TableRow hover role="checkbox" tabIndex={-1} key={row.code}>
-                          {columns.map((column) => {
-                            const value = row[column.id];
-                            return (
-                              <TableCell key={column.id} align={column.align}>
-                                {column.format && typeof value === 'number'
-                                  ? column.format(value)
-                                  : value}
-                              </TableCell>
-                            );
-                          })}
-                        </TableRow>
-                      );
-                    })}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Paper>
-        );
-      }
-      
-   
     const VisuallyHiddenInput = styled('input')({
         clip: 'rect(0 0 0 0)',
         clipPath: 'inset(50%)',
@@ -358,10 +357,9 @@ const Geocoding = () => {
         width: 20,
       });
       
-      function test(){
-        console.log(errorCordenadas)
-        console.log(dataCordenas)
-      }
+    //   function test(){
+    //     console.log(dataGeocoding)
+    //   }
       
       const accionesBtn=[
         {text:"GENERAR CORDENADAS",accion:search,color:"#17212f"},
@@ -374,7 +372,7 @@ const Geocoding = () => {
     <>
        <Grid container  justifyContent={"space-between"}  >
                 {
-                    !dataFile.name?<InputFileUpload/>:
+                    !dataGeocoding?.file.name?<InputFileUpload/>:
                     <Button variant='contained' color='warning'  startIcon={<WarningIcon  />}onClick={resetFile} >
                             Cambiar archivo
                     </Button>
@@ -385,32 +383,41 @@ const Geocoding = () => {
                 </Button>
 
             </Grid>
-            {dataFile&&
+            {dataGeocoding?.file?.name&&
             <Div style={{display:"flex",justifyContent:"space-between"}}>
-                <Box sx={{backgroundColor:"#00ff00", padding:"5px 20px",color:"black",borderRadius:"3px"}} >{dataFile?.name}</Box>
-                <span>Total : {dataFile.total}</span> 
+                <Box sx={{backgroundColor:"#00ff00", padding:"5px 20px",color:"black",borderRadius:"3px"}} >{dataGeocoding?.file?.name}</Box>
+                {dataGeocoding.file?.name&&dataGeocoding.cordenadasRestantes==0?
+                <Box sx={{backgroundColor:"#0d6efd",color:"white",padding:"5px 20px",borderRadius:"3px"}} >Ya se finalizo la busqueda de este archivo</Box>:""}
+                <span>Total : {dataGeocoding?.file.total}</span> 
             </Div>}
             <hr/>
             <Button  variant="contained" style={{margin:"10px",backgroundColor:accionesBtn[accionBtn].color}} onClick={accionesBtn[accionBtn].accion} >
                 {accionesBtn[accionBtn].text}
             </Button>
-            <Collapse in={dataCordenas.length} >
+            <Collapse in={dataGeocoding?.cordenadas.length} >
                 <div>
                 <Box sx={{ width: '100%' }}>
-                    <LinearProgressWithLabel value={38} />
+                    <LinearProgressWithLabel  
+                     sx={{
+                            '& .MuiLinearProgress-bar': {
+                            backgroundColor: '#00ff00', // Cambia 'red' al color que desees
+                            },
+                        }}value={progreso}
+                     />
                 </Box>
                 <StickyHeadTable />
                 <Grid container justifyContent={"space-around"} marginTop={5}>
-                    {/* <Button onClick={showSnackbarError}>test</Button> */}
-                    {csvData.length?<Button onClick={()=>dowloandData(csvData,"RESTANTES")} variant='contained' sx={{backgroundColor:'#0d6efd'}} >Descargar Restantes</Button>:""}
-                    {dataCordenas.length?<Button onClick={()=>dowloandData(dataCordenas,"CORDENADAS")} variant='contained'color='success' >Descargar Encontradas</Button>:""}
-                    {errorCordenadas.length?<Button onClick={()=>dowloandData(errorCordenadas,"ERRORES")} variant='contained' color='error' >Descargar Errores</Button>:""}
+                    
+                    {dataGeocoding?.cordenadasRestantes.length?<Button onClick={()=>dowloandData(dataGeocoding?.cordenadasRestantes,"RESTANTES")} variant='contained' sx={{backgroundColor:'#0d6efd'}} >Descargar Restantes</Button>:""}
+                    {dataGeocoding?.cordenadas.length?<Button onClick={()=>dowloandData(dataGeocoding?.cordenadas,"CORDENADAS")} variant='contained'color='success' >Descargar Encontradas</Button>:""}
+                    {dataGeocoding?.cordenadasErrores.length?<Button onClick={()=>dowloandData(dataGeocoding?.cordenadasErrores,"ERRORES")} variant='contained' color='error' >Descargar Errores</Button>:""}
                 </Grid>
                 </div>
             </Collapse>
+            {/* <Button onClick={test}>test</Button> */}
             {!!snackbar && (
                 <Snackbar open  autoHideDuration={10000}
-                anchorOrigin={{ vertical: 'top', horizontal: 'right' }} // Cambia la posición de la alerta
+                anchorOrigin={{ vertical: 'top', horizontal: 'right' }} 
                 transformOrigin={{ vertical: 'top', horizontal: 'right' }} 
                 >
                 <Alert {...snackbar} onClose={handleCloseSnackbar} sx={{backgroundColor:"rtx"}} />
