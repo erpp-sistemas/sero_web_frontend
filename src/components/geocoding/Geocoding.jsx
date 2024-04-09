@@ -26,7 +26,9 @@ import { setApikeyGeocodingSlice } from '../../redux/apikeyGeocodingSlice';
 import PropTypes from 'prop-types';
 import LinearProgress from '@mui/material/LinearProgress';
 import Typography from '@mui/material/Typography';
-import { setCordenadas, setCordenadasErrores, setCordenadasRestantes, setFile, setPorSubir, setResponse, valueInitCordenadas } from '../../redux/dataGeocodingSlice';
+import { setCordenadas, setCordenadasErrores, setCordenadasFormatoErrores, setCordenadasRestantes, setFile, setPorSubir, setResponse, setVistaPanel, valueInitCordenadas } from '../../redux/dataGeocodingSlice';
+
+import tool from '../../toolkit/geocodingToolkit'
  
 //*Genera un div con estilos en especifico para el documento
 const Div = styled('div')(({ theme }) => ({
@@ -65,11 +67,12 @@ LinearProgressWithLabel.propTypes = {
 const columns = [
   { id: 'id', label: '#', minWidth: 5 },
   { id: 'name', label: 'Sección', minWidth: 100 },
-  { id: 'total',label: 'Total',minWidth: 10,align: 'right'}
+  { id: 'total',label: 'Total',minWidth: 10,align: 'right'},
+  { id: 'accion',label: '',minWidth: 10,align: 'center'}
 ];
 
-function createData(id, name, total) {
-  return { id, name, total };
+function createData(id, name, total,accion) {
+  return { id, name, total,accion };
 }
 
 
@@ -77,12 +80,14 @@ function createData(id, name, total) {
 let bj = { bandera: false }; //! Variable que maneja el estado de la pausa
 
 const Geocoding = () => {
-    const [progreso, setProgreso] = useState(false);
+   
+    const [progreso, setProgreso] = useState(0);
     const [accionBtn,setAccionBtn]=useState(0)
     const [snackbar, setSnackbar] = useState(null);
+
+    const dataGeocoding=useSelector(a=>a.dataGeocoding)
     const dispatch=useDispatch()
     const apikeySlice=useSelector(a=>a.apikeyGeocoding)
-    const dataGeocoding=useSelector(a=>a.dataGeocoding)
     const user=useSelector(a=>a.user)
     
     const resetApikey=()=>{
@@ -141,26 +146,12 @@ const InputFileUpload=()=> {
 
  //*Calcula el rogreso de el total de cuentas buscadas
  const calcularProgreso = () => {
-    const cordenadas = dataGeocoding?.cordenadas.length + dataGeocoding?.cordenadasErrores.length;
+    const cordenadas = dataGeocoding?.cordenadas.length + dataGeocoding?.cordenadasErrores.length+dataGeocoding?.cordenadasFormatoErrores.length;
     const cuentas = dataGeocoding?.file?.total;
     const total = (cordenadas * 100) / cuentas;
     setProgreso(total);
   };
-  //*Obtiene las cordenadas de la api
-  const getCordenadas = async (address) => {
-    console.log(">>>BUSCAMOS<<<");
-    const KEY = apikeySlice;
-    let url = `https://geocode.search.hereapi.com/v1/geocode?q=${address}&apiKey=${KEY}`;
 
-    try {
-      const response = await axios.get(url);
-      const cordenadas = response?.data?.items[0]?.position;
-      return cordenadas;
-    } catch (error) {
-      console.log(error);
-      throw error;
-    }
-  };
 
   //*Pausa la busqueda del las direcciones
   const Pausa = () => {
@@ -181,124 +172,83 @@ const InputFileUpload=()=> {
     dispatch(setFile(""))
     dispatch(setResponse([]))
     setAccionBtn(0)
+    bj.bandera = false
   }
-  //*Empieza la busqueda y genera errores de los resultados de busqueda
-  const search = async () => {
-    const newArray=dataGeocoding?.cordenadasRestantes
-    if (!dataGeocoding?.cordenadasRestantes.length) {
-        showSnackbar(
-            {children: `"INGRESE UN ARCHIVO CSV"`,
-            severity: "warning"}
-         )
-    }
-    if (!dataGeocoding?.cordenadasRestantes[0].cuenta || !dataGeocoding?.cordenadasRestantes[0].direccion) {
+
+ //*Empieza la busqueda y genera errores de los resultados de busqueda
+ const search = async () => {
+    
+  const newArray=dataGeocoding?.cordenadasRestantes
+  const validacionArray=tool.validateFileFields(newArray)
+
+  if (validacionArray.message) {
     showSnackbar(
-        {children: `"EL ARCHIVO QUE INGRESO NO TIENE ENCABEZADOS DE CUENTA O DIRECCIÓN`,
+        {children: validacionArray.message,
         severity: "warning"}
-    )
-    } else {
-        setAccionBtn(1)
-        showSnackbar(
-            {children: `BUSCANDO`,
-            severity: "success"}
-    )
-      for (let index = 0; newArray.length>=0 ; index++) {
-        if (bj.bandera) {
-          break;
-        }
-        const cuenta = dataGeocoding?.cordenadasRestantes[index];
-       if(cuenta?.cuenta!=""){ 
-        try {
-            const cordenadas = await getCordenadas(cuenta.direccion);
+  )
+  } else {
+      setAccionBtn(1)
+      showSnackbar({children: `BUSCANDO`, severity: "success"} )
 
-            if (cordenadas?.lat) {
-              dispatch(setCordenadas({
-                cuenta: cuenta.cuenta,
-                direccion: cuenta.direccion,
-                latitud: `${cordenadas.lat}`,
-                longitud: `${cordenadas.lng}`,
-                plaza:5,
-                usuario_id:user.user_id
-              }));
-              dispatch(setPorSubir({
-                cuenta: cuenta.cuenta,
-                direccion: cuenta.direccion,
-                latitud: `${cordenadas.lat}`,
-                longitud: `${cordenadas.lng}`,
-                plaza:5,
-                usuario_id:user.user_id
-              }));
+    for (let index = 0; newArray.length>=index ; index++) {
+
+      if (bj.bandera) { console.log("breakeado"); break; }
+
+      const cuenta = dataGeocoding?.cordenadasRestantes[index];
+      const validarCuenta=cuenta?tool.validateCuenta(cuenta):false
+
+     if(validarCuenta&&validarCuenta?.direccion){
+      try {
+          const cordenadas = await tool.getCordenadas(validarCuenta.direccion,apikeySlice);
+          
+          if (cordenadas?.lat) {
+            let cor={
+              ...cuenta,
+              latitud: `${cordenadas.lat}`,
+              longitud: `${cordenadas.lng}`,
+              plaza:5,
+              usuario_id:user.user_id
             }
-            if (!cordenadas) {
-              console.log(">>>NO SE ENCONTRO<<<");
-              dispatch(setCordenadasErrores({
-                cuenta: cuenta.cuenta,
-                direccion: cuenta.direccion,
-              }));
-            }
-          } catch (error) {
-            console.log(">>>ERROR EN LA PETICION<<<");
-            if (error?.response?.status == 429) {
-              showSnackbar(
-                {children: `SE ALCANZÓ EL LÍMITE DE PETICIONES CON ESTA APIKEY`,
-                severity: "error"}
-             )
-              break;
-            }
-            if (error?.response?.status == 401) {
-              showSnackbar(
-                {children: `LA APIKEY INGRESADA NO ESTÁ AUTORIZADA`,
-                severity: "error"}
-             )
-              break;
-            }
-            dispatch(setCordenadasErrores({
-                cuenta: cuenta.cuenta,
-                direccion: cuenta.direccion
-              }));
+            dispatch(setCordenadas(cor));
+            dispatch(setPorSubir(cor));
+          }else{
+            console.log(">>>NO SE ENCONTRO<<<");
+            dispatch(setCordenadasErrores(cuenta ));
           }
-       }
-        dispatch(setCordenadasRestantes())
-        calcularProgreso();
-      }
+        } catch (error) {
+          console.log(">>>ERROR EN LA PETICION<<<");
+          if (error?.response?.status == 429) {
+            Pausa()
+            showSnackbar(
+              {children: `SE ALCANZÓ EL LÍMITE DE PETICIONES CON ESTA APIKEY O INTENTE DE NUEVO`,
+              severity: "error"}
+           )
+          }
+          if (error?.response?.status == 401) {
+            Pausa()
+            showSnackbar({children: `LA APIKEY INGRESADA NO ESTÁ AUTORIZADA`,severity: "error"})
+          }
+          dispatch(setCordenadasErrores(cuenta));
+        }
+     }else{
+      cuenta&&cuenta.cuenta!==""&&dispatch(setCordenadasFormatoErrores(cuenta))
+     }
+      dispatch(setCordenadasRestantes())
+      calcularProgreso();
     }
-  };
-  //*Genera un reporte de excel de cada apartado de arreglos dinamicamente
-  const dowloandData = (arrayData, BookTittle) => {
-    showSnackbar(
-        {children: `EMPEZANDO DESCARGA DE EXEL`,
-        severity: "success"}
-    )
-    const exportToCsv = function (data) {
-      console.log(">>> EMPEZAMOS DESCARGA <<<");
-      let filas = [];
-      for (let i = 0; i < data.length; i++) {
-        filas.push(
-          `${data[i].cuenta},${data[i].direccion},${
-            data[i].latitud ? data[i].latitud : ""
-          },${data[i].longitud ? data[i].longitud : ""}`
-        );
-      }
-      const cvs = filas.join("\r\n");
-      return "data:text/csv;charset=utf-8," + encodeURIComponent(cvs);
-    };
-
-    function exportar() {
-      const link = document.createElement("a");
-      link.setAttribute("download", `${BookTittle}.csv`);
-      link.href = exportToCsv(arrayData);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-    }
-    exportar();
-  };
+  }
+};
+ 
+const setPage=(page)=>{
+  dispatch(setVistaPanel(page))
+}
 
     const rows = [
-        createData('1', 'TOTAL', dataGeocoding?.file?.total),
-        createData('2', 'RESTANTES', dataGeocoding?.cordenadasRestantes.length),
-        createData('3', 'ENCONTRADAS', dataGeocoding?.cordenadas.length),
-        createData('4', 'ERRORES', dataGeocoding?.cordenadasErrores.length)
+        createData('1', 'TOTAL', dataGeocoding?.file?.total,dataGeocoding?.cordenadasRestantes.length!==0&&<Button variant='contained' color='secondary' >Ver</Button>),
+        createData('2', 'RESTANTES', dataGeocoding?.cordenadasRestantes.length,dataGeocoding?.cordenadasRestantes.length!==0&&<Button color='secondary' onClick={()=>setPage(2)} variant='contained'>Ver</Button>),
+        createData('3', 'ENCONTRADAS', dataGeocoding?.cordenadas.length,dataGeocoding?.cordenadas.length!==0&&<Button color='secondary' variant='contained'onClick={()=>setPage(3)} >Ver</Button>),
+        createData('4', 'ERRORES', dataGeocoding?.cordenadasErrores.length,dataGeocoding?.cordenadasErrores.length!==0&&<Button color='secondary' variant='contained' onClick={()=>setPage(4)}>Ver</Button>),
+        createData('5', 'ERRORES FORMATO', dataGeocoding?.cordenadasFormatoErrores.length,dataGeocoding?.cordenadasFormatoErrores.length!==0&&<Button color='secondary' variant='contained'onClick={()=>setPage(5)} >Ver</Button>)
       ];
       
     const  StickyHeadTable=()=> {
@@ -362,10 +312,19 @@ const InputFileUpload=()=> {
     //   }
       
       const accionesBtn=[
-        {text:"GENERAR CORDENADAS",accion:search,color:"#17212f"},
+        {text:"GENERAR CORDENADAS",accion: search,color:"#17212f"},
         {text:"PAUSAR BUSQUEDA",accion:Pausa,color:"#f44336"},
-        {text:"REANUDAR BUSQUEDA",accion:search,color:"#0d6efd"}
+        {text:"REANUDAR BUSQUEDA",accion: search,color:"#0d6efd"}
       ]
+      const formatoPlantilla=[
+        {
+          cuenta: 'SRMRAN00032715M700 (EJEMPLO)',
+          calle: 'SANTA MARIA (EJEMPLO)',
+          numExt: '29 (EJEMPLO)',
+          colonia: 'TOTOLTEPEC (EJEMPLO)',
+          cp: 'cp 50245 (EJEMPLO)',
+          municipio: 'TOLUCA (EJEMPLO)',
+        }]
 
       const handleCloseSnackbar = () => setSnackbar(null);
   return (
@@ -378,7 +337,7 @@ const InputFileUpload=()=> {
                     </Button>
                 }
                
-                <Button variant="contained" color='success' startIcon={<InsertDriveFileIcon  />}>
+                <Button variant="contained" color='success' onClick={()=>tool.dowloandData(formatoPlantilla,"PLANTILLA")} startIcon={<InsertDriveFileIcon  />}>
                 Plantilla
                 </Button>
 
@@ -394,7 +353,7 @@ const InputFileUpload=()=> {
             <Button  variant="contained" style={{margin:"10px",backgroundColor:accionesBtn[accionBtn].color}} onClick={accionesBtn[accionBtn].accion} >
                 {accionesBtn[accionBtn].text}
             </Button>
-            <Collapse in={dataGeocoding?.cordenadas.length} >
+            <Collapse in={dataGeocoding?.cordenadas.length||dataGeocoding?.cordenadasErrores.length} >
                 <div>
                 <Box sx={{ width: '100%' }}>
                     <LinearProgressWithLabel  
@@ -407,16 +366,16 @@ const InputFileUpload=()=> {
                 </Box>
                 <StickyHeadTable />
                 <Grid container justifyContent={"space-around"} marginTop={5}>
-                    
-                    {dataGeocoding?.cordenadasRestantes.length?<Button onClick={()=>dowloandData(dataGeocoding?.cordenadasRestantes,"RESTANTES")} variant='contained' sx={{backgroundColor:'#0d6efd'}} >Descargar Restantes</Button>:""}
-                    {dataGeocoding?.cordenadas.length?<Button onClick={()=>dowloandData(dataGeocoding?.cordenadas,"CORDENADAS")} variant='contained'color='success' >Descargar Encontradas</Button>:""}
-                    {dataGeocoding?.cordenadasErrores.length?<Button onClick={()=>dowloandData(dataGeocoding?.cordenadasErrores,"ERRORES")} variant='contained' color='error' >Descargar Errores</Button>:""}
+                    {dataGeocoding?.cordenadasRestantes.length?<Button onClick={()=>tool.dowloandData(dataGeocoding?.cordenadasRestantes,"RESTANTES")} variant='contained' sx={{backgroundColor:'#0d6efd'}} >Descargar Restantes</Button>:""}
+                    {dataGeocoding?.cordenadas.length?<Button onClick={()=>tool.dowloandData(dataGeocoding?.cordenadas,"CORDENADAS")} variant='contained'color='success' >Descargar Encontradas</Button>:""}
+                    {dataGeocoding?.cordenadasErrores.length?<Button onClick={()=>tool.dowloandData(dataGeocoding?.cordenadasErrores,"ERRORES")} variant='contained' color='error' >Descargar Errores</Button>:""}
+                    {dataGeocoding?.cordenadasFormatoErrores.length?<Button onClick={()=>tool.dowloandData(dataGeocoding?.cordenadasFormatoErrores,"ERRORES FORMATO")} variant='contained' color='warning' >Errores Formato</Button>:""}
                 </Grid>
                 </div>
             </Collapse>
             {/* <Button onClick={test}>test</Button> */}
             {!!snackbar && (
-                <Snackbar open  autoHideDuration={10000}
+                <Snackbar open  autoHideDuration={5000}
                 anchorOrigin={{ vertical: 'top', horizontal: 'right' }} 
                 transformOrigin={{ vertical: 'top', horizontal: 'right' }} 
                 >

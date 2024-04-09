@@ -1,11 +1,14 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState={
+    vistaPanel:0,
     response:[],
     porSubir:[],
     cordenadas:[],
     cordenadasRestantes:[],
     cordenadasErrores:[],
+    cordenadasFormatoErrores:[],
+    mapboxMap:null,
     file:"",
 }
 
@@ -21,7 +24,10 @@ export const dataGeocodingSlice = createSlice({
         setPorSubir: (state, action) => {state.porSubir.push(action.payload)},
         setFile: (state, action) => {state.file=action.payload},
         setCordenadas: (state, action) => {state.cordenadas.push(action.payload) },
-        setCordenadasErrores: (state, action) => {state.cordenadasErrores.push(action.payload)}
+        setCordenadasErrores: (state, action) => {state.cordenadasErrores.push(action.payload)},
+        setCordenadasFormatoErrores: (state, action) => {state.cordenadasFormatoErrores.push(action.payload)},
+        setMapboxMap: (state, action) => {state.mapboxMap=action.payload},
+        setVistaPanel: (state, action) => {state.vistaPanel=action.payload}
     }
   });
   
@@ -33,6 +39,9 @@ export const dataGeocodingSlice = createSlice({
                     setFile,
                     setPorSubir,
                     resetPorsubir,
-                    setResponse
+                    setResponse,
+                    setMapboxMap,
+                    setCordenadasFormatoErrores,
+                    setVistaPanel
                  } = dataGeocodingSlice.actions;
   export default dataGeocodingSlice.reducer;
