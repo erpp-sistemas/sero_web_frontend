@@ -29,7 +29,12 @@ import Typography from '@mui/material/Typography';
 import { setCordenadas, setCordenadasErrores, setCordenadasFormatoErrores, setCordenadasRestantes, setFile, setPorSubir, setResponse, setVistaPanel, valueInitCordenadas } from '../../redux/dataGeocodingSlice';
 
 import tool from '../../toolkit/geocodingToolkit'
+
+import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
+import Tooltip from '@mui/material/Tooltip';
  
+
+
 //*Genera un div con estilos en especifico para el documento
 const Div = styled('div')(({ theme }) => ({
   ...theme.typography.button,
@@ -168,16 +173,20 @@ const InputFileUpload=()=> {
   };
  //*Resetea solo los datos del file sin laterar las datos que ya se tenian
   const resetFile=()=>{
-    Pausa()
-    dispatch(setFile(""))
-    dispatch(setResponse([]))
-    setAccionBtn(0)
-    bj.bandera = false
+    if(!dataGeocoding.response.totales){
+      Pausa()
+      dispatch(setFile(""))
+      dispatch(setResponse([]))
+      setAccionBtn(0)
+      bj.bandera = false
+    }else{
+      showSnackbar( {children: `ANTES DE CAMBIAR DE ARCHIVO DESCARTA LAS CORDENADAS REPETIDAS`,severity: "warning"})
+    }
   }
 
  //*Empieza la busqueda y genera errores de los resultados de busqueda
  const search = async () => {
-    
+
   const newArray=dataGeocoding?.cordenadasRestantes
   const validacionArray=tool.validateFileFields(newArray)
 
@@ -192,18 +201,19 @@ const InputFileUpload=()=> {
 
     for (let index = 0; newArray.length>=index ; index++) {
 
-      if (bj.bandera) { console.log("breakeado"); break; }
+      if (bj.bandera){ console.log("breakeado"); break; }
 
       const cuenta = dataGeocoding?.cordenadasRestantes[index];
       const validarCuenta=cuenta?tool.validateCuenta(cuenta):false
 
-     if(validarCuenta&&validarCuenta?.direccion){
+     if(!validarCuenta.message&&validarCuenta?.direccion){
       try {
           const cordenadas = await tool.getCordenadas(validarCuenta.direccion,apikeySlice);
           
           if (cordenadas?.lat) {
             let cor={
               ...cuenta,
+              id:`${new Date().getMilliseconds()}${cordenadas.lat}`,
               latitud: `${cordenadas.lat}`,
               longitud: `${cordenadas.lng}`,
               plaza:5,
@@ -237,20 +247,37 @@ const InputFileUpload=()=> {
       calcularProgreso();
     }
   }
+  setAccionBtn(0)
 };
  
+
 const setPage=(page)=>{
   dispatch(setVistaPanel(page))
 }
 
-    const rows = [
-        createData('1', 'TOTAL', dataGeocoding?.file?.total,dataGeocoding?.cordenadasRestantes.length!==0&&<Button variant='contained' color='secondary' >Ver</Button>),
-        createData('2', 'RESTANTES', dataGeocoding?.cordenadasRestantes.length,dataGeocoding?.cordenadasRestantes.length!==0&&<Button color='secondary' onClick={()=>setPage(2)} variant='contained'>Ver</Button>),
-        createData('3', 'ENCONTRADAS', dataGeocoding?.cordenadas.length,dataGeocoding?.cordenadas.length!==0&&<Button color='secondary' variant='contained'onClick={()=>setPage(3)} >Ver</Button>),
-        createData('4', 'ERRORES', dataGeocoding?.cordenadasErrores.length,dataGeocoding?.cordenadasErrores.length!==0&&<Button color='secondary' variant='contained' onClick={()=>setPage(4)}>Ver</Button>),
-        createData('5', 'ERRORES FORMATO', dataGeocoding?.cordenadasFormatoErrores.length,dataGeocoding?.cordenadasFormatoErrores.length!==0&&<Button color='secondary' variant='contained'onClick={()=>setPage(5)} >Ver</Button>)
-      ];
-      
+  const arrayDataTable=[
+    {num:1,name:"TOTAL",dbLength:dataGeocoding?.file?.total},
+    {num:2,name:"RESTANTES",dbLength:dataGeocoding?.cordenadasRestantes.length},
+    {num:3,name:"ENCONTRADAS",dbLength:dataGeocoding?.cordenadas.length},
+    {num:4,name:"ERRORES",dbLength:dataGeocoding?.cordenadasErrores.length},
+    {num:5,name:"DIRECCIONES INCOMPLETAS",dbLength:dataGeocoding?.cordenadasFormatoErrores.length},
+  ]
+
+    const rows =arrayDataTable.map(t=>(
+      createData(
+        t.num,
+        t.name,
+        t.dbLength,
+        t.dbLength!==0&&t.num!==1?
+      <Tooltip placement="top-start" title="Ver informes">
+        <Button onClick={()=>setPage(t.num -1)} variant='contained' color='secondary' >
+          <RemoveRedEyeIcon/>
+        </Button>
+      </Tooltip>:""
+      )
+    ))
+    
+ 
     const  StickyHeadTable=()=> {
     
     
@@ -274,7 +301,7 @@ const setPage=(page)=>{
             <TableBody>
                 {rows.map((row) => {
                     return (
-                    <TableRow hover role="checkbox" tabIndex={-1} key={row.code}>
+                    <TableRow hover role="checkbox" tabIndex={-1} key={row.num}>
                         {columns.map((column) => {
                         const value = row[column.id];
                         return (
@@ -294,6 +321,7 @@ const setPage=(page)=>{
         </Paper>
     );
     }
+
       
     const VisuallyHiddenInput = styled('input')({
         clip: 'rect(0 0 0 0)',
@@ -359,18 +387,18 @@ const setPage=(page)=>{
                     <LinearProgressWithLabel  
                      sx={{
                             '& .MuiLinearProgress-bar': {
-                            backgroundColor: '#00ff00', // Cambia 'red' al color que desees
+                            backgroundColor: '#00ff00',
                             },
                         }}value={progreso}
                      />
                 </Box>
                 <StickyHeadTable />
-                <Grid container justifyContent={"space-around"} marginTop={5}>
+                {/* <Grid container justifyContent={"space-around"} marginTop={5}>
                     {dataGeocoding?.cordenadasRestantes.length?<Button onClick={()=>tool.dowloandData(dataGeocoding?.cordenadasRestantes,"RESTANTES")} variant='contained' sx={{backgroundColor:'#0d6efd'}} >Descargar Restantes</Button>:""}
                     {dataGeocoding?.cordenadas.length?<Button onClick={()=>tool.dowloandData(dataGeocoding?.cordenadas,"CORDENADAS")} variant='contained'color='success' >Descargar Encontradas</Button>:""}
                     {dataGeocoding?.cordenadasErrores.length?<Button onClick={()=>tool.dowloandData(dataGeocoding?.cordenadasErrores,"ERRORES")} variant='contained' color='error' >Descargar Errores</Button>:""}
                     {dataGeocoding?.cordenadasFormatoErrores.length?<Button onClick={()=>tool.dowloandData(dataGeocoding?.cordenadasFormatoErrores,"ERRORES FORMATO")} variant='contained' color='warning' >Errores Formato</Button>:""}
-                </Grid>
+                </Grid> */}
                 </div>
             </Collapse>
             {/* <Button onClick={test}>test</Button> */}

@@ -60,12 +60,13 @@ import axios from "axios";
     //*validaciones por objeto
     const arrayValidaciones=[
         {validacion:arrayFile?.length ,message:"Ingrese un Archivo CSV"  },
-        {validacion:arrayFile[0]?.cuenta ,message:"Se nesecita un encabezado de cuenta en el archivo"  },
-        {validacion:arrayFile[0]?.calle ,message:"Se nesecita un encabezado  de calle en el archivo"  },
-        {validacion:arrayFile[0]?.numExt ,message:"Se nesecita un encabezado  de NumExt en el archivo"  },
-        {validacion:arrayFile[0]?.colonia ,message:"Se nesecita un encabezado  de colonia en el archivo"  },
-        {validacion:arrayFile[0]?.cp ,message:"Se nesecita un encabezado  de cp en el archivo"  },
-        {validacion:arrayFile[0]?.municipio ,message:"Se nesecita un encabezado  de municipio en el archivo"  }
+        {validacion:arrayFile[0]?.cuenta ,message:"Se nesecita un campo de cuenta en el archivo"  },
+        {validacion:arrayFile[0]?.calle ,message:"Se nesecita un campo  de calle en el archivo"  },
+        {validacion:arrayFile[0]?.numExt ,message:"Se nesecita un campo  de NumExt en el archivo"  },
+        {validacion:arrayFile[0]?.colonia ,message:"Se nesecita un campo  de colonia en el archivo"  },
+        {validacion:arrayFile[0]?.cp ,message:"Se nesecita un campo  de cp en el archivo"  },
+        {validacion:arrayFile[0]?.municipio ,message:"Se nesecita un campo  de municipio en el archivo"  },
+        {validacion:arrayFile[0]?.estado ,message:"Se nesecita un campo  de municipio en el archivo"  }
     ]
     for(let v of arrayValidaciones ){
         if(!v.validacion){
@@ -92,7 +93,7 @@ import axios from "axios";
     for(let v of arrayValidaciones ){
         if(!v.validacion){
             console.log(cuenta.cuenta,v.message)    
-            return false
+            return  {message:v.message}
         }
     }
 

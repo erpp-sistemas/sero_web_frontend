@@ -86,3 +86,23 @@ body,
   color: white;
 }
 
+.customMarker{
+ background-color:steelblue ;
+ border-radius: 50%;
+ width: 15px;
+ height: 15px;
+ cursor: pointer;
+}
+.panleMapInfo{
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    background-color: white;
+    width: 300px;
+    z-index: 20;
+    border-radius: 0px 0px 5px 5px;
+}
+.btn{
+  padding: 20px;
+  background-color: tomato;
+}
