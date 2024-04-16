@@ -19,7 +19,7 @@ import SelectMenusCreateUser from "./SelectMenusCreateUser";
 import MessageAlert from "./MessageAlert";
 
 import { tokens } from "../theme";
-import { registerUser } from "../api/auth";
+import { registerRequest } from "../api/auth.js";
 import { registerUserFirebase } from "../firebase/auth";
 import { createUserPlazaServiceProcess, getAllPlaces } from "../api/place";
 import { getAllServices } from "../api/service";
@@ -568,7 +568,7 @@ export default function HorizontalNonLinearStepper({
           }
 
           // Registrar usuario con datos comunes
-          const response = await registerUser(commonUserData);
+          const response = await registerRequest(commonUserData);
 
           if ((response.id_usuario, places, services, processes)) {
             const extractedData = generateCombinations(

@@ -8,7 +8,7 @@ const index = () => {
     return (
         <Box m="20px">
             <Header title="Crea un nuevo usuario" subtitle="Ingresa los datos" />            
-          {/*   <StepperComponent /> */}
+          <StepperComponent />
           {/*<UserModule/>*/}
         </Box>
     )

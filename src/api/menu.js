@@ -1,11 +1,8 @@
 import instance from './axios';
 import axios from './axios'
 
-//export const loginRequest = user => axios.post(`/login`, user)
-
-export const menusUserIdRequest = (user_id) => instance.get(`/MenusUserId/${user_id}`)
-
-
+export const menusUserIdRequest = (user_id) => axios.get(`/MenusUserId/${user_id}`)
+export const menusProfileRequest = (profile_id) => axios.get(`/MenusProfile/${profile_id}`)
 
 /**
  * Obtiene todos los menús asociados a un usuario por su ID.

@@ -26,6 +26,8 @@ import WorkAssignment from './scenes/work-assignment'
 import DashboardCoordinator from './scenes/dashboard-coordinacion'
 import Account from './scenes/account'
 import UsersList from './scenes/users-list'
+import UserNew from './scenes/user-new'
+import WorkAttendance from './scenes/work-attendance'
 
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
@@ -152,6 +154,7 @@ function App() {
                     <Route path="/permission" element={<Permission/>}/>
                     <Route path="/places" element={<Places/>}/>
                     <Route path="/users-list" element={<UsersList/>}/>
+                    <Route path="/user-new" element={<UserNew/>}/>
                     <Route path="/acount-history" element={<AcountHistory />} />
                     <Route path="/valid-payment" element={< ValidPayment />} />
                     <Route path="/task" element={<Task />} />
@@ -160,6 +163,7 @@ function App() {
                     <Route path="/menu" element={<Menu />} />
                     <Route path="/permission" element={<Permission />} />
                     <Route path="/places" element={<Places />} />
+                    <Route path="/work-attendance" element={<WorkAttendance />} />
                   </Routes>
                 </main>
 
