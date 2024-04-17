@@ -127,7 +127,7 @@ function App() {
                 <main className="content">
                   <Topbar setIsSidebar={setIsSidebar} />
                   <Routes>
-                    <Route path="/home2" element={<Home />} />
+                    <Route path="/home" element={<Home />} />
                     <Route path="/dashboard-direccion" element={<Dashboard setLogin={setLogin} />} />
                     <Route path="/team" element={<Team />} />
                     <Route path="/contacts" element={<Contacts />} />
@@ -146,7 +146,7 @@ function App() {
                     <Route path="/maintenance" element={<Maintenance />} />
                     <Route path="/work-assignment" element={<WorkAssignment />} />
                     <Route path="/dashboard-coordinator" element={<DashboardCoordinator />} />
-                    <Route path="/home" element={<Geocoding />} />
+                    <Route path="/geocoding" element={<Geocoding />} />
                     <Route path="/acount-history" element={<AcountHistory/>}/>
                     <Route path="/valid-payment" element={< ValidPayment/>}/>
                     <Route path="/task" element={<Task/>}/>

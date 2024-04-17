@@ -157,7 +157,13 @@ const SubirCordenadasPanel = ({ setValue,value }) => {
   const actionSelectPanel = () => {
     if (cuentasSeleccionadas.length > 0) {
       setCuentasSeleccionadas([])
-    } else { setCuentasSeleccionadas(dataGeocoding.porSubir) }
+    } else { 
+      let data=panel.data
+      if(vistaPanel==2){
+        data=dataGeocoding.porSubir
+      }
+      setCuentasSeleccionadas(data)
+     }
   }
   //*son las columnas que existiran en las tablas
   const columns = [

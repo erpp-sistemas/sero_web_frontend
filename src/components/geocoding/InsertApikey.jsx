@@ -1,24 +1,52 @@
-import { Box, FormControl, FilledInput, InputAdornment, InputLabel, Grid } from '@mui/material';
+import { Box, FormControl, FilledInput, InputAdornment, InputLabel, Grid ,useTheme} from '@mui/material';
 import Fab from '@mui/material/Fab';
 import PushPinIcon from '@mui/icons-material/PushPin';
 import HelpIcon from '@mui/icons-material/Help';
 
 import { useEffect, useRef, useState } from 'react';
-
 import Tooltip from '@mui/material/Tooltip';
 
 import { DataGrid } from '@mui/x-data-grid';
+import { apartarKey, getAllKeys } from '../../api/geocoding';
+import { dispatch } from '../../redux/store';
+import { setApikeyGeocodingSlice } from '../../redux/apikeyGeocodingSlice';
+import { useSelector } from 'react-redux';
 
 
+import { tokens } from '../../theme'
+import Alert from '@mui/material/Alert';
 
 
-
-const index = ({apikey,setApikey,saveKey}) => {
+const index = () => {
+  const [keys,setKeys]=useState([])
   const inputApikey=useRef(null)
+  const [apikey,setApikey]=useState(false)
+  const [error,setError]=useState(false)
+
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
+
+  const user = useSelector(a => a.user)
 
   useEffect(()=>{
-    
+    getAllKeys() 
+    .then((res)=>{setKeys(res.data.data)})
   },[])
+
+  const saveKey=async ()=>{ 
+
+   try{
+    const res=await apartarKey(apikey,user.user_id)
+      dispatch(setApikeyGeocodingSlice(res?.data?.apikey?.apikey))
+   }catch(error){
+    console.log(error)
+    setError(true)
+    setTimeout(()=>{
+      setError(false)
+    },4000)
+   }
+    
+  }
 
   const saveApikey=()=>{
     let apikeyValue=inputApikey.current.value
@@ -27,34 +55,28 @@ const index = ({apikey,setApikey,saveKey}) => {
 
   const columns = [
     { field: 'id', headerName: '#', width: 70 },
-    { field: 'firstName', headerName: 'First name', width: 130 },
-    { field: 'lastName', headerName: 'Last name', width: 130 },
-    {
-      field: 'age',
-      headerName: 'Age',
-      type: 'number',
-      width: 90,
+    { field: 'apikey', headerName: 'APIKEY', width: 280 },
+    { field: 'peticiones', headerName: 'PETICIONES', width: 80 },
+    { field: 'status', headerName: 'STATUS', width: 130,
+    renderCell: (params) => {
+      const c = params.row.status;
+      
+
+      return (
+        <Box sx={{backgroundColor:!c?"#0f0":"#fffb00",width:"80%",textAlign:"center",color:"black",borderRadius:"10px"}} >{!c?"LIBRE":"OCUPADA"} </Box>
+      );
     },
-    {
-      field: 'fullName',
-      headerName: 'Full name',
-      description: 'This column has a value getter and is not sortable.',
-      sortable: false,
-      width: 160
-    },
+    }
   ];
   
-  const rows = [
-    { id: 1, lastName: 'Snow', firstName: 'Jon', age: 35 },
-    { id: 2, lastName: 'Lannister', firstName: 'Cersei', age: 42 },
-    { id: 3, lastName: 'Lannister', firstName: 'Jaime', age: 45 },
-    { id: 4, lastName: 'Stark', firstName: 'Arya', age: 16 },
-    { id: 5, lastName: 'Targaryen', firstName: 'Daenerys', age: null },
-    { id: 6, lastName: 'Melisandre', firstName: null, age: 150 },
-    { id: 7, lastName: 'Clifford', firstName: 'Ferrara', age: 44 },
-    { id: 8, lastName: 'Frances', firstName: 'Rossini', age: 36 },
-    { id: 9, lastName: 'Roxie', firstName: 'Harvey', age: 65 },
-  ];
+  const rows = keys?.map(k=>{ 
+    return{
+      id:k.id,
+      apikey:k.apikey,
+      peticiones:k.peticiones,
+      status:k.activo
+    }
+  });
   
    function DataTable() {
     return (
@@ -68,22 +90,19 @@ const index = ({apikey,setApikey,saveKey}) => {
             },
           }}
           pageSizeOptions={[5, 10]}
-          // checkboxSelection
         />
       </div>
     );
   }
 
 
-
-
   return (
     <>
     <Grid container sm={6} xs={9} display={'flex'} justifyContent={"center"}>
       <Grid item sm={9} marginBottom={"10px"}>
-          <Box style={{ backgroundColor: '#60ae61', color: 'black', padding: '20px', borderRadius: '10px',width:"100%" } }>
+          <Box  style={{ backgroundColor: colors.primary[400], color: 'black', padding: '20px', borderRadius: '10px',width:"100%" } }>
             <FormControl fullWidth variant="filled">
-              <InputLabel htmlFor="filled-adornment-amount"  color="success">Inserta tu APIKEY</InputLabel>
+              <InputLabel htmlFor="filled-adornment-amount"  color="primary">Inserta tu APIKEY</InputLabel>
               <FilledInput
                 inputRef={inputApikey}
                 onInput={saveApikey}
@@ -94,9 +113,8 @@ const index = ({apikey,setApikey,saveKey}) => {
             
             <Box style={{display:"flex",justifyContent:"space-between",alignItems:"center"}} disabled={!apikey}>
             <Fab sx={{margin:2,padding:2,'&:disabled': { 
-                    backgroundColor: '#17212fdb', 
                     color: '#999', 
-                  }}} variant="extended" size="small" color="primary" onClick={saveKey} disabled={apikey.length<7||!apikey}  >
+                  }}} variant="extended" size="small" color="secondary" onClick={saveKey} disabled={apikey.length<7||!apikey}  >
               <PushPinIcon sx={{ mr: 1 ,mal:3}} />
               GUARDAR
             </Fab>
@@ -105,6 +123,7 @@ const index = ({apikey,setApikey,saveKey}) => {
             </Tooltip>
             </Box>
           </Box>
+         {error&& <Alert severity="error" >Error al apartar esta apikey</Alert>}
       </Grid>
 
 

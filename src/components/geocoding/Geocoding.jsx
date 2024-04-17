@@ -33,6 +33,7 @@ import tool from '../../toolkit/geocodingToolkit'
 import CancelIcon from '@mui/icons-material/Cancel';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import Tooltip from '@mui/material/Tooltip';
+import { abandonarApikey, sumarConsultaApikey } from '../../api/geocoding';
 
 
 
@@ -238,6 +239,10 @@ const Geocoding = () => {
               }
               dispatch(setCordenadas(cor));
               dispatch(setPorSubir(cor));
+              //!aqui validamos si alguien mas uso la apikey o sumamos peticiones
+              try{  await sumarConsultaApikey(apikeySlice,user.user_id)}
+              catch(error){ Pausa();dispatch(setApikeyGeocodingSlice(null))}
+
             } else {
               console.log(">>>NO SE ENCONTRO<<<");
               dispatch(setCordenadasErrores(cuenta));
@@ -374,6 +379,12 @@ const Geocoding = () => {
     }]
 
   const handleCloseSnackbar = () => setSnackbar(null);
+
+const changeApikey=()=>{
+    abandonarApikey(apikeySlice)
+    .then(dispatch(setApikeyGeocodingSlice(null)))
+}
+
   return (
     <>
       <Grid container justifyContent={"space-between"}  >
@@ -388,7 +399,7 @@ const Geocoding = () => {
         <Button variant="contained" color='success' onClick={() => tool.dowloandData(formatoPlantilla, "PLANTILLA")} startIcon={<InsertDriveFileIcon />}>
           Plantilla
         </Button>
-        <Button variant="contained" color='error' onClick={() => dispatch(setApikeyGeocodingSlice(null))} startIcon={<CancelIcon />}>
+        <Button variant="contained" color='error' onClick={changeApikey} startIcon={<CancelIcon />}>
           CAMBIAR APIKEY
         </Button>
         </Box>
@@ -397,8 +408,6 @@ const Geocoding = () => {
       {dataGeocoding?.file?.name &&
         <Div style={{ display: "flex", justifyContent: "space-between" }}>
           <Box sx={{ backgroundColor: "#00ff00", padding: "5px 20px", color: "black", borderRadius: "3px" }} >{dataGeocoding?.file?.name}</Box>
-          {dataGeocoding.file?.name && dataGeocoding.cordenadasRestantes == 0 ?
-            <Box sx={{ backgroundColor: "#0d6efd", color: "white", padding: "5px 20px", borderRadius: "3px" }} >Ya se finalizo la busqueda de este archivo</Box> : ""}
           <span>Total : {dataGeocoding?.file.total}</span>
         </Div>}
       <hr />
