@@ -11,7 +11,7 @@ import axios from "axios";
       const cordenadas = response?.data?.items[0]?.position;
       return cordenadas;
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       throw error;
     }
   };
@@ -92,7 +92,7 @@ import axios from "axios";
     ]
     for(let v of arrayValidaciones ){
         if(!v.validacion){
-            console.log(cuenta.cuenta,v.message)    
+            // console.log(cuenta.cuenta,v.message)    
             return  {message:v.message}
         }
     }

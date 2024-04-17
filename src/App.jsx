@@ -24,7 +24,7 @@ import Map from './scenes/map'
 import Maintenance from './scenes/maintenance'
 import WorkAssignment from './scenes/work-assignment'
 import DashboardCoordinator from './scenes/dashboard-coordinacion'
-import DashboardGeocidong from './scenes/dashboard-generatecor'
+import Geocoding from './scenes/geocoding'
 import Account from './scenes/account'
 import UsersList from './scenes/users-list'
 
@@ -144,7 +144,7 @@ function App() {
                     <Route path="/maintenance" element={<Maintenance />} />
                     <Route path="/work-assignment" element={<WorkAssignment />} />
                     <Route path="/dashboard-coordinator" element={<DashboardCoordinator />} />
-                    <Route path="/home" element={<DashboardGeocidong />} />
+                    <Route path="/home" element={<Geocoding />} />
                     <Route path="/acount-history" element={<AcountHistory/>}/>
                     <Route path="/valid-payment" element={< ValidPayment/>}/>
                     <Route path="/task" element={<Task/>}/>

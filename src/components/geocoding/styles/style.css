@@ -1,0 +1,55 @@
+.BoxCustomModal{
+    height: 100%;
+    background-color: transparent;
+    animation: 0.0s 1 linear  forwards show;
+    position: absolute;
+    top: 0;
+    z-index: 30;
+    width: 100%;
+  }
+  @keyframes show {
+    100%{
+        background-color: rgba(81, 79, 79, 0.411);
+    }
+  }
+
+  .closeModal{
+display: none;
+  }
+
+.collapseF{
+    overflow-x: hidden;
+    width: 100%;
+    /* animation: 0.5s 1 linear  forwards shower; */
+}
+@keyframes shower {
+    100%{
+        /* width: 100%; */
+    }
+  }
+
+.showFomr{
+    opacity: 0;
+    padding: 30px;
+    border-radius: 20px;
+    animation: 0.5s 1 linear  forwards vew;
+}
+@keyframes vew {
+    100%{
+       opacity: 100;
+    }
+  }
+.customInputs{
+    margin:10px !important;
+    width: 45%;
+}
+
+  .css-1rs3b7x-MuiFormLabel-root-MuiInputLabel-root.Mui-focused{
+    color: rgb(0 255 0) !important;
+  }
+  .css-lcwwen-MuiInputBase-root-MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline{
+    border-color:  rgb(0 255 0) !important;
+  }
+
+
+

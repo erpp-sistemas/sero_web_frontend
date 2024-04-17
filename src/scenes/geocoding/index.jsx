@@ -29,9 +29,9 @@ const index = () => {
     </Grow>
 
     <Slide direction="up" in={apikeySlice} mountOnEnter unmountOnExit>
-      <div  style={{ width:'100%',display: 'flex', justifyContent: 'center', alignItems: 'center'}}> 
+      <Box  style={{ width:'100%',display: 'flex', justifyContent: 'center', alignItems: 'center'}}> 
       <BoxGeoconding />
-      </div>
+      </Box>
     </Slide>  
     </Box>
   );
