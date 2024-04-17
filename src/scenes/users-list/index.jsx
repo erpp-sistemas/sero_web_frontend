@@ -286,7 +286,7 @@ function Index() {
 
         <GridToolbarExport color="secondary" />
 
-        <Link to="/new-user" style={{ textDecoration: 'none' }}>
+        <Link to="/user-new" style={{ textDecoration: 'none' }}>
           <Button
             color="secondary"
             startIcon={<AddOutlined />}
