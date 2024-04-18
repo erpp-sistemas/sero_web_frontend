@@ -24,6 +24,7 @@ import ApartmentIcon from '@mui/icons-material/Apartment';
 import EditRoadIcon from '@mui/icons-material/EditRoad';
 import PersonPinCircleIcon from '@mui/icons-material/PersonPinCircle';
 import * as ExcelJS from "exceljs";
+import LoadingModal from '../../components/LoadingModal.jsx'
 
 const Index = () => {
     
@@ -59,8 +60,10 @@ const Index = () => {
 
           const response = await workAttendanceRequest(selectedPlace, selectedStartDate, selectedEndDate);
           
+          console.log('response', response)
           setNoData('')
           setUsers(response.data);
+          setIsLoading(false)
           
         } catch (error) {
           setIsLoading(false)
@@ -155,7 +158,7 @@ const Index = () => {
                   break;
                 case 'Dia incompleto':
                   icon = <SentimentVeryDissatisfiedIcon/>;
-                  chipColor = 'primary';
+                  chipColor = 'error';
                   chipLabel = 'Día incompleto';
                   break;
                 default:
@@ -251,7 +254,7 @@ const Index = () => {
               let icon = null;
               let chipColor = 'primary';
               let chipLabel = '';
-              switch (params.row.entry_status) {
+              switch (params.row.exit_status) {
                 case 'Asistencia correcta':
                   icon = <InsertEmoticonIcon/>;
                   chipColor = 'success';
@@ -269,8 +272,8 @@ const Index = () => {
                   break;
                 case 'Dia incompleto':
                   icon = <SentimentVeryDissatisfiedIcon/>;
-                  chipColor = 'primary';
-                  chipLabel = 'Día incompleto';
+                  chipColor = 'error';
+                  chipLabel = 'Dia incompleto';
                   break;
                 default:
                   icon = null;
@@ -299,7 +302,7 @@ const Index = () => {
               let icon = null;
               let chipColor = 'primary';
               let chipLabel = '';
-              switch (params.row.entry_point_status) {
+              switch (params.row.exit_point_status) {
                 case 'Campo':
                   icon = <EditRoadIcon/>;
                   chipColor = 'warning';
@@ -372,6 +375,7 @@ const Index = () => {
 
       const handleExportToExcel = async () => {
         try {
+            setIsLoading(true)
             const workbook = new ExcelJS.Workbook();
             const worksheet = workbook.addWorksheet("Usuarios");
             
@@ -410,8 +414,10 @@ const Index = () => {
             a.download = "users.xlsx";
             a.click();
             window.URL.revokeObjectURL(url);
+            setIsLoading(false)
         } catch (error) {
             console.error("Error:", error);
+            setIsLoading(false)
         }
     };    
 
@@ -440,6 +446,7 @@ const Index = () => {
 
     return (
         <>
+        <LoadingModal open={isLoading}/>
           <Box
               m='20px 0'
               display='flex'
@@ -488,7 +495,7 @@ const Index = () => {
               <Grid item xs={3}>
                 <Button 
                   variant="contained" 
-                  color="secondary"
+                  sx={{ bgcolor: 'secondary.main', '&:hover': { bgcolor: 'secondary.dark' } }}
                   style={{ width: '100%', height: '100%' }}
                   onClick={() => {
                     handleGetWorkAttendance();                    
