@@ -31,7 +31,7 @@ const SubirCordenadasPanel = ({ setValue,value }) => {
   const [cuentasSeleccionadas, setCuentasSeleccionadas] = useState([])
   const [changePage, setChangePage] = useState(false)
   const [cordenadaEdit, setCordenadaEdit] = useState(false)
-
+  const plaza=useSelector(p=>p.plazaNumber)
 
 
   const dataGeocoding = useSelector(s => s.dataGeocoding)
@@ -57,7 +57,7 @@ const SubirCordenadasPanel = ({ setValue,value }) => {
   const getCordenadas = (data) => {
     setEspera(true)
     const cuentas = { cuentas: data }
-    obtener(cuentas)
+    obtener(cuentas,plaza)
       .then(res => {
         if (res?.data?.encontradas && res?.data?.encontradas > 0) {
           setCordenadasRep(res.data.data)
@@ -71,7 +71,7 @@ const SubirCordenadasPanel = ({ setValue,value }) => {
     setEspera(true)
     dispatch(setVistaPanel(0))
     const data = { cuentas: cuentasSeleccionadas }
-    subirCordenadas(data)
+    subirCordenadas(data,plaza)
       .then(res => {
         const Instance = [...dataGeocoding.porSubir]
         const InstanceSeleccion = [...cuentasSeleccionadas]
@@ -95,7 +95,7 @@ const SubirCordenadasPanel = ({ setValue,value }) => {
   const actualizarCordenadas = () => {
     setEspera(true)
     const data = { cuentas: cuentasSeleccionadas }
-    actualizar(data)
+    actualizar(data,plaza)
       .then(res => {
         if (res.status == 200) {
           dispatch(setResponse(["TODO ACTUALIZADO"]))
@@ -213,10 +213,15 @@ const SubirCordenadasPanel = ({ setValue,value }) => {
 
         const handleButtonClick = () => {
           if (vistaPanel !== 3 && vistaPanel !== 4 && vistaPanel !== 1) {
-            vewMap([
+            let cordendasComparacion=[
+              {id:18, longitud: c.nuevaLon, latitud: c.nuevaLat, color: "#00ff00", text: "Nueva", cuenta: c.cuenta }
+            ]
+            if( cordenadasRep?.find(b => b.cuenta === c.cuenta)?.longitud){
+             cordendasComparacion.push(
               {id:20, longitud: cordenadasRep?.find(b => b.cuenta === c.cuenta)?.longitud, latitud: cordenadasRep?.find(b => b.cuenta === c.cuenta)?.latitud, color: "red", text: "Actual", cuenta: c.cuenta},
-              {id:18, longitud: c.longitud, latitud: c.latitud, color: "#00ff00", text: "Nueva", cuenta: c.cuenta }
-            ]);
+             )
+            }
+            vewMap(cordendasComparacion);
           } else {
             setCordenadaEdit({ ...c.dataCuenta, index, data: panel.data });
           }
@@ -258,7 +263,10 @@ const SubirCordenadasPanel = ({ setValue,value }) => {
       latitud: repetidaLatitud,
       status,
       index,
-      dataCuenta:c
+      dataCuenta:c,
+      nuevaLat:c.latitud,
+      nuevaLon:c.longitud,
+
     };
   }) : [];
 

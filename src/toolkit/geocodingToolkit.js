@@ -5,13 +5,12 @@ import axios from "axios";
     console.log(">>>BUSCAMOS<<<");
     const KEY = apikeySlice;
     let url = `https://geocode.search.hereapi.com/v1/geocode?q=${address}&apiKey=${KEY}`;
-
     try {
       const response = await axios.get(url);
       const cordenadas = response?.data?.items[0]?.position;
       return cordenadas;
     } catch (error) {
-      // console.log(error);
+      console.log(error);
       throw error;
     }
   };
@@ -66,7 +65,7 @@ import axios from "axios";
         {validacion:arrayFile[0]?.colonia ,message:"Se nesecita un campo  de colonia en el archivo"  },
         {validacion:arrayFile[0]?.cp ,message:"Se nesecita un campo  de cp en el archivo"  },
         {validacion:arrayFile[0]?.municipio ,message:"Se nesecita un campo  de municipio en el archivo"  },
-        {validacion:arrayFile[0]?.estado ,message:"Se nesecita un campo  de municipio en el archivo"  }
+        {validacion:arrayFile[0]?.estado ,message:"Se nesecita un campo  de estado en el archivo"  }
     ]
     for(let v of arrayValidaciones ){
         if(!v.validacion){
@@ -80,7 +79,10 @@ import axios from "axios";
   }
   const validateCuenta=(cuenta)=>{
     //*validaciones por objeto
-
+    const caracteresNoAdmitidos=[
+      "#",",",";"
+    ]
+    const direccion=`${cuenta.calle} ${cuenta.numExt} ${cuenta.colonia} ${cuenta.cp} ${cuenta.municipio}`
     const arrayValidaciones=[
         {validacion:cuenta ,message:"Se nesecitan campos en la cuenta"  },
         {validacion:cuenta.cuenta ,message:"Se nesecita un campo de cuenta en la cuenta"  },
@@ -88,12 +90,19 @@ import axios from "axios";
         {validacion:cuenta.numExt ,message:"Se nesecita un campo  de NumExt en la cuenta"  },
         {validacion:cuenta.colonia ,message:"Se nesecita un campo  de colonia en la cuenta"  },
         {validacion:cuenta.cp ,message:"Se nesecita un campo  de cp en la cuenta"  },
-        {validacion:cuenta.municipio ,message:"Se nesecita un campo  de municipio en la cuenta"  }
+        {validacion:cuenta.municipio ,message:"Se nesecita un campo  de municipio en la cuenta"},
+        {validacion:cuenta.estado ,message:"Se nesecita un campo  de estado en la cuenta"},
     ]
     for(let v of arrayValidaciones ){
         if(!v.validacion){
-            // console.log(cuenta.cuenta,v.message)    
+             
             return  {message:v.message}
+        }
+        for(let caracter of caracteresNoAdmitidos){
+          if(direccion.includes(caracter)){
+            
+            return  {message:`caracter " ${caracter} "no admitido`}
+        }
         }
     }
 

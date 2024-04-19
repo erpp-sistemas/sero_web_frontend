@@ -26,7 +26,7 @@ import { setApikeyGeocodingSlice } from '../../redux/apikeyGeocodingSlice';
 import PropTypes from 'prop-types';
 import LinearProgress from '@mui/material/LinearProgress';
 import Typography from '@mui/material/Typography';
-import { setCordenadas, setCordenadasErrores, setCordenadasFormatoErrores, setCordenadasRestantes, setFile, setPorSubir, setResponse, setSumaTotalCordendas, setVistaPanel, valueInitCordenadas } from '../../redux/dataGeocodingSlice';
+import {  Reset, setCordenadas, setCordenadasErrores, setCordenadasFormatoErrores, setCordenadasRestantes, setFile, setPorSubir, setResponse, setSumaTotalCordendas, setVistaPanel, valueInitCordenadas } from '../../redux/dataGeocodingSlice';
 
 import tool from '../../toolkit/geocodingToolkit'
 
@@ -34,6 +34,9 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import Tooltip from '@mui/material/Tooltip';
 import { abandonarApikey, sumarConsultaApikey } from '../../api/geocoding';
+import PlaceSelect from '../PlaceSelect';
+import { setPlazaNumber } from '../../redux/plazaNumberSlice';
+import ModalAviso from './ModalAviso';
 
 
 
@@ -91,27 +94,41 @@ const Geocoding = () => {
   const [progreso, setProgreso] = useState(0);
   const [accionBtn, setAccionBtn] = useState(0)
   const [snackbar, setSnackbar] = useState(null);
+ 
+  const [Instanceplaza, setInstancePlaza] = useState(null);
+  const [openModal, setOpenModal] = useState(false);
 
   const dataGeocoding = useSelector(a => a.dataGeocoding)
   const dispatch = useDispatch()
   const apikeySlice = useSelector(a => a.apikeyGeocoding)
   const user = useSelector(a => a.user)
+  const plazaSlice = useSelector(p => p.plazaNumber)
+  
+  const [plaza, setPlaza] = useState(plazaSlice);
 
   useEffect(()=>{
     calcularProgreso()
   },[dataGeocoding.cordenadasRestantes,dataGeocoding.totalIngresos])
 
-  const resetApikey = () => {
-    dispatch(setApikeyGeocodingSlice(null))
-  }
   //*Funcion que genera las alertas
   const showSnackbar = (arrayOptiones) => {
     setSnackbar({
       ...arrayOptiones
     });
+    setTimeout(()=>{
+      setSnackbar(null)
+    },6000)
   };
   //* Genera el array del scv 
   const handleFileUpload = (event) => {
+    if(!plaza){
+      showSnackbar(
+        {
+          children: "Escoge una plaza de destino",
+          severity: "warning"
+        })
+    }else{
+     
     const file = event.target.files[0];
     Papa.parse(file, {
       complete: (result) => {
@@ -134,7 +151,7 @@ const Geocoding = () => {
         let Instance=[]
         result.data.forEach(c => {
            if(c.cuenta){
-            Instance.push({id: `${new Date().getMilliseconds()}${Math.floor(Math.random() * 400)}`,...c})
+            Instance.push({id: `${new Date().getMilliseconds()}${Math.floor(Math.random() * 400)}${c.cuenta}`,...c})
            }
         });
         dispatch(valueInitCordenadas([...Instance,...dataGeocoding.cordenadasRestantes]))
@@ -144,6 +161,7 @@ const Geocoding = () => {
       },
       header: true,
     });
+  }
   };
 
   //*Genera el boton para insertar el file
@@ -184,6 +202,7 @@ const Geocoding = () => {
   const Pausa = () => {
     bj.bandera = !bj.bandera;
     if (!bj.bandera) {
+      setAccionBtn(1)
       search();
     } else {
       setAccionBtn(2)
@@ -212,19 +231,23 @@ const Geocoding = () => {
   const search = async () => {
 
     const newArray = dataGeocoding?.cordenadasRestantes
-
+    const ExisteCuentas=tool.validateFileFields(newArray)
+    if (ExisteCuentas.message) {
+      showSnackbar({ children: ExisteCuentas.message, severity: "warning" });
+      return "break"
+    }
+    
       setAccionBtn(1)
       showSnackbar({ children: `BUSCANDO`, severity: "success" })
-
+        
       for (let index = 0; newArray.length >= index; index++) {
-
-        if (bj.bandera) { console.log("breakeado"); break; }
+        if (bj.bandera) { console.log("breakeado"),setAccionBtn(2); break; }
+        
 
         const cuenta = dataGeocoding?.cordenadasRestantes[index];
         const validarCuenta = cuenta ? tool.validateCuenta(cuenta) : false
 
         if (!validarCuenta.message && validarCuenta?.direccion) {
-          //* Segenera un id para cuenta 
          
           try {
             const cordenadas = await tool.getCordenadas(validarCuenta.direccion, apikeySlice); 
@@ -234,7 +257,7 @@ const Geocoding = () => {
                 ...cuenta,
                 latitud: `${cordenadas.lat}`,
                 longitud: `${cordenadas.lng}`,
-                plaza: 5,
+                plaza: plaza,
                 usuario_id: user.user_id
               }
               dispatch(setCordenadas(cor));
@@ -257,10 +280,12 @@ const Geocoding = () => {
                   severity: "error"
                 }
               )
+              break
             }
             if (error?.response?.status == 401) {
-              Pausa()
-              showSnackbar({ children: `LA APIKEY INGRESADA NO ESTÁ AUTORIZADA`, severity: "error" })
+             Pausa()
+              showSnackbar({ children: `LA APIKEY INGRESADA NO ESTÁ AUTORIZADA O INTENTE DE NUEVO`, severity: "error" })
+              break
             }
             dispatch(setCordenadasErrores(cuenta));
           }
@@ -271,7 +296,15 @@ const Geocoding = () => {
         calcularProgreso;
       
     }
-    setAccionBtn(0)
+    if(dataGeocoding.porSubir.length==0&&dataGeocoding.file.total){
+      showSnackbar(
+        {
+          children: `Termino la busqueda de este archivo `,
+          severity: "info"
+        },12000
+      )
+      setAccionBtn(0)
+    }
   };
 
 
@@ -359,14 +392,12 @@ const Geocoding = () => {
     width: 20,
   });
 
-  //   function test(){
-  //     console.log(dataGeocoding)
-  //   }
+ 
 
   const accionesBtn = [
     { text: "GENERAR CORDENADAS", accion: search, color: "#17212f" },
     { text: "PAUSAR BUSQUEDA", accion: Pausa, color: "#f44336" },
-    { text: "REANUDAR BUSQUEDA", accion: search, color: "#0d6efd" }
+    { text: "REANUDAR BUSQUEDA", accion: Pausa, color: "#0d6efd" }
   ]
   const formatoPlantilla = [
     {
@@ -385,8 +416,32 @@ const changeApikey=()=>{
     .then(dispatch(setApikeyGeocodingSlice(null)))
 }
 
+const handlePlaceChange=(event)=>{
+ if(plaza){
+  setInstancePlaza(event.target.value)
+  setOpenModal(true)
+ }else{
+  console.log("hola")
+  setPlaza(event.target.value)
+  dispatch(setPlazaNumber(event.target.value))
+ }
+}
+const changePlaza=()=>{
+  setPlaza(Instanceplaza)
+  dispatch(setPlazaNumber(Instanceplaza))
+  dispatch(Reset())
+  setOpenModal(false)
+}
+
+
+
   return (
     <>
+    <ModalAviso open={openModal} setOpen={setOpenModal}  plaza={changePlaza} />
+    <Box marginBottom={"20px"}>
+    <PlaceSelect selectedPlace={plaza} handlePlaceChange={handlePlaceChange} />
+    </Box>
+    
       <Grid container justifyContent={"space-between"}  >
         {
           !dataGeocoding?.file.name ? <InputFileUpload /> :
@@ -428,9 +483,8 @@ const changeApikey=()=>{
           <StickyHeadTable />
         </div>
       </Collapse>
-      {/* <Button onClick={test}>test</Button> */}
       {!!snackbar && (
-        <Snackbar open autoHideDuration={5000}
+        <Snackbar open 
           anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
           transformOrigin={{ vertical: 'top', horizontal: 'right' }}
         >

@@ -34,17 +34,15 @@ const index = () => {
   },[])
 
   const saveKey=async ()=>{ 
-
-   try{
     const res=await apartarKey(apikey,user.user_id)
       dispatch(setApikeyGeocodingSlice(res?.data?.apikey?.apikey))
-   }catch(error){
-    console.log(error)
+   if(!res?.data){
     setError(true)
     setTimeout(()=>{
       setError(false)
     },4000)
    }
+   
     
   }
 
@@ -60,10 +58,15 @@ const index = () => {
     { field: 'status', headerName: 'STATUS', width: 130,
     renderCell: (params) => {
       const c = params.row.status;
-      
-
+      const limitPeticiones = params.row.peticiones;
       return (
-        <Box sx={{backgroundColor:!c?"#0f0":"#fffb00",width:"80%",textAlign:"center",color:"black",borderRadius:"10px"}} >{!c?"LIBRE":"OCUPADA"} </Box>
+        <Box sx={{
+          backgroundColor:limitPeticiones<1000?!c?"#0f0":"#fffb00":"red",
+          width:"100%",textAlign:"center",color:"black",borderRadius:"10px"}} >
+            <p>
+              {limitPeticiones<1000?!c?"LIBRE":"OCUPADA":"LIMITE ALCANZADO"} 
+            </p>
+        </Box>
       );
     },
     }

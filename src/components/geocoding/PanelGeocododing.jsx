@@ -60,6 +60,11 @@ function FullWidthTabs() {
   const [markerInstances, setMarkerInstances] = useState([]);
   const [mark, setMarkortt] = useState([]);
 
+  const cordenadas = useSelector((c) => c.dataGeocoding?.cordenadas);
+  const comparacion = useSelector((c) => c.dataGeocoding?.cordendasComparacion);
+  const plaza = useSelector((p) => p.plazaNumber);
+  const mapaRef = useRef(null);
+
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
@@ -68,9 +73,7 @@ function FullWidthTabs() {
     setValue(index);
   };
 
-  const cordenadas = useSelector((c) => c.dataGeocoding?.cordenadas);
-  const comparacion = useSelector((c) => c.dataGeocoding?.cordendasComparacion);
-  const mapaRef = useRef(null);
+
 
   useEffect(() => {
     mapaRef.current = null;
@@ -97,7 +100,7 @@ function FullWidthTabs() {
 
   const removeMarkers = () => {
     setMarkortt([]);
-    // console.log("removimos");
+    console.log("removimos")
     for (let marker of markerInstances) {
       marker.remove();
     }
@@ -108,8 +111,17 @@ function FullWidthTabs() {
   const generateMarker = (data) => {
     const Instances = [];
     const markers = comparacion ? comparacion : data ? data : mark;
+    
+    const Repetidas = [...mark];
+    console.log(markers)
+    for (let coordenada of markers) {
+      const exist = mark.find((m) => m.cuenta == coordenada.cuenta);
+      const existInstance = Repetidas.find((m) => m.cuenta == coordenada.cuenta);
+      // console.log("queriamos meter") 
+      if ((!exist && !existInstance) || comparacion) {
+        console.log("metimos")
 
-    markers.forEach((coordenada) => {
+        Repetidas.push(coordenada);
       const popupContent = `<h3 style="color: black;">${coordenada.cuenta}</h3><p style="color: black;"></p>`;
 
       const popup = new mapboxgl.Popup({
@@ -121,7 +133,7 @@ function FullWidthTabs() {
       customMarker.style.backgroundColor =
         coordenada?.color && coordenada.color;
 
-      const marker = new mapboxgl.Marker(customMarker)
+      const marker =  new mapboxgl.Marker(customMarker)
         .setLngLat([
           parseFloat(coordenada.longitud),
           parseFloat(coordenada.latitud),
@@ -136,20 +148,24 @@ function FullWidthTabs() {
       customMarker.addEventListener("mouseleave", () => {
         marker.togglePopup();
       });
-
       Instances.push(marker);
-    });
+      
+     }
+    };
+  
+    setMarkortt(Repetidas);
     setMarkerInstances(Instances);
+    
     if (markers.length > 0) {
       mapaRef.current.setCenter([
-        parseFloat(markers[markers.length - 1].longitud),
-        parseFloat(markers[markers.length - 1].latitud),
+        parseFloat(markers[0].longitud),
+        parseFloat(markers[0].latitud),
       ]);
     }
   };
 
   const markerDescart = () => {
-    // console.log("RETOMAMOS ORIGINALES");
+   
     const Instances = [...mark];
     const Nuevas = [];
 
@@ -163,13 +179,27 @@ function FullWidthTabs() {
       }
     }
 
-    setMarkortt(Instances);
+   
     if (Nuevas.length) {
       generateMarker(Nuevas);
     } else if (markerInstances.length == 0) {
       generateMarker();
     }
   };
+
+  const resetMarkers = (cambioPlaza) => {
+    if (comparacion||cambioPlaza=="cambioPlza") {
+      dispatch(setCordendasComparacion());
+      setValue(0);
+      removeMarkers();
+    }
+  };
+
+
+  useEffect(() => {
+    if (!mapaRef.current) return;
+      resetMarkers("cambioPlza")
+  }, [plaza]);
 
   useEffect(() => {
     if (!mapaRef.current) return;
@@ -188,13 +218,7 @@ function FullWidthTabs() {
     removeMarkers();
   }, [comparacion]);
 
-  const resetMarkers = () => {
-    if (comparacion) {
-      dispatch(setCordendasComparacion());
-      setValue(0);
-      removeMarkers();
-    }
-  };
+  
   const test = () => {
     console.log(markerInstances);
   };

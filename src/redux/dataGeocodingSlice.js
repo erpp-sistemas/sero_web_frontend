@@ -1,6 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-const initialState={
+
+
+export const initialStateMemo={
     totalIngresos:0, //* almacena el monto total de las cuentas ingresadas y tener un porcentaje certero
     vistaPanel:0,   //*Controla la vista que tendra el panel 
     response:[],    //* se almacena las respuestas que hubo al subir las cordendas
@@ -12,12 +14,23 @@ const initialState={
     cordenadasFormatoErrores:[],//*Almacena las cordendas que les hace falta un dato
     file:"",//* Almacena los datos del archivo ingresado
 }
-
 // Slice para 'dataGeocodingSlice'
 export const dataGeocodingSlice = createSlice({
     name: 'apikeyGeocodingSlice',
-    initialState,
+    initialState:initialStateMemo,
     reducers: {
+        Reset: (state, action) => {
+            state.totalIngresos = 0;
+            state.vistaPanel = 0;
+            state.response = [];
+            state.cordendasComparacion= [];
+            state.porSubir = [];
+            state.cordenadas = [];
+            state.cordenadasRestantes = [];
+            state.cordenadasErrores = [];
+            state.cordenadasFormatoErrores = [];
+            state.file = '';
+        },
         setCordenadasRestantes: (state, action) => {state.cordenadasRestantes.splice(0, 1)},
         resetPorsubir:(state, action) =>{state.porSubir=action.payload},
         valueInitCordenadas: (state, action) => {state.cordenadasRestantes=action.payload},
@@ -34,7 +47,8 @@ export const dataGeocodingSlice = createSlice({
         resetCordenadasFormatoErrores: (state, action) => {state.cordenadasFormatoErrores=action.payload},
         setCordenadasFormatoErrores: (state, action) => {state.cordenadasFormatoErrores.push(action.payload)},
         setSumaTotalCordendas:(state,action)=>{state.totalIngresos+=action.payload},
-        setVistaPanel: (state, action) => {state.vistaPanel=action.payload}
+        setVistaPanel: (state, action) => {state.vistaPanel=action.payload},
+      
     }
   });
   
@@ -55,6 +69,8 @@ export const dataGeocodingSlice = createSlice({
                     setResetCordenadasFormatoErrores,
                     setReseteCordenadasErrores,
                     resetCordenadasFormatoErrores,
-                    setSumaTotalCordendas
+                    setSumaTotalCordendas,
+                    Reset
                  } = dataGeocodingSlice.actions;
   export default dataGeocodingSlice.reducer;
+  
