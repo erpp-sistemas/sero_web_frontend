@@ -2,7 +2,7 @@ import axios from "axios";
 
  //*Obtiene las cordenadas de la api
   const getCordenadas = async (address,apikeySlice) => {
-    console.log(">>>BUSCAMOS<<<");
+    // console.log(">>>BUSCAMOS<<<");
     const KEY = apikeySlice;
     let url = `https://geocode.search.hereapi.com/v1/geocode?q=${address}&apiKey=${KEY}`;
     try {

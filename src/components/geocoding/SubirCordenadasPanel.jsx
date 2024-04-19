@@ -7,7 +7,7 @@ import { resetPorsubir, setCordendasComparacion, setPushCordendasRestantes, setR
 
 
 import {
-  Box, Stack, Button, Checkbox, Alert, AlertTitle, Tooltip
+  Box, Stack, Button, Checkbox, Alert, AlertTitle, Tooltip, CircularProgress
 } from '@mui/material'
 
 import { DataGrid } from '@mui/x-data-grid';
@@ -25,13 +25,13 @@ import tool from '../../toolkit/geocodingToolkit'
 import './styles/style.css'
 import EditModal from './EditModal';
 
-const SubirCordenadasPanel = ({ setValue,value }) => {
+const SubirCordenadasPanel = ({ setValue, value }) => {
   const [espera, setEspera] = useState(false)
   const [cordenadasRep, setCordenadasRep] = useState([])
   const [cuentasSeleccionadas, setCuentasSeleccionadas] = useState([])
   const [changePage, setChangePage] = useState(false)
   const [cordenadaEdit, setCordenadaEdit] = useState(false)
-  const plaza=useSelector(p=>p.plazaNumber)
+  const plaza = useSelector(p => p.plazaNumber)
 
 
   const dataGeocoding = useSelector(s => s.dataGeocoding)
@@ -53,11 +53,11 @@ const SubirCordenadasPanel = ({ setValue,value }) => {
     }
 
   }
-//* Busca las cordendas para identificar si existe en la base ya
+  //* Busca las cordendas para identificar si existe en la base ya
   const getCordenadas = (data) => {
     setEspera(true)
     const cuentas = { cuentas: data }
-    obtener(cuentas,plaza)
+    obtener(cuentas, plaza)
       .then(res => {
         if (res?.data?.encontradas && res?.data?.encontradas > 0) {
           setCordenadasRep(res.data.data)
@@ -66,16 +66,16 @@ const SubirCordenadasPanel = ({ setValue,value }) => {
       })
     setCuentasSeleccionadas(vistaPanel == 2 ? dataGeocoding.porSubir : panel.data)
   }
-//*Manda ya todas cuentas seleccionadas a la dDB
+  //*Manda ya todas cuentas seleccionadas a la dDB
   const mandarCordenadasDB = () => {
     setEspera(true)
     dispatch(setVistaPanel(0))
     const data = { cuentas: cuentasSeleccionadas }
-    subirCordenadas(data,plaza)
+    subirCordenadas(data, plaza)
       .then(res => {
         const Instance = [...dataGeocoding.porSubir]
         const InstanceSeleccion = [...cuentasSeleccionadas]
-
+        setEspera(false)
         InstanceSeleccion.forEach((c) => {
 
           const index = Instance.findIndex(I => I.id == c.id)
@@ -88,14 +88,14 @@ const SubirCordenadasPanel = ({ setValue,value }) => {
 
       })
 
-    setEspera(false)
+
   }
 
   //*En caso de tener cuentas repetidas se actualizan 
   const actualizarCordenadas = () => {
     setEspera(true)
     const data = { cuentas: cuentasSeleccionadas }
-    actualizar(data,plaza)
+    actualizar(data, plaza)
       .then(res => {
         if (res.status == 200) {
           dispatch(setResponse(["TODO ACTUALIZADO"]))
@@ -157,13 +157,13 @@ const SubirCordenadasPanel = ({ setValue,value }) => {
   const actionSelectPanel = () => {
     if (cuentasSeleccionadas.length > 0) {
       setCuentasSeleccionadas([])
-    } else { 
-      let data=panel.data
-      if(vistaPanel==2){
-        data=dataGeocoding.porSubir
+    } else {
+      let data = panel.data
+      if (vistaPanel == 2) {
+        data = dataGeocoding.porSubir
       }
       setCuentasSeleccionadas(data)
-     }
+    }
   }
   //*son las columnas que existiran en las tablas
   const columns = [
@@ -213,13 +213,13 @@ const SubirCordenadasPanel = ({ setValue,value }) => {
 
         const handleButtonClick = () => {
           if (vistaPanel !== 3 && vistaPanel !== 4 && vistaPanel !== 1) {
-            let cordendasComparacion=[
-              {id:18, longitud: c.nuevaLon, latitud: c.nuevaLat, color: "#00ff00", text: "Nueva", cuenta: c.cuenta }
+            let cordendasComparacion = [
+              { id: 18, longitud: c.nuevaLon, latitud: c.nuevaLat, color: "#00ff00", text: "Nueva", cuenta: c.cuenta }
             ]
-            if( cordenadasRep?.find(b => b.cuenta === c.cuenta)?.longitud){
-             cordendasComparacion.push(
-              {id:20, longitud: cordenadasRep?.find(b => b.cuenta === c.cuenta)?.longitud, latitud: cordenadasRep?.find(b => b.cuenta === c.cuenta)?.latitud, color: "red", text: "Actual", cuenta: c.cuenta},
-             )
+            if (cordenadasRep?.find(b => b.cuenta === c.cuenta)?.longitud) {
+              cordendasComparacion.push(
+                { id: 20, longitud: cordenadasRep?.find(b => b.cuenta === c.cuenta)?.longitud, latitud: cordenadasRep?.find(b => b.cuenta === c.cuenta)?.latitud, color: "red", text: "Actual", cuenta: c.cuenta },
+              )
             }
             vewMap(cordendasComparacion);
           } else {
@@ -235,11 +235,11 @@ const SubirCordenadasPanel = ({ setValue,value }) => {
           </Tooltip>
         );
       },
-    },  
+    },
     { field: 'status', headerName: 'ESTATUS', width: 130 },
   ];
 
-//*son las filas que se generan para las tablas dependiendo del panel que este a la vista cambia su informacion 
+  //*son las filas que se generan para las tablas dependiendo del panel que este a la vista cambia su informacion 
 
   const rows = panel ? panel.data?.map((c, index) => {
     const check = cuentasSeleccionadas.findIndex(cu => cu.id == c.id) != -1 ? true : false
@@ -250,7 +250,7 @@ const SubirCordenadasPanel = ({ setValue,value }) => {
     const repetidaLongitud = cordenadasRep?.find(b => b.cuenta === cuenta)?.longitud;
     let subido = dataGeocoding.porSubir.find(d => d.id == c.id)
     let repetida = dataGeocoding?.response.repetidas ? dataGeocoding?.response.repetidas.find(d => d.id == c.id) : false
-    let status= subido || vistaPanel !== 2 ?"PENDIENTE":repetida?"REPETIDA":"SUBIDO"
+    let status = subido || vistaPanel !== 2 ? "PENDIENTE" : repetida ? "REPETIDA" : "SUBIDO"
     return {
       id: c.id,
       check,
@@ -263,36 +263,36 @@ const SubirCordenadasPanel = ({ setValue,value }) => {
       latitud: repetidaLatitud,
       status,
       index,
-      dataCuenta:c,
-      nuevaLat:c.latitud,
-      nuevaLon:c.longitud,
+      dataCuenta: c,
+      nuevaLat: c.latitud,
+      nuevaLon: c.longitud,
 
     };
   }) : [];
 
 
-//*Esta es la tabla generada
+  //*Esta es la tabla generada
   function DataTable() {
     return (
       <div style={{ height: 400, width: '100%' }}>
-       {
-        value==0&&
-        <DataGrid
-        color="secundary"
-        rows={rows}
-        columns={columns}
-        initialState={{
-          pagination: {
-            paginationModel: { page: 0, pageSize: 10 },
-          },
-        }}
-        pageSizeOptions={[5, 10, 50, 100]}
-      />
-       }
+        {
+          value == 0 &&
+          <DataGrid
+            color="secundary"
+            rows={rows}
+            columns={columns}
+            initialState={{
+              pagination: {
+                paginationModel: { page: 0, pageSize: 10 },
+              },
+            }}
+            pageSizeOptions={[5, 10, 50, 100]}
+          />
+        }
       </div>
     );
   }
-//* Borra las cordendas repetidas
+  //* Borra las cordendas repetidas
   const DescartarCordenadasRepetidas = () => {
     dispatch(setResponse([]))
   }
@@ -306,6 +306,12 @@ const SubirCordenadasPanel = ({ setValue,value }) => {
         <Button onClick={() => dispatch(setVistaPanel(0))} variant='contained' color='info' slot='end'>
           <KeyboardReturnIcon /> Regresar al panel
         </Button>
+      }
+      {
+        espera &&
+        <Box sx={{ display: 'flex' }}>
+          <CircularProgress />
+        </Box>
       }
 
       <Box sx={{ width: "100%", minHeight: "400px" }}>

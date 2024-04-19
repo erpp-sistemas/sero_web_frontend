@@ -101,7 +101,9 @@ function FullWidthTabs() {
   const removeMarkers = () => {
     setMarkortt([]);
     console.log("removimos")
+    // console.log(markerInstances)
     for (let marker of markerInstances) {
+
       marker.remove();
     }
     setMarkerInstances([]);
@@ -109,53 +111,53 @@ function FullWidthTabs() {
   };
 
   const generateMarker = (data) => {
-    const Instances = [];
+    const Instances = [...markerInstances];
     const markers = comparacion ? comparacion : data ? data : mark;
-    
+
     const Repetidas = [...mark];
-    console.log(markers)
+
     for (let coordenada of markers) {
       const exist = mark.find((m) => m.cuenta == coordenada.cuenta);
       const existInstance = Repetidas.find((m) => m.cuenta == coordenada.cuenta);
-      // console.log("queriamos meter") 
+
       if ((!exist && !existInstance) || comparacion) {
         console.log("metimos")
 
         Repetidas.push(coordenada);
-      const popupContent = `<h3 style="color: black;">${coordenada.cuenta}</h3><p style="color: black;"></p>`;
+        const popupContent = `<h3 style="color: black;">${coordenada.cuenta}</h3><p style="color: black;"></p>`;
 
-      const popup = new mapboxgl.Popup({
-        offset: 25,
-      }).setHTML(popupContent);
+        const popup = new mapboxgl.Popup({
+          offset: 25,
+        }).setHTML(popupContent);
 
-      const customMarker = document.createElement("div");
-      customMarker.className = "customMarker";
-      customMarker.style.backgroundColor =
-        coordenada?.color && coordenada.color;
+        const customMarker = document.createElement("div");
+        customMarker.className = "customMarker";
+        customMarker.style.backgroundColor =
+          coordenada?.color && coordenada.color;
 
-      const marker =  new mapboxgl.Marker(customMarker)
-        .setLngLat([
-          parseFloat(coordenada.longitud),
-          parseFloat(coordenada.latitud),
-        ])
-        .addTo(mapaRef.current);
+        const marker = new mapboxgl.Marker(customMarker)
+          .setLngLat([
+            parseFloat(coordenada.longitud),
+            parseFloat(coordenada.latitud),
+          ])
+          .addTo(mapaRef.current);
 
-      customMarker.addEventListener("mouseenter", () => {
-        marker.setPopup(popup);
-        marker.togglePopup();
-      });
+        customMarker.addEventListener("mouseenter", () => {
+          marker.setPopup(popup);
+          marker.togglePopup();
+        });
 
-      customMarker.addEventListener("mouseleave", () => {
-        marker.togglePopup();
-      });
-      Instances.push(marker);
-      
-     }
+        customMarker.addEventListener("mouseleave", () => {
+          marker.togglePopup();
+        });
+        Instances.push(marker);
+
+      }
     };
-  
+    // console.log(Repetidas)
     setMarkortt(Repetidas);
     setMarkerInstances(Instances);
-    
+
     if (markers.length > 0) {
       mapaRef.current.setCenter([
         parseFloat(markers[0].longitud),
@@ -165,10 +167,9 @@ function FullWidthTabs() {
   };
 
   const markerDescart = () => {
-   
+
     const Instances = [...mark];
     const Nuevas = [];
-
     for (let c of cordenadas) {
       const exist = mark.find((m) => m.cuenta == c.cuenta);
       const existInstance = Instances.find((m) => m.cuenta == c.cuenta);
@@ -178,8 +179,6 @@ function FullWidthTabs() {
         Nuevas.push(c);
       }
     }
-
-   
     if (Nuevas.length) {
       generateMarker(Nuevas);
     } else if (markerInstances.length == 0) {
@@ -188,7 +187,7 @@ function FullWidthTabs() {
   };
 
   const resetMarkers = (cambioPlaza) => {
-    if (comparacion||cambioPlaza=="cambioPlza") {
+    if (comparacion || cambioPlaza == "cambioPlza") {
       dispatch(setCordendasComparacion());
       setValue(0);
       removeMarkers();
@@ -198,7 +197,7 @@ function FullWidthTabs() {
 
   useEffect(() => {
     if (!mapaRef.current) return;
-      resetMarkers("cambioPlza")
+    resetMarkers("cambioPlza")
   }, [plaza]);
 
   useEffect(() => {
@@ -218,7 +217,7 @@ function FullWidthTabs() {
     removeMarkers();
   }, [comparacion]);
 
-  
+
   const test = () => {
     console.log(markerInstances);
   };
