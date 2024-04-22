@@ -6,7 +6,6 @@ import "react-pro-sidebar/dist/css/styles.css";
 import { tokens } from "../../theme";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import LogoutIcon from '@mui/icons-material/Logout';
-
 import { useSelector } from 'react-redux'
 import Cookies from 'js-cookie'
 import { getMenusUserId } from '../../services/menu.service';
