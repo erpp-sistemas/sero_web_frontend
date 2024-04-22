@@ -18,7 +18,6 @@ import axios from "axios";
 
 //*Genera un reporte de excel de cada apartado de arreglos dinamicamente
   const dowloandData = (arrayData, BookTittle) => {
-   console.log(arrayData)
     const exportToCsv = function (data) {
 
       console.log(">>> EMPEZAMOS DESCARGA <<<");
@@ -109,6 +108,35 @@ import axios from "axios";
     return {cuenta:cuenta.cuenta,direccion:`${cuenta.calle} ${cuenta.numExt} ${cuenta.colonia} ${cuenta.cp} ${cuenta.municipio}`}
 
   }
+  
+  const formatearData = (cuenta) => {
+    const caracteresNoAdmitidos = /[#,;.]/g; // Expresión regular para caracteres no admitidos
+  
+    let cuentaFormateada = {
+      cuenta: cuenta.cuenta,
+      calle: cuenta.calle,
+      numExt: cuenta.numExt,
+      colonia: cuenta.colonia,
+      cp: cuenta.cp,
+      municipio: cuenta.municipio,
+      estado: cuenta.estado
+    };
+  
+    for (let key in cuentaFormateada) {
+      if (cuentaFormateada.hasOwnProperty(key)) {
+        let valor = cuentaFormateada[key];
+        // Verificar si el valor es una cadena de texto antes de llamar a replace()
+        if (typeof valor === 'string') {
+          // Reemplazar caracteres no admitidos en el valor utilizando la expresión regular
+          cuentaFormateada[key] = valor.replace(caracteresNoAdmitidos, '');
+        }
+      }
+    }
+  
+    return cuentaFormateada;
+  };
+  
+  
 
 
 
@@ -116,5 +144,6 @@ import axios from "axios";
     getCordenadas,
     dowloandData,
     validateFileFields,
-    validateCuenta
+    validateCuenta,
+    formatearData
   }

@@ -14,7 +14,7 @@ export const initialStateMemo={
     cordenadasFormatoErrores:[],//*Almacena las cordendas que les hace falta un dato
     file:"",//* Almacena los datos del archivo ingresado
 }
-// Slice para 'dataGeocodingSlice'
+
 export const dataGeocodingSlice = createSlice({
     name: 'apikeyGeocodingSlice',
     initialState:initialStateMemo,

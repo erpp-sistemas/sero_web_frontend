@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { actualizar, obtener, subirCordenadas } from '../../api/geocoding';
 import { dispatch } from '../../redux/store';
@@ -24,6 +24,28 @@ import WarningIcon from '@mui/icons-material/Warning';
 import tool from '../../toolkit/geocodingToolkit'
 import './styles/style.css'
 import EditModal from './EditModal';
+
+  //*Esta es la tabla generada
+  const  DataTable=({rows,columns,value})=> {
+    return (
+      <div style={{ height: 400, width: '100%'  }}>
+        {
+          value == 0 &&
+          <DataGrid
+            color="secundary"
+            rows={rows}
+            columns={columns}
+            initialState={{
+              pagination: {
+                paginationModel: { page: 0, pageSize: 10 },
+              },
+            }}
+            pageSizeOptions={[5, 10, 50, 100]}
+          />
+        }
+      </div>
+    );
+  }
 
 const SubirCordenadasPanel = ({ setValue, value }) => {
   const [espera, setEspera] = useState(false)
@@ -153,6 +175,7 @@ const SubirCordenadasPanel = ({ setValue, value }) => {
     dispatch(setCordendasComparacion(data))
     setValue(1)
   }
+   
   //*Selecciona todas o deseleccionada todas las cuentas en el check box
   const actionSelectPanel = () => {
     if (cuentasSeleccionadas.length > 0) {
@@ -171,10 +194,11 @@ const SubirCordenadasPanel = ({ setValue, value }) => {
       field: 'check', headerName: <Checkbox
         color="secondary"
         onClick={actionSelectPanel}
-        defaultChecked={cuentasSeleccionadas.length}
+        checked={cuentasSeleccionadas.length}
       />, width: 50, align: 'center', disableColumnMenu: true, sortable: false,
       renderCell: (params) => {
         const prop = params.row
+        const check = cuentasSeleccionadas.findIndex(cu => cu.id == prop.id) != -1 ? true : false
         let index = params.row.index;
         let subido = dataGeocoding.porSubir.find(c => c.id == prop.id)
         let repetida = dataGeocoding?.response.repetidas ? dataGeocoding?.response.repetidas.find(c => c.id == prop.id) : false
@@ -185,7 +209,7 @@ const SubirCordenadasPanel = ({ setValue, value }) => {
                 <Checkbox
                   color="secondary"
                   onClick={() => chekCuenta(index)}
-                  defaultChecked={params.row.check ? true : false}
+                  checked={check}
                 />
                 :
                 repetida ?
@@ -271,32 +295,17 @@ const SubirCordenadasPanel = ({ setValue, value }) => {
   }) : [];
 
 
-  //*Esta es la tabla generada
-  function DataTable() {
-    return (
-      <div style={{ height: 400, width: '100%' }}>
-        {
-          value == 0 &&
-          <DataGrid
-            color="secundary"
-            rows={rows}
-            columns={columns}
-            initialState={{
-              pagination: {
-                paginationModel: { page: 0, pageSize: 10 },
-              },
-            }}
-            pageSizeOptions={[5, 10, 50, 100]}
-          />
-        }
-      </div>
-    );
-  }
+
   //* Borra las cordendas repetidas
   const DescartarCordenadasRepetidas = () => {
     dispatch(setResponse([]))
   }
 
+
+  const tableMemo = useMemo(() => {
+    return <DataTable rows={rows} columns={columns} value={value} />;
+  }, [cuentasSeleccionadas]);
+  
 
 
 
@@ -356,7 +365,7 @@ const SubirCordenadasPanel = ({ setValue, value }) => {
                             </Box>
                           </Alert>
                           <Box>
-                            <DataTable />
+                            {tableMemo}
                           </Box>
                         </>
                       }
@@ -401,7 +410,7 @@ const SubirCordenadasPanel = ({ setValue, value }) => {
                   </Button>
 
                 </Alert>
-                <DataTable />
+               {tableMemo}
               </div> :
               <span></span>
           }

@@ -67,49 +67,81 @@ function LinearProgressWithLabel(props) {
   );
 }
 
-LinearProgressWithLabel.propTypes = {
-  value: PropTypes.number.isRequired,
-  color: "red"
-};
 
 
 
-const columns = [
-  { id: 'id', label: '#', minWidth: 5 },
-  { id: 'name', label: 'Sección', minWidth: 100 },
-  { id: 'total', label: 'Total', minWidth: 10, align: 'right' },
-  { id: 'accion', label: '', minWidth: 10, align: 'center' }
-];
 
 function createData(id, name, total, accion) {
   return { id, name, total, accion };
 }
 
 
+const StickyHeadTable = ({rows}) => {
+  const columns = [
+    { id: 'id', label: '#', minWidth: 5 },
+    { id: 'name', label: 'Sección', minWidth: 100 },
+    { id: 'total', label: 'Total', minWidth: 10, align: 'right' },
+    { id: 'accion', label: '', minWidth: 10, align: 'center' }
+  ];
+
+  return (
+    <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+      <TableContainer sx={{ maxHeight: 440 }}>
+        <Table stickyHeader aria-label="sticky table">
+          <TableHead>
+            <TableRow>
+              {columns.map((column) => (
+                <TableCell
+                  key={column.id}
+                  align={column.align}
+                  style={{ minWidth: column.minWidth }}
+                >
+                  {column.label}
+                </TableCell>
+              ))}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {rows.map((row) => {
+              return (
+                <TableRow hover role="checkbox" tabIndex={-1} key={row.num}>
+                  {columns.map((column) => {
+                    const value = row[column.id];
+                    return (
+                      <TableCell key={column.id} align={column.align}>
+                        {column.format && typeof value === 'number'
+                          ? column.format(value)
+                          : value}
+                      </TableCell>
+                    );
+                  })}
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Paper>
+  );
+}
 
 let bj = { bandera: false }; //! Variable que maneja el estado de la pausa
 
 const Geocoding = () => {
-
-  const [progreso, setProgreso] = useState(0);
   const [accionBtn, setAccionBtn] = useState(0)
   const [snackbar, setSnackbar] = useState(null);
-
   const [Instanceplaza, setInstancePlaza] = useState(null);
   const [openModal, setOpenModal] = useState(false);
 
-  const dataGeocoding = useSelector(a => a.dataGeocoding)
+
   const dispatch = useDispatch()
+  const dataGeocoding = useSelector(a => a.dataGeocoding)
   const apikeySlice = useSelector(a => a.apikeyGeocoding)
   const user = useSelector(a => a.user)
   const plazaSlice = useSelector(p => p.plazaNumber)
 
   const [plaza, setPlaza] = useState(plazaSlice);
-
-  useEffect(() => {
-    calcularProgreso()
-  }, [dataGeocoding.cordenadasRestantes, dataGeocoding.totalIngresos])
-
+  
   //*Funcion que genera las alertas
   const showSnackbar = (arrayOptiones) => {
     setSnackbar({
@@ -120,6 +152,7 @@ const Geocoding = () => {
     }, 6000)
   };
   //* Genera el array del scv 
+
   const handleFileUpload = (event) => {
     if (!plaza) {
       showSnackbar(
@@ -128,7 +161,7 @@ const Geocoding = () => {
           severity: "warning"
         })
     } else {
-
+ 
       const file = event.target.files[0];
       Papa.parse(file, {
         complete: (result) => {
@@ -150,8 +183,10 @@ const Geocoding = () => {
             )
             let Instance = []
             result.data.forEach(c => {
+              const formatoCuenta=tool.formatearData(c)
               if (c.cuenta) {
-                Instance.push({ id: `${new Date().getMilliseconds()}${Math.floor(Math.random() * 400)}${c.cuenta}`, ...c })
+                
+                Instance.push({ id: `${new Date().getMilliseconds()}${Math.floor(Math.random() * 400)}${c.cuenta}`, ...formatoCuenta })
               }
             });
             dispatch(valueInitCordenadas([...Instance, ...dataGeocoding.cordenadasRestantes]))
@@ -164,44 +199,27 @@ const Geocoding = () => {
     }
   };
 
-  //*Genera el boton para insertar el file
-  const InputFileUpload = () => {
-
-    return (
-      <Button
-        component="label"
-        role={undefined}
-        variant="contained"
-        tabIndex={-1}
-        startIcon={<CloudUploadIcon />}
-        color='secondary'
-        sx={{
-          '&.Mui-disabled': {
-            backgroundColor: '#17212fdb',
-            color: '#999',
-          },
-        }}
-        disabled={dataGeocoding?.file?.name}
-
-      >
-        Selecciona un archivo
-        <VisuallyHiddenInput type="file" accept=".csv" onChange={handleFileUpload} />
-      </Button>
-    );
-  }
-
   //*Calcula el progreso de el total de cuentas buscadas
   const calcularProgreso = () => {
     const cordenadas = dataGeocoding?.cordenadas.length + dataGeocoding?.cordenadasErrores.length + dataGeocoding?.cordenadasFormatoErrores.length;
     const cuentas = dataGeocoding?.totalIngresos;
     const total = (cordenadas * 100) / cuentas;
-    setProgreso(total);
+    return total
   };
+  const progreso=useMemo(()=>{
+    return calcularProgreso()
+  },[dataGeocoding.cordenadasRestantes, dataGeocoding.totalIngresos])
+
 
   //*Pausa la busqueda del las direcciones
+  const setPage = (page) => {
+    dispatch(setVistaPanel(page))
+  }
+
   const Pausa = () => {
     bj.bandera = !bj.bandera;
     if (!bj.bandera) {
+      dispatch(setVistaPanel(0))
       setAccionBtn(1)
       search();
     } else {
@@ -213,15 +231,29 @@ const Geocoding = () => {
         }
       )
     }
+   
   };
+  const pausTable=(table)=>{
+    if(!bj.bandera&&!accionBtn==0){
+      setAccionBtn(2)
+      Pausa()
+    }
+  
+  }
+
   //*Resetea solo los datos del file sin laterar las datos que ya se tenian
   const resetFile = () => {
     if (!dataGeocoding.response.repidas) {
       Pausa()
       dispatch(setFile(""))
       dispatch(setResponse([]))
-      setAccionBtn(0)
-      bj.bandera = false
+      if(dataGeocoding.cordenadasRestantes.length==0){
+        setAccionBtn(0)
+        bj.bandera = false
+      }else{
+        setAccionBtn(2)
+        bj.bandera = true
+      }
     } else {
       showSnackbar({ children: `ANTES DE CAMBIAR DE ARCHIVO DESCARTA LAS CORDENADAS REPETIDAS`, severity: "warning" })
     }
@@ -233,6 +265,7 @@ const Geocoding = () => {
     const newArray = dataGeocoding?.cordenadasRestantes
     const ExisteCuentas = tool.validateFileFields(newArray)
     if (ExisteCuentas.message) {
+      
       showSnackbar({ children: ExisteCuentas.message, severity: "warning" });
       return "break"
     }
@@ -242,8 +275,6 @@ const Geocoding = () => {
 
     for (let index = 0; newArray.length >= index; index++) {
       if (bj.bandera) { console.log("breakeado"), setAccionBtn(2); break; }
-
-
       const cuenta = dataGeocoding?.cordenadasRestantes[index];
       const validarCuenta = cuenta ? tool.validateCuenta(cuenta) : false
 
@@ -263,13 +294,12 @@ const Geocoding = () => {
             dispatch(setCordenadas(cor));
             dispatch(setPorSubir(cor));
             //!aqui validamos si alguien mas uso la apikey o sumamos peticiones
-            try { await sumarConsultaApikey(apikeySlice, user.user_id) }
-            catch (error) { Pausa(); dispatch(setApikeyGeocodingSlice(null)) }
-
           } else {
             // console.log(">>>NO SE ENCONTRO<<<");
             dispatch(setCordenadasErrores(cuenta));
           }
+          try { await sumarConsultaApikey(apikeySlice, user.user_id) }
+          catch (error) { Pausa(); dispatch(setApikeyGeocodingSlice(null)) }
         } catch (error) {
           // console.log(">>>ERROR EN LA PETICION<<<");
           if (error?.response?.status == 429) {
@@ -293,10 +323,9 @@ const Geocoding = () => {
         cuenta && cuenta.cuenta !== "" && dispatch(setCordenadasFormatoErrores(cuenta))
       }
       dispatch(setCordenadasRestantes())
-      calcularProgreso;
-
+      
     }
-    if (dataGeocoding.cordenadasRestantes.length == 0 && dataGeocoding.file.total) {
+    if (dataGeocoding.cordenadasRestantes.length == 0 ) {
       showSnackbar(
         {
           children: `Termino la busqueda de este archivo `,
@@ -308,9 +337,7 @@ const Geocoding = () => {
   };
 
 
-  const setPage = (page) => {
-    dispatch(setVistaPanel(page))
-  }
+  
 
   const arrayDataTable = [
     { num: 1, name: "TOTAL", dbLength: dataGeocoding?.file?.total },
@@ -327,72 +354,13 @@ const Geocoding = () => {
       t.dbLength,
       t.dbLength !== 0 && t.num !== 1 ?
         <Tooltip placement="top-start" title="Ver informes">
-          <Button onClick={() => setPage(t.num - 1)} variant='contained' color='secondary' >
+          <Button onClick={() => {  setPage(t.num - 1)}} variant='contained' color='secondary' >
             <RemoveRedEyeIcon />
           </Button>
-        </Tooltip> : ""
+         </Tooltip> 
+        : ""
     )
   ))
-
-
-  const StickyHeadTable = () => {
-
-
-    return (
-      <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-        <TableContainer sx={{ maxHeight: 440 }}>
-          <Table stickyHeader aria-label="sticky table">
-            <TableHead>
-              <TableRow>
-                {columns.map((column) => (
-                  <TableCell
-                    key={column.id}
-                    align={column.align}
-                    style={{ minWidth: column.minWidth }}
-                  >
-                    {column.label}
-                  </TableCell>
-                ))}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {rows.map((row) => {
-                return (
-                  <TableRow hover role="checkbox" tabIndex={-1} key={row.num}>
-                    {columns.map((column) => {
-                      const value = row[column.id];
-                      return (
-                        <TableCell key={column.id} align={column.align}>
-                          {column.format && typeof value === 'number'
-                            ? column.format(value)
-                            : value}
-                        </TableCell>
-                      );
-                    })}
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Paper>
-    );
-  }
-
-
-  const VisuallyHiddenInput = styled('input')({
-    clip: 'rect(0 0 0 0)',
-    clipPath: 'inset(50%)',
-    height: 1,
-    overflow: 'hidden',
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    whiteSpace: 'nowrap',
-    width: 20,
-  });
-
-
 
   const accionesBtn = [
     { text: "GENERAR CORDENADAS", accion: search, color: "#17212f" },
@@ -418,6 +386,7 @@ const Geocoding = () => {
 
   const handlePlaceChange = (event) => {
     if (plaza) {
+     if(!bj.bandera&&dataGeocoding.porSubir[0]){ Pausa()}
       setInstancePlaza(event.target.value)
       setOpenModal(true)
     } else {
@@ -426,13 +395,14 @@ const Geocoding = () => {
     }
   }
   const changePlaza = () => {
+    dispatch(Reset())
+    setAccionBtn(0)
     setPlaza(Instanceplaza)
     dispatch(setPlazaNumber(Instanceplaza))
-    dispatch(Reset())
     setOpenModal(false)
   }
 
-
+  
 
   return (
     <>
@@ -443,7 +413,28 @@ const Geocoding = () => {
 
       <Grid container justifyContent={"space-between"}  >
         {
-          !dataGeocoding?.file.name ? <InputFileUpload /> :
+          !dataGeocoding?.file.name ?
+          <Button
+          component="label"
+          role={undefined}
+          variant="contained"
+          tabIndex={-1}
+          startIcon={<CloudUploadIcon />}
+          color='secondary'
+          sx={{
+            '&.Mui-disabled': {
+              backgroundColor: '#17212fdb',
+              color: '#999',
+            },
+          }}
+          disabled={plaza==null||dataGeocoding?.file?.name}
+  
+        >
+          Selecciona un archivo 
+          <input id='fileInput' type="file" accept='.csv' onInput={handleFileUpload} style={{opacity:"0",display:"none"}} />
+       
+        </Button>
+           :
             <Button variant='contained' color='warning' startIcon={<WarningIcon />} onClick={resetFile} >
               Cambiar archivo
             </Button>
@@ -465,9 +456,12 @@ const Geocoding = () => {
           <span>Total : {dataGeocoding?.file.total}</span>
         </Div>}
       <hr />
+     {
+      plaza&&
       <Button variant="contained" style={{ margin: "10px", backgroundColor: accionesBtn[accionBtn].color }} onClick={accionesBtn[accionBtn].accion} >
         {accionesBtn[accionBtn].text}
       </Button>
+     }
       <Collapse in={dataGeocoding?.cordenadas.length || dataGeocoding?.cordenadasErrores.length} >
         <div>
           <Box sx={{ width: '100%' }}>
@@ -479,7 +473,7 @@ const Geocoding = () => {
               }} value={progreso}
             />
           </Box>
-          <StickyHeadTable />
+          <StickyHeadTable rows={rows}  />
         </div>
       </Collapse>
       {!!snackbar && (
