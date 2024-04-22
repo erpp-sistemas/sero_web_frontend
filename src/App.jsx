@@ -22,7 +22,7 @@ import NewUser from './scenes/new-user'
 import MapList from './scenes/maps'
 import Map from './scenes/map'
 import Maintenance from './scenes/maintenance'
-import WorkAssignment from './scenes/work-assignment'
+import WorkAssignment from './scenes/assignment'
 import DashboardCoordinator from './scenes/dashboard-coordinacion'
 import Account from './scenes/account'
 import UsersList from './scenes/users-list'
@@ -143,7 +143,7 @@ function App() {
                     <Route path="/map/:place_id" element={<Map />} />
                     <Route path="/roles" element={<Roles />} />
                     <Route path="/maintenance" element={<Maintenance />} />
-                    <Route path="/work-assignment" element={<WorkAssignment />} />
+                    <Route path="/assignment" element={<WorkAssignment />} />
                     <Route path="/dashboard-coordinator" element={<DashboardCoordinator />} />
                     <Route path="/acount-history" element={<AcountHistory/>}/>
                     <Route path="/valid-payment" element={< ValidPayment/>}/>

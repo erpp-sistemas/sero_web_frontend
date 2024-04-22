@@ -13,8 +13,6 @@ import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import Divider from '@mui/material/Divider';
 import Grid from '@mui/material/Grid';
-import CircularProgress from '@mui/material/CircularProgress';
-
 import { tokens } from "../../theme";
 import PlaceSelect from '../../components/PlaceSelect'
 import ServiceSelect from '../../components/ServiceSelect'
@@ -24,8 +22,9 @@ import { Box, useTheme, Button} from "@mui/material";
 import Typography from '@mui/material/Typography';
 import Input from '@mui/material/Input';
 import { read, utils } from 'xlsx';
-import {postWorkAssignment} from '../../services/assignment.service.js'
 import { DataGrid } from "@mui/x-data-grid";
+import {workAssignmentRequest} from '../../api/assignment.js'
+import CustomAlert from '../../components/CustomAlert.jsx'
 
 const Index = () => {
     
@@ -57,6 +56,7 @@ const Index = () => {
 
         setSelectedFile(null);    
         setError(null);
+        setIsLoading(false)
 
         if (file) {
           const allowedExtensions = ['.xlsx', '.xls'];
@@ -64,18 +64,15 @@ const Index = () => {
       
           if (allowedExtensions.includes(fileExtension)) {
             setSelectedFile(file);            
-            setError(null);
-            //fileValidCallback(true);
+            setError(null);            
           } else {        
-            setError('El archivo seleccionado no es un archivo Excel válido (.xlsx o .xls).');
-            // Puedes mostrar un mensaje de error al usuario o tomar otra acción según tus necesidades.
-            e.target.value = ''; // Limpiar la selección para permitir al usuario cargar un archivo válido.            
+            setError('El archivo seleccionado no es un archivo Excel válido (.xlsx o .xls).');            
+            e.target.value = '';
           }
         }
         else{
           setError("¡Error! Debes seleccionar un archivo Excel.");
-        }
-        // Forzar la actualización cada vez que se selecciona un archivo
+        }        
         setFileKey(prevKey => prevKey + 1);
       };
 
@@ -97,30 +94,37 @@ const Index = () => {
               const sheetName = workbook.SheetNames[0];
               const worksheet = workbook.Sheets[sheetName];
               let dataArray = utils.sheet_to_json(worksheet, { header: 1 });
-
-              // Elimina elementos vacíos del arreglo
+              
               dataArray = dataArray.filter(item => item.length > 0);
+              
+              const expectedColumns = ['cuenta', 'usuario', 'tarea'];
+              const actualColumns = dataArray[0].map(cell => cell.toLowerCase());
+              const invalidColumns = actualColumns.filter(col => !expectedColumns.includes(col));
 
-              // Elimina el primer elemento que es el encabezado/título
+              if (invalidColumns.length > 0 || actualColumns.length !== 3) {                  
+                  setError("El archivo Excel debe contener exactamente las columnas 'cuenta', 'usuario' y 'tarea'.")
+                  return
+              }              
               dataArray.shift();
-  
-              // Ahora tienes el contenido del archivo Excel en el array 'dataArray'
-              console.log('Excel Data:', dataArray);
 
-              const result = await postWorkAssignment(selectedPlace, selectedService, dataArray);
+              const result = await workAssignmentRequest(selectedPlace, selectedService, dataArray);
 
               console.log('Respuesta del backend:', result);             
 
-              setResultAssignment(result)
+              setResultAssignment(result.data)
 
             } catch (error) {
-                //setError("¡Error al leer el archivo Excel!");
-                if(Array.isArray(error.response.data)){
-                  return setError(error.response.data)
-                } 
-                else {                //console.error(error.response.data)
-                  setError([error.response.data.message])
+
+              console.log('error',error)
+              if (error.response && error.response.data) {
+                if (Array.isArray(error.response.data)) {
+                    setError(error.response.data);
+                } else {
+                    setError([error.response.data.message]);
                 }
+            } else {
+                setError(error);
+            }
             }
             finally {
               setIsLoading(false);
@@ -214,17 +218,21 @@ const Index = () => {
                 padding='15px 10px'
                 borderRadius='10px'
             >
-               <PlaceSelect                
-                selectedPlace={selectedPlace}
-                handlePlaceChange={handlePlaceChange}
-               />
-
-                <ServiceSelect
-                  selectedPlace={selectedPlace}                  
-                  selectedService={selectedService}
-                  handleServiceChange={handleServiceChange}
+              <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
+                <Grid item xs={6}>
+                  <PlaceSelect                
+                  selectedPlace={selectedPlace}
+                  handlePlaceChange={handlePlaceChange}
                 />
-
+                </Grid>
+                <Grid item xs={6}>
+                  <ServiceSelect
+                    selectedPlace={selectedPlace}                  
+                    selectedService={selectedService}
+                    handleServiceChange={handleServiceChange}
+                  />
+                </Grid>
+              </Grid>
               <Box>
                 <label htmlFor="file-upload-excel">
                   <Typography variant="body1" gutterBottom>
@@ -247,7 +255,7 @@ const Index = () => {
 
               {/* <FileUploadExcel handleFileUpload={handleFileUpload} fileValidCallback={setFileValid} /> */}
 
-              {error && <AlertMessage message={error} type="error" />} {/* Usa el componente de alerta */}
+              {error && <AlertMessage message={error} type="error" />} {/* Usa el componente de alerta */}              
 
               <Button
                 variant="contained"
@@ -258,16 +266,8 @@ const Index = () => {
                 }}
                 disabled={ isLoading || !selectedPlace || !selectedService } 
               >
-                Convertir Excel a Array
-              </Button>
-
-              {isLoading && 
-                <Box sx={{ display: 'flex' }}>
-                  <CircularProgress
-                    color="success"
-                  />
-                </Box>
-              }
+                Carga Asignaciones
+              </Button>             
 
             </Box>           
             
@@ -279,6 +279,8 @@ const Index = () => {
                     backgroundColor: colors.primary[400],
                 }}
             >
+              {error && <CustomAlert type="error" message={error} onClose={() => setError(null)} />}
+
                 <Grid container spacing={2}>
                    {/* Primer elemento */}
                   <Grid item xs={8}>

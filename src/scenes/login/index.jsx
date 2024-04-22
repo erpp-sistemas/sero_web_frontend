@@ -2,15 +2,10 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {useForm} from 'react-hook-form'
 import { loginRequest, verifyTokenRequest } from '../../api/auth'
-import { placeByUserIdRequest } from '../../api/place'
-import { placeServiceByUserIdRequest } from '../../api/service'
-import { placeServiceProcessByUserIdRequest } from '../../api/process'
 import Cookies from 'js-cookie'
 import {useDispatch} from 'react-redux'
 import {setUser} from '../../features/user/userSlice'
-import {setPlace} from '../../features/place/placeSlice'
-import {setService} from '../../features/servicess/serviceSlice'
-import {setProcess} from '../../features/process/processSlice'
+import LoadingModal from '../../components/LoadingModal.jsx'
 
 
 const Login = ({ setLogin }) => {
@@ -21,30 +16,37 @@ const Login = ({ setLogin }) => {
 
     const [signinErrors, setSigninErrors] = useState([])
     const [isAuthenticated, setIsAuthenticated] = useState(false)
+    const [isLoading, setIsLoading] = useState(false)
 
     const {register, handleSubmit, formState: {errors},} = useForm()    
 
     const onSubmit = handleSubmit(data => {
+      
       signin(data)
     })
 
     const signin = async (user) => {
       
       try {
-        const res = await loginRequest(user)
+        
+        setIsLoading(true)
+        const res = await loginRequest(user)        
         console.log(res);
         if (res && res.data) {
-          setIsAuthenticated(true)
-          dispatch(setUser(res.data))
-        }
-
+          setTimeout(() => {
+            setIsLoading(false);
+            setIsAuthenticated(true);
+            dispatch(setUser(res.data));
+          }, 3000);
+        }        
       
       } catch (error) {
-        if(Array.isArray(error.response.data)){
+        if(Array.isArray(error.response.data)){          
           return setSigninErrors(error.response.data)
         }
       
         setSigninErrors([error.response.data.message])
+        setIsLoading(false)
       }
     }
 
@@ -94,6 +96,7 @@ const Login = ({ setLogin }) => {
         <div className="bg-no-repeat bg-cover bg-center relative"
             style={{ backgroundImage: 'url(fondo-login.jpeg)' }}
         >
+          <LoadingModal open={isLoading}/>
             <div className="absolute bg-gradient-to-b from-blue-900 to-blue-800 opacity-25 inset-0 z-0"></div>
             <div className="min-h-screen sm:flex sm:flex-row mx-0 justify-center">
                 <div className="flex-col flex self-center p-10 sm:max-w-5xl xl:max-w-2xl z-10">
