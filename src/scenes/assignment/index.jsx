@@ -139,6 +139,9 @@ const Index = () => {
             if (missingColumns.length > 0) {
               setIsLoading(false);
               setError(`El archivo Excel no contiene las columnas requeridas: ${missingColumns.join(", ")}.`);
+              setAlertOpen(true)
+              setAlertType("error")
+              setAlertMessage(`El archivo Excel no contiene las columnas requeridas: ${missingColumns.join(", ")}.`)
               return;
             }
 

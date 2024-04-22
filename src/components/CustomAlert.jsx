@@ -9,15 +9,15 @@ const CustomAlert = ({ alertOpen, type, message, onClose }) => {
     if (alertOpen) {
       timer = setTimeout(() => {
         onClose(false);
-      }, 5000);
+      }, 7000);
     }
 
     return () => clearTimeout(timer);
   }, [alertOpen, onClose]);
 
   return (
-    <Snackbar open={alertOpen} autoHideDuration={5000} onClose={() => onClose(false)}  anchorOrigin={{ vertical: 'top', horizontal: 'right' }}>
-      <Alert severity={type} onClose={() => onClose(false)}>
+    <Snackbar open={alertOpen} autoHideDuration={7000} onClose={() => onClose(false)}  anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+      <Alert variant="filled" severity={type} onClose={() => onClose(false)} sx={{ fontSize: '1rem', color: 'white' }}>
         {message}
       </Alert>
     </Snackbar>
