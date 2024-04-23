@@ -7,7 +7,7 @@ import { Box, useTheme, Button, Avatar} from "@mui/material";
 import Viewer from 'react-viewer';
 import TextField from '@mui/material/TextField';
 import Header from '../../components/Header';
-import { DataGrid, GridActionsCellItem,
+import { DataGrid,
   GridToolbarColumnsButton,
   GridToolbarContainer,
   GridToolbarDensitySelector,
@@ -25,6 +25,7 @@ import EditRoadIcon from '@mui/icons-material/EditRoad';
 import PersonPinCircleIcon from '@mui/icons-material/PersonPinCircle';
 import * as ExcelJS from "exceljs";
 import LoadingModal from '../../components/LoadingModal.jsx'
+import CustomAlert from '../../components/CustomAlert.jsx'
 
 const Index = () => {
     
@@ -38,6 +39,9 @@ const Index = () => {
     const [noData, setNoData] = useState('');
     const [messageError, setMessageError] = useState('');
     const [isLoading, setIsLoading] = useState(false)
+    const [alertOpen, setAlertOpen] = useState(false);
+    const [alertType, setAlertType] = useState("");
+    const [alertMessage, setAlertMessage] = useState("");
 
       const handlePlaceChange = (event) => {
         setNoData('')
@@ -56,6 +60,26 @@ const Index = () => {
 
       const handleGetWorkAttendance = async () => {
         try {
+
+          if(!selectedPlace){
+            setAlertOpen(true)
+            setAlertType("error")
+            setAlertMessage("¡Error! Debes seleccionar una plaza")
+            return
+          }
+          else if(!selectedStartDate){
+            setAlertOpen(true)
+            setAlertType("error")
+            setAlertMessage("¡Error! Debes seleccionar una fecha de inicio")
+            return
+          }
+          else if(!selectedEndDate){
+            setAlertOpen(true)
+            setAlertType("error")
+            setAlertMessage("¡Error! Debes seleccionar una fecha final")
+            return
+          }
+
           setIsLoading(true)
 
           const response = await workAttendanceRequest(selectedPlace, selectedStartDate, selectedEndDate);
@@ -447,6 +471,12 @@ const Index = () => {
     return (
         <>
         <LoadingModal open={isLoading}/>
+        <CustomAlert
+                alertOpen={alertOpen}
+                type={alertType}
+                message={alertMessage}
+                onClose={setAlertOpen}
+              />            
           <Box
               m='20px 0'
               display='flex'

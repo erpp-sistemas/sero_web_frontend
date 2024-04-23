@@ -103,8 +103,7 @@ const Index = () => {
             setError("¡Error! Debes seleccionar una plaza");
             setAlertOpen(true)
             setAlertType("error")
-            setAlertMessage("¡Error! Debes seleccionar una plaza")
-            set
+            setAlertMessage("¡Error! Debes seleccionar una plaza")            
             return;
           }
           else if (!selectedService){
