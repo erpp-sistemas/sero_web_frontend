@@ -37,6 +37,8 @@ import { abandonarApikey, sumarConsultaApikey } from '../../api/geocoding';
 import PlaceSelect from '../PlaceSelect';
 import { setPlazaNumber } from '../../redux/plazaNumberSlice';
 import ModalAviso from './ModalAviso';
+import CustomAlert from '../CustomAlert';
+import { message } from 'antd';
 
 
 
@@ -132,6 +134,7 @@ const Geocoding = () => {
   const [snackbar, setSnackbar] = useState(null);
   const [Instanceplaza, setInstancePlaza] = useState(null);
   const [openModal, setOpenModal] = useState(false);
+  const [dataAlert,setDataAlert]=useState(false)
 
 
   const dispatch = useDispatch()
@@ -144,12 +147,9 @@ const Geocoding = () => {
   
   //*Funcion que genera las alertas
   const showSnackbar = (arrayOptiones) => {
-    setSnackbar({
+    setDataAlert({
       ...arrayOptiones
     });
-    setTimeout(() => {
-      setSnackbar(null)
-    }, 6000)
   };
   //* Genera el array del scv 
 
@@ -157,8 +157,8 @@ const Geocoding = () => {
     if (!plaza) {
       showSnackbar(
         {
-          children: "Escoge una plaza de destino",
-          severity: "warning"
+          message: "Escoge una plaza de destino",
+          type: "warning"
         })
     } else {
  
@@ -169,16 +169,16 @@ const Geocoding = () => {
           if (validacionArray.message) {
             showSnackbar(
               {
-                children: validacionArray.message,
-                severity: "warning"
+                message: validacionArray.message,
+                type: "warning"
               }
             )
           } else {
             let conteo = result.data.length - 1;
             showSnackbar(
               {
-                children: `Archivo ${file.name} , cargado correctamente `,
-                severity: "success"
+                message: `Archivo ${file.name} , cargado correctamente `,
+                type: "success"
               }
             )
             let Instance = []
@@ -219,43 +219,33 @@ const Geocoding = () => {
   const Pausa = () => {
     bj.bandera = !bj.bandera;
     if (!bj.bandera) {
-      dispatch(setVistaPanel(0))
       setAccionBtn(1)
       search();
     } else {
       setAccionBtn(2)
       showSnackbar(
         {
-          children: `"BUSQUEDA PAUSADA"`,
-          severity: "warning"
+          message: `BUSQUEDA PAUSADA`,
+          type: "warning"
         }
       )
     }
    
   };
-  const pausTable=(table)=>{
-    if(!bj.bandera&&!accionBtn==0){
-      setAccionBtn(2)
-      Pausa()
-    }
-  
-  }
+ 
 
   //*Resetea solo los datos del file sin laterar las datos que ya se tenian
   const resetFile = () => {
     if (!dataGeocoding.response.repidas) {
-      Pausa()
+      if(dataGeocoding.cordenadas.length){
+        bj.bandera=true
+        setAccionBtn(2)
+      }
       dispatch(setFile(""))
       dispatch(setResponse([]))
-      if(dataGeocoding.cordenadasRestantes.length==0){
-        setAccionBtn(0)
-        bj.bandera = false
-      }else{
-        setAccionBtn(2)
-        bj.bandera = true
-      }
+   
     } else {
-      showSnackbar({ children: `ANTES DE CAMBIAR DE ARCHIVO DESCARTA LAS CORDENADAS REPETIDAS`, severity: "warning" })
+      showSnackbar({ message: `ANTES DE CAMBIAR DE ARCHIVO DESCARTA LAS CORDENADAS REPETIDAS`, type: "warning" })
     }
   }
 
@@ -263,15 +253,13 @@ const Geocoding = () => {
   const search = async () => {
 
     const newArray = dataGeocoding?.cordenadasRestantes
-    const ExisteCuentas = tool.validateFileFields(newArray)
-    if (ExisteCuentas.message) {
-      
-      showSnackbar({ children: ExisteCuentas.message, severity: "warning" });
+    if (newArray.length==0) {
+      showSnackbar({ message: "Ingresa otro archivo para seguir buscando", type: "warning" });
       return "break"
     }
-
+    
     setAccionBtn(1)
-    showSnackbar({ children: `BUSCANDO`, severity: "success" })
+    showSnackbar({ message: `BUSCANDO`, type: "success" })
 
     for (let index = 0; newArray.length >= index; index++) {
       if (bj.bandera) { console.log("breakeado"), setAccionBtn(2); break; }
@@ -306,15 +294,15 @@ const Geocoding = () => {
             Pausa()
             showSnackbar(
               {
-                children: `SE ALCANZÓ EL LÍMITE DE PETICIONES CON ESTA APIKEY O INTENTE DE NUEVO`,
-                severity: "error"
+                message: `SE ALCANZÓ EL LÍMITE DE PETICIONES CON ESTA APIKEY O INTENTE DE NUEVO`,
+                type: "error"
               }
             )
             break
           }
           if (error?.response?.status == 401) {
             Pausa()
-            showSnackbar({ children: `LA APIKEY INGRESADA NO ESTÁ AUTORIZADA O INTENTE DE NUEVO`, severity: "error" })
+            showSnackbar({ message: `LA APIKEY INGRESADA NO ESTÁ AUTORIZADA O INTENTE DE NUEVO`, type: "error" })
             break
           }
           dispatch(setCordenadasErrores(cuenta));
@@ -325,15 +313,17 @@ const Geocoding = () => {
       dispatch(setCordenadasRestantes())
       
     }
-    if (dataGeocoding.cordenadasRestantes.length == 0 ) {
+
+     if(!bj.bandera){
       showSnackbar(
         {
-          children: `Termino la busqueda de este archivo `,
-          severity: "info"
-        }, 12000
+          message: `Termino la busqueda de este archivo `,
+          type: "info"
+        }
       )
       setAccionBtn(0)
-    }
+     }
+    
   };
 
 
@@ -406,6 +396,7 @@ const Geocoding = () => {
 
   return (
     <>
+      <CustomAlert alertOpen={dataAlert} type={dataAlert.type} message={dataAlert.message} onClose={()=>setDataAlert(false)} />
       <ModalAviso open={openModal} setOpen={setOpenModal} plaza={changePlaza} />
       <Box marginBottom={"20px"}>
         <PlaceSelect selectedPlace={plaza} handlePlaceChange={handlePlaceChange} />

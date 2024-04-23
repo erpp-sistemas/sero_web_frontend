@@ -9,8 +9,9 @@ export const initialStateMemo={
     cordendasComparacion:[], //* almacena las cordendas que se vana comparar en el mapa
     porSubir:[],    //*almacena las que faltan por subir a la DB
     cordenadas:[],  //* almacena las cordendas encontrdas 
-    cordenadasRestantes:[], //*Almacena las cordendas restantes por buscar o ver que tipo de error hay
-    cordenadasErrores:[],   //*Almacena las cordenadas que no se pudieron encontrar o hubo un error 
+    cordenadasRestantes:[], //*Almacena las cordendas restantes por buscar 
+    cordenadasActDomicilio:[],//*Almacena las cordendas que se pudieron actualizar en la tabla domicilio contribuyente
+    cordenadasErrores:[],  //*Almacena las cordenadas que no se pudieron encontrar o hubo un error 
     cordenadasFormatoErrores:[],//*Almacena las cordendas que les hace falta un dato
     file:"",//* Almacena los datos del archivo ingresado
 }
@@ -27,6 +28,7 @@ export const dataGeocodingSlice = createSlice({
             state.porSubir = [];
             state.cordenadas = [];
             state.cordenadasRestantes = [];
+            state.cordenadasActDomicilio = [];
             state.cordenadasErrores = [];
             state.cordenadasFormatoErrores = [];
             state.file = '';
@@ -48,7 +50,8 @@ export const dataGeocodingSlice = createSlice({
         setCordenadasFormatoErrores: (state, action) => {state.cordenadasFormatoErrores.push(action.payload)},
         setSumaTotalCordendas:(state,action)=>{state.totalIngresos+=action.payload},
         setVistaPanel: (state, action) => {state.vistaPanel=action.payload},
-      
+        setCordenadasDomicilio: (state, action) => {state.cordenadasActDomicilio=action.payload},
+
     }
   });
   
@@ -70,6 +73,7 @@ export const dataGeocodingSlice = createSlice({
                     setReseteCordenadasErrores,
                     resetCordenadasFormatoErrores,
                     setSumaTotalCordendas,
+                    setCordenadasDomicilio,
                     Reset
                  } = dataGeocodingSlice.actions;
   export default dataGeocodingSlice.reducer;

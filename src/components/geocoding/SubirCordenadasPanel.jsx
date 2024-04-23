@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { actualizar, obtener, subirCordenadas } from '../../api/geocoding';
 import { dispatch } from '../../redux/store';
-import { resetPorsubir, setCordendasComparacion, setPushCordendasRestantes, setResetCordenadasFormatoErrores, setReseteCordenadasErrores, setResponse, setVistaPanel } from '../../redux/dataGeocodingSlice';
+import { resetCordenadasErrores, resetCordenadasFormatoErrores, resetPorsubir, setCordenadasDomicilio, setCordendasComparacion, setPushCordendasRestantes, setResponse, setVistaPanel } from '../../redux/dataGeocodingSlice';
 
 
 import {
@@ -59,22 +59,7 @@ const SubirCordenadasPanel = ({ setValue, value }) => {
   const dataGeocoding = useSelector(s => s.dataGeocoding)
   const vistaPanel = dataGeocoding.vistaPanel;
 
-  //*Manda las cordendas con errores al arreglo de Restantes para intentar la busqueda de nuevo
-  const reBuscar = () => {
-    if (cuentasSeleccionadas.length > 0) {
-      setEspera(true)
-      cuentasSeleccionadas.forEach(c => {
-        dispatch(setPushCordendasRestantes(c))
-      });
 
-      vistaPanel == 4 ?
-        dispatch(setResetCordenadasFormatoErrores()) :
-        dispatch(setReseteCordenadasErrores())
-      setCuentasSeleccionadas([])
-      setEspera(false)
-    }
-
-  }
   //* Busca las cordendas para identificar si existe en la base ya
   const getCordenadas = (data) => {
     setEspera(true)
@@ -97,6 +82,8 @@ const SubirCordenadasPanel = ({ setValue, value }) => {
       .then(res => {
         const Instance = [...dataGeocoding.porSubir]
         const InstanceSeleccion = [...cuentasSeleccionadas]
+        const InstanceDomicilio = [...res.actualizadas_domicilio,...dataGeocoding.cordenadasActDomicilio]
+        console.log(InstanceDomicilio)
         setEspera(false)
         InstanceSeleccion.forEach((c) => {
 
@@ -107,12 +94,10 @@ const SubirCordenadasPanel = ({ setValue, value }) => {
         });
         dispatch(resetPorsubir(Instance))
         dispatch(setResponse(res))
-
+        dispatch(setCordenadasDomicilio(InstanceDomicilio))
       })
-
-
   }
-
+  console.log(dataGeocoding.cordenadasActDomicilio)
   //*En caso de tener cuentas repetidas se actualizan 
   const actualizarCordenadas = () => {
     setEspera(true)
@@ -120,16 +105,41 @@ const SubirCordenadasPanel = ({ setValue, value }) => {
     actualizar(data, plaza)
       .then(res => {
         if (res.status == 200) {
+          const InstanceDomicilio = [...res.data.actualizadas_domicilio,...dataGeocoding.cordenadasActDomicilio]
           dispatch(setResponse(["TODO ACTUALIZADO"]))
+          dispatch(setCordenadasDomicilio(InstanceDomicilio))
         }
         setEspera(false)
       })
+  }  
+  
+  //*Manda las cordendas con errores al arreglo de Restantes para intentar la busqueda de nuevo
+  const reBuscar = () => {
+    if (cuentasSeleccionadas.length > 0) {
+      setEspera(true)
+      const Instance=[]
+        cuentasSeleccionadas.forEach(c => {
+          dispatch(setPushCordendasRestantes(c))
+        });
+        for(let cuenta of panel.data){
+          if(!cuentasSeleccionadas.find(cb=>cb.id==cuenta.id)){
+            Instance.push(cuenta)
+          }
+      }
+      vistaPanel == 4 ?
+          dispatch(resetCordenadasFormatoErrores(Instance))
+          :
+          dispatch(resetCordenadasErrores(Instance));
+  
+        setCuentasSeleccionadas([])
+      setEspera(false)
+    }
   }
   //* Es un array de las vistas y tablas donde su identificador es el index
   const arrayObjTable = [
     { data: dataGeocoding.response.repetidas ? dataGeocoding.response.repetidas : [], color: "warning", tittle: "REPETIDAS", textButton: "actualizar" },
     { data: dataGeocoding.cordenadasRestantes, color: "info", tittle: "RESTANTES", accionPanel: false, textButton: "false" },
-    { data: dataGeocoding.cordenadas, color: "success", tittle: "ENCONTRADAS", accionPanel: mandarCordenadasDB, textButton: "REVISAR POR SUBIR" },
+    { data: dataGeocoding.cordenadas, color: "success", tittle: "ENCONTRADAS", accionPanel: mandarCordenadasDB, textButton: "SUBIR CORDENADAS" },
     { data: dataGeocoding.cordenadasErrores, color: "error", tittle: "ERRORES", accionPanel: reBuscar, textButton: "VOLVER A BUSCAR" },
     { data: dataGeocoding.cordenadasFormatoErrores, color: "error", tittle: "ERRORES FORMATO", accionPanel: reBuscar, textButton: "VOLVER A BUSCAR" },
     { data: dataGeocoding.porSubir, color: "info", tittle: "POR SUBIR", accionPanel: mandarCordenadasDB, textButton: "SUBIR CUENTAS" }
@@ -304,10 +314,8 @@ const SubirCordenadasPanel = ({ setValue, value }) => {
 
   const tableMemo = useMemo(() => {
     return <DataTable rows={rows} columns={columns} value={value} />;
-  }, [cuentasSeleccionadas]);
+  }, [cuentasSeleccionadas,panel.data]);
   
-
-
 
   return (
     <>
@@ -319,7 +327,7 @@ const SubirCordenadasPanel = ({ setValue, value }) => {
       {
         espera &&
         <Box sx={{ display: 'flex' }}>
-          <CircularProgress />
+          <CircularProgress color='secondary' />
         </Box>
       }
 
@@ -339,6 +347,14 @@ const SubirCordenadasPanel = ({ setValue, value }) => {
                   {
                     dataGeocoding.cordenadas[0] &&
                     <>
+                     {
+                        dataGeocoding.cordenadasActDomicilio[0] &&
+                        <Alert variant="filled" severity="info" sx={{ display: "flex", justifyContent: "start", alignItems: "center" }}>
+                          {dataGeocoding.cordenadasActDomicilio.length} cordenadas actualizadas en domicilio contribuyente
+                          <Button variant='contained' sx={{ marginLeft: "30px" }} onClick={() => tool.dowloandData(dataGeocoding.cordenadasActDomicilio,"CUENTAS ACTUALIZADAS DOMICILIO CONTRIBUYENTE")} disabled={espera} color='success' >Descargar reporte </Button>
+                        </Alert>
+                      }
+
                       {
                         dataGeocoding.porSubir[0] &&
                         <Alert variant="filled" severity="info" sx={{ display: "flex", justifyContent: "start", alignItems: "center" }}>
@@ -346,7 +362,7 @@ const SubirCordenadasPanel = ({ setValue, value }) => {
                           <Button variant='contained' sx={{ marginLeft: "30px" }} onClick={() => dispatch(setVistaPanel(2))} disabled={espera} >Revisar Cordenadas </Button>
                         </Alert>
                       }
-
+                     
                       {
                         dataGeocoding?.response?.totales && dataGeocoding?.response?.totales?.cordenadas_exitosas !== 0 &&
                         <Alert variant="filled" severity="success">
