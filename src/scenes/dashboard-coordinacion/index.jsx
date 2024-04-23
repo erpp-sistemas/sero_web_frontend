@@ -338,7 +338,7 @@ const index = () => {
             </Box>
 
             {/* FILA 5 */}
-            <Box
+            {/* <Box
                 id="grid-1"
                 display="grid"
                 gridTemplateColumns="repeat(12, 1fr)"
@@ -346,7 +346,7 @@ const index = () => {
                 gap="15px"
                 sx={{ margin: '20px 0' }}
             >
-                {/* GRAFICA DE BARRA MOSTRANDO TOTAL DE GESTIONES POR GESTOR Y CUANTOS CAMPOS FUERON CAPTURADOS */}
+                GRAFICA DE BARRA MOSTRANDO TOTAL DE GESTIONES POR GESTOR Y CUANTOS CAMPOS FUERON CAPTURADOS
                 <Box
                     gridColumn='span 12'
                     backgroundColor={colors.primary[400]}
@@ -375,7 +375,7 @@ const index = () => {
                         groupMode={false}
                     />
                 </Box>
-            </Box>
+            </Box> */}
 
             {/* FILA 6 */}
             <Box

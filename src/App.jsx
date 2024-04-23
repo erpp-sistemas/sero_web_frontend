@@ -24,6 +24,7 @@ import Map from './scenes/map'
 import Maintenance from './scenes/maintenance'
 import WorkAssignment from './scenes/assignment'
 import DashboardCoordinator from './scenes/dashboard-coordinacion'
+import Geocoding from './scenes/geocoding'
 import Account from './scenes/account'
 import UsersList from './scenes/users-list'
 import UserNew from './scenes/user-new'
@@ -96,14 +97,14 @@ function App() {
   }
 
   useEffect(()=>{
-    console.log(isAuthenticated)
-    if (!isAuthenticated) {
-      setLogin(null)
-      navigation('/')
-    } else {
-      setLogin(true)
-      navigation('/home')
-    }
+    // console.log(isAuthenticated)
+    // if (!isAuthenticated) {
+    //   setLogin(null)
+    //   navigation('/')
+    // } else {
+    //   setLogin(true)
+    //   navigation('/home')
+    // }
   }, [isAuthenticated])
 
 
@@ -145,6 +146,7 @@ function App() {
                     <Route path="/maintenance" element={<Maintenance />} />
                     <Route path="/assignment" element={<WorkAssignment />} />
                     <Route path="/dashboard-coordinator" element={<DashboardCoordinator />} />
+                    <Route path="/geocoding" element={<Geocoding />} />
                     <Route path="/acount-history" element={<AcountHistory/>}/>
                     <Route path="/valid-payment" element={< ValidPayment/>}/>
                     <Route path="/task" element={<Task/>}/>
