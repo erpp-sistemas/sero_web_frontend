@@ -6,8 +6,7 @@ import ServiceSelect from '../../components/ServiceSelect'
 import ProcessSelect from '../../components/ProcessSelectMultipleChip'
 import { validPaymentRequest } from '../../api/payment.js'
 import { useSelector } from 'react-redux'
-import { Box, useTheme, Button, Avatar} from "@mui/material";
-import Viewer from 'react-viewer';
+import { Box, useTheme, Button} from "@mui/material";
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
@@ -23,31 +22,6 @@ import * as ExcelJS from "exceljs";
 import LoadingModal from '../../components/LoadingModal.jsx'
 import { CardActionArea } from '@mui/material';
 import CustomAlert from '../../components/CustomAlert.jsx'
-import ManageSearchIcon from '@mui/icons-material/ManageSearch';
-import Header from '../../components/Header';
-import { DataGrid,
-  GridToolbarColumnsButton,
-  GridToolbarContainer,
-  GridToolbarDensitySelector,
-  GridToolbarExport,
-  GridToolbarFilterButton, } from '@mui/x-data-grid';
-import Chip from '@mui/material/Chip';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import ErrorIcon from '@mui/icons-material/Error';
-import WarningIcon from '@mui/icons-material/Warning';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import ListItemAvatar from '@mui/material/ListItemAvatar';
-import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
-import Tooltip from '@mui/material/Tooltip';
-import IconButton from '@mui/material/IconButton';
-import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
-import PreviewIcon from '@mui/icons-material/Preview';
-import DoneAllIcon from '@mui/icons-material/DoneAll'
-import SubdirectoryArrowLeftIcon from '@mui/icons-material/SubdirectoryArrowLeft';
-import SubdirectoryArrowRightIcon from '@mui/icons-material/SubdirectoryArrowRight';
 
 const Index = () => {
     
@@ -64,7 +38,6 @@ const Index = () => {
     const [alertOpen, setAlertOpen] = useState(false);
     const [alertType, setAlertType] = useState("");
     const [alertMessage, setAlertMessage] = useState("");
-    const [columns, setColumns] = useState([]);
 
     const [result, setResult] = useState([]);
     const [countResult, setCountResult] = useState(0);
@@ -86,9 +59,6 @@ const Index = () => {
     const [percentageCountWithoutPropertyPhoto, setPercentageCountWithoutPropertyPhoto] = useState(0);
     const [percentageCountWithoutEvidencePhoto, setPercentageCountWithoutEvidencePhoto] = useState(0);
     const [percentageCountPropertyNotLocated, setPercentageCountPropertyNotLocated] = useState(0);
-
-    const [resultCounts, setResultCounts] = useState(0);
-    const [resultAmount, setResultAmount] = useState(0);
 
       const handlePlaceChange = (event) => {
         setSelectedPlace(event.target.value);  
@@ -369,180 +339,6 @@ const Index = () => {
         }
     };
 
-    const handleExportToExcelFull = async () => {
-      try {
-        setIsLoading(true)
-          const workbook = new ExcelJS.Workbook();
-          const worksheet = workbook.addWorksheet("Registros Encontrados");
-                      
-          const headers = Object.keys(result[0]);
-          worksheet.addRow(headers);              
-          
-          result.forEach(row => {
-              const values = headers.map(header => row[header]);
-              worksheet.addRow(values);
-          });
-
-          const buffer = await workbook.xlsx.writeBuffer();
-          const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = "users.xlsx";
-          a.click();
-          window.URL.revokeObjectURL(url);
-          setIsLoading(false)
-      } catch (error) {
-          console.error("Error:", error);
-          return null;
-      }
-  };
-
-    function CustomToolbar() {
-      return (
-        <GridToolbarContainer>
-          <GridToolbarColumnsButton color="secondary" />
-          <GridToolbarFilterButton color="secondary" />
-          <GridToolbarDensitySelector color="secondary" />
-  
-          <Button
-              color="secondary"
-              onClick={handleExportToExcelFull}
-          >
-              Exportar a Excel
-          </Button>    
-          
-        </GridToolbarContainer>
-      );
-    }
-
-    const buildColumns = () => {      
-      if (result.length > 0) {
-        const firstRow = result[0];
-        const dynamicColumns = Object.keys(firstRow).map((key) => {
-          
-          if (key === 'id') {
-            return null;
-          }
-
-          if (key === 'urlImagenFachada' || key === 'urlImagenEvidencia') {
-            return {
-              field: key,
-              headerName: key.toUpperCase(),
-              renderHeader: () => (
-                <strong style={{ color: "#5EBFFF" }}>{key.toUpperCase()}</strong>
-              ),
-              renderCell: (params) => <AvatarImage data={params.value} />,              
-              width: 150,
-              sortable: false,
-              filterable: false,
-            };
-          }
-
-          if (key === 'foto fachada predio') {
-            return {
-              field: key,
-              headerName: key.toUpperCase(),
-              renderHeader: () => (
-                <strong style={{ color: "#5EBFFF" }}>{key.toUpperCase()}</strong>
-              ),
-              renderCell: (params) => (
-                <Chip
-                  icon={params.value === 'si' ? <CheckCircleIcon style={{ color: 'green' }} /> : <ErrorIcon style={{ color: 'red' }} />}
-                  label={params.value}
-                  color={params.value === 'si' ? 'secondary' : 'error'}
-                  variant="outlined"
-                />
-              ),
-              width: 150,
-              sortable: false,
-              filterable: false,
-            };
-          }
-
-          if (key === 'foto evidencia predio') {
-            return {
-              field: key,
-              headerName: key.toUpperCase(),
-              renderHeader: () => (
-                <strong style={{ color: "#5EBFFF" }}>{key.toUpperCase()}</strong>
-              ),
-              renderCell: (params) => (
-                <Chip
-                  icon={params.value === 'si' ? <CheckCircleIcon style={{ color: 'green' }} /> : <ErrorIcon style={{ color: 'red' }} />}
-                  label={params.value}
-                  color={params.value === 'si' ? 'secondary' : 'error'}
-                  variant="outlined"
-                />
-              ),
-              width: 150,
-              sortable: false,
-              filterable: false,
-            };
-          }
-
-          if (key === 'estatus de gestion valida') {
-            return {
-              field: key,
-              headerName: key.toUpperCase(),
-              renderHeader: () => (
-                <strong style={{ color: "#5EBFFF" }}>{key.toUpperCase()}</strong>
-              ),
-              renderCell: (params) => (
-                <Chip
-                  icon={params.value === 'valida' ? <CheckCircleIcon style={{ color: 'green' }} /> : <ErrorIcon style={{ color: 'red' }} />}
-                  label={params.value}
-                  color={params.value === 'valida' ? 'secondary' : 'error'}
-                  variant="outlined"
-                />
-              ),
-              width: 150,
-              sortable: false,
-              filterable: false,
-            };
-          }
-  
-          return {
-            field: key,
-            headerName: key.toUpperCase(),
-            renderHeader: () => (
-              <strong style={{ color: "#5EBFFF" }}>{key.toUpperCase()}</strong>
-            ),
-            width: 210,
-            editable: false,
-          };
-        }).filter((column) => column !== null);
-  
-        setColumns(dynamicColumns);
-      }
-    };  
-    
-    useEffect(() => {
-      buildColumns();
-    }, [result]);  
-
-    const AvatarImage = ({ data }) => {
-      const [visibleAvatar, setVisibleAvatar] = React.useState(false);
-      return (
-        <>
-          <Avatar
-            onClick={() => {
-              setVisibleAvatar(true);
-            }}
-            alt="Remy Sharp"
-            src={data}
-          />
-    
-          <Viewer
-            visible={visibleAvatar}
-            onClose={() => {
-              setVisibleAvatar(false);
-            }}
-            images={[{ src: data, alt: 'avatar' }]}          
-          />
-        </>
-      );
-    };    
 
       console.log('place_id', selectedPlace)
       console.log('service_id',selectedService)      
@@ -662,8 +458,7 @@ const Index = () => {
                   }}                  
                   sx={{ bgcolor: 'secondary.main', '&:hover': { bgcolor: 'secondary.dark' } }}
                   >
-                    <ManageSearchIcon fontSize="large"/>
-                    Buscar                  
+                  Generar
                 </Button>
               </Grid>
             </Grid>            
@@ -954,34 +749,6 @@ const Index = () => {
                   </CardActionArea>
                 </Card>
               </Grid>       
-            </Grid>
-            <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
-              <Grid item xs={12}>
-                <Box m="20px">
-                  <Header title="Listado de pagos validos" />
-                  <Box
-                    sx={{
-                      height: 400,
-                      width: '100%',
-                      '.css-196n7va-MuiSvgIcon-root': {
-                        fill: 'white',
-                      },
-                    }}
-                  >
-                    {result.length === 0 ? (
-                      <div style={{ textAlign: 'center', padding: '20px' }}>No row</div>
-                    ) : (
-                      <DataGrid
-                        rows={result}
-                        columns={columns}
-                        getRowId={(row) => row.id}
-                        editable={false}                         
-                        slots={{ toolbar: CustomToolbar}}                        
-                      />
-                    )}
-                  </Box>
-                </Box>
-              </Grid>              
             </Grid>
 
           </Box>                 

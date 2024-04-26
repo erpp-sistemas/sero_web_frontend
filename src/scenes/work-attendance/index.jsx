@@ -26,6 +26,25 @@ import PersonPinCircleIcon from '@mui/icons-material/PersonPinCircle';
 import * as ExcelJS from "exceljs";
 import LoadingModal from '../../components/LoadingModal.jsx'
 import CustomAlert from '../../components/CustomAlert.jsx'
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import ErrorIcon from '@mui/icons-material/Error';
+import WarningIcon from '@mui/icons-material/Warning';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import ListItemAvatar from '@mui/material/ListItemAvatar';
+import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
+import Tooltip from '@mui/material/Tooltip';
+import IconButton from '@mui/material/IconButton';
+import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
+import PreviewIcon from '@mui/icons-material/Preview';
+import DoneAllIcon from '@mui/icons-material/DoneAll';
+import Divider from '@mui/material/Divider';
+import ModalTable from '../../components/work-attendance/ModalTable.jsx'
+import ManageSearchIcon from '@mui/icons-material/ManageSearch';
+import SubdirectoryArrowLeftIcon from '@mui/icons-material/SubdirectoryArrowLeft';
+import SubdirectoryArrowRightIcon from '@mui/icons-material/SubdirectoryArrowRight';
 
 const Index = () => {
     
@@ -42,6 +61,12 @@ const Index = () => {
     const [alertOpen, setAlertOpen] = useState(false);
     const [alertType, setAlertType] = useState("");
     const [alertMessage, setAlertMessage] = useState("");
+    const [totalRecords, setTotalRecords] = useState(0);
+    const [resultCountsEntry, setResultCountsEntry] = useState({});    
+    const [resultCountsExit, setResultCountsExit] = useState({});   
+    
+    const [openModal, setOpenModal] = useState(false);
+    const [modalData, setModalData] = useState([]);
 
       const handlePlaceChange = (event) => {
         setNoData('')
@@ -463,6 +488,96 @@ const Index = () => {
         );
       }
 
+      useEffect(() => {
+        const countsE = users.reduce((acce, row) => {
+            const resultE = row.entry_status;
+            
+            acce[resultE] = (acce[resultE] || 0) + 1;
+  
+            return acce;
+        }, {});
+
+        const countsS = users.reduce((accs, row) => {
+          const resultS = row.exit_status;
+          
+          accs[resultS] = (accs[resultS] || 0) + 1;
+
+          return accs;
+      }, {});
+  
+        setTotalRecords(users.length);
+        setResultCountsEntry(countsE);
+        setResultCountsExit(countsS);        
+        console.log(countsE)
+        console.log(countsS)
+  
+      }, [users])
+  
+    const resultIcons = {
+        "Asistencia correcta": <CheckCircleIcon color="secondary"/>,
+        "Retardo": <WarningIcon color="warning"/>,
+        "Falta": <ErrorIcon color="error"/>,
+        "Dia incompleto": <WarningIcon color="warning"/>,
+    };
+
+    const handleDownloadExcel = async (type, result) => {
+      try {
+        setIsLoading(true);
+
+        let filteredData
+
+        if (type === 1){
+          filteredData = users.filter(row => row.entry_status === result);
+        }
+        else if (type === 2){
+          filteredData = users.filter(row => row.exit_status === result);
+        }
+        
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet("Registros Encontrados");
+    
+        const headers = Object.keys(filteredData[0]);
+        worksheet.addRow(headers);
+    
+        filteredData.forEach(row => {
+          const values = headers.map(header => row[header]);
+          worksheet.addRow(values);
+        });
+    
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${result}.xlsx`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Error:", error);
+        setIsLoading(false);
+      }
+    };
+
+    const handleOpenModal = (type, result) => {
+
+      let filteredData
+
+      if(type === 1){
+        filteredData = users.filter(row => row.entry_status === result);
+      }
+      else if(type === 2){
+        filteredData = users.filter(row => row.exit_status === result);
+      }
+      
+      setModalData(filteredData);
+      setOpenModal(true);
+    };
+  
+    const handleCloseModal = () => {
+      setOpenModal(false);
+    };
+
       console.log('place_id', selectedPlace)      
       console.log('start_date', selectedStartDate)
       console.log('finish_date', selectedEndDate)
@@ -472,11 +587,11 @@ const Index = () => {
         <>
         <LoadingModal open={isLoading}/>
         <CustomAlert
-                alertOpen={alertOpen}
-                type={alertType}
-                message={alertMessage}
-                onClose={setAlertOpen}
-              />            
+          alertOpen={alertOpen}
+          type={alertType}
+          message={alertMessage}
+          onClose={setAlertOpen}
+        />
           <Box
               m='20px 0'
               display='flex'
@@ -531,36 +646,142 @@ const Index = () => {
                     handleGetWorkAttendance();                    
                   }}
                   >
-                  Generar
+                  <ManageSearchIcon fontSize="large"/>
+                  Buscar
                 </Button>
               </Grid>
             </Grid>
+            <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
+                <Grid item xs={8}>
+                  <Box m="20px">
+                    <Header title="Listado de asistencia" />
+                    <Box
+                      sx={{
+                        height: 400,
+                        width: '100%',
+                        '.css-196n7va-MuiSvgIcon-root': {
+                          fill: 'white',
+                        },
+                      }}
+                    >
+                      {users.length === 0 ? (
+                        <div style={{ textAlign: 'center', padding: '20px' }}>No row</div>
+                      ) : (
+                        <DataGrid
+                          rows={users}
+                          columns={buildColumns()}
+                          getRowId={(row) => row.user_id}
+                          editable={false} 
+                          slots={{ toolbar: CustomToolbar}}                
+                        />
+                      )}
+                    </Box>
+                  </Box>
+
+                </Grid>
+                <Grid item xs={4}>
+                <Box
+                    m='5px 0'
+                    display='flex'
+                    flexDirection='column'
+                    justifyContent='space-evenly'
+                    gap='10px'
+                    sx={{
+                        backgroundColor: colors.primary[400],
+                        padding: '5px 5px',
+                        borderRadius: '10px',
+                        width: '100%',
+                    }}
+                  >
+                    <List
+                      sx={{
+                        width: '100%',
+                        maxWidth: 360,                        
+                        bgcolor: {backgroundColor: colors.primary[400]},
+                      }}
+                    >
+                      <ListItem>
+                        <ListItemAvatar>
+                          <Avatar>
+                            <DoneAllIcon color="secondary"/>
+                          </Avatar>
+                        </ListItemAvatar>
+                        <ListItemText primary={`Registros encontrados: ${totalRecords}`} />
+                      </ListItem>
+                      <Divider variant="inset" component="li" />
+                      <ListItem sx={{backgroundColor: theme.palette.info.main}}>
+                        <ListItemIcon>
+                            <SubdirectoryArrowRightIcon />
+                        </ListItemIcon>
+                        <ListItemText primary={`Entrada`} />                        
+                      </ListItem>                      
+                      <Divider variant="inset" component="li" />
+                      {Object.entries(resultCountsEntry).map(([result, count]) => (
+                        <React.Fragment key={result}>
+                            <ListItem>
+                                <ListItemAvatar>
+                                    <Avatar>
+                                        {resultIcons[result]}
+                                    </Avatar>
+                                </ListItemAvatar>
+                                <ListItemText primary={`${result}: ${count}`} />
+                                <ListItemSecondaryAction>
+                                  <Tooltip title="Descargar" arrow>
+                                    <IconButton onClick={() => handleDownloadExcel(1, result)}>
+                                      <CloudDownloadIcon  style={{ color: theme.palette.secondary.main }} />
+                                    </IconButton>
+                                  </Tooltip>
+                                  <Tooltip title="Ver Registros" arrow>
+                                    <IconButton  onClick={() => handleOpenModal(1, result)}>
+                                      <PreviewIcon  style={{ color: theme.palette.info.main }} />
+                                    </IconButton>
+                                  </Tooltip>
+                                </ListItemSecondaryAction>
+                            </ListItem>
+                            <Divider variant="inset" component="li" />
+                        </React.Fragment>
+                      ))}
+                      <ListItem sx={{backgroundColor: theme.palette.info.main}}>
+                        <ListItemIcon>
+                            <SubdirectoryArrowLeftIcon />
+                        </ListItemIcon>
+                        <ListItemText primary={`Salida`} />                        
+                      </ListItem>                      
+                      <Divider variant="inset" component="li" />
+                        {Object.entries(resultCountsExit).map(([results, counts]) => (
+                          <React.Fragment key={results}>
+                              <ListItem>
+                                  <ListItemAvatar>
+                                      <Avatar>
+                                          {resultIcons[results]}
+                                      </Avatar>
+                                  </ListItemAvatar>
+                                  <ListItemText primary={`${results}: ${counts}`} />
+                                  <ListItemSecondaryAction>
+                                    <Tooltip title="Descargar" arrow>
+                                      <IconButton onClick={() => handleDownloadExcel(2, results)}>
+                                        <CloudDownloadIcon  style={{ color: theme.palette.secondary.main }} />
+                                      </IconButton>
+                                    </Tooltip>
+                                    <Tooltip title="Ver Registros" arrow>
+                                      <IconButton  onClick={() => handleOpenModal(2, results)}>
+                                        <PreviewIcon  style={{ color: theme.palette.info.main }} />
+                                      </IconButton>
+                                    </Tooltip>
+                                  </ListItemSecondaryAction>
+                              </ListItem>
+                              <Divider variant="inset" component="li" />
+                          </React.Fragment>
+                        ))}
+                    </List>
+                  </Box>
+                </Grid>
+              </Grid>
+
+              <ModalTable open={openModal} onClose={handleCloseModal} data={modalData} />
           </Box>
           
-          <Box m="20px">
-            <Header title="Listado de asistencia" />
-            <Box
-              sx={{
-                height: 400,
-                width: '100%',
-                '.css-196n7va-MuiSvgIcon-root': {
-                  fill: 'white',
-                },
-              }}
-            >
-              {users.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '20px' }}>No row</div>
-              ) : (
-                <DataGrid
-                  rows={users}
-                  columns={buildColumns()}
-                  getRowId={(row) => row.user_id}
-                  editable={false} 
-                  slots={{ toolbar: CustomToolbar}}                
-                />
-              )}
-            </Box>
-          </Box>
+          
 
         </>
 

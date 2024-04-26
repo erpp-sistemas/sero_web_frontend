@@ -16,7 +16,6 @@ import Grid from '@mui/material/Grid';
 import { tokens } from "../../theme";
 import PlaceSelect from '../../components/PlaceSelect'
 import ServiceSelect from '../../components/ServiceSelect'
-import AlertMessage from "../../components/AlertMessage";
 import { useSelector } from 'react-redux'
 import { Box, useTheme, Button} from "@mui/material";
 import Typography from '@mui/material/Typography';
@@ -35,7 +34,15 @@ import { DataGrid, GridActionsCellItem,
 import * as ExcelJS from "exceljs";
 import Chip from '@mui/material/Chip';
 import NotInterestedIcon from '@mui/icons-material/NotInterested';
+import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
+import Tooltip from '@mui/material/Tooltip';
+import IconButton from '@mui/material/IconButton';
+import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
+import ModalTable from '../../components/Assignment/ModalTable.jsx'
+import PreviewIcon from '@mui/icons-material/Preview';
+import PersonOffIcon from '@mui/icons-material/PersonOff';
 
 const Index = () => {
     
@@ -55,6 +62,9 @@ const Index = () => {
     const [alertOpen, setAlertOpen] = useState(false);
     const [alertType, setAlertType] = useState("");
     const [alertMessage, setAlertMessage] = useState("");
+
+    const [openModal, setOpenModal] = useState(false);
+    const [modalData, setModalData] = useState([]);
 
       const handlePlaceChange = (event) => {
         setSelectedPlace(event.target.value);  
@@ -201,12 +211,12 @@ const Index = () => {
   }, [resultAssignment])
 
   const resultIcons = {
-    "asignacion correcta": <CheckCircleIcon />,
-    "no existe la cuenta": <ErrorIcon />,
-    "cuenta duplicada": <WarningIcon />,
-    "no existe la tarea": <CancelIcon />,
-    "no existe el usuario": <PersonOutlineIcon />,
-    "no tiene deuda en el mes actual": <AttachMoneyIcon />,
+    "asignacion correcta": <CheckCircleIcon color="secondary"/>,
+    "no existe la cuenta": <ErrorIcon color="error"/>,
+    "cuenta duplicada": <WarningIcon color="warning"/>,
+    "no existe la tarea": <CancelIcon color="error"/>,
+    "no existe el usuario": <PersonOffIcon color="error"/>,
+    "no tiene deuda en el mes actual": <AttachMoneyIcon color="warning"/>,
 };
 
 const buildColumns = () => {   
@@ -370,6 +380,16 @@ const handleDownloadExcel = async (result) => {
   }
 };
 
+  const handleOpenModal = (result) => {
+    const filteredData = resultAssignment.filter(row => row.assignment_result === result);
+    setModalData(filteredData);
+    setOpenModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setOpenModal(false);
+};
+
       console.log('place_id', selectedPlace)
       console.log('service_id',selectedService)
       console.log('file', selectedFile)
@@ -411,11 +431,19 @@ const handleDownloadExcel = async (result) => {
                   />
                 </Grid>
               </Grid>
-              <Box>
-                <label htmlFor="file-upload-excel">
-                  <Typography variant="body1" gutterBottom>
-                    Cargar archivo Excel
-                  </Typography>
+              <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
+                <Grid item xs={6}>
+                  <Box>
+                  <label htmlFor="file-upload-excel">                  
+                  <Button
+                      variant="contained"
+                      component="span"
+                      color="primary"
+                      sx={{ bgcolor: 'info.main', '&:hover': { bgcolor: 'info.dark' } }}
+                  >
+                     <CloudUploadIcon style={{ marginRight: '5px' }}/>
+                      Seleccionar archivo
+                  </Button>
                   <Input
                   key={fileKey}
                     accept=".xlsx, .xls"
@@ -428,22 +456,23 @@ const handleDownloadExcel = async (result) => {
                     Archivo seleccionado: {selectedFile ? selectedFile.name : 'Ningún archivo seleccionado'}
                   </Typography>
                 </label>
-              </Box>
-
-              {error && <AlertMessage message={error} type="error" />}
-
-              <Button
-                variant="contained"
-                color="primary"
-                sx={{ bgcolor: 'secondary.main', '&:hover': { bgcolor: 'secondary.dark' } }}
-                onClick={() => {
-                  handleConvertExcelToArray();
-                  
-                }}                
-              >
-                Carga Asignaciones
-              </Button>             
-
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    sx={{ bgcolor: 'secondary.main', '&:hover': { bgcolor: 'secondary.dark' } }}
+                    onClick={() => {
+                      handleConvertExcelToArray();
+                      
+                    }}                
+                    >
+                      <UploadFileIcon style={{ marginRight: '5px' }} />
+                    Carga Asignaciones
+                  </Button>
+                </Grid>
+              </Grid>
             </Box>
 
                 
@@ -460,28 +489,39 @@ const handleDownloadExcel = async (result) => {
             >
               <Grid container spacing={2}>                   
                   <Grid item xs={8}>
-                  {resultAssignment.length === 0 ? (
-                      <div style={{ textAlign: 'center', padding: '20px' }}>No row</div>
-                    ) : (
-                      <DataGrid
-                        rows={resultAssignment}
-                        columns={buildColumns()}
-                        getRowId={(row) => row.id}
-                        editable={false} 
-                        slots={{ toolbar: CustomToolbar}}                
-                      />
-                    )}
+                  <Box
+                    sx={{
+                      height: 450,
+                      width: '100%',
+                      '.css-196n7va-MuiSvgIcon-root': {
+                        fill: 'white',
+                      },
+                    }}
+                  >
+                  
+                    {resultAssignment.length === 0 ? (
+                        <div style={{ textAlign: 'center', padding: '20px' }}>No row</div>
+                      ) : (
+                        <DataGrid
+                          rows={resultAssignment}
+                          columns={buildColumns()}
+                          getRowId={(row) => row.id}
+                          editable={false} 
+                          slots={{ toolbar: CustomToolbar}}                
+                        />
+                      )}
+                    </Box>
                   </Grid>
                   <Grid item xs={4}>
                   <Box
-                    m='10px 0'
+                    m='5px 0'
                     display='flex'
                     flexDirection='column'
                     justifyContent='space-evenly'
-                    gap='20px'
+                    gap='10px'
                     sx={{
                         backgroundColor: colors.primary[400],
-                        padding: '15px 10px',
+                        padding: '5px 5px',
                         borderRadius: '10px',
                         width: '100%',
                     }}
@@ -496,7 +536,7 @@ const handleDownloadExcel = async (result) => {
                       <ListItem>
                         <ListItemAvatar>
                           <Avatar>
-                            <DoneAllIcon />
+                            <DoneAllIcon color="secondary"/>
                           </Avatar>
                         </ListItemAvatar>
                         <ListItemText primary={`Registros Cargados: ${totalRecords}`} />
@@ -504,22 +544,37 @@ const handleDownloadExcel = async (result) => {
                       <Divider variant="inset" component="li" />
                       {Object.entries(resultCounts).map(([result, count]) => (
                         <React.Fragment key={result}>
-                            <ListItem button onClick={() => handleDownloadExcel(result)}>
+                            <ListItem>
                                 <ListItemAvatar>
                                     <Avatar>
                                         {resultIcons[result]}
                                     </Avatar>
                                 </ListItemAvatar>
                                 <ListItemText primary={`${result}: ${count}`} />
+                                <ListItemSecondaryAction>
+                                  <Tooltip title="Descargar" arrow>
+                                    <IconButton onClick={() => handleDownloadExcel(result)}>
+                                      <CloudDownloadIcon  style={{ color: theme.palette.secondary.main }} />
+                                    </IconButton>
+                                  </Tooltip>
+                                  <Tooltip title="Ver Registros" arrow>
+                                    <IconButton onClick={() => handleOpenModal(result)}>
+                                      <PreviewIcon  style={{ color: theme.palette.info.main }} />
+                                    </IconButton>
+                                  </Tooltip>
+                                </ListItemSecondaryAction>
                             </ListItem>
                             <Divider variant="inset" component="li" />
                         </React.Fragment>
                       ))}
                     </List>
-                    </Box>
-                  </Grid>
+                  </Box>
+                </Grid>
               </Grid>              
             </Box>
+
+            <ModalTable open={openModal} onClose={handleCloseModal} data={modalData} />
+
           </Box>
         </>
 

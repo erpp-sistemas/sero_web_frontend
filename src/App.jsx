@@ -98,13 +98,13 @@ function App() {
 
   useEffect(()=>{
     // console.log(isAuthenticated)
-    // if (!isAuthenticated) {
-    //   setLogin(null)
-    //   navigation('/')
-    // } else {
-    //   setLogin(true)
-    //   navigation('/home')
-    // }
+    if (!isAuthenticated) {
+      setLogin(null)
+      navigation('/')
+    } else {
+      setLogin(true)
+      navigation('/home')
+    }
   }, [isAuthenticated])
 
 
