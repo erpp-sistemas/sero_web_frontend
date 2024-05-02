@@ -6,6 +6,7 @@ import axios from 'axios'
 //    withCredentials: true
 // }) 
 
-const instance = axios.create({ baseURL: "https://erpp.center/sero-web/api"}) // Se usa en modo produccion
+// Se usa en modo produccion
+const instance = axios.create({ baseURL: "https://erpp.center/sero-web/api"}) 
 
 export default instance

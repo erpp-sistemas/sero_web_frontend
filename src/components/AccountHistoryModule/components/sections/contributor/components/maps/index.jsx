@@ -3,6 +3,9 @@ import { LoadScript } from "@react-google-maps/api";
 import "../maps/GoogleMaps.css";
 import PropTypes from 'prop-types';
 import { withErrorBoundary } from '@sentry/react';
+import { Typography, Divider } from '@mui/material';;
+import Grid from '@mui/material/Grid';
+import LocationOffIcon from '@mui/icons-material/LocationOff';
 
 const classNames = {
   principal: "GoogleMapsPrincipal",
@@ -25,11 +28,13 @@ const classNames = {
 function GoogleMaps({latitude,longitude}) {
 
 
-  const lat =latitude?latitude: 19.6593364
-  const lng =longitude?longitude: -99.2093698
+  const lat =latitude ? latitude : 0
+  const lng =longitude ? longitude : 0
   const mapRef = React.useRef(null);
   const panoramaRef = React.useRef(null);
   const [mapLoaded, setMapLoaded] = React.useState(false);
+
+  
 /**
    * Maneja el evento onLoad del componente LoadScript.
    */
@@ -62,7 +67,7 @@ function GoogleMaps({latitude,longitude}) {
   const apiKey = "AIzaSyBSbHAclLiEeiClEXfeZ2zn9OT850Mw55A";
   return (
     <div className={classNames.principal}>
-    <LoadScript googleMapsApiKey={apiKey} onLoad={onMapLoad}>
+    <LoadScript googleMapsApiKey={apiKey} onLoad={onMapLoad} loading="async">
       <div className={classNames.mapParent}>
         <div ref={mapRef} className={classNames.map}></div>
       </div>

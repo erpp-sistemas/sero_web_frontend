@@ -39,7 +39,7 @@ import { useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from 'react-redux'
 import Cookies from 'js-cookie'
 import { verifyTokenRequest } from "./api/auth";
-import AcountHistory from "./scenes/acount-history";
+import AccountHistory from "./scenes/account-history";
 import SheetGenerator from "./scenes/sheet-generator";
 import ValidPayment from './scenes/valid-payment'
 import Task from "./scenes/task";
@@ -146,8 +146,7 @@ function App() {
                     <Route path="/maintenance" element={<Maintenance />} />
                     <Route path="/assignment" element={<WorkAssignment />} />
                     <Route path="/dashboard-coordinator" element={<DashboardCoordinator />} />
-                    <Route path="/geocoding" element={<Geocoding />} />
-                    <Route path="/acount-history" element={<AcountHistory/>}/>
+                    <Route path="/geocoding" element={<Geocoding />} />                    
                     <Route path="/valid-payment" element={< ValidPayment/>}/>
                     <Route path="/task" element={<Task/>}/>
                     <Route path="/service" element={<Service/>}/>
@@ -157,7 +156,7 @@ function App() {
                     <Route path="/places" element={<Places/>}/>
                     <Route path="/users-list" element={<UsersList/>}/>
                     <Route path="/user-new" element={<UserNew/>}/>
-                    <Route path="/acount-history" element={<AcountHistory />} />
+                    <Route path="/account-history" element={<AccountHistory />} />
                     <Route path="/valid-payment" element={< ValidPayment />} />
                     <Route path="/task" element={<Task />} />
                     <Route path="/service" element={<Service />} />
