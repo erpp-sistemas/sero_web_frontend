@@ -38,6 +38,7 @@ import UsersList from './scenes/users-list'
 import UserNew from './scenes/user-new'
 import WorkAttendance from './scenes/work-attendance'
 import Records from './scenes/records'
+import Impresiones from './scenes/records-impression'
 import Topbar from "./scenes/global/Topbar"
 import Sidebar from "./scenes/global/Sidebar"
 import SidebarMap from "./scenes/global/SidebarMap"
@@ -92,14 +93,14 @@ function App() {
 
 	useEffect(()=>{
 
-		if (!isAuthenticated) {
-			setLogin(null)
-			navigation('/')
-		} 
-
-		else {
+		if (isAuthenticated) {
 			setLogin(true)
 			navigation('/home')
+			
+		} 
+		else {
+			setLogin(null)
+			navigation('/')
 		}
 
 	// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -144,7 +145,7 @@ function App() {
 
 									<Routes>
 
-										<Route path="/home" element={<Home />} />
+										<Route path="/home2" element={<Home />} />
 										<Route path="/dashboard-direccion" element={<Dashboard setLogin={setLogin} />} />
 										<Route path="/team" element={<Team />} />
 										<Route path="/contacts" element={<Contacts />} />
@@ -183,7 +184,8 @@ function App() {
 										<Route path="/permission" element={<Permission />} />
 										<Route path="/places" element={<Places />} />
 										<Route path="/work-attendance" element={<WorkAttendance />} />
-										<Route path="/records" element={<Records />} />yy
+										<Route path="/records" element={<Records />} />
+										<Route path="/home" element={<Impresiones />} />
 
 									</Routes>
 

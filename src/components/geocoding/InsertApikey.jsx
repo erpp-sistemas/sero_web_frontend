@@ -104,6 +104,7 @@ const index = () => {
     <Grid container sm={6} xs={9} display={'flex'} justifyContent={"center"}>
       <Grid item sm={9} marginBottom={"10px"}>
           <Box  style={{ backgroundColor: colors.primary[400], color: 'black', padding: '20px', borderRadius: '10px',width:"100%" } }>
+            
             <FormControl fullWidth variant="filled">
               <InputLabel htmlFor="filled-adornment-amount"  color="primary">Inserta tu APIKEY</InputLabel>
               <FilledInput

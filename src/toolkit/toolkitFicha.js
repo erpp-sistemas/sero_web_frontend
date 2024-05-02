@@ -160,10 +160,49 @@ function NumberToDate(serial) {
 
 
 
+const formatearHtml=(html,data)=>{
+    let text_html=html
+    for(let key in data){
+        let value=data[key]?data[key]:""
+        let keyUpper=key.toUpperCase();
+        text_html=text_html.replace(`{{${keyUpper}}}`,value)
+    }
+
+    return text_html
+}
+
+
+const unificarRegistros=(data)=>{
+    console.log(data)
+    const registros=[];
+
+    for(let registro of data){
+        // let repetido=false;
+            const repetido= registros.findIndex(r=>r.cuenta==registro.cuenta)
+
+        if(repetido==-1){
+           
+            let allPagos=[
+                {servicio:registro.servicio,descripcion:registro.descripcion,total_pagado:registro.total_pagado}
+            ] 
+            registros.push({...registro,allPagos})
+        }else{
+            let pago={servicio:registro.servicio,descripcion:registro.descripcion,total_pagado:registro.total_pagado}
+            registros[repetido].allPagos.push(pago)
+        }
+
+    }
+    console.log(registros)
+    
+}
+
+
 export default {
     generatePaquete,
     uploadFichas,
     getServicios,
     getPlazas,
-    formatearFila
+    formatearFila,
+    formatearHtml,
+    unificarRegistros
 }

@@ -23,7 +23,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setApikeyGeocodingSlice } from '../../redux/apikeyGeocodingSlice';
 
 
-import PropTypes from 'prop-types';
+
 import LinearProgress from '@mui/material/LinearProgress';
 import Typography from '@mui/material/Typography';
 import { Reset, setCordenadas, setCordenadasErrores, setCordenadasFormatoErrores, setCordenadasRestantes, setFile, setPorSubir, setResponse, setSumaTotalCordendas, setVistaPanel, valueInitCordenadas } from '../../redux/dataGeocodingSlice';
@@ -38,7 +38,7 @@ import PlaceSelect from '../PlaceSelect';
 import { setPlazaNumber } from '../../redux/plazaNumberSlice';
 import ModalAviso from './ModalAviso';
 import CustomAlert from '../CustomAlert';
-import { message } from 'antd';
+
 
 
 
@@ -106,7 +106,7 @@ const StickyHeadTable = ({rows}) => {
           <TableBody>
             {rows.map((row) => {
               return (
-                <TableRow hover role="checkbox" tabIndex={-1} key={row.num}>
+                <TableRow hover role="checkbox" tabIndex={-1} key={row.name}>
                   {columns.map((column) => {
                     const value = row[column.id];
                     return (
