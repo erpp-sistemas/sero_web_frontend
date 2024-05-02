@@ -1,18 +1,14 @@
 import { Box, Typography, Checkbox, FormControl, InputLabel, MenuItem, TextField, Button, Select } from '@mui/material'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import * as XLSX from 'xlsx'
-import useFichasState from '../../hooks/fichasStates.js'
-import Modal from '../../components/Records/Modal.jsx'
-import { useNavigate } from 'react-router-dom'
 import tool from '../../toolkit/toolkitFicha.js'
-import LinerProgress from '../../components/Records/LinerProgress.jsx'
-import { useSelector } from 'react-redux'
-import { dispatch } from '../../redux/store.js'
-import { setFechaCortePaquete, setFolioPaquete, setIdPaquete, setPlazaPaquete, setServicioPaquete } from '../../redux/paqueteReducer.js'
+import LinearProgressWithLabel from '../../components/Records/LinerProgress.jsx'
+import { useSelector, useDispatch } from 'react-redux'
+import { setActivity, setPlazas, setServicios, setPlaza, setServicio, setFileName, setSelectionCompleted, setFolio, setRegistros, setPorcentaje, setCargando } from '../../redux/recordsSlice.js'
 
 /**
 	* Página principal de fichas
@@ -22,57 +18,51 @@ import { setFechaCortePaquete, setFolioPaquete, setIdPaquete, setPlazaPaquete, s
 */
 function Records() {
 
-	// const [excel, setExcel] = useState(null)
+	const [fechaCorte, setfechaCorte] = useState(null)
+	// eslint-disable-next-line no-unused-vars
+	const [excel, setExcel] = useState(null)
+	const user = useSelector(state => state.user)
+	const { activity, plazas, servicios, plaza, servicio, fileName, folio, selectionCompleted, registros, porcentaje, cargando } = useSelector(state => state.records);
+	const dispatch = useDispatch()
 
-	const { activity, setActivity, plazas, setPlazas, plaza, setPlaza, servicios, setServicios, setServicio, servicio, fileName, setFileName, selectionCompleted, setFolio, folio, setSelectionCompleted, cargando, setCargando, regsitros, setRegistros, porcentaje, setPorcentaje, modal, setModal, setFechaCorte, fechaCorte } = useFichasState()
+	const Progreso = useMemo(() => {
+		return porcentaje
+	}, [porcentaje])
 
-	// const navigate = useNavigate()
-	// const paquete = useSelector(p => p.paquete)
+	const calcularProgreso = (total) => {
+		const calculo = total * 100 / registros.length
+		dispatch(setPorcentaje(calculo))
+	}
 
-	// const handleChange = async (event) => {
-	// 	dispatch(setPlazaPaquete(event.target.value))
-	// 	const servicios = await tool.getServicios(event.target.value)
-	// 	setServicios(servicios)
-	// }
+	const processUpload = async () => {
 
-	// const Progreso = useMemo(() => {
-	// 	return porcentaje
-	// }, [porcentaje])
+		dispatch(setPorcentaje(0))
+		dispatch(setCargando(true))
 
-	// const calcularProgreso = (total) => {
-	// 	const calculo = total * 100 / regsitros.length
-	// 	setPorcentaje(calculo)
-	// }
+		const data = {
+			servicio: servicio,
+			fecha_corte: fechaCorte.format('YYYY-MM-DD'),
+			folio: folio || 'desconocido',
+			plaza: plaza,
+			excel_document: 'desconocido',
+			user_id: user.user_id
+		}
 
-	// const processUpload = async () => {
-	// 	setPorcentaje(0)
-	// 	setCargando(true)
-
-	// 	const data = {
-	// 		servicio: paquete.servicio,
-	// 		fecha_corte: paquete.fecha_corte.format('YYYY-MM-DD'),
-	// 		folio: paquete.folio || 'desconocido',
-	// 		plaza: paquete.plaza,
-	// 		excel_document: excel 
-	// 	}
-
-	// 	const id_paquete = await tool.generatePaquete(data)
-	// 	dispatch(setIdPaquete(id_paquete))
-	// 	let total = 0
-	// 	for (let ficha of regsitros) {
-	// 		await tool.uploadFichas({ id_paquete, ...ficha })
-	// 		total += 1
-	// 		calcularProgreso(total)
-	// 	}
-	// 	setCargando(false)
-	// 	setModal(true)
-	// }
+		const id_paquete = await tool.generatePaquete(data)
+		let total = 0
+		for (let ficha of registros) {
+			await tool.uploadFichas({ id_paquete, ...ficha })
+			total += 1
+			calcularProgreso(total)
+		}
+		dispatch(setCargando(false))
+	}
 
 	const handleFileUpload = (e) => {
 
 		const file = e.target.files?.[0]
 		if (!file) return
-		// setExcel(file)
+		setExcel(file)
 		const reader = new FileReader()
 
 		reader.onload = async (event) => {
@@ -82,27 +72,20 @@ function Records() {
 			const sheet = workbook.Sheets[sheetName]
 			const options = { header: 1 }
 			const jsonData = XLSX.utils.sheet_to_json(sheet, options)
-
 			const filasFormateadas = await tool.formatearFila(jsonData, folio)
-
-			setRegistros(filasFormateadas)
-			console.log(filasFormateadas)
+			dispatch(setRegistros(filasFormateadas))
 		}
 
 		reader.readAsArrayBuffer(file)
-		setFileName(file.name)
+		dispatch(setFileName(file.name))
 	}
-
-	// const handleChangeTwo = async (event) => {
-	// 	dispatch(setServicioPaquete(event.target.value))
-	// }
 
 	useEffect(() => {
 
 		const apiPlazas = async () => {
 			try {
 				const plazas = await tool.getPlazas()
-				setPlazas(plazas)
+				dispatch(setPlazas(plazas))
 			} catch (error) {
 				console.error('Error fetching data:', error)
 			}
@@ -110,7 +93,7 @@ function Records() {
 		const apiServicios = async () => {
 			try {
 				const servicios = await tool.getServicios()
-				setServicios(servicios)
+				dispatch(setServicios(servicios))
 			} catch (error) {
 				console.error('Error fetching data:', error)
 			}
@@ -118,17 +101,15 @@ function Records() {
 		apiPlazas()
 		apiServicios()
 
-	}, [setPlazas, setServicios])
+	}, [dispatch])
 
 	useEffect(() => {
-		setSelectionCompleted(plaza !== '' && servicio !== '' && fechaCorte !== null)
-	}, [plaza, servicio, fechaCorte, setSelectionCompleted])
+		dispatch(setSelectionCompleted(plaza !== '' && servicio !== '' && fechaCorte !== null))
+	}, [dispatch, fechaCorte, plaza, servicio])
 
 	return (
 
 		<Box padding={'10px'} minHeight='100vh' display={'flex'} justifyContent={'start'} alignItems={'center'} flexDirection={'column'}>
-
-			{/* <Modal open={modal} setOpen={setModal} text={`Este es su folio ${paquete.id}`} type={"success"} action={() => navigate("/impresion")} />*/}
 
 			<Typography textAlign={'center'} color={'#cff9e0'} fontSize={'2.5rem'}>Generador de fichas</Typography> 
 
@@ -141,7 +122,7 @@ function Records() {
 					<Checkbox
 						id='package'
 						checked={activity}
-						onChange={() => setActivity(true)}
+						onChange={() => (dispatch(setActivity(true)), setExcel(null))}
 						sx={{ '& .MuiSvgIcon-root': { fontSize: '20px', color: activity ? '#28a745' : 'grey', }, '&:hover': { backgroundColor: '#228d3b', }, }}
 					/>
 
@@ -154,7 +135,7 @@ function Records() {
 					<Checkbox
 						id='individual'
 						checked={!activity}
-						onChange={() => setActivity(false)}
+						onChange={() => (dispatch(setActivity(false)), setExcel(null))}
 						sx={{ '& .MuiSvgIcon-root': { fontSize: '20px', color: !activity ? '#28a745' : 'grey', }, '&:hover': { backgroundColor: '#228d3b', }, }}
 					/>
 
@@ -175,7 +156,7 @@ function Records() {
 							id="demo-simple-select"
 							value={plaza}
 							label="Plaza"
-							onChange={(e) => setPlaza(e.target.value)}
+							onChange={(e) => dispatch(setPlaza(e.target.value))}
 							sx={{ color: '#ffffff', '& .MuiSelect-select': { borderColor: '#ffffff', }, '& .MuiSvgIcon-root': { color: '#ffffff', }, }}
 						>
 
@@ -200,7 +181,7 @@ function Records() {
 							id="demo-simple-select"
 							value={servicio}
 							label="Plaza"
-							onChange={(e)=>(setServicio(e.target.value))}
+							onChange={(e)=>(dispatch(setServicio(e.target.value)))}
 							sx={{ color: '#ffffff', '& .MuiSelect-select': { borderColor: '#ffffff', }, '& .MuiSvgIcon-root': { color: '#ffffff', }, }}
 						>
 
@@ -222,7 +203,7 @@ function Records() {
 							<DatePicker
 								label="Fecha de corte"
 								value={fechaCorte}
-								onChange={(newValue) => { setFechaCorte(newValue) }}
+								onChange={(newValue) => { setfechaCorte(newValue) }}
 								sx={{ width: '99%', '& .MuiSvgIcon-root': { color: '#ffffff', }, '& .MuiInputLabel-root': { color: '#ffffff', }, '& .MuiInputBase-input': { color: '#ffffff', }, }}
 							/>
 
@@ -238,7 +219,7 @@ function Records() {
 
 						<Box mt={2}>
 							<Typography variant="body1" sx={{ color: '#fff' }}>
-								Total de registros esperados: {regsitros.length}
+								Total de registros esperados: {registros.length}
 							</Typography>
 						</Box>
 
@@ -251,7 +232,7 @@ function Records() {
 									label="Folio existente"
 									variant="outlined"
 									value={folio}
-									onChange={(e) => setFolio(e.target.value)}
+									onChange={(e) => dispatch(setFolio(e.target.value))}
 								/>
 							</Box>
 
@@ -270,7 +251,18 @@ function Records() {
 							<input type="file" id="file-upload" onChange={handleFileUpload} style={{ display: 'none' }} />
 
 							<label htmlFor="file-upload">
-								<Button component="span" fullWidth variant="contained" >SUBIR EXCEL</Button>
+								<Button 
+									sx={{
+										backgroundColor: '#add8e6', 
+										color: '#000000', 
+										'&:hover': {
+											backgroundColor: '#87ceeb', 
+										},
+									}}
+									component="span" 
+									fullWidth 
+									variant="contained" 
+								>SUBIR EXCEL</Button>
 							</label>
 
 						</Box>
@@ -279,29 +271,29 @@ function Records() {
 
 				)}
 
-				{/* <Box mt={'2rem'}>
+				<Box mt={'2rem'}>
 
-					{Progreso > 0 && <LinerProgress value={Progreso} />}
+					{Progreso > 0 && <LinearProgressWithLabel value={Progreso} />}
 
 					<Button
 						sx={{
-							bgcolor: regsitros.length === 0 ? '#cccccc' : '#2fd968',
+							bgcolor: registros.length === 0 ? '#cccccc' : '#2fd968',
 							'&:hover': {
-								bgcolor: regsitros.length === 0 ? '#cccccc' : '#1faa4d',
+								bgcolor: registros.length === 0 ? '#cccccc' : '#1faa4d',
 							},
 							'&:active': {
-								bgcolor: regsitros.length === 0 ? '#cccccc' : '#157c38',
+								bgcolor: registros.length === 0 ? '#cccccc' : '#157c38',
 							},
 						}}
 						fullWidth
 						variant="contained"
-						disabled={regsitros.length === 0 || (!activity && !paquete.folio) || cargando}
+						disabled={registros.length === 0 || (!activity && !folio) || cargando }
 						onClick={processUpload}
 					>
 						CREAR REGISTROS
 					</Button>
 
-				</Box> */}
+				</Box>
 
 			</Box>
 

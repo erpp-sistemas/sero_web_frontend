@@ -189,6 +189,7 @@ const Sidebar = () => {
   return (
     <Box
       sx={{
+		zIndex:"99",
         "& .pro-sidebar-inner": {
           background: `${colors.primary[400]} !important`,
         },
