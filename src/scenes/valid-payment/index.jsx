@@ -62,7 +62,7 @@ const Index = () => {
     const [selectedFinishDate, setSelectedFinishDate] = React.useState('');
     const [isLoading, setIsLoading] = useState(false)
     const [alertOpen, setAlertOpen] = useState(false);
-    const [alertType, setAlertType] = useState("");
+    const [alertType, setAlertType] = useState("info");
     const [alertMessage, setAlertMessage] = useState("");
     const [columns, setColumns] = useState([]);
 
@@ -260,7 +260,17 @@ const Index = () => {
           
         } catch (error) {
           setIsLoading(false)
-          console.error("Error:", error);
+
+          if(error.response.status === 400){
+            console.log(error.response.status)
+            console.log('estamos en el error 400')
+            setAlertOpen(true)
+            setAlertType("warning")
+            setAlertMessage("¡Atencion! No se encontraron pagos")
+            setResult([]);
+          }
+        console.log([error.response.data.message])        
+        setResult([]);
           
         }        
       };
@@ -625,18 +635,10 @@ const Index = () => {
                   type="date"
                   sx={{ width: '100%' }}
                   value={selectedStartDate}
-                  onChange={handleStartDateChange}
-                  defaultValue="2023-01-01"                 
+                  onChange={handleStartDateChange}                  
                   InputLabelProps={{
                     shrink: true,
-                  }}
-                  IInputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end"  style={{ color: 'green' }} >
-                        <EventIcon/>
-                      </InputAdornment>
-                    ),
-                  }}
+                  }}                  
                 />
               </Grid>
               <Grid item xs={3}>
@@ -646,8 +648,7 @@ const Index = () => {
                   type="date"
                   sx={{ width: '100%' }}
                   value={selectedFinishDate}
-                  onChange={handleFinishDateChange}
-                  defaultValue="2023-01-01"                 
+                  onChange={handleFinishDateChange}                  
                   InputLabelProps={{
                     shrink: true,
                   }}

@@ -59,7 +59,7 @@ const Index = () => {
     const [messageError, setMessageError] = useState('');
     const [isLoading, setIsLoading] = useState(false)
     const [alertOpen, setAlertOpen] = useState(false);
-    const [alertType, setAlertType] = useState("");
+    const [alertType, setAlertType] = useState("info");
     const [alertMessage, setAlertMessage] = useState("");
     const [totalRecords, setTotalRecords] = useState(0);
     const [resultCountsEntry, setResultCountsEntry] = useState({});    
@@ -616,8 +616,7 @@ const Index = () => {
                   type="date"
                   sx={{ width: '100%' }}
                   value={selectedStartDate}
-                  onChange={handleStartDateChange}
-                  defaultValue="2023-01-01"                 
+                  onChange={handleStartDateChange}                  
                   InputLabelProps={{
                     shrink: true,
                   }}                  
@@ -630,8 +629,7 @@ const Index = () => {
                   type="date"
                   sx={{ width: '100%' }}
                   value={selectedEndDate}
-                  onChange={handleEndDateChange}
-                  defaultValue="2023-01-01"                 
+                  onChange={handleEndDateChange}                  
                   InputLabelProps={{
                     shrink: true,
                   }}
