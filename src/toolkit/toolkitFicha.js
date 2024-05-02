@@ -27,40 +27,25 @@ const getServicios=async()=>{
 
 const generatePaquete=async(data)=>{
 
-	const formData = new FormData()
-
-	const fecha_corteString = (typeof data.fecha_corte === 'object') ? data.fecha_corte.toISOString().split('T')[0] : data.fecha_corte;
-
-    formData.append('servicio', data.servicio)
-    formData.append('fecha_corte', fecha_corteString)
-    formData.append('folio', data.folio || 'desconocido')
-    formData.append('plaza', data.plaza)
-    formData.append('excel_document', data.excel_document)
-
-    const url=`${baseURL}/paquetes/create/`
+    const url=`${baseURL}/api/records/paquete`
 
     try{
-
-        const res=await axios.post(url,formData)
-        return res?.data?.id
-
+        const res=await axios.post(url,data)
+        return res.data.data.id
     }catch(error){
-		
-        console.log(error)
-
+        false
     }
 
 }
 
 const uploadFichas=async(data)=>{	
-    const url=`${baseURL}/paquetes/create/register/`
+    const url=`${baseURL}/api/records/registro/`
     await axios.post(url,data)
         .then(()=>{
-            console.log("success")
             return "success"
         })
-        .catch(res=>{
-            console.log(res)
+        .catch(()=>{
+			false
         })
 }
 
@@ -93,11 +78,11 @@ const uploadFichas=async(data)=>{
         estatus_gestion_Valida: 'estatus de getion valida',
         estatus_nuestra_cartera: 'estatus en nuestra cartera',
         estatus_cuenta: 'estatus de la cuenta',
-        foto_fachada: 'foto fachada predio',
+        foto_fachada_predio: 'foto fachada predio',
         url_fachada: 'urlImagenFachada',
-        foto_evidencia: 'foto evidencia predio',
+        foto_evidencia_predio: 'foto evidencia predio',
         url_evidencia: 'urlImagenEvidencia'
-    };
+    };	
 
     const resultados = []
 
@@ -126,15 +111,15 @@ const uploadFichas=async(data)=>{
                     }
                     ficha.fecha_pago = ficha.fecha_pago.slice(0, 10).replace(/ /g, '')
                     ficha.fecha_gestion = ficha.fecha_gestion.slice(0, 10).replace(/ /g, '')
-                    ficha.porcentaje_paga =  parseFloat(ficha.porcentaje_paga)
-                    ficha.porcentaje_descuento =  parseFloat(ficha.porcentaje_descuento)
+                    ficha.foto_fachada_predio =  ficha.foto_fachada_predio==='si'||ficha.foto_fachada_predio==='Si'?1:0
+                    ficha.foto_evidencia_predio =  ficha.foto_evidencia_predio==='si'||ficha.foto_evidencia_predio==='Si'?1:0
 
                 } else {
                     candado = false
                 }
             }
             if (candado) {
-                resultados.push({folio:folio||"xxx",...ficha})
+                resultados.push({folio: folio ? folio : 'desconocido', ...ficha})
             }
         }
     })
@@ -160,49 +145,10 @@ function NumberToDate(serial) {
 
 
 
-const formatearHtml=(html,data)=>{
-    let text_html=html
-    for(let key in data){
-        let value=data[key]?data[key]:""
-        let keyUpper=key.toUpperCase();
-        text_html=text_html.replace(`{{${keyUpper}}}`,value)
-    }
-
-    return text_html
-}
-
-
-const unificarRegistros=(data)=>{
-    console.log(data)
-    const registros=[];
-
-    for(let registro of data){
-        // let repetido=false;
-            const repetido= registros.findIndex(r=>r.cuenta==registro.cuenta)
-
-        if(repetido==-1){
-           
-            let allPagos=[
-                {servicio:registro.servicio,descripcion:registro.descripcion,total_pagado:registro.total_pagado}
-            ] 
-            registros.push({...registro,allPagos})
-        }else{
-            let pago={servicio:registro.servicio,descripcion:registro.descripcion,total_pagado:registro.total_pagado}
-            registros[repetido].allPagos.push(pago)
-        }
-
-    }
-    console.log(registros)
-    
-}
-
-
 export default {
     generatePaquete,
     uploadFichas,
     getServicios,
     getPlazas,
-    formatearFila,
-    formatearHtml,
-    unificarRegistros
+    formatearFila
 }
