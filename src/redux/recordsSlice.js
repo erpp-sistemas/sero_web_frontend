@@ -1,6 +1,3 @@
-// import { baseURL } from '../hooks/'
-// import axios from 'axios'
-
 const initialState = {
 	activity: true,
 	idPaquete: 0,
@@ -15,6 +12,8 @@ const initialState = {
 	fechaCorte: null,
 	porcentaje: [],
 	cargando: false,
+	modal: false,
+	nombre: '',
 }
 
 const recordsSlice = (state = initialState, action) => {
@@ -85,6 +84,16 @@ const recordsSlice = (state = initialState, action) => {
 			return {
 				...state,
 				cargando: action.payload,
+			}
+		case 'SET_MODAL':
+			return {
+				...state,
+				modal: action.payload,
+			}
+		case 'SET_NOMBRE':
+			return {
+				...state,
+				nombre: action.payload,
 			}
 	default:
 		return state
@@ -157,4 +166,14 @@ export const setPorcentaje = (porcentaje) => ({
 export const setCargando = (cargando) => ({
 	type: 'SET_CARGANDO',
 	payload: cargando,
+})
+
+export const setModal = (modal) => ({
+	type: 'SET_MODAL',
+	payload: modal,
+})
+
+export const setNombre = (modal) => ({
+	type: 'SET_NOMBRE',
+	payload: modal,
 })

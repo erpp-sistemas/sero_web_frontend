@@ -10,6 +10,7 @@ body,
   height: 100%;
   width: 100%;
   font-family: "Source Sans Pro", sans-serif;
+	
 }
 
 .content {
@@ -138,5 +139,85 @@ body,
         translateY(-50px) scaleX(1);
 		background-color: #265528;
     }
+
+}
+
+.records_impression{
+	padding: 40px;
+}
+
+.records{
+	width: auto;
+	background: rgba(255, 255, 255, 0.250);
+	padding: 40px;
+	border-radius: 20px;
+}
+
+.records_impression__content{
+	padding: 2.5rem,
+}
+
+.records__checkbox{
+	gap: 2rem;
+}
+
+.records_impression__data{
+	padding: 20px;
+	align-items: start;
+	justify-content: center;
+}
+
+.records_impression__data__box{
+	gap: 1rem;
+}
+
+
+@media screen and (max-width: 1000px) {
+
+	.records{
+		padding: 20px;
+	}
+
+	.records__checkbox{
+		flex-direction: column;
+		gap: .2rem;
+	}
+
+	.records_impression{
+		padding: 10px;
+	}
+
+	.records_impression__title {
+		width: 100%;
+		text-align: center;
+	}
+
+	.records_impression__grid {
+		flex-direction: column;
+		gap: 1rem;
+	}
+
+	.records_impression__content {
+		border-top-right-radius: 20px;
+		border-bottom-right-radius: 20px;
+		padding: 1.5rem;
+		padding-top: 2rem;
+	}
+
+	.records_impression__ranges {
+		flex-direction: column;
+	}
+
+	.records_impression__data {
+		border-top-left-radius: 20px;
+		border-bottom-left-radius: 20px;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.records_impression__data__box{
+		gap: 0rem;
+		flex-direction: column;
+	}	
 
 }

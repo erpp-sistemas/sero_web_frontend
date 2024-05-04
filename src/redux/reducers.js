@@ -19,6 +19,7 @@ import plazaNumber from './plazaNumberSlice'
 import apikeyGeocoding from './apikeyGeocodingSlice'
 import dataGeocoding from "./dataGeocodingSlice"
 import recordsSlice from "./recordsSlice"
+import impresionSlice from "./impressionSlice"
 
 const rootReducer = combineReducers({
   user: userReducer,
@@ -41,6 +42,7 @@ const rootReducer = combineReducers({
   apikeyGeocoding:apikeyGeocoding,
   dataGeocoding:dataGeocoding,
   records: recordsSlice,
+  impression: impresionSlice,
   //service: serviceReducer,
   //process: processReducer,
 

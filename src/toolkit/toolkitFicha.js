@@ -82,7 +82,7 @@ const uploadFichas=async(data)=>{
         url_fachada: 'urlImagenFachada',
         foto_evidencia_predio: 'foto evidencia predio',
         url_evidencia: 'urlImagenEvidencia'
-    };	
+    }	
 
     const resultados = []
 
@@ -91,11 +91,11 @@ const uploadFichas=async(data)=>{
         if (index === 0) return
 
         const ficha = Object.keys(columnIndexes).reduce((ficha, columnName) => {
-            const columnIndex = jsonData[0].indexOf(columnIndexes[columnName]);
-            ficha[columnName] = (columnIndex !== -1) ? fila[columnIndex] || 'desconocido' : 'desconocido';
+            const columnIndex = jsonData[0].indexOf(columnIndexes[columnName])
+            ficha[columnName] = (columnIndex !== -1) ? fila[columnIndex] || 'desconocido' : 'desconocido'
             
-            return ficha;
-        }, {});
+            return ficha
+        }, {})
 
         if (ficha.cuenta !== "desconocido") {
             let candado = true
@@ -111,8 +111,8 @@ const uploadFichas=async(data)=>{
                     }
                     ficha.fecha_pago = ficha.fecha_pago.slice(0, 10).replace(/ /g, '')
                     ficha.fecha_gestion = ficha.fecha_gestion.slice(0, 10).replace(/ /g, '')
-                    ficha.foto_fachada_predio =  ficha.foto_fachada_predio==='si'||ficha.foto_fachada_predio==='Si'?1:0
-                    ficha.foto_evidencia_predio =  ficha.foto_evidencia_predio==='si'||ficha.foto_evidencia_predio==='Si'?1:0
+                    ficha.foto_fachada_predio = ficha.foto_fachada_predio==='si'||ficha.foto_fachada_predio==='Si'?1:0
+                    ficha.foto_evidencia_predio = ficha.foto_evidencia_predio==='si'||ficha.foto_evidencia_predio==='Si'?1:0
 
                 } else {
                     candado = false
@@ -142,8 +142,6 @@ function NumberToDate(serial) {
     const formattedDate = `${date.toLocaleDateString()} ${hours % 12}:${minutes < 10 ? '0' + minutes : minutes}:${seconds < 10 ? '0' + seconds : seconds} ${ampm}`
     return formattedDate
 }
-
-
 
 export default {
     generatePaquete,
