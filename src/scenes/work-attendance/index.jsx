@@ -397,6 +397,62 @@ const Index = () => {
               />
             ),
           },
+          { 
+            field: 'food_entry_time',
+            renderHeader: () => (
+              <strong style={{ color: "#5EBFFF" }}>{"HORA DE ENTRADA DE COMIDA"}</strong>
+            ),
+            width: 200,
+            renderCell: (params) => (
+              <>
+                {params.value}
+                <AccessTimeIcon style={{ marginLeft: '5px' }} />
+              </>
+            ),
+          },
+          { 
+            field: 'food_entry_attendance_place',
+            renderHeader: () => (
+              <strong style={{ color: "#5EBFFF" }}>{"LUGAR DE ENTRADA DE COMIDA"}</strong>
+            ),
+            width: 200,
+            renderCell: (params) => (
+              <PersonPinCircleIcon 
+                style={{ cursor: 'pointer', color: 'lightblue', fontSize: 40 }} 
+                onClick={() => {
+                  window.open(params.value, '_blank');
+                }}
+              />
+            ),
+          },
+          { 
+            field: 'food_exit_time',
+            renderHeader: () => (
+              <strong style={{ color: "#5EBFFF" }}>{"HORA DE SALIDA DE COMIDA"}</strong>
+            ),
+            width: 200,
+            renderCell: (params) => (
+              <>
+                {params.value}
+                <AccessTimeIcon style={{ marginLeft: '5px' }} />
+              </>
+            ),
+          },
+          { 
+            field: 'food_exit_attendance_place',
+            renderHeader: () => (
+              <strong style={{ color: "#5EBFFF" }}>{"LUGAR DE SALIDA DE COMIDA"}</strong>
+            ),
+            width: 200,
+            renderCell: (params) => (
+              <PersonPinCircleIcon 
+                style={{ cursor: 'pointer', color: 'lightblue', fontSize: 40 }} 
+                onClick={() => {
+                  window.open(params.value, '_blank');
+                }}
+              />
+            ),
+          },
         ];
       
         return columns;
@@ -440,7 +496,9 @@ const Index = () => {
                 { header: "Estatus de Punto de Entrada", key: "entry_point_status", width: 25 },                
                 { header: "Hora de Salida", key: "exit_time", width: 20 },
                 { header: "Estatus de Salida", key: "exit_status", width: 20 },
-                { header: "Estatus de Punto de Salida", key: "exit_point_status", width: 25 },                
+                { header: "Estatus de Punto de Salida", key: "exit_point_status", width: 25 },
+                { header: "Hora de Entrada de comida", key: "food_entry_time", width: 20 },
+                { header: "Hora de Salida de comida", key: "food_exit_time", width: 20 },
             ];
 
             users.forEach((user) => {
@@ -453,7 +511,9 @@ const Index = () => {
                     entry_point_status: user.entry_point_status,                    
                     exit_time: user.exit_time,
                     exit_status: user.exit_status,
-                    exit_point_status: user.exit_point_status,                    
+                    exit_point_status: user.exit_point_status,
+                    food_entry_time: user.food_entry_time,
+                    food_exit_time: user.food_exit_time,
                 });
             });
 
