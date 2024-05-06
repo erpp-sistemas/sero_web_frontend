@@ -44,36 +44,36 @@ const Payments = ({ payments }) => {
           <Grid container spacing={2} >            
             {parsedPayments.map((payment, index) => (
               <Grid key={index} item xs={12} md={4}>
-              <Card variant='outlined' sx={{ bgcolor: theme.palette.mode === 'dark' ? colors.primary[600] : colors.primary[50]}}>
+              <Card variant='outlined' sx={{ backgroundColor: 'rgba(128, 128, 128, 0.1)', borderLeft: '5px solid #00ff00' }}>
                 <CardContent>                
-                  <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-                    <Divider textAlign='left'>Monto pagado</Divider>
+                  <Typography sx={{ fontSize: 14 }} color="text.secondary">
+                    Monto pagado
                   </Typography>
-                  <Typography variant="h5" component="div">
+                  <Typography variant="h4" component="div" gutterBottom>
                     {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(payment.amount_paid)}
                   </Typography>                   
-                  <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-                    <Divider textAlign='left'>Fecha de pago</Divider>
+                  <Typography sx={{ fontSize: 14 }} color="text.secondary">
+                    Fecha de pago
                   </Typography>
-                  <Typography variant="h5" component="div">
+                  <Typography variant="h4" component="div" gutterBottom>
                     {payment.payment_date ? new Date(payment.payment_date).toLocaleDateString() : 'No disponible'}
                   </Typography>
-                  <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-                    <Divider textAlign='left'>Referencia</Divider>
+                  <Typography sx={{ fontSize: 14 }} color="text.secondary">
+                    Referencia
                   </Typography>
-                  <Typography variant="h5" component="div">
+                  <Typography variant="h4" component="div" gutterBottom>
                     {payment.reference ? payment.reference : "No disponible"}
                   </Typography>
-                  <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-                    <Divider textAlign='left'>Descripcion</Divider>
+                  <Typography sx={{ fontSize: 14 }} color="text.secondary">
+                    Descripcion
                   </Typography>
-                  <Typography variant="h5" component="div">
+                  <Typography variant="h4" component="div" gutterBottom>
                     {payment.description ? payment.description : "No disponible"}
                   </Typography>
-                  <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-                    <Divider textAlign='left'>Periodo</Divider>
+                  <Typography sx={{ fontSize: 14 }} color="text.secondary">
+                    Periodo
                   </Typography>
-                  <Typography variant="h5" component="div">
+                  <Typography variant="h4" component="div" gutterBottom>
                     {payment.payment_period ? payment.payment_period : "no disponible"}
                   </Typography>
                 </CardContent>                 

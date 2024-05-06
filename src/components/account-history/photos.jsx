@@ -69,11 +69,12 @@ const Photos = ({ photo }) => {
           <Grid container spacing={2} >            
             {parsedPhotos.map((ph, index) => (
               <Grid key={index} item xs={12} md={4}>
-              <Card variant='outlined' sx={{ bgcolor: theme.palette.mode === 'dark' ? colors.primary[600] : colors.primary[50]}}>
+              <Card variant='outlined' sx={{ backgroundColor: 'rgba(128, 128, 128, 0.1)'}}>
                 <CardHeader 
                   avatar={<AvatarImage data={ph.photo_person_who_capture} />}
                   title={ph.person_who_capture}
                   subheader={ph.date_capture}
+                  sx={{ borderLeft: '5px solid #00ff00' }}
                 />
                 <CardMedia
                   component='img'
@@ -82,22 +83,22 @@ const Photos = ({ photo }) => {
                   alt={ph.image_url}
                 />
                 <CardContent>
-                  <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-                    <Divider textAlign='left'>Tipo de foto</Divider>
+                  <Typography sx={{ fontSize: 14 }} color="text.secondary">
+                    Tipo de foto
                   </Typography>
-                  <Typography variant="h5" component="div">
+                  <Typography variant="h4" component="div" gutterBottom>
                     {ph.image_type}
                   </Typography>                  
-                  <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-                    <Divider textAlign='left'>Tarea gestionada</Divider>
+                  <Typography sx={{ fontSize: 14 }} color="text.secondary">
+                    Tarea gestionada
                   </Typography>
-                  <Typography variant="h5" component="div">
+                  <Typography variant="h4" component="div" gutterBottom>
                     {ph.task_done}
                   </Typography>                  
-                  <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-                    <Divider textAlign='left'>Fecha en que ingreso en sistema</Divider>
+                  <Typography sx={{ fontSize: 14 }} color="text.secondary">
+                    Fecha en que ingreso en sistema
                   </Typography>
-                  <Typography variant="h5" component="div">
+                  <Typography variant="h4" component="div" gutterBottom>
                     {ph.synchronization_date}
                   </Typography>
                 </CardContent>                 

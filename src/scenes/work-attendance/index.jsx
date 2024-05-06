@@ -119,11 +119,14 @@ const Index = () => {
 
           if(error.response.status === 400){
             console.log(error.response.status)
+            console.log('estamos en el error 400')
+            setAlertOpen(true)
+            setAlertType("warning")
+            setAlertMessage("¡Atencion! No se encontraron asistencias")
             setUsers([]);
           }
-          
-          setMessageError([error.response.data.message])
-          console.log([error.response.data.message])
+        console.log([error.response.data.message])        
+        setUsers([]);
           
         }        
       };

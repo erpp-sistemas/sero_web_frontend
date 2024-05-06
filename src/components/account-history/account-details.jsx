@@ -45,7 +45,7 @@ const AccountDetails = ({ accountDetails }) => {
   console.log(accountDetails.longitude)
 
   return (
-    <div>
+    <div>       
        <Box
             m='20px 0'
             display='flex'
@@ -69,8 +69,8 @@ const AccountDetails = ({ accountDetails }) => {
                     <InputAdornment position="start">
                       <PersonIcon  sx={{ color: 'info.main' }}/>
                     </InputAdornment>
-                  ),
-                }}
+                  ),                  
+                }}         
               />
             </Grid>
             <Grid item xs={8}>

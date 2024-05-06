@@ -13,15 +13,12 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import TextField from '@mui/material/TextField';
-import EventIcon from '@mui/icons-material/Event';
-import InputAdornment from '@mui/material/InputAdornment';
 import LinearProgress from '@mui/material/LinearProgress';
 import Card from '@mui/material/Card';
 import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 import * as ExcelJS from "exceljs";
 import LoadingModal from '../../components/LoadingModal.jsx'
-import { CardActionArea } from '@mui/material';
 import CustomAlert from '../../components/CustomAlert.jsx'
 import ManageSearchIcon from '@mui/icons-material/ManageSearch';
 import Header from '../../components/Header';
@@ -34,20 +31,11 @@ import { DataGrid,
 import Chip from '@mui/material/Chip';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
-import WarningIcon from '@mui/icons-material/Warning';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import ListItemAvatar from '@mui/material/ListItemAvatar';
-import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
 import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton';
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 import PreviewIcon from '@mui/icons-material/Preview';
-import DoneAllIcon from '@mui/icons-material/DoneAll'
-import SubdirectoryArrowLeftIcon from '@mui/icons-material/SubdirectoryArrowLeft';
-import SubdirectoryArrowRightIcon from '@mui/icons-material/SubdirectoryArrowRight';
+import ModalTable from '../../components/ValidPayment/ModalTable.jsx'
 
 const Index = () => {
     
@@ -87,8 +75,9 @@ const Index = () => {
     const [percentageCountWithoutEvidencePhoto, setPercentageCountWithoutEvidencePhoto] = useState(0);
     const [percentageCountPropertyNotLocated, setPercentageCountPropertyNotLocated] = useState(0);
 
-    const [resultCounts, setResultCounts] = useState(0);
-    const [resultAmount, setResultAmount] = useState(0);
+    const [openModal, setOpenModal] = useState(false);
+    const [modalData, setModalData] = useState([]);
+    const [modalTitle, setModalTitle] = useState('');
 
       const handlePlaceChange = (event) => {
         setSelectedPlace(event.target.value);  
@@ -411,7 +400,10 @@ const Index = () => {
     function CustomToolbar() {
       return (
         <GridToolbarContainer>
-          <GridToolbarColumnsButton color="secondary" />
+          <GridToolbarColumnsButton color="secondary" >
+            Columnas
+          </GridToolbarColumnsButton>
+          
           <GridToolbarFilterButton color="secondary" />
           <GridToolbarDensitySelector color="secondary" />
   
@@ -552,7 +544,43 @@ const Index = () => {
           />
         </>
       );
-    };    
+    };
+
+    const handleOpenModal = (type) => {
+
+       let filteredData       
+
+       if(type === 1){
+         filteredData = result         
+       }
+       else if(type === 2){
+         filteredData = result.filter(row => row['estatus de gestion valida'] === 'valida');
+       }
+       else if(type === 3){
+        filteredData = result.filter(row => row['estatus de gestion valida'] === 'no valida');
+      }
+      else if (type === 4) {
+        filteredData = result.filter(row => row['estatus de gestion valida'] === 'valida' && row.latitud === 0);
+      }
+      else if (type === 5) {
+        filteredData = result.filter(row => row['estatus de gestion valida'] === 'valida' && row['foto fachada predio'] === 'no');
+      }
+      else if (type === 6) {
+        filteredData = result.filter(row => row['estatus de gestion valida'] === 'valida' && row['foto evidencia predio'] === 'no');
+      }
+      else if (type === 7) {
+        filteredData = result.filter(row => row['estatus de gestion valida'] === 'valida' && row['estatus_predio'] !== 'Predio localizado');
+      }
+
+       console.log(filteredData)
+      
+       setModalData(filteredData);
+       setOpenModal(true);       
+    };
+  
+    const handleCloseModal = () => {
+      setOpenModal(false);
+    };
 
       console.log('place_id', selectedPlace)
       console.log('service_id',selectedService)      
@@ -667,79 +695,74 @@ const Index = () => {
                     Buscar                  
                 </Button>
               </Grid>
-            </Grid>            
-            <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
-              <Grid item xs={4}>
-                <Card 
-                  variant="outlined" 
-                  sx={{ maxWidth: 360 }} 
-                  onClick={() => {
-                    if (result.length > 0) {
-                        handleExportToExcel(1);                    
-                    } else {                        
-                        console.log("No hay datos para exportar");
-                    }
-                  }}
-                >
-                <CardActionArea>
-                  <Box sx={{ p: 2, textAlign: 'center' }}>                    
-                    <Typography variant="h2" component="div" sx={{ textAlign: 'center' }}>
-                        {countResult}
-                    </Typography>
-                    <Typography variant="h5" component="div" color={'secondary'}>
-                        Registros Encontrados
-                    </Typography>
-                  </Box>
-                  </CardActionArea>
-                </Card>                
-              </Grid>
-              <Grid item xs={4}>
-                <Card variant="outlined" sx={{ maxWidth: 360 }}>
-                  <Box sx={{ p: 2, textAlign: 'center'  }}>
-                    <Typography  variant="h2" component="div" sx={{ textAlign: 'center' }}>
-                      {countUniqueAccount}
-                    </Typography>
-                    <Typography variant="h5" component="div" color={'secondary'}>
-                      Cuentas Unicas
-                    </Typography>
-                  </Box>
-                  <Divider />                  
-                </Card>
-              </Grid>
-              <Grid item xs={4}>
-                <Card variant="outlined" sx={{ maxWidth: 360 }}>
-                  <Box sx={{ p: 2, textAlign: 'center' }}>                    
-                    <Typography variant="h2" component="div" sx={{ textAlign: 'center' }}>
-                      $ {totalAmount}
-                    </Typography>
-                    <Typography variant="h5" component="div" color={'secondary'}>
-                      Monto ingresado
-                    </Typography>                    
-                  </Box>
-                  <Divider />                  
-                </Card>
-              </Grid>              
             </Grid>
             <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
-              <Grid item xs={3}>
-                <Card 
-                  variant="outlined" 
-                  sx={{ maxWidth: 360 }}
-                  onClick={() => {
-                    if (result.length > 0) {
-                        handleExportToExcel(2);                    
-                    } else {                        
-                        console.log("No hay datos para exportar");
-                    }
-                  }}
-                  >
-                  <CardActionArea>
-                  <Box sx={{ p: 1, textAlign: 'center' }}>
-                    <Typography variant="h2" component="div" sx={{ textAlign: 'center' }}>
-                      {countValidProcedures}
+              <Grid item xs={4}>
+                <Card variant="outlined" sx={{ maxWidth: 360, backgroundColor: 'rgba(128, 128, 128, 0.1)', borderLeft: '5px solid #00ff00'  }}>
+                  <Box sx={{ p: 2, textAlign: 'center' }}>                    
+                    <Typography variant="h2" component="div">
+                    {countResult}
                     </Typography>
-                    <Typography variant="h5" component="div" color={'secondary'}>
-                      Gestiones Validas
+                    <Typography color="text.secondary" variant="h5">
+                      Registros encontrados
+                      <Tooltip title="Descargar" arrow>
+                        <IconButton onClick={() => {
+                          if (result.length > 0) {
+                              handleExportToExcel(1);                    
+                          } else {                        
+                              console.log("No hay datos para exportar");
+                          }
+                        }}
+                        >
+                          <CloudDownloadIcon  style={{ color: theme.palette.secondary.main }} />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Ver Registros" arrow>
+                        <IconButton
+                        onClick={() => handleOpenModal(1)}
+                        >
+                          <PreviewIcon  style={{ color: theme.palette.info.main }} />
+                        </IconButton>
+                      </Tooltip>
+                    </Typography>
+                  </Box>                  
+                </Card>
+              </Grid>
+              <Grid item xs={4}>
+                <Card variant="outlined" sx={{ maxWidth: 360, backgroundColor: 'rgba(128, 128, 128, 0.1)', borderLeft: '5px solid #00ff00'  }}>
+                  <Box sx={{ p: 3, textAlign: 'center' }}>                    
+                    <Typography variant="h2" component="div">
+                    {countUniqueAccount}
+                    </Typography>
+                    <Typography color="text.secondary" variant="h5">
+                      Cuentas unicas                      
+                    </Typography>
+                  </Box>                  
+                </Card>
+              </Grid>
+              <Grid item xs={4}>
+                <Card variant="outlined" sx={{ maxWidth: 360, backgroundColor: 'rgba(128, 128, 128, 0.1)', borderLeft: '5px solid #00ff00'  }}>
+                  <Box sx={{ p: 3, textAlign: 'center' }}>                    
+                    <Typography variant="h2" component="div">
+                    $ {totalAmount}
+                    </Typography>
+                    <Typography color="text.secondary" variant="h5">
+                      Monto ingresado                      
+                    </Typography>
+                  </Box>                  
+                </Card>
+              </Grid>
+            </Grid>
+
+            <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
+              <Grid item xs={3}>
+                <Card variant="outlined" sx={{ maxWidth: 360, backgroundColor: 'rgba(128, 128, 128, 0.1)', borderLeft: '5px solid #00ff00'  }}>
+                  <Box sx={{ p: 2, textAlign: 'center' }}>                    
+                    <Typography variant="h3" component="div">
+                    {countValidProcedures}
+                    </Typography>
+                    <Typography color="text.secondary" variant="h6">
+                      Gestiones validas                      
                     </Typography>                    
                   </Box>                  
                   <Box sx={{ display: 'flex', alignItems: 'center', p : 1 }}>
@@ -750,50 +773,79 @@ const Index = () => {
                       <Typography variant="body2" color="text.secondary">{`${percentageValidProcedures}%`}</Typography>
                     </Box>
                   </Box>
-                </CardActionArea>
+                  <Box sx={{ display: 'flex', textAlign: 'left' }}>                  
+                    <Tooltip title="Descargar" arrow>
+                      <IconButton onClick={() => {
+                        if (result.length > 0) {
+                            handleExportToExcel(2);                    
+                        } else {                        
+                            console.log("No hay datos para exportar");
+                        }
+                      }}
+                      >
+                        <CloudDownloadIcon  style={{ color: theme.palette.secondary.main }} />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Ver Registros" arrow>
+                      <IconButton
+                       onClick={() => handleOpenModal(2)}
+                      >
+                        <PreviewIcon  style={{ color: theme.palette.info.main }} />
+                      </IconButton>
+                    </Tooltip>                  
+                  </Box>                  
                 </Card>
               </Grid>
               <Grid item xs={3}>
-                <Card 
-                  variant="outlined" 
-                  sx={{ maxWidth: 360 }}
-                  onClick={() => {
-                    if (result.length > 0) {
-                        handleExportToExcel(3);
-                    } else {                        
-                        console.log("No hay datos para exportar");
-                    }
-                  }}
-                  >
-                  <CardActionArea>
-                    <Box sx={{ p: 1, textAlign: 'center' }}>                    
-                      <Typography variant="h2" component="div" sx={{ textAlign: 'center' }}>
-                        {countInvalidProcedures}
-                      </Typography>
-                      <Typography variant="h5" component="div" color={'secondary'}>
-                        Gestiones No Validas
-                      </Typography>                    
-                    </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', p : 1 }}>
-                      <Box sx={{ width: '100%' }}>
-                        <LinearProgress color="warning" variant="determinate" value={percentageInvalidProcedures} sx={{ height: 12}} />
-                      </Box>
-                      <Box sx={{ minWidth: 35, pl: 1, pr: 1 }}>
-                        <Typography variant="body2" color="text.secondary">{`${percentageInvalidProcedures}%`}</Typography>
-                      </Box>
-                    </Box>
-                  </CardActionArea>                 
-                </Card>
-              </Grid>
-              <Grid item xs={3}>
-                <Card variant="outlined" sx={{ maxWidth: 360 }}>
-                  <Box sx={{ p: 1, textAlign: 'center' }}>                    
-                    <Typography variant="h2" component="div" sx={{ textAlign: 'center' }}>
-                      $ {amountValidProcedures}
+                <Card variant="outlined" sx={{ maxWidth: 360, backgroundColor: 'rgba(128, 128, 128, 0.1)', borderLeft: '5px solid #00ff00'  }}>
+                  <Box sx={{ p: 2, textAlign: 'center' }}>                    
+                    <Typography variant="h3" component="div">
+                    {countInvalidProcedures}
                     </Typography>
-                    <Typography variant="h5" component="div" color={'secondary'}>
-                      Monto de gestiones validas
+                    <Typography color="text.secondary" variant="h6">
+                      Gestiones no validas                      
                     </Typography>                    
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', p : 1 }}>
+                    <Box sx={{ width: '100%' }}>
+                      <LinearProgress color="warning" variant="determinate" value={percentageInvalidProcedures} sx={{ height: 12}} />
+                    </Box>
+                    <Box sx={{ minWidth: 35, pl: 1, pr: 1 }}>
+                      <Typography variant="body2" color="text.secondary">{`${percentageInvalidProcedures}%`}</Typography>
+                    </Box>
+                  </Box>
+                  <Box sx={{ textAlign: 'left' }}>
+                    <Tooltip title="Descargar" arrow>
+                      <IconButton onClick={() => {
+                        if (result.length > 0) {
+                            handleExportToExcel(3);                    
+                        } else {                        
+                            console.log("No hay datos para exportar");
+                        }
+                      }}
+                      >
+                        <CloudDownloadIcon  style={{ color: theme.palette.secondary.main }} />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Ver Registros" arrow>
+                      <IconButton
+                       onClick={() => handleOpenModal(3)}
+                      >
+                        <PreviewIcon  style={{ color: theme.palette.info.main }} />
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
+                </Card>
+              </Grid>
+              <Grid item xs={3}>
+                <Card variant="outlined" sx={{ maxWidth: 360, backgroundColor: 'rgba(128, 128, 128, 0.1)', borderLeft: '5px solid #00ff00'  }}>
+                  <Box sx={{ p: 3, textAlign: 'center' }}>                    
+                    <Typography variant="h3" component="div">
+                    {amountValidProcedures}
+                    </Typography>
+                    <Typography color="text.secondary" variant="h6">
+                      Monto de gestiones validas                      
+                    </Typography>
                   </Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', p : 1 }}>
                     <Box sx={{ width: '100%' }}>
@@ -802,18 +854,18 @@ const Index = () => {
                     <Box sx={{ minWidth: 35, pl: 1, pr: 1 }}>
                       <Typography variant="body2" color="text.secondary">{`${percentageAmountValidProcedures}%`}</Typography>
                     </Box>
-                  </Box>                 
+                  </Box>                  
                 </Card>
               </Grid>
               <Grid item xs={3}>
-                <Card variant="outlined" sx={{ maxWidth: 360 }}>
-                  <Box sx={{ p: 1, textAlign: 'center' }}>                    
-                    <Typography variant="h2" component="div" sx={{ textAlign: 'center' }}>
-                      $ {amountInvalidProcedures}
+                <Card variant="outlined" sx={{ maxWidth: 360, backgroundColor: 'rgba(128, 128, 128, 0.1)', borderLeft: '5px solid #00ff00'  }}>
+                  <Box sx={{ p: 3, textAlign: 'center' }}>                    
+                    <Typography variant="h3" component="div">
+                    {amountInvalidProcedures}
                     </Typography>
-                    <Typography variant="h5" component="div" color={'secondary'}>
-                      Monto de gestiones no validas
-                    </Typography>                    
+                    <Typography color="text.secondary" variant="h6">
+                      Monto de gestiones no validas                      
+                    </Typography>
                   </Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', p : 1 }}>
                     <Box sx={{ width: '100%' }}>
@@ -822,140 +874,180 @@ const Index = () => {
                     <Box sx={{ minWidth: 35, pl: 1, pr: 1 }}>
                       <Typography variant="body2" color="text.secondary">{`${percentageAmountInvalidProcedures}%`}</Typography>
                     </Box>
-                  </Box>                 
+                  </Box>                  
                 </Card>
               </Grid>
             </Grid>
+
+
+            
             <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
               <Grid item xs={3}>
-                  <Card 
-                    variant="outlined" 
-                    sx={{ maxWidth: 360 }}
-                    onClick={() => {
-                      if (result.length > 0) {
-                          handleExportToExcel(4);
-                      } else {                        
-                          console.log("No hay datos para exportar");
-                      }
-                    }}
-                    >
-                    <CardActionArea>
-                      <Box sx={{ p: 1, textAlign: 'center' }}>                    
-                        <Typography variant="h2" component="div" sx={{ textAlign: 'center' }}>
-                          {countNoPosition}
-                        </Typography>
-                        <Typography variant="h5" component="div" color={'secondary'}>
-                          Registros sin posicion
-                        </Typography>                    
-                      </Box>
-                      <Box sx={{ display: 'flex', alignItems: 'center', p : 1 }}>
-                        <Box sx={{ width: '100%' }}>
-                          <LinearProgress color="error" variant="determinate" value={percentageCountNoPosition} sx={{ height: 12}} />
-                        </Box>
-                        <Box sx={{ minWidth: 35, pl: 1, pr: 1 }}>
-                          <Typography variant="body2" color="text.secondary">{`${percentageCountNoPosition}%`}</Typography>
-                        </Box>
-                      </Box>
-                    </CardActionArea>
-                  </Card>
-              </Grid>
-              <Grid item xs={3}>
-                <Card 
-                  variant="outlined" 
-                  sx={{ maxWidth: 360 }}
-                  onClick={() => {
-                    if (result.length > 0) {
-                        handleExportToExcel(5);
-                    } else {                        
-                        console.log("No hay datos para exportar");
-                    }
-                  }}
-                >
-                  <CardActionArea>
-                    <Box sx={{ p: 1, textAlign: 'center' }}>                    
-                      <Typography variant="h2" component="div" sx={{ textAlign: 'center' }}>
-                        {countWithoutPropertyPhoto}
-                      </Typography>
-                      <Typography variant="h5" component="div" color={'secondary'}>
-                        Registros sin foto de fachada
-                      </Typography>                    
+                <Card variant="outlined" sx={{ maxWidth: 360, backgroundColor: 'rgba(128, 128, 128, 0.1)', borderLeft: '5px solid #00ff00'  }}>
+                  <Box sx={{ p: 2, textAlign: 'center' }}>                    
+                    <Typography variant="h3" component="div">
+                    {countNoPosition}
+                    </Typography>
+                    <Typography color="text.secondary" variant="h6">
+                      Registros sin posicion                      
+                    </Typography>                    
+                  </Box>                  
+                  <Box sx={{ display: 'flex', alignItems: 'center', p : 1 }}>
+                    <Box sx={{ width: '100%' }}>
+                      <LinearProgress color="error" variant="determinate" value={percentageCountNoPosition} sx={{ height: 12}} />
                     </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', p : 1 }}>
-                      <Box sx={{ width: '100%' }}>
-                        <LinearProgress color="error" variant="determinate" value={percentageCountWithoutPropertyPhoto} sx={{ height: 12}} />
-                      </Box>
-                      <Box sx={{ minWidth: 35, pl: 1, pr: 1 }}>
-                        <Typography variant="body2" color="text.secondary">{`${percentageCountWithoutPropertyPhoto}%`}</Typography>
-                      </Box>
+                    <Box sx={{ minWidth: 35, pl: 1, pr: 1 }}>
+                      <Typography variant="body2" color="text.secondary">{`${percentageCountNoPosition}%`}</Typography>
                     </Box>
-                  </CardActionArea>
+                  </Box>
+                  <Box sx={{ textAlign: 'left' }}>
+                    <Tooltip title="Descargar" arrow>
+                      <IconButton onClick={() => {
+                        if (result.length > 0) {
+                            handleExportToExcel(4);                    
+                        } else {                        
+                            console.log("No hay datos para exportar");
+                        }
+                      }}
+                      >
+                        <CloudDownloadIcon  style={{ color: theme.palette.secondary.main }} />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Ver Registros" arrow>
+                      <IconButton
+                       onClick={() => handleOpenModal(4)}
+                      >
+                        <PreviewIcon  style={{ color: theme.palette.info.main }} />
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
                 </Card>
               </Grid>
               <Grid item xs={3}>
-                <Card 
-                  variant="outlined" 
-                  sx={{ maxWidth: 360 }}
-                  onClick={() => {
-                    if (result.length > 0) {
-                        handleExportToExcel(6);
-                    } else {                        
-                        console.log("No hay datos para exportar");
-                    }
-                  }}
-                  >
-                  <CardActionArea>
-                    <Box sx={{ p: 1, textAlign: 'center' }}>                    
-                      <Typography variant="h2" component="div" sx={{ textAlign: 'center' }}>
-                        {countWithoutEvidencePhoto}
-                      </Typography>
-                      <Typography variant="h5" component="div" color={'secondary'}>
-                        Registros sin foto de evidencia
-                      </Typography>                    
+                <Card variant="outlined" sx={{ maxWidth: 360, backgroundColor: 'rgba(128, 128, 128, 0.1)', borderLeft: '5px solid #00ff00'  }}>
+                  <Box sx={{ p: 2, textAlign: 'center' }}>                    
+                    <Typography variant="h3" component="div">
+                    {countWithoutPropertyPhoto}
+                    </Typography>
+                    <Typography color="text.secondary" variant="h6">
+                      Registros sin foto de fachada
+                    </Typography>                    
+                  </Box>                  
+                  <Box sx={{ display: 'flex', alignItems: 'center', p : 1 }}>
+                    <Box sx={{ width: '100%' }}>
+                      <LinearProgress color="error" variant="determinate" value={percentageCountWithoutPropertyPhoto} sx={{ height: 12}} />
                     </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', p : 1 }}>
-                      <Box sx={{ width: '100%' }}>
-                        <LinearProgress color="error" variant="determinate" value={percentageCountWithoutEvidencePhoto} sx={{ height: 12}} />
-                      </Box>
-                      <Box sx={{ minWidth: 35, pl: 1, pr: 1 }}>
-                        <Typography variant="body2" color="text.secondary">{`${percentageCountWithoutEvidencePhoto}%`}</Typography>
-                      </Box>
+                    <Box sx={{ minWidth: 35, pl: 1, pr: 1 }}>
+                      <Typography variant="body2" color="text.secondary">{`${percentageCountWithoutPropertyPhoto}%`}</Typography>
                     </Box>
-                  </CardActionArea>
+                  </Box>
+                  <Box sx={{ textAlign: 'left' }}>
+                    <Tooltip title="Descargar" arrow>
+                      <IconButton onClick={() => {
+                        if (result.length > 0) {
+                            handleExportToExcel(5);                    
+                        } else {                        
+                            console.log("No hay datos para exportar");
+                        }
+                      }}
+                      >
+                        <CloudDownloadIcon  style={{ color: theme.palette.secondary.main }} />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Ver Registros" arrow>
+                      <IconButton
+                       onClick={() => handleOpenModal(5)}
+                      >
+                        <PreviewIcon  style={{ color: theme.palette.info.main }} />
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
                 </Card>
               </Grid>
               <Grid item xs={3}>
-                <Card 
-                  variant="outlined" 
-                  sx={{ maxWidth: 360 }}
-                  onClick={() => {
-                    if (result.length > 0) {
-                        handleExportToExcel(7);
-                    } else {                        
-                        console.log("No hay datos para exportar");
-                    }
-                  }}
-                  >
-                    <CardActionArea>
-                    <Box sx={{ p: 1, textAlign: 'center' }}>                    
-                      <Typography variant="h2" component="div" sx={{ textAlign: 'center' }}>
-                        {countPropertyNotLocated}
-                      </Typography>
-                      <Typography variant="h6" component="div" color={'secondary'}>
-                        Registros de predios no localizados
-                      </Typography>                    
+                <Card variant="outlined" sx={{ maxWidth: 360, backgroundColor: 'rgba(128, 128, 128, 0.1)', borderLeft: '5px solid #00ff00'  }}>
+                  <Box sx={{ p: 2, textAlign: 'center' }}>                    
+                    <Typography variant="h3" component="div">
+                    {countWithoutEvidencePhoto}
+                    </Typography>
+                    <Typography color="text.secondary" variant="h6">
+                      Registros sin foto de evidencia
+                    </Typography>                    
+                  </Box>                  
+                  <Box sx={{ display: 'flex', alignItems: 'center', p : 1 }}>
+                    <Box sx={{ width: '100%' }}>
+                      <LinearProgress color="error" variant="determinate" value={percentageCountWithoutEvidencePhoto} sx={{ height: 12}} />
                     </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', p : 1 }}>
-                      <Box sx={{ width: '100%' }}>
-                        <LinearProgress color="error" variant="determinate" value={percentageCountPropertyNotLocated} sx={{ height: 12}} />
-                      </Box>
-                      <Box sx={{ minWidth: 35, pl: 1, pr: 1 }}>
-                        <Typography variant="body2" color="text.secondary">{`${percentageCountPropertyNotLocated}%`}</Typography>
-                      </Box>
+                    <Box sx={{ minWidth: 35, pl: 1, pr: 1 }}>
+                      <Typography variant="body2" color="text.secondary">{`${percentageCountWithoutEvidencePhoto}%`}</Typography>
                     </Box>
-                  </CardActionArea>
+                  </Box>
+                  <Box sx={{ textAlign: 'left' }}>
+                    <Tooltip title="Descargar" arrow>
+                      <IconButton onClick={() => {
+                        if (result.length > 0) {
+                            handleExportToExcel(6);                    
+                        } else {                        
+                            console.log("No hay datos para exportar");
+                        }
+                      }}
+                      >
+                        <CloudDownloadIcon  style={{ color: theme.palette.secondary.main }} />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Ver Registros" arrow>
+                      <IconButton
+                       onClick={() => handleOpenModal(6)}
+                      >
+                        <PreviewIcon  style={{ color: theme.palette.info.main }} />
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
                 </Card>
-              </Grid>       
+              </Grid>
+              <Grid item xs={3}>
+                <Card variant="outlined" sx={{ maxWidth: 360, backgroundColor: 'rgba(128, 128, 128, 0.1)', borderLeft: '5px solid #00ff00'  }}>
+                  <Box sx={{ p: 2, textAlign: 'center' }}>                    
+                    <Typography variant="h3" component="div">
+                    {countPropertyNotLocated}
+                    </Typography>
+                    <Typography color="text.secondary" variant="h6">
+                      Registros de predios no localizados
+                    </Typography>                    
+                  </Box>                  
+                  <Box sx={{ display: 'flex', alignItems: 'center', p : 1 }}>
+                    <Box sx={{ width: '100%' }}>
+                      <LinearProgress color="error" variant="determinate" value={percentageCountPropertyNotLocated} sx={{ height: 12}} />
+                    </Box>
+                    <Box sx={{ minWidth: 35, pl: 1, pr: 1 }}>
+                      <Typography variant="body2" color="text.secondary">{`${percentageCountPropertyNotLocated}%`}</Typography>
+                    </Box>
+                  </Box>
+                  <Box sx={{ textAlign: 'left' }}>
+                    <Tooltip title="Descargar" arrow>
+                      <IconButton onClick={() => {
+                        if (result.length > 0) {
+                            handleExportToExcel(7);                    
+                        } else {                        
+                            console.log("No hay datos para exportar");
+                        }
+                      }}
+                      >
+                        <CloudDownloadIcon  style={{ color: theme.palette.secondary.main }} />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Ver Registros" arrow>
+                      <IconButton
+                       onClick={() => handleOpenModal(7)}
+                      >
+                        <PreviewIcon  style={{ color: theme.palette.info.main }} />
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
+                </Card>
+              </Grid>
             </Grid>
+
             <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
               <Grid item xs={12}>
                 <Box m="20px">
@@ -984,9 +1076,9 @@ const Index = () => {
                 </Box>
               </Grid>              
             </Grid>
-
+            <ModalTable open={openModal} onClose={handleCloseModal} data={modalData} />
           </Box>                 
-
+          
         </>
 
     );

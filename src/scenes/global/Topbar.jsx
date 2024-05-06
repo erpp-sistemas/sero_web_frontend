@@ -212,7 +212,7 @@ const Topbar = () => {
         {/* ----------------------------------------- /// */}
 
         <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-          <Avatar alt="Foto usuario" src="avatar.jpg" sx={{ width: '50px', height: '50px' }} />
+          <Avatar alt="Foto usuario" src={user.photo} sx={{ width: '50px', height: '50px' }} />
         </IconButton>
 
         <Menu

@@ -17,9 +17,6 @@ import Actions from '../../components/account-history/actions.jsx'
 import Photos from '../../components/account-history/photos.jsx'
 import PDFGenerator from '../../components/account-history/pdf-generator.jsx'
 
-import Header from '../../components/Header';
-import AccountHistoryModule from '../../components/AccountHistoryModule';
-
 const Index = () => {
   const user = useSelector(state => state.user)
   const theme = useTheme();

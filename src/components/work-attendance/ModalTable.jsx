@@ -20,6 +20,7 @@ import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 import PreviewIcon from '@mui/icons-material/Preview';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 import Divider from '@mui/material/Divider';
+import ImageViewerModal from '../../components/ImageViewerModal.jsx'
 
 const ModalTable = ({ open, onClose, data }) => {
     const columns = [
@@ -301,13 +302,13 @@ const ModalTable = ({ open, onClose, data }) => {
               src={data}
             />
       
-            <Viewer
-              visible={visibleAvatar}
-              onClose={() => {
-                setVisibleAvatar(false);
-              }}
-              images={[{ src: data, alt: 'avatar' }]}          
-            />
+            {visibleAvatar && (
+              <ImageViewerModal
+                open={true}
+                onClose={() => setVisibleAvatar(false)}
+                imageUrl={data}
+              />
+            )}
           </>
         );
       };

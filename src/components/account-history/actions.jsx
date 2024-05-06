@@ -69,25 +69,25 @@ const Actions = ({ action }) => {
           <Grid container spacing={2} >            
             {parsedActions.map((actions, index) => (
               <Grid key={index} item xs={12} md={4}>
-              <Card variant='outlined' sx={{ bgcolor: theme.palette.mode === 'dark' ? colors.primary[600] : colors.primary[50]}}>
+              <Card variant='outlined' sx={{ backgroundColor: 'rgba(128, 128, 128, 0.1)', borderLeft: '5px solid #00ff00' }}>
                 <CardContent>
                 <Grid container spacing={2} alignItems="center">
                     <Grid item xs={3}>
                       <AvatarImage data={actions.photo_person_who_capture} />
                     </Grid>
                     <Grid item xs={9}>
-                      <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-                        <Divider textAlign='left'>Persona que gestionó</Divider>
+                      <Typography sx={{ fontSize: 14 }} color="text.secondary" >
+                        Persona que gestionó
                       </Typography>
-                      <Typography variant="h5" component="div">
+                      <Typography variant="h4" component="div" gutterBottom>
                         {actions.person_who_capture}
                       </Typography>
                     </Grid>
                   </Grid>
-                  <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-                    <Divider textAlign='left'>Tarea gestionada</Divider>
+                  <Typography sx={{ fontSize: 14 }} color="text.secondary">
+                    Tarea gestionada
                   </Typography>
-                  <Typography>
+                  <Typography gutterBottom>
                     <Box display="flex" alignItems="center" >
                       <Chip
                         icon={actions.task_done.includes('Carta Invitación') ? <MarkEmailRead /> : <DirectionsRun />} 
@@ -98,14 +98,14 @@ const Actions = ({ action }) => {
                           actions.task_done === '2da Carta Invitación' ? 'warning' :
                           actions.task_done === '3ra Carta Invitación' ? 'warning' : 
                           actions.task_done === '4ta Carta Invitación' ? 'error' : 'info'
-                        }
+                        }                         
                       />
                     </Box>
                   </Typography> 
-                  <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-                    <Divider textAlign='left'>Fecha de gestion</Divider>
+                  <Typography sx={{ fontSize: 14 }} color="text.secondary">
+                    Fecha de gestion
                   </Typography>
-                  <Typography variant="h5" component="div">
+                  <Typography variant="h4" component="div" gutterBottom>
                     {actions.date_capture}
                   </Typography>                                   
                 </CardContent>                 

@@ -44,36 +44,36 @@ const Debit = ({ debit }) => {
           <Grid container spacing={2} >            
             {parsedDebit.map((debt, index) => (
               <Grid key={index} item xs={12} md={4}>
-              <Card variant='outlined' sx={{ bgcolor: theme.palette.mode === 'dark' ? colors.primary[600] : colors.primary[50]}}>
+              <Card variant='outlined' sx={{ backgroundColor: 'rgba(128, 128, 128, 0.1)', borderLeft: '5px solid #00ff00' }}>
                 <CardContent>                
-                  <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-                    <Divider textAlign='left'>Monto de deuda</Divider>
+                  <Typography sx={{ fontSize: 14 }} color="text.secondary">
+                    Monto de deuda
                   </Typography>
-                  <Typography variant="h5" component="div">
+                  <Typography variant="h4" component="div" gutterBottom>
                     {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(debt.debt_amount)}
                   </Typography>                   
-                  <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-                    <Divider textAlign='left'>Fecha de actualizacion</Divider>
+                  <Typography sx={{ fontSize: 14 }} color="text.secondary" >
+                    Fecha de actualizacion
                   </Typography>
-                  <Typography variant="h5" component="div">
+                  <Typography variant="h4" component="div" gutterBottom>
                     {debt.update_date ? new Date(debt.update_date).toLocaleDateString() : 'No disponible'}
                   </Typography>
-                  <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-                    <Divider textAlign='left'>Fecha de corte</Divider>
+                  <Typography sx={{ fontSize: 14 }} color="text.secondary" >
+                    Fecha de corte
                   </Typography>
-                  <Typography variant="h5" component="div">
+                  <Typography variant="h4" component="div" gutterBottom>
                     {debt.cutoff_date ? new Date(debt.cutoff_date).toLocaleDateString() : 'No disponible'}
                   </Typography>
-                  <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-                    <Divider textAlign='left'>Ultimo bimestre de pago</Divider>
+                  <Typography sx={{ fontSize: 14 }} color="text.secondary" >
+                    Ultimo bimestre de pago
                   </Typography>
-                  <Typography variant="h5" component="div">
+                  <Typography variant="h4" component="div" gutterBottom>
                     {debt.last_two_month_payment ? debt.last_two_month_payment : 'No disponible'}
                   </Typography>
-                  <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-                    <Divider textAlign='left'>Ultima fecha de pago</Divider>
+                  <Typography sx={{ fontSize: 14 }} color="text.secondary" >
+                    Ultima fecha de pago
                   </Typography>
-                  <Typography variant="h5" component="div">
+                  <Typography variant="h4" component="div" gutterBottom>
                     {debt.last_payment_date ? new Date(debt.last_payment_date).toLocaleDateString() : 'No disponible'}
                   </Typography>
                 </CardContent>                 
