@@ -5,8 +5,7 @@ import { tokens } from '../../theme';
 import Grid from '@mui/material/Grid';
 import TextField from '@mui/material/TextField';
 import PersonIcon from '@mui/icons-material/Person';
-// import GoogleMaps from '../../components/account-history/google-map.jsx'
-import GoogleMaps from '../../components/AccountHistoryModule/components/sections/contributor/components/maps/index.jsx'
+import MapContainer from '../../components/account-history/google-map.jsx'
 import MapsHomeWorkIcon from '@mui/icons-material/MapsHomeWork';
 import RoomPreferencesIcon from '@mui/icons-material/RoomPreferences';
 import { LocationOff } from '@mui/icons-material';
@@ -29,17 +28,17 @@ const AccountDetails = ({ accountDetails }) => {
     );
   }
 
-  const mapComponent = accountDetails.latitude > 0 ? (
-    <GoogleMaps latitude={accountDetails.latitude} longitude={accountDetails.longitude}/>              
-  ) : (
-    <Grid item container xs={12}>
-      <Grid item xs={12}>
-        <Typography variant="h4" component="h4" sx={{ fontWeight: 'bold', color: 'secondary'}}>
-          <Divider><span><LocationOff sx={{ fontSize: '42px', color: 'orange' }}/></span>Sin geolocalizacion</Divider>
-        </Typography>
-      </Grid>            
-    </Grid>    
-  );
+  // const mapComponent = accountDetails.latitude > 0 ? (
+  //   <GoogleMaps latitude={accountDetails.latitude} longitude={accountDetails.longitude}/>              
+  // ) : (
+  //   <Grid item container xs={12}>
+  //     <Grid item xs={12}>
+  //       <Typography variant="h4" component="h4" sx={{ fontWeight: 'bold', color: 'secondary'}}>
+  //         <Divider><span><LocationOff sx={{ fontSize: '42px', color: 'orange' }}/></span>Sin geolocalizacion</Divider>
+  //       </Typography>
+  //     </Grid>            
+  //   </Grid>    
+  // );
 
   console.log(accountDetails.latitude)
   console.log(accountDetails.longitude)
@@ -357,7 +356,8 @@ const AccountDetails = ({ accountDetails }) => {
             <Grid item xs={4}>
               <Card sx={{ backgroundColor: 'transparent', borderColor: theme.palette.mode === 'dark' ? colors.primary[0] : colors.primary[0], display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                 <CardMedia>
-                {mapComponent}
+                  <MapContainer latitude={accountDetails.latitude} longitude={accountDetails.longitude} />
+                {/* {mapComponent} */}
                 </CardMedia>
               </Card>              
               {/* <GoogleMaps latitude={accountDetails.latitude} longitude={accountDetails.longitude}/>               */}

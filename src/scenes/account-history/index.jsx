@@ -16,6 +16,13 @@ import Debit from '../../components/account-history/debit.jsx'
 import Actions from '../../components/account-history/actions.jsx'
 import Photos from '../../components/account-history/photos.jsx'
 import PDFGenerator from '../../components/account-history/pdf-generator.jsx'
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import PhoneIcon from '@mui/icons-material/Phone';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import PersonPinIcon from '@mui/icons-material/PersonPin';
+import { AddAPhoto, ContactEmergency, CreditScore, DirectionsBike, Savings } from "@mui/icons-material";
+
 
 const Index = () => {
   const user = useSelector(state => state.user)
@@ -58,8 +65,18 @@ const Index = () => {
         const response = await AccountHistoryRequest(selectedPlace, account);
         
         console.log(response.data)
+        //console.log(response.data[0].payments)
+        //const parsedPayments = Array.isArray(response.data[0].payments) ? response.data[0].payments : JSON.parse(response.data[0].payments);
+
+        //console.log(parsedPayments.length)
 
         setInformationUser(response.data)
+        
+        //console.log(JSON.parse(response.data.payments)) 
+
+        //const parsedPayments = Array.isArray(response.data.payments) ? response.data.payments : JSON.parse(response.data.payments);
+        //console.log(parsedPayments)
+
         setIsLoading(false)
 
       } catch (error) {
@@ -73,7 +90,10 @@ const Index = () => {
             setAlertMessage("¡Atencion! La cuenta no existe")
             setInformationUser([]);
           }
-        console.log([error.response.data.message])        
+          else{
+            console.log([error.response.data.message])
+          }
+        
         setInformationUser([]);
       }
     }
@@ -87,6 +107,12 @@ const Index = () => {
 
     console.log(selectedPlace)
     console.log(account)
+
+    const [value, setValue] = React.useState(0);
+
+    const handleChangeTab = (event, newValue) => {
+      setValue(newValue);
+    };
 
   return (
     <>
@@ -142,30 +168,77 @@ const Index = () => {
                 <ManageSearchIcon fontSize="large"/>
                 Buscar
               </Button>
-            </Grid>
-            <Grid item xs={1}> 
-              <Button 
-                variant="contained" 
-                sx={{ bgcolor: 'secondary.main', '&:hover': { bgcolor: 'secondary.dark' } }}
-                style={{ width: '100%', height: '100%' }}
-                onClick={handleGeneratePDF}
-                >
-                  Genera Pdf
-                <ManageSearchIcon fontSize="large"/>                
-              </Button>
-            </Grid>
-          </Grid> 
-          <Grid item xs={12}>
-          {informationUser.map((data, index) => (
-            <div key={index}>
-              <AccountDetails accountDetails={data} />
-              <Payments payments={data.payments} />
-              <Debit debit={data.debit} />
-              <Actions action={data.action} />
-              <Photos photo={data.photo} />
-            </div>
-          ))}
+            </Grid>            
           </Grid>
+
+          <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2} >
+            <Grid item xs={12}>
+              <Tabs 
+              value={value}
+              onChange={handleChangeTab}
+              aria-label="icon label tabs example"
+              textColor="secondary"
+              indicatorColor="secondary"
+              variant="fullWidth"
+              sx={{ backgroundColor: 'rgba(128, 128, 128, 0.1)'}}
+              >
+                <Tab icon={<ContactEmergency />} label="Informacion General"/>
+                <Tab icon={<CreditScore />} label="Pagos"/>
+                <Tab icon={<Savings />} label="Deuda" />
+                <Tab icon={<DirectionsBike />} label="Acciones"/>
+                <Tab icon={<AddAPhoto />} label="Fotografias"/>
+              </Tabs>
+            </Grid> 
+            
+            <Grid item xs={12}>            
+              {value === 0 && (
+                <Box>
+                  {informationUser.map((data, index) => (
+                    <div key={index}>
+                      <AccountDetails accountDetails={data} />                
+                    </div>
+                  ))}                  
+                </Box>
+              )}
+              {value === 1 && (
+                <Box>                
+                  {informationUser.map((data, index) => (
+                    <div key={index}>                     
+                      <Payments payments={data.payments} />                      
+                    </div>
+                  ))}
+                </Box>
+              )}              
+              {value === 2 && (
+                <Box>                
+                  {informationUser.map((data, index) => (
+                    <div key={index}>                      
+                      <Debit debit={data.debit} />                      
+                    </div>
+                  ))}
+                </Box>
+              )}
+               {value === 3 && (
+                <Box>                
+                  {informationUser.map((data, index) => (
+                    <div key={index}>                      
+                      <Actions action={data.action} />                      
+                    </div>
+                  ))}
+                </Box>
+              )}
+               {value === 4 && (
+                <Box>                
+                  {informationUser.map((data, index) => (
+                    <div key={index}>                     
+                      <Photos photo={data.photo} />
+                    </div>
+                  ))}
+                </Box>
+              )}              
+            </Grid>           
+          </Grid>           
+          
         </Box>
     </>
   )

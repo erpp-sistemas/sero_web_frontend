@@ -50,22 +50,14 @@ const Actions = ({ action }) => {
 
   return (
     <div>
-      <Box
-          m='20px 0'
+      <Box          
           display='flex'
           justifyContent='space-evenly'
           flexWrap='wrap'
           gap='20px'          
           padding='15px 10px'
           borderRadius='10px'
-        >
-          <Grid item container xs={12}>
-            <Grid item xs={12}>
-              <Typography variant="h3" component="h3" sx={{ fontWeight: 'bold', fontSize: '2rem'}}>
-                <Divider>Acciones</Divider>
-              </Typography>
-            </Grid>            
-          </Grid>
+        >          
           <Grid container spacing={2} >            
             {parsedActions.map((actions, index) => (
               <Grid key={index} item xs={12} md={4}>

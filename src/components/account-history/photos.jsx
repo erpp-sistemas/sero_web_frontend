@@ -50,8 +50,7 @@ const Photos = ({ photo }) => {
 
   return (
     <div>
-      <Box
-          m='20px 0'
+      <Box          
           display='flex'
           justifyContent='space-evenly'
           flexWrap='wrap'
@@ -59,13 +58,6 @@ const Photos = ({ photo }) => {
           padding='15px 10px'
           borderRadius='10px'
         >
-          <Grid item container xs={12}>
-            <Grid item xs={12}>
-              <Typography variant="h3" component="h3" sx={{ fontWeight: 'bold', fontSize: '2rem'}}>
-                <Divider>Fotografias</Divider>
-              </Typography>
-            </Grid>            
-          </Grid>
           <Grid container spacing={2} >            
             {parsedPhotos.map((ph, index) => (
               <Grid key={index} item xs={12} md={4}>
