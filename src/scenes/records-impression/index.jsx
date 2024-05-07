@@ -25,6 +25,7 @@ const Impression = () => {
 		setIdPaquete(event.target.value)
         const selectedPaquete = paquetes.find(item => item.id === selectedId)
         setPaquete(selectedPaquete)
+		console.log(paquete)
 		handleRegistro()
 		
 	}	
@@ -228,7 +229,7 @@ const Impression = () => {
 				<Box className='records_impression__data' sx={{ minHeight: '500px', height:'auto', width:'100%', background:'rgba(255, 255, 255, 0.250)', borderTopRightRadius:'10px', borderBottomRightRadius:'10px', display:'flex', flexDirection:'column', gap:'2rem' }} fullWidth >
 										
 					{ 
-						Object.keys(paquete).length !== 0 ? (
+						Object.keys(paquete).length !== 0 ? ( 
 
 						<>
 							<Box className='records_impression__data__box' display={'flex'} justifyContent={'center'} alignItems={'center'}>
@@ -247,7 +248,23 @@ const Impression = () => {
 								<Typography sx={{ fontWeight:'600', fontSize:'1.1rem', color:'#cff9e0' }}>Fecha de corte:</Typography><Typography sx={{ fontSize:'1rem' }}>{paquete.fecha_corte}</Typography> 
 							</Box>
 							<Box className='records_impression__data__box' display={'flex'} justifyContent={'center'} alignItems={'center'}>
-								<Typography sx={{ fontWeight:'600', fontSize:'1.1rem', color:'#cff9e0' }}>Cantidad de Registros:</Typography><Typography sx={{ fontSize:'1rem' }}>{rango}</Typography> 
+								<Typography sx={{ fontWeight:'600', fontSize:'1.1rem', color:'#cff9e0' }}>Documento Excel:</Typography>
+								<a 
+									href={paquete.excel_document} 
+									style={{ 
+										textDecoration: 'none',
+										color: '#fff',
+										cursor: 'pointer',
+										background: '#151e27',
+										padding: '5px 15px',
+										borderRadius: '20px',
+										transition: 'background-color 0.3s, color 0.3s', 
+									}}
+									onMouseOver={(e) => e.target.style.backgroundColor = '#273543'} 
+									onMouseOut={(e) => e.target.style.backgroundColor = '#151e27'}
+								>
+									Descargar
+								</a>
 							</Box>
 							{
 								paquete.folio !== 'desconocido' ? (
@@ -259,6 +276,9 @@ const Impression = () => {
 								):( false )
 
 							}
+							<Box className='records_impression__data__box' display={'flex'} justifyContent={'center'} alignItems={'center'}>
+								<Typography sx={{ fontWeight:'600', fontSize:'1.1rem', color:'#cff9e0' }}>Cantidad de Registros:</Typography><Typography sx={{ fontSize:'1rem' }}>{rango}</Typography> 
+							</Box>
 
 						</>
 

@@ -13,7 +13,13 @@ export default function Preview({ registro, setOpenPreview }) {
                 
 				<Typography sx={{ color:'black', fontSize:'2rem', fontWeight:'500' }}>Vista previa</Typography>
 
-                <Box sx={{ width:'95%', height:'95%', border:'2px solid gray', borderRadius:'20px', overflow:'hidden' }}>
+                <Box sx={{ 
+					width:'95%', 
+					height:'95%', 
+					border:'2px solid gray', 
+					borderRadius:'20px', 
+					overflow:'auto', 
+				}}>
 
                     <iframe srcDoc={`<!DOCTYPE html>
 
@@ -26,6 +32,27 @@ export default function Preview({ registro, setOpenPreview }) {
                             <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
                             <title>Preuba de template</title>
+
+							<style>
+								body {
+									overflow-y: scroll; /* Mostrar scrollbar vertical */
+									scrollbar-width: thin; /* Ancho del scrollbar */
+									scrollbar-color: gray gray; /* Color del scrollbar */
+								}
+								
+								::-webkit-scrollbar {
+									width: 8px; /* Ancho del scrollbar */
+								}
+
+								::-webkit-scrollbar-track {
+									background: transparent; /* Color de fondo del scrollbar */
+								}
+
+								::-webkit-scrollbar-thumb {
+									background-color: gray; /* Color del thumb (la parte deslizable del scrollbar) */
+									border-radius: 10px; /* Borde redondeado del thumb */
+								}
+							</style>
 
                         </head>
 
@@ -41,9 +68,16 @@ export default function Preview({ registro, setOpenPreview }) {
 
                             <p>Tipo de Gestion: ${registro.tipo_gestion}</p>	
 
+							<ul>
+								${registro.pagos.map(pago => `<li>${pago.descripcion}: $${pago.total_pagado}</li>`).join('')}
+							</ul>
+
+							<img src="${registro.url_evidencia}" alt="Evidencia" style="max-width: 100%; height: auto;">
+							<img src="${registro.url_fachada}" alt="Evidencia" style="max-width: 100%; height: auto;">
+
                         </body>
 
-                        </html>`} title="Vista previa" style={{ width: '100%', height: '100%', border: 'none' }} />
+                    </html>`} title="Vista previa" style={{ width: '100%', height: '100%', border: 'none' }} />
 
                 </Box>
 
@@ -55,7 +89,7 @@ export default function Preview({ registro, setOpenPreview }) {
     )
 
 }
-	
+					
 Preview.propTypes = {
     registro: PropTypes.object.isRequired,
     setOpenPreview: PropTypes.func.isRequired

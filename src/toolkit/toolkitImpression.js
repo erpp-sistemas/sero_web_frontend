@@ -12,6 +12,7 @@ const getPaquetes = async () => {
 		servicio: item.servicio,
 		folio: item.folio,
 		fecha_corte: item.fecha_corte,
+		excel_document: item.excel_document,
 		usuario: item.usuario,
 	}))
 	return paquetes

@@ -40,26 +40,36 @@ function Records() {
 		dispatch(setPorcentaje(0))
 		dispatch(setCargando(true))
 
-		const data = {
-			id_servicio: servicio,
-			nombre: nombre,
-			fecha_corte: fechaCorte.format('YYYY-MM-DD'),
-			folio: folio || 'desconocido',
-			id_plaza: plaza,
-			excel_document: 'desconocido',
-			id_usuario: user.profile_id
-		}
+		try {
 
-		const id_paquete = await tool.generatePaquete(data)
-		let total = 0
-		for (let ficha of registros) {
-			await tool.uploadFichas({ id_paquete, ...ficha })
-			total += 1
-			calcularProgreso(total)
-		}
-		dispatch(setIdPaquete(id_paquete))
-		dispatch(setCargando(false))
-		dispatch(setModal(true))
+            const excelURL = await tool.uploadS3(excel)
+			
+			const data = {
+				id_servicio: servicio,
+				nombre: nombre,
+				fecha_corte: fechaCorte.format('YYYY-MM-DD'),
+				folio: folio || 'desconocido',
+				id_plaza: plaza,
+				excel_document: excelURL.filePath,
+				id_usuario: user.profile_id
+			}
+	
+			const id_paquete = await tool.generatePaquete(data)
+			let total = 0
+			for (let ficha of registros) {
+				await tool.uploadFichas({ id_paquete, ...ficha })
+				total += 1
+				calcularProgreso(total)
+			}
+
+			dispatch(setIdPaquete(id_paquete))
+			dispatch(setCargando(false))
+			dispatch(setModal(true))
+
+        } catch (error) {
+            console.error('Error al subir el archivo de Excel:', error)
+        }
+
 	}
 
 	const handleFileUpload = (e) => {
