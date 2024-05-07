@@ -1,21 +1,97 @@
 import { Box, Button, MenuItem, FormControl, InputLabel, Select, TextField, Typography } from '@mui/material'
 import ArticleIcon from '@mui/icons-material/Article'
-import { useEffect } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
-import { setPaquetes, setPaquete, setIdPaquete, setRangoInicial, setRangoFinal } from '../../redux/impressionSlice'
+import { useEffect, useState } from 'react'
 import tool from '../../toolkit/toolkitImpression.js'
+import Preview from '../../components/Records/Preview.jsx'
+import Charge from '../../components/Records/charge.jsx'
 
 const Impression = () => {
 
-	const { paquetes, paquete, idPaquete, rangoInicial, rangoFinal } = useSelector(state => state.impression)
-	const dispatch = useDispatch()
+	const [loading, setLoading] = useState(false)
+	const [registros, setRegistros] = useState({})
+	const [registro, setRegistro] = useState(null)
+	const [rango, setRango] = useState(0)
+	const [rangoInicial, setRangoInicial] = useState(0)
+	const [rangoFinal, setRangoFinal] = useState(0)
+	const [paquetes, setPaquetes] = useState([])
+	const [paquete, setPaquete] = useState({})
+	const [selectedCuenta, setSelectedCuenta] = useState('')
+	const [idPaquete, setIdPaquete] = useState(0)
+	const [openPreview, setOpenPreview] = useState(0)
 
 	const handlePaqueteChange = async (event) => {
+		setLoading(true)
         const selectedId = event.target.value
-		dispatch(setIdPaquete(event.target.value))
+		setIdPaquete(event.target.value)
         const selectedPaquete = paquetes.find(item => item.id === selectedId)
-        dispatch(setPaquete(selectedPaquete))
-		const paquetes = await tool.getRegistrosById(idPaquete)
+        setPaquete(selectedPaquete)
+		handleRegistro()
+		
+	}	
+
+	const handleSeleccionRegistro = (registroN) => {
+		setRegistro(registroN)
+		console.log(registro)
+	}
+
+	const handleRegistro = async () => {
+
+		try {
+
+			const paquetes = await tool.getRegistrosById(idPaquete)
+	
+			const registrosAgrupados = {}
+	
+			paquetes.forEach(registro => {
+				const {
+					cuenta,
+					calle,
+					colonia,
+					status_previo,
+					tarea_gestionada,
+					tipo_gestion,
+					tipo_servicio,
+					tipo_tarifa,
+					total_pagado,
+					url_evidencia,
+					url_fachada,
+				} = registro
+	
+				if (!registrosAgrupados[cuenta]) {
+					registrosAgrupados[cuenta] = {
+						calle,
+						colonia,
+						status_previo,
+						tarea_gestionada,
+						tipo_gestion,
+						tipo_servicio,
+						tipo_tarifa,
+						total_pagado,
+						url_evidencia,
+						url_fachada,
+						pagos: []
+					}
+				}
+	
+				if (registro) {
+					registrosAgrupados[cuenta].pagos.push({
+						descripcion: registro.descripcion || "",
+						descuentos: registro.descuentos || "",
+						total_pagado: registro.total_pagado || ""
+					})
+				}
+			})
+
+			setRegistros(registrosAgrupados)
+			setRango(Object.keys(registrosAgrupados).length)
+			setRangoInicial(1)
+			setRangoFinal(Object.keys(registrosAgrupados).length)
+			setLoading(false)
+	
+		} catch (error) {
+			console.error('Ocurrió un error:', error.message)
+		}
+
 	}
 
 	useEffect(() => {
@@ -23,14 +99,21 @@ const Impression = () => {
 		const apiPaquetes = async () => {
 			try {
 				const paquetes = await tool.getPaquetes()
-				dispatch(setPaquetes(paquetes))
+				setPaquetes(paquetes)
 			} catch (error) {
 				console.error('Error fetching data:', error)
 			}
 		}
 		apiPaquetes()
 
-	}, [dispatch])
+	}, [])
+
+	useEffect(() => {
+		if (idPaquete) {
+			handleRegistro()
+		}
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [idPaquete])
 
     return (
 
@@ -57,7 +140,7 @@ const Impression = () => {
 								sx={{ color: '#ffffff', '& .MuiSelect-select': { borderColor: '#ffffff', }, '& .MuiSvgIcon-root': { color: '#ffffff', }, }}
 							>
 								{paquetes.map(item => (
-                                    <MenuItem key={item.id} value={item.id}>{item.id}</MenuItem>
+                                    <MenuItem key={item.id} value={item.id}>{item.id} - {item.nombre}</MenuItem>
                                 ))}
 							</Select>
 
@@ -83,7 +166,7 @@ const Impression = () => {
 						}} 
 						id='outlined-basic' 
 						label='INICIO'	
-						onChange={(event) => dispatch(setRangoInicial(event.target.value))}
+						onChange={(event) => setRangoInicial(event.target.value)}
 						variant='outlined' 
 						value={rangoInicial}
 						type='number'
@@ -103,7 +186,7 @@ const Impression = () => {
 						}} 
 						id='outlined-basic' 
 						label='FINAL' 
-						onChange={(event) => dispatch(setRangoFinal(event.target.value))}
+						onChange={(event) => setRangoFinal(event.target.value)}
 						variant='outlined' 
 						value={rangoFinal}
 						type='number'
@@ -122,18 +205,22 @@ const Impression = () => {
 							<Select
 								labelId='demo-simple-select-label'
 								id='demo-simple-select'
-								value={'previ'}
+								value={selectedCuenta}
 								label='FICHA'
-								onChange={()=>console.log('hola')}
+								onChange={(event) => setSelectedCuenta(event.target.value)}
 								sx={{ color: '#ffffff', '& .MuiSelect-select': { borderColor: '#ffffff', }, '& .MuiSvgIcon-root': { color: '#ffffff', }, }}
 							>
-							</Select>
+								{Object.keys(registros).slice(0, 10).map((cuenta, index) => (
+									<MenuItem key={index} value={cuenta} onClick={() => handleSeleccionRegistro(registros[cuenta])}>{cuenta}</MenuItem>
+								))}
+							</Select>	
 
 						</FormControl>
 
 					</Box>
 
-					<Button variant="text" sx={{ marginTop:'30px', width:'100%', maxWidth:'200px', color:'white', fontWeight:'600', fontSize:'.8rem'}} fullWidth onClick={() => console.log('abir')}> VER PREVIEW </Button>
+					{ registro ? <Button variant="text" sx={{ marginTop:'30px', width:'100%', maxWidth:'200px', color:'white', fontWeight:'600', fontSize:'.8rem'}} fullWidth onClick={() => setOpenPreview(true)}> VER PREVIEW </Button> :false }
+
 					<Button variant="contained" sx={{ marginTop:'30px', width:'100%', maxWidth:'250px', color:'white', fontWeight:'600', fontSize:'.8rem'}} fullWidth> GENERAR FICHAS PDF </Button>
 
 				</Box>
@@ -160,7 +247,7 @@ const Impression = () => {
 								<Typography sx={{ fontWeight:'600', fontSize:'1.1rem', color:'#cff9e0' }}>Fecha de corte:</Typography><Typography sx={{ fontSize:'1rem' }}>{paquete.fecha_corte}</Typography> 
 							</Box>
 							<Box className='records_impression__data__box' display={'flex'} justifyContent={'center'} alignItems={'center'}>
-								<Typography sx={{ fontWeight:'600', fontSize:'1.1rem', color:'#cff9e0' }}>Cantidad de Registros:</Typography><Typography sx={{ fontSize:'1rem' }}>10000</Typography> 
+								<Typography sx={{ fontWeight:'600', fontSize:'1.1rem', color:'#cff9e0' }}>Cantidad de Registros:</Typography><Typography sx={{ fontSize:'1rem' }}>{rango}</Typography> 
 							</Box>
 							{
 								paquete.folio !== 'desconocido' ? (
@@ -187,6 +274,9 @@ const Impression = () => {
 				</Box>
 
             </Box>
+
+			{ openPreview ? <Preview setOpenPreview={setOpenPreview} registro={registro}  /> : false }
+			{ loading ? <Charge /> : false}
 
         </Box>
 

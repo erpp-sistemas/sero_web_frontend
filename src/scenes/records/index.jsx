@@ -115,7 +115,7 @@ function Records() {
 
 		<Box width={'100%'} padding={'10px'} minHeight='100vh' display={'flex'} justifyContent={'start'} alignItems={'center'} flexDirection={'column'}>
 			
-			<Typography mb={'2rem'} textAlign={'center'} color={'#cff9e0'} fontSize={'2.5rem'}>Generador de fichas</Typography>
+			<Typography mb={'2rem'} textAlign={'center'} color={'#cff9e0'} fontSize={'2.5rem'}>Registro de fichas</Typography>
 			
 			<div className='records'>	 
 
@@ -144,17 +144,17 @@ function Records() {
 							onChange={() => (dispatch(setActivity(false)), setExcel(null))}
 							sx={{ '& .MuiSvgIcon-root': { fontSize: '25px', color: !activity ? '#28a745' : 'grey', }, '&:hover': { backgroundColor: '#228d3b', }, }}
 						/>
-
+	
 					</Box>
 
 				</Box>
 
 				<Box marginTop={'2rem'}>
 
-					<Box className='' width={'100%'}>
+					<Box className='' width={'350px'} >
 
 						<TextField
-							sx={{ width: '99%', marginBottom: '1rem' }}
+							sx={{ width:'100%', marginBottom: '1rem' }}
 							id='outlined-basic'
 							label='Nombre'
 							variant='outlined'
@@ -172,7 +172,7 @@ function Records() {
 								value={plaza}
 								label='Plaza'
 								onChange={(e) => dispatch(setPlaza(e.target.value))}
-								sx={{ color: '#ffffff', '& .MuiSelect-select': { borderColor: '#ffffff', }, '& .MuiSvgIcon-root': { color: '#ffffff', }, }}
+								sx={{ width:'100%', color: '#ffffff', '& .MuiSelect-select': { borderColor: '#ffffff', }, '& .MuiSvgIcon-root': { color: '#ffffff', }, }}
 							>
 
 								{plazas.filter(plaza => plaza.active).map((plaza, index) => (
@@ -197,7 +197,7 @@ function Records() {
 								value={servicio}
 								label='Plaza'
 								onChange={(e)=>(dispatch(setServicio(e.target.value)))}
-								sx={{ color: '#ffffff', '& .MuiSelect-select': { borderColor: '#ffffff', }, '& .MuiSvgIcon-root': { color: '#ffffff', }, }}
+								sx={{ width:'100%', color: '#ffffff', '& .MuiSelect-select': { borderColor: '#ffffff', }, '& .MuiSvgIcon-root': { color: '#ffffff', }, }}
 							>
 
 								{servicios.filter(servicio => servicio.active).map((servicio, index) => (
@@ -219,7 +219,7 @@ function Records() {
 									label='Fecha de corte'
 									value={fechaCorte}
 									onChange={(newValue) => { setfechaCorte(newValue) }}
-									sx={{ width: '99%', '& .MuiSvgIcon-root': { color: '#ffffff', }, '& .MuiInputLabel-root': { color: '#ffffff', }, '& .MuiInputBase-input': { color: '#ffffff', }, }}
+									sx={{ width:'100%', '& .MuiSvgIcon-root': { color: '#ffffff', }, '& .MuiInputLabel-root': { color: '#ffffff', }, '& .MuiInputBase-input': { color: '#ffffff', }, }}
 								/>
 
 							</DemoContainer>

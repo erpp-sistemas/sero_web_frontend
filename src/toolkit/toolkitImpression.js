@@ -7,7 +7,7 @@ const getPaquetes = async () => {
 	const data = response.data
 	const paquetes = data.data.map((item) => ({
 		id: item.id,
-		nombre: item.nombre,
+		nombre: item.nombre,	
 		plaza: item.plaza,
 		servicio: item.servicio,
 		folio: item.folio,
@@ -21,7 +21,8 @@ const getRegistrosById = async (idPaquete) => {
 	try {
 		const response = await axios.get(`${baseURL}/api/records/registro/${idPaquete}`)
 		const data = response.data
-		console.log(data)
+		return(data.data)
+
 	} catch (error) {
 		console.error('Error fetching data:', error)
 	}
