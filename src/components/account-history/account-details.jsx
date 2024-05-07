@@ -5,7 +5,7 @@ import { tokens } from '../../theme';
 import Grid from '@mui/material/Grid';
 import TextField from '@mui/material/TextField';
 import PersonIcon from '@mui/icons-material/Person';
-import MapContainer from '../../components/account-history/google-map.jsx'
+import MapboxMap from '../../components/account-history/google-map.jsx'
 import MapsHomeWorkIcon from '@mui/icons-material/MapsHomeWork';
 import RoomPreferencesIcon from '@mui/icons-material/RoomPreferences';
 import { LocationOff } from '@mui/icons-material';
@@ -353,16 +353,10 @@ const AccountDetails = ({ accountDetails }) => {
                 </Grid>                
               </Grid>
             </Grid>
-            <Grid item xs={4}>
-              <Card sx={{ backgroundColor: 'transparent', borderColor: theme.palette.mode === 'dark' ? colors.primary[0] : colors.primary[0], display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                <CardMedia>
-                  <MapContainer latitude={accountDetails.latitude} longitude={accountDetails.longitude} />
-                {/* {mapComponent} */}
-                </CardMedia>
-              </Card>              
-              {/* <GoogleMaps latitude={accountDetails.latitude} longitude={accountDetails.longitude}/>               */}
+            <Grid item xs={4}>              
+                <MapboxMap latitude={accountDetails.latitude} longitude={accountDetails.longitude}/>                 
             </Grid>
-          </Grid>
+          </Grid>          
         </Box>      
     </div>
   );
