@@ -44,14 +44,19 @@ const Impression = () => {
 			const registrosAgrupados = {}
 	
 			paquetes.forEach(registro => {
+				console.log(registro)
 				const {
 					cuenta,
 					calle,
 					colonia,
+					propietario,
+					servicio,
 					status_previo,
+					latitud,
+					longitud,
+					tipo_servicio,
 					tarea_gestionada,
 					tipo_gestion,
-					tipo_servicio,
 					tipo_tarifa,
 					total_pagado,
 					url_evidencia,
@@ -60,8 +65,13 @@ const Impression = () => {
 	
 				if (!registrosAgrupados[cuenta]) {
 					registrosAgrupados[cuenta] = {
+						cuenta,
 						calle,
 						colonia,
+						latitud,
+						longitud,
+						propietario,
+						servicio,
 						status_previo,
 						tarea_gestionada,
 						tipo_gestion,
@@ -277,7 +287,7 @@ const Impression = () => {
 
 							}
 							<Box className='records_impression__data__box' display={'flex'} justifyContent={'center'} alignItems={'center'}>
-								<Typography sx={{ fontWeight:'600', fontSize:'1.1rem', color:'#cff9e0' }}>Cantidad de Registros:</Typography><Typography sx={{ fontSize:'1rem' }}>{rango}</Typography> 
+								<Typography sx={{ fontWeight:'600', fontSize:'1.1rem', color:'#cff9e0' }}>Cantidad de Fichas:</Typography><Typography sx={{ fontSize:'1rem' }}>{rango}</Typography> 
 							</Box>
 
 						</>
