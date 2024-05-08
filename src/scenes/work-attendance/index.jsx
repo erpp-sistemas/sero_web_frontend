@@ -9,9 +9,9 @@ import TextField from '@mui/material/TextField';
 import Header from '../../components/Header';
 import { DataGrid,
   GridToolbarColumnsButton,
-  GridToolbarContainer,
+  GridToolbarContainer,  
   GridToolbarDensitySelector,
-  GridToolbarExport,
+  GridToolbarExport,  
   GridToolbarFilterButton, } from '@mui/x-data-grid';
 import InsertEmoticonIcon from '@mui/icons-material/InsertEmoticon';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
@@ -134,7 +134,7 @@ const Index = () => {
       const buildColumns = () => {   
         const columns = [
           { 
-            field: 'user',
+            field: 'usuario',
             renderHeader: () => (
               <strong style={{ color: "#5EBFFF" }}>{"NOMBRE"}</strong>
             ),
@@ -142,22 +142,22 @@ const Index = () => {
             editable: false,
           },
           { 
-            field: 'url_image',
+            field: 'imagen_url',
             renderHeader: () => (
               <strong style={{ color: "#5EBFFF" }}>{"FOTO"}</strong>
             ),
             width: 70,
-            renderCell: (params) => <AvatarImage data={params.row.url_image} />,
+            renderCell: (params) => <AvatarImage data={params.row.imagen_url} />,
           },
           { 
-            field: 'place', 
+            field: 'plaza', 
             renderHeader: () => (
               <strong style={{ color: "#5EBFFF" }}>{"PLAZA"}</strong>
             ),
             width: 120,
           },
           { 
-            field: 'date_capture', 
+            field: 'fecha_captura', 
             renderHeader: () => (
               <strong style={{ color: "#5EBFFF" }}>{"FECHA DE CAPTURA"}</strong>
             ),
@@ -170,7 +170,7 @@ const Index = () => {
             ),
           },
           { 
-            field: 'entry_time',
+            field: 'hora_entrada',
             renderHeader: () => (
               <strong style={{ color: "#5EBFFF" }}>{"HORA DE ENTRADA"}</strong>
             ),
@@ -183,7 +183,7 @@ const Index = () => {
             ),
           },
           { 
-            field: 'entry_status',
+            field: 'estatus_entrada',
             renderHeader: () => (
               <strong style={{ color: "#5EBFFF" }}>{"ESTATUS DE ENTRADA"}</strong>
             ),
@@ -192,7 +192,7 @@ const Index = () => {
               let icon = null;
               let chipColor = 'primary';
               let chipLabel = '';
-              switch (params.row.entry_status) {
+              switch (params.row.estatus_entrada) {
                 case 'Asistencia correcta':
                   icon = <InsertEmoticonIcon/>;
                   chipColor = 'success';
@@ -231,7 +231,7 @@ const Index = () => {
             },
           },
           { 
-            field: 'entry_point_status',
+            field: 'estatus_punto_entrada',
             renderHeader: () => (
               <strong style={{ color: "#5EBFFF" }}>{"ESTATUS DE PUNTO DE ENTRADA"}</strong>
             ),
@@ -240,7 +240,7 @@ const Index = () => {
               let icon = null;
               let chipColor = 'primary';
               let chipLabel = '';
-              switch (params.row.entry_point_status) {
+              switch (params.row.estatus_punto_entrada) {
                 case 'Campo':
                   icon = <EditRoadIcon/>;
                   chipColor = 'warning';
@@ -269,7 +269,7 @@ const Index = () => {
             },
           },
           { 
-            field: 'entry_attendance_place',
+            field: 'lugar_entrada',
             renderHeader: () => (
               <strong style={{ color: "#5EBFFF" }}>{"LUGAR DE ENTRADA"}</strong>
             ),
@@ -284,7 +284,7 @@ const Index = () => {
             ),
           },
           { 
-            field: 'exit_time',
+            field: 'hora_salida',
             renderHeader: () => (
               <strong style={{ color: "#5EBFFF" }}>{"HORA DE SALIDA"}</strong>
             ),
@@ -297,7 +297,7 @@ const Index = () => {
             ),
           },
           { 
-            field: 'exit_status',
+            field: 'estatus_salida',
             renderHeader: () => (
               <strong style={{ color: "#5EBFFF" }}>{"ESTATUS DE SALIDA"}</strong>
             ),
@@ -306,7 +306,7 @@ const Index = () => {
               let icon = null;
               let chipColor = 'primary';
               let chipLabel = '';
-              switch (params.row.exit_status) {
+              switch (params.row.estatus_salida) {
                 case 'Asistencia correcta':
                   icon = <InsertEmoticonIcon/>;
                   chipColor = 'success';
@@ -345,7 +345,7 @@ const Index = () => {
             },            
           },
           { 
-            field: 'exit_point_status',
+            field: 'estatus_punto_salida',
             renderHeader: () => (
               <strong style={{ color: "#5EBFFF" }}>{"ESTATUS DE PUNTO DE SALIDA"}</strong>
             ),
@@ -354,7 +354,7 @@ const Index = () => {
               let icon = null;
               let chipColor = 'primary';
               let chipLabel = '';
-              switch (params.row.exit_point_status) {
+              switch (params.row.estatus_punto_salida) {
                 case 'Campo':
                   icon = <EditRoadIcon/>;
                   chipColor = 'warning';
@@ -383,7 +383,7 @@ const Index = () => {
             },
           },
           { 
-            field: 'exit_attendance_place',
+            field: 'lugar_salida',
             renderHeader: () => (
               <strong style={{ color: "#5EBFFF" }}>{"LUGAR DE SALIDA"}</strong>
             ),
@@ -398,7 +398,7 @@ const Index = () => {
             ),
           },
           { 
-            field: 'food_entry_time',
+            field: 'hora_entrada_comida',
             renderHeader: () => (
               <strong style={{ color: "#5EBFFF" }}>{"HORA DE ENTRADA DE COMIDA"}</strong>
             ),
@@ -411,7 +411,7 @@ const Index = () => {
             ),
           },
           { 
-            field: 'food_entry_attendance_place',
+            field: 'lugar_entrada_comida',
             renderHeader: () => (
               <strong style={{ color: "#5EBFFF" }}>{"LUGAR DE ENTRADA DE COMIDA"}</strong>
             ),
@@ -426,7 +426,7 @@ const Index = () => {
             ),
           },
           { 
-            field: 'food_exit_time',
+            field: 'hora_salida_comida',
             renderHeader: () => (
               <strong style={{ color: "#5EBFFF" }}>{"HORA DE SALIDA DE COMIDA"}</strong>
             ),
@@ -439,7 +439,7 @@ const Index = () => {
             ),
           },
           { 
-            field: 'food_exit_attendance_place',
+            field: 'lugar_salida_comida',
             renderHeader: () => (
               <strong style={{ color: "#5EBFFF" }}>{"LUGAR DE SALIDA DE COMIDA"}</strong>
             ),
@@ -481,79 +481,29 @@ const Index = () => {
         );
       };
 
-      const handleExportToExcel = async () => {
-        try {
-            setIsLoading(true)
-            const workbook = new ExcelJS.Workbook();
-            const worksheet = workbook.addWorksheet("Usuarios");
-            
-            worksheet.columns = [
-                { header: "Nombre", key: "user", width: 30 },                
-                { header: "Plaza", key: "place", width: 20 },
-                { header: "Fecha de Captura", key: "date_capture", width: 20 },
-                { header: "Hora de Entrada", key: "entry_time", width: 20 },
-                { header: "Estatus de Entrada", key: "entry_status", width: 20 },
-                { header: "Estatus de Punto de Entrada", key: "entry_point_status", width: 25 },                
-                { header: "Hora de Salida", key: "exit_time", width: 20 },
-                { header: "Estatus de Salida", key: "exit_status", width: 20 },
-                { header: "Estatus de Punto de Salida", key: "exit_point_status", width: 25 },
-                { header: "Hora de Entrada de comida", key: "food_entry_time", width: 20 },
-                { header: "Hora de Salida de comida", key: "food_exit_time", width: 20 },
-            ];
 
-            users.forEach((user) => {
-                worksheet.addRow({
-                    user: user.user,                    
-                    place: user.place,
-                    date_capture: user.date_capture,
-                    entry_time: user.entry_time,
-                    entry_status: user.entry_status,
-                    entry_point_status: user.entry_point_status,                    
-                    exit_time: user.exit_time,
-                    exit_status: user.exit_status,
-                    exit_point_status: user.exit_point_status,
-                    food_entry_time: user.food_entry_time,
-                    food_exit_time: user.food_exit_time,
-                });
-            });
-
-            
-            const buffer = await workbook.xlsx.writeBuffer();
-            const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = "users.xlsx";
-            a.click();
-            window.URL.revokeObjectURL(url);
-            setIsLoading(false)
-        } catch (error) {
-            console.error("Error:", error);
-            setIsLoading(false)
-        }
-    };    
-
-      function CustomToolbar() {
-        return (
-          <GridToolbarContainer>
-            <GridToolbarColumnsButton color="secondary" />
-            <GridToolbarFilterButton color="secondary" />
-            <GridToolbarDensitySelector color="secondary" />
-    
-            <Button
-                color="secondary"
-                onClick={handleExportToExcel}
-            >
-                Exportar a Excel
-            </Button>    
-            
-          </GridToolbarContainer>
-        );
-      }
+      const CustomToolbar = () => (
+        <GridToolbarContainer >
+         
+          <GridToolbarDensitySelector color="secondary" />
+          <GridToolbarFilterButton color="secondary" label='filtros'/>
+          <GridToolbarColumnsButton color="secondary" />
+          <GridToolbarExport
+          csvOptions={{
+            fileName: 'Registro Asistencia',
+            delimiter: ';',
+            utf8WithBom: true,            
+          }}
+          printOptions={{ disableToolbarButton: true }}
+          color="secondary"
+          
+          />
+        </GridToolbarContainer>
+      );      
 
       useEffect(() => {
         const countsE = users.reduce((acce, row) => {
-            const resultE = row.entry_status;
+            const resultE = row.estatus_entrada;
             
             acce[resultE] = (acce[resultE] || 0) + 1;
   
@@ -561,7 +511,7 @@ const Index = () => {
         }, {});
 
         const countsS = users.reduce((accs, row) => {
-          const resultS = row.exit_status;
+          const resultS = row.estatus_salida;
           
           accs[resultS] = (accs[resultS] || 0) + 1;
 
@@ -570,9 +520,7 @@ const Index = () => {
   
         setTotalRecords(users.length);
         setResultCountsEntry(countsE);
-        setResultCountsExit(countsS);        
-        console.log(countsE)
-        console.log(countsS)
+        setResultCountsExit(countsS);
   
       }, [users])
   
@@ -590,10 +538,10 @@ const Index = () => {
         let filteredData
 
         if (type === 1){
-          filteredData = users.filter(row => row.entry_status === result);
+          filteredData = users.filter(row => row.estatus_entrada === result);
         }
         else if (type === 2){
-          filteredData = users.filter(row => row.exit_status === result);
+          filteredData = users.filter(row => row.estatus_salida === result);
         }
         
         const workbook = new ExcelJS.Workbook();
@@ -627,10 +575,10 @@ const Index = () => {
       let filteredData
 
       if(type === 1){
-        filteredData = users.filter(row => row.entry_status === result);
+        filteredData = users.filter(row => row.estatus_entrada === result);
       }
       else if(type === 2){
-        filteredData = users.filter(row => row.exit_status === result);
+        filteredData = users.filter(row => row.estatus_salida === result);
       }
       
       setModalData(filteredData);
@@ -731,7 +679,7 @@ const Index = () => {
                         <DataGrid
                           rows={users}
                           columns={buildColumns()}
-                          getRowId={(row) => row.user_id}
+                          getRowId={(row) => row.usuario_id}
                           editable={false} 
                           slots={{ toolbar: CustomToolbar}}                
                         />
