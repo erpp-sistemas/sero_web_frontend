@@ -13,7 +13,7 @@
 		return plazas
 	}
 
-	const getServicios=async()=>{
+	const getServicios = async () => {
 		const responsetwo = await axios.get(`${baseURL}/api/services`)
 		const data = responsetwo.data
 		const servicios = data.services.map((item) => ({
@@ -23,6 +23,11 @@
 		}))
 		
 		return servicios
+	}
+
+	const getName = async (nombre) => {
+		const resposeName = await axios.get(`${baseURL}/api/records/paquete/nombre/${nombre}`)
+		return resposeName
 	}
 
 	const generatePaquete=async(data)=>{
@@ -73,7 +78,7 @@
 			gestor: 'gestor',
 			tarea_gestionada: 'tarea_gestionada',
 			fecha_gestion: 'fecha_de_gestion',
-			tipo_gestion: 'tipo de gestion',
+			tipo_gestion: 'tabla_gestion',
 			estatus_predio: 'estatus_predio',
 			estatus_gestion_Valida: 'estatus de getion valida',
 			estatus_nuestra_cartera: 'estatus en nuestra cartera',
@@ -113,6 +118,7 @@
 						ficha.fecha_gestion = ficha.fecha_gestion.slice(0, 10).replace(/ /g, '')
 						ficha.foto_fachada_predio = ficha.foto_fachada_predio==='si'||ficha.foto_fachada_predio==='Si'?1:0
 						ficha.foto_evidencia_predio = ficha.foto_evidencia_predio==='si'||ficha.foto_evidencia_predio==='Si'?1:0
+						ficha.promocion = ficha.promocion + "";
 
 					} else {
 						candado = false
@@ -124,6 +130,7 @@
 			}
 		})
 		return resultados
+		
 	}
 
 	function NumberToDate(serial) {
@@ -169,5 +176,6 @@
 		getServicios,
 		getPlazas,
 		formatearFila,
-		uploadS3
+		uploadS3,
+		getName
 	}

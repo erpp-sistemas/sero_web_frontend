@@ -9,7 +9,7 @@ import tool from '../../toolkit/toolkitFicha.js'
 import LinearProgressWithLabel from '../../components/Records/LinerProgress.jsx'
 import ModalId from '../../components/Records/ModalId.jsx'
 import { useSelector, useDispatch } from 'react-redux'
-import { setActivity, setPlazas, setServicios, setPlaza, setServicio, setFileName, setSelectionCompleted, setFolio, setRegistros, setPorcentaje, setCargando, setModal, setIdPaquete, setNombre } from '../../redux/recordsSlice.js'
+import { setActivity, setPlazas, setServicios, setPlaza, setServicio, setFileName, setSelectionCompleted, setFolio, setRegistros, setPorcentaje, setCargando, setModal, setIdPaquete } from '../../redux/recordsSlice.js'
 
 /**
 	* Página principal de fichas
@@ -20,10 +20,12 @@ import { setActivity, setPlazas, setServicios, setPlaza, setServicio, setFileNam
 function Records() {
 
 	const [fechaCorte, setfechaCorte] = useState(null)
+	const [nombreExiste, setNombreExiste] = useState(false)
+	const [nombre, setNombre] = useState('')
 	// eslint-disable-next-line no-unused-vars
 	const [excel, setExcel] = useState(null)
 	const user = useSelector(state => state.user)
-	const { activity, plazas, servicios, plaza, servicio, fileName, folio, selectionCompleted, registros, porcentaje, cargando, modal, nombre } = useSelector(state => state.records)
+	const { activity, plazas, servicios, plaza, servicio, fileName, folio, selectionCompleted, registros, porcentaje, cargando, modal } = useSelector(state => state.records)
 	const dispatch = useDispatch()
 
 	const Progreso = useMemo(() => {
@@ -57,6 +59,7 @@ function Records() {
 			const id_paquete = await tool.generatePaquete(data)
 			let total = 0
 			for (let ficha of registros) {
+				console.log(ficha)
 				await tool.uploadFichas({ id_paquete, ...ficha })
 				total += 1
 				calcularProgreso(total)
@@ -121,6 +124,24 @@ function Records() {
 		dispatch(setSelectionCompleted(plaza !== '' && servicio !== '' && fechaCorte !== null))
 	}, [dispatch, fechaCorte, plaza, servicio])
 
+	
+	useEffect(() => {
+		
+		const handleNombreChange = async () => {
+
+			try {
+				const data = await tool.getName(nombre)
+				setNombreExiste(data.data.existe)
+			} catch (error) {
+				console.error('Error al verificar el nombre:', error)
+			}
+
+		}
+
+		handleNombreChange()
+
+	}, [nombre])
+
 	return (
 
 		<Box width={'100%'} padding={'10px'} minHeight='100vh' display={'flex'} justifyContent={'start'} alignItems={'center'} flexDirection={'column'}>
@@ -138,7 +159,10 @@ function Records() {
 						<Checkbox
 							id='package'
 							checked={activity}
-							onChange={() => (dispatch(setActivity(true)), setExcel(null))}
+							onChange={() => {
+								dispatch(setActivity(true))
+								dispatch(setFolio(null))
+							}}
 							sx={{ '& .MuiSvgIcon-root': { fontSize: '25px', color: activity ? '#28a745' : 'grey', }, '&:hover': { backgroundColor: '#228d3b', }, }}
 						/>
 
@@ -151,7 +175,10 @@ function Records() {
 						<Checkbox
 							id='individual'
 							checked={!activity}
-							onChange={() => (dispatch(setActivity(false)), setExcel(null))}
+							onChange={() => {
+								dispatch(setActivity(false))
+								dispatch(setFolio(null))
+							}}
 							sx={{ '& .MuiSvgIcon-root': { fontSize: '25px', color: !activity ? '#28a745' : 'grey', }, '&:hover': { backgroundColor: '#228d3b', }, }}
 						/>
 	
@@ -163,26 +190,58 @@ function Records() {
 
 					<Box className='' width={'350px'} >
 
-						<TextField
-							sx={{ width:'100%', marginBottom: '1rem' }}
-							id='outlined-basic'
-							label='Nombre'
-							variant='outlined'
-							value={nombre}
-							onChange={(e) => dispatch(setNombre(e.target.value))}
-						/>	
+					<TextField
+						sx={{
+							width: '100%',
+							marginBottom: '1rem',
+							'& .MuiInputLabel-root': {
+								color: nombreExiste ? 'rgb(185, 0, 0) !important' : 'white !important',
+							},
+							'& .MuiOutlinedInput-root': {
+								'& fieldset': {
+									borderColor: nombreExiste ? 'rgb(185, 0, 0) !important' : 'white !important', 
+								},
+								'&:hover fieldset': {
+									borderColor: nombreExiste ? 'rgb(185, 0, 0) !important' : 'white !important',
+								},
+								'&.Mui-focused fieldset': {
+									borderColor: nombreExiste ? 'rgb(185, 0, 0) !important' : 'white !important', 
+								},
+							},
+						}}
+						id='outlined-basic'
+						label='Nombre'
+						variant='outlined'
+						value={nombre}
+						onChange={(e) => 	setNombre(e.target.value)}
+					/>
+
+						{ nombreExiste ? <p className='records_aviso'>Ya existe un registro con este nombre.</p> : false }
 
 						<FormControl fullWidth>
 
-							<InputLabel id='demo-simple-select-label' sx={{ color: '#ffffff' }}>Plaza</InputLabel>
+							<InputLabel 
+								id='demo-simple-select-label' 
+								sx={{ 
+									color: '#ffffff',
+								}}
+							>Plaza</InputLabel>
 
 							<Select
 								labelId='demo-simple-select-label'
 								id='demo-simple-select'
+								className="custom-select"
 								value={plaza}
 								label='Plaza'
 								onChange={(e) => dispatch(setPlaza(e.target.value))}
-								sx={{ width:'100%', color: '#ffffff', '& .MuiSelect-select': { borderColor: '#ffffff', }, '& .MuiSvgIcon-root': { color: '#ffffff', }, }}
+								sx={{ 
+									width:'100%', 
+									color: '#ffffff',
+									'&:focus': {  
+										color: '#ffffff important',
+										borderColor: '#ffffff !important', 
+									},
+								}}
 							>
 
 								{plazas.filter(plaza => plaza.active).map((plaza, index) => (
@@ -312,13 +371,13 @@ function Records() {
 							}}
 							fullWidth
 							variant='contained'
-							disabled={registros.length === 0 || (!activity && !folio) || cargando }
+							disabled={registros.length === 0 || (!activity && !folio) || cargando || nombreExiste || nombre == '' }
 							onClick={processUpload}
 						>
 							CREAR REGISTROS
 						</Button>
 
-						{modal ? <ModalId/> : false }
+						{modal ? <ModalId  nombre={nombre}/> : false }
 
 					</Box>
 

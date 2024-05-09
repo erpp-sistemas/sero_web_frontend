@@ -27,7 +27,6 @@ const Impression = () => {
         setPaquete(selectedPaquete)
 		console.log(paquete)
 		handleRegistro()
-		
 	}	
 
 	const handleSeleccionRegistro = (registroN) => {
@@ -48,12 +47,16 @@ const Impression = () => {
 				const {
 					cuenta,
 					calle,
+					fecha_gestion,
+					fecha_pago,
 					colonia,
 					propietario,
 					servicio,
 					status_previo,
 					latitud,
 					longitud,
+					gestor,
+					recibo,
 					tipo_servicio,
 					tarea_gestionada,
 					tipo_gestion,
@@ -67,8 +70,12 @@ const Impression = () => {
 					registrosAgrupados[cuenta] = {
 						cuenta,
 						calle,
+						fecha_pago,
 						colonia,
 						latitud,
+						recibo,
+						gestor,
+						fecha_gestion,
 						longitud,
 						propietario,
 						servicio,
@@ -221,7 +228,7 @@ const Impression = () => {
 								onChange={(event) => setSelectedCuenta(event.target.value)}
 								sx={{ color: '#ffffff', '& .MuiSelect-select': { borderColor: '#ffffff', }, '& .MuiSvgIcon-root': { color: '#ffffff', }, }}
 							>
-								{Object.keys(registros).slice(0, 10).map((cuenta, index) => (
+								{Object.keys(registros).slice(0, 5).map((cuenta, index) => (
 									<MenuItem key={index} value={cuenta} onClick={() => handleSeleccionRegistro(registros[cuenta])}>{cuenta}</MenuItem>
 								))}
 							</Select>	

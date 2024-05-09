@@ -144,6 +144,22 @@ body,
 
 .records_impression{
 	padding: 40px;
+	/* color: rgb(175, 175, 175); */
+}
+
+.css-v3zyv7-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input:focus {
+	color: #ffffff !important;
+	border-color: #ffffff !important;
+}
+
+.records_aviso{
+	width: 100%;
+	height: auto;
+	margin-top: -10px;
+	margin-bottom: 20px;
+	color: rgb(185, 0, 0);
+	font-size: 12px;
+	font-weight: 600;
 }
 
 .records{

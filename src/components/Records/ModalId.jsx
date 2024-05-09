@@ -1,12 +1,13 @@
 import { Box, Typography, Button } from '@mui/material'
 import { setModal } from '../../redux/recordsSlice.js'
 import { useDispatch, useSelector } from 'react-redux'
+import PropTypes from 'prop-types'
 
-export default function ModalId() {
+export default function ModalId({ nombre }) {
 
 	const dispatch = useDispatch()
 
-	const { idPaquete,  nombre } = useSelector(state => state.records)
+	const { idPaquete } = useSelector(state => state.records)
 
 	const redirect = () => {
 		dispatch(setModal(false))
@@ -25,5 +26,9 @@ export default function ModalId() {
 
 	)
 
+}
+
+ModalId.propTypes = {
+    nombre: PropTypes.object.isRequired
 }
  
