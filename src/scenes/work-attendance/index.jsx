@@ -611,16 +611,16 @@ const Index = () => {
     
     if (searchTerm === '') {
       setFilteredUsers([]);
-      setNoResults(false); // Reiniciar el estado si se borra el término de búsqueda
+      setNoResults(false); 
       setMatching(-1)
     } else {
       if (matchingUsers.length === 0) {
         setFilteredUsers([]);
-        setNoResults(true); // Establecer el estado si no se encontraron resultados
+        setNoResults(true);
         setMatching(0)
       } else {
         setFilteredUsers(matchingUsers);
-        setNoResults(false); // Reiniciar el estado si se encontraron resultados
+        setNoResults(false);
         setMatching(matchingUsers.length)
       }
     }
@@ -802,7 +802,7 @@ const Index = () => {
                               columns={buildColumns()}
                               getRowId={(row) => row.usuario_id}
                               editable={false} 
-                              slots={{ toolbar: CustomToolbar}}                          
+                              // slots={{ toolbar: CustomToolbar}}                          
                           />
                       )}
                     </Box>
