@@ -3,7 +3,7 @@ import Grid from '@mui/material/Grid';
 import { tokens } from "../../theme";
 import PlaceSelect from '../../components/PlaceSelect'
 import {workAttendanceRequest} from '../../api/attendance.js'
-import { Box, useTheme, Button, Avatar} from "@mui/material";
+import { Box, useTheme, Button, Avatar, InputAdornment, FormControl, FormHelperText} from "@mui/material";
 import Viewer from 'react-viewer';
 import TextField from '@mui/material/TextField';
 import Header from '../../components/Header';
@@ -45,6 +45,8 @@ import ModalTable from '../../components/work-attendance/ModalTable.jsx'
 import ManageSearchIcon from '@mui/icons-material/ManageSearch';
 import SubdirectoryArrowLeftIcon from '@mui/icons-material/SubdirectoryArrowLeft';
 import SubdirectoryArrowRightIcon from '@mui/icons-material/SubdirectoryArrowRight';
+import AccountBoxIcon from '@mui/icons-material/AccountBox';
+import { Download, Search } from "@mui/icons-material";
 
 const Index = () => {
     
@@ -67,6 +69,14 @@ const Index = () => {
     
     const [openModal, setOpenModal] = useState(false);
     const [modalData, setModalData] = useState([]);
+
+    const [searchTerm, setSearchTerm] = useState(null);
+    const [filteredUsers, setFilteredUsers] = useState([]);
+    const [matching, setMatching] = useState(-1);
+
+    const [noResults, setNoResults] = useState(false);
+    const [searchPerformed, setSearchPerformed] = useState(false);
+    
 
       const handlePlaceChange = (event) => {
         setNoData('')
@@ -111,8 +121,9 @@ const Index = () => {
           
           console.log('response', response)
           setNoData('')
-          setUsers(response.data);
+          setUsers(response.data);          
           setIsLoading(false)
+          setNoResults(false)
           
         } catch (error) {
           setIsLoading(false)
@@ -486,22 +497,21 @@ const Index = () => {
         <GridToolbarContainer >
          
           <GridToolbarDensitySelector color="secondary" />
-          <GridToolbarFilterButton color="secondary" label='filtros'/>
+          <GridToolbarFilterButton color="secondary"/>
           <GridToolbarColumnsButton color="secondary" />
           <GridToolbarExport
-          csvOptions={{
+          csvOptions={{            
             fileName: 'Registro Asistencia',
             delimiter: ';',
-            utf8WithBom: true,            
+            utf8WithBom: true,
           }}
           printOptions={{ disableToolbarButton: true }}
-          color="secondary"
-          
-          />
+          color="secondary"          
+          />                    
         </GridToolbarContainer>
       );      
 
-      useEffect(() => {
+      useEffect(() => {        
         const countsE = users.reduce((acce, row) => {
             const resultE = row.estatus_entrada;
             
@@ -583,16 +593,86 @@ const Index = () => {
       
       setModalData(filteredData);
       setOpenModal(true);
-    };
-  
+    };    
+    
     const handleCloseModal = () => {
       setOpenModal(false);
-    };
+    };    
 
-      console.log('place_id', selectedPlace)      
-      console.log('start_date', selectedStartDate)
-      console.log('finish_date', selectedEndDate)
-      console.log('isLoading', isLoading)
+  useEffect(() => {
+
+    setSearchPerformed(true);
+
+    const matchingUsers = users.filter(user => {
+      return Object.values(user).some(value =>
+        value && value.toString().toLowerCase().includes(searchTerm)
+      );
+    });
+    
+    if (searchTerm === '') {
+      setFilteredUsers([]);
+      setNoResults(false); // Reiniciar el estado si se borra el término de búsqueda
+      setMatching(-1)
+    } else {
+      if (matchingUsers.length === 0) {
+        setFilteredUsers([]);
+        setNoResults(true); // Establecer el estado si no se encontraron resultados
+        setMatching(0)
+      } else {
+        setFilteredUsers(matchingUsers);
+        setNoResults(false); // Reiniciar el estado si se encontraron resultados
+        setMatching(matchingUsers.length)
+      }
+    }
+
+  }, [searchTerm]);
+
+  const handleChange = (event) => {
+    setSearchTerm(event.target.value.toLowerCase());
+  };
+
+    const handleDownloadExcelDataGrid = async () => {
+      try {
+        setIsLoading(true);        
+        
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet("Registros Encontrados");
+
+        if (filteredUsers.length > 0){
+          const headers = Object.keys(filteredUsers[0]);
+          worksheet.addRow(headers);
+
+          filteredUsers.forEach((row) => {
+              const values = headers.map((header) => row[header]);
+              worksheet.addRow(values);
+          });
+        }
+        else {
+          const headers = Object.keys(users[0]);
+          worksheet.addRow(headers);
+
+          users.forEach((row) => {
+              const values = headers.map((header) => row[header]);
+              worksheet.addRow(values);
+          });
+        }        
+
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], {
+            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `Registros_Asistencia.xlsx`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+        setIsLoading(false);
+      } catch (error) {
+          console.error("Error:", error);
+          setIsLoading(false);
+      }
+    };
 
     return (
         <>
@@ -673,16 +753,57 @@ const Index = () => {
                         },
                       }}
                     >
-                      {users.length === 0 ? (
-                        <div style={{ textAlign: 'center', padding: '20px' }}>No row</div>
+                      <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2} >
+                        <Grid item xs={6}>
+                          <FormControl>
+                            <TextField                              
+                              fullWidth                            
+                              value={searchTerm}              
+                              onChange={handleChange}              
+                              color='secondary'
+                              size="small"
+                              InputProps={{
+                                endAdornment: (
+                                  <InputAdornment position="end">
+                                    <Search color="secondary"/>
+                                  </InputAdornment>
+                                ),
+                              }}
+                            />
+                            
+                            {( noResults ) && (
+                              <FormHelperText  style={{ color: 'red' }}>
+                                No se encontraron resultados
+                              </FormHelperText>
+                            )}
+                            
+                          </FormControl>                          
+                        </Grid>
+                        <Grid item xs={2}>
+                          <Button 
+                            variant="outlined"                             
+                            color="secondary"                            
+                            onClick={() => {
+                              handleDownloadExcelDataGrid();                    
+                            }}
+                            size="small"
+                            startIcon={<Download/>}
+                            >                                                        
+                            Exportar
+                          </Button>
+                        </Grid>
+                      </Grid>
+
+                      {(users.length === 0 ) ? (
+                          <div style={{ textAlign: 'center', padding: '20px' }}>No se encontraron resultados</div>
                       ) : (
-                        <DataGrid
-                          rows={users}
-                          columns={buildColumns()}
-                          getRowId={(row) => row.usuario_id}
-                          editable={false} 
-                          slots={{ toolbar: CustomToolbar}}                
-                        />
+                          <DataGrid
+                              rows={filteredUsers.length > 0 ? filteredUsers : users}
+                              columns={buildColumns()}
+                              getRowId={(row) => row.usuario_id}
+                              editable={false} 
+                              slots={{ toolbar: CustomToolbar}}                          
+                          />
                       )}
                     </Box>
                   </Box>
