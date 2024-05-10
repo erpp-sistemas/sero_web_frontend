@@ -59,7 +59,6 @@ function Records() {
 			const id_paquete = await tool.generatePaquete(data)
 			let total = 0
 			for (let ficha of registros) {
-				console.log(ficha)
 				await tool.uploadFichas({ id_paquete, ...ficha })
 				total += 1
 				calcularProgreso(total)

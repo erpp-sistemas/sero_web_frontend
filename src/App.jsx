@@ -147,7 +147,7 @@ function App() {
 
 									<Routes>
 
-										<Route path="/home" element={<Records />} />
+										<Route path="/home" element={<Impresion />} />
 										<Route path="/dashboard-direccion" element={<Dashboard setLogin={setLogin} />} />
 										<Route path="/team" element={<Team />} />
 										<Route path="/contacts" element={<Contacts />} />

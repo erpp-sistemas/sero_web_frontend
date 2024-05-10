@@ -29,7 +29,20 @@ const getRegistrosById = async (idPaquete) => {
 	}
 }
 
+const createRecords = async (data) => {
+	const url=`${baseURL}/api/records/registro/pdf`
+
+	try{
+		const res=await axios.post(url,data)
+		return res.status
+	}catch(error){
+		false
+	}
+
+}
+
 export default {
     getPaquetes,
-	getRegistrosById
+	getRegistrosById,
+	createRecords
 }
