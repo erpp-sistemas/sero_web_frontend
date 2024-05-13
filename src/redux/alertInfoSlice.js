@@ -1,14 +1,13 @@
 
-import { createSlice } from '@reduxjs/toolkit';
-// Slice para 'alertInfo'
+import { createSlice } from '@reduxjs/toolkit'
+
 export const alertInfoSlice = createSlice({
     name: 'alertInfo',
     initialState: null,
     reducers: {
       setAlertInfoFromRequest: (state, action) => action.payload,
     },
-  });
+})
 
-  // Exportar la acción y el reducer
-export const { setAlertInfoFromRequest } = alertInfoSlice.actions;
-export default alertInfoSlice.reducer;
+export const { setAlertInfoFromRequest } = alertInfoSlice.actions
+export default alertInfoSlice.reducer

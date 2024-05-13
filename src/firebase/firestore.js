@@ -1,11 +1,12 @@
-import { doc, getFirestore, setDoc } from "firebase/firestore";
-import app from "./firebase.config";
+import { doc, getFirestore, setDoc } from "firebase/firestore"
+import app from "./firebase.config"
 
 const db = getFirestore(app)
 
-
 export async function createUserDocument(uid, email, nombre_usuario, id_usuario, password) {
+
     try {
+
       await setDoc(doc(db, "usersErpp", uid), {
         isActive: true,
         IMEI: "",
@@ -17,10 +18,10 @@ export async function createUserDocument(uid, email, nombre_usuario, id_usuario,
         lastSync: "",
         totalAccounts: 0,
         uid: uid,
-      });
-  
-      console.log("Información del usuario almacenada en Firestore correctamente");
-    } catch (error) {
-      console.error("Error al almacenar información del usuario en Firestore:", error.message);
+      })
+		console.log("Información del usuario almacenada en Firestore correctamente")
+    } catch (error) {	
+		console.error("Error al almacenar información del usuario en Firestore:", error.message)
     }
-  }
+
+}

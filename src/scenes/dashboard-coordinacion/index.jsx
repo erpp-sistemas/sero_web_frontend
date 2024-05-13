@@ -1,26 +1,25 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState } from 'react'
 import { tokens } from '../../theme'
-
 
 // LIBRARIES
 import { Box, useTheme, Typography, Button } from '@mui/material'
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 
 // ICONS
-import NewspaperIcon from '@mui/icons-material/Newspaper';
-import PaidIcon from '@mui/icons-material/Paid';
-import PushPinIcon from '@mui/icons-material/PushPin';
-import DoNotDisturbAltIcon from '@mui/icons-material/DoNotDisturbAlt';
-import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
-import MyLocationIcon from '@mui/icons-material/MyLocation';
-import PhotoIcon from '@mui/icons-material/Photo';
-import RequestQuoteIcon from '@mui/icons-material/RequestQuote';
+import NewspaperIcon from '@mui/icons-material/Newspaper'
+import PaidIcon from '@mui/icons-material/Paid'
+import PushPinIcon from '@mui/icons-material/PushPin'
+import DoNotDisturbAltIcon from '@mui/icons-material/DoNotDisturbAlt'
+import AssignmentIndIcon from '@mui/icons-material/AssignmentInd'
+import MyLocationIcon from '@mui/icons-material/MyLocation'
+import PhotoIcon from '@mui/icons-material/Photo'
+import RequestQuoteIcon from '@mui/icons-material/RequestQuote'
 
 // COMPONENTS
-import RecaudacionGestor from '../../components/RecaudacionGestor';
+import RecaudacionGestor from '../../components/RecaudacionGestor'
 import PorcentajeGestor from '../../components/PorcentajeGestor'
-import StatBox from '../../components/StatBox';
-import ProgressCircle from "../../components/ProgressCircle";
+import StatBox from '../../components/StatBox'
+import ProgressCircle from "../../components/ProgressCircle"
 import Legend from '../../components/LightweightCharts/Legend'
 import BarStack from '../../components/NivoChart/BarStack'
 import Pie from '../../components/NivoChart/Pie'
@@ -28,13 +27,13 @@ import ModalBox from '../../components/ModalBox'
 import ModalGridData from '../../components/ModalGridData'
 
 // DATA TEMP
-import { data, data_campos_capturados, data_cuentas_pagadas, data_tipo_servicio_bar } from '../../data/BarStack'
+import { data, data_cuentas_pagadas, data_tipo_servicio_bar } from '../../data/BarStack'
 import { data as data_pie, data_tipo_servicio } from '../../data/Pie'
 
-const index = () => {
+const Index = () => {
 
-    const theme = useTheme();
-    const colors = tokens(theme.palette.mode);
+    const theme = useTheme()
+    const colors = tokens(theme.palette.mode)
 
     const [showModal, setShowModal] = useState(false)
     const [showModalGrid, setShowModalGrid] = useState(false)
@@ -337,46 +336,6 @@ const index = () => {
                 </Box>
             </Box>
 
-            {/* FILA 5 */}
-            {/* <Box
-                id="grid-1"
-                display="grid"
-                gridTemplateColumns="repeat(12, 1fr)"
-                gridAutoRows="300px"
-                gap="15px"
-                sx={{ margin: '20px 0' }}
-            >
-                GRAFICA DE BARRA MOSTRANDO TOTAL DE GESTIONES POR GESTOR Y CUANTOS CAMPOS FUERON CAPTURADOS
-                <Box
-                    gridColumn='span 12'
-                    backgroundColor={colors.primary[400]}
-                    borderRadius="10px"
-                    sx={{ cursor: 'pointer' }}
-                >
-                    <Box
-                        mt="10px"
-                        mb="-15px"
-                        p="0 10px"
-                        justifyContent="space-between"
-                        alignItems="center"
-                    >
-
-                        <Typography
-                            variant="h5"
-                            fontWeight="600"
-                            sx={{ padding: "2px 30px 0 5px" }}
-                            color={colors.grey[200]}
-                        >
-                            CAMPOS CAPTURADOS POR GESTOR
-                        </Typography>
-                    </Box>
-
-                    <BarStack data={data_campos_capturados} position='horizontal' color='pastel1' keys={['capturado', 'no capturado']}
-                        groupMode={false}
-                    />
-                </Box>
-            </Box> */}
-
             {/* FILA 6 */}
             <Box
                 id="grid-1"
@@ -568,4 +527,4 @@ const index = () => {
     )
 }
 
-export default index
+export default Index

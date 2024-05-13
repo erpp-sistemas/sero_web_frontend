@@ -1,4 +1,4 @@
-import { tokens } from "../theme";
+import { tokens } from "../theme"
 
 export const numero_gestiones = [
     {
@@ -55,4 +55,4 @@ export const numero_gestiones = [
         },
       ],
     },
-  ];
+  ]

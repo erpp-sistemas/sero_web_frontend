@@ -1,5 +1,3 @@
-
-
 const initialState={
     id:null,
     plaza:"",
@@ -7,7 +5,6 @@ const initialState={
     fecha_corte:null,
     folio:null
 }
-
 
 const paqueteReducer=(state=initialState,action)=>{
     switch (action.type){
@@ -42,7 +39,6 @@ const paqueteReducer=(state=initialState,action)=>{
 }
 export default paqueteReducer
 
-
 export const setIdPaquete=(id)=>({
     type:"SET_ID",
     payload:id
@@ -63,4 +59,3 @@ export const setFolioPaquete=(folio)=>({
     type:"SET_FOLIO",
     payload:folio
 })
-

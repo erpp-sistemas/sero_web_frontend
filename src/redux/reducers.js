@@ -43,9 +43,6 @@ const rootReducer = combineReducers({
   dataGeocoding:dataGeocoding,
   records: recordsSlice,
   impression: impresionSlice,
-  //service: serviceReducer,
-  //process: processReducer,
-
 })
 
 export default rootReducer

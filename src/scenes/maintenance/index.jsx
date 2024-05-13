@@ -1,9 +1,11 @@
-import React from 'react'
+function Index() {
 
-function index() {
-  return (
-    <div>Maintenance</div>
-  )
+	return (
+
+		<div>Maintenance</div>
+		
+	)
+
 }
 
-export default index
+export default Index

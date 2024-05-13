@@ -1,20 +1,21 @@
-import { Box, useTheme } from '@mui/material';
-import React from 'react'
-import { tokens } from '../../theme';
-import Header from '../../components/Header';
-import PlacesModule from '../../components/PlacesModule';
+import { Box } from '@mui/material'
+import Header from '../../components/Header'
+import PlacesModule from '../../components/PlacesModule'
 
 function Places() {
 
-    const theme = useTheme();
-    const colors = tokens(theme.palette.mode);
-  return (
-    <Box m="20px">
-    <Header title="Gestiòn de Plazas" subtitle="Operaciones de Crear, Leer, Actualizar y Eliminar Plazas en el Sistema" />
-  <PlacesModule/>
-    
-  </Box>
-  )
+	return (
+
+		<Box m="20px">
+
+			<Header title="Gestiòn de Plazas" subtitle="Operaciones de Crear, Leer, Actualizar y Eliminar Plazas en el Sistema" />
+
+			<PlacesModule/>
+			
+		</Box>
+
+	)
+	
 }
 
 export default Places

@@ -1,4 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit'
 
 export const paymentsSlice = createSlice({
     name: 'payments',
@@ -6,9 +6,8 @@ export const paymentsSlice = createSlice({
     reducers: {
       setPayments: (state, action) => action.payload,
     },
-  });
+})
   
-  // Exportar la acción y el reducer
-  export const { setPayments } = paymentsSlice.actions;
-  export default paymentsSlice.reducer;
+export const { setPayments } = paymentsSlice.actions
+export default paymentsSlice.reducer
   

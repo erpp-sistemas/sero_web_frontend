@@ -1,31 +1,32 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Box } from '@mui/material'
 import Header from '../../components/Header'
 import { useSelector } from 'react-redux'
-
 import { getPlacesByUserId } from '../../services/place.service'
 import Card from '../../components/Card'
 
-const index = () => {
+const Index = () => {
   
     const user = useSelector(state => state.user)
 
     const [plazas, setPlazas] = useState()
 
     useEffect(() => {
-        getPlazasByUser()
-    }, [])
 
-    const getPlazasByUser = async () => {
-        const res = await getPlacesByUserId(user.user_id)
-        setPlazas(res)
-    }
+		const getPlazasByUser = async () => {
+			const res = await getPlacesByUserId(user.user_id)
+			setPlazas(res)
+		}
+	
+		
+        getPlazasByUser()
+
+    }, [user.user_id])
+
 
     return (
-        <Box
-            m='20px'
-            padding='20px 10px'
-        >
+		
+        <Box m='20px' padding='20px 10px' >
 
             <Header title="Mapa GIS" subtitle="Selecciona la plaza" />
 
@@ -39,7 +40,9 @@ const index = () => {
             </Box>
 
         </Box>
+		
     )
+
 }
 
-export default index
+export default Index

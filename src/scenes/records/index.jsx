@@ -22,7 +22,6 @@ function Records() {
 	const [fechaCorte, setfechaCorte] = useState(null)
 	const [nombreExiste, setNombreExiste] = useState(false)
 	const [nombre, setNombre] = useState('')
-	// eslint-disable-next-line no-unused-vars
 	const [excel, setExcel] = useState(null)
 	const user = useSelector(state => state.user)
 	const { activity, plazas, servicios, plaza, servicio, fileName, folio, selectionCompleted, registros, porcentaje, cargando, modal } = useSelector(state => state.records)

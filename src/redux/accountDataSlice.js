@@ -1,7 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
 
-
-
 export const accountDataSlice = createSlice({
     name: 'accountData',
     initialState: null,

@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit"
 
 export const getImageDataSlice = createSlice({
     name: 'getImageData',
@@ -17,8 +17,7 @@ export const getImageDataSlice = createSlice({
     reducers: {
       setImageData: (state, action) => ({ ...state, ...action.payload }),
     },
-  });
+})
   
-  // Exportar la acción y el reducer
-  export const { setImageData } = getImageDataSlice.actions;
-  export default getImageDataSlice.reducer;
+export const { setImageData } = getImageDataSlice.actions
+export default getImageDataSlice.reducer

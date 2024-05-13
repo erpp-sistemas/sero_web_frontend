@@ -7,7 +7,6 @@ const initialState = {
     longitud: 0
 }
 
-
 export const plazaMapaSlice = createSlice({
     name: 'plaza_mapa',
     initialState,
@@ -21,7 +20,6 @@ export const plazaMapaSlice = createSlice({
         }
     }
 })
-
 
 export const { setPlazaMapa } = plazaMapaSlice.actions;
 export default plazaMapaSlice.reducer

@@ -1,39 +1,37 @@
-import { createSlice } from "@reduxjs/toolkit";
-
-
+import { createSlice } from "@reduxjs/toolkit"
 
 export const initialStateMemo={
-    totalIngresos:0, //* almacena el monto total de las cuentas ingresadas y tener un porcentaje certero
-    vistaPanel:0,   //*Controla la vista que tendra el panel 
-    response:[],    //* se almacena las respuestas que hubo al subir las cordendas
-    cordendasComparacion:[], //* almacena las cordendas que se vana comparar en el mapa
-    porSubir:[],    //*almacena las que faltan por subir a la DB
-    cordenadas:[],  //* almacena las cordendas encontrdas 
-    cordenadasRestantes:[], //*Almacena las cordendas restantes por buscar 
-    cordenadasActDomicilio:[],//*Almacena las cordendas que se pudieron actualizar en la tabla domicilio contribuyente
-    cordenadasErrores:[],  //*Almacena las cordenadas que no se pudieron encontrar o hubo un error 
-    cordenadasFormatoErrores:[],//*Almacena las cordendas que les hace falta un dato
-    file:"",//* Almacena los datos del archivo ingresado
+    totalIngresos:0, 
+    vistaPanel:0,  
+    response:[],    
+    cordendasComparacion:[], 
+    porSubir:[],    
+    cordenadas:[],  
+    cordenadasRestantes:[], 
+    cordenadasActDomicilio:[],
+    cordenadasErrores:[], 
+    cordenadasFormatoErrores:[],
+    file:"",
 }
 
 export const dataGeocodingSlice = createSlice({
     name: 'apikeyGeocodingSlice',
     initialState:initialStateMemo,
     reducers: {
-        Reset: (state, action) => {
-            state.totalIngresos = 0;
-            state.vistaPanel = 0;
-            state.response = [];
-            state.cordendasComparacion= [];
-            state.porSubir = [];
-            state.cordenadas = [];
-            state.cordenadasRestantes = [];
-            state.cordenadasActDomicilio = [];
-            state.cordenadasErrores = [];
-            state.cordenadasFormatoErrores = [];
-            state.file = '';
+        Reset: (state) => {
+            state.totalIngresos = 0
+            state.vistaPanel = 0
+            state.response = []
+            state.cordendasComparacion= []
+            state.porSubir = []
+            state.cordenadas = []
+            state.cordenadasRestantes = []
+            state.cordenadasActDomicilio = []
+            state.cordenadasErrores = []
+            state.cordenadasFormatoErrores = []
+            state.file = ''
         },
-        setCordenadasRestantes: (state, action) => {state.cordenadasRestantes.splice(0, 1)},
+        setCordenadasRestantes: (state) => {state.cordenadasRestantes.splice(0, 1)},
         resetPorsubir:(state, action) =>{state.porSubir=action.payload},
         valueInitCordenadas: (state, action) => {state.cordenadasRestantes=action.payload},
         setCordendasComparacion: (state, action) => {state.cordendasComparacion=action.payload},
@@ -44,8 +42,8 @@ export const dataGeocodingSlice = createSlice({
         setCordenadas: (state, action) => {state.cordenadas.push(action.payload) },
         setCordenadasErrores: (state, action) => {state.cordenadasErrores.push(action.payload)},
         resetCordenadasErrores: (state, action) => {state.cordenadasErrores=action.payload},
-        setReseteCordenadasErrores: (state, action) => {state.cordenadasErrores=[]},
-        setResetCordenadasFormatoErrores: (state, action) => {state.cordenadasFormatoErrores=[]},
+        setReseteCordenadasErrores: (state) => {state.cordenadasErrores=[]},
+        setResetCordenadasFormatoErrores: (state) => {state.cordenadasFormatoErrores=[]},
         resetCordenadasFormatoErrores: (state, action) => {state.cordenadasFormatoErrores=action.payload},
         setCordenadasFormatoErrores: (state, action) => {state.cordenadasFormatoErrores.push(action.payload)},
         setSumaTotalCordendas:(state,action)=>{state.totalIngresos+=action.payload},
@@ -53,9 +51,8 @@ export const dataGeocodingSlice = createSlice({
         setCordenadasDomicilio: (state, action) => {state.cordenadasActDomicilio=action.payload},
 
     }
-  });
-  
-  // Exportar la acción y el reducer
+  })
+
   export const {    setCordenadasRestantes,
                     setCordenadas,
                     setCordenadasErrores,
@@ -75,6 +72,6 @@ export const dataGeocodingSlice = createSlice({
                     setSumaTotalCordendas,
                     setCordenadasDomicilio,
                     Reset
-                 } = dataGeocodingSlice.actions;
-  export default dataGeocodingSlice.reducer;
+                 } = dataGeocodingSlice.actions
+  export default dataGeocodingSlice.reducer
   
