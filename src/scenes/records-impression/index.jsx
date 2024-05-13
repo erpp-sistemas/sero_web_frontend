@@ -70,7 +70,6 @@
 			try {
 				const status = await tool.createRecords(data)
 				if(status==200){
-					console.log('terminado')
 					setCompletedRequests(prev => prev + 1)
 				}else{
 					console.error('Error:', status)
