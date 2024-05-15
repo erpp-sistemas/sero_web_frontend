@@ -239,7 +239,7 @@ const Sidebar = () => {
 Item.propTypes = {
     title: PropTypes.string.isRequired,
     to: PropTypes.string.isRequired,
-    icon: PropTypes.string.isRequired,
+    icon: PropTypes.object.isRequired,
     selected: PropTypes.string.isRequired,
     setSelected: PropTypes.func.isRequired, 
     color: PropTypes.string.isRequired,

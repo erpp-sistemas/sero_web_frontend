@@ -1,4 +1,4 @@
-import { Box, Typography, Checkbox, FormControl, InputLabel, MenuItem, TextField, Button, Select } from '@mui/material'
+import { Box, Typography, Checkbox, FormControl, TextField, Button } from '@mui/material'
 import { useEffect, useState, useMemo } from 'react'
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
@@ -9,7 +9,9 @@ import tool from '../../toolkit/toolkitFicha.js'
 import LinearProgressWithLabel from '../../components/Records/LinerProgress.jsx'
 import ModalId from '../../components/Records/ModalId.jsx'
 import { useSelector, useDispatch } from 'react-redux'
-import { setActivity, setPlazas, setServicios, setPlaza, setServicio, setFileName, setSelectionCompleted, setFolio, setRegistros, setPorcentaje, setCargando, setModal, setIdPaquete } from '../../redux/recordsSlice.js'
+import { setActivity, setPlazas, setServicios, setFileName, setSelectionCompleted, setFolio, setRegistros, setPorcentaje, setCargando, setModal, setIdPaquete } from '../../redux/recordsSlice.js'
+import PlaceSelect from '../../components/PlaceSelect'
+import ServiceSelect from '../../components/ServiceSelect'
 
 /**
 	* Página principal de fichas
@@ -19,12 +21,24 @@ import { setActivity, setPlazas, setServicios, setPlaza, setServicio, setFileNam
 */
 function Records() {
 
+	const [selectedPlace, setSelectedPlace] = useState('')
+    const [selectedService, setSelectedService] = useState('')
+
+	const handleServiceChange = (event) => {
+		setSelectedService(event.target.value)
+	}
+
+	const handlePlaceChange = (event) => {
+		setSelectedPlace(event.target.value);  
+		setSelectedService('');      
+	}
+
 	const [fechaCorte, setfechaCorte] = useState(null)
 	const [nombreExiste, setNombreExiste] = useState(false)
 	const [nombre, setNombre] = useState('')
 	const [excel, setExcel] = useState(null)
 	const user = useSelector(state => state.user)
-	const { activity, plazas, servicios, plaza, servicio, fileName, folio, selectionCompleted, registros, porcentaje, cargando, modal } = useSelector(state => state.records)
+	const { activity, plaza, servicio, fileName, folio, selectionCompleted, registros, porcentaje, cargando, modal } = useSelector(state => state.records)
 	const dispatch = useDispatch()
 
 	const Progreso = useMemo(() => {
@@ -46,13 +60,14 @@ function Records() {
             const excelURL = await tool.uploadS3(excel)
 			
 			const data = {
-				id_servicio: servicio,
+				id_servicio: selectedService,
 				nombre: nombre,
 				fecha_corte: fechaCorte.format('YYYY-MM-DD'),
 				folio: folio || 'desconocido',
-				id_plaza: plaza,
+				id_plaza: selectedPlace,
 				excel_document: excelURL.filePath,
-				id_usuario: user.profile_id
+				id_usuario: user.profile_id,
+				activate: 0,
 			}
 	
 			const id_paquete = await tool.generatePaquete(data)
@@ -122,7 +137,6 @@ function Records() {
 		dispatch(setSelectionCompleted(plaza !== '' && servicio !== '' && fechaCorte !== null))
 	}, [dispatch, fechaCorte, plaza, servicio])
 
-	
 	useEffect(() => {
 		
 		const handleNombreChange = async () => {
@@ -218,63 +232,20 @@ function Records() {
 
 						<FormControl fullWidth>
 
-							<InputLabel 
-								id='demo-simple-select-label' 
-								sx={{ 
-									color: '#ffffff',
-								}}
-							>Plaza</InputLabel>
-
-							<Select
-								labelId='demo-simple-select-label'
-								id='demo-simple-select'
-								className="custom-select"
-								value={plaza}
-								label='Plaza'
-								onChange={(e) => dispatch(setPlaza(e.target.value))}
-								sx={{ 
-									width:'100%', 
-									color: '#ffffff',
-									'&:focus': {  
-										color: '#ffffff important',
-										borderColor: '#ffffff !important', 
-									},
-								}}
-							>
-
-								{plazas.filter(plaza => plaza.active).map((plaza, index) => (
-
-									<MenuItem key={index} value={plaza.id}>
-										{plaza.nombre}
-									</MenuItem>
-
-								))}
-
-							</Select>
+							<PlaceSelect                
+								selectedPlace={selectedPlace}
+								handlePlaceChange={handlePlaceChange}
+							/>
 
 						</FormControl>
 
 						<FormControl fullWidth sx={{ marginTop: '1rem', marginBottom: '0.6rem' }} >
 
-							<InputLabel id='demo-simple-select-label' sx={{ color: '#ffffff' }}>Servicio</InputLabel>
-
-							<Select
-								labelId='demo-simple-select-label'
-								id='demo-simple-select'
-								value={servicio}
-								label='Plaza'
-								onChange={(e)=>(dispatch(setServicio(e.target.value)))}
-								sx={{ width:'100%', color: '#ffffff', '& .MuiSelect-select': { borderColor: '#ffffff', }, '& .MuiSvgIcon-root': { color: '#ffffff', }, }}
-							>
-
-								{servicios.filter(servicio => servicio.active).map((servicio, index) => (
-									<MenuItem key={index} value={servicio.id}>
-										{servicio.nombre}
-									</MenuItem>
-
-								))}
-
-							</Select>
+							<ServiceSelect
+								selectedPlace={selectedPlace}                  
+								selectedService={selectedService}
+								handleServiceChange={handleServiceChange}
+							/>
 
 						</FormControl>
 
