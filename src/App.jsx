@@ -39,6 +39,7 @@ import UserNew from './scenes/user-new'
 import WorkAttendance from './scenes/work-attendance'
 import Records from './scenes/records'
 import Impresion from './scenes/records-impression/index'
+import Download from './scenes/records-download/index'
 import Topbar from "./scenes/global/Topbar"
 import Sidebar from "./scenes/global/Sidebar"
 import SidebarMap from "./scenes/global/SidebarMap"
@@ -188,6 +189,7 @@ function App() {
 										<Route path="/work-attendance" element={<WorkAttendance />} />
 										<Route path="/records" element={<Records />} />
 										<Route path="/impresion" element={<Impresion />} />
+										<Route path="/download" element={<Download />} />
 
 									</Routes>
 
@@ -197,7 +199,7 @@ function App() {
 
 						</ThemeProvider>
 
-					</ColorModeContext.Provider>
+					</ColorModeContext.Provider>	
 
 				)}
 

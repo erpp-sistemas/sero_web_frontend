@@ -15,7 +15,7 @@ export default function ChargeCounter(props) {
 			</Box>
 
 			<Box sx={{ width: '100%', display: 'flex', alignItems: 'center', flexDirection:'column', justifyContent:'center' }}>
-				<Typography variant="body2" color="text.secondary" sx={{ color: "#fff", fontWeight: '700', fontSize: '2rem' }}>{`Creando ficha numero: ${Math.round(props?.value,)}`}</Typography>
+				<Typography variant="body2" color="text.secondary" sx={{ color: "#fff", fontWeight: '700', fontSize: '2rem' }}>{`Fichas creadas: ${Math.round(props?.value,)}`}</Typography>
 			</Box>
 
 		</Box>

@@ -3,6 +3,7 @@ import axios from "axios"
 const baseURL = 'http://localhost:3001/sero-web'
 
 const getPaquetes = async () => {
+
     const response = await axios.get(`${baseURL}/api/records/paquete`)
 	const data = response.data
 	const paquetes = data.data.map((item) => ({
@@ -19,6 +20,7 @@ const getPaquetes = async () => {
 }
 
 const getRegistrosById = async (idPaquete) => {
+
 	try {
 		const response = await axios.get(`${baseURL}/api/records/registro/${idPaquete}`)
 		const data = response.data
@@ -27,9 +29,11 @@ const getRegistrosById = async (idPaquete) => {
 	} catch (error) {
 		console.error('Error fetching data:', error)
 	}
+
 }
 
 const createRecords = async (data) => {
+
 	const url=`${baseURL}/api/records/registro/pdf`
 
 	try{
@@ -41,8 +45,36 @@ const createRecords = async (data) => {
 
 }
 
+const updateActiveStatus = async (cuenta) => {
+
+	try {
+		const response = await axios.put(`${baseURL}/api/records/registro/activate/${cuenta}`)
+		const data = response.data
+		return(data.data)
+
+	} catch (error) {
+		console.error('Error fetching data:', error)
+	}
+
+}
+
+const updateActivePaquete = async (id) => {
+
+	try {
+		const response = await axios.put(`${baseURL}/api/records/paquete/activate/${id}`)
+		const data = response.data
+		return(data.data)
+
+	} catch (error) {
+		console.error('Error fetching data:', error)
+	}
+
+}
+
 export default {
     getPaquetes,
 	getRegistrosById,
-	createRecords
+	createRecords,
+	updateActiveStatus,
+	updateActivePaquete
 }

@@ -118,13 +118,14 @@
 						ficha.fecha_gestion = ficha.fecha_gestion.slice(0, 10).replace(/ /g, '')
 						ficha.foto_fachada_predio = ficha.foto_fachada_predio==='si'||ficha.foto_fachada_predio==='Si'?1:0
 						ficha.foto_evidencia_predio = ficha.foto_evidencia_predio==='si'||ficha.foto_evidencia_predio==='Si'?1:0
-						ficha.promocion = ficha.promocion + "";
+						ficha.promocion = ficha.promocion + ""
 
 					} else {
 						candado = false
 					}
 				}
 				if (candado) {
+					ficha.active = 0
 					resultados.push({folio: folio ? folio : 'desconocido', ...ficha})
 				}
 			}
