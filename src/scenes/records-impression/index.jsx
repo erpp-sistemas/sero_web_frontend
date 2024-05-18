@@ -36,6 +36,20 @@ const Impression = () => {
 		
 	}	
 
+	const handleDownload = async () =>{
+		setCargando(true)
+	
+		try {
+			await tool.downloadZip(idPaq, paquetes)
+			setCargando(false)
+
+		} catch (error) {
+			console.error('Error al descargar el archivo ZIP:', error)
+			setCargando(false)
+		}
+
+	}
+	
 	const handleSeleccionRegistro = (registroN) => {
 		setRegistro(registroN)
 	}
@@ -57,7 +71,7 @@ const Impression = () => {
 			propietario: registro.propietario,
 			tipo_servicio: registro.tipo_servicio,
 			servicio: registro.servicio,
-			calle: registro.calle,
+			calle: registro.calle,	
 			colonia: registro.colonia,
 			latitud: registro.latitud,
 			longitud: registro.longitud,
@@ -68,7 +82,9 @@ const Impression = () => {
 			recibo: registro.recibo,
 			fecha_pago: registro.fecha_pago,
 			url_evidencia: registro.url_evidencia,
-			url_fachada: registro.url_fachada
+			url_fachada: registro.url_fachada,
+			paquete: paquete,
+			pagos: registro.pagos
 		}
 
 		try {
@@ -76,7 +92,10 @@ const Impression = () => {
 			if(status==200){
 				setCompletedRequests(prev => prev + 1)
 				await tool.updateActiveStatus(registro.cuenta)
-			}else{
+			}else if(status==400){
+				console.error('La plaza o servicio no contiene templates:', status)
+				setCompletedRequests(prev => prev + 1)
+			} else {
 				console.error('Error:', status)
 				setCompletedRequests(prev => prev + 1)
 			}
@@ -84,6 +103,15 @@ const Impression = () => {
 			console.error('Error fetching data:', error)
 		}
 
+	}
+
+	const apiPaquetes = async () => {
+		try {
+			const paquetes = await tool.getPaquetes()
+			setPaquetes(paquetes)
+		} catch (error) {
+			console.error('Error fetching data:', error)
+		}
 	}
 	
 	const handleRegistro = async (idPaquete) => {
@@ -121,7 +149,7 @@ const Impression = () => {
 			setRegistros(registrosAgrupados)
 			setRango(Object.keys(registrosAgrupados).length)
 			setCargando(false)
-	
+			apiPaquetes()
 		} catch (error) {
 			console.error('Ocurrió un error:', error.message)
 			setCargando(false)
@@ -130,17 +158,7 @@ const Impression = () => {
 	}
 
 	useEffect(() => {
-
-		const apiPaquetes = async () => {
-			try {
-				const paquetes = await tool.getPaquetes()
-				setPaquetes(paquetes)
-			} catch (error) {
-				console.error('Error fetching data:', error)
-			}
-		}
 		apiPaquetes()
-
 	}, [])
 
 	return (
@@ -221,6 +239,22 @@ const Impression = () => {
 
 					{ rango > 0 ? <Button onClick={() => handleStartUp()} variant="contained" sx={{ marginTop:'30px', width:'100%', maxWidth:'250px', color:'white', fontWeight:'600', fontSize:'.8rem'}} fullWidth> GENERAR FICHAS PDF </Button> : false }
 
+					{
+						Object.keys(paquete).length !== 0 ? (
+							rango > 0 ? (
+								paquete.activate === true ? (
+									<Button variant="contained" onClick={handleDownload} color="success" sx={{marginTop:'20px', color:'white', fontWeight:'600' }}>DESCARGA INCOMPLETA</Button>
+								):(
+									false
+								)
+							):(
+								<Button variant="contained" onClick={handleDownload} color="success" sx={{marginTop:'20px', color:'white', fontWeight:'600' }}>DESCARGAR ZIP</Button>
+							)
+						):(
+							false
+						)
+					}
+
 				</Box>
 
 				<Box className='records_impression__data' sx={{ minHeight: '500px', height:'auto', width:'100%', background:'rgba(255, 255, 255, 0.250)', borderTopRightRadius:'10px', borderBottomRightRadius:'10px', display:'flex', flexDirection:'column', gap:'2rem' }} fullWidth >
@@ -286,7 +320,7 @@ const Impression = () => {
 							):(
 
 								<Box className='record_impression__empty' sx={{ display:'flex', justifyContent:'center', alignItems:'center', flexDirection:'column', width:'100%' }}>
-									<Typography width={'80%'} mb={'1rem'} fontSize={'1.5rem'} color={'#00FF00'} textAlign={'center'}>Este paquete ya creo todas las fichas posibles, si hubo alguna correción subir ficha individual.</Typography>
+									<Typography width={'80%'} mb={'1rem'} fontSize={'1.5rem'} color={'#00FF00'} textAlign={'center'}>Este paquete ya creo todas las fichas posibles y esta listo para descargar, si hubo alguna correción subir ficha individual.</Typography>
 									<ArticleIcon sx={{fontSize:'3.5rem', color:'#00FF00'}}></ArticleIcon>
 								</Box>
 

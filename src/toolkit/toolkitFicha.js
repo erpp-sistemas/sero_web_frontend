@@ -54,6 +54,17 @@
 			})
 	}
 
+	function NumberToDate(numeroSerie) {
+		const fechaInicioExcel = new Date(1899, 12, 1)
+		const ajuste1900 = 2
+		const milisegundos = (numeroSerie - ajuste1900) * 24 * 60 * 60 * 1000
+		const fechaHora = new Date(fechaInicioExcel.getTime() + milisegundos)
+		const dia = fechaHora.getDate().toString().padStart(2, '0')
+		const mes = (fechaHora.getMonth() + 1).toString().padStart(2, '0')
+		const año = fechaHora.getFullYear()
+		return `${año}/${mes}/${dia}`
+	}
+
 	const formatearFila =async (data,folio) => {
 		const jsonData=data
 		const columnIndexes = {
@@ -104,18 +115,16 @@
 
 			if (ficha.cuenta !== "desconocido") {
 				let candado = true
-				const fecha_pago = null
-				const fecha_gestion = null
 				for (let key in ficha) {
 					if (ficha[key] !== undefined) {
 						if (typeof ficha.fecha_pago === 'number') {
-							ficha.fecha_pago = NumberToDate(fecha_pago)
+							ficha.fecha_pago = NumberToDate(ficha.fecha_pago)
 						}
 						if (typeof ficha.fecha_gestion === 'number') {
-							ficha.fecha_gestion = NumberToDate(fecha_gestion)
+							ficha.fecha_gestion = NumberToDate(ficha.fecha_gestion)
 						}
-						ficha.fecha_pago = ficha.fecha_pago.slice(0, 10).replace(/ /g, '')
-						ficha.fecha_gestion = ficha.fecha_gestion.slice(0, 10).replace(/ /g, '')
+						ficha.fecha_pago = ficha.fecha_pago.replace(/\//g, '-').slice(0, 10).replace(/ /g, '');
+						ficha.fecha_gestion = ficha.fecha_gestion.replace(/\//g, '-').slice(0, 10).replace(/ /g, '');
 						ficha.foto_fachada_predio = ficha.foto_fachada_predio==='si'||ficha.foto_fachada_predio==='Si'?1:0
 						ficha.foto_evidencia_predio = ficha.foto_evidencia_predio==='si'||ficha.foto_evidencia_predio==='Si'?1:0
 						ficha.promocion = ficha.promocion + ""
@@ -134,25 +143,7 @@
 		
 	}
 
-	function NumberToDate(serial) {
-		const MS_PER_DAY = 24 * 60 * 60 * 1000
-		const EPOCH_OFFSET_DAYS = 25569
-		const excelEpoch = new Date(Date.UTC(1970, 0, 1))
-
-		const utcDays = serial - EPOCH_OFFSET_DAYS
-		const utcMilliseconds = utcDays * MS_PER_DAY
-
-		const date = new Date(excelEpoch.getTime() + utcMilliseconds)
-		const hours = date.getHours()
-		const minutes = date.getMinutes()
-		const seconds = date.getSeconds()
-		const ampm = hours >= 12 ? 'p. m.' : 'a. m.'
-		const formattedDate = `${date.toLocaleDateString()} ${hours % 12}:${minutes < 10 ? '0' + minutes : minutes}:${seconds < 10 ? '0' + seconds : seconds} ${ampm}`
-		return formattedDate
-	}
-
 	const uploadS3 = async (file) => {
-		console.log(file)
 		const formData = new FormData()
 		formData.append('file', file)
 
@@ -162,7 +153,6 @@
 					'Content-Type': 'multipart/form-data'
 				}
 			})
-			console.log(response.data)
 			return response.data
 		} catch (error) {
 			console.error('Error al subir archivo a S3:', error)

@@ -15,6 +15,7 @@ const getPaquetes = async () => {
 		fecha_corte: item.fecha_corte,
 		excel_document: item.excel_document,
 		usuario: item.usuario,
+		activate: item.activate,
 	}))
 	return paquetes
 }
@@ -33,7 +34,7 @@ const getRegistrosById = async (idPaquete) => {
 }
 
 const createRecords = async (data) => {
-
+	
 	const url=`${baseURL}/api/records/registro/pdf`
 
 	try{
@@ -43,6 +44,36 @@ const createRecords = async (data) => {
 		false
 	}
 
+}
+
+const downloadZip = async (idPaq, paquetes) => {
+	if (idPaq === 0) {
+		console.warn('No se ha seleccionado ningún paquete')
+		return
+	}
+	const selectedPaquete = paquetes.find(item => item.id === idPaq)
+	if (!selectedPaquete) {
+		console.error('Paquete seleccionado no encontrado')
+		return
+	}
+	const nombreCarpeta = selectedPaquete.nombre
+
+	try {
+		const response = await axios.get(`${baseURL}/api/records/download/${nombreCarpeta}`, {
+			responseType: 'blob', 
+		})
+
+		const url = window.URL.createObjectURL(new Blob([response.data]))
+		const link = document.createElement('a')
+		link.href = url
+		link.setAttribute('download', `${nombreCarpeta}.zip`)
+		document.body.appendChild(link)
+		link.click()
+		link.remove()
+	} catch (error) {
+		console.error('Error al descargar el archivo:', error)
+	}
+	
 }
 
 const updateActiveStatus = async (cuenta) => {
@@ -76,5 +107,6 @@ export default {
 	getRegistrosById,
 	createRecords,
 	updateActiveStatus,
-	updateActivePaquete
+	updateActivePaquete,
+	downloadZip
 }
