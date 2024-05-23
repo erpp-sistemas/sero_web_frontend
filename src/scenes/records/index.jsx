@@ -23,14 +23,17 @@ function Records() {
 
 	const [selectedPlace, setSelectedPlace] = useState('')
     const [selectedService, setSelectedService] = useState('')
+    const [fechaImpresion, setFechaImpresion] = useState(null)
+    const [firma, setFirma] = useState(null)
+    const [cfdi, setCfdi] = useState(null)
 
 	const handleServiceChange = (event) => {
 		setSelectedService(event.target.value)
 	}
 
 	const handlePlaceChange = (event) => {
-		setSelectedPlace(event.target.value);  
-		setSelectedService('');      
+		setSelectedPlace(event.target.value) 
+		setSelectedService('')
 	}
 
 	const [fechaCorte, setfechaCorte] = useState(null)
@@ -225,7 +228,7 @@ function Records() {
 						label='Nombre'
 						variant='outlined'
 						value={nombre}
-						onChange={(e) => 	setNombre(e.target.value)}
+						onChange={(e) => setNombre(e.target.value)}
 					/>
 
 						{ nombreExiste ? <p className='records_aviso'>Ya existe un registro con este nombre.</p> : false }
@@ -257,12 +260,118 @@ function Records() {
 									label='Fecha de corte'
 									value={fechaCorte}
 									onChange={(newValue) => { setfechaCorte(newValue) }}
-									sx={{ width:'100%', '& .MuiSvgIcon-root': { color: '#ffffff', }, '& .MuiInputLabel-root': { color: '#ffffff', }, '& .MuiInputBase-input': { color: '#ffffff', }, }}
+									sx={{ marginBottom:'20px', width:'100%', '& .MuiSvgIcon-root': { color: '#ffffff', }, '& .MuiInputLabel-root': { color: '#ffffff', }, '& .MuiInputBase-input': { color: '#ffffff', }, }}
 								/>
 
 							</DemoContainer>
 
 						</LocalizationProvider>
+
+						{
+							(selectedPlace === 4 && selectedService === 1 || selectedPlace === 2 && selectedService === 1 ) && (
+
+								<>
+
+									<br />
+									<LocalizationProvider dateAdapter={AdapterDayjs}>
+
+										<DemoContainer components={['DatePicker']}>
+
+											<DatePicker
+												label='Fecha de impresión'
+												value={fechaImpresion}
+												onChange={(newValue) => { setFechaImpresion(newValue) }}
+												sx={{ width:'100%', '& .MuiSvgIcon-root': { color: '#ffffff', }, '& .MuiInputLabel-root': { color: '#ffffff', }, '& .MuiInputBase-input': { color: '#ffffff', }, }}
+											/>
+
+										</DemoContainer>
+
+									</LocalizationProvider>
+								</>
+
+						)}
+
+						{
+							(selectedPlace === 2 && selectedService === 2) && (
+
+							<Box className='records__checkbox' marginTop={'2rem'} display={'flex'} justifyContent={'center'} alignItems={'center'} width={'100%'}>
+
+								<Box display={'flex'} justifyContent={'center'} alignItems={'center'} flexDirection={'column'}>
+
+									<label htmlFor='package' style={{ textAlign: 'center', color: '#cff9e0', fontSize: '0.9rem', cursor: 'pointer' }}>Con Firma</label>
+
+									<Checkbox
+										id='package'	
+										checked={firma}
+										onChange={() => {
+											setFirma(true)
+										}}
+										sx={{ '& .MuiSvgIcon-root': { fontSize: '20px', color: firma ? '#28a745' : 'grey', }, '&:hover': { backgroundColor: '#228d3b', }, }}
+									/>
+
+								</Box>
+
+								<Box display={'flex'} justifyContent={'center'} alignItems={'center'} flexDirection={'column'}>
+
+									<label htmlFor='individual' style={{ textAlign: 'center', color: '#cff9e0', fontSize: '0.9rem', cursor: 'pointer' }}>Sin Firma</label>
+
+									<Checkbox	
+										id='individual'
+										checked={!firma}
+										onChange={() => {
+											setFirma(false)
+										}}
+										sx={{ '& .MuiSvgIcon-root': { fontSize: '20px', color: !firma ? '#28a745' : 'grey', }, '&:hover': { backgroundColor: '#228d3b', }, }}
+									/>
+
+								</Box>
+
+							</Box>
+
+						)}
+
+						{
+							(selectedPlace === 2 && selectedService === 1) && (
+
+							<Box className='records__checkbox' marginTop={'2rem'} display={'flex'} justifyContent={'center'} alignItems={'center'} width={'100%'}>
+
+								<Box display={'flex'} justifyContent={'center'} alignItems={'center'} flexDirection={'column'}>
+
+									<label htmlFor='package' style={{ textAlign: 'center', color: '#cff9e0', fontSize: '0.9rem', cursor: 'pointer' }}>Con CFDI</label>
+
+									<Checkbox
+										id='package'
+										checked={cfdi}
+										onChange={() => {
+											setCfdi(true)
+										}}
+										sx={{ '& .MuiSvgIcon-root': { fontSize: '20px', color: cfdi ? '#28a745' : 'grey', }, '&:hover': { backgroundColor: '#228d3b', }, }}
+									/>
+
+								</Box>
+
+								<Box display={'flex'} justifyContent={'center'} alignItems={'center'} flexDirection={'column'}>
+
+									<label htmlFor='individual' style={{ textAlign: 'center', color: '#cff9e0', fontSize: '0.9rem', cursor: 'pointer' }}>Sin CFDI</label>
+
+									<Checkbox	
+										id='individual'
+										checked={!cfdi}
+										onChange={() => {
+											setCfdi(false)
+										}}
+										sx={{ '& .MuiSvgIcon-root': { fontSize: '20px', color: !cfdi ? '#28a745' : 'grey', }, '&:hover': { backgroundColor: '#228d3b', }, }}
+									/>
+
+								</Box>
+
+							</Box>
+
+						)}
+
+					</Box>
+
+					<Box>
 
 					</Box>
 
