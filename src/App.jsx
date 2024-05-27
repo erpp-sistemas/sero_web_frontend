@@ -49,7 +49,8 @@ import Roles from "./scenes/roles"
 import Menu from "./scenes/menu";
 import Permission from "./scenes/permission";
 import Places from "./scenes/places";
-
+import CoordinationDashboard from './scenes/coordination-dashboard'
+import SurveyReport from './scenes/survey-report'
 
 
 function App() {
@@ -165,6 +166,8 @@ function App() {
                     <Route path="/permission" element={<Permission />} />
                     <Route path="/places" element={<Places />} />
                     <Route path="/work-attendance" element={<WorkAttendance />} />
+                    <Route path="/coordination-dashboard" element={<CoordinationDashboard />} />
+                    <Route path="/survey-report" element={<SurveyReport />} />
                   </Routes>
                 </main>
 
