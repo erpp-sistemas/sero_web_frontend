@@ -4,17 +4,18 @@ import Grid from '@mui/material/Grid';
 import { tokens } from "../../theme";
 import Line from '../../components/NivoChart/Line'
 
-function DailyManagement({ data }) {
+function DailyManagement({ data, typeConcept }) {
 
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);    
 
-    // Función para generar un color aleatorio
+    console.log(data)
+    console.log(typeConcept)
+    
   const generateColor = () => `hsl(${Math.floor(Math.random() * 360)}, 70%, 50%)`;
 
-  // Agrupar y transformar los datos
   const groupedData = data.reduce((acc, curr) => {
-    const { month_year, day, count } = curr;
+    const { month_year, concept, count } = curr;
     if (!acc[month_year]) {
       acc[month_year] = {
         id: month_year,
@@ -22,27 +23,24 @@ function DailyManagement({ data }) {
         data: []
       };
     }
-    acc[month_year].data.push({ x: day.toString(), y: count });
+    acc[month_year].data.push({ x: concept.toString(), y: count });
     return acc;
   }, {});
-
-  // Obtener todos los días presentes en los datos
+  
   const allDays = new Set();
   Object.values(groupedData).forEach(group => {
     group.data.forEach(point => {
       allDays.add(point.x);
     });
   });
-
-  // Asegurarse de que todos los días están presentes en cada mes
+  
   Object.values(groupedData).forEach(group => {
     const daySet = new Set(group.data.map(point => point.x));
     allDays.forEach(day => {
       if (!daySet.has(day)) {
         group.data.push({ x: day, y: 0 });
       }
-    });
-    // Ordenar los días del mes de menor a mayor
+    });    
     group.data.sort((a, b) => parseInt(a.x) - parseInt(b.x));
   });
 
@@ -87,7 +85,7 @@ function DailyManagement({ data }) {
                 </Typography>
             </Box>
             {data.length > 0 && (
-                <Line data={ formattedData } />
+                <Line data={ formattedData } titlex={typeConcept === 'hour' ? 'horas del dia' : 'dias del mes'} />
               )}
         </Box>
     </Box>

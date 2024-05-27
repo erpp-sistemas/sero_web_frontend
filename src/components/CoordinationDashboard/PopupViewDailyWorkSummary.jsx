@@ -1,7 +1,7 @@
 import React from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography } from '@mui/material';
 
-function PopupViewDailyWorkSummary({ open, onClose, userId, dateCapture }) {
+function PopupViewPositionDailyWorkSummary({ open, onClose, userId, dateCapture }) {
   return (
     <Dialog open={open} onClose={onClose}>
       <DialogTitle>Detalles del Usuario</DialogTitle>
@@ -19,4 +19,4 @@ function PopupViewDailyWorkSummary({ open, onClose, userId, dateCapture }) {
   );
 }
 
-export default PopupViewDailyWorkSummary;
+export default PopupViewPositionDailyWorkSummary;

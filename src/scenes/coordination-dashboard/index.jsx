@@ -50,6 +50,7 @@ function index() {
     const [typePropertyData , setTypePropertyData] = useState([]);
     const [dailyManagementData , setDailyManagementData] = useState([]);
     const [dailyWorkSummaryData , setDailyWorkSummaryData] = useState([]);
+    const [typeDailyManagementData , setTypeDailyManagementData] = useState('month');
 
     const [isLoading, setIsLoading] = useState(false)
     const [alertOpen, setAlertOpen] = useState(false);
@@ -115,9 +116,14 @@ function index() {
           return
         }
 
+        const typeConcept = selectedStartDate === selectedFinishDate ? 'hour' : 'month';
+        setTypeDailyManagementData(typeConcept);
+
         console.log(selectedPlace)
         console.log(selectedService)
         console.log(selectedProcess)
+        console.log(selectedStartDate)
+        console.log(selectedFinishDate)
 
         setIsLoading(true)       
         
@@ -273,7 +279,7 @@ function index() {
 
             <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
               <Grid item xs={12}>
-                <DailyManagement data={ dailyManagementData }/>
+                <DailyManagement data={ dailyManagementData } typeConcept={ typeDailyManagementData }/>
               </Grid>
             </Grid>
 

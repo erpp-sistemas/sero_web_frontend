@@ -11,7 +11,7 @@ import { DataGrid,
 import Viewer from 'react-viewer';
 import { AccessTime, CalendarToday, Flag, Photo, PhotoAlbum, PhotoAlbumOutlined, PhotoCamera, Spellcheck, TaskAlt, ViewAgenda } from "@mui/icons-material";
 import { LinearProgress } from '@mui/material';
-import PopupViewDailyWorkSummary from '../../components/CoordinationDashboard/PopupViewDailyWorkSummary.jsx'
+import PopupViewPositionDailyWorkSummary from '../../components/CoordinationDashboard/PopupViewDailyWorkSummary.jsx'
 
 function DataGridManagementByManager({data}) {
 
@@ -254,11 +254,11 @@ function DataGridManagementByManager({data}) {
           </div>
           );
         }
-      },
+      },      
       { 
         field: 'total_photos',
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"FOTOS"}</strong>
+          <strong style={{ color: "#5EBFFF" }}>{"FOTOS TOMADAS"}</strong>
         ),
         width: 120,
         editable: false,
@@ -279,7 +279,33 @@ function DataGridManagementByManager({data}) {
               <Photo sx={{ color: color }} />
             </div>
           )          
-        }
+        }        
+      },
+      { 
+        field: 'total_not_photos',
+        renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>{"CUENTAS SIN FOTOS"}</strong>
+        ),
+        width: 140,
+        editable: false,
+        renderCell: (params) => {
+          let color;
+  
+          if (params.value > 0) {
+            color = theme.palette.error.main;
+          } else {
+            color = theme.palette.secondary.main;
+          }
+          
+          return (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>            
+              <Typography variant="body1" sx={{ fontWeight: 'bold', fontSize: '1.2em' }}>
+                {params.value}
+              </Typography>
+              <Photo sx={{ color: color }} />
+            </div>
+          )          
+        }        
       },
       { 
         field: 'actions',
@@ -352,7 +378,7 @@ function DataGridManagementByManager({data}) {
           </Grid>
         )}  
       </Box>
-      <PopupViewDailyWorkSummary 
+      <PopupViewPositionDailyWorkSummary 
         open={popupOpen} 
         onClose={handleClosePopup} 
         userId={popupData.userId} 
