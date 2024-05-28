@@ -303,7 +303,12 @@ function index() {
 
             <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
               <Grid item xs={12}>
-                <DailyWorkSummary data={ dailyWorkSummaryData }/>
+                <DailyWorkSummary 
+                  data={ dailyWorkSummaryData } 
+                  placeId={ selectedPlace } 
+                  serviceId={ selectedService }
+                  proccessId={ selectedProcess }
+                />
               </Grid>
             </Grid>
             

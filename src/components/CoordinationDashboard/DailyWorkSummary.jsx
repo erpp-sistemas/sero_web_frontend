@@ -13,7 +13,7 @@ import { AccessTime, CalendarToday, Flag, Photo, PhotoAlbum, PhotoAlbumOutlined,
 import { LinearProgress } from '@mui/material';
 import PopupViewPositionDailyWorkSummary from '../../components/CoordinationDashboard/PopupViewDailyWorkSummary.jsx'
 
-function DataGridManagementByManager({data}) {
+function DataGridManagementByManager({data, placeId, serviceId, proccessId}) {
 
   console.log(data)
 
@@ -382,7 +382,10 @@ function DataGridManagementByManager({data}) {
         open={popupOpen} 
         onClose={handleClosePopup} 
         userId={popupData.userId} 
-        dateCapture={popupData.dateCapture} 
+        dateCapture={popupData.dateCapture}
+        placeId={placeId} 
+        serviceId={serviceId} 
+        proccessId={proccessId} 
       />
   </Box>   
   )
