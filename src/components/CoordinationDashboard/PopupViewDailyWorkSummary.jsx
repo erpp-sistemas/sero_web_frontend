@@ -70,12 +70,12 @@ function PopupViewPositionDailyWorkSummary({ open, onClose, userId, dateCapture,
   };
 
   const handleLocalizadasDownload = () => {
-    const localizedData = positionsData.filter(item => item.property_status === 'Predio localizado');
+    const localizedData = positionsData.filter(item => item.property_status !== 'Predio no localizado');
     downloadExcel(localizedData, 'Localizadas');
   };
 
   const handleNoLocalizadasDownload = () => {
-    const notLocalizedData = positionsData.filter(item => item.property_status !== 'Predio localizado');
+    const notLocalizedData = positionsData.filter(item => item.property_status === 'Predio no localizado');
     downloadExcel(notLocalizedData, 'No_Localizadas');
   };
 
