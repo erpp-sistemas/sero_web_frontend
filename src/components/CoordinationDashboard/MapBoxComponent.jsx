@@ -53,7 +53,7 @@ const MapboxMap = ({ positions, onClickMarker }) => {
     });
 
     positions.forEach(({ latitude, longitude, photo, account, property_status, date_capture, task }) => {
-      const markerColor = property_status === 'Predio localizado' ? 'green' : 'red';
+      const markerColor = property_status != 'Predio no localizado' ? 'green' : 'red';
 
       const customMarkerElement = document.createElement('div');
       customMarkerElement.style.display = 'flex';
