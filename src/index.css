@@ -197,6 +197,12 @@ body,
 	border-radius: 50%;
 }
 
+.backups{
+	width: auto;
+	background: rgba(255, 255, 255, 0.250);
+	padding: 40px;
+	border-radius: 20px;
+}
 
 @media screen and (max-width: 1000px) {
 

@@ -16,6 +16,10 @@ const getPaquetes = async () => {
 		excel_document: item.excel_document,
 		usuario: item.usuario,
 		activate: item.activate,
+		fecha_impresion: item.fecha_impresion,
+		firma: item.firma,
+		cfdi: item.cfdi,
+		mes_facturacion: item.mes_facturacion,
 	}))
 	return paquetes
 }

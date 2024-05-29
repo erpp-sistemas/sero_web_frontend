@@ -24,6 +24,7 @@ function Records() {
 	const [selectedPlace, setSelectedPlace] = useState('')
     const [selectedService, setSelectedService] = useState('')
     const [fechaImpresion, setFechaImpresion] = useState(null)
+    const [mesFacturacion, setMesFacturacion] = useState(null)
     const [firma, setFirma] = useState(null)
     const [cfdi, setCfdi] = useState(null)
 
@@ -71,7 +72,11 @@ function Records() {
 				excel_document: excelURL.filePath,
 				id_usuario: user.profile_id,
 				activate: 0,
-			}
+				firma: firma ? 1 : 0,
+				mes_facturacion: mesFacturacion,
+				fecha_impresion: fechaImpresion,
+				cfdi: cfdi ? 1 : 0, 	
+			}	
 	
 			const id_paquete = await tool.generatePaquete(data)
 			let total = 0
@@ -287,6 +292,41 @@ function Records() {
 										</DemoContainer>
 
 									</LocalizationProvider>
+								</>
+
+						)}
+
+						{
+							(selectedPlace === 2 && selectedService === 1 ) && (
+
+								<>
+
+									<br />
+									<TextField
+											sx={{
+												width: '100%',
+												marginBottom: '1rem',
+												'& .MuiInputLabel-root': {
+													color: nombreExiste ? 'rgb(185, 0, 0) !important' : 'white !important',
+												},
+												'& .MuiOutlinedInput-root': {
+													'& fieldset': {
+														borderColor: nombreExiste ? 'rgb(185, 0, 0) !important' : 'white !important', 
+													},
+													'&:hover fieldset': {
+														borderColor: nombreExiste ? 'rgb(185, 0, 0) !important' : 'white !important',
+													},
+													'&.Mui-focused fieldset': {
+														borderColor: nombreExiste ? 'rgb(185, 0, 0) !important' : 'white !important', 
+													},
+												},
+											}}
+											id='outlined-basic'
+											label='Mes de facturación'
+											variant='outlined'
+											value={mesFacturacion}
+											onChange={(e) => setMesFacturacion(e.target.value)}
+										/>
 								</>
 
 						)}

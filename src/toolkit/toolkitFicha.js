@@ -31,7 +31,6 @@
 	}
 
 	const generatePaquete=async(data)=>{
-
 		const url=`${baseURL}/api/records/paquete`
 
 		try{
@@ -76,9 +75,15 @@
 			longitud: 'longitud',
 			tipo_servicio: 'tipo_de_servicio',
 			tipo_tarifa: 'tipo_tarifa',
-			serie_medidor: 'serie_medidor',
+			medidor: 'serie_medidor',
 			servicio: 'servicio',
 			recibo: 'recibo',
+			clave_catastral: 'clave_catastral',
+			superficie_terreno: 'superficie_terreno_h',
+			superficie_construccion: 'superficie_construccion_h',
+			valor_terreno: 'valor_terreno_h',
+			valor_construccion: 'valor_construccion_h',
+			valor_catastral: 'valor_catastral_h',
 			descripcion: 'descripcion',
 			promocion: 'promocion',
 			fecha_pago: 'fecha de pago',
@@ -89,11 +94,12 @@
 			gestor: 'gestor',
 			tarea_gestionada: 'tarea_gestionada',
 			fecha_gestion: 'fecha_de_gestion',
-			tipo_gestion: 'tabla_gestion',
-			estatus_predio: 'estatus_predio',
-			estatus_gestion_Valida: 'estatus de getion valida',
-			estatus_nuestra_cartera: 'estatus en nuestra cartera',
-			estatus_cuenta: 'estatus de la cuenta',
+			tabla_gestion: 'tabla_gestion',
+			tipo_gestion: 'tipo de gestion',
+			status_predio: 'estatus_predio',
+			status_gestion_valida: 'estatus de getion valida',
+			status_nuestra_cartera: 'estatus en nuestra cartera',
+			status_cuenta: 'estatus de la cuenta',
 			foto_fachada_predio: 'foto fachada predio',
 			url_fachada: 'urlImagenFachada',
 			foto_evidencia_predio: 'foto evidencia predio',
@@ -109,7 +115,27 @@
 			const ficha = Object.keys(columnIndexes).reduce((ficha, columnName) => {
 				const columnIndex = jsonData[0].indexOf(columnIndexes[columnName])
 				ficha[columnName] = (columnIndex !== -1) ? fila[columnIndex] || 'desconocido' : 'desconocido'
+
+				if (columnName === 'clave_catastral' && ficha[columnName] === 'desconocido') {
+					ficha[columnName] = '0'
+				}
+				if (columnName === 'superficie_terreno' && ficha[columnName] === 'desconocido') {
+					ficha[columnName] = '0'
+				}
+				if (columnName === 'superficie_construccion' && ficha[columnName] === 'desconocido') {
+					ficha[columnName] = '0'
+				}
+				if (columnName === 'valor_terreno' && ficha[columnName] === 'desconocido') {
+					ficha[columnName] = '0'
+				}
+				if (columnName === 'valor_construccion' && ficha[columnName] === 'desconocido') {
+					ficha[columnName] = '0'
+				}
+				if (columnName === 'valor_catastral' && ficha[columnName] === 'desconocido') {
+					ficha[columnName] = '0'
+				}
 				
+
 				return ficha
 			}, {})
 
@@ -134,7 +160,7 @@
 					}
 				}
 				if (candado) {
-					ficha.active = 0
+					ficha.activate = 0
 					resultados.push({folio: folio ? folio : 'desconocido', ...ficha})
 				}
 			}

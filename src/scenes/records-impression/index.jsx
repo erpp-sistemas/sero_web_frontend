@@ -11,6 +11,7 @@ const Impression = () => {
 	const [loading, setLoading] = useState(false)
 	const [cargando, setCargando] = useState(false)
 	const [registros, setRegistros] = useState({})
+	const [totalFichas, setTotalFichas] = useState(0)
 	const [registro, setRegistro] = useState(null)
 	const [rango, setRango] = useState(0)
 	const [paquetes, setPaquetes] = useState([])
@@ -84,7 +85,13 @@ const Impression = () => {
 			url_evidencia: registro.url_evidencia,
 			url_fachada: registro.url_fachada,
 			paquete: paquete,
-			pagos: registro.pagos
+			pagos: registro.pagos,
+			clave_catastral: registro.clave_catastral,
+			superficie_terreno: registro.superficie_terreno,
+			superficie_construccion: registro.superficie_construccion,
+			valor_terreno: registro.valor_terreno,
+			valor_contruccion: registro.valor_construccion,
+			valor_catastral: registro.valor_catastral
 		}
 
 		try {
@@ -119,9 +126,10 @@ const Impression = () => {
 		try {
 
 			const paquetes = await tool.getRegistrosById(idPaquete)
-	
 			const registrosAgrupados = {}
 			const cuentasParaEliminar = new Set()
+			
+			setTotalFichas(paquetes.length)
 
 			paquetes.forEach(registro => {
 				const { cuenta, activate } = registro
@@ -131,12 +139,12 @@ const Impression = () => {
 			})
 	
 			paquetes.forEach(registro => {
-				const { cuenta, calle, fecha_gestion, fecha_pago, colonia, propietario, servicio, status_previo, latitud, longitud, gestor, recibo, tipo_servicio, tarea_gestionada, tipo_gestion, tipo_tarifa, total_pagado, url_evidencia, url_fachada, activate } = registro	
+				const { cuenta, calle, fecha_gestion, fecha_pago, colonia, propietario, servicio, status_previo, latitud, longitud, gestor, recibo, tipo_servicio, tarea_gestionada, tipo_gestion, tipo_tarifa, total_pagado, url_evidencia, url_fachada, activate, clave_catastral, superficie_terreno, superficie_construccion, valor_terreno, valor_construccion, valor_catastral } = registro	
 				if (cuentasParaEliminar.has(cuenta)) {
 					return
 				}
 				if (!registrosAgrupados[cuenta]) {
-					registrosAgrupados[cuenta] = { cuenta, calle, fecha_pago, colonia, latitud, recibo, gestor, fecha_gestion, longitud, propietario, servicio, status_previo, tarea_gestionada, tipo_gestion, tipo_servicio, tipo_tarifa, total_pagado, url_evidencia, url_fachada, activate, pagos: [] } }
+					registrosAgrupados[cuenta] = { cuenta, calle, fecha_pago, colonia, latitud, recibo, gestor, fecha_gestion, longitud, propietario, servicio, status_previo, tarea_gestionada, tipo_gestion, tipo_servicio, tipo_tarifa, total_pagado, url_evidencia, url_fachada, activate, clave_catastral, superficie_terreno, superficie_construccion, valor_terreno, valor_construccion, valor_catastral, pagos: [] } }
 				if (registro) {
 					registrosAgrupados[cuenta].pagos.push({
 						descripcion: registro.descripcion || "",
@@ -169,7 +177,7 @@ const Impression = () => {
 		
 			<Box className='records_impression__grid' sx={{ mt:'1rem', width:'auto', display:'flex', minHeight:'500px', justifyContent:'center', alignItems:'start' }} container spacing={0}>
 
-				<Box className='records_impression__content' sx={{ minHeight: '500px', width:'100%', height:'auto', backgroundColor:'rgba(255, 255, 255, 0.250)', borderTopLeftRadius:'10px', borderBottomLeftRadius:'10px', display:'flex', justifyContent:'center', alignItems:'center', flexDirection:'column' }}>
+				<Box className='records_impression__content' sx={{ minHeight: '600px', width:'100%', height:'auto', backgroundColor:'rgba(255, 255, 255, 0.250)', borderTopLeftRadius:'10px', borderBottomLeftRadius:'10px', display:'flex', justifyContent:'center', alignItems:'center', flexDirection:'column' }}>
 					
 					<Box sx={{ width:'100%', maxWidth:'300px' }} display={'flex'} justifyContent={'space-between'} >
 
@@ -257,7 +265,7 @@ const Impression = () => {
 
 				</Box>
 
-				<Box className='records_impression__data' sx={{ minHeight: '500px', height:'auto', width:'100%', background:'rgba(255, 255, 255, 0.250)', borderTopRightRadius:'10px', borderBottomRightRadius:'10px', display:'flex', flexDirection:'column', gap:'2rem' }} fullWidth >
+				<Box className='records_impression__data' sx={{ minHeight: '600px', height:'auto', width:'100%', background:'rgba(255, 255, 255, 0.250)', borderTopRightRadius:'10px', borderBottomRightRadius:'10px', display:'flex', flexDirection:'column', gap:'2rem' }} fullWidth >
 										
 					{ 
 
@@ -312,7 +320,11 @@ const Impression = () => {
 
 									}
 									<Box className='records_impression__data__box' display={'flex'} justifyContent={'center'} alignItems={'center'}>
-										<Typography sx={{ fontWeight:'600', fontSize:'1.1rem', color:'#cff9e0' }}>Cantidad de Fichas:</Typography><Typography sx={{ fontSize:'1rem' }}>{rango}</Typography> 
+										<Typography sx={{ fontWeight:'600', fontSize:'1.1rem', color:'#cff9e0' }}>Fichas Faltantes:</Typography><Typography sx={{ fontSize:'1rem' }}>{rango}</Typography> 
+									</Box>
+
+									<Box className='records_impression__data__box' display={'flex'} justifyContent={'center'} alignItems={'center'}>
+										<Typography sx={{ fontWeight:'600', fontSize:'1.1rem', color:'#cff9e0' }}>Fichas Totales:</Typography><Typography sx={{ fontSize:'1rem' }}>{totalFichas}</Typography> 
 									</Box>
 
 								</>
@@ -341,7 +353,7 @@ const Impression = () => {
 
 			</Box>
 
-			{ openPreview ? <Preview setOpenPreview={setOpenPreview} registro={registro}  /> : false }
+			{ openPreview ? <Preview setOpenPreview={setOpenPreview} registro={registro} paquete={paquete} /> : false }
 			{ loading ? <ChargeCounter value={completedRequests} /> : false}
 			{ cargando ? <Charge/> : false}
 
