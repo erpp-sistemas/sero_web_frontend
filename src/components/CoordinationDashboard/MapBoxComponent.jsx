@@ -1,14 +1,15 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import mapboxgl from 'mapbox-gl';
 import Avatar from '@mui/material/Avatar';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
+import LoadingModal from '../../components/LoadingModal.jsx'
 
 const mapContainerStyle = {
   width: '100%',
-  height: '400px' // Ajusta esta altura según sea necesario
+  height: '400px' 
 };
 
 const TooltipCard = ({ account, latitude, longitude, property_status, date_capture, task }) => (
@@ -36,20 +37,26 @@ const TooltipCard = ({ account, latitude, longitude, property_status, date_captu
   </Card>
 );
 
-const MapboxMap = ({ positions, onClickMarker }) => {
+const MapboxMap = ({ positions, onClickMarker, setIsLoading }) => {
   const mapContainerRef = useRef(null);
-  const map = useRef(null);
+  const map = useRef(null);  
 
   useEffect(() => {
     if (map.current) {
       map.current.remove();
     }
 
+    setIsLoading(true);
+
     map.current = new mapboxgl.Map({
       container: mapContainerRef.current,
       style: 'mapbox://styles/mapbox/streets-v11',
       center: [positions[0].longitude, positions[0].latitude],
       zoom: 14
+    });
+
+    map.current.on('load', () => {
+      setIsLoading(false);
     });
 
     positions.forEach(({ latitude, longitude, photo, account, property_status, date_capture, task }) => {
@@ -111,9 +118,12 @@ const MapboxMap = ({ positions, onClickMarker }) => {
         map.current = null;
       }
     };
-  }, [positions]);
+  }, [positions, setIsLoading]);
+
+  
 
   return <div ref={mapContainerRef} style={mapContainerStyle} />;
+  
 };
 
 export default MapboxMap;

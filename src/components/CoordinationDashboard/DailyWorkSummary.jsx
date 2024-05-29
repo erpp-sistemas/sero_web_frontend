@@ -9,7 +9,7 @@ import { DataGrid,
   GridToolbarExport,  
   GridToolbarFilterButton, } from '@mui/x-data-grid';
 import Viewer from 'react-viewer';
-import { AccessTime, CalendarToday, Flag, Photo, PhotoAlbum, PhotoAlbumOutlined, PhotoCamera, Spellcheck, TaskAlt, ViewAgenda } from "@mui/icons-material";
+import { AccessTime, CalendarToday, Flag, ModeOfTravel, NotListedLocation, Photo, PhotoAlbum, PhotoAlbumOutlined, PhotoCamera, Spellcheck, TaskAlt, ViewAgenda } from "@mui/icons-material";
 import { LinearProgress } from '@mui/material';
 import PopupViewPositionDailyWorkSummary from '../../components/CoordinationDashboard/PopupViewDailyWorkSummary.jsx'
 
@@ -254,7 +254,33 @@ function DataGridManagementByManager({data, placeId, serviceId, proccessId}) {
           </div>
           );
         }
-      },      
+      },
+      { 
+        field: 'not_position',
+        renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>{"CUENTAS SIN POSICION"}</strong>
+        ),
+        width: 160,
+        editable: false,
+        renderCell: (params) => {
+          let color;
+  
+          if (params.value > 0) {
+            color = theme.palette.error.main;
+          } else {
+            color = theme.palette.secondary.main;
+          }
+          
+          return (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>            
+              <Typography variant="body1" sx={{ fontWeight: 'bold', fontSize: '1.2em' }}>
+                {params.value}
+              </Typography>
+              <NotListedLocation sx={{ color: color }} />
+            </div>
+          )          
+        }        
+      },
       { 
         field: 'total_photos',
         renderHeader: () => (
