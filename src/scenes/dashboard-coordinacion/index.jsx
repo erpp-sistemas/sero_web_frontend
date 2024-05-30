@@ -191,10 +191,10 @@ const index = () => {
                     sx={{ cursor: 'pointer' }}
                 >
 
-                    <Legend
+                    {/* <Legend
                         title='NÚMERO DE GESTIONES TOTALES'
                         data=''
-                    />
+                    /> */}
                 </Box>
 
                 <RecaudacionGestor size_grid={5} />
@@ -281,11 +281,11 @@ const index = () => {
                     >
 
                         <Box sx={{ width: '49%', height: '97%' }}>
-                            <Pie data={data_tipo_servicio} theme='yellow_green_blue' />
+                            {/* <Pie data={data_tipo_servicio} theme='yellow_green_blue' /> */}
                         </Box>
 
                         <Box sx={{ width: '49%', height: '97%' }}>
-                            <Pie data={data_pie} theme='accent' />
+                            {/* <Pie data={data_pie} theme='accent' /> */}
                         </Box>
 
 

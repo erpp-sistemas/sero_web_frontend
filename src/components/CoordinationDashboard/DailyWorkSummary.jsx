@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Box, useTheme, Button, Avatar, Typography, Chip } from "@mui/material";
+import { Box, useTheme, Button, Avatar, Typography, Chip, InputAdornment, FormControl, FormHelperText } from "@mui/material";
 import Grid from '@mui/material/Grid';
+import TextField from '@mui/material/TextField';
 import { tokens } from "../../theme";
 import { DataGrid,
   GridToolbarColumnsButton,
@@ -9,7 +10,7 @@ import { DataGrid,
   GridToolbarExport,  
   GridToolbarFilterButton, } from '@mui/x-data-grid';
 import Viewer from 'react-viewer';
-import { AccessTime, CalendarToday, Flag, ModeOfTravel, NotListedLocation, Photo, PhotoAlbum, PhotoAlbumOutlined, PhotoCamera, Spellcheck, TaskAlt, ViewAgenda } from "@mui/icons-material";
+import { AccessTime, CalendarToday, Flag, NotListedLocation, Photo, Search, TaskAlt, ViewAgenda } from "@mui/icons-material";
 import { LinearProgress } from '@mui/material';
 import PopupViewPositionDailyWorkSummary from '../../components/CoordinationDashboard/PopupViewDailyWorkSummary.jsx'
 
@@ -22,6 +23,12 @@ function DataGridManagementByManager({data, placeId, serviceId, proccessId}) {
 
   const [popupOpen, setPopupOpen] = useState(false);
   const [popupData, setPopupData] = useState({ userId: null, dateCapture: null });
+  const [searchTerm, setSearchTerm] = useState(null);
+  const [filteredUsers, setFilteredUsers] = useState([]);
+  const [matching, setMatching] = useState(-1);
+
+  const [noResults, setNoResults] = useState(false);
+  const [searchPerformed, setSearchPerformed] = useState(false);
 
   const handleOpenPopup = (userId, dateCapture) => {
     setPopupData({ userId, dateCapture });
@@ -376,6 +383,44 @@ function DataGridManagementByManager({data, placeId, serviceId, proccessId}) {
     );
   };
 
+  useEffect(() => {
+    
+    setSearchPerformed(true);  
+    
+    if (!searchTerm) {
+      setFilteredUsers([]);
+      setNoResults(false);
+      setMatching(-1);
+      return;
+    } 
+    
+    const matchingUsers = data.filter(user => {
+      return Object.values(user).some(value =>
+        value && value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    });  
+    
+    if (matchingUsers.length === 0) {
+      setFilteredUsers([]);
+      setNoResults(true);
+      setMatching(0);
+    } else {
+      setFilteredUsers(matchingUsers);
+      setNoResults(false);
+      setMatching(matchingUsers.length);
+    }
+  
+  }, [searchTerm]);
+  
+
+  useEffect(() => {
+    setNoResults(false);
+  }, []);
+
+  const handleChange = (event) => {
+    setSearchTerm(event.target.value.toLowerCase());
+  };
+
   return (
     <Box
       id="grid-1"
@@ -391,10 +436,39 @@ function DataGridManagementByManager({data, placeId, serviceId, proccessId}) {
         sx={{ cursor: 'pointer' }}
       >
         {data.length > 0 && (
+          <>
+           <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2} >
+            <Grid item xs={6} sx={{ paddingBottom: 1 }}>
+              <FormControl>
+                <TextField                              
+                  fullWidth                            
+                  value={searchTerm}              
+                  onChange={handleChange}              
+                  color='secondary'
+                  size="small"
+                  placeholder="Ingresa tu búsqueda"
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <Search color="secondary"/>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+                
+                {( noResults ) && (
+                  <FormHelperText  style={{ color: 'red' }}>
+                    No se encontraron resultados
+                  </FormHelperText>
+                )}
+                
+              </FormControl>
+            </Grid>
+           </Grid>
           <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>              
             <Grid item xs={12} style={{ height: 400, width: '100%' }}>         
               <DataGrid
-                  rows={data}
+                  rows={filteredUsers.length > 0 ? filteredUsers : data}
                   columns={buildColumns()}
                   getRowId={(row) => row.id}
                   editable={false}                 
@@ -402,6 +476,7 @@ function DataGridManagementByManager({data, placeId, serviceId, proccessId}) {
               />
             </Grid>
           </Grid>
+          </>
         )}  
       </Box>
       <PopupViewPositionDailyWorkSummary 

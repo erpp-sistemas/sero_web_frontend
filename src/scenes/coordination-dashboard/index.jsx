@@ -260,88 +260,61 @@ function index() {
                 </Button>
               </Grid>
             </Grid>
-            <Grid container justifyContent="space-between" alignItems="stretch" spacing={2}>
-              <RowOne data={rowOneData}/>
-            </Grid>
+              {result.length > 0 && (
+              <>
+                <Grid container justifyContent="space-between" alignItems="stretch" spacing={2}>
+                  <RowOne data={rowOneData}/>
+                </Grid>
 
-            <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
-              <Grid item xs={6}>                
-                <LineNumberOFTotalProcedures 
-                  lineMonthData={lineMonthData} 
-                  lineWeekData={lineWeekData} 
-                  lineDayData={lineDayData} 
-                />               
-              </Grid>
-              <Grid item xs={6}>
-                  <DataGridManagementByManager data={ dataGridData }/>
-              </Grid>
-            </Grid>
+                <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
+                  <Grid item xs={6}>                
+                    <LineNumberOFTotalProcedures 
+                      lineMonthData={lineMonthData} 
+                      lineWeekData={lineWeekData} 
+                      lineDayData={lineDayData} 
+                    />               
+                  </Grid>
+                  <Grid item xs={6}>
+                      <DataGridManagementByManager data={ dataGridData }/>
+                  </Grid>
+                </Grid>
 
-            <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
-              <Grid item xs={12}>
-                <DailyManagement data={ dailyManagementData } typeConcept={ typeDailyManagementData }/>
-              </Grid>
-            </Grid>
+                <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
+                  <Grid item xs={12}>
+                    <DailyManagement data={ dailyManagementData } typeConcept={ typeDailyManagementData }/>
+                  </Grid>
+                </Grid>
 
-            <Grid container justifyContent="space-between" alignItems="stretch" spacing={2}>
-              <Grid item xs={6}>
-                <ManagedTask data= {managedTaskData} />
-              </Grid>
-              <Grid item xs={6}>
-                <LocationStatus data={ locationStatusData }/>
-              </Grid>
-            </Grid>
+                <Grid container justifyContent="space-between" alignItems="stretch" spacing={2}>
+                  <Grid item xs={6}>
+                    <ManagedTask data= {managedTaskData} />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <LocationStatus data={ locationStatusData }/>
+                  </Grid>
+                </Grid>
 
-            <Grid container justifyContent="space-between" alignItems="stretch" spacing={2}>
-              <Grid item xs={6}>
-                <TypeService data={ typeServiceData } />
-              </Grid>
-              <Grid item xs={6}>
-                <TypeProperty data={ typePropertyData } />
-              </Grid>
-            </Grid>
+                <Grid container justifyContent="space-between" alignItems="stretch" spacing={2}>
+                  <Grid item xs={6}>
+                    <TypeService data={ typeServiceData } />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <TypeProperty data={ typePropertyData } />
+                  </Grid>
+                </Grid>
 
-            <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
-              <Grid item xs={12}>
-                <DailyWorkSummary 
-                  data={ dailyWorkSummaryData } 
-                  placeId={ selectedPlace } 
-                  serviceId={ selectedService }
-                  proccessId={ selectedProcess }
-                />
-              </Grid>
-            </Grid>
-            
-            {/* <Grid container justifyContent="space-between" alignItems="stretch" spacing={2}>
-              <Grid item xs={6}>
-                <ManagedTask data= {managedTaskData} />
-              </Grid>
-              <Grid item xs={6}>
-                <LocationStatus data={ locationStatusData }/>
-              </Grid>
-            </Grid> */}
-            {/* <Grid container justifyContent="space-between" alignItems="stretch" spacing={2}>
-              <Grid item xs={6}>
-                <TypeService data={ typeServiceData } />
-              </Grid>
-              <Grid item xs={6}>
-                <TypeProperty data={ typePropertyData } />
-              </Grid>
-            </Grid> */}
-            
-            
-            
-              
-            {/* <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
-                <PieManagementByTypeOfServiceAndLocationStatus datatype={ pieManagementByTypeData } datalocation={ pieManagementByLocationData }/>
-            </Grid> */}
-            
-            {/* <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
-              <Grid item xs={12}>
-                <BarStackManagementsByManagerAndLocationStatus data={ barStackData }/>
-              </Grid>
-            </Grid> */}
-            
+                <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
+                  <Grid item xs={12}>
+                    <DailyWorkSummary 
+                      data={ dailyWorkSummaryData } 
+                      placeId={ selectedPlace } 
+                      serviceId={ selectedService }
+                      proccessId={ selectedProcess }
+                    />
+                  </Grid>
+                </Grid>
+              </>
+            )}
           </Box>
     </>
   )
