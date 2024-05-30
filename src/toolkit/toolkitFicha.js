@@ -187,6 +187,24 @@
 
 	}
 
+	const uploadBackup = async (file) => {
+		const formData = new FormData()
+		formData.append('file', file)
+
+		try {
+			const response = await axios.post(`${baseURL}/api/records/backup`, formData, {
+				headers: {
+					'Content-Type': 'multipart/form-data'
+				}
+			})
+			return response.data
+		} catch (error) {
+			console.error('Error al subir archivo a S3:', error)
+			throw error
+		}
+
+	}
+
 	export default {
 		generatePaquete,
 		uploadFichas,
@@ -194,5 +212,6 @@
 		getPlazas,
 		formatearFila,
 		uploadS3,
-		getName
+		getName,
+		uploadBackup
 	}
