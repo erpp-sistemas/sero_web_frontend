@@ -426,7 +426,7 @@ function DataGridManagementByManager({data, placeId, serviceId, proccessId}) {
       id="grid-1"
       display="grid"
       gridTemplateColumns="repeat(12, 1fr)"
-      gridAutoRows="390px"
+      gridAutoRows="450px"
       gap="15px"
     >   
       <Box

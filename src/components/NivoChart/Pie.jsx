@@ -4,7 +4,7 @@ const Pie = ({ data, color }) => {
     return (
         <ResponsivePie
         data={data}
-        margin={{ top: 40, right: 80, bottom: 80, left: 80 }}
+        margin={{ top: 40, right: 120, bottom: 80, left: 10 }}
         innerRadius={0.5}
         padAngle={0.7}
         cornerRadius={3}
@@ -22,7 +22,7 @@ const Pie = ({ data, color }) => {
             ]
         }}
         arcLinkLabelsSkipAngle={10}
-        arcLinkLabelsTextColor="#333333"
+        arcLinkLabelsTextColor="#e71818"
         arcLinkLabelsThickness={2}
         arcLinkLabelsColor={{ from: 'color' }}
         arcLabelsSkipAngle={10}
@@ -107,13 +107,13 @@ const Pie = ({ data, color }) => {
         ]}
         legends={[
             {
-                anchor: 'bottom',
-                direction: 'row',
+                anchor: 'bottom-right',
+                direction: 'column',
                 justify: false,
-                translateX: 0,
-                translateY: 56,
-                itemsSpacing: 0,
-                itemWidth: 100,
+                translateX: 117,
+                translateY: -80,
+                itemsSpacing: 5,
+                itemWidth: 131,
                 itemHeight: 18,
                 itemTextColor: '#999',
                 itemDirection: 'left-to-right',

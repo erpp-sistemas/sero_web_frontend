@@ -24,6 +24,8 @@ import TypeService from '../../components/CoordinationDashboard/TypeService.jsx'
 import TypeProperty from '../../components/CoordinationDashboard/TypeProperty.jsx'
 import DailyManagement from '../../components/CoordinationDashboard/DailyManagement.jsx'
 import DailyWorkSummary from '../../components/CoordinationDashboard/DailyWorkSummary.jsx'
+import PaymentsProcedures from '../../components/CoordinationDashboard/PaymentsProcedures.jsx'
+import PaymentsProceduresByTypeService from '../../components/CoordinationDashboard/PaymentsProceduresByTypeService.jsx'
 
 function index() {
 
@@ -51,6 +53,8 @@ function index() {
     const [dailyManagementData , setDailyManagementData] = useState([]);
     const [dailyWorkSummaryData , setDailyWorkSummaryData] = useState([]);
     const [typeDailyManagementData , setTypeDailyManagementData] = useState('month');
+    const [paymentsProceduresData , setPaymentsProceduresData] = useState([]);
+    const [paymentsProceduresByTypeServiceData , setPaymentsProceduresByTypeServiceData] = useState([]);    
 
     const [isLoading, setIsLoading] = useState(false)
     const [alertOpen, setAlertOpen] = useState(false);
@@ -145,12 +149,15 @@ function index() {
         setTypePropertyData(JSON.parse(response.data[0].TypeProperty))
         setDailyManagementData(JSON.parse(response.data[0].DailyManagement))
         setDailyWorkSummaryData(JSON.parse(response.data[0].DailyWorkSummary))
+        setPaymentsProceduresData(JSON.parse(response.data[0].PaymentsProcedures))
+        setPaymentsProceduresByTypeServiceData(JSON.parse(response.data[0].PaymentsProceduresByTypeService))
 
         console.log(rowOneData)
         console.log(response.data[0].LineMonthNumberOFTotalProcedures)
         console.log(response.data[0].LineWeekNumberOFTotalProcedures)
         console.log(response.data[0].LineDayNumberOFTotalProcedures)
         console.log(JSON.parse(response.data[0].ManagedTask))
+        console.log(JSON.parse(response.data[0].PaymentsProcedures))
 
         setResult(response.data)
         setIsLoading(false)
@@ -311,6 +318,16 @@ function index() {
                       serviceId={ selectedService }
                       proccessId={ selectedProcess }
                     />
+                  </Grid>
+                </Grid>
+                <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
+                  <Grid item xs={12}>    
+                    <PaymentsProcedures data={ paymentsProceduresData} />
+                  </Grid>
+                </Grid>
+                <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
+                  <Grid item xs={6}>    
+                    <PaymentsProceduresByTypeService data={ paymentsProceduresByTypeServiceData } />
                   </Grid>
                 </Grid>
               </>
