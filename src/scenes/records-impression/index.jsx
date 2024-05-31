@@ -67,6 +67,7 @@ const Impression = () => {
 
 	const handleGeneratePDF = async (registro) => {
 		const data = {
+			id: registro.id,
 			nombre: paquete.nombre,
 			cuenta: registro.cuenta,
 			propietario: registro.propietario,
@@ -139,12 +140,12 @@ const Impression = () => {
 			})
 	
 			paquetes.forEach(registro => {
-				const { cuenta, calle, fecha_gestion, fecha_pago, colonia, propietario, servicio, status_previo, latitud, longitud, gestor, recibo, tipo_servicio, tarea_gestionada, tipo_gestion, tipo_tarifa, total_pagado, url_evidencia, url_fachada, activate, clave_catastral, superficie_terreno, superficie_construccion, valor_terreno, valor_construccion, valor_catastral } = registro	
+				const { id, cuenta, calle, fecha_gestion, fecha_pago, colonia, propietario, servicio, status_previo, latitud, longitud, gestor, recibo, tipo_servicio, tarea_gestionada, tipo_gestion, tipo_tarifa, total_pagado, url_evidencia, url_fachada, activate, clave_catastral, superficie_terreno, superficie_construccion, valor_terreno, valor_construccion, valor_catastral } = registro	
 				if (cuentasParaEliminar.has(cuenta)) {
 					return
 				}
 				if (!registrosAgrupados[cuenta]) {
-					registrosAgrupados[cuenta] = { cuenta, calle, fecha_pago, colonia, latitud, recibo, gestor, fecha_gestion, longitud, propietario, servicio, status_previo, tarea_gestionada, tipo_gestion, tipo_servicio, tipo_tarifa, total_pagado, url_evidencia, url_fachada, activate, clave_catastral, superficie_terreno, superficie_construccion, valor_terreno, valor_construccion, valor_catastral, pagos: [] } }
+					registrosAgrupados[cuenta] = { id, cuenta, calle, fecha_pago, colonia, latitud, recibo, gestor, fecha_gestion, longitud, propietario, servicio, status_previo, tarea_gestionada, tipo_gestion, tipo_servicio, tipo_tarifa, total_pagado, url_evidencia, url_fachada, activate, clave_catastral, superficie_terreno, superficie_construccion, valor_terreno, valor_construccion, valor_catastral, pagos: [] } }
 				if (registro) {
 					registrosAgrupados[cuenta].pagos.push({
 						descripcion: registro.descripcion || "",

@@ -42,15 +42,19 @@
 
 	}
 
-	const uploadFichas=async(data)=>{	
-		const url=`${baseURL}/api/records/registro/`
-		await axios.post(url,data)
-			.then(()=>{
-				return "success"
-			})
-			.catch(()=>{
-				false
-			})
+	const uploadFichas = async (data) => {	
+		const url = `${baseURL}/api/records/registro/`
+		const dataToSend = {
+			...data,
+			counter: data.counter
+		}
+		try {
+			await axios.post(url, dataToSend)
+			return "success"
+		} catch (error) {
+			console.error("Error al subir las fichas:", error)
+			return false;
+		}
 	}
 
 	function NumberToDate(numeroSerie) {

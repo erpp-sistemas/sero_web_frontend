@@ -1,4 +1,4 @@
-import { Box, Typography, Checkbox, FormControl, TextField, Button } from '@mui/material'
+import { Box, Typography, Checkbox, FormControl, TextField, Button, Tooltip } from '@mui/material'
 import { useEffect, useState, useMemo } from 'react'
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
@@ -94,7 +94,7 @@ function Records() {
             console.error('Error al subir el archivo de Excel:', error)
         }
 
-	}
+	}	
 
 	const handleFileUpload = (e) => {
 
@@ -162,11 +162,16 @@ function Records() {
 
 	}, [nombre])
 
+	const paqueteText = `Sube tu archivo excel con los registros necesarios y crea los PDF solicitados`
+	const individualesText = `Sube tu archivo excel solo con una cuenta y folio para crear un unico PDF`
+
 	return (
 
 		<Box width={'100%'} padding={'10px'} minHeight='100vh' display={'flex'} justifyContent={'start'} alignItems={'center'} flexDirection={'column'}>
 			
-			<Typography mb={'2rem'} textAlign={'center'} color={'#cff9e0'} fontSize={'2.5rem'}>Registro de fichas</Typography>
+			<div className='records_title'>
+				<Typography mr={'12px'} textAlign={'center'} color={'#cff9e0'} fontSize={'2.2rem'}>Registro de fichas</Typography>
+			</div>
 			
 			<div className='records'>	 
 
@@ -175,16 +180,22 @@ function Records() {
 					<Box display={'flex'} justifyContent={'center'} alignItems={'center'} flexDirection={'column'}>
 
 						<label htmlFor='package' style={{ textAlign: 'center', color: '#cff9e0', fontSize: '1.1rem', cursor: 'pointer' }}>Crear Paquete</label>
-
-						<Checkbox
-							id='package'
-							checked={activity}
-							onChange={() => {
-								dispatch(setActivity(true))
-								dispatch(setFolio(null))
-							}}
-							sx={{ '& .MuiSvgIcon-root': { fontSize: '25px', color: activity ? '#28a745' : 'grey', }, '&:hover': { backgroundColor: '#228d3b', }, }}
-						/>
+						
+						<Tooltip
+							title={paqueteText} 
+							enterDelay={100} 
+							leaveDelay={200}	
+						>
+							<Checkbox
+								id='package'
+								checked={activity}
+								onChange={() => {
+									dispatch(setActivity(true))
+									dispatch(setFolio(null))
+								}}
+								sx={{ '& .MuiSvgIcon-root': { fontSize: '25px', color: activity ? '#28a745' : 'grey', }, '&:hover': { backgroundColor: '#228d3b', }, }}
+							/>
+						</Tooltip>
 
 					</Box>
 
@@ -192,16 +203,22 @@ function Records() {
 
 						<label htmlFor='individual' style={{ textAlign: 'center', color: '#cff9e0', fontSize: '1.1rem', cursor: 'pointer' }}>Crear Individuales</label>
 
-						<Checkbox
-							id='individual'
-							checked={!activity}
-							onChange={() => {
-								dispatch(setActivity(false))
-								dispatch(setFolio(null))
-							}}
-							sx={{ '& .MuiSvgIcon-root': { fontSize: '25px', color: !activity ? '#28a745' : 'grey', }, '&:hover': { backgroundColor: '#228d3b', }, }}
-						/>
-	
+						<Tooltip
+							title={individualesText} 
+							enterDelay={100} 
+							leaveDelay={200}	
+						>
+							<Checkbox
+								id='individual'
+								checked={!activity}
+								onChange={() => {
+									dispatch(setActivity(false))
+									dispatch(setFolio(null))
+								}}
+								sx={{ '& .MuiSvgIcon-root': { fontSize: '25px', color: !activity ? '#28a745' : 'grey', }, '&:hover': { backgroundColor: '#228d3b', }, }}
+							/>
+						</Tooltip>
+
 					</Box>
 
 				</Box>
@@ -271,6 +288,22 @@ function Records() {
 							</DemoContainer>
 
 						</LocalizationProvider>
+
+							
+						{!activity &&
+							
+							<Box mt={'1rem'}>
+								<TextField
+									sx={{ width: '99%', '& .MuiInputLabel-root': { color: '#ffffff', }, '& .MuiInputBase-input': { color: '#ffffff', }, }}
+									id='outlined-basic'
+									label='Folio existente'
+									variant='outlined'
+									value={folio}
+									onChange={(e) => dispatch(setFolio(e.target.value))}
+								/>
+							</Box>
+	
+						}
 
 						{
 							(selectedPlace === 4 && selectedService === 1 || selectedPlace === 2 && selectedService === 1 ) && (
@@ -411,10 +444,6 @@ function Records() {
 
 					</Box>
 
-					<Box>
-
-					</Box>
-
 					{selectionCompleted && (
 
 						<>
@@ -425,20 +454,6 @@ function Records() {
 								</Typography>
 							</Box>
 
-							{!activity &&
-							
-								<Box mt={'1rem'}>
-									<TextField
-										sx={{ width: '99%', '& .MuiInputLabel-root': { color: '#ffffff', }, '& .MuiInputBase-input': { color: '#ffffff', }, }}
-										id='outlined-basic'
-										label='Folio existente'
-										variant='outlined'
-										value={folio}
-										onChange={(e) => dispatch(setFolio(e.target.value))}
-									/>
-								</Box>
-
-							}
 
 							<Box mt={'2rem'}>
 

@@ -209,6 +209,14 @@ body,
 	flex-direction: column;
 }
 
+.records_title{
+	width: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin-bottom: 10px;
+}
+
 @media screen and (max-width: 1000px) {
 
 	.records{
