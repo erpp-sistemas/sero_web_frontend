@@ -40,7 +40,7 @@ function PaymentsProceduresByTypeService({data}) {
             color={colors.grey[200]}
             textAlign={'center'}
           >
-            GESTIONES CON PÄGO POR TIPO DE SERVICIO
+            GESTIONES CON PAGO POR TIPO DE SERVICIO
           </Typography>
         </Box>
         <Box

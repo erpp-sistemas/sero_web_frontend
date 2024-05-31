@@ -26,6 +26,8 @@ import DailyManagement from '../../components/CoordinationDashboard/DailyManagem
 import DailyWorkSummary from '../../components/CoordinationDashboard/DailyWorkSummary.jsx'
 import PaymentsProcedures from '../../components/CoordinationDashboard/PaymentsProcedures.jsx'
 import PaymentsProceduresByTypeService from '../../components/CoordinationDashboard/PaymentsProceduresByTypeService.jsx'
+import PaymentsProceduresByManager from '../../components/CoordinationDashboard/PaymentsProceduresByManager.jsx'
+import PaymentsProceduresByAmountPaid from '../../components/CoordinationDashboard/PaymentsProceduresByAmountPaid.jsx'
 
 function index() {
 
@@ -54,7 +56,9 @@ function index() {
     const [dailyWorkSummaryData , setDailyWorkSummaryData] = useState([]);
     const [typeDailyManagementData , setTypeDailyManagementData] = useState('month');
     const [paymentsProceduresData , setPaymentsProceduresData] = useState([]);
-    const [paymentsProceduresByTypeServiceData , setPaymentsProceduresByTypeServiceData] = useState([]);    
+    const [paymentsProceduresByTypeServiceData , setPaymentsProceduresByTypeServiceData] = useState([]);
+    const [paymentsProceduresByManagerData , setPaymentsProceduresByManagerData] = useState([]);
+    const [paymentsProceduresByAmountPaidData , setPaymentsProceduresByAmountPaidData] = useState([]);    
 
     const [isLoading, setIsLoading] = useState(false)
     const [alertOpen, setAlertOpen] = useState(false);
@@ -123,6 +127,8 @@ function index() {
         const typeConcept = selectedStartDate === selectedFinishDate ? 'hour' : 'month';
         setTypeDailyManagementData(typeConcept);
 
+        console.log(typeConcept)
+
         console.log(selectedPlace)
         console.log(selectedService)
         console.log(selectedProcess)
@@ -151,6 +157,8 @@ function index() {
         setDailyWorkSummaryData(JSON.parse(response.data[0].DailyWorkSummary))
         setPaymentsProceduresData(JSON.parse(response.data[0].PaymentsProcedures))
         setPaymentsProceduresByTypeServiceData(JSON.parse(response.data[0].PaymentsProceduresByTypeService))
+        setPaymentsProceduresByManagerData(JSON.parse(response.data[0].PaymentsProceduresByManager))
+        setPaymentsProceduresByAmountPaidData(JSON.parse(response.data[0].PaymentsProceduresByAmountPaid))
 
         console.log(rowOneData)
         console.log(response.data[0].LineMonthNumberOFTotalProcedures)
@@ -326,8 +334,16 @@ function index() {
                   </Grid>
                 </Grid>
                 <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
+                  <Grid item xs={12}>
+                    <PaymentsProceduresByAmountPaid data={ paymentsProceduresByAmountPaidData } typeConcept={ 'dias del mes' }/>
+                  </Grid>
+                </Grid>                
+                <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
                   <Grid item xs={6}>    
                     <PaymentsProceduresByTypeService data={ paymentsProceduresByTypeServiceData } />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <PaymentsProceduresByManager data={ paymentsProceduresByManagerData }/>
                   </Grid>
                 </Grid>
               </>
