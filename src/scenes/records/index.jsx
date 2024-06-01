@@ -25,8 +25,8 @@ function Records() {
     const [selectedService, setSelectedService] = useState('')
     const [fechaImpresion, setFechaImpresion] = useState(null)
     const [mesFacturacion, setMesFacturacion] = useState(null)
-    const [firma, setFirma] = useState(null)
-    const [cfdi, setCfdi] = useState(null)
+    const [firma, setFirma] = useState(true)
+    const [cfdi, setCfdi] = useState(true)
 
 	const handleServiceChange = (event) => {
 		setSelectedService(event.target.value)
@@ -162,8 +162,9 @@ function Records() {
 
 	}, [nombre])
 
-	const paqueteText = `Sube tu archivo excel con los registros necesarios y crea los PDF solicitados`
+	const paqueteText = `Sube tu archivo excel con los registros necesarios y crea los PDF necesarios`
 	const individualesText = `Sube tu archivo excel solo con una cuenta y folio para crear un unico PDF`
+	const crearText = `Completa todos los campos para habilitar el boton`
 
 	return (
 
@@ -251,6 +252,11 @@ function Records() {
 						variant='outlined'
 						value={nombre}
 						onChange={(e) => setNombre(e.target.value)}
+						onKeyPress={(e) => {
+							if (e.key === ' ') {
+								e.preventDefault()
+							}
+						}}
 					/>
 
 						{ nombreExiste ? <p className='records_aviso'>Ya existe un registro con este nombre.</p> : false }
@@ -492,8 +498,35 @@ function Records() {
 
 						{cargando ? <LinearProgressWithLabel value={Progreso} /> : false}
 
-						<Button
-							sx={{
+						{(registros.length === 0 || (!activity && !folio) || cargando || nombreExiste || nombre == '') ? (
+							<Tooltip
+								title={crearText} 
+								enterDelay={100} 
+								leaveDelay={200}	
+							>
+								<span>
+								<Button
+									sx={{
+									bgcolor: registros.length === 0 ? '#cccccc' : '#2fd968',
+									'&:hover': {
+										bgcolor: registros.length === 0 ? '#cccccc' : '#1faa4d',
+									},
+									'&:active': {
+										bgcolor: registros.length === 0 ? '#cccccc' : '#157c38',
+									},
+									}}
+									fullWidth
+									variant='contained'
+									disabled={true}
+									onClick={processUpload}
+								>
+									CREAR REGISTROS
+								</Button>
+								</span>
+							</Tooltip>
+							) : (
+							<Button
+								sx={{
 								bgcolor: registros.length === 0 ? '#cccccc' : '#2fd968',
 								'&:hover': {
 									bgcolor: registros.length === 0 ? '#cccccc' : '#1faa4d',
@@ -501,14 +534,15 @@ function Records() {
 								'&:active': {
 									bgcolor: registros.length === 0 ? '#cccccc' : '#157c38',
 								},
-							}}
-							fullWidth
-							variant='contained'
-							disabled={registros.length === 0 || (!activity && !folio) || cargando || nombreExiste || nombre == '' }
-							onClick={processUpload}
-						>
-							CREAR REGISTROS
-						</Button>
+								}}
+								fullWidth
+								variant='contained'
+								disabled={false}
+								onClick={processUpload}
+							>
+								CREAR REGISTROS
+							</Button>
+							)}
 
 						{modal ? <ModalId  nombre={nombre}/> : false }
 
