@@ -27,6 +27,7 @@ import DailyWorkSummary from '../../components/CoordinationDashboard/DailyWorkSu
 import PaymentsProcedures from '../../components/CoordinationDashboard/PaymentsProcedures.jsx'
 import PaymentsProceduresByTypeService from '../../components/CoordinationDashboard/PaymentsProceduresByTypeService.jsx'
 import PaymentsProceduresByManager from '../../components/CoordinationDashboard/PaymentsProceduresByManager.jsx'
+import DailyManagementNotPhoto from '../../components/CoordinationDashboard/DailyManagementNotPhoto.jsx'
 import PaymentsProceduresByAmountPaid from '../../components/CoordinationDashboard/PaymentsProceduresByAmountPaid.jsx'
 
 function index() {
@@ -58,6 +59,7 @@ function index() {
     const [paymentsProceduresData , setPaymentsProceduresData] = useState([]);
     const [paymentsProceduresByTypeServiceData , setPaymentsProceduresByTypeServiceData] = useState([]);
     const [paymentsProceduresByManagerData , setPaymentsProceduresByManagerData] = useState([]);
+    const [dailyManagementNotPhotoData , setDailyManagementNotPhotoData] = useState([]);
     const [paymentsProceduresByAmountPaidData , setPaymentsProceduresByAmountPaidData] = useState([]);    
 
     const [isLoading, setIsLoading] = useState(false)
@@ -159,6 +161,7 @@ function index() {
         setPaymentsProceduresByTypeServiceData(JSON.parse(response.data[0].PaymentsProceduresByTypeService))
         setPaymentsProceduresByManagerData(JSON.parse(response.data[0].PaymentsProceduresByManager))
         setPaymentsProceduresByAmountPaidData(JSON.parse(response.data[0].PaymentsProceduresByAmountPaid))
+        setDailyManagementNotPhotoData(JSON.parse(response.data[0].DailyManagementNotPhoto))
 
         console.log(rowOneData)
         console.log(response.data[0].LineMonthNumberOFTotalProcedures)
@@ -282,21 +285,22 @@ function index() {
                 </Grid>
 
                 <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
-                  <Grid item xs={6}>                
-                    <LineNumberOFTotalProcedures 
-                      lineMonthData={lineMonthData} 
-                      lineWeekData={lineWeekData} 
-                      lineDayData={lineDayData} 
-                    />               
-                  </Grid>
-                  <Grid item xs={6}>
-                      <DataGridManagementByManager data={ dataGridData }/>
+                  <Grid item xs={12}>
+                    <DailyManagement data={ dailyManagementData } typeConcept={ typeDailyManagementData }/>
                   </Grid>
                 </Grid>
 
                 <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
-                  <Grid item xs={12}>
-                    <DailyManagement data={ dailyManagementData } typeConcept={ typeDailyManagementData }/>
+                  <Grid item xs={6}>
+                    <DailyManagementNotPhoto data={ dailyManagementNotPhotoData } typeConcept={ typeDailyManagementData }/>
+                    {/* <LineNumberOFTotalProcedures 
+                      lineMonthData={lineMonthData} 
+                      lineWeekData={lineWeekData} 
+                      lineDayData={lineDayData} 
+                    />                */}
+                  </Grid>
+                  <Grid item xs={6}>
+                      <DataGridManagementByManager data={ dataGridData }/>
                   </Grid>
                 </Grid>
 
@@ -333,11 +337,11 @@ function index() {
                     <PaymentsProcedures data={ paymentsProceduresData} />
                   </Grid>
                 </Grid>
-                <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
+                {/* <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
                   <Grid item xs={12}>
                     <PaymentsProceduresByAmountPaid data={ paymentsProceduresByAmountPaidData } typeConcept={ 'dias del mes' }/>
                   </Grid>
-                </Grid>                
+                </Grid>                 */}
                 <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
                   <Grid item xs={6}>    
                     <PaymentsProceduresByTypeService data={ paymentsProceduresByTypeServiceData } />

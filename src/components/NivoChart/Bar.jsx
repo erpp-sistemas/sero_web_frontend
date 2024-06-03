@@ -20,7 +20,7 @@ const Bar = ({ data, index, keys, position, color }) => {
             innerPadding={2}
             valueScale={{ type: 'symlog' }}
             indexScale={{ type: 'band', round: true }}
-            colors={{ scheme: 'yellow_green_blue' }}  // This can be removed if needed
+            colors={{ scheme: `${color}` }}
             enableGridY={false}
             isInteractive={true}
             tooltip={d => {
@@ -128,7 +128,7 @@ const Bar = ({ data, index, keys, position, color }) => {
                     itemHeight: 20,
                     itemDirection: 'left-to-right',
                     itemOpacity: 0.85,
-                    itemTextColor: 'white',
+                    
                     symbolSize: 20,
                     effects: [
                         {

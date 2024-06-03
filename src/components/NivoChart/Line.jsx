@@ -23,7 +23,7 @@ const Line = ({ data, titlex }) => {
 
     <ResponsiveLine
         data={data}
-        margin={{ top: 30, right: 150, bottom: 150, left: 60 }}
+        margin={{ top: 30, right: 150, bottom: 70, left: 60 }}
         xScale={{ type: 'point' }}
         yScale={{
             type: 'linear',
@@ -37,7 +37,7 @@ const Line = ({ data, titlex }) => {
         axisBottom={{
             tickSize: 5,
             tickPadding: 5,
-            tickRotation: 0,
+            tickRotation: 45,
             legend: `${titlex}`,
             legendOffset: 36,
             legendPosition: 'middle',

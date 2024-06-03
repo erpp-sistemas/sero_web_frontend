@@ -1,6 +1,12 @@
 import { ResponsivePie } from '@nivo/pie'
+import { useTheme } from '@mui/material'
+import { tokens } from '../../theme'
 
 const Pie = ({ data, color }) => {
+
+    const theme = useTheme();
+    const colors = tokens(theme.palette.mode);
+
     return (
         <ResponsivePie
         data={data}
@@ -22,7 +28,7 @@ const Pie = ({ data, color }) => {
             ]
         }}
         arcLinkLabelsSkipAngle={10}
-        arcLinkLabelsTextColor="#e71818"
+        arcLinkLabelsTextColor={colors.grey[100]}
         arcLinkLabelsThickness={2}
         arcLinkLabelsColor={{ from: 'color' }}
         arcLabelsSkipAngle={10}
@@ -115,7 +121,7 @@ const Pie = ({ data, color }) => {
                 itemsSpacing: 5,
                 itemWidth: 131,
                 itemHeight: 18,
-                itemTextColor: '#999',
+                itemTextColor: colors.grey[100],
                 itemDirection: 'left-to-right',
                 itemOpacity: 1,
                 symbolSize: 18,

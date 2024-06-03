@@ -44,7 +44,7 @@ function PaymentsProcedures({ data }) {
                     color={colors.grey[200]}
                     textAlign={'center'}
                 >
-                    GESTIONES POR GESTOR Y CUANTAS FUERON PAGADAS
+                    GESTIONES Y CUANTAS FUERON PAGADAS
                 </Typography>
             </Box>
             {data.length > 0 && (

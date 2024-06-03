@@ -24,8 +24,7 @@ function PaymentsProceduresByTypeService({data}) {
       gridTemplateColumns="repeat(12, 1fr)"
       gridAutoRows="390px"
       gap="15px"
-      width='100%'
-      padding='15px'
+      width='100%'      
     >   
       <Box
         gridColumn='span 12'

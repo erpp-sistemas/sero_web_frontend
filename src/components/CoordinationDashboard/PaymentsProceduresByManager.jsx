@@ -128,14 +128,14 @@ function PaymentsProceduresByManager({data}) {
           );
         }
       },
-      { 
-        field: 'amount_paid',
-        renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"MONTO PAGADO"}</strong>
-        ),
-        width: 120,
-        editable: false,        
-      },      
+      // { 
+      //   field: 'amount_paid',
+      //   renderHeader: () => (
+      //     <strong style={{ color: "#5EBFFF" }}>{"MONTO PAGADO"}</strong>
+      //   ),
+      //   width: 120,
+      //   editable: false,        
+      // },      
     ];
   
     return columns;
