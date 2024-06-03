@@ -14,6 +14,10 @@ function DailyManagementNotPhoto({ data, typeConcept }) {
     
   const generateColor = () => `hsl(${Math.floor(Math.random() * 360)}, 70%, 50%)`;
 
+  if (!data) {
+      return null;
+  }
+
   const groupedData = data.reduce((acc, curr) => {
     const { month_year, concept, count } = curr;
     if (!acc[month_year]) {

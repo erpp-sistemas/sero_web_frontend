@@ -11,6 +11,10 @@ function TypeProperty({ data }) {
 
     console.log(data)
 
+    if (!data) {
+      return null;
+  }
+
     const convertData = (data) => {
         return data.map(item => {
           

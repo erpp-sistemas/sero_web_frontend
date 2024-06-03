@@ -168,6 +168,7 @@ function index() {
         console.log(response.data[0].LineWeekNumberOFTotalProcedures)
         console.log(response.data[0].LineDayNumberOFTotalProcedures)
         console.log(JSON.parse(response.data[0].ManagedTask))
+        console.log(JSON.parse(response.data[0].DailyManagement))
         console.log(JSON.parse(response.data[0].PaymentsProcedures))
 
         setResult(response.data)

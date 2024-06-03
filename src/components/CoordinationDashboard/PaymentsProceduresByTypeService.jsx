@@ -16,6 +16,10 @@ function PaymentsProceduresByTypeService({data}) {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
+  if (!data) {
+    return null;
+}
+
   return (
 
     <Box

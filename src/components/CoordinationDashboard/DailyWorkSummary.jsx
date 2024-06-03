@@ -18,6 +18,10 @@ function DataGridManagementByManager({data, placeId, serviceId, proccessId}) {
 
   console.log(data)
 
+  if (!data) {
+    return null;
+}
+
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 

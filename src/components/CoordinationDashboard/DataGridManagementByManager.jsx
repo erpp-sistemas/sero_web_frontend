@@ -16,6 +16,10 @@ function DataGridManagementByManager({data}) {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
+  if (!data) {
+    return null;
+}
+
   const buildColumns = () => {   
     const columns = [
       { 

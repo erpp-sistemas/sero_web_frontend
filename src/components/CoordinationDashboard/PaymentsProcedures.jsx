@@ -8,6 +8,10 @@ function PaymentsProcedures({ data }) {
 
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
+
+    if (!data) {
+      return null;
+  }
     
     const conceptNamesKeys = ['gestiones_con_pago', 'gestiones_sin_pago'];
     
