@@ -99,7 +99,6 @@ const Impression = () => {
 			const status = await tool.createRecords(data)
 			if(status==200){
 				setCompletedRequests(prev => prev + 1)
-				await tool.updateActiveStatus(registro.cuenta)
 			}else if(status==400){
 				console.error('La plaza o servicio no contiene templates:', status)
 				setCompletedRequests(prev => prev + 1)
