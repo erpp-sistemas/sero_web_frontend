@@ -50,6 +50,7 @@ import Menu from "./scenes/menu";
 import Permission from "./scenes/permission";
 import Places from "./scenes/places";
 import CoordinationDashboard from './scenes/coordination-dashboard'
+import TrafficLight from './scenes/traffic-light'
 import SurveyReport from './scenes/survey-report'
 
 
@@ -168,6 +169,7 @@ function App() {
                     <Route path="/work-attendance" element={<WorkAttendance />} />
                     <Route path="/coordination-dashboard" element={<CoordinationDashboard />} />
                     <Route path="/survey-report" element={<SurveyReport />} />
+                    <Route path="/traffic-light" element={<TrafficLight />} />
                   </Routes>
                 </main>
 

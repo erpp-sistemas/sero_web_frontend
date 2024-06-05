@@ -2,9 +2,9 @@ import React from 'react'
 import { Box, useTheme, Button, Avatar, Typography} from "@mui/material";
 import Grid from '@mui/material/Grid';
 import { tokens } from "../../theme";
-import Bar from '../NivoChart/Bar'
+import Bar from '../NivoChart/BarCustomized'
 
-function PaymentsProcedures({ data }) {
+function TrafficLightCountingProcedures({ data }) {
 
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
@@ -14,8 +14,37 @@ function PaymentsProcedures({ data }) {
   }
 
   console.log(data)
-    
-    const conceptNamesKeys = ['gestiones_con_pago', 'gestiones_sin_pago'];
+
+  const order = [
+    'sin gestion', 'vencidas', '7 dias', '14 dias', '21 dias', '30 dias', 'en proceso', 'gestion actual'
+  ];
+
+  const sortData = (data, order) => {
+      return data.sort((a, b) => order.indexOf(a.color_meaning) - order.indexOf(b.color_meaning));
+  };
+
+  const convertData = (data) => {
+    return data.map(item => {
+      
+      const statusKey = item.color_meaning.split(' ').map(word => word[0]).join('');
+      return {
+        color_meaning: `${item.color_meaning}`,
+        [`${item.color_meaning}`]: item.count,
+        color: item.color
+        // [`${statusKey}_Color`]: "hsl(0, 70%, 50%)"
+      };
+    });
+  };   
+  
+  const formattedData = convertData(data);
+
+  const getColorMeaningNamesKeys = (data) => {
+    return sortData(data, order).map(item => item.color_meaning);
+  };
+
+  const colorMeaningNamesKeys = getColorMeaningNamesKeys(data);
+
+  console.log(colorMeaningNamesKeys)   
     
   return (
 
@@ -50,15 +79,15 @@ function PaymentsProcedures({ data }) {
                     color={colors.grey[200]}
                     textAlign={'center'}
                 >
-                    GESTIONES Y CUANTAS FUERON PAGADAS
+                    SEMAFORO POR CUENTAS
                 </Typography>
             </Box>
             {data.length > 0 && (
-                <Bar data={ data } index='concept' keys={ conceptNamesKeys } position='vertical' color='category10'/>
+                <Bar data={ formattedData } index='color_meaning' keys={ colorMeaningNamesKeys } position='vertical' format='>-0,~d'/>
               )}
         </Box>
     </Box>    
   )
 }
 
-export default PaymentsProcedures
+export default TrafficLightCountingProcedures

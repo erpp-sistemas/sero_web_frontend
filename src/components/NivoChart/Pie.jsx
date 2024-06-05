@@ -17,7 +17,7 @@ const Pie = ({ data, color }) => {
         activeOuterRadiusOffset={8}
         borderWidth={1}
         colors={{ scheme: `${color}` }}
-        fit={false}
+        fit={true}        
         borderColor={{
             from: 'color',
             modifiers: [
