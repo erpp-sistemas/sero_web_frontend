@@ -15,6 +15,7 @@ const getPaquetes = async () => {
 		fecha_corte: item.fecha_corte,
 		excel_document: item.excel_document,
 		usuario: item.usuario,
+		id_usuario: item.id_usuario,
 		activate: item.activate,
 		fecha_impresion: item.fecha_impresion,
 		firma: item.firma,
@@ -50,7 +51,21 @@ const createRecords = async (data) => {
 
 }
 
+const deleteRecords = async (id) => {
+	
+	const url=`${baseURL}/api/records/paquete/delete/${id}`
+
+	try{
+		const res=await axios.delete(url)
+		return res.status
+	}catch(error){
+		false
+	}
+
+}
+
 const downloadZip = async (idPaq, paquetes) => {
+
 	if (idPaq === 0) {
 		console.warn('No se ha seleccionado ningún paquete')
 		return
@@ -61,9 +76,10 @@ const downloadZip = async (idPaq, paquetes) => {
 		return
 	}
 	const nombreCarpeta = selectedPaquete.nombre
+	const usuario = selectedPaquete.usuario
 
 	try {
-		const response = await axios.get(`${baseURL}/api/records/download/${nombreCarpeta}`, {
+		const response = await axios.get(`${baseURL}/api/records/download/${usuario}/${nombreCarpeta}`, {
 			responseType: 'blob', 
 		})
 
@@ -112,5 +128,6 @@ export default {
 	createRecords,
 	updateActiveStatus,
 	updateActivePaquete,
-	downloadZip
+	downloadZip,
+	deleteRecords
 }

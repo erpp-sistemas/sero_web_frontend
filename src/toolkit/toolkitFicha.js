@@ -120,8 +120,8 @@
 				const columnIndex = jsonData[0].indexOf(columnIndexes[columnName])
 				ficha[columnName] = (columnIndex !== -1) ? fila[columnIndex] || 'desconocido' : 'desconocido'
 
-				if (columnName === 'clave_catastral' && ficha[columnName] === 'desconocido') {
-					ficha[columnName] = '0'
+				if (columnName === 'clave_catastral') {
+					ficha[columnName] = ficha[columnName] === 'desconocido' ? '0' : String(ficha[columnName]);
 				}
 				if (columnName === 'superficie_terreno' && ficha[columnName] === 'desconocido') {
 					ficha[columnName] = '0'
@@ -138,7 +138,9 @@
 				if (columnName === 'valor_catastral' && ficha[columnName] === 'desconocido') {
 					ficha[columnName] = '0'
 				}
-				
+				if (columnName === 'descuento' && ficha[columnName] === 'desconocido') {
+					ficha[columnName] = 0
+				}
 
 				return ficha
 			}, {})
@@ -173,12 +175,12 @@
 		
 	}
 
-	const uploadS3 = async (file) => {
+	const uploadS3 = async (file, name) => {
 		const formData = new FormData()
 		formData.append('file', file)
 
 		try {
-			const response = await axios.post(`${baseURL}/api/records/uploadS3`, formData, {
+			const response = await axios.post(`${baseURL}/api/records/uploadS3/${name}`, formData, {
 				headers: {
 					'Content-Type': 'multipart/form-data'
 				}
@@ -191,12 +193,12 @@
 
 	}
 
-	const uploadBackup = async (file) => {
+	const uploadBackup = async (file, name) => {
 		const formData = new FormData()
 		formData.append('file', file)
 
 		try {
-			const response = await axios.post(`${baseURL}/api/records/backup`, formData, {
+			const response = await axios.post(`${baseURL}/api/records/backup/${name}`, formData, {
 				headers: {
 					'Content-Type': 'multipart/form-data'
 				}

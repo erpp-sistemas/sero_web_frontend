@@ -61,7 +61,7 @@ function Records() {
 
 		try {
 
-            const excelURL = await tool.uploadS3(excel)
+            const excelURL = await tool.uploadS3(excel, user.name)
 			
 			const data = {
 				id_servicio: selectedService,
@@ -70,7 +70,7 @@ function Records() {
 				folio: folio || 'desconocido',
 				id_plaza: selectedPlace,
 				excel_document: excelURL.filePath,
-				id_usuario: user.profile_id,
+				id_usuario: user.user_id,
 				activate: 0,
 				firma: firma ? 1 : 0,
 				mes_facturacion: mesFacturacion,

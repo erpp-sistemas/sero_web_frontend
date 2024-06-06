@@ -5,13 +5,18 @@ import tool from '../../toolkit/toolkitImpression.js'
 import Preview from '../../components/Records/Preview.jsx'
 import ChargeCounter from '../../components/Records/chargeCounter.jsx'
 import ChargeMessage from '../../components/Records/chargeMessage.jsx'
+import ModalDelete from '../../components/Records/modalDelete.jsx'
+import { useSelector } from 'react-redux'
+import DeleteIcon from '@mui/icons-material/Delete'
 
 const Impression = () => {
 
 	const [loading, setLoading] = useState(false)
 	const [cargando, setCargando] = useState(false)
+	const [openDelete, setOpenDelete] = useState(false)
 	const [registros, setRegistros] = useState({})
 	const [totalFichas, setTotalFichas] = useState(0)
+	const [id, setId] = useState(0)
 	const [registro, setRegistro] = useState(null)
 	const [rango, setRango] = useState(0)
 	const [paquetes, setPaquetes] = useState([])
@@ -20,6 +25,7 @@ const Impression = () => {
 	const [idPaq, setIdPaq] = useState(0)
 	const [openPreview, setOpenPreview] = useState(0)
 	const [completedRequests, setCompletedRequests] = useState(0)
+	const user = useSelector(state => state.user)
 
 	const handlePaqueteChange = async (event) => {
 		setCargando(true)
@@ -63,6 +69,7 @@ const Impression = () => {
 			await handleGeneratePDF(registro)
 		}
 		setLoading(false)
+		window.location.reload()
 	}
 
 	const handleGeneratePDF = async (registro) => {
@@ -92,7 +99,8 @@ const Impression = () => {
 			superficie_construccion: registro.superficie_construccion,
 			valor_terreno: registro.valor_terreno,
 			valor_contruccion: registro.valor_construccion,
-			valor_catastral: registro.valor_catastral
+			valor_catastral: registro.valor_catastral,
+			user: paquete.usuario 
 		}
 
 		try {
@@ -115,7 +123,8 @@ const Impression = () => {
 	const apiPaquetes = async () => {
 		try {
 			const paquetes = await tool.getPaquetes()
-			setPaquetes(paquetes)
+			const userPaquetes = paquetes.filter(item => item.id_usuario === user.user_id)
+			setPaquetes(userPaquetes)
 		} catch (error) {
 			console.error('Error fetching data:', error)
 		}
@@ -128,23 +137,43 @@ const Impression = () => {
 			const paquetes = await tool.getRegistrosById(idPaquete)
 			const registrosAgrupados = {}
 			const cuentasParaEliminar = new Set()
-			
-			setTotalFichas(paquetes.length)
-
-			paquetes.forEach(registro => {
-				const { cuenta, activate } = registro
-				if (activate === true) {
-					cuentasParaEliminar.add(cuenta)
-				}
-			})
 	
 			paquetes.forEach(registro => {
-				const { id, cuenta, calle, fecha_gestion, fecha_pago, colonia, propietario, servicio, status_previo, latitud, longitud, gestor, recibo, tipo_servicio, tarea_gestionada, tipo_gestion, tipo_tarifa, total_pagado, url_evidencia, url_fachada, activate, clave_catastral, superficie_terreno, superficie_construccion, valor_terreno, valor_construccion, valor_catastral } = registro	
-				if (cuentasParaEliminar.has(cuenta)) {
-					return
-				}
+
+				const { cuenta, activate } = registro
 				if (!registrosAgrupados[cuenta]) {
-					registrosAgrupados[cuenta] = { id, cuenta, calle, fecha_pago, colonia, latitud, recibo, gestor, fecha_gestion, longitud, propietario, servicio, status_previo, tarea_gestionada, tipo_gestion, tipo_servicio, tipo_tarifa, total_pagado, url_evidencia, url_fachada, activate, clave_catastral, superficie_terreno, superficie_construccion, valor_terreno, valor_construccion, valor_catastral, pagos: [] } }
+					registrosAgrupados[cuenta] = { 
+						id: registro.id, 
+						cuenta, 
+						calle: registro.calle, 
+						fecha_pago: registro.fecha_pago, 
+						colonia: registro.colonia, 
+						latitud: registro.latitud, 
+						recibo: registro.recibo, 
+						gestor: registro.gestor, 
+						fecha_gestion: registro.fecha_gestion, 
+						longitud: registro.longitud, 
+						propietario: registro.propietario, 
+						servicio: registro.servicio, 
+						status_previo: registro.status_previo, 
+						tarea_gestionada: registro.tarea_gestionada, 
+						tipo_gestion: registro.tipo_gestion, 
+						tipo_servicio: registro.tipo_servicio, 
+						tipo_tarifa: registro.tipo_tarifa, 
+						total_pagado: registro.total_pagado, 
+						url_evidencia: registro.url_evidencia, 
+						url_fachada: registro.url_fachada, 
+						activate, 
+						clave_catastral: registro.clave_catastral, 
+						superficie_terreno: registro.superficie_terreno, 
+						superficie_construccion: registro.superficie_construccion, 
+						valor_terreno: registro.valor_terreno, 
+						valor_construccion: registro.valor_construccion, 
+						valor_catastral: registro.valor_catastral, 
+						pagos: [] 
+					}
+				}
+	
 				if (registro) {
 					registrosAgrupados[cuenta].pagos.push({
 						descripcion: registro.descripcion || "",
@@ -152,22 +181,42 @@ const Impression = () => {
 						total_pagado: registro.total_pagado || ""
 					})
 				}
-			})
+	
+				if (activate === true) {
+					cuentasParaEliminar.add(cuenta)
+				}
 
+			})
+	
+			const totalFichas = Object.keys(registrosAgrupados).length
+			setTotalFichas(totalFichas)
+	
+			cuentasParaEliminar.forEach(cuenta => {
+				delete registrosAgrupados[cuenta]
+			})
+	
+			const registrosFaltantes = Object.keys(registrosAgrupados).length
+			
 			setRegistros(registrosAgrupados)
-			setRango(Object.keys(registrosAgrupados).length)
+			setRango(registrosFaltantes)
 			setCargando(false)
 			apiPaquetes()
+
 		} catch (error) {
+
 			console.error('Ocurrió un error:', error.message)
 			setCargando(false)
+
 		}
 
 	}
 
 	useEffect(() => {
-		apiPaquetes()
-	}, [])
+		if (user && user.user_id) {
+			apiPaquetes()
+		}
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [user])
 
 	return (
 
@@ -276,7 +325,7 @@ const Impression = () => {
 								<>
 
 									<Box className='records_impression__data__box' display={'flex'} justifyContent={'center'} alignItems={'center'}>
-										<Typography sx={{ fontWeight:'600', fontSize:'1.1rem', color:'#cff9e0' }}>Nombre de paquete:</Typography><Typography sx={{ fontSize:'1rem' }}>{paquete.nombre}</Typography>
+										<Typography sx={{ fontWeight:'600', fontSize:'1.1rem', color:'#cff9e0' }}>Nombre de paquete:</Typography><Typography sx={{ fontSize:'1rem' }}>{paquete.nombre}</Typography><Button onClick={() => (setId(paquete.id), setOpenDelete(true))}  sx={{m:'0', p:'0', width:'auto', }} ><DeleteIcon sx={{color:'red'}}/></Button>
 									</Box>
 									<Box className='records_impression__data__box' display={'flex'} justifyContent={'center'} alignItems={'center'}>
 										<Typography sx={{ fontWeight:'600', fontSize:'1.1rem', color:'#cff9e0' }}>Nombre de usuario:</Typography><Typography sx={{ fontSize:'1rem' }}>{paquete.usuario}</Typography>
@@ -356,6 +405,7 @@ const Impression = () => {
 			{ openPreview ? <Preview setOpenPreview={setOpenPreview} registro={registro} paquete={paquete} /> : false }
 			{ loading ? <ChargeCounter value={completedRequests} /> : false}
 			{ cargando ? <ChargeMessage/> : false} 
+			{ openDelete ? <ModalDelete id={id} setOpenDelete={setOpenDelete} /> : false }
 
 		</Box>
 
