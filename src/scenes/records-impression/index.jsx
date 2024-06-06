@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import tool from '../../toolkit/toolkitImpression.js'
 import Preview from '../../components/Records/Preview.jsx'
 import ChargeCounter from '../../components/Records/chargeCounter.jsx'
-import Charge from '../../components/Records/charge.jsx'
+import ChargeMessage from '../../components/Records/chargeMessage.jsx'
 
 const Impression = () => {
 
@@ -355,7 +355,7 @@ const Impression = () => {
 
 			{ openPreview ? <Preview setOpenPreview={setOpenPreview} registro={registro} paquete={paquete} /> : false }
 			{ loading ? <ChargeCounter value={completedRequests} /> : false}
-			{ cargando ? <Charge/> : false}
+			{ cargando ? <ChargeMessage/> : false} 
 
 		</Box>
 

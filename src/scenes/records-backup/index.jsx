@@ -1,7 +1,7 @@
 import { Box, Typography, Button } from '@mui/material'
 import { useState } from 'react'
 import tool from '../../toolkit/toolkitFicha.js'
-import Charge from '../../components/Records/charge.jsx'
+import ChargeMessage from '../../components/Records/chargeMessage.jsx'
 import ModalBackup from '../../components/Records/ModalBackup.jsx'
 
 const Backup = () => {
@@ -110,7 +110,7 @@ const Backup = () => {
 
 			</div>
 
-			{ cargando ? <Charge/> : false}
+			{ cargando ? <ChargeMessage/> : false} 
 			{ open ? <ModalBackup/> : false}
 
 		</Box>
