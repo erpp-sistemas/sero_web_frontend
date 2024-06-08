@@ -1,8 +1,12 @@
-import { Box, Typography, Button } from '@mui/material'
+import { useSelector } from 'react-redux'
 import { useState } from 'react'
+
+import { Box, Typography, Button } from '@mui/material'
+
 import tool from '../../toolkit/toolkitFicha.js'
 import ChargeMessage from '../../components/Records/chargeMessage.jsx'
 import ModalBackup from '../../components/Records/ModalBackup.jsx'
+
 
 const Backup = () => {
 	
@@ -10,6 +14,7 @@ const Backup = () => {
 	const [archivo, setArchivo] = useState(null)
 	const [cargando, setCargando] = useState(false)
 	const [open, setOpen] = useState(false)
+	const user = useSelector(state => state.user)
 
 	const handleFileUpload = (e) => {
 		const file = e.target.files?.[0]
@@ -25,7 +30,7 @@ const Backup = () => {
 		setCargando(true)
 
 		try {
-            const archivoURL = await tool.uploadBackup(archivo)
+            const archivoURL = await tool.uploadBackup(archivo, user.name)
 			console.log(archivoURL)
 			setCargando(false)
 			setArchivo(null)

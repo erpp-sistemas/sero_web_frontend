@@ -1,4 +1,4 @@
-import { Box, Button, MenuItem, FormControl, InputLabel, Select, Typography } from '@mui/material'
+import { Box, Button, MenuItem, FormControl, InputLabel, Select, Typography, Tooltip } from '@mui/material'
 import ArticleIcon from '@mui/icons-material/Article'
 import { useEffect, useState } from 'react'
 import tool from '../../toolkit/toolkitImpression.js'
@@ -218,6 +218,12 @@ const Impression = () => {
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [user])
 
+	const generarText = `Comienza la creación de los archivos PDF`
+	const excelText = `Descarga el archivo excel original de los registros`
+	const deleteText = `Borra este paquete de fichas`
+	const incompletaText = `Descarga las fichas antes de terminar la creacion de todos los PDF`
+	const completaText = `Descarga todos los PDF`
+
 	return (
 
 		<Box className='records_impression' minHeight='100vh' display={'flex'} justifyContent={'start'} flexDirection={'column'}>
@@ -294,18 +300,45 @@ const Impression = () => {
 
 					{ registro ? <Button variant="text" sx={{ marginTop:'30px', width:'100%', maxWidth:'200px', color:'white', fontWeight:'600', fontSize:'.8rem'}} fullWidth onClick={() => setOpenPreview(true)}> VER PREVIEW </Button> :false }
 
-					{ rango > 0 ? <Button onClick={() => handleStartUp()} variant="contained" sx={{ marginTop:'30px', width:'100%', maxWidth:'250px', color:'white', fontWeight:'600', fontSize:'.8rem'}} fullWidth> GENERAR FICHAS PDF </Button> : false }
+					{ rango > 0 ? 
+						<Tooltip
+							title={generarText} 
+							enterDelay={100} 
+							leaveDelay={200}	
+						>
+							<span>
+								<Button onClick={() => handleStartUp()} variant="contained" sx={{ marginTop:'30px', width:'100%', maxWidth:'250px', color:'white', fontWeight:'600', fontSize:'.8rem'}} fullWidth> GENERAR FICHAS PDF </Button> 
+							</span>
+						</Tooltip>
+						: false 
+					}
 
 					{
 						Object.keys(paquete).length !== 0 ? (
 							rango > 0 ? (
 								paquete.activate === true ? (
-									<Button variant="contained" onClick={handleDownload} color="success" sx={{marginTop:'20px', color:'white', fontWeight:'600' }}>DESCARGA INCOMPLETA</Button>
+									<Tooltip
+										title={incompletaText} 
+										enterDelay={100} 
+										leaveDelay={200}	
+									>
+										<span>
+											<Button variant="contained" onClick={handleDownload} color="success" sx={{marginTop:'20px', color:'white', fontWeight:'600' }}>DESCARGA INCOMPLETA</Button>
+										</span>
+									</Tooltip>
 								):(
 									false
 								)
 							):(
-								<Button variant="contained" onClick={handleDownload} color="success" sx={{marginTop:'20px', color:'white', fontWeight:'600' }}>DESCARGAR ZIP</Button>
+								<Tooltip
+									title={completaText} 
+									enterDelay={100} 
+									leaveDelay={200}	
+								>
+									<span>
+										<Button variant="contained" onClick={handleDownload} color="success" sx={{marginTop:'20px', color:'white', fontWeight:'600' }}>DESCARGAR ZIP</Button>
+									</span>
+								</Tooltip>
 							)
 						):(
 							false
@@ -325,8 +358,17 @@ const Impression = () => {
 								<>
 
 									<Box className='records_impression__data__box' display={'flex'} justifyContent={'center'} alignItems={'center'}>
-										<Typography sx={{ fontWeight:'600', fontSize:'1.1rem', color:'#cff9e0' }}>Nombre de paquete:</Typography><Typography sx={{ fontSize:'1rem' }}>{paquete.nombre}</Typography><Button onClick={() => (setId(paquete.id), setOpenDelete(true))}  sx={{m:'0', p:'0', width:'auto', }} ><DeleteIcon sx={{color:'red'}}/></Button>
+										<Typography sx={{ fontWeight:'600', fontSize:'1.1rem', color:'#cff9e0' }}>Nombre de paquete:</Typography><Typography sx={{ fontSize:'1rem' }}>{paquete.nombre}</Typography>
+										<Tooltip
+											title={deleteText} 
+											enterDelay={100} 
+											leaveDelay={200}	
+										>
+										
+											<Button onClick={() => (setId(paquete.id), setOpenDelete(true))}  sx={{m:'0', p:'0', width:'auto', }} ><DeleteIcon sx={{color:'red'}}/></Button>
+										</Tooltip>
 									</Box>
+									
 									<Box className='records_impression__data__box' display={'flex'} justifyContent={'center'} alignItems={'center'}>
 										<Typography sx={{ fontWeight:'600', fontSize:'1.1rem', color:'#cff9e0' }}>Nombre de usuario:</Typography><Typography sx={{ fontSize:'1rem' }}>{paquete.usuario}</Typography>
 									</Box>
@@ -341,22 +383,28 @@ const Impression = () => {
 									</Box>
 									<Box className='records_impression__data__box' display={'flex'} justifyContent={'center'} alignItems={'center'}>
 										<Typography sx={{ fontWeight:'600', fontSize:'1.1rem', color:'#cff9e0' }}>Documento Excel:</Typography>
-										<a 
-											href={paquete.excel_document} 
-											style={{ 
-												textDecoration: 'none',
-												color: '#fff',
-												cursor: 'pointer',
-												background: '#151e27',
-												padding: '5px 15px',
-												borderRadius: '20px',
-												transition: 'background-color 0.3s, color 0.3s', 
-											}}
-											onMouseOver={(e) => e.target.style.backgroundColor = '#273543'} 
-											onMouseOut={(e) => e.target.style.backgroundColor = '#151e27'}
+										<Tooltip
+											title={excelText} 
+											enterDelay={100} 
+											leaveDelay={200}	
 										>
-											Descargar
-										</a>
+											<a 
+												href={paquete.excel_document} 
+												style={{ 
+													textDecoration: 'none',
+													color: '#fff',
+													cursor: 'pointer',
+													background: '#151e27',
+													padding: '5px 15px',
+													borderRadius: '20px',
+													transition: 'background-color 0.3s, color 0.3s', 
+												}}
+												onMouseOver={(e) => e.target.style.backgroundColor = '#273543'} 
+												onMouseOut={(e) => e.target.style.backgroundColor = '#151e27'}
+											>
+												Descargar
+											</a>
+										</Tooltip>
 									</Box>
 									{
 										paquete.folio !== 'desconocido' ? (
