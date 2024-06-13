@@ -3,15 +3,15 @@ import Grid from '@mui/material/Grid';
 import { tokens } from "../../theme";
 import PlaceSelect from '../../components/PlaceSelect'
 import {workAttendanceRequest} from '../../api/attendance.js'
-import { Box, useTheme, Button, Avatar} from "@mui/material";
+import { Box, useTheme, Button, Avatar, InputAdornment, FormControl, FormHelperText} from "@mui/material";
 import Viewer from 'react-viewer';
 import TextField from '@mui/material/TextField';
 import Header from '../../components/Header';
 import { DataGrid,
   GridToolbarColumnsButton,
-  GridToolbarContainer,
+  GridToolbarContainer,  
   GridToolbarDensitySelector,
-  GridToolbarExport,
+  GridToolbarExport,  
   GridToolbarFilterButton, } from '@mui/x-data-grid';
 import InsertEmoticonIcon from '@mui/icons-material/InsertEmoticon';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
@@ -45,6 +45,8 @@ import ModalTable from '../../components/work-attendance/ModalTable.jsx'
 import ManageSearchIcon from '@mui/icons-material/ManageSearch';
 import SubdirectoryArrowLeftIcon from '@mui/icons-material/SubdirectoryArrowLeft';
 import SubdirectoryArrowRightIcon from '@mui/icons-material/SubdirectoryArrowRight';
+import AccountBoxIcon from '@mui/icons-material/AccountBox';
+import { Download, Search } from "@mui/icons-material";
 
 const Index = () => {
     
@@ -59,7 +61,7 @@ const Index = () => {
     const [messageError, setMessageError] = useState('');
     const [isLoading, setIsLoading] = useState(false)
     const [alertOpen, setAlertOpen] = useState(false);
-    const [alertType, setAlertType] = useState("");
+    const [alertType, setAlertType] = useState("info");
     const [alertMessage, setAlertMessage] = useState("");
     const [totalRecords, setTotalRecords] = useState(0);
     const [resultCountsEntry, setResultCountsEntry] = useState({});    
@@ -67,6 +69,14 @@ const Index = () => {
     
     const [openModal, setOpenModal] = useState(false);
     const [modalData, setModalData] = useState([]);
+
+    const [searchTerm, setSearchTerm] = useState(null);
+    const [filteredUsers, setFilteredUsers] = useState([]);
+    const [matching, setMatching] = useState(-1);
+
+    const [noResults, setNoResults] = useState(false);
+    const [searchPerformed, setSearchPerformed] = useState(false);
+    
 
       const handlePlaceChange = (event) => {
         setNoData('')
@@ -111,19 +121,23 @@ const Index = () => {
           
           console.log('response', response)
           setNoData('')
-          setUsers(response.data);
+          setUsers(response.data);          
           setIsLoading(false)
+          setNoResults(false)
           
         } catch (error) {
           setIsLoading(false)
 
           if(error.response.status === 400){
             console.log(error.response.status)
+            console.log('estamos en el error 400')
+            setAlertOpen(true)
+            setAlertType("warning")
+            setAlertMessage("¡Atencion! No se encontraron asistencias")
             setUsers([]);
           }
-          
-          setMessageError([error.response.data.message])
-          console.log([error.response.data.message])
+        console.log([error.response.data.message])        
+        setUsers([]);
           
         }        
       };
@@ -131,7 +145,7 @@ const Index = () => {
       const buildColumns = () => {   
         const columns = [
           { 
-            field: 'user',
+            field: 'usuario',
             renderHeader: () => (
               <strong style={{ color: "#5EBFFF" }}>{"NOMBRE"}</strong>
             ),
@@ -139,22 +153,22 @@ const Index = () => {
             editable: false,
           },
           { 
-            field: 'url_image',
+            field: 'imagen_url',
             renderHeader: () => (
               <strong style={{ color: "#5EBFFF" }}>{"FOTO"}</strong>
             ),
             width: 70,
-            renderCell: (params) => <AvatarImage data={params.row.url_image} />,
+            renderCell: (params) => <AvatarImage data={params.row.imagen_url} />,
           },
           { 
-            field: 'place', 
+            field: 'plaza', 
             renderHeader: () => (
               <strong style={{ color: "#5EBFFF" }}>{"PLAZA"}</strong>
             ),
             width: 120,
           },
           { 
-            field: 'date_capture', 
+            field: 'fecha_captura', 
             renderHeader: () => (
               <strong style={{ color: "#5EBFFF" }}>{"FECHA DE CAPTURA"}</strong>
             ),
@@ -167,7 +181,7 @@ const Index = () => {
             ),
           },
           { 
-            field: 'entry_time',
+            field: 'hora_entrada',
             renderHeader: () => (
               <strong style={{ color: "#5EBFFF" }}>{"HORA DE ENTRADA"}</strong>
             ),
@@ -180,7 +194,7 @@ const Index = () => {
             ),
           },
           { 
-            field: 'entry_status',
+            field: 'estatus_entrada',
             renderHeader: () => (
               <strong style={{ color: "#5EBFFF" }}>{"ESTATUS DE ENTRADA"}</strong>
             ),
@@ -189,7 +203,7 @@ const Index = () => {
               let icon = null;
               let chipColor = 'primary';
               let chipLabel = '';
-              switch (params.row.entry_status) {
+              switch (params.row.estatus_entrada) {
                 case 'Asistencia correcta':
                   icon = <InsertEmoticonIcon/>;
                   chipColor = 'success';
@@ -228,7 +242,7 @@ const Index = () => {
             },
           },
           { 
-            field: 'entry_point_status',
+            field: 'estatus_punto_entrada',
             renderHeader: () => (
               <strong style={{ color: "#5EBFFF" }}>{"ESTATUS DE PUNTO DE ENTRADA"}</strong>
             ),
@@ -237,7 +251,7 @@ const Index = () => {
               let icon = null;
               let chipColor = 'primary';
               let chipLabel = '';
-              switch (params.row.entry_point_status) {
+              switch (params.row.estatus_punto_entrada) {
                 case 'Campo':
                   icon = <EditRoadIcon/>;
                   chipColor = 'warning';
@@ -266,7 +280,7 @@ const Index = () => {
             },
           },
           { 
-            field: 'entry_attendance_place',
+            field: 'lugar_entrada',
             renderHeader: () => (
               <strong style={{ color: "#5EBFFF" }}>{"LUGAR DE ENTRADA"}</strong>
             ),
@@ -281,7 +295,7 @@ const Index = () => {
             ),
           },
           { 
-            field: 'exit_time',
+            field: 'hora_salida',
             renderHeader: () => (
               <strong style={{ color: "#5EBFFF" }}>{"HORA DE SALIDA"}</strong>
             ),
@@ -294,7 +308,7 @@ const Index = () => {
             ),
           },
           { 
-            field: 'exit_status',
+            field: 'estatus_salida',
             renderHeader: () => (
               <strong style={{ color: "#5EBFFF" }}>{"ESTATUS DE SALIDA"}</strong>
             ),
@@ -303,7 +317,7 @@ const Index = () => {
               let icon = null;
               let chipColor = 'primary';
               let chipLabel = '';
-              switch (params.row.exit_status) {
+              switch (params.row.estatus_salida) {
                 case 'Asistencia correcta':
                   icon = <InsertEmoticonIcon/>;
                   chipColor = 'success';
@@ -342,7 +356,7 @@ const Index = () => {
             },            
           },
           { 
-            field: 'exit_point_status',
+            field: 'estatus_punto_salida',
             renderHeader: () => (
               <strong style={{ color: "#5EBFFF" }}>{"ESTATUS DE PUNTO DE SALIDA"}</strong>
             ),
@@ -351,7 +365,7 @@ const Index = () => {
               let icon = null;
               let chipColor = 'primary';
               let chipLabel = '';
-              switch (params.row.exit_point_status) {
+              switch (params.row.estatus_punto_salida) {
                 case 'Campo':
                   icon = <EditRoadIcon/>;
                   chipColor = 'warning';
@@ -380,11 +394,67 @@ const Index = () => {
             },
           },
           { 
-            field: 'exit_attendance_place',
+            field: 'lugar_salida',
             renderHeader: () => (
               <strong style={{ color: "#5EBFFF" }}>{"LUGAR DE SALIDA"}</strong>
             ),
             width: 120,
+            renderCell: (params) => (
+              <PersonPinCircleIcon 
+                style={{ cursor: 'pointer', color: 'lightblue', fontSize: 40 }} 
+                onClick={() => {
+                  window.open(params.value, '_blank');
+                }}
+              />
+            ),
+          },
+          { 
+            field: 'hora_entrada_comida',
+            renderHeader: () => (
+              <strong style={{ color: "#5EBFFF" }}>{"HORA DE ENTRADA DE COMIDA"}</strong>
+            ),
+            width: 200,
+            renderCell: (params) => (
+              <>
+                {params.value}
+                <AccessTimeIcon style={{ marginLeft: '5px' }} />
+              </>
+            ),
+          },
+          { 
+            field: 'lugar_entrada_comida',
+            renderHeader: () => (
+              <strong style={{ color: "#5EBFFF" }}>{"LUGAR DE ENTRADA DE COMIDA"}</strong>
+            ),
+            width: 200,
+            renderCell: (params) => (
+              <PersonPinCircleIcon 
+                style={{ cursor: 'pointer', color: 'lightblue', fontSize: 40 }} 
+                onClick={() => {
+                  window.open(params.value, '_blank');
+                }}
+              />
+            ),
+          },
+          { 
+            field: 'hora_salida_comida',
+            renderHeader: () => (
+              <strong style={{ color: "#5EBFFF" }}>{"HORA DE SALIDA DE COMIDA"}</strong>
+            ),
+            width: 200,
+            renderCell: (params) => (
+              <>
+                {params.value}
+                <AccessTimeIcon style={{ marginLeft: '5px' }} />
+              </>
+            ),
+          },
+          { 
+            field: 'lugar_salida_comida',
+            renderHeader: () => (
+              <strong style={{ color: "#5EBFFF" }}>{"LUGAR DE SALIDA DE COMIDA"}</strong>
+            ),
+            width: 200,
             renderCell: (params) => (
               <PersonPinCircleIcon 
                 style={{ cursor: 'pointer', color: 'lightblue', fontSize: 40 }} 
@@ -422,75 +492,28 @@ const Index = () => {
         );
       };
 
-      const handleExportToExcel = async () => {
-        try {
-            setIsLoading(true)
-            const workbook = new ExcelJS.Workbook();
-            const worksheet = workbook.addWorksheet("Usuarios");
-            
-            worksheet.columns = [
-                { header: "Nombre", key: "user", width: 30 },                
-                { header: "Plaza", key: "place", width: 20 },
-                { header: "Fecha de Captura", key: "date_capture", width: 20 },
-                { header: "Hora de Entrada", key: "entry_time", width: 20 },
-                { header: "Estatus de Entrada", key: "entry_status", width: 20 },
-                { header: "Estatus de Punto de Entrada", key: "entry_point_status", width: 25 },                
-                { header: "Hora de Salida", key: "exit_time", width: 20 },
-                { header: "Estatus de Salida", key: "exit_status", width: 20 },
-                { header: "Estatus de Punto de Salida", key: "exit_point_status", width: 25 },                
-            ];
 
-            users.forEach((user) => {
-                worksheet.addRow({
-                    user: user.user,                    
-                    place: user.place,
-                    date_capture: user.date_capture,
-                    entry_time: user.entry_time,
-                    entry_status: user.entry_status,
-                    entry_point_status: user.entry_point_status,                    
-                    exit_time: user.exit_time,
-                    exit_status: user.exit_status,
-                    exit_point_status: user.exit_point_status,                    
-                });
-            });
+      const CustomToolbar = () => (
+        <GridToolbarContainer >
+         
+          <GridToolbarDensitySelector color="secondary" />
+          <GridToolbarFilterButton color="secondary"/>
+          <GridToolbarColumnsButton color="secondary" />
+          <GridToolbarExport
+          csvOptions={{            
+            fileName: 'Registro Asistencia',
+            delimiter: ';',
+            utf8WithBom: true,
+          }}
+          printOptions={{ disableToolbarButton: true }}
+          color="secondary"          
+          />                    
+        </GridToolbarContainer>
+      );      
 
-            
-            const buffer = await workbook.xlsx.writeBuffer();
-            const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = "users.xlsx";
-            a.click();
-            window.URL.revokeObjectURL(url);
-            setIsLoading(false)
-        } catch (error) {
-            console.error("Error:", error);
-            setIsLoading(false)
-        }
-    };    
-
-      function CustomToolbar() {
-        return (
-          <GridToolbarContainer>
-            <GridToolbarColumnsButton color="secondary" />
-            <GridToolbarFilterButton color="secondary" />
-            <GridToolbarDensitySelector color="secondary" />
-    
-            <Button
-                color="secondary"
-                onClick={handleExportToExcel}
-            >
-                Exportar a Excel
-            </Button>    
-            
-          </GridToolbarContainer>
-        );
-      }
-
-      useEffect(() => {
+      useEffect(() => {        
         const countsE = users.reduce((acce, row) => {
-            const resultE = row.entry_status;
+            const resultE = row.estatus_entrada;
             
             acce[resultE] = (acce[resultE] || 0) + 1;
   
@@ -498,7 +521,7 @@ const Index = () => {
         }, {});
 
         const countsS = users.reduce((accs, row) => {
-          const resultS = row.exit_status;
+          const resultS = row.estatus_salida;
           
           accs[resultS] = (accs[resultS] || 0) + 1;
 
@@ -507,9 +530,7 @@ const Index = () => {
   
         setTotalRecords(users.length);
         setResultCountsEntry(countsE);
-        setResultCountsExit(countsS);        
-        console.log(countsE)
-        console.log(countsS)
+        setResultCountsExit(countsS);
   
       }, [users])
   
@@ -527,10 +548,10 @@ const Index = () => {
         let filteredData
 
         if (type === 1){
-          filteredData = users.filter(row => row.entry_status === result);
+          filteredData = users.filter(row => row.estatus_entrada === result);
         }
         else if (type === 2){
-          filteredData = users.filter(row => row.exit_status === result);
+          filteredData = users.filter(row => row.estatus_salida === result);
         }
         
         const workbook = new ExcelJS.Workbook();
@@ -564,24 +585,94 @@ const Index = () => {
       let filteredData
 
       if(type === 1){
-        filteredData = users.filter(row => row.entry_status === result);
+        filteredData = users.filter(row => row.estatus_entrada === result);
       }
       else if(type === 2){
-        filteredData = users.filter(row => row.exit_status === result);
+        filteredData = users.filter(row => row.estatus_salida === result);
       }
       
       setModalData(filteredData);
       setOpenModal(true);
-    };
-  
+    };    
+    
     const handleCloseModal = () => {
       setOpenModal(false);
-    };
+    };    
 
-      console.log('place_id', selectedPlace)      
-      console.log('start_date', selectedStartDate)
-      console.log('finish_date', selectedEndDate)
-      console.log('isLoading', isLoading)
+  useEffect(() => {
+
+    setSearchPerformed(true);
+
+    const matchingUsers = users.filter(user => {
+      return Object.values(user).some(value =>
+        value && value.toString().toLowerCase().includes(searchTerm)
+      );
+    });
+    
+    if (searchTerm === '') {
+      setFilteredUsers([]);
+      setNoResults(false); 
+      setMatching(-1)
+    } else {
+      if (matchingUsers.length === 0) {
+        setFilteredUsers([]);
+        setNoResults(true);
+        setMatching(0)
+      } else {
+        setFilteredUsers(matchingUsers);
+        setNoResults(false);
+        setMatching(matchingUsers.length)
+      }
+    }
+
+  }, [searchTerm]);
+
+  const handleChange = (event) => {
+    setSearchTerm(event.target.value.toLowerCase());
+  };
+
+    const handleDownloadExcelDataGrid = async () => {
+      try {
+        setIsLoading(true);        
+        
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet("Registros Encontrados");
+
+        if (filteredUsers.length > 0){
+          const headers = Object.keys(filteredUsers[0]);
+          worksheet.addRow(headers);
+
+          filteredUsers.forEach((row) => {
+              const values = headers.map((header) => row[header]);
+              worksheet.addRow(values);
+          });
+        }
+        else {
+          const headers = Object.keys(users[0]);
+          worksheet.addRow(headers);
+
+          users.forEach((row) => {
+              const values = headers.map((header) => row[header]);
+              worksheet.addRow(values);
+          });
+        }        
+
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], {
+            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `Registros_Asistencia.xlsx`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+        setIsLoading(false);
+      } catch (error) {
+          console.error("Error:", error);
+          setIsLoading(false);
+      }
+    };
 
     return (
         <>
@@ -616,8 +707,7 @@ const Index = () => {
                   type="date"
                   sx={{ width: '100%' }}
                   value={selectedStartDate}
-                  onChange={handleStartDateChange}
-                  defaultValue="2023-01-01"                 
+                  onChange={handleStartDateChange}                  
                   InputLabelProps={{
                     shrink: true,
                   }}                  
@@ -630,8 +720,7 @@ const Index = () => {
                   type="date"
                   sx={{ width: '100%' }}
                   value={selectedEndDate}
-                  onChange={handleEndDateChange}
-                  defaultValue="2023-01-01"                 
+                  onChange={handleEndDateChange}                  
                   InputLabelProps={{
                     shrink: true,
                   }}
@@ -664,16 +753,57 @@ const Index = () => {
                         },
                       }}
                     >
-                      {users.length === 0 ? (
-                        <div style={{ textAlign: 'center', padding: '20px' }}>No row</div>
+                      <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2} >
+                        <Grid item xs={6}>
+                          <FormControl>
+                            <TextField                              
+                              fullWidth                            
+                              value={searchTerm}              
+                              onChange={handleChange}              
+                              color='secondary'
+                              size="small"
+                              InputProps={{
+                                endAdornment: (
+                                  <InputAdornment position="end">
+                                    <Search color="secondary"/>
+                                  </InputAdornment>
+                                ),
+                              }}
+                            />
+                            
+                            {( noResults ) && (
+                              <FormHelperText  style={{ color: 'red' }}>
+                                No se encontraron resultados
+                              </FormHelperText>
+                            )}
+                            
+                          </FormControl>                          
+                        </Grid>
+                        <Grid item xs={2}>
+                          <Button 
+                            variant="outlined"                             
+                            color="secondary"                            
+                            onClick={() => {
+                              handleDownloadExcelDataGrid();                    
+                            }}
+                            size="small"
+                            startIcon={<Download/>}
+                            >                                                        
+                            Exportar
+                          </Button>
+                        </Grid>
+                      </Grid>
+
+                      {(users.length === 0 ) ? (
+                          <div style={{ textAlign: 'center', padding: '20px' }}>No se encontraron resultados</div>
                       ) : (
-                        <DataGrid
-                          rows={users}
-                          columns={buildColumns()}
-                          getRowId={(row) => row.user_id}
-                          editable={false} 
-                          slots={{ toolbar: CustomToolbar}}                
-                        />
+                          <DataGrid
+                              rows={filteredUsers.length > 0 ? filteredUsers : users}
+                              columns={buildColumns()}
+                              getRowId={(row) => row.usuario_id}
+                              editable={false} 
+                              // slots={{ toolbar: CustomToolbar}}                          
+                          />
                       )}
                     </Box>
                   </Box>

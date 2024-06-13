@@ -1,9 +1,9 @@
 
-import { Bar, ResponsiveBar } from '@nivo/bar'
+import { ResponsiveBar } from '@nivo/bar'
 import { useTheme } from '@mui/material'
 import { tokens } from '../../theme'
 
-const BarStack = ({ data, position, color, keys, groupMode }) => {
+const Bar = ({ data, index, keys, position, color }) => {
 
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
@@ -13,15 +13,16 @@ const BarStack = ({ data, position, color, keys, groupMode }) => {
         <ResponsiveBar
             data={data}
             keys={keys}
-            indexBy="usuario"
+            indexBy={index}
             margin={{ top: 50, right: 150, bottom: 100, left: 60 }}
-            padding={0.3}
+            padding={0.3}            
+            layout={position}
             innerPadding={2}
             valueScale={{ type: 'symlog' }}
             indexScale={{ type: 'band', round: true }}
             colors={{ scheme: `${color}` }}
-            enableGridY={false}            
-            isInteractive={true}            
+            enableGridY={false}
+            isInteractive={true}
             tooltip={d => {
                 return (
                     <div style={{ width: '270px', padding: '5px 20px', backgroundColor: '#fffafa', borderRadius: '10px', color: '#000000', textAlign: 'center' }}>
@@ -33,7 +34,6 @@ const BarStack = ({ data, position, color, keys, groupMode }) => {
                 )
             }}
             theme={{
-                // added
                 axis: {
                     domain: {
                         line: {
@@ -63,46 +63,38 @@ const BarStack = ({ data, position, color, keys, groupMode }) => {
             }}
             defs={[
                 {
-                    id: 'dots',
-                    type: 'patternDots',
-                    background: 'inherit',
-                    color: '#38bcb2',
-                    size: 4,
-                    padding: 1,
-                    stagger: true
+                    id: 'gradientA',
+                    type: 'linearGradient',
+                    colors: [
+                        { offset: 0, color: '#f39c12' },
+                        { offset: 100, color: '#f1c40f' },
+                    ],
                 },
                 {
-                    id: 'lines',
-                    type: 'patternLines',
-                    background: 'inherit',
-                    color: '#eed312',
-                    rotation: -45,
-                    lineWidth: 6,
-                    spacing: 10
-                }
+                    id: 'gradientB',
+                    type: 'linearGradient',
+                    colors: [
+                        { offset: 0, color: '#2980b9' },
+                        { offset: 100, color: '#3498db' },
+                    ],
+                },
+                // Add more gradients as needed
             ]}
             fill={[
                 {
-                    match: {
-                        id: 'fries'
-                    },
-                    id: 'dots'
+                    match: { id: 'fries' },
+                    id: 'gradientA',
                 },
                 {
-                    match: {
-                        id: 'sandwich'
-                    },
-                    id: 'lines'
-                }
+                    match: { id: 'sandwich' },
+                    id: 'gradientB',
+                },
+                // Add more fill rules as needed
             ]}
-            borderRadius={3}
             borderColor={{
                 from: 'color',
                 modifiers: [
-                    [
-                        'darker',
-                        1.6
-                    ]
+                    ['darker', 1.6]
                 ]
             }}
             axisTop={null}
@@ -110,21 +102,18 @@ const BarStack = ({ data, position, color, keys, groupMode }) => {
             axisBottom={{
                 tickSize: 10,
                 tickPadding: 8,
-                tickRotation: 45,                
+                tickRotation: 45,
                 legendPosition: 'middle',
                 legendOffset: 32,
                 truncateTickAt: 0
             }}
             enableTotals={true}
-            totalsOffset={100}            
+            totalsOffset={100}
             labelTextColor={{
                 from: 'color',
-                 modifiers: [
-                [
-                    'darker',
-                    '3'
+                modifiers: [
+                    ['darker', 3]
                 ]
-            ]
             }}
             legends={[
                 {
@@ -139,7 +128,7 @@ const BarStack = ({ data, position, color, keys, groupMode }) => {
                     itemHeight: 20,
                     itemDirection: 'left-to-right',
                     itemOpacity: 0.85,
-                    itemTextColor: 'white',
+                    
                     symbolSize: 20,
                     effects: [
                         {
@@ -158,4 +147,4 @@ const BarStack = ({ data, position, color, keys, groupMode }) => {
     )
 }
 
-export default BarStack
+export default Bar
