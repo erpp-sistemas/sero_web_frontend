@@ -1,6 +1,6 @@
 	import axios from "axios"
 
-	const baseURL = 'http://localhost:3001/sero-web'
+	const baseURL = 'http://localhost:3001'
 
 	const getPlazas=async()=>{
 		const response = await axios.get(`${baseURL}/api/places`)
@@ -110,6 +110,7 @@
 			url_evidencia: 'urlImagenEvidencia'
 		}	
 
+		const tiposDeDatos = {}
 		const resultados = []
 
 		await jsonData.forEach( (fila, index) => {
@@ -120,29 +121,105 @@
 				const columnIndex = jsonData[0].indexOf(columnIndexes[columnName])
 				ficha[columnName] = (columnIndex !== -1) ? fila[columnIndex] || 'desconocido' : 'desconocido'
 
+				if (columnName === 'calle') {
+					ficha[columnName] = ficha[columnName] === 'desconocido' ? '0' : String(ficha[columnName])
+				}
+				if (columnName === 'propietario') {
+					ficha[columnName] = ficha[columnName] === 'desconocido' ? '0' : String(ficha[columnName])
+				}
+				if (columnName === 'colonia') {
+					ficha[columnName] = ficha[columnName] === 'desconocido' ? '0' : String(ficha[columnName])
+				}
+				if (columnName === 'latitud' && ficha[columnName] === 'desconocido') {
+					ficha[columnName] = 0
+				}
+				if (columnName === 'longitud' && ficha[columnName] === 'desconocido') {
+					ficha[columnName] = 0
+				}
+				if (columnName === 'tipo_servicio') {
+					ficha[columnName] = ficha[columnName] === 'desconocido' ? '0' : String(ficha[columnName])
+				}
+				if (columnName === 'tipo_tarifa') {
+					ficha[columnName] = ficha[columnName] === 'desconocido' ? '0' : String(ficha[columnName])
+				}
+				if (columnName === 'medidor') {
+					ficha[columnName] = ficha[columnName] === 'desconocido' ? '0' : String(ficha[columnName])
+				}
+				if (columnName === 'servicio') {
+					ficha[columnName] = ficha[columnName] === 'desconocido' ? '0' : String(ficha[columnName])
+				}
+				if (columnName === 'recibo') {
+					ficha[columnName] = ficha[columnName] === 'desconocido' ? '0' : String(ficha[columnName])
+				}
 				if (columnName === 'clave_catastral') {
-					ficha[columnName] = ficha[columnName] === 'desconocido' ? '0' : String(ficha[columnName]);
+					ficha[columnName] = ficha[columnName] === 'desconocido' ? '0' : String(ficha[columnName])
 				}
 				if (columnName === 'superficie_terreno' && ficha[columnName] === 'desconocido') {
-					ficha[columnName] = '0'
+					ficha[columnName] = 0
 				}
 				if (columnName === 'superficie_construccion' && ficha[columnName] === 'desconocido') {
-					ficha[columnName] = '0'
+					ficha[columnName] = 0
 				}
 				if (columnName === 'valor_terreno' && ficha[columnName] === 'desconocido') {
-					ficha[columnName] = '0'
+					ficha[columnName] = 0
 				}
 				if (columnName === 'valor_construccion' && ficha[columnName] === 'desconocido') {
-					ficha[columnName] = '0'
+					ficha[columnName] = 0
 				}
 				if (columnName === 'valor_catastral' && ficha[columnName] === 'desconocido') {
-					ficha[columnName] = '0'
+					ficha[columnName] = 0
+				}
+				if (columnName === 'descripcion') {
+					ficha[columnName] = ficha[columnName] === 'desconocido' ? '0' : String(ficha[columnName])
+				}
+				if (columnName === 'total_pagado' && ficha[columnName] === 'desconocido') {
+					ficha[columnName] = 0
+				}
+				if (columnName === 'porcentaje_paga') {
+					ficha[columnName] = ficha[columnName] === 'desconocido' ? '0' : String(ficha[columnName])
+				}				
+				if (columnName === 'porcentaje_descuento') {
+					ficha[columnName] = ficha[columnName] === 'desconocido' ? '0' : String(ficha[columnName])
 				}
 				if (columnName === 'descuento' && ficha[columnName] === 'desconocido') {
 					ficha[columnName] = 0
 				}
+				if (columnName === 'gestor') {
+					ficha[columnName] = ficha[columnName] === 'desconocido' ? '0' : String(ficha[columnName])
+				}
+				if (columnName === 'tarea_gestionada') {
+					ficha[columnName] = ficha[columnName] === 'desconocido' ? '0' : String(ficha[columnName])
+				}
+				if (columnName === 'tabla_gestion') {
+					ficha[columnName] = ficha[columnName] === 'desconocido' ? '0' : String(ficha[columnName])
+				}
+				if (columnName === 'tipo_gestion') {
+					ficha[columnName] = ficha[columnName] === 'desconocido' ? '0' : String(ficha[columnName])
+				}
+				if (columnName === 'status_predio') {
+					ficha[columnName] = ficha[columnName] === 'desconocido' ? '0' : String(ficha[columnName])
+				}
+				if (columnName === 'status_gestion_valida') {
+					ficha[columnName] = ficha[columnName] === 'desconocido' ? '0' : String(ficha[columnName])
+				}
+				if (columnName === 'status_nuestra_cartera') {
+					ficha[columnName] = ficha[columnName] === 'desconocido' ? '0' : String(ficha[columnName])
+				}
+				if (columnName === 'status_cuenta') {
+					ficha[columnName] = ficha[columnName] === 'desconocido' ? '0' : String(ficha[columnName])
+				}
+				if (columnName === 'cuenta') {
+					ficha[columnName] = ficha[columnName] === 'desconocido' ? '0' : String(ficha[columnName])
+				}
+				if (columnName === 'url_fachada') {
+					ficha[columnName] = ficha[columnName] === 'desconocido' ? '0' : String(ficha[columnName])
+				}
+				if (columnName === 'url_evidencia') {
+					ficha[columnName] = ficha[columnName] === 'desconocido' ? '0' : String(ficha[columnName])
+				}
 
 				return ficha
+
 			}, {})
 
 			if (ficha.cuenta !== "desconocido") {
@@ -165,12 +242,23 @@
 						candado = false
 					}
 				}
+
+				
 				if (candado) {
 					ficha.activate = 0
 					resultados.push({folio: folio ? folio : 'desconocido', ...ficha})
+
+					Object.keys(ficha).forEach((key) => {
+						if (!tiposDeDatos[key]) {
+							tiposDeDatos[key] = typeof ficha[key];
+						} else if (tiposDeDatos[key] !== typeof ficha[key]) {
+							console.warn(`Diferente tipo de dato en la columna '${key}': Esperado '${tiposDeDatos[key]}', Encontrado '${typeof ficha[key]}'`);
+						}
+					})
 				}
 			}
 		})
+
 		return resultados
 		
 	}
@@ -204,6 +292,7 @@
 				}
 			})
 			return response.data
+
 		} catch (error) {
 			console.error('Error al subir archivo a S3:', error)
 			throw error

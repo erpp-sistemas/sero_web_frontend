@@ -2,7 +2,7 @@ import axios from 'axios'
 
 // Se usa en modo local
 const instance = axios.create({
-   baseURL: 'http://localhost:3001/sero-web/api',
+   baseURL: 'http://localhost:3001/api',
    withCredentials: true
 }) 
 

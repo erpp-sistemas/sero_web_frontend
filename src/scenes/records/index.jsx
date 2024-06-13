@@ -38,8 +38,7 @@ function Records() {
 	}
 
 	const [fechaCorte, setfechaCorte] = useState(null)
-	const [nombreExiste, setNombreExiste] = useState(false)
-	const [nombre, setNombre] = useState('')
+	const [nombre, setNombre] = useState('nuevo')
 	const [excel, setExcel] = useState(null)
 	const user = useSelector(state => state.user)
 	const { activity, plaza, servicio, fileName, folio, selectionCompleted, registros, porcentaje, cargando, modal } = useSelector(state => state.records)
@@ -96,6 +95,28 @@ function Records() {
 
 	}	
 
+	const changeName = () => {
+
+		const now = new Date()
+
+		const formattedDate = now.toLocaleDateString('es-ES', {
+			day: '2-digit',
+			month: '2-digit',
+			year: 'numeric',
+		}).replace(/\//g, '-')
+	
+		const formattedTime = now.toLocaleTimeString('es-ES', {
+			hour: '2-digit',
+			minute: '2-digit',
+			second: '2-digit',
+		}).replace(/:/g, '-')
+	
+		const fullName = user.name.replace(' ', '_')
+		const newName = `${formattedDate}:${formattedTime}_${fullName}`
+		setNombre(newName)
+
+	}
+
 	const handleFileUpload = (e) => {
 
 		const file = e.target.files?.[0]
@@ -144,23 +165,6 @@ function Records() {
 	useEffect(() => {
 		dispatch(setSelectionCompleted(plaza !== '' && servicio !== '' && fechaCorte !== null))
 	}, [dispatch, fechaCorte, plaza, servicio])
-
-	useEffect(() => {
-		
-		const handleNombreChange = async () => {
-
-			try {
-				const data = await tool.getName(nombre)
-				setNombreExiste(data.data.existe)
-			} catch (error) {
-				console.error('Error al verificar el nombre:', error)
-			}
-
-		}
-
-		handleNombreChange()
-
-	}, [nombre])
 
 	const paqueteText = `Sube tu archivo excel con los registros necesarios y crea los PDF necesarios`
 	const individualesText = `Sube tu archivo excel solo con una cuenta y folio para crear un unico PDF`
@@ -228,39 +232,6 @@ function Records() {
 
 					<Box className='' width={'350px'} >
 
-					<TextField
-						sx={{
-							width: '100%',
-							marginBottom: '1rem',
-							'& .MuiInputLabel-root': {
-								color: nombreExiste ? 'rgb(185, 0, 0) !important' : 'white !important',
-							},
-							'& .MuiOutlinedInput-root': {
-								'& fieldset': {
-									borderColor: nombreExiste ? 'rgb(185, 0, 0) !important' : 'white !important', 
-								},
-								'&:hover fieldset': {
-									borderColor: nombreExiste ? 'rgb(185, 0, 0) !important' : 'white !important',
-								},
-								'&.Mui-focused fieldset': {
-									borderColor: nombreExiste ? 'rgb(185, 0, 0) !important' : 'white !important', 
-								},
-							},
-						}}
-						id='outlined-basic'
-						label='Nombre'
-						variant='outlined'
-						value={nombre}
-						onChange={(e) => setNombre(e.target.value)}
-						onKeyPress={(e) => {
-							if (e.key === ' ') {
-								e.preventDefault()
-							}
-						}}
-					/>
-
-						{ nombreExiste ? <p className='records_aviso'>Ya existe un registro con este nombre.</p> : false }
-
 						<FormControl fullWidth>
 
 							<PlaceSelect                
@@ -287,7 +258,7 @@ function Records() {
 								<DatePicker
 									label='Fecha de corte'
 									value={fechaCorte}
-									onChange={(newValue) => { setfechaCorte(newValue) }}
+									onChange={(newValue) => { setfechaCorte(newValue), changeName() }}
 									sx={{ marginBottom:'20px', width:'100%', '& .MuiSvgIcon-root': { color: '#ffffff', }, '& .MuiInputLabel-root': { color: '#ffffff', }, '& .MuiInputBase-input': { color: '#ffffff', }, }}
 								/>
 
@@ -295,7 +266,29 @@ function Records() {
 
 						</LocalizationProvider>
 
+						{
+
+							fechaCorte !== null ? 
+
+							<FormControl fullWidth sx={{ marginTop: '1rem', marginBottom: '0.6rem' }} >
+
+								<TextField
+									sx={{
+										width: '100%',
+									}}
+									id='outlined-basic'
+									label='Nombre'
+									variant='outlined'
+									value={nombre}
+									disabled
+								/>
+
+							</FormControl>
 							
+							: false
+
+						}
+						
 						{!activity &&
 							
 							<Box mt={'1rem'}>
@@ -342,30 +335,17 @@ function Records() {
 
 									<br />
 									<TextField
-											sx={{
-												width: '100%',
-												marginBottom: '1rem',
-												'& .MuiInputLabel-root': {
-													color: nombreExiste ? 'rgb(185, 0, 0) !important' : 'white !important',
-												},
-												'& .MuiOutlinedInput-root': {
-													'& fieldset': {
-														borderColor: nombreExiste ? 'rgb(185, 0, 0) !important' : 'white !important', 
-													},
-													'&:hover fieldset': {
-														borderColor: nombreExiste ? 'rgb(185, 0, 0) !important' : 'white !important',
-													},
-													'&.Mui-focused fieldset': {
-														borderColor: nombreExiste ? 'rgb(185, 0, 0) !important' : 'white !important', 
-													},
-												},
-											}}
-											id='outlined-basic'
-											label='Mes de facturación'
-											variant='outlined'
-											value={mesFacturacion}
-											onChange={(e) => setMesFacturacion(e.target.value)}
-										/>
+										sx={{
+											width: '100%',
+											marginBottom: '1rem',
+										}}
+										id='outlined-basic'
+										label='Mes de facturación'
+										variant='outlined'
+										value={mesFacturacion}
+										onChange={(e) => setMesFacturacion(e.target.value)}
+									/>
+
 								</>
 
 						)}
@@ -471,7 +451,13 @@ function Records() {
 
 								)}
 
-								<input type='file' id='file-upload' onChange={handleFileUpload} style={{ display: 'none' }} />
+								<input 
+									type="file" 
+									id="file-upload" 
+									onChange={handleFileUpload} 
+									style={{ display: 'none' }} 
+									accept=".xlsx,.xls" 
+								/>
 
 								<label htmlFor='file-upload'>
 									<Button 
@@ -498,7 +484,7 @@ function Records() {
 
 						{cargando ? <LinearProgressWithLabel value={Progreso} /> : false}
 
-						{(registros.length === 0 || (!activity && !folio) || cargando || nombreExiste || nombre == '') ? (
+						{(registros.length === 0 || (!activity && !folio) || cargando || nombre == '') ? (
 							<Tooltip
 								title={crearText} 
 								enterDelay={100} 

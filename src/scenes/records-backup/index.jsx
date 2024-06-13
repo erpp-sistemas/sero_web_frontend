@@ -30,8 +30,7 @@ const Backup = () => {
 		setCargando(true)
 
 		try {
-            const archivoURL = await tool.uploadBackup(archivo, user.name)
-			console.log(archivoURL)
+			await tool.uploadBackup(archivo, user.name)
 			setCargando(false)
 			setArchivo(null)
 			setOpen(true)
@@ -104,6 +103,8 @@ const Backup = () => {
 								variant='contained' 
 								onClick={processUpload}
 							>SUBIR</Button>
+
+							
 						</Box>
 
 					):(
