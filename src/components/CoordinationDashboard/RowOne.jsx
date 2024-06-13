@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Box, useTheme } from '@mui/material'
+import { Box, Button, useTheme } from '@mui/material'
 import { tokens } from "../../theme";
 import Grid from '@mui/material/Grid';
 import Card from '@mui/material/Card';
@@ -11,6 +11,8 @@ import NewspaperIcon from '@mui/icons-material/Newspaper';
 import PushPinIcon from '@mui/icons-material/PushPin';
 import DoNotDisturbAltIcon from '@mui/icons-material/DoNotDisturbAlt';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
+import { CloudDownload, Download, NoPhotography, Preview, Visibility } from "@mui/icons-material";
+import ButtonGroup from '@mui/material/ButtonGroup';
 
 function RowOne({data}) {
 
@@ -33,8 +35,8 @@ function RowOne({data}) {
         setCountLocated(data[0].count_located)
         setCountNotLocated(data[0].count_not_located)
         setCountManagers(data[0].count_managers)
-        setCountNotPhoto(data[0].not_photo)
-        setCountPostPayment(data[0].count_post_payment)
+        setCountNotPhoto(data[0].count_not_photo)
+        //setCountPostPayment(data[0].count_post_payment)
       }      
     }, [data]);
     // useEffect(() => {
@@ -77,7 +79,7 @@ function RowOne({data}) {
       {data.length > 0 && (
         <>
         <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
-          <Grid item xs={3}>
+          <Grid item xs={2.4}>
             <Card variant="outlined" sx={{ maxWidth: 400, backgroundColor: 'rgba(128, 128, 128, 0.1)', borderLeft: '5px solid #00ff00'  }}>
               <Box sx={{ p: 2, textAlign: 'right', position: 'relative' }}>                    
                 <Typography variant="h2" component="div">
@@ -89,10 +91,24 @@ function RowOne({data}) {
                 <Box sx={{ position: 'absolute', top: 8, left: 8, background: 'linear-gradient(to right, #a7eb9b, #00A71B)', width: 48, height: 48, borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                     <NewspaperIcon sx={{ fontSize: 30, color: '#FFFFFF' }} />                  
                 </Box>
+                <Box sx={{ position: 'absolute', bottom: 2, left: 8, display: 'flex', gap: 1 }}>
+                  <ButtonGroup variant="text" aria-label="Basic button group" size="small">
+                    <Tooltip title="Descargar" arrow>
+                      <IconButton>
+                          <CloudDownload  style={{ color: theme.palette.secondary.main }} />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Ver Registros" arrow>
+                      <IconButton>
+                        <Preview  style={{ color: theme.palette.info.main }} />
+                      </IconButton>
+                    </Tooltip>
+                  </ButtonGroup>
+                </Box>
               </Box>                  
             </Card>
           </Grid>
-          <Grid item xs={3}>
+          <Grid item xs={2.4}>
             <Card variant="outlined" sx={{ maxWidth: 360, backgroundColor: 'rgba(128, 128, 128, 0.1)', borderLeft: '5px solid #00ff00'  }}>
               <Box sx={{ p: 2, textAlign: 'right', position: 'relative' }}>                    
                 <Typography variant="h2" component="div">
@@ -107,7 +123,7 @@ function RowOne({data}) {
               </Box>                  
             </Card>
           </Grid>
-          <Grid item xs={3}>
+          <Grid item xs={2.4}>
             <Card variant="outlined" sx={{ maxWidth: 400, backgroundColor: 'rgba(128, 128, 128, 0.1)', borderLeft: '5px solid #00ff00'  }}>
               <Box sx={{ p: 2, textAlign: 'right', position: 'relative' }}>                    
                 <Typography variant="h2" component="div">
@@ -122,7 +138,7 @@ function RowOne({data}) {
               </Box>                  
             </Card>
           </Grid>
-          <Grid item xs={3}>
+          <Grid item xs={2.4}>
             <Card variant="outlined" sx={{ maxWidth: 400, backgroundColor: 'rgba(128, 128, 128, 0.1)', borderLeft: '5px solid #00ff00'  }}>
               <Box sx={{ p: 2, textAlign: 'right', position: 'relative' }}>
                 <Typography variant="h2" component="div">
@@ -131,12 +147,27 @@ function RowOne({data}) {
                 <Typography color="text.secondary" variant="h5">
                   Predios no localizados
                 </Typography>
-                <Box sx={{ position: 'absolute', top: 8, left: 8, background: 'linear-gradient(to right, #a7eb9b, #00A71B)', width: 48, height: 48, borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <Box sx={{ position: 'absolute', top: 8, left: 8, background: countNotLocated === 0 ? 'linear-gradient(to right, #a7eb9b, #00A71B)' : 'linear-gradient(to right, #eb9b9b, #A71B1B)', width: 48, height: 48, borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                     <DoNotDisturbAltIcon sx={{ fontSize: 30, color: '#FFFFFF' }} />                  
                 </Box>
               </Box>                  
             </Card>
-          </Grid>          
+          </Grid>
+          <Grid item xs={2.4}>
+            <Card variant="outlined" sx={{ maxWidth: 400, backgroundColor: 'rgba(128, 128, 128, 0.1)', borderLeft: '5px solid #00ff00'  }}>
+              <Box sx={{ p: 2, textAlign: 'right', position: 'relative' }}>
+                <Typography variant="h2" component="div">
+                {countNotPhoto}
+                </Typography>
+                <Typography color="text.secondary" variant="h5">
+                  Gestiones sin foto
+                </Typography>
+                <Box sx={{ position: 'absolute', top: 8, left: 8, background: countNotLocated === 0 ? 'linear-gradient(to right, #a7eb9b, #00A71B)' : 'linear-gradient(to right, #eb9b9b, #A71B1B)', width: 48, height: 48, borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <NoPhotography sx={{ fontSize: 30, color: '#FFFFFF' }} />                  
+                </Box>
+              </Box>                  
+            </Card>
+          </Grid>
         </Grid>        
         </>
       )}

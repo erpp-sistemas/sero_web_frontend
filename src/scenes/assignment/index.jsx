@@ -143,7 +143,8 @@ const Index = () => {
             const excelData = utils.sheet_to_json(sheet);      
             
             const requiredColumns = ["cuenta", "usuario", "tarea"];
-            const missingColumns = requiredColumns.filter(col => !Object.keys(excelData[0]).includes(col));
+            const excelColumns = Object.keys(excelData[0]).map(col => col.toLowerCase());
+            const missingColumns = requiredColumns.filter(col => !excelColumns.includes(col.toLowerCase()));
       
             if (missingColumns.length > 0) {
               setIsLoading(false);
@@ -155,24 +156,32 @@ const Index = () => {
             }
 
             const mappedData = excelData.map(row => ({
-              cuenta: row.cuenta,
-              usuario: row.usuario,
-              tarea: row.tarea
+              cuenta: row[Object.keys(row).find(key => key.toLowerCase() === "cuenta")],
+              usuario: row[Object.keys(row).find(key => key.toLowerCase() === "usuario")],
+              tarea: row[Object.keys(row).find(key => key.toLowerCase() === "tarea")]
             }));     
             
             console.log("Datos del archivo Excel mapeados a objetos:", mappedData);
 
-            const result = await workAssignmentRequest(selectedPlace, selectedService, mappedData);
-
-            console.log('Respuesta del backend:', result.data);
-
-            setResultAssignment(result.data)
+            try {
+              const result = await workAssignmentRequest(selectedPlace, selectedService, mappedData);
+              console.log('Respuesta del backend:', result.data);
       
-            setIsLoading(false);
-            setError(null);
-            setAlertOpen(true)
-            setAlertType("success")
-            setAlertMessage("¡Felicidades! Se cargaron con exito sus asignaciones")
+              setResultAssignment(result.data);
+      
+              setIsLoading(false);
+              setError(null);
+              setAlertOpen(true);
+              setAlertType("success");
+              setAlertMessage("¡Felicidades! Se cargaron con éxito sus asignaciones");
+            } catch (backendError) {
+              console.error('Error del backend:', backendError);
+              setIsLoading(false);
+              setError("¡Error al procesar los datos en el backend!");
+              setAlertOpen(true);
+              setAlertType("error");
+              setAlertMessage("¡Error! No se pudo procesar los datos en el backend. Verifique si el procedimiento almacenado existe.");
+            }
           };
       
           reader.onerror = (error) => {
@@ -187,8 +196,22 @@ const Index = () => {
           reader.readAsArrayBuffer(selectedFile);
         } catch (error) {
           setIsLoading(false);
-          console.error("Error general al convertir Excel a Array:", error);
-          setError("¡Error al convertir Excel a Array!");
+
+          setIsLoading(false)
+
+          if(error.response.status === 400){
+            console.log(error.response.status)
+            console.log('estamos en el error 400')
+            setAlertOpen(true)
+            setAlertType("warning")
+            setAlertMessage("¡Atencion! No se encontraron pagos")
+            setResult([]);
+          }
+        console.log([error.response.data.message])        
+        setResult([]);
+
+          console.error("Error general al convertir Excel a Array:", [error.response.data.message]);//error);
+          setError([error.response.data.message])//("¡Error al convertir Excel a Array!");
           setAlertOpen(true)
           setAlertType("error")
           setAlertMessage("¡Error! Error al convertir Excel a Array!")

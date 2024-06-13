@@ -1,6 +1,25 @@
 import { ResponsivePie } from '@nivo/pie'
 import { useTheme } from '@mui/material'
 import { tokens } from '../../theme'
+import { Tooltip } from '@nivo/tooltip';
+
+const CustomTooltip = ({ datum }) => {
+    const theme = useTheme();
+    const colors = tokens(theme.palette.mode);
+    const tooltipStyle = {
+        padding: '5px 10px',
+        background: colors.primary[900], // Fondo del tooltip
+        color: colors.grey[100], // Color del texto del tooltip
+        borderRadius: '4px',
+        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.25)',
+    };
+
+    return (
+        <div style={tooltipStyle}>
+            <strong>{datum.id}</strong>: {datum.value}
+        </div>
+    );
+};
 
 const Pie = ({ data, color }) => {
 
@@ -41,6 +60,7 @@ const Pie = ({ data, color }) => {
                 ]
             ]
         }}
+        tooltip={(props) => <CustomTooltip {...props} />}
         defs={[
             {
                 id: 'dots',
