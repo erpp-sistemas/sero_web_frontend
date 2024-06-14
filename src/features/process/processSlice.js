@@ -23,9 +23,9 @@ export const processSlice = createSlice({
     }
 })
 
-export const { setProcess } = processSlice.actions;
+export const { setProcess } = processSlice.actions
 export default processSlice.reducer
 
 export const logoutProcess = () => (dispatch) => {
-    dispatch(setProcess(initialState));
-  };
+    dispatch(setProcess(initialState))
+}

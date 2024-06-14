@@ -1,23 +1,25 @@
-import { combineReducers } from "redux";
-import userReducer from "../features/user/userSlice"; // Importa el reducer de usuario
-import placeReducer from "../features/place/placeSlice";
-import plazaMapaReducer from "./plazaMapa.Slice"; // Importa el reducer de campana y mapa
-import featuresReducer from "./featuresSlice"; // Importa el reducer de características
-import dialogReducer from "./dialogSlice"; // Importa el reducer de diálogo
-import mapaReducer from "./mapaSlice"; // Importa el reducer de mapa
-import accountData from "./accountDataSlice"; //Importa el reducer de accountData
-import actions from "./actionsSlice";
-import alertInfo from "./alertInfoSlice";
-import contributorAddress from "./contributorAddressSlice";
-import debts from "./debtsSlice";
-import getImageData from "./getImageDataSlice";
+import { combineReducers } from "redux"
+import userReducer from "../features/user/userSlice"
+import placeReducer from "../features/place/placeSlice"
+import plazaMapaReducer from "./plazaMapa.Slice"
+import featuresReducer from "./featuresSlice"
+import dialogReducer from "./dialogSlice"
+import mapaReducer from "./mapaSlice"
+import accountData from "./accountDataSlice"
+import actions from "./actionsSlice"
+import alertInfo from "./alertInfoSlice"
+import contributorAddress from "./contributorAddressSlice"
+import debts from "./debtsSlice"
+import getImageData from "./getImageDataSlice"
 import getRowAccount from './getRowAccountSlice'
 import informationContributor from './informationContributorSlice'
 import payment from './paymentsSlice'
 import photo from './photosSlice'
 import plazaNumber from './plazaNumberSlice'
 import apikeyGeocoding from './apikeyGeocodingSlice'
-import dataGeocoding from "./dataGeocodingSlice";
+import dataGeocoding from "./dataGeocodingSlice"
+import recordsSlice from "./recordsSlice"
+import impresionSlice from "./impressionSlice"
 
 const rootReducer = combineReducers({
   user: userReducer,
@@ -38,16 +40,9 @@ const rootReducer = combineReducers({
   photo:photo,
   plazaNumber:plazaNumber,
   apikeyGeocoding:apikeyGeocoding,
-  dataGeocoding:dataGeocoding
+  dataGeocoding:dataGeocoding,
+  records: recordsSlice,
+  impression: impresionSlice,
+})
 
-
-
-
-
-
-  //service: serviceReducer,
-  //process: processReducer,
-  // Agrega más reducers individuales aquí si es necesario
-});
-
-export default rootReducer;
+export default rootReducer

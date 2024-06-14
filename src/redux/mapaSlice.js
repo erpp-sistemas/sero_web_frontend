@@ -14,7 +14,5 @@ export const mapaSlice = createSlice({
     }
 })
 
-
-
 export const { setMapa } = mapaSlice.actions;
 export default mapaSlice.reducer

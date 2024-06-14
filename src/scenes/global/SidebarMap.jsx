@@ -1,48 +1,58 @@
-import { useEffect, useState } from "react";
-import { ProSidebar, Menu, MenuItem } from "react-pro-sidebar";
-import { Box, IconButton, Typography, useTheme, Tooltip, Card, CardHeader, CardContent, Button, Alert } from "@mui/material";
-import { Link } from "react-router-dom";
-import "react-pro-sidebar/dist/css/styles.css";
-
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useEffect, useState } from "react"
+import { ProSidebar, Menu, MenuItem } from "react-pro-sidebar"
+import { Box, IconButton, useTheme, Card, CardHeader, CardContent, Button, Alert } from "@mui/material"
+import "react-pro-sidebar/dist/css/styles.css"
 import { getServicesMapByIdPlaza, getLayersMapByIdPlaza } from '../../services/map.service'
-import { tokens } from "../../theme";
-
+import { tokens } from "../../theme"
 import { useSelector } from 'react-redux'
 import { useDispatch } from 'react-redux'
 import { setDialog } from '../../redux/dialogSlice'
 import { setLayersActivos, setCargarLayer } from '../../redux/featuresSlice'
-
-import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
+import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined"
 import SeroClaro from '../../assets/sero_claro.png'
 import SeroOscuro from '../../assets/sero-logo.png'
-
-import { Marker } from "mapbox-gl";
-
-
+import { Marker } from "mapbox-gl"
 
 const Sidebar = () => {
 
     const dispatch = useDispatch()
-
-    const mapa_seleccionado = useSelector((state) => state.plaza_mapa) // es la campana seleccionada
+    const mapa_seleccionado = useSelector((state) => state.plaza_mapa)
     const mapa_activo = useSelector((state) => state.mapa)
     const dialog_mapa = useSelector((state) => state.dialog)
     const features = useSelector((state) => state.features)
-
-
-    const theme = useTheme();
-    const colors = tokens(theme.palette.mode);
-    const [isCollapsed, setIsCollapsed] = useState(false);
-
+    const theme = useTheme()
+    const colors = tokens(theme.palette.mode)
+    const [isCollapsed, setIsCollapsed] = useState(false)
     const [serviciosMapa, setServiciosMapa] = useState([])
     const [layersMapa, setLayersMapa] = useState([])
     const [nombreServicioActivo, setNombreServicioActivo] = useState('')
     const [marker, setMarker] = useState(null)
+	
+    const fillCartografia = (servicio) => {
+        const id = document.getElementById(servicio.service_id.toString())
+        id.style.color = colors.greenAccent[600]
+        setNombreServicioActivo(servicio.etiqueta)
+        setLayersByIdServicio(servicio.service_id)
+    }
+
+    const loadData = async () => {
+
+        const servicios_mapa = getServicesMapByIdPlaza(mapa_seleccionado.place_id)
+
+        const layers_mapa = getLayersMapByIdPlaza(mapa_seleccionado.place_id)
+
+        const promise = await Promise.all([servicios_mapa, layers_mapa])
+
+        setServiciosMapa(promise[0])
+        setLayersMapa(promise[1])
+		
+    }
 
     useEffect(() => {
         screen.width <= 450 ? setIsCollapsed(true) : setIsCollapsed(false)
         loadData()
-    }, [mapa_seleccionado])
+    }, [loadData, mapa_seleccionado])
 
     useEffect(() => {
         if (serviciosMapa.length > 0) {
@@ -50,9 +60,7 @@ const Sidebar = () => {
                 if (servicio.service_id === 7) fillCartografia(servicio)
             })
         }
-    }, [serviciosMapa])
-
-
+    }, [fillCartografia, serviciosMapa])
 
     useEffect(() => {
 
@@ -74,30 +82,7 @@ const Sidebar = () => {
             if (marker !== null) marker.remove()
         }
 
-
-    }, [features.coordinates])
-
-
-    const fillCartografia = (servicio) => {
-        const id = document.getElementById(servicio.service_id.toString())
-        id.style.color = colors.greenAccent[600]
-        setNombreServicioActivo(servicio.etiqueta)
-        setLayersByIdServicio(servicio.service_id)
-    }
-
-
-    const loadData = async () => {
-
-        const servicios_mapa = getServicesMapByIdPlaza(mapa_seleccionado.place_id)
-
-        const layers_mapa = getLayersMapByIdPlaza(mapa_seleccionado.place_id)
-
-        const promise = await Promise.all([servicios_mapa, layers_mapa])
-        //console.log(promise)
-
-        setServiciosMapa(promise[0])
-        setLayersMapa(promise[1])
-    }
+    }, [colors.greenAccent, features.coordinates, mapa_activo.mapa, marker])
 
     const setLayersByIdServicio = (id_servicio) => {
 
@@ -137,39 +122,34 @@ const Sidebar = () => {
         validateLayerInMap(layer)
     }
 
-    const cargarLayerMap = (layer) => {
-        return new Promise(async (resolve, reject) => {
-            try {
-                if (layer.url_geoserver !== '') {
-                    if (layer.tipo === 'punto') {
-                        await cargaPunto(layer);
-                    } else if (layer.tipo === 'poligono') {
-                        await cargarPoligono(layer);
-                    } else if (layer.tipo === 'seccion') {
-                        //await cargarSeccion(layer);
-                    }
-                }
-                resolve("Layer cargado cargado con éxito");
-            } catch (error) {
-                console.log(error);
-                reject(error);
-            }
-        })
+    const cargarLayerMap = async(layer) => {
 
-    }
+		try {
+			if (layer.url_geoserver !== '') {
+				if (layer.tipo === 'punto') {
+					await cargaPunto(layer)
+				} else if (layer.tipo === 'poligono') {
+					await cargarPoligono(layer)
+				}
+			}
+		} catch (error) {
+			console.error(error)
+		}
+
+	}
 
     const validateLayerInMap = (layer) => {
         if (!mapa_activo.mapa.getLayer(layer.layer_id)) {
             dispatch(setDialog({ title: 'Cargando capa...', status: true }))
             dispatch(setCargarLayer(cargarLayerMap))
-            cargarLayerMap(layer).then(message => {
+            cargarLayerMap(layer).then(() => {
                 dispatch(setDialog({
                     title: '',
                     status: false
                 }))
                 changeColorLayer(layer.name_layer, colors.greenAccent[600])
             }).catch(error => {
-                console.log("No se pudo cargar el layer", error)
+                console.error(error)
             })
             return
         }
@@ -194,8 +174,8 @@ const Sidebar = () => {
 
     const cargaPunto = async (layer) => {
 
-        const data = await cargarFeaturesLayer(layer.url_geoserver);
-        mapa_activo.mapa.addSource(layer.name_layer, { type: 'geojson', data: data });
+        const data = await cargarFeaturesLayer(layer.url_geoserver)
+        mapa_activo.mapa.addSource(layer.name_layer, { type: 'geojson', data: data })
         mapa_activo.mapa.addLayer({
             "id": layer.layer_id.toString(),
             "type": "circle",
@@ -204,13 +184,13 @@ const Sidebar = () => {
             "minzoom": 10,
             "maxzoom": 24,
             "paint": { 'circle-radius': ['/', 7.142857142857142, 2], 'circle-color': layer.color, 'circle-opacity': layer.opacidad, 'circle-stroke-width': 1, 'circle-stroke-color': '#232323' },
-        });
+        })
         mapa_activo.mapa.setLayoutProperty(layer.layer_id.toString(), 'visibility', 'visible')
     }
 
     const cargarPoligono = async (layer) => {
-        const data = await cargarFeaturesLayer(layer.url_geoserver);
-        mapa_activo.mapa.addSource(layer.name_layer, { type: 'geojson', data: data });
+        const data = await cargarFeaturesLayer(layer.url_geoserver)
+        mapa_activo.mapa.addSource(layer.name_layer, { type: 'geojson', data: data })
         mapa_activo.mapa.addLayer({
             id: layer.layer_id.toString(),
             type: "fill",
@@ -224,22 +204,15 @@ const Sidebar = () => {
                 'fill-opacity': layer.opacidad,
             },
 
-        });
+        })
     }
 
 
     const cargarFeaturesLayer = async (url) => {
-        let response = await fetch(url);
-        let data = await response.json();
-        return data;
+        let response = await fetch(url)
+        let data = await response.json()
+        return data
     }
-
-    const handleCerrarSesion = () => {
-        localStorage.removeItem('user')
-        window.location.reload()
-    }
-
-
 
     return (
         <Box
@@ -352,13 +325,13 @@ const Sidebar = () => {
                                         title='Información'
                                     />
                                     <CardContent
-                                        sx={{ backgroundColor: theme.palette.mode === 'dark' ? colors.primary[500] : colors.primary[400] }} >
-                                        {Object.keys(features.features_layer).length > 0 && (features.features_layer.cuenta || features.features_layer.municipio || features.features_layer.ide) ? Object.keys(features.features_layer).map(f => (
-                                            <Button sx={{ width: '100%', backgroundColor: theme.palette.mode === 'dark' ? colors.primary[500] : colors.primary[400], color: colors.grey[100] }}>
-                                                {`${f.replaceAll('_', ' ')} : ${features.features_layer[f]}`}
-                                            </Button>
-                                        )) : null}
-                                    </CardContent>
+										sx={{ backgroundColor: theme.palette.mode === 'dark' ? colors.primary[500] : colors.primary[400] }} >
+										{Object.keys(features.features_layer).length > 0 && (features.features_layer.cuenta || features.features_layer.municipio || features.features_layer.ide) ? Object.keys(features.features_layer).map((f, index) => ( // Añadir paréntesis aquí
+											<Button key={index} sx={{ width: '100%', backgroundColor: theme.palette.mode === 'dark' ? colors.primary[500] : colors.primary[400], color: colors.grey[100] }}>
+												{`${f.replaceAll('_', ' ')} : ${features.features_layer[f]}`} 
+											</Button>
+										)) : null}
+									</CardContent>
                                 </Card>
 
                             </Box>
@@ -368,7 +341,7 @@ const Sidebar = () => {
                 </Menu>
             </ProSidebar>
         </Box >
-    );
-};
+    )
+}
 
-export default Sidebar;
+export default Sidebar

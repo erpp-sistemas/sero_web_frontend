@@ -146,4 +146,4 @@ export const users = [
         plazas: "Naucalpan"
     },
 
-];
+]

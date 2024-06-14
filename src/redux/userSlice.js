@@ -1,17 +1,17 @@
 import { createSlice } from '@reduxjs/toolkit'
 
 const initialState = {
-  user_id: 0,
-  name: '',
-  birthdate: '',
-  sex: '',
-  personal_phone: '',
-  work_phone: '',
-  username: '', 
-  profile_id: 0,
-  profile: '',
-  active: false,
-  url_foto: ''
+	user_id: 0,
+	name: '',
+	birthdate: '',
+	sex: '',
+	personal_phone: '',
+	work_phone: '',
+	username: '', 
+	profile_id: 0,
+	profile: '',
+	active: false,
+	url_foto: ''
 }
 
 export const userSlice = createSlice({
@@ -35,5 +35,5 @@ export const userSlice = createSlice({
     }
 })
 
-export const { setUserR } = userSlice.actions;
+export const { setUserR } = userSlice.actions
 export default userSlice.reducer

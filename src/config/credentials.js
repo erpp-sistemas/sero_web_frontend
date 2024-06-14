@@ -1,1 +1,1 @@
-export const mode = 'prod';
+export const mode = 'prod'

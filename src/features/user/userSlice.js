@@ -36,9 +36,9 @@ export const userSlice = createSlice({
     }
 })
 
-export const { setUser } = userSlice.actions;
+export const { setUser } = userSlice.actions
 export default userSlice.reducer
 
 export const logoutUser = () => (dispatch) => {
-    dispatch(setUser(initialState));
-  };
+    dispatch(setUser(initialState))
+}

@@ -21,9 +21,9 @@ export const serviceSlice = createSlice({
     }
 })
 
-export const { setService } = serviceSlice.actions;
+export const { setService } = serviceSlice.actions
 export default serviceSlice.reducer
 
 export const logoutService = () => (dispatch) => {
-    dispatch(setService(initialState));
-  };
+    dispatch(setService(initialState))
+}
