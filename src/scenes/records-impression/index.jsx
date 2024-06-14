@@ -65,6 +65,7 @@ const Impression = () => {
 		setLoading(true)
 		await tool.updateActivePaquete(idPaq)
 		const registrosArray = Object.values(registros)
+		registrosArray.sort((a, b) => a.id - b.id)
 		for (let registro of registrosArray) {
 			await handleGeneratePDF(registro)
 		}
