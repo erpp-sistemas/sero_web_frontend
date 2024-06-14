@@ -75,6 +75,7 @@ const Impression = () => {
 	const handleGeneratePDF = async (registro) => {
 		const data = {
 			id: registro.id,
+			id_local: registro.id_local,
 			nombre: paquete.nombre,
 			cuenta: registro.cuenta,
 			propietario: registro.propietario,
@@ -146,6 +147,7 @@ const Impression = () => {
 						id: registro.id, 
 						cuenta, 
 						calle: registro.calle, 
+						id_local: registro.id_local, 
 						fecha_pago: registro.fecha_pago, 
 						colonia: registro.colonia, 
 						latitud: registro.latitud, 

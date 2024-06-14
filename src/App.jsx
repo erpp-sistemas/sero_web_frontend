@@ -52,6 +52,9 @@ import Places from "./scenes/places";
 import CoordinationDashboard from './scenes/coordination-dashboard'
 import TrafficLight from './scenes/traffic-light'
 import SurveyReport from './scenes/survey-report'
+import Records from './scenes/records'
+import RecordsBackup from './scenes/records-backup'
+import RecordsImpression from './scenes/records-impression'
 
 
 function App() {
@@ -170,6 +173,9 @@ function App() {
                     <Route path="/coordination-dashboard" element={<CoordinationDashboard />} />
                     <Route path="/survey-report" element={<SurveyReport />} />
                     <Route path="/traffic-light" element={<TrafficLight />} />
+                    <Route path="/records" element={<Records />} />
+                    <Route path="/backup" element={<RecordsBackup />} />
+                    <Route path="/impresion" element={<RecordsImpression />} />
                   </Routes>
                 </main>
 
