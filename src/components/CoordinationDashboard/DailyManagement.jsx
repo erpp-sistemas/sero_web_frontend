@@ -7,10 +7,7 @@ import Line from '../../components/NivoChart/Line'
 function DailyManagement({ data, typeConcept }) {
 
     const theme = useTheme();
-    const colors = tokens(theme.palette.mode);    
-
-    console.log(data)
-    console.log(typeConcept)
+    const colors = tokens(theme.palette.mode);
     
   const generateColor = () => `hsl(${Math.floor(Math.random() * 360)}, 70%, 50%)`;
 

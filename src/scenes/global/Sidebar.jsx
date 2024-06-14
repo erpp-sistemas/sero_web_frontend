@@ -150,6 +150,7 @@ const Sidebar = () => {
     async function loadMenus() {
       const res = await getMenusUserId(user.user_id)
       setMenus(res)
+      console.log(res)
     }
 
     loadMenus()
@@ -270,9 +271,9 @@ const Sidebar = () => {
                     {m.name}
                   </Typography>
                 )}
-                {m.subMenu.map((submenus) => (
-                  <div key={submenus.menu_id}>
+                {m.subMenu.map((submenus) => (                  
                     <Item
+                      key={submenus.menu_id}
                       title={submenus.name}
                       to={submenus.route}
                       icon={submenus.icon_mui}
@@ -281,9 +282,8 @@ const Sidebar = () => {
                       color={colors.grey[100]}
                       isCollapsed={isCollapsed}
                     />
-
-                  </div>
-                ))
+                )
+              )
 
                 }
 

@@ -24,10 +24,7 @@ function RowOne({data}) {
     const [countNotLocated, setCountNotLocated] = useState(0);
     const [countManagers, setCountManagers] = useState(0);
     const [countNotPhoto, setCountNotPhoto] = useState(0);
-    const [countPostPayment, setCountPostPayment] = useState(0);
-
-
-    console.log(data)
+    const [countPostPayment, setCountPostPayment] = useState(0);   
     
     useEffect(() => {
       if(data.length > 0) {
