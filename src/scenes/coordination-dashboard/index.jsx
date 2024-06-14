@@ -3,15 +3,21 @@ import { tokens } from "../../theme";
 import PlaceSelect from '../../components/PlaceSelect'
 import ServiceSelect from '../../components/ServiceSelect'
 import ProcessSelect from '../../components/ProcessSelect'
-import { Box, useTheme, Button} from "@mui/material";
+import { Box, useTheme, Button, Avatar, Typography} from "@mui/material";
 import LoadingModal from '../../components/LoadingModal.jsx'
 import CustomAlert from '../../components/CustomAlert.jsx'
 import Grid from '@mui/material/Grid';
 import TextField from '@mui/material/TextField';
-import { ManageSearch } from "@mui/icons-material";
+import { ManageSearch, Newspaper } from "@mui/icons-material";
 import {coordinationDashboardRequest} from '../../api/coordination.js'
 import RowOne from '../../components/CoordinationDashboard/RowOne.jsx'
 import DataGridManagementByManager from '../../components/CoordinationDashboard/DataGridManagementByManager.jsx'
+import PieManagementByTypeOfServiceAndLocationStatus from '../../components/CoordinationDashboard/PieManagementByTypeOfServiceAndLocationStatus.jsx'
+import BarStackManagementsByManagerAndLocationStatus from "../../components/CoordinationDashboard/BarStackManagementsByManagerAndLocationStatus.jsx";
+import ProgressCircle from "../../components/ProgressCircle";
+import LineNumberOFTotalProcedures from '../../components/CoordinationDashboard/LineNumberOFTotalProcedures.jsx'
+import Legend from '../../components/LightweightCharts/Legend'
+import Card from '@mui/material/Card';
 import ManagedTask from '../../components/CoordinationDashboard/ManagedTask.jsx'
 import LocationStatus from '../../components/CoordinationDashboard/LocationStatus.jsx'
 import TypeService from '../../components/CoordinationDashboard/TypeService.jsx'
@@ -22,6 +28,7 @@ import PaymentsProcedures from '../../components/CoordinationDashboard/PaymentsP
 import PaymentsProceduresByTypeService from '../../components/CoordinationDashboard/PaymentsProceduresByTypeService.jsx'
 import PaymentsProceduresByManager from '../../components/CoordinationDashboard/PaymentsProceduresByManager.jsx'
 import DailyManagementNotPhoto from '../../components/CoordinationDashboard/DailyManagementNotPhoto.jsx'
+import PaymentsProceduresByAmountPaid from '../../components/CoordinationDashboard/PaymentsProceduresByAmountPaid.jsx'
 
 function index() {
 
@@ -34,8 +41,14 @@ function index() {
     const [selectedStartDate, setSelectedStartDate] = React.useState('');
     const [selectedFinishDate, setSelectedFinishDate] = React.useState('');
     const [result, setResult] = useState([]);
-    const [rowOneData, setRowOneData] = useState([]);        
+    const [rowOneData, setRowOneData] = useState([]);    
+    const [lineMonthData, setLineMonthData] = useState([]);
+    const [lineWeekData, setLineWeekData] = useState([]);
+    const [lineDayData, setLineDayData] = useState([]);
     const [dataGridData, setDataGridData] = useState([]);
+    const [pieManagementByTypeData, setPieManagementByTypeData] = useState([]);
+    const [pieManagementByLocationData, setPieManagementByLocationData] = useState([]);
+    const [barStackData , setBarStackData] = useState([]);
     const [managedTaskData , setManagedTaskData] = useState([]);
     const [locationStatusData , setLocationStatusData] = useState([]);
     const [typeServiceData , setTypeServiceData] = useState([]);
@@ -46,7 +59,8 @@ function index() {
     const [paymentsProceduresData , setPaymentsProceduresData] = useState([]);
     const [paymentsProceduresByTypeServiceData , setPaymentsProceduresByTypeServiceData] = useState([]);
     const [paymentsProceduresByManagerData , setPaymentsProceduresByManagerData] = useState([]);
-    const [dailyManagementNotPhotoData , setDailyManagementNotPhotoData] = useState([]);    
+    const [dailyManagementNotPhotoData , setDailyManagementNotPhotoData] = useState([]);
+    const [paymentsProceduresByAmountPaidData , setPaymentsProceduresByAmountPaidData] = useState([]);    
 
     const [isLoading, setIsLoading] = useState(false)
     const [alertOpen, setAlertOpen] = useState(false);
@@ -115,14 +129,28 @@ function index() {
         const typeConcept = selectedStartDate === selectedFinishDate ? 'hour' : 'month';
         setTypeDailyManagementData(typeConcept);
 
+        console.log(typeConcept)
+
+        console.log(selectedPlace)
+        console.log(selectedService)
+        console.log(selectedProcess)
+        console.log(selectedStartDate)
+        console.log(selectedFinishDate)
+
         setIsLoading(true)       
         
 
         const response = await coordinationDashboardRequest(selectedPlace, selectedService, selectedProcess, selectedStartDate, selectedFinishDate);
         console.log(response)
 
-        setRowOneData(JSON.parse(response.data[0].row_one));        
+        setRowOneData(JSON.parse(response.data[0].row_one));
+        setLineMonthData(JSON.parse(response.data[0].LineMonthNumberOFTotalProcedures));
+        setLineWeekData(JSON.parse(response.data[0].LineWeekNumberOFTotalProcedures));
+        setLineDayData(JSON.parse(response.data[0].LineDayNumberOFTotalProcedures));
         setDataGridData(JSON.parse(response.data[0].DataGridManagementByManager))
+        setPieManagementByTypeData(JSON.parse(response.data[0].PieManagementByTypeOfService))
+        setPieManagementByLocationData(JSON.parse(response.data[0].PieManagementByLocationStatus))
+        setBarStackData(JSON.parse(response.data[0].BarStackManagementsByManagerAndLocationStatus))
         setManagedTaskData(JSON.parse(response.data[0].ManagedTask))
         setLocationStatusData(JSON.parse(response.data[0].LocationStatus))
         setTypeServiceData(JSON.parse(response.data[0].TypeService))
@@ -132,7 +160,16 @@ function index() {
         setPaymentsProceduresData(JSON.parse(response.data[0].PaymentsProcedures))
         setPaymentsProceduresByTypeServiceData(JSON.parse(response.data[0].PaymentsProceduresByTypeService))
         setPaymentsProceduresByManagerData(JSON.parse(response.data[0].PaymentsProceduresByManager))
+        setPaymentsProceduresByAmountPaidData(JSON.parse(response.data[0].PaymentsProceduresByAmountPaid))
         setDailyManagementNotPhotoData(JSON.parse(response.data[0].DailyManagementNotPhoto))
+
+        console.log(rowOneData)
+        console.log(response.data[0].LineMonthNumberOFTotalProcedures)
+        console.log(response.data[0].LineWeekNumberOFTotalProcedures)
+        console.log(response.data[0].LineDayNumberOFTotalProcedures)
+        console.log(JSON.parse(response.data[0].ManagedTask))
+        console.log(JSON.parse(response.data[0].DailyManagement))
+        console.log(JSON.parse(response.data[0].PaymentsProcedures))
 
         setResult(response.data)
         setIsLoading(false)
@@ -257,6 +294,11 @@ function index() {
                 <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
                   <Grid item xs={6}>
                     <DailyManagementNotPhoto data={ dailyManagementNotPhotoData } typeConcept={ typeDailyManagementData }/>
+                    {/* <LineNumberOFTotalProcedures 
+                      lineMonthData={lineMonthData} 
+                      lineWeekData={lineWeekData} 
+                      lineDayData={lineDayData} 
+                    />                */}
                   </Grid>
                   <Grid item xs={6}>
                       <DataGridManagementByManager data={ dataGridData }/>
@@ -296,6 +338,11 @@ function index() {
                     <PaymentsProcedures data={ paymentsProceduresData} />
                   </Grid>
                 </Grid>
+                {/* <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
+                  <Grid item xs={12}>
+                    <PaymentsProceduresByAmountPaid data={ paymentsProceduresByAmountPaidData } typeConcept={ 'dias del mes' }/>
+                  </Grid>
+                </Grid>                 */}
                 <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
                   <Grid item xs={6}>    
                     <PaymentsProceduresByTypeService data={ paymentsProceduresByTypeServiceData } />
