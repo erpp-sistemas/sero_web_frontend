@@ -277,7 +277,7 @@ const Sidebar = () => {
                                         <Box sx={{ display: 'flex', justifyContent: 'space-evenly', width: '100%', borderRadius: '10px', flexWrap: 'wrap' }} >
 
                                             {serviciosMapa.length > 0 && serviciosMapa.map((servicio, index) => (
-                                                <IconButton sx={{ width: '30%' }} key={index} aria-label="delete" size="large" onClick={() => handleServicioIcon(servicio)}>
+                                                <IconButton sx={{ width: '30%' }} key={servicio.service_id} aria-label="delete" size="large" onClick={() => handleServicioIcon(servicio)}>
                                                     <i id={servicio.service_id.toString()} style={{ color: colors.grey[100] }} className={servicio.icono}></i>
                                                 </IconButton>
                                             ))}

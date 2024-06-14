@@ -9,7 +9,7 @@ const Index = () => {
   
     const user = useSelector(state => state.user)
 
-    const [plazas, setPlazas] = useState()
+    const [plazas, setPlazas] = useState([])
 
     useEffect(() => {
 

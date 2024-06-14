@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Box, useTheme, Button, Avatar, Typography, LinearProgress} from "@mui/material";
+import { Box, useTheme, Button, Avatar, Typography, LinearProgress, InputAdornment, FormControl, FormHelperText, TextField } from "@mui/material";
 import Grid from '@mui/material/Grid';
 import { tokens } from "../../theme";
 import { DataGrid,
@@ -9,12 +9,19 @@ import { DataGrid,
   GridToolbarExport,  
   GridToolbarFilterButton, } from '@mui/x-data-grid';
 import Viewer from 'react-viewer';
-import { TaskAlt } from "@mui/icons-material";
+import { TaskAlt, Search } from "@mui/icons-material";
 
 function DataGridManagementByManager({data}) {
 
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+
+  const [searchTerm, setSearchTerm] = useState(null);
+  const [filteredUsers, setFilteredUsers] = useState([]);
+  const [matching, setMatching] = useState(-1);
+
+  const [noResults, setNoResults] = useState(false);
+  const [searchPerformed, setSearchPerformed] = useState(false);
 
   if (!data) {
     return null;
@@ -160,12 +167,50 @@ function DataGridManagementByManager({data}) {
     );
   };
 
+  useEffect(() => {
+    
+    setSearchPerformed(true);  
+    
+    if (!searchTerm) {
+      setFilteredUsers([]);
+      setNoResults(false);
+      setMatching(-1);
+      return;
+    } 
+    
+    const matchingUsers = data.filter(user => {
+      return Object.values(user).some(value =>
+        value && value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    });  
+    
+    if (matchingUsers.length === 0) {
+      setFilteredUsers([]);
+      setNoResults(true);
+      setMatching(0);
+    } else {
+      setFilteredUsers(matchingUsers);
+      setNoResults(false);
+      setMatching(matchingUsers.length);
+    }
+  
+  }, [searchTerm]);
+  
+
+  useEffect(() => {
+    setNoResults(false);
+  }, []);
+
+  const handleChange = (event) => {
+    setSearchTerm(event.target.value.toLowerCase());
+  };
+
   return (
     <Box
       id="grid-1"
       display="grid"
       gridTemplateColumns="repeat(12, 1fr)"
-      gridAutoRows="390px"
+      gridAutoRows="450px"
       gap="15px"
     >   
       <Box
@@ -175,17 +220,47 @@ function DataGridManagementByManager({data}) {
         sx={{ cursor: 'pointer' }}
       >
         {data.length > 0 && (
-          <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>              
-            <Grid item xs={12} style={{ height: 400, width: '100%' }}>         
-              <DataGrid
-                  rows={data}
-                  columns={buildColumns()}
-                  getRowId={(row) => row.user}
-                  editable={false}                 
-                  autoPageSize
-              />
+          <>
+            <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2} >
+              <Grid item xs={6} sx={{ paddingBottom: 1 }}>
+                <FormControl>
+                  <TextField                              
+                    fullWidth                            
+                    value={searchTerm}              
+                    onChange={handleChange}              
+                    color='secondary'
+                    size="small"
+                    placeholder="Ingresa tu búsqueda"
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <Search color="secondary"/>
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                  
+                  {( noResults ) && (
+                    <FormHelperText  style={{ color: 'red' }}>
+                      No se encontraron resultados
+                    </FormHelperText>
+                  )}
+                  
+                </FormControl>
+              </Grid>
             </Grid>
-          </Grid>
+            <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>              
+              <Grid item xs={12} style={{ height: 400, width: '100%' }}>         
+                <DataGrid
+                    rows={filteredUsers.length > 0 ? filteredUsers : data}
+                    columns={buildColumns()}
+                    getRowId={(row) => row.user}
+                    editable={false}                 
+                    autoPageSize
+                />
+              </Grid>
+            </Grid>
+          </>
         )}  
       </Box>
   </Box>   
