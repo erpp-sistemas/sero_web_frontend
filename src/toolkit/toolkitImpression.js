@@ -1,6 +1,6 @@
 import axios from "axios"
 
-const baseURL = 'https://erpp.center/sero-web/'
+const baseURL = 'https://erpp.center/sero-web'
 // const baseURL = 'http://localhost:3001'
 
 const getPaquetes = async () => {
