@@ -9,6 +9,11 @@ import ModalDelete from '../../components/Records/modalDelete.jsx'
 import { useSelector } from 'react-redux'
 import DeleteIcon from '@mui/icons-material/Delete'
 
+/**
+	* @name CreacionImpresionFichas
+	* @author Iván Sánchez
+	* @component
+*/
 const Impression = () => {
 
 	const [loading, setLoading] = useState(false)

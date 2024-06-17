@@ -14,10 +14,9 @@ import PlaceSelect from '../../components/PlaceSelect'
 import ServiceSelect from '../../components/ServiceSelect'
 
 /**
-	* Página principal de fichas
-	* Iván Sánchez
+	* @name PáginaPrincipalFichas
+	* @author Iván Sánchez
 	* @component
-	* @returns {JSX.Element} Componente Process.>
 */
 function Records() {
 
