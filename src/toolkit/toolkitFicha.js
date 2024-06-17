@@ -138,8 +138,10 @@ const formatearFila = async (data, folio) => {
             if (['superficie_terreno', 'superficie_construccion', 'valor_terreno', 'valor_construccion', 'valor_catastral'].includes(columnName)) {
                 ficha[columnName] = ficha[columnName] === 'desconocido' ? '0' : String(ficha[columnName])
             }
-            return ficha;
-        }, {});
+
+            return ficha
+
+        }, {})
 
         if (ficha.cuenta !== 'desconocido') {
             let candado = true;
@@ -175,7 +177,9 @@ const formatearFila = async (data, folio) => {
             }
         }
     }
+	console.log(resultados)
     return resultados
+
 }
 
 const uploadS3 = async (file, name) => {
