@@ -7,7 +7,11 @@ import tool from '../../toolkit/toolkitFicha.js'
 import ChargeMessage from '../../components/Records/chargeMessage.jsx'
 import ModalBackup from '../../components/Records/ModalBackup.jsx'
 
-
+/**
+	* @name RespaldoFichas
+	* @author Iván Sánchez
+	* @component
+*/
 const Backup = () => {
 	
 	const [fileName, setFileName] = useState('')
