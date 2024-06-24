@@ -40,15 +40,31 @@ function RowOne({data, placeId, serviceId, proccessId, startDate, finishDate}) {
       }      
     }, [data]);
 
-    const handleGetManagements = async () => {
+    const handleGetManagements = async (value) => {
       try {
 
-        setIsLoading(true)        
+        setIsLoading(true)
+        let value_name = ''
 
-        const response = await managementByRangeDateAndIndicatorTypeRequest(placeId, serviceId, proccessId, startDate, finishDate, 'management');
-        console.log(response)  
+        const response = await managementByRangeDateAndIndicatorTypeRequest(placeId, serviceId, proccessId, startDate, finishDate, value);
         
-        handleExportToExcelFull(response.data, 'gestiones')
+        if (value === 'management'){
+          value_name = 'gestiones'
+        }
+        else if (value === 'managers'){
+          value_name = 'gestores'
+        }
+        else if (value === 'located_properties'){
+          value_name = 'predios_localizados'
+        }
+        else if (value === 'unlocated_properties'){
+          value_name = 'predios_no_localizados'
+        }
+        else if (value === 'procedures_without_photo'){
+          value_name = 'gestiones_sin_foto'
+        }        
+        
+        handleExportToExcelFull(response.data, value_name)
 
         setIsLoading(false)
         
@@ -70,7 +86,6 @@ function RowOne({data, placeId, serviceId, proccessId, startDate, finishDate}) {
       try {
         setIsLoading(true)
 
-        console.log(result[0])
           const workbook = new ExcelJS.Workbook();
           const worksheet = workbook.addWorksheet("Registros Encontrados");
                       
@@ -96,32 +111,6 @@ function RowOne({data, placeId, serviceId, proccessId, startDate, finishDate}) {
           return null;
       }
   };
-    // useEffect(() => {
-
-    //   setCountResult(data.length)
-
-    //   let located = 0;
-    //   let noLocated  = 0;
-    //   const uniqueIds = new Set();
-
-    //     data.forEach(item => {
-    //         if (item.estatus_predio === 'Predio localizado') {
-    //             located++;
-    //         } else {
-    //             noLocated++;
-    //         }
-    //         uniqueIds.add(item.gestor);
-    //     });
-
-    //     setCountLocatedProperty(located);
-    //     setCountNoLocatedProperty(noLocated);
-    //     setUniqueUserIds(uniqueIds.size);
-
-    // }, [data]);
-
-    // console.log(data)
-    // console.log(countResult)
-    // console.log(uniqueUserIds)
 
   return (
     <Box      
@@ -152,17 +141,12 @@ function RowOne({data, placeId, serviceId, proccessId, startDate, finishDate}) {
                 <Box sx={{ position: 'absolute', bottom: 2, left: 8, display: 'flex', gap: 1 }}>
                   <ButtonGroup variant="text" aria-label="Basic button group" size="small">
                     <Tooltip title="Descargar" arrow>
-                      <IconButton>
+                      <IconButton
+                         onClick={() => handleGetManagements('management')}
+                      >
                           <CloudDownload  style={{ color: theme.palette.secondary.main }} />
                       </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Ver Registros" arrow>
-                      <IconButton
-                         onClick={() => handleGetManagements()}
-                      >
-                        <Preview  style={{ color: theme.palette.info.main }} />
-                      </IconButton>
-                    </Tooltip>
+                    </Tooltip>                    
                   </ButtonGroup>
                 </Box>
               </Box>                  
@@ -180,6 +164,17 @@ function RowOne({data, placeId, serviceId, proccessId, startDate, finishDate}) {
                 <Box sx={{ position: 'absolute', top: 8, left: 8, background: 'linear-gradient(to right, #a7eb9b, #00A71B)', width: 48, height: 48, borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                     <AssignmentIndIcon sx={{ fontSize: 30, color: '#FFFFFF' }} />                  
                 </Box>
+                <Box sx={{ position: 'absolute', bottom: 2, left: 8, display: 'flex', gap: 1 }}>
+                  <ButtonGroup variant="text" aria-label="Basic button group" size="small">
+                    <Tooltip title="Descargar" arrow>
+                      <IconButton
+                         onClick={() => handleGetManagements('managers')}
+                      >
+                          <CloudDownload  style={{ color: theme.palette.secondary.main }} />
+                      </IconButton>
+                    </Tooltip>                    
+                  </ButtonGroup>
+                </Box>
               </Box>                  
             </Card>
           </Grid>
@@ -194,6 +189,17 @@ function RowOne({data, placeId, serviceId, proccessId, startDate, finishDate}) {
                 </Typography>
                 <Box sx={{ position: 'absolute', top: 8, left: 8, background: 'linear-gradient(to right, #a7eb9b, #00A71B)', width: 48, height: 48, borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                     <PushPinIcon sx={{ fontSize: 30, color: '#FFFFFF' }} />                  
+                </Box>
+                <Box sx={{ position: 'absolute', bottom: 2, left: 8, display: 'flex', gap: 1 }}>
+                  <ButtonGroup variant="text" aria-label="Basic button group" size="small">
+                    <Tooltip title="Descargar" arrow>
+                      <IconButton
+                         onClick={() => handleGetManagements('located_properties')}
+                      >
+                          <CloudDownload  style={{ color: theme.palette.secondary.main }} />
+                      </IconButton>
+                    </Tooltip>                    
+                  </ButtonGroup>
                 </Box>
               </Box>                  
             </Card>
@@ -210,6 +216,17 @@ function RowOne({data, placeId, serviceId, proccessId, startDate, finishDate}) {
                 <Box sx={{ position: 'absolute', top: 8, left: 8, background: countNotLocated === 0 ? 'linear-gradient(to right, #a7eb9b, #00A71B)' : 'linear-gradient(to right, #eb9b9b, #A71B1B)', width: 48, height: 48, borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                     <DoNotDisturbAltIcon sx={{ fontSize: 30, color: '#FFFFFF' }} />                  
                 </Box>
+                <Box sx={{ position: 'absolute', bottom: 2, left: 8, display: 'flex', gap: 1 }}>
+                  <ButtonGroup variant="text" aria-label="Basic button group" size="small">
+                    <Tooltip title="Descargar" arrow>
+                      <IconButton
+                         onClick={() => handleGetManagements('unlocated_properties')}
+                      >
+                          <CloudDownload  style={{ color: theme.palette.secondary.main }} />
+                      </IconButton>
+                    </Tooltip>                    
+                  </ButtonGroup>
+                </Box>
               </Box>                  
             </Card>
           </Grid>
@@ -225,7 +242,18 @@ function RowOne({data, placeId, serviceId, proccessId, startDate, finishDate}) {
                 <Box sx={{ position: 'absolute', top: 8, left: 8, background: countNotLocated === 0 ? 'linear-gradient(to right, #a7eb9b, #00A71B)' : 'linear-gradient(to right, #eb9b9b, #A71B1B)', width: 48, height: 48, borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                     <NoPhotography sx={{ fontSize: 30, color: '#FFFFFF' }} />                  
                 </Box>
-              </Box>                  
+                <Box sx={{ position: 'absolute', bottom: 2, left: 8, display: 'flex', gap: 1 }}>
+                  <ButtonGroup variant="text" aria-label="Basic button group" size="small">
+                    <Tooltip title="Descargar" arrow>
+                      <IconButton
+                         onClick={() => handleGetManagements('procedures_without_photo')}
+                      >
+                          <CloudDownload  style={{ color: theme.palette.secondary.main }} />
+                      </IconButton>
+                    </Tooltip>                    
+                  </ButtonGroup>
+                </Box>
+              </Box>
             </Card>
           </Grid>
         </Grid>        
