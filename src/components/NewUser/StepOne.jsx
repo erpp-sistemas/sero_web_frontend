@@ -101,13 +101,15 @@ function StepOne({ onNext, onFormData }) {
     }));
   };
 
+  const defaultImage = "https://ser0.mx/ser0/image/sin_foto_perfil.png"
+
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     setFormData(prevState => ({
-      ...prevState,
-      url_image: file
+    ...prevState,
+    url_image: file
     }));
-  };
+    };
 
   const handleDeletePhoto = () => {
     setFormData(prevState => ({
@@ -181,60 +183,164 @@ function StepOne({ onNext, onFormData }) {
         Datos Personales
       </Typography>
       <Divider sx={{ backgroundColor: '#5EBFFF' }} />
+      <Box mt={2}>
+        <Collapse in={alertOpen}>
+          <Alert severity="error" onClose={() => setAlertOpen(false)}>
+            Los siguientes campos son obligatorios y no tienen valor: {missingFields.join(', ')}
+          </Alert>
+        </Collapse>
+      </Box>
       <form onSubmit={handleSubmit}>
-        <Grid container spacing={2} mt={1}>
-          <Grid item xs={12} sm={4} >
-            <TextField
-              fullWidth
-              label="Nombre(s)"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}              
-              color='info'
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <PersonIcon />
-                  </InputAdornment>
-                ),
-              }}
-            />
+      <Grid container spacing={2}>
+        <Grid item xs={12} sm={8}>
+          <Grid container mt={1} spacing={2}>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Nombre(s)"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                color="info"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <PersonIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Apellido Paterno"
+                name="first_last_name"
+                value={formData.first_last_name}
+                onChange={handleChange}
+                color="info"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <FamilyIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Apellido Materno"
+                name="second_last_name"
+                value={formData.second_last_name}
+                onChange={handleChange}
+                color="info"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <FamilyIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                type="date"
+                label="Fecha de Nacimiento"
+                name="birthdate"
+                value={formData.birthdate}
+                onChange={handleChange}
+                color="info"
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <EventIcon />
+                    </InputAdornment>
+                  ),
+                  sx: {
+                    '& input[type="date"]::-webkit-calendar-picker-indicator': {
+                      filter: 'invert(50%) sepia(100%) saturate(1000%) hue-rotate(90deg) brightness(1.2) contrast(1.2)',
+                    },
+                    '& input[type="date"]::-webkit-clear-button': {
+                      display: 'none',
+                    },
+                    '& input[type="date"]::-webkit-inner-spin-button': {
+                      display: 'none',
+                    },
+                  },
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl component="fieldset">
+                <FormLabel component="legend" color="info">
+                  <WcIcon /> Sexo
+                </FormLabel>
+                <RadioGroup
+                  row
+                  name="sex_id"
+                  value={formData.sex_id}
+                  onChange={handleChange}
+                >
+                  <FormControlLabel
+                    value="1"
+                    control={<Radio color="secondary" />}
+                    label="Masculino"
+                  />
+                  <FormControlLabel
+                    value="2"
+                    control={<Radio color="secondary" />}
+                    label="Femenino"
+                  />
+                </RadioGroup>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Teléfono Personal"
+                name="personal_phone"
+                value={formData.personal_phone}
+                onChange={handleNumericChange}
+                color="info"
+                inputProps={{ maxLength: 10 }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <PhoneIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Teléfono de la Empresa"
+                name="work_phone"
+                value={formData.work_phone}
+                onChange={handleNumericChange}
+                color="info"
+                inputProps={{ maxLength: 10 }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <PhoneInTalkIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Grid>
           </Grid>
-          <Grid item xs={12} sm={4}>
-            <TextField
-              fullWidth
-              label="Apellido Paterno"
-              name="first_last_name"
-              value={formData.first_last_name}
-              onChange={handleChange}
-              color='info'
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <FamilyIcon/> 
-                  </InputAdornment>
-                ),
-              }}
-            />
-          </Grid>
-          <Grid item xs={12} sm={4}>
-            <TextField
-              fullWidth
-              label="Apellido Materno"
-              name="second_last_name"
-              value={formData.second_last_name}
-              onChange={handleChange}
-              color='info'
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <FamilyIcon />
-                  </InputAdornment>
-                ),
-              }}
-            />
-          </Grid>
-          <Grid item xs={12} sm={4}>
+        </Grid>
+        <Grid item xs={12} sm={4}>
+          <Grid container mt={1} spacing={2} justifyContent="center">
             <Box display="flex" alignItems="center" flexDirection="column" position="relative">
               <input
                 accept="image/*"
@@ -243,14 +349,14 @@ function StepOne({ onNext, onFormData }) {
                 onChange={handleFileChange}
                 style={{ display: 'none' }}
               />
-              <label htmlFor="photo-upload">
+              <label htmlFor="photo-upload" style={{ textAlign: 'center' }}>
                 <Typography variant="body1" gutterBottom>Sube tu foto</Typography>
-                <Box display="flex" alignItems="center">
+                <Box display="flex" alignItems="center" justifyContent="center">
                   <CloudUploadIcon color="info" fontSize="large" />
                   <Avatar
                     alt="Foto"
-                    src={formData.url_image ? URL.createObjectURL(formData.url_image) : ''}
-                    sx={{ width: 100, height: 100, borderRadius: '8px', ml: 1 }}
+                    src={formData.url_image ? URL.createObjectURL(formData.url_image) : defaultImage}
+                    sx={{ width: 200, height: 200, borderRadius: '8px', ml: 1 }}
                   />
                 </Box>
               </label>
@@ -263,81 +369,8 @@ function StepOne({ onNext, onFormData }) {
               )}
             </Box>
           </Grid>
-          <Grid item xs={12} sm={4}>
-            <TextField
-              fullWidth
-              type="date"
-              label="Fecha de Nacimiento"
-              name="birthdate"
-              value={formData.birthdate}
-              onChange={handleChange}
-              color='info'
-              InputLabelProps={{
-                shrink: true,
-              }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <EventIcon /> 
-                  </InputAdornment>
-                ),
-              }}
-            />
-          </Grid>
-          <Grid item xs={12} sm={4}>
-            <FormControl component="fieldset">
-              <FormLabel component="legend" color='info'>
-                <WcIcon/>
-                Sexo
-              </FormLabel>
-              <RadioGroup
-                row
-                name="sex_id"
-                value={formData.sex_id}
-                onChange={handleChange} 
-              >
-                <FormControlLabel value="1" control={<Radio color='secondary' />} label="Masculino" />
-                <FormControlLabel value="2" control={<Radio color='secondary' />} label="Femenino" />
-              </RadioGroup>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} sm={4}>
-            <TextField
-              fullWidth
-              label="Teléfono Personal"
-              name="personal_phone"
-              value={formData.personal_phone}
-              onChange={handleNumericChange}
-              color='info'
-              inputProps={{ maxLength: 10 }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <PhoneIcon/>
-                  </InputAdornment>
-                ),
-              }}
-            />
-          </Grid>
-          <Grid item xs={12} sm={4}>
-            <TextField
-              fullWidth
-              label="Teléfono de la Empresa"
-              name="work_phone"
-              value={formData.work_phone}
-              onChange={handleNumericChange}
-              color='info'
-              inputProps={{ maxLength: 10 }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <PhoneInTalkIcon/>
-                  </InputAdornment>
-                ),
-              }}
-            />
-          </Grid>
         </Grid>
+      </Grid>
 
         <Typography variant="h5" gutterBottom mt={3}>
           Datos de Accesos al Sistema
@@ -432,15 +465,7 @@ function StepOne({ onNext, onFormData }) {
             Siguiente
           </Button>
         </Box>
-      </form>
-      
-      <Box mt={2}>
-        <Collapse in={alertOpen}>
-          <Alert severity="error" onClose={() => setAlertOpen(false)}>
-            Los siguientes campos son obligatorios y no tienen valor: {missingFields.join(', ')}
-          </Alert>
-        </Collapse>
-      </Box>
+      </form>      
     </Box>
   );
 }

@@ -13,8 +13,11 @@ import DoNotDisturbAltIcon from '@mui/icons-material/DoNotDisturbAlt';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import { CloudDownload, Download, NoPhotography, Preview, Visibility } from "@mui/icons-material";
 import ButtonGroup from '@mui/material/ButtonGroup';
+import { managementByRangeDateAndIndicatorTypeRequest } from '../../api/management.js'
+import LoadingModal from '../../components/LoadingModal.jsx'
+import * as ExcelJS from "exceljs";
 
-function RowOne({data}) {
+function RowOne({data, placeId, serviceId, proccessId, startDate, finishDate}) {
 
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
@@ -24,7 +27,8 @@ function RowOne({data}) {
     const [countNotLocated, setCountNotLocated] = useState(0);
     const [countManagers, setCountManagers] = useState(0);
     const [countNotPhoto, setCountNotPhoto] = useState(0);
-    const [countPostPayment, setCountPostPayment] = useState(0);   
+    const [placeIdData, setPlaceIdData] = useState(0);
+    const [isLoading, setIsLoading] = useState(false)
     
     useEffect(() => {
       if(data.length > 0) {
@@ -32,10 +36,66 @@ function RowOne({data}) {
         setCountLocated(data[0].count_located)
         setCountNotLocated(data[0].count_not_located)
         setCountManagers(data[0].count_managers)
-        setCountNotPhoto(data[0].count_not_photo)
-        //setCountPostPayment(data[0].count_post_payment)
+        setCountNotPhoto(data[0].count_not_photo)        
       }      
     }, [data]);
+
+    const handleGetManagements = async () => {
+      try {
+
+        setIsLoading(true)        
+
+        const response = await managementByRangeDateAndIndicatorTypeRequest(placeId, serviceId, proccessId, startDate, finishDate, 'management');
+        console.log(response)  
+        
+        handleExportToExcelFull(response.data, 'gestiones')
+
+        setIsLoading(false)
+        
+      } catch (error) {
+
+        if(error.response.status === 400){
+          console.log(error.response.status)
+          console.log('estamos en el error 400')
+          setIsLoading(false)
+          
+        }
+      console.log([error.response.data.message])
+      setIsLoading(false)
+        
+      }        
+    };
+
+    const handleExportToExcelFull = async (result, name) => {
+      try {
+        setIsLoading(true)
+
+        console.log(result[0])
+          const workbook = new ExcelJS.Workbook();
+          const worksheet = workbook.addWorksheet("Registros Encontrados");
+                      
+          const headers = Object.keys(result[0]);
+          worksheet.addRow(headers);              
+          
+          result.forEach(row => {
+              const values = headers.map(header => row[header]);
+              worksheet.addRow(values);
+          });
+
+          const buffer = await workbook.xlsx.writeBuffer();
+          const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = name + ".xlsx";
+          a.click();
+          window.URL.revokeObjectURL(url);
+          setIsLoading(false)
+      } catch (error) {
+          console.error("Error:", error);
+          return null;
+      }
+  };
     // useEffect(() => {
 
     //   setCountResult(data.length)
@@ -73,6 +133,7 @@ function RowOne({data}) {
       padding='10px 10px'
       borderRadius='10px'
     >
+      <LoadingModal open={isLoading}/>
       {data.length > 0 && (
         <>
         <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
@@ -96,7 +157,9 @@ function RowOne({data}) {
                       </IconButton>
                     </Tooltip>
                     <Tooltip title="Ver Registros" arrow>
-                      <IconButton>
+                      <IconButton
+                         onClick={() => handleGetManagements()}
+                      >
                         <Preview  style={{ color: theme.palette.info.main }} />
                       </IconButton>
                     </Tooltip>

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react'
-import { Box, Avatar, Tooltip, Button } from '@mui/material'
+import React, { useState, useEffect, useMemo } from 'react'
+import { Box, Avatar, Tooltip, Button, TextField, Typography, Badge, InputAdornment, Grid } from '@mui/material'
 import Header from '../../components/Header'
 import { DataGrid, GridToolbarColumnsButton, GridToolbarContainer, GridToolbarDensitySelector, GridToolbarExport, GridToolbarFilterButton, } from '@mui/x-data-grid'
 import { getUsersByUserIdRequest } from '../../api/user.js'
@@ -19,28 +19,33 @@ import PeopleIcon from '@mui/icons-material/People'
 import MenuBookIcon from '@mui/icons-material/MenuBook'
 import InfoIcon from '@mui/icons-material/Info'
 import UserDetailsModal from '../../components/UsersList/UserDetailsModal.jsx'
-import { AddOutlined } from "@mui/icons-material"
+import { AddOutlined, Cancel, CheckCircle, Face, FileDownload, NoAccounts, People, PeopleAlt, Search } from "@mui/icons-material"
 import { Link } from 'react-router-dom'
+import { useSelector } from 'react-redux';
+import * as ExcelJS from "exceljs";
 
 function Index() {
+
+	const user = useSelector((state) => state.user);
 	const [users, setUsers] = React.useState([])
 	const [selectedUser, setSelectedUser] = useState(null)
 	const [openModal, setOpenModal] = useState(false)
+	const [filter, setFilter] = useState('all');
+	const [searchText, setSearchText] = useState('');
 
-	const UsersByUserId = async () => {
+	const UsersByUserId = async (user_id) => {
 		try {
-		const response = await getUsersByUserIdRequest(151)
-		setUsers(response.data)
-
-		setUsers(response.data)
+		const response = await getUsersByUserIdRequest(user_id)
+		setUsers(response.data)		
+    console.log(response.data)
 		} catch (error) {
 		console.error('Error fetching data:', error)
 		}
 	}
 
 	useEffect(() => {
-		UsersByUserId(151)
-	}, [])
+		UsersByUserId(user.user_id)    
+	}, [user.user_id])
 
 	const handleOpenModal = (user) => {
 		setSelectedUser(user)
@@ -52,14 +57,14 @@ function Index() {
 		setOpenModal(false)
 	}
 
-	const buildColumns = () => {   
-		const columns = [
+  const buildColumns = useMemo(() => {
+    return [
 		{ 
 			field: 'name',
 			renderHeader: () => (
 			<strong style={{ color: "#5EBFFF" }}>{"NOMBRE"}</strong>
 			),
-			width: 110,
+			width: 150,
 			editable: false,
 		},
 		{ 
@@ -145,10 +150,8 @@ function Index() {
 			</Tooltip>
 			),
 		},
-		]
-	
-		return columns
-	}
+		];
+  }, []);
 
 	const AvatarImage = ({ data }) => {
 		const [visibleAvatar, setVisibleAvatar] = React.useState(false)
@@ -291,13 +294,168 @@ function Index() {
 		</GridToolbarContainer>
 		)
 	}
+
+	const handleFilterChange = (newFilter) => {
+        setFilter(newFilter);
+        setSearchText('');
+    };
+
+    const handleSearchChange = (event) => {
+        setSearchText(event.target.value);
+    };
+
+    const filteredUsers = useMemo(() => {
+		let filtered = users;
+		switch (filter) {
+			case 'active':
+				filtered = users.filter(user => user.active === 'activo');
+				break;
+			case 'inactive':
+				filtered = users.filter(user => user.active === 'in activo');
+				break;
+			case 'all':
+			default:
+				break;
+		}
+		if (searchText) {
+			filtered = filtered.filter(user => 
+				Object.values(user).some(value => 
+					String(value).toLowerCase().includes(searchText.toLowerCase())
+				)
+			);
+		}
+		return filtered;
+	}, [users, filter, searchText]);
+
+  const exportToExcel = async () => {
+    try {
+      
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet("Registros Encontrados");
+                    
+        const headers = Object.keys(filteredUsers[0]);
+        worksheet.addRow(headers);              
+        
+        filteredUsers.forEach(row => {
+            const values = headers.map(header => row[header]);
+            worksheet.addRow(values);
+        });
+
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "users.xlsx";
+        a.click();
+        window.URL.revokeObjectURL(url);
+        
+    } catch (error) {
+        console.error("Error:", error);
+        return null;
+    }
+  };
   
 	return (
 
 		<Box m="20px">
 
 			<Header title="Listado de usuario" />
-			
+			<Box mb={2} >
+				<Badge
+					badgeContent={filter === 'all' ? filteredUsers.length : 0}
+					color="secondary"
+					anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+          max={9999} 
+				>
+					<Chip
+						label="Todos los usuarios"
+						clickable
+						color={filter === 'all' ? 'success' : 'default'}
+						onClick={() => handleFilterChange('all')}
+						icon={<People />}
+            sx={{m:1}}
+					/>
+				</Badge>
+				<Badge
+					badgeContent={filter === 'active' ? filteredUsers.length : 0}
+					color="secondary"
+					anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+          max={9999} 
+				>
+					<Chip
+						label="Usuarios activos"
+						clickable
+						color={filter === 'active' ? 'success' : 'default'}
+						onClick={() => handleFilterChange('active')}
+						icon={<CheckCircle />}
+            sx={{m:1}}
+					/>
+				</Badge>
+				<Badge
+					badgeContent={filter === 'inactive' ? filteredUsers.length : 0}
+					color="error"
+					anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+          max={9999} 
+				>
+					<Chip
+						label="Usuarios baja"
+						clickable
+						color={filter === 'inactive' ? 'success' : 'default'}
+						onClick={() => handleFilterChange('inactive')}
+						icon={<Cancel />}
+            sx={{m:1}}
+					/>
+				</Badge>
+
+      </Box>
+      <Grid container spacing={2} alignItems="center" mb={2}>
+        <Grid item xs={6}>
+            <TextField
+                label="Buscar"
+                variant="outlined"
+                fullWidth
+                value={searchText}
+                onChange={handleSearchChange}
+                placeholder="Ingresa lo que quieres buscar"
+                InputProps={{
+                    startAdornment: (
+                        <InputAdornment position="start">
+                            <Search color="secondary" />
+                        </InputAdornment>
+                    ),
+                }}
+                sx={{
+                    '& .MuiOutlinedInput-root': {
+                        '& fieldset': {
+                            borderColor: 'grey',
+                        },
+                        '&:hover fieldset': {
+                            borderColor: 'secondary.main',
+                        },
+                        '&.Mui-focused fieldset': {
+                            borderColor: 'secondary.main',
+                        },
+                    },
+                }}
+            />
+            {filteredUsers.length === 0 && (
+                <Typography variant="body2" color="textSecondary">
+                    No se encontraron resultados.
+                </Typography>
+            )}
+        </Grid>
+        <Grid item xs={3}>
+            <Button
+                variant="contained"
+                color="secondary"
+                onClick={exportToExcel}
+                startIcon={<FileDownload />}
+            >
+                Exportar a Excel
+            </Button>
+        </Grid>
+      </Grid>
 			<Box
 				sx={{
 				height: 400,
@@ -308,11 +466,12 @@ function Index() {
 				}}
 			>
 				<DataGrid
-				rows={users}
-				columns={buildColumns()}
+				rows={filteredUsers}
+				columns={buildColumns}
 				getRowId={(row) => row.user_id}
 				editable={false} 
 				slots={{ toolbar: CustomToolbar }}
+				onRowClick={(params) => handleOpenModal(params.row)}
 				/>
 			</Box>
 

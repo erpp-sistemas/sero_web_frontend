@@ -77,7 +77,26 @@ function StepTwo({ onNextTwo, onFormDataTwo }) {
             } else {
                 updatedSelectedProcesses[selectedPlace][selectedService].push(process_id);
             }
+
+            const processesSelected = updatedSelectedProcesses[selectedPlace][selectedService].length > 0;
+
+            if (!processesSelected) {
+                delete updatedSelectedProcesses[selectedPlace][selectedService];
+                // Check if there are any services selected for the current place
+                if (Object.keys(updatedSelectedProcesses[selectedPlace]).length === 0) {
+                    delete updatedSelectedProcesses[selectedPlace];
+                }
+            }
+
             setSelectedProcesses(updatedSelectedProcesses);
+
+            const updatedProcesses = processes.map(process =>
+                process.process_id === process_id
+                ? { ...process, active: !process.active } // Toggle active state
+                : process
+            );
+            setProcesses(updatedProcesses);
+
             console.log(JSON.stringify(updatedSelectedProcesses, null, 2));
         }
     };

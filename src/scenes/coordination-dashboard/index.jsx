@@ -282,7 +282,14 @@ function index() {
               {result.length > 0 && (
               <>
                 <Grid container justifyContent="space-between" alignItems="stretch" spacing={2}>
-                  <RowOne data={rowOneData}/>
+                  <RowOne 
+                    data={rowOneData}
+                    placeId={ selectedPlace } 
+                    serviceId={ selectedService }
+                    proccessId={ selectedProcess }
+                    startDate={ selectedStartDate }
+                    finishDate={ selectedFinishDate }
+                  />
                 </Grid>
 
                 <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
