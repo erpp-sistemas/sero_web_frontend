@@ -9,10 +9,7 @@ import { resetCordenadasErrores, resetCordenadasFormatoErrores, valueInitCordena
     
 
 const EditModal = ({cuenta,close,setSeleccionadas,seleccionadas}) => {
-
-    // console.log(cuenta.data)
-    // console.log(cuenta.id)
-    // console.log(cuenta.index)
+	
     const panel=useSelector(p=>p.dataGeocoding.vistaPanel)
     const dtt=useSelector(p=>p.dataGeocoding)
  

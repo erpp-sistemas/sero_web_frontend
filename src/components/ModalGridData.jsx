@@ -56,7 +56,6 @@ const ModalGridData = ({ setShowModal }) => {
     const getAllUsers = async () => {
 
         getData('users', '').then(data => {
-            console.log(data)
             setUsuarios(data)
         })
 

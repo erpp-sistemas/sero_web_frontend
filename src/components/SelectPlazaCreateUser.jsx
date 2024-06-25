@@ -132,7 +132,6 @@ const SelectPlazaCreateUser = ({ setPlazasServiciosProcesos }) => {
 
       await getProcesosByIdPlazaServicio(idPlazaSeleccionada, service_id);
       /* setPlazasServiciosProcesos() */
-      console.log(service);
       setService(service);
 
       service_id === 1

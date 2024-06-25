@@ -161,11 +161,9 @@ const Index = () => {
               tarea: row[Object.keys(row).find(key => key.toLowerCase() === "tarea")]
             }));     
             
-            console.log("Datos del archivo Excel mapeados a objetos:", mappedData);
 
             try {
               const result = await workAssignmentRequest(selectedPlace, selectedService, mappedData);
-              console.log('Respuesta del backend:', result.data);
       
               setResultAssignment(result.data);
       
@@ -200,14 +198,11 @@ const Index = () => {
           setIsLoading(false)
 
           if(error.response.status === 400){
-            console.log(error.response.status)
-            console.log('estamos en el error 400')
             setAlertOpen(true)
             setAlertType("warning")
             setAlertMessage("¡Atencion! No se encontraron pagos")
             setResult([]);
-          }
-        console.log([error.response.data.message])        
+          }      
         setResult([]);
 
           console.error("Error general al convertir Excel a Array:", [error.response.data.message]);//error);
@@ -229,7 +224,6 @@ const Index = () => {
 
       setResultCounts(counts);      
       setTotalRecords(resultAssignment.length);
-      console.log(counts)
 
   }, [resultAssignment])
 
@@ -412,13 +406,6 @@ const handleDownloadExcel = async (result) => {
   const handleCloseModal = () => {
     setOpenModal(false);
 };
-
-      console.log('place_id', selectedPlace)
-      console.log('service_id',selectedService)
-      console.log('file', selectedFile)
-      console.log('isLoading', isLoading)
-
-
 
     return (
         <>

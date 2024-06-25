@@ -20,19 +20,12 @@ function NewUser() {
   };
 
   const handleStepOneNext = data => {
-    setFormData(prevData => ({ ...prevData, ...data }));
-    setProfileId(data.profile_id);
-
-    if (data.profile_id === 1) {
-      console.log(data)
-        //signup(data);
-    } else {
-        console.log(data)
-    }
-};
+    setFormData(prevData => ({ ...prevData, ...data }))
+    setProfileId(data.profile_id)
+}
 
 const handleStepTwoNext = data => {
-  setFormData(prevData => ({ ...prevData, ...data }));
+  setFormData(prevData => ({ ...prevData, ...data }))
 
   if (profileId === 5) {      
       assignedPlaces(data)
@@ -40,11 +33,10 @@ const handleStepTwoNext = data => {
   } else {
     console.log(data)
   }
-};
+}
 
 const handleStepThreeNext = data => {
   setFormData(prevData => ({ ...prevData, ...data }));
-  console.log(data)
 };
 
 const signup = async user => {

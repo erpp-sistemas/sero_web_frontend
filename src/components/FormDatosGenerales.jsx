@@ -53,9 +53,6 @@ const FormDatosGenerales = ({ chageDatosGenerales, datosGenerales }) => {
   const [places, setPlaces] = React.useState([]);
   const [fileList, setFileList] = React.useState([]);
 
-  /* console.log(fileList[0].thumbUrl);
-
-
    const base64Image = fileList[0].thumbUrl
    const filename =fileList[0].name
 
@@ -67,24 +64,18 @@ const FormDatosGenerales = ({ chageDatosGenerales, datosGenerales }) => {
  */
 
   const fetchData = async () => {
-    console.log("aqui prueba 1");
     // Fetch your base64 image URL from fileList[0].thumbUrl
     if (!fileList || fileList.length === 0) {
       console.error("File list is empty or undefined.");
       return;
     }
     const base64Image = fileList[0]?.thumbUrl;
-    console.log(fileList[0]);
-    console.log(base64Image);
     if (base64Image) {
-      console.log(base64Image);
-      console.log("aqui prueba 2");
       try {
         const file = await convertBase64ToFile(base64Image, fileList[0].name);
         // Now you have the File object, you can do something with it
         if (file) {
           const fileUrl = await uploadToS3(file);
-          console.log("URL del archivo subido:", fileUrl);
 
           setFotoUsuario(fileUrl);
 
@@ -164,11 +155,9 @@ const FormDatosGenerales = ({ chageDatosGenerales, datosGenerales }) => {
     if (e.target.files && e.target.files.length > 0) {
       setSelectedImage(e.target.files[0]);
       const file = e.target.files[0];
-      //console.log(e.target.files)
 
       try {
         const fileUrl = await uploadToS3(file);
-        console.log("URL del archivo subido:", fileUrl);
 
         setFotoUsuario(fileUrl);
 

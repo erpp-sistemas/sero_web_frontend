@@ -12,8 +12,6 @@ function PaymentsProcedures({ data }) {
     if (!data) {
       return null;
   }
-
-  console.log(data)
     
     const conceptNamesKeys = ['gestiones_con_pago', 'gestiones_sin_pago'];
     

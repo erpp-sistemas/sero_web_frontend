@@ -130,11 +130,9 @@ const Index = () => {
           
           const concatenatedValues = selectedProcess.join(', ');
           
-          console.log('proceso concatenado', concatenatedValues);
           const type = 1
 
           const response = await validPaymentRequest(selectedPlace, selectedService, selectedProcess,selectedValidDays, selectedStartDate, selectedFinishDate, type);
-          console.log(response)
 
           setResult(response.data)
 
@@ -339,17 +337,6 @@ const Index = () => {
         }
     };
 
-
-      console.log('place_id', selectedPlace)
-      console.log('service_id',selectedService)      
-      console.log('process_id', selectedProcess)
-      console.log('days', selectedValidDays)
-      console.log('start_date', selectedStartDate)
-      console.log('finish_date', selectedFinishDate)
-      console.log('isLoading', isLoading)
-
-
-
     return (
         <>
           <Box
@@ -461,8 +448,6 @@ const Index = () => {
                   onClick={() => {
                     if (result.length > 0) {
                         handleExportToExcel(1);                    
-                    } else {                        
-                        console.log("No hay datos para exportar");
                     }
                   }}
                 >
@@ -513,9 +498,7 @@ const Index = () => {
                   onClick={() => {
                     if (result.length > 0) {
                         handleExportToExcel(2);                    
-                    } else {                        
-                        console.log("No hay datos para exportar");
-                    }
+                    } 
                   }}
                   >
                   <CardActionArea>
@@ -545,8 +528,6 @@ const Index = () => {
                   onClick={() => {
                     if (result.length > 0) {
                         handleExportToExcel(3);
-                    } else {                        
-                        console.log("No hay datos para exportar");
                     }
                   }}
                   >
@@ -619,9 +600,7 @@ const Index = () => {
                     onClick={() => {
                       if (result.length > 0) {
                           handleExportToExcel(4);
-                      } else {                        
-                          console.log("No hay datos para exportar");
-                      }
+                      } 
                     }}
                     >
                     <CardActionArea>
@@ -651,9 +630,7 @@ const Index = () => {
                   onClick={() => {
                     if (result.length > 0) {
                         handleExportToExcel(5);
-                    } else {                        
-                        console.log("No hay datos para exportar");
-                    }
+                    } 
                   }}
                 >
                   <CardActionArea>
@@ -683,9 +660,7 @@ const Index = () => {
                   onClick={() => {
                     if (result.length > 0) {
                         handleExportToExcel(6);
-                    } else {                        
-                        console.log("No hay datos para exportar");
-                    }
+                    } 
                   }}
                   >
                   <CardActionArea>
@@ -715,8 +690,6 @@ const Index = () => {
                   onClick={() => {
                     if (result.length > 0) {
                         handleExportToExcel(7);
-                    } else {                        
-                        console.log("No hay datos para exportar");
                     }
                   }}
                   >

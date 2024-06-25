@@ -29,7 +29,6 @@ function PopupViewPositionDailyWorkSummary({ open, onClose, userId, dateCapture,
       setIsLoading(true);
 
       const response = await viewPositionDailyWorkSummaryRequest(placeId, serviceId, proccessId, userId, dateCapture);
-      console.log('response', response.data);
       setPositionsData(JSON.parse(response.data[0].Positions))
       setPhotosData(JSON.parse(response.data[0].Photos))      
       setNotPhotosData(JSON.parse(response.data[0].NotPhotos) || []);  
@@ -106,11 +105,9 @@ function PopupViewPositionDailyWorkSummary({ open, onClose, userId, dateCapture,
   };
 
   const handleMarkerClick = ({ account, dateCapture, latitude, longitude }) => {
-    console.log('Marker clicked:', account, dateCapture, latitude, longitude);
     
     const photosForAccount = photosData.filter(photo => photo.account === account);
     setSelectedPhotos(photosForAccount || []);
-    console.log(photosForAccount)
   };
 
   const gestionesCount = positionsData.length;

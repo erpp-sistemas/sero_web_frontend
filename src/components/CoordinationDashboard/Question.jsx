@@ -9,9 +9,6 @@ function Question({ data, campo, question }) {
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);    
 
-    console.log(data)
-
-    
     const conteo = {};
     
     data.forEach(item => {
@@ -28,13 +25,9 @@ function Question({ data, campo, question }) {
         }
       });  
             
-    console.log(conteo);
-        
     const arregloRespuestas = Object.entries(conteo).map(([respuesta, count]) => ({ count, answer: respuesta }));
 
     arregloRespuestas.sort((a, b) => b.count - a.count);
-
-    console.log(arregloRespuestas);
 
     const convertData = (data) => {
         return data.map(item => {
@@ -54,8 +47,6 @@ function Question({ data, campo, question }) {
       };   
       
       const locationStatusNamesKeys = getLocationStatusNamesKeys(arregloRespuestas);
-
-      console.log(locationStatusNamesKeys)
     
   return (
 

@@ -1,7 +1,7 @@
 import axios from "axios"
 
-const baseURL = 'https://erpp.center/sero-web'
-// const baseURL = 'http://localhost:3001'
+// const baseURL = 'https://erpp.center/sero-web'
+const baseURL = 'http://localhost:3001'
 
 const getPlazas=async()=>{
 	const response = await axios.get(`${baseURL}/api/places`)
@@ -177,7 +177,7 @@ const formatearFila = async (data, folio) => {
             }
         }
     }
-	console.log(resultados)
+	
     return resultados
 
 }
@@ -200,12 +200,12 @@ const uploadS3 = async (file, name) => {
 
 }
 
-const uploadBackup = async (file, name) => {
+const uploadBackup = async (file, nombre) => {
 	const formData = new FormData()
 	formData.append('file', file)
 
 	try {
-		const response = await axios.post(`${baseURL}/api/records/backup/${name}`, formData, {
+		const response = await axios.post(`${baseURL}/api/records/backup/${nombre}`, formData, {
 			headers: {
 				'Content-Type': 'multipart/form-data'
 			}
@@ -219,6 +219,11 @@ const uploadBackup = async (file, name) => {
 
 }
 
+const getBackup = async () => {
+	const Backup = await axios.get(`${baseURL}/api/records/backup`)
+	return Backup
+}
+
 export default {
 	generatePaquete,
 	uploadFichas,
@@ -227,5 +232,6 @@ export default {
 	formatearFila,
 	uploadS3,
 	getName,
-	uploadBackup
+	uploadBackup,
+	getBackup
 }

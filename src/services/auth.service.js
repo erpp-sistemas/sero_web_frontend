@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { getUrl } from '../api/rest'
 
-let token = null;
+let token = null
 const BASE_URL = getUrl()
 
 export const setToken = (tokenUser) => {
@@ -9,13 +9,13 @@ export const setToken = (tokenUser) => {
 }
 
 export const login = (username, password) => {
+    // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
         try {
             const user = await axios.post(`${BASE_URL}/auth/login`, {
                 username: username,
                 password: password
             })
-            //console.log(user);
             resolve(user.data)
         } catch (error) {
             reject(error)

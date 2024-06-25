@@ -31,9 +31,6 @@ function PieManagementByTypeOfServiceAndLocationStatus({datatype, datalocation})
     return `rgba(${r}, ${g}, ${b}, ${a})`;
   };  
 
-  console.log(datatype)
-  console.log(datalocation)
-
   return (
 
     <Box
