@@ -15,7 +15,7 @@ function StepTwo({ onNextTwo, onFormDataTwo }) {
     const [selectedService, setSelectedService] = useState(null);
     const [processes, setProcesses] = useState([]);
     const [selectedProcesses, setSelectedProcesses] = useState({});
-    const user = useSelector(state => state.user)
+    const user = useSelector(state => state.user);
 
     const getPlaces = async (user_id) => {
         try {
@@ -34,14 +34,16 @@ function StepTwo({ onNextTwo, onFormDataTwo }) {
     const handleCardClick = (place_id) => {
         setSelectedPlace(place_id);
         setSelectedService(null);
-        setProcesses([]);
+
         placeServiceByUserIdRequest(user.user_id, place_id)
             .then(response => {
                 console.log(response.data);
-                setServices(response.data.map(service => ({
+                const servicesWithSelection = response.data.map(service => ({
                     ...service,
-                    active: service.active
-                })));
+                    active: selectedProcesses[place_id]?.[service.service_id]?.length > 0 || false
+                }));
+                setServices(servicesWithSelection);
+                setProcesses([]); // Clear processes when selecting a new place
             })
             .catch(error => {
                 console.error("Error fetching services:", error);
@@ -53,10 +55,11 @@ function StepTwo({ onNextTwo, onFormDataTwo }) {
         placeServiceProcessByUserIdRequest(user.user_id, selectedPlace, service_id)
             .then(response => {
                 console.log(response.data);
-                setProcesses(response.data.map(process => ({
+                const processesWithSelection = response.data.map(process => ({
                     ...process,
-                    active: false
-                })));
+                    active: selectedProcesses[selectedPlace]?.[service_id]?.includes(process.process_id) || false
+                }));
+                setProcesses(processesWithSelection);
             })
             .catch(error => {
                 console.error("Error fetching processes:", error);
@@ -66,10 +69,10 @@ function StepTwo({ onNextTwo, onFormDataTwo }) {
     const handleProcessChipClick = (process_id) => {
         const updatedSelectedProcesses = { ...selectedProcesses };
         if (selectedPlace && selectedService) {
-            if (updatedSelectedProcesses[selectedPlace] === undefined) {
+            if (!updatedSelectedProcesses[selectedPlace]) {
                 updatedSelectedProcesses[selectedPlace] = {};
             }
-            if (updatedSelectedProcesses[selectedPlace][selectedService] === undefined) {
+            if (!updatedSelectedProcesses[selectedPlace][selectedService]) {
                 updatedSelectedProcesses[selectedPlace][selectedService] = [];
             }
             if (updatedSelectedProcesses[selectedPlace][selectedService].includes(process_id)) {
@@ -82,7 +85,6 @@ function StepTwo({ onNextTwo, onFormDataTwo }) {
 
             if (!processesSelected) {
                 delete updatedSelectedProcesses[selectedPlace][selectedService];
-                // Check if there are any services selected for the current place
                 if (Object.keys(updatedSelectedProcesses[selectedPlace]).length === 0) {
                     delete updatedSelectedProcesses[selectedPlace];
                 }
@@ -105,7 +107,7 @@ function StepTwo({ onNextTwo, onFormDataTwo }) {
       e.preventDefault();
 
       onNextTwo(selectedProcesses);
-      onFormDataTwo(selectedProcesses)
+      onFormDataTwo(selectedProcesses);
     };
 
     return (
@@ -191,7 +193,7 @@ function StepTwo({ onNextTwo, onFormDataTwo }) {
                                         <Chip
                                             label={service.name}
                                             clickable
-                                            color={selectedService === service.service_id ? "success" : "default"}
+                                            color={selectedService === service.service_id ? "success" : (service.active ? "success" : "default")}
                                             onClick={() => handleServiceChipClick(service.service_id)}
                                         />
                                     </div>
@@ -242,17 +244,17 @@ function StepTwo({ onNextTwo, onFormDataTwo }) {
                     Object.keys(selectedProcesses[placeId]).map(serviceId => (
                         selectedProcesses[placeId][serviceId].length > 0 && (
                             <div key={`${placeId}-${serviceId}`}>
-                                <Typography variant="body1">Plaza: {placeId}, Servicio: {serviceId}, Procesos: {selectedProcesses[placeId][serviceId].join(', ')}</Typography>
+                                <Typography variant="body1">Plaza: {places.find(p => p.place_id === placeId)?.name}, Servicio: {services.find(s => s.service_id === serviceId)?.name}, Procesos: {selectedProcesses[placeId][serviceId].join(', ')}</Typography>
                             </div>
                         )
                     ))
                 ))}
             </Box>
             <Box mt={2}>
-            <Button type="submit" sx={{ bgcolor: 'secondary.main', '&:hover': { bgcolor: 'secondary.dark' } }} variant="contained" color="secondary" endIcon={<KeyboardTabIcon/>}>
-            Siguiente
-          </Button>
-        </Box>
+                <Button type="submit" sx={{ bgcolor: 'secondary.main', '&:hover': { bgcolor: 'secondary.dark' } }} variant="contained" color="secondary" endIcon={<KeyboardTabIcon />}>
+                    Siguiente
+                </Button>
+            </Box>
         </div>
       </form>
     );

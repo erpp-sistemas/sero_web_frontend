@@ -34,10 +34,8 @@ function NewUser() {
 const handleStepTwoNext = data => {
   setFormData(prevData => ({ ...prevData, ...data }));
 
-  const profileIdFromformData = data.profile_id;
-
-  if (profileIdFromformData === 5) {
-      setProfileId(profileIdFromformData);
+  if (profileId === 5) {      
+      assignedPlaces(data)
       console.log(data)
   } else {
     console.log(data)
@@ -52,8 +50,19 @@ const handleStepThreeNext = data => {
 const signup = async user => {
   try {
       const res = await registerRequest(user);
-      console.info(res.data);
-      setActiveStep(totalSteps());
+      console.log(res.data)
+  } catch (error) {
+      if (Array.isArray(error.response.data)) {
+          return setSigninErrors(error.response.data);
+      }
+      setSigninErrors([error.response.data.message]);
+      handleNext();
+  }
+}
+
+const assignedPlaces = async data => {
+  try {
+     console.log(data)
   } catch (error) {
       if (Array.isArray(error.response.data)) {
           return setSigninErrors(error.response.data);
