@@ -24,7 +24,6 @@ const PieChart = ({ dataSQL }) => {
       res.push(obj)
     })
     setDataBar(res)
-    // console.log(res);
     const redu = res.reduce((acum, current) => {
       return acum + current.value
     }, 0)

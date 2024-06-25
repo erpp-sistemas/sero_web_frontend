@@ -237,7 +237,6 @@ export default function HorizontalNonLinearStepper({
   };
 
   const handleStep = (step) => () => {
-    console.log("HandlerStep " + step);
     setActiveStep(step);
   };
 
@@ -577,17 +576,12 @@ export default function HorizontalNonLinearStepper({
               services,
               processes
             );
-            console.log(extractedData);
             extractedData.forEach(async (data) => {
               try {
                 // Use the spread operator (...) to add id_usuario property to the data object
 
                 // Call createUserPlazaServiceProcess with the updated data object
-                console.log(data);
                 await createUserPlazaServiceProcess(data);
-                console.log(
-                  "User plaza service process data created successfully"
-                );
               } catch (error) {
                 console.error(
                   "Error creating user plaza service process data:",
@@ -610,9 +604,6 @@ export default function HorizontalNonLinearStepper({
 
                 // Call createUserPlazaServiceProcess with the updated data object
                 await createMenuByUserAndRol(data);
-                console.log(
-                  "User plaza service process data created successfully"
-                );
               } catch (error) {
                 console.error(
                   "Error creating user plaza service process data:",
@@ -637,9 +628,6 @@ export default function HorizontalNonLinearStepper({
 
                 // Call createUserPlazaServiceProcess with the updated data object
                 await createSubMenuByUserAndRol(data);
-                console.log(
-                  "User plaza service process data created successfully"
-                );
               } catch (error) {
                 console.error(
                   "Error creating user plaza service process data:",
@@ -738,14 +726,11 @@ export default function HorizontalNonLinearStepper({
         
                 objetosActualizados.forEach(async (data) => {
                   try {
-                    console.log(data);
                     // Use the spread operator (...) to add id_usuario property to the data object
       
                     // Call createUserPlazaServiceProcess with the updated data object
                     await createUserPlazaServiceProcess(data);
-                    console.log(
-                      "User plaza service process data created successfully"
-                    );
+        
                   } catch (error) {
                     console.error(
                       "Error creating user plaza service process data:",
@@ -803,7 +788,6 @@ export default function HorizontalNonLinearStepper({
               try {
                 const updatedData = { ...data, id_usuario: 999 };
                 await createUserPlazaServiceProcess(updatedData);
-                console.log("User plaza service process data created successfully");
               } catch (error) {
                 console.error("Error creating user plaza service process data:", error);
               }
@@ -846,9 +830,6 @@ export default function HorizontalNonLinearStepper({
 
               // Call createUserPlazaServiceProcess with the updated data object
               await createUserPlazaServiceProcess(data);
-              console.log(
-                "User plaza service process data created successfully"
-              );
             } catch (error) {
               console.error(
                 "Error creating user plaza service process data:",
@@ -868,9 +849,6 @@ export default function HorizontalNonLinearStepper({
 
               // Call createUserPlazaServiceProcess with the updated data object
               await createMenuByUserAndRol(data);
-              console.log(
-                "User plaza service process data created successfully"
-              );
             } catch (error) {
               console.error(
                 "Error creating user plaza service process data:",

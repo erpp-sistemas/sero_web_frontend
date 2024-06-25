@@ -209,6 +209,41 @@ body,
 	flex-direction: column;
 }
 
+.table{
+	margin-top: 50px;
+	width: 80%;
+	height: auto;
+	background: #265528;
+	background: rgba(255, 255, 255, 0.250);
+	padding: 40px;
+	border-radius: 20px;
+}
+
+.table__text{
+	font-weight: 500;
+	font-size: 20px;
+}
+
+.table__list{
+	margin-top: 25px;
+}
+
+.table__header{
+	width: 100%;
+	height: auto;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.table__header__input{
+	width: 200px;
+	border: none;
+	background: none;
+	border-bottom: 1px solid black;
+	padding-left: 10px;
+}
+
 .records_title{
 	width: 100%;
 	display: flex;

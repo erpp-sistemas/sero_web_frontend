@@ -12,7 +12,7 @@ const Index = () => {
 
 	const user = useSelector(state => state.user)
 	const theme = useTheme()
-	const colors = tokens(theme.palette.mode);
+	const colors = tokens(theme.palette.mode)
 
 	return (
 
@@ -23,7 +23,7 @@ const Index = () => {
 				<Box sx={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
 				<Box sx={{ padding: '0 20px' }}>
 					<Typography variant="h4" color={colors.grey[100]} component="div" sx={{ display: 'inline' }}>
-					Bienvenido <span className='text-[#5ebfff]'>{user.name}</span>
+						Bienvenido <span className='text-[#5ebfff]'>{user.name}</span>
 					</Typography>
 				</Box>
 				</Box>

@@ -16,8 +16,6 @@ import PopupViewPositionDailyWorkSummary from '../../components/CoordinationDash
 
 function DataGridManagementByManager({data, placeId, serviceId, proccessId}) {
 
-  console.log(data)
-
   if (!data) {
     return null;
 }

@@ -85,12 +85,10 @@ const Index = () => {
           setIsLoading(true)
 
           const response = await trafficLightRequest(selectedPlace, selectedService, selectedProcess, selectedDate);
-          console.log(response)
 
           setTrafficLightCountingProceduresData(JSON.parse(response.data[0].TrafficLightCountingProcedures));
           setTrafficLightDebitProceduresData(JSON.parse(response.data[0].TrafficLightDebitProcedures));
           setResult(response.data)   
-          console.log(JSON.parse(response.data[0].TrafficLightCountingProcedures))
 
           setIsLoading(false)
 
@@ -102,20 +100,16 @@ const Index = () => {
           setIsLoading(false)
 
           if(error.response.status === 400){
-            console.log(error.response.status)
-            console.log('estamos en el error 400')
             setAlertOpen(true)
             setAlertType("warning")
             setAlertMessage("¡Atencion! No se encontraron cuentas")
             setResult([]);
-          }
-        console.log([error.response.data.message])        
+          }    
         setResult([]);
           
         }        
       };
 
-      console.log(selectedProcess)
 
     return (
         <>

@@ -52,7 +52,6 @@ function index() {
 
     const handlePlaceChange = (event) => {
       setSelectedPlace(event.target.value);
-      console.log(event.target.value)
     };
 
     const handleStartDateChange = (event) => {
@@ -83,15 +82,12 @@ function index() {
           setAlertType("error")
           setAlertMessage("¡Error! Debes seleccionar una fecha final")
           return
-        }
-
-        console.log(selectedPlace)        
+        }      
 
         setIsLoading(true)
         
 
         const response = await surveyReportRequest(selectedPlace, selectedStartDate, selectedFinishDate);
-        console.log(response.data)
 
         const transformedData = response.data.reduce((acc, item) => {
           const { field, answer, count, color } = item;
@@ -113,7 +109,6 @@ function index() {
       return `hsl(${h}, ${s}%, ${l}%)`;
     };
       
-      console.log(transformedData);
       setResult(transformedData)
         
         // const jsonString = response.data[0]['JSON_F52E2B61-18A1-11d1-B105-00805F49916B'];
@@ -122,13 +117,10 @@ function index() {
         //   return { ...item, data_json: JSON.parse(item.data_json) };
         // });
   
-        // console.log(formattedData);
 
         
 
         // setSurveyReport(JSON.parse(response.data[0].survey_report))
-
-        // console.log(JSON.parse(response.data[0].survey_report))
 
         setIsLoading(false)
 
@@ -140,14 +132,11 @@ function index() {
         setIsLoading(false)
 
         if(error.response.status === 400){
-          console.log(error.response.status)
-          console.log('estamos en el error 400')
           setAlertOpen(true)
           setAlertType("warning")
           setAlertMessage("¡Atencion! No se encontraron pagos")
           setResult([]);
-        }
-      console.log([error.response.data.message])        
+        }      
       setResult([]);
         
       }        

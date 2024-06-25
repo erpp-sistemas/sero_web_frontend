@@ -9,8 +9,6 @@ function ManagedTask({ data }) {
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);    
 
-    console.log(data)
-
     if (!data) {
       return null;
   }
@@ -34,8 +32,6 @@ function ManagedTask({ data }) {
       };   
       
       const taskNamesKeys = getTaskNamesKeys(data);
-
-      console.log(taskNamesKeys)
     
   return (
 

@@ -69,19 +69,16 @@ function index() {
 
     const handlePlaceChange = (event) => {
       setSelectedPlace(event.target.value);  
-      setSelectedService('');      
-      console.log(event.target.value)
+      setSelectedService('')
     };
 
     const handleServiceChange = (event) => {
       setSelectedService(event.target.value);
       setSelectedProcess('')
-      console.log(event.target.value)
     };
 
     const handleProcessChange = (event) => {        
-      setSelectedProcess(event.target.value);
-      console.log(event.target.value)
+      setSelectedProcess(event.target.value)
     };
 
     const handleStartDateChange = (event) => {
@@ -129,19 +126,10 @@ function index() {
         const typeConcept = selectedStartDate === selectedFinishDate ? 'hour' : 'month';
         setTypeDailyManagementData(typeConcept);
 
-        console.log(typeConcept)
-
-        console.log(selectedPlace)
-        console.log(selectedService)
-        console.log(selectedProcess)
-        console.log(selectedStartDate)
-        console.log(selectedFinishDate)
-
         setIsLoading(true)       
         
 
         const response = await coordinationDashboardRequest(selectedPlace, selectedService, selectedProcess, selectedStartDate, selectedFinishDate);
-        console.log(response)
 
         setRowOneData(JSON.parse(response.data[0].row_one));
         setLineMonthData(JSON.parse(response.data[0].LineMonthNumberOFTotalProcedures));
@@ -162,15 +150,6 @@ function index() {
         setPaymentsProceduresByManagerData(JSON.parse(response.data[0].PaymentsProceduresByManager))
         setPaymentsProceduresByAmountPaidData(JSON.parse(response.data[0].PaymentsProceduresByAmountPaid))
         setDailyManagementNotPhotoData(JSON.parse(response.data[0].DailyManagementNotPhoto))
-
-        console.log(rowOneData)
-        console.log(response.data[0].LineMonthNumberOFTotalProcedures)
-        console.log(response.data[0].LineWeekNumberOFTotalProcedures)
-        console.log(response.data[0].LineDayNumberOFTotalProcedures)
-        console.log(JSON.parse(response.data[0].ManagedTask))
-        console.log(JSON.parse(response.data[0].DailyManagement))
-        console.log(JSON.parse(response.data[0].PaymentsProcedures))
-
         setResult(response.data)
         setIsLoading(false)
 
@@ -182,14 +161,11 @@ function index() {
         setIsLoading(false)
 
         if(error.response.status === 400){
-          console.log(error.response.status)
-          console.log('estamos en el error 400')
           setAlertOpen(true)
           setAlertType("warning")
           setAlertMessage("¡Atencion! No se encontraron pagos")
           setResult([]);
-        }
-      console.log([error.response.data.message])        
+        }      
       setResult([]);
         
       }        

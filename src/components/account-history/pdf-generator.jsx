@@ -19,7 +19,6 @@ const styles = StyleSheet.create({
 
 // Componente PDFGenerator
 const PDFGenerator = ({ data }) => {
-  console.log(data)
   return (
     <div>
       <PDFDownloadLink document={<MyDocument data={data} />} fileName="account_details.pdf">

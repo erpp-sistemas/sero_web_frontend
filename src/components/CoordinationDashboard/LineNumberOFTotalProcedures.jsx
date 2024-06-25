@@ -140,9 +140,6 @@ export default LineNumberOFTotalProcedures;
 //     const l = Math.floor(Math.random() * 30 + 50);
 //     return `hsl(${h}, ${s}%, ${l}%)`;
 //   };
-
-//   console.log(data)
-  
   
 //   const monthNames = [
 //     "Ene", "Feb", "Mar", "Abr", "May", "Jun",

@@ -40,9 +40,6 @@ const AccountDetails = ({ accountDetails }) => {
   //   </Grid>    
   // );
 
-  console.log(accountDetails.latitude)
-  console.log(accountDetails.longitude)
-
   return (
     <div>       
        <Box

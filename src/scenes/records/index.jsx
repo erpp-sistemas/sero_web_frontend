@@ -1,4 +1,4 @@
-import { Box, Typography, Checkbox, FormControl, TextField, Button, Tooltip } from '@mui/material'
+import { Box, Typography, Checkbox, FormControl, TextField, Button, Tooltip, InputLabel, Select, MenuItem } from '@mui/material'
 import { useEffect, useState, useMemo } from 'react'
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
@@ -25,7 +25,6 @@ function Records() {
     const [fechaImpresion, setFechaImpresion] = useState(null)
     const [mesFacturacion, setMesFacturacion] = useState(null)
     const [firma, setFirma] = useState(true)
-    const [cfdi, setCfdi] = useState(true)
 
 	const handleServiceChange = (event) => {
 		setSelectedService(event.target.value)
@@ -52,6 +51,10 @@ function Records() {
 		dispatch(setPorcentaje(calculo))
 	}
 
+	const handleChange = (event) => {
+		setMesFacturacion(event.target.value)
+	}
+
 	const processUpload = async () => {
 
 		dispatch(setPorcentaje(0))
@@ -73,7 +76,6 @@ function Records() {
 				firma: firma ? 1 : 0,
 				mes_facturacion: mesFacturacion,
 				fecha_impresion: fechaImpresion,
-				cfdi: cfdi ? 1 : 0, 	
 			}	
 	
 			const id_paquete = await tool.generatePaquete(data)
@@ -332,18 +334,37 @@ function Records() {
 
 								<>
 
-									<br />
-									<TextField
-										sx={{
-											width: '100%',
-											marginBottom: '1rem',
-										}}
-										id='outlined-basic'
-										label='Mes de facturación'
-										variant='outlined'
-										value={mesFacturacion}
-										onChange={(e) => setMesFacturacion(e.target.value)}
-									/>
+								<InputLabel 
+									id="mes-facturacion-label"
+									sx={{
+										marginTop: '20px'
+									}}
+								>
+									Mes de facturación
+								</InputLabel>
+								<Select
+									labelId="mes-facturacion-label"
+									id="mes-facturacion"
+									value={mesFacturacion}
+									onChange={handleChange}
+									label="Mes de facturación"
+									sx={{
+										width:'100%'
+									}}
+								>
+									<MenuItem value="Enero">Enero</MenuItem>
+									<MenuItem value="Febrero">Febrero</MenuItem>
+									<MenuItem value="Marzo">Marzo</MenuItem>
+									<MenuItem value="Abril">Abril</MenuItem>
+									<MenuItem value="Mayo">Mayo</MenuItem>
+									<MenuItem value="Junio">Junio</MenuItem>
+									<MenuItem value="Julio">Julio</MenuItem>
+									<MenuItem value="Agosto">Agosto</MenuItem>
+									<MenuItem value="Septiembre">Septiembre</MenuItem>
+									<MenuItem value="Octubre">Octubre</MenuItem>
+									<MenuItem value="Noviembre">Noviembre</MenuItem>
+									<MenuItem value="Diciembre">Diciembre</MenuItem>
+								</Select>
 
 								</>
 
@@ -380,45 +401,6 @@ function Records() {
 											setFirma(false)
 										}}
 										sx={{ '& .MuiSvgIcon-root': { fontSize: '20px', color: !firma ? '#28a745' : 'grey', }, '&:hover': { backgroundColor: '#228d3b', }, }}
-									/>
-
-								</Box>
-
-							</Box>
-
-						)}
-
-						{
-							(selectedPlace === 2 && selectedService === 1) && (
-
-							<Box className='records__checkbox' marginTop={'2rem'} display={'flex'} justifyContent={'center'} alignItems={'center'} width={'100%'}>
-
-								<Box display={'flex'} justifyContent={'center'} alignItems={'center'} flexDirection={'column'}>
-
-									<label htmlFor='package' style={{ textAlign: 'center', color: '#cff9e0', fontSize: '0.9rem', cursor: 'pointer' }}>Con CFDI</label>
-
-									<Checkbox
-										id='package'
-										checked={cfdi}
-										onChange={() => {
-											setCfdi(true)
-										}}
-										sx={{ '& .MuiSvgIcon-root': { fontSize: '20px', color: cfdi ? '#28a745' : 'grey', }, '&:hover': { backgroundColor: '#228d3b', }, }}
-									/>
-
-								</Box>
-
-								<Box display={'flex'} justifyContent={'center'} alignItems={'center'} flexDirection={'column'}>
-
-									<label htmlFor='individual' style={{ textAlign: 'center', color: '#cff9e0', fontSize: '0.9rem', cursor: 'pointer' }}>Sin CFDI</label>
-
-									<Checkbox	
-										id='individual'
-										checked={!cfdi}
-										onChange={() => {
-											setCfdi(false)
-										}}
-										sx={{ '& .MuiSvgIcon-root': { fontSize: '20px', color: !cfdi ? '#28a745' : 'grey', }, '&:hover': { backgroundColor: '#228d3b', }, }}
 									/>
 
 								</Box>

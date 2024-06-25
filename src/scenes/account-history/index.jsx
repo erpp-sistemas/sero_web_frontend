@@ -64,18 +64,11 @@ const Index = () => {
 
         const response = await AccountHistoryRequest(selectedPlace, account);
         
-        console.log(response.data)
-        //console.log(response.data[0].payments)
         //const parsedPayments = Array.isArray(response.data[0].payments) ? response.data[0].payments : JSON.parse(response.data[0].payments);
-
-        //console.log(parsedPayments.length)
 
         setInformationUser(response.data)
         
-        //console.log(JSON.parse(response.data.payments)) 
-
         //const parsedPayments = Array.isArray(response.data.payments) ? response.data.payments : JSON.parse(response.data.payments);
-        //console.log(parsedPayments)
 
         setIsLoading(false)
 
@@ -83,15 +76,13 @@ const Index = () => {
         setIsLoading(false)
 
           if(error.response.status === 400){
-            console.log(error.response.status)
-            console.log('estamos en el error 400')
             setAlertOpen(true)
             setAlertType("warning")
             setAlertMessage("¡Atencion! La cuenta no existe")
             setInformationUser([]);
           }
           else{
-            console.log([error.response.data.message])
+            return
           }
         
         setInformationUser([]);
@@ -99,14 +90,8 @@ const Index = () => {
     }
 
     const handleGeneratePDF = () => {
-      
-      console.log("Generando PDF...", informationUser);
-      
-      <PDFGenerator informationUser={informationUser} />
-    };
-
-    console.log(selectedPlace)
-    console.log(account)
+		<PDFGenerator informationUser={informationUser} />
+    }
 
     const [value, setValue] = React.useState(0);
 

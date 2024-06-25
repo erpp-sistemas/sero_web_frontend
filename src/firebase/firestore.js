@@ -19,7 +19,6 @@ export async function createUserDocument(uid, email, nombre_usuario, id_usuario,
         totalAccounts: 0,
         uid: uid,
       })
-		console.log("Información del usuario almacenada en Firestore correctamente")
     } catch (error) {	
 		console.error("Error al almacenar información del usuario en Firestore:", error.message)
     }
