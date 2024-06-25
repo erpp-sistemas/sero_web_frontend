@@ -37,7 +37,6 @@ import SeroSpace from '../../assets/ser0_space_fondooscuro.png'
 const Topbar = () => {
 
   const mapa_seleccionado = useSelector((state) => state.plaza_mapa)
-  //console.log(mapa_seleccionado)
 
   const navigation = useNavigate()
   let location = useLocation()

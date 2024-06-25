@@ -71,12 +71,9 @@ function RowOne({data, placeId, serviceId, proccessId, startDate, finishDate}) {
       } catch (error) {
 
         if(error.response.status === 400){
-          console.log(error.response.status)
-          console.log('estamos en el error 400')
           setIsLoading(false)
           
         }
-      console.log([error.response.data.message])
       setIsLoading(false)
         
       }        

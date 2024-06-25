@@ -10,8 +10,6 @@ const LineChart = ({ isDashboard = false, dataChart, tipo, isTotal = false }) =>
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
-  //console.log(dataChart);
-
   const line = (
     <Line
       data={dataChart}
@@ -162,9 +160,6 @@ const LineChart = ({ isDashboard = false, dataChart, tipo, isTotal = false }) =>
         d.point.color = 'blue'
         return (
           <>
-            {/* <>
-              {console.log(d)}
-            </> */}
             <div style={{ width: '270px', padding: '5px 20px', backgroundColor: '#fffafa', borderRadius: '10px', color: '#000000', textAlign: 'center' }}>
               <div style={{ width: '10px', height: '10px', marginRight: '10px', backgroundColor: d.point.serieColor, display: 'inline-block' }}></div>
               <h4 style={{ display: 'inline-block', fontWeight: 'bold', color: '#000000' }}>

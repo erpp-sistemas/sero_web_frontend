@@ -107,15 +107,11 @@ const Index = () => {
               }              
               dataArray.shift();
 
-              const result = await workAssignmentRequest(selectedPlace, selectedService, dataArray);
-
-              console.log('Respuesta del backend:', result);             
+              const result = await workAssignmentRequest(selectedPlace, selectedService, dataArray);           
 
               setResultAssignment(result.data)
 
             } catch (error) {
-
-              console.log('error',error)
               if (error.response && error.response.data) {
                 if (Array.isArray(error.response.data)) {
                     setError(error.response.data);
@@ -197,14 +193,7 @@ const Index = () => {
     "no existe la tarea": <CancelIcon />,
     "no existe el usuario": <PersonOutlineIcon />,
     "no tiene deuda en el mes actual": <AttachMoneyIcon />,
-};
-
-      console.log('place_id', selectedPlace)
-      console.log('service_id',selectedService)
-      console.log('file', selectedFile)
-      console.log('isLoading', isLoading)
-
-
+}
 
     return (
         <>

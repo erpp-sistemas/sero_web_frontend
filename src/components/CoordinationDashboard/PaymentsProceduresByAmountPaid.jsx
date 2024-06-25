@@ -9,9 +9,6 @@ function PaymentsProceduresByAmountPaid({ data, typeConcept }) {
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);    
 
-    console.log(data)
-    console.log(typeConcept)
-    
   const generateColor = () => `hsl(${Math.floor(Math.random() * 360)}, 70%, 50%)`;
 
   const groupedData = data.reduce((acc, curr) => {
@@ -45,8 +42,6 @@ function PaymentsProceduresByAmountPaid({ data, typeConcept }) {
   });
 
   const formattedData = Object.values(groupedData);
-
-  console.log(formattedData);
     
   return (
 

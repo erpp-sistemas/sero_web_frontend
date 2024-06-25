@@ -118,8 +118,7 @@ const Index = () => {
           setIsLoading(true)
 
           const response = await workAttendanceRequest(selectedPlace, selectedStartDate, selectedEndDate);
-          
-          console.log('response', response)
+        
           setNoData('')
           setUsers(response.data);          
           setIsLoading(false)
@@ -129,14 +128,11 @@ const Index = () => {
           setIsLoading(false)
 
           if(error.response.status === 400){
-            console.log(error.response.status)
-            console.log('estamos en el error 400')
             setAlertOpen(true)
             setAlertType("warning")
             setAlertMessage("¡Atencion! No se encontraron asistencias")
             setUsers([]);
-          }
-        console.log([error.response.data.message])        
+          }   
         setUsers([]);
           
         }        

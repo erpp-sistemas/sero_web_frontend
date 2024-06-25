@@ -44,7 +44,6 @@ const MapBoxMap = ({ latitud, longitud, url_capa_geoserver, url_capa_limite_muni
                     filterMap()
                 }
             } catch (error) {
-                console.log(error);
                 reject(error);
             }
         })

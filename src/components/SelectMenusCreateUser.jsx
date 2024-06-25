@@ -49,7 +49,6 @@ const SelectMenusCreateUser = ({role,setSelectedMenus}) => {
       // Aquí deberías hacer tu solicitud de red para obtener los datos
       // Reemplaza 'TU_URL_DE_DATOS' con la URL real de tus datos
       const response = await menuByUserAndRol(0,1);
-      console.log(response);
 
       // Agrega el campo 'id_tarea' a cada fila usando el índice como valor único si no no se ven en la datagrid
       const rowsWithId = response.map((row, index) => ({
@@ -71,12 +70,7 @@ const SelectMenusCreateUser = ({role,setSelectedMenus}) => {
    
  
   }, [])
-
-
   
-  
-   console.log(menus);
-
     return (
         <Box
             m='20px 0'

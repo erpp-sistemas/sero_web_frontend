@@ -8,9 +8,6 @@ function DailyManagementNotPhoto({ data, typeConcept }) {
 
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);    
-
-    console.log(data)
-    console.log(typeConcept)
     
   const generateColor = () => `hsl(${Math.floor(Math.random() * 360)}, 70%, 50%)`;
 
@@ -48,9 +45,7 @@ function DailyManagementNotPhoto({ data, typeConcept }) {
     group.data.sort((a, b) => parseInt(a.x) - parseInt(b.x));
   });
 
-  const formattedData = Object.values(groupedData);
-
-  console.log(formattedData);
+  const formattedData = Object.values(groupedData)
     
   return (
 

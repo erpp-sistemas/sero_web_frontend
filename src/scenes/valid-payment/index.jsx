@@ -149,11 +149,9 @@ const Index = () => {
           
           const concatenatedValues = selectedProcess.join(', ');
           
-          console.log('proceso concatenado', concatenatedValues);
           const type = 1
 
           const response = await validPaymentRequest(selectedPlace, selectedService, selectedProcess,selectedValidDays, selectedStartDate, selectedFinishDate, type);
-          console.log(response)
 
           setResult(response.data)
 
@@ -251,14 +249,11 @@ const Index = () => {
           setIsLoading(false)
 
           if(error.response.status === 400){
-            console.log(error.response.status)
-            console.log('estamos en el error 400')
             setAlertOpen(true)
             setAlertType("warning")
             setAlertMessage("¡Atencion! No se encontraron pagos")
             setResult([]);
-          }
-        console.log([error.response.data.message])        
+          }       
         setResult([]);
           
         }        
@@ -572,25 +567,13 @@ const Index = () => {
         filteredData = result.filter(row => row['estatus de gestion valida'] === 'valida' && row['estatus_predio'] !== 'Predio localizado');
       }
 
-       console.log(filteredData)
-      
        setModalData(filteredData);
        setOpenModal(true);       
-    };
+    }
   
     const handleCloseModal = () => {
       setOpenModal(false);
-    };
-
-      console.log('place_id', selectedPlace)
-      console.log('service_id',selectedService)      
-      console.log('process_id', selectedProcess)
-      console.log('days', selectedValidDays)
-      console.log('start_date', selectedStartDate)
-      console.log('finish_date', selectedFinishDate)
-      console.log('isLoading', isLoading)
-
-
+    }
 
     return (
         <>
@@ -709,9 +692,7 @@ const Index = () => {
                         <IconButton onClick={() => {
                           if (result.length > 0) {
                               handleExportToExcel(1);                    
-                          } else {                        
-                              console.log("No hay datos para exportar");
-                          }
+                          } 
                         }}
                         >
                           <CloudDownloadIcon  style={{ color: theme.palette.secondary.main }} />
@@ -778,8 +759,6 @@ const Index = () => {
                       <IconButton onClick={() => {
                         if (result.length > 0) {
                             handleExportToExcel(2);                    
-                        } else {                        
-                            console.log("No hay datos para exportar");
                         }
                       }}
                       >
@@ -819,9 +798,7 @@ const Index = () => {
                       <IconButton onClick={() => {
                         if (result.length > 0) {
                             handleExportToExcel(3);                    
-                        } else {                        
-                            console.log("No hay datos para exportar");
-                        }
+                        } 
                       }}
                       >
                         <CloudDownloadIcon  style={{ color: theme.palette.secondary.main }} />
@@ -905,9 +882,7 @@ const Index = () => {
                       <IconButton onClick={() => {
                         if (result.length > 0) {
                             handleExportToExcel(4);                    
-                        } else {                        
-                            console.log("No hay datos para exportar");
-                        }
+                        } 
                       }}
                       >
                         <CloudDownloadIcon  style={{ color: theme.palette.secondary.main }} />
@@ -946,8 +921,6 @@ const Index = () => {
                       <IconButton onClick={() => {
                         if (result.length > 0) {
                             handleExportToExcel(5);                    
-                        } else {                        
-                            console.log("No hay datos para exportar");
                         }
                       }}
                       >
@@ -987,8 +960,6 @@ const Index = () => {
                       <IconButton onClick={() => {
                         if (result.length > 0) {
                             handleExportToExcel(6);                    
-                        } else {                        
-                            console.log("No hay datos para exportar");
                         }
                       }}
                       >
@@ -1028,9 +999,7 @@ const Index = () => {
                       <IconButton onClick={() => {
                         if (result.length > 0) {
                             handleExportToExcel(7);                    
-                        } else {                        
-                            console.log("No hay datos para exportar");
-                        }
+                        } 
                       }}
                       >
                         <CloudDownloadIcon  style={{ color: theme.palette.secondary.main }} />

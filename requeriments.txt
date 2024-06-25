@@ -33,7 +33,6 @@ export class SystemVariableService {
     
       for (const key in actionObject) {
 
-        console.log(key);
         switch (key) {
           case "taskDone":
             columns.push({

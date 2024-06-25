@@ -46,8 +46,6 @@ function DailyManagement({ data, typeConcept }) {
   });
 
   const formattedData = Object.values(groupedData);
-
-  console.log(formattedData);
     
   return (
 

@@ -7,10 +7,7 @@ import Bar from '../NivoChart/Bar'
 function TypeProperty({ data }) {
 
     const theme = useTheme();
-    const colors = tokens(theme.palette.mode);    
-
-    console.log(data)
-
+    const colors = tokens(theme.palette.mode)
     if (!data) {
       return null;
   }
@@ -34,8 +31,6 @@ function TypeProperty({ data }) {
       };   
       
       const typePropertyNamesKeys = getTypePropertyNamesKeys(data);
-
-      console.log(typePropertyNamesKeys)
     
   return (
 

@@ -8,9 +8,6 @@ const ChartComponent = ({ data, field, title }) => {
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
 
-    console.log(data)
-
-
     const chartData = data.map(item => ({
         answer: item.answer,
         count: item.count,

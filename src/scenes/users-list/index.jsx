@@ -37,7 +37,6 @@ function Index() {
 		try {
 		const response = await getUsersByUserIdRequest(user_id)
 		setUsers(response.data)		
-    console.log(response.data)
 		} catch (error) {
 		console.error('Error fetching data:', error)
 		}
