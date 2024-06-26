@@ -210,8 +210,9 @@ body,
 }
 
 .table{
-	margin-top: 50px;
-	width: 80%;
+	margin: 50px 0px;
+	width: 100%;
+	max-width: 650px;
 	height: auto;
 	background: #265528;
 	background: rgba(255, 255, 255, 0.250);
@@ -221,7 +222,7 @@ body,
 
 .table__text{
 	font-weight: 500;
-	font-size: 20px;
+	font-size: 30px;
 }
 
 .table__list{
@@ -234,6 +235,9 @@ body,
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
+	flex-wrap: wrap; 
+    flex-direction: column;
+	gap: 20px;
 }
 
 .table__header__input{
@@ -250,6 +254,42 @@ body,
 	justify-content: center;
 	align-items: center;
 	margin-bottom: 10px;
+}
+
+.table__list{
+	width: 100%;
+	margin-top: 10px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-direction: column;
+}
+
+.table__list__li{
+	width: 100%;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	font-size: 20px;
+	margin-top: 15px;
+	color: #cff9e0;
+}
+
+.table__list__li__button{
+	margin-left: 35px;
+}
+
+.pagination{
+	width: 100%;
+	margin-top: 25px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.pagination__text{
+	margin: 0px 10px;
+	font-size: 20px;
 }
 
 @media screen and (max-width: 1000px) {

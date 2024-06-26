@@ -1,7 +1,7 @@
 import axios from "axios"
 
-// const baseURL = 'https://erpp.center/sero-web'
-const baseURL = 'http://localhost:3001'
+const baseURL = 'https://erpp.center/sero-web'
+// const baseURL = 'http://localhost:3001'
 
 const getPlazas=async()=>{
 	const response = await axios.get(`${baseURL}/api/places`)
@@ -12,6 +12,12 @@ const getPlazas=async()=>{
 		active: item.activo
 	}))
 	return plazas
+}
+
+const getRespaldos = async () => {
+	const response = await axios.get(`${baseURL}/api/records/respaldo`)
+	const data = response.data
+	return data
 }
 
 const getServicios = async () => {
@@ -219,9 +225,15 @@ const uploadBackup = async (file, nombre) => {
 
 }
 
-const getBackup = async () => {
-	const Backup = await axios.get(`${baseURL}/api/records/backup`)
-	return Backup
+const createRespaldo = async (data) => {	
+	const url = `${baseURL}/api/records/respaldo`
+	try {
+		await axios.post(url, data)
+		return "success"
+	} catch (error) {
+		console.error("Error al crear el respaldo:", error)
+		return false
+	}
 }
 
 export default {
@@ -233,5 +245,6 @@ export default {
 	uploadS3,
 	getName,
 	uploadBackup,
-	getBackup
+	createRespaldo,
+	getRespaldos
 }
