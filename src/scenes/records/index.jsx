@@ -12,6 +12,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { setActivity, setPlazas, setServicios, setFileName, setSelectionCompleted, setFolio, setRegistros, setPorcentaje, setCargando, setModal, setIdPaquete } from '../../redux/recordsSlice.js'
 import PlaceSelect from '../../components/PlaceSelect'
 import ServiceSelect from '../../components/ServiceSelect'
+import { useTheme } from '@mui/material/styles'
 
 /**
 	* @name PáginaPrincipalFichas
@@ -25,6 +26,9 @@ function Records() {
     const [fechaImpresion, setFechaImpresion] = useState(null)
     const [mesFacturacion, setMesFacturacion] = useState(null)
     const [firma, setFirma] = useState(true)
+
+	const theme = useTheme()
+	const isLightMode = theme.palette.mode === 'light'
 
 	const handleServiceChange = (event) => {
 		setSelectedService(event.target.value)
@@ -176,16 +180,16 @@ function Records() {
 		<Box width={'100%'} padding={'10px'} minHeight='100vh' display={'flex'} justifyContent={'start'} alignItems={'center'} flexDirection={'column'}>
 			
 			<div className='records_title'>
-				<Typography mr={'12px'} textAlign={'center'} color={'#cff9e0'} fontSize={'2.2rem'}>Registro de fichas</Typography>
+				<Typography mr={'12px'} textAlign={'center'} color={isLightMode ? '#000000' : '#cff9e0'} fontSize={'2.2rem'}>Registro de fichas</Typography>
 			</div>
 			
-			<div className='records'>	 
+			<div className={isLightMode ? 'records__ligth' : 'records'}>	 
 
 				<Box className='records__checkbox' marginTop={'2rem'} display={'flex'} justifyContent={'center'} alignItems={'center'} width={'100%'}>
 
 					<Box display={'flex'} justifyContent={'center'} alignItems={'center'} flexDirection={'column'}>
 
-						<label htmlFor='package' style={{ textAlign: 'center', color: '#cff9e0', fontSize: '1.1rem', cursor: 'pointer' }}>Crear Paquete</label>
+						<label htmlFor='package' style={{ textAlign: 'center', color:isLightMode ? '#000000' : '#cff9e0', fontSize: '1.1rem', cursor: 'pointer' }}>Crear Paquete</label>
 						
 						<Tooltip
 							title={paqueteText} 
@@ -207,7 +211,7 @@ function Records() {
 
 					<Box display={'flex'} justifyContent={'center'} alignItems={'center'} flexDirection={'column'}>
 
-						<label htmlFor='individual' style={{ textAlign: 'center', color: '#cff9e0', fontSize: '1.1rem', cursor: 'pointer' }}>Crear Individuales</label>
+						<label htmlFor='individual' style={{ textAlign: 'center', color: isLightMode ? '#000000' : '#cff9e0', fontSize: '1.1rem', cursor: 'pointer' }}>Crear Individuales</label>
 
 						<Tooltip
 							title={individualesText} 
@@ -260,7 +264,7 @@ function Records() {
 									label='Fecha de corte'
 									value={fechaCorte}
 									onChange={(newValue) => { setfechaCorte(newValue), changeName() }}
-									sx={{ marginBottom:'20px', width:'100%', '& .MuiSvgIcon-root': { color: '#ffffff', }, '& .MuiInputLabel-root': { color: '#ffffff', }, '& .MuiInputBase-input': { color: '#ffffff', }, }}
+									sx={{ marginBottom:'20px', width:'100%', '& .MuiSvgIcon-root': { color:isLightMode ? '#000000' : '#ffffff', }, '& .MuiInputLabel-root': { color: isLightMode ? '#000000' : '#ffffff', }, '& .MuiInputBase-input': { color: isLightMode ? '#000000' : '#ffffff', }, }}
 								/>
 
 							</DemoContainer>
@@ -294,7 +298,7 @@ function Records() {
 							
 							<Box mt={'1rem'}>
 								<TextField
-									sx={{ width: '99%', '& .MuiInputLabel-root': { color: '#ffffff', }, '& .MuiInputBase-input': { color: '#ffffff', }, }}
+									sx={{ width: '99%', '& .MuiInputLabel-root': { color:isLightMode ? '#000000' : '#ffffff', }, '& .MuiInputBase-input': { color: isLightMode ? '#000000' : '#ffffff', }, }}
 									id='outlined-basic'
 									label='Folio existente'
 									variant='outlined'
@@ -319,7 +323,7 @@ function Records() {
 												label='Fecha de impresión'
 												value={fechaImpresion}
 												onChange={(newValue) => { setFechaImpresion(newValue) }}
-												sx={{ width:'100%', '& .MuiSvgIcon-root': { color: '#ffffff', }, '& .MuiInputLabel-root': { color: '#ffffff', }, '& .MuiInputBase-input': { color: '#ffffff', }, }}
+												sx={{ width:'100%', '& .MuiSvgIcon-root': { color: isLightMode ? '#000000' :'#ffffff', }, '& .MuiInputLabel-root': { color:isLightMode ? '#000000' : '#ffffff', }, '& .MuiInputBase-input': { color: isLightMode ? '#000000' : '#ffffff', }, }}
 											/>
 
 										</DemoContainer>
@@ -377,7 +381,7 @@ function Records() {
 
 								<Box display={'flex'} justifyContent={'center'} alignItems={'center'} flexDirection={'column'}>
 
-									<label htmlFor='package' style={{ textAlign: 'center', color: '#cff9e0', fontSize: '0.9rem', cursor: 'pointer' }}>Con Firma</label>
+									<label htmlFor='package' style={{ textAlign: 'center', color: isLightMode ? '#000000' :'#cff9e0', fontSize: '0.9rem', cursor: 'pointer' }}>Con Firma</label>
 
 									<Checkbox
 										id='package'	
@@ -392,7 +396,7 @@ function Records() {
 
 								<Box display={'flex'} justifyContent={'center'} alignItems={'center'} flexDirection={'column'}>
 
-									<label htmlFor='individual' style={{ textAlign: 'center', color: '#cff9e0', fontSize: '0.9rem', cursor: 'pointer' }}>Sin Firma</label>
+									<label htmlFor='individual' style={{ textAlign: 'center', color: isLightMode ? '#000000' : '#cff9e0', fontSize: '0.9rem', cursor: 'pointer' }}>Sin Firma</label>
 
 									<Checkbox	
 										id='individual'
@@ -416,7 +420,7 @@ function Records() {
 						<>
 
 							<Box mt={2}>
-								<Typography variant='body1' sx={{ color: '#fff' }}>
+								<Typography variant='body1' sx={{ color: isLightMode ? '#000000' : '#fff' }}>
 									Total de registros esperados: {registros.length}
 								</Typography>
 							</Box>
@@ -426,7 +430,7 @@ function Records() {
 
 								{fileName && (
 
-									<Typography variant='body1' sx={{ marginBottom: '1rem', color: '#fff' }}>
+									<Typography variant='body1' sx={{ marginBottom: '1rem', color: isLightMode ? '#000000' : '#fff' }}>
 										Archivo seleccionado: {fileName}
 									</Typography>
 
