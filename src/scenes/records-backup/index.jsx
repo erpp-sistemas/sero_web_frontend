@@ -7,6 +7,7 @@ import ChargeMessage from '../../components/Records/chargeMessage.jsx'
 import DownloadingIcon from '@mui/icons-material/Downloading'
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos'
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos'
+import { useTheme } from '@mui/material/styles'
 
 const Backup = () => {
     const [fileName, setFileName] = useState('')
@@ -15,9 +16,12 @@ const Backup = () => {
     const [nombre, setNombre] = useState('')
     const [backup, setBackup] = useState([])
     const [currentPage, setCurrentPage] = useState(1)
-    const [itemsPerPage] = useState(3) // Cambia aquí el número de elementos por página según necesites
-    const [searchTerm, setSearchTerm] = useState('') // Estado para el término de búsqueda
+    const [itemsPerPage] = useState(4) 
+    const [searchTerm, setSearchTerm] = useState('')
     const user = useSelector(state => state.user)
+
+	const theme = useTheme()
+	const isLightMode = theme.palette.mode === 'light'
 
     const handleFileUpload = (e) => {
         const file = e.target.files?.[0]
@@ -76,9 +80,9 @@ const Backup = () => {
 
     return (
         <Box minHeight='100vh' width={'auto'} display={'flex'} alignItems={'center'} justifyContent={'start'} flexDirection={'column'}>
-            <Typography className='records_impression__title' mb={'2rem'} textAlign={'center'} color={'#cff9e0'} fontSize={'2.5rem'}>Subir Respaldo de Fichas</Typography>
+            <Typography className='records_impression__title' mb={'2rem'} textAlign={'center'} color={isLightMode ? '#000000' :'#cff9e0'} fontSize={'2.5rem'}>Subir Respaldo de Fichas</Typography>
 
-            <div className='backups'>
+            <div className={isLightMode ? 'backups__ligth' : 'backups'} >
                 <Typography className='records_impression__title' mb={'2rem'} textAlign={'center'} color={'#fffff'} fontSize={'1.3rem'}>Para subir el respaldo de fichas finales a la nube es necesario que estas se encuentren comprimidas en formato .ZIP o .RAR </Typography>
                 <Typography className='records_impression__title' mb={'2rem'} textAlign={'center'} color={'#fffff'} fontSize={'1.3rem'}>En caso de necesitar ayuda para comprimir, haz click <a href="https://www.youtube.com/watch?v=ymvMnVfwOGI" style={{ color: '#00FF00', marginLeft: '2px' }} target="_blank" rel="noopener noreferrer"> AQUÍ</a></Typography>
 
@@ -95,7 +99,7 @@ const Backup = () => {
 
                 <Box mt={'2rem'} width={'70%'}>
                     {fileName && (
-                        <Typography variant='body1' sx={{ marginBottom: '1rem', color: '#fff' }}>
+                        <Typography variant='body1' sx={{ marginBottom: '1rem', color: isLightMode ? '#000000' : '#fff' }}>
                             Archivo seleccionado: {fileName}
                         </Typography>
                     )}
@@ -111,8 +115,8 @@ const Backup = () => {
                     <label htmlFor='file-upload'>
                         <Button 
                             sx={{
-                                border:'1px solid #cff9e0',
-                                color: '#cff9e0',
+                                border: isLightMode ? '1px solid #000000' : '1px solid #cff9e0',
+                                color: isLightMode ? '#000000' : '#cff9e0',
                             }}
                             component='span' 
                             fullWidth 
@@ -146,7 +150,7 @@ const Backup = () => {
             </div>
 
             { user.user_id !== 0 && (
-                <div className='table'>
+                <div className={isLightMode ? 'table__ligth' : 'table'}>
                     <div className='table__header'>
                         <h1 className='table__text'>Descarga de backups</h1>
                         <div>
@@ -157,7 +161,7 @@ const Backup = () => {
                                 className='table__header__input'  
                                 onChange={e => {
                                     setSearchTerm(e.target.value)
-                                    setCurrentPage(1) // Reset page to 1 on new search
+                                    setCurrentPage(1) 
                                 }}
                                 value={searchTerm}
                             />
@@ -170,7 +174,7 @@ const Backup = () => {
                                 currentItems.length === 0 
                                 ? <div>No hay respaldos disponibles</div> 
                                 : currentItems.map((respaldo, index) => (
-                                    <li className='table__list__li' key={index}>
+                                    <li className={isLightMode ? 'table__list__li__ligth' : 'table__list__li'} key={index}>
                                         {respaldo.nombre} 
                                         <button className='table__list__li__button'>
 											<a href={respaldo.url_respaldo}>
