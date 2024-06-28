@@ -510,9 +510,8 @@ console.log(data)
       setIsLoading(true);
   
       const workbook = new ExcelJS.Workbook();
-      const worksheet = workbook.addWorksheet("Registros Encontrados");
+      const worksheet = workbook.addWorksheet("Registros Encontrados");  
   
-      // Mapeo de cabeceras en inglés a nombres en español
       const columnHeaders = {
         name: "NOMBRE",
         date_capture: "FECHA",
@@ -525,8 +524,7 @@ console.log(data)
         not_located: "PREDIO NO LOCALIZADO",
         not_position: "GESTIONES SIN POSICION",
         total_not_photos: "GESTIONES SIN FOTO",
-        total_photos: "FOTOS TOMADAS",
-        // Agregar aquí más campos si es necesario
+        total_photos: "FOTOS TOMADAS",        
       };
   
       const addRowsToWorksheet = (data) => {
@@ -562,8 +560,6 @@ console.log(data)
       setIsLoading(false);
     }
   };
-  
-  
 
   return (
     <Box
