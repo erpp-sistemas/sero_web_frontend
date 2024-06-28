@@ -105,6 +105,7 @@ const Impression = () => {
 			url_fachada: registro.url_fachada,
 			paquete: paquete,
 			pagos: registro.pagos,
+			recibos: registro.recibos,
 			clave_catastral: registro.clave_catastral,
 			superficie_terreno: registro.superficie_terreno,
 			superficie_construccion: registro.superficie_construccion,
@@ -142,15 +143,12 @@ const Impression = () => {
 	}
 	
 	const handleRegistro = async (idPaquete) => {
-
 		try {
-
 			const paquetes = await tool.getRegistrosById(idPaquete)
 			const registrosAgrupados = {}
 			const cuentasParaEliminar = new Set()
 	
 			paquetes.forEach(registro => {
-
 				const { cuenta, activate } = registro
 				if (!registrosAgrupados[cuenta]) {
 					registrosAgrupados[cuenta] = { 
@@ -158,10 +156,8 @@ const Impression = () => {
 						cuenta, 
 						calle: registro.calle, 
 						id_local: registro.id_local, 
-						fecha_pago: registro.fecha_pago, 
 						colonia: registro.colonia, 
 						latitud: registro.latitud, 
-						recibo: registro.recibo, 
 						gestor: registro.gestor, 
 						fecha_gestion: registro.fecha_gestion, 
 						longitud: registro.longitud, 
@@ -190,14 +186,15 @@ const Impression = () => {
 					registrosAgrupados[cuenta].pagos.push({
 						descripcion: registro.descripcion || "",
 						descuentos: registro.descuentos || "",
-						total_pagado: registro.total_pagado || ""
+						total_pagado: registro.total_pagado || "",
+						fecha_pago: registro.fecha_pago || "", 
+						recibo: registro.recibo || ""
 					})
 				}
 	
 				if (activate === true) {
 					cuentasParaEliminar.add(cuenta)
 				}
-
 			})
 	
 			const totalFichas = Object.keys(registrosAgrupados).length
@@ -208,19 +205,16 @@ const Impression = () => {
 			})
 	
 			const registrosFaltantes = Object.keys(registrosAgrupados).length
-			
+			console.log(registrosAgrupados)
 			setRegistros(registrosAgrupados)
 			setRango(registrosFaltantes)
 			setCargando(false)
 			apiPaquetes()
-
+	
 		} catch (error) {
-
 			console.error('Ocurrió un error:', error.message)
 			setCargando(false)
-
 		}
-
 	}
 
 	useEffect(() => {
