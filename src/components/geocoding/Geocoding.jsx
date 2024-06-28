@@ -365,6 +365,7 @@ const Geocoding = () => {
       colonia: 'TOTOLTEPEC (EJEMPLO)',
       cp: 'cp 50245 (EJEMPLO)',
       municipio: 'TOLUCA (EJEMPLO)',
+      estado: 'EDOMEX',
     }]
 
   const handleCloseSnackbar = () => setSnackbar(null);

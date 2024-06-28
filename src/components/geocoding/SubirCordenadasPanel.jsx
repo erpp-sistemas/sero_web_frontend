@@ -80,6 +80,7 @@ const SubirCordenadasPanel = ({ setValue, value }) => {
     const data = { cuentas: cuentasSeleccionadas }
     subirCordenadas(data, plaza)
       .then(res => {
+        console.log(res)
         const Instance = [...dataGeocoding.porSubir]
         const InstanceSeleccion = [...cuentasSeleccionadas]
         const InstanceDomicilio = [...res.actualizadas_domicilio,...dataGeocoding.cordenadasActDomicilio]

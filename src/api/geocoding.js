@@ -35,22 +35,20 @@ export const obtener = async (data,plaza) => {
 }
 
 export const getAllKeys=async()=>{
-
     try {
         const response = await instance.get(`/geocode/apikeys/`)
         return response
     } catch (error) {
 		console.error(error)
     }
-
 }
 
 export const apartarKey=async(key,user)=>{ 
-   
     try {
         const response = await instance.post(`/geocode/apikeys/${user}`,{key:key})
         return response
     } catch (error) {
+        console.log(error)
         return error
     }
 
@@ -73,6 +71,32 @@ export const sumarConsultaApikey=async(key,user)=>{
         const response = await instance.post(`/geocode/apikeys/sumar/${user}`,{key:key})
         return response
     } catch (error) {
+        return error
+    }
+
+}
+
+
+export const guardarYutlizar=async(key)=>{ 
+   
+    try {
+        const response = await instance.post(`/geocode/apikeys/nueva/`,{apikey:key})
+       
+        return response 
+    } catch (error) {
+       
+        return error
+    }
+
+}
+export const deleteApikey=async(key)=>{ 
+    
+    try {
+        const response = await instance.delete(`/geocode/apikeys/${key}`)
+      
+        return response 
+    } catch (error) {
+     
         return error
     }
 
