@@ -10,15 +10,20 @@ import { DataGrid,
   GridToolbarExport,  
   GridToolbarFilterButton, } from '@mui/x-data-grid';
 import Viewer from 'react-viewer';
-import { AccessTime, CalendarToday, Flag, NotListedLocation, Photo, Search, TaskAlt, ViewAgenda } from "@mui/icons-material";
+import { AccessTime, CalendarToday, Download, Flag, NotListedLocation, Photo, Search, TaskAlt, ViewAgenda } from "@mui/icons-material";
 import { LinearProgress } from '@mui/material';
 import PopupViewPositionDailyWorkSummary from '../../components/CoordinationDashboard/PopupViewDailyWorkSummary.jsx'
+import LoadingModal from '../../components/LoadingModal.jsx'
+import * as ExcelJS from "exceljs";
+
 
 function DataGridManagementByManager({data, placeId, serviceId, proccessId}) {
 
   if (!data) {
     return null;
 }
+
+console.log(data)
 
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -31,6 +36,7 @@ function DataGridManagementByManager({data, placeId, serviceId, proccessId}) {
 
   const [noResults, setNoResults] = useState(false);
   const [searchPerformed, setSearchPerformed] = useState(false);
+  const [isLoading, setIsLoading] = useState(false)
 
   const handleOpenPopup = (userId, dateCapture) => {
     setPopupData({ userId, dateCapture });
@@ -198,6 +204,82 @@ function DataGridManagementByManager({data, placeId, serviceId, proccessId}) {
         renderCell: (params) => {
           
           const percentage = (params.row.located / params.row.total_procedures) * 100 || 0;
+          
+          let progressColor;
+          if (percentage <= 33) {
+            progressColor = 'error';
+          } else if (percentage <= 66) {
+            progressColor = 'warning';
+          } else {
+            progressColor = 'secondary';
+          }
+          return (
+           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '90px' }}>
+             <Typography variant="body1" sx={{ fontWeight: 'bold', fontSize: '1.2em' }}>
+                {params.value}
+              </Typography>
+            <LinearProgress
+              variant="determinate"
+              value={percentage}
+              sx={{ width: '60%', height: '8px' }}
+              style={{ marginTop: '5px' }}
+              color={progressColor}
+            />
+             <Typography variant="body1" sx={{ fontSize: '0.8em' }}>
+             {`${Math.round(percentage)}%`}
+            </Typography>
+          </div>
+          );
+        }
+      },
+      { 
+        field: 'vacant_lot',
+        renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>{"PREDIO BALDIO"}</strong>
+        ),
+        width: 120,
+        editable: false,
+        renderCell: (params) => {
+          
+          const percentage = (params.row.vacant_lot / params.row.total_procedures) * 100 || 0;
+          
+          let progressColor;
+          if (percentage <= 33) {
+            progressColor = 'error';
+          } else if (percentage <= 66) {
+            progressColor = 'warning';
+          } else {
+            progressColor = 'secondary';
+          }
+          return (
+           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '90px' }}>
+             <Typography variant="body1" sx={{ fontWeight: 'bold', fontSize: '1.2em' }}>
+                {params.value}
+              </Typography>
+            <LinearProgress
+              variant="determinate"
+              value={percentage}
+              sx={{ width: '60%', height: '8px' }}
+              style={{ marginTop: '5px' }}
+              color={progressColor}
+            />
+             <Typography variant="body1" sx={{ fontSize: '0.8em' }}>
+             {`${Math.round(percentage)}%`}
+            </Typography>
+          </div>
+          );
+        }
+      },
+      { 
+        field: 'abandoned_property',
+        renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>{"PREDIO ABANDONADO"}</strong>
+        ),
+        width: 150,
+        editable: false,
+        renderCell: (params) => {
+          
+          const percentage = (params.row.abandoned_property / params.row.total_procedures) * 100 || 0;
           
           let progressColor;
           if (percentage <= 33) {
@@ -423,6 +505,66 @@ function DataGridManagementByManager({data, placeId, serviceId, proccessId}) {
     setSearchTerm(event.target.value.toLowerCase());
   };
 
+  const handleDownloadExcelDataGrid = async () => {
+    try {
+      setIsLoading(true);
+  
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("Registros Encontrados");
+  
+      // Mapeo de cabeceras en inglés a nombres en español
+      const columnHeaders = {
+        name: "NOMBRE",
+        date_capture: "FECHA",
+        first_and_last_management: "PRIMERA Y ULTIMA GESTION",
+        hours_worked: "HORAS TRABAJADAS",
+        total_procedures: "GESTIONES REALIZADAS",
+        located: "PREDIO LOCALIZADO",
+        vacant_lot: "PREDIO BALDIO",
+        abandoned_property: "PREDIO ABANDONADO",
+        not_located: "PREDIO NO LOCALIZADO",
+        not_position: "GESTIONES SIN POSICION",
+        total_not_photos: "GESTIONES SIN FOTO",
+        total_photos: "FOTOS TOMADAS",
+        // Agregar aquí más campos si es necesario
+      };
+  
+      const addRowsToWorksheet = (data) => {
+        const headers = Object.keys(columnHeaders);
+        const headerRow = headers.map(header => columnHeaders[header]);
+        worksheet.addRow(headerRow);
+  
+        data.forEach((row) => {
+          const values = headers.map((header) => row[header]);
+          worksheet.addRow(values);
+        });
+      };
+  
+      if (filteredUsers.length > 0) {
+        addRowsToWorksheet(filteredUsers);
+      } else {
+        addRowsToWorksheet(data);
+      }
+  
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `Registros_Asistencia.xlsx`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error:", error);
+      setIsLoading(false);
+    }
+  };
+  
+  
+
   return (
     <Box
       id="grid-1"
@@ -430,7 +572,8 @@ function DataGridManagementByManager({data, placeId, serviceId, proccessId}) {
       gridTemplateColumns="repeat(12, 1fr)"
       gridAutoRows="450px"
       gap="15px"
-    >   
+    >
+      <LoadingModal open={isLoading}/>
       <Box
         gridColumn='span 12'
         backgroundColor='rgba(128, 128, 128, 0.1)'
@@ -465,6 +608,19 @@ function DataGridManagementByManager({data, placeId, serviceId, proccessId}) {
                 )}
                 
               </FormControl>
+            </Grid>
+            <Grid item xs={2}>
+              <Button 
+                variant="outlined"                             
+                color="secondary"                            
+                onClick={() => {
+                  handleDownloadExcelDataGrid();                    
+                }}
+                size="small"
+                startIcon={<Download/>}
+                >                                                        
+                Exportar
+              </Button>
             </Grid>
            </Grid>
           <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>              
