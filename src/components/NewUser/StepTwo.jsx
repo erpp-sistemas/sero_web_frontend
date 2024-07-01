@@ -2,11 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { placeByUserIdRequest } from '../../api/place.js';
 import { placeServiceByUserIdRequest } from '../../api/service.js';
 import { placeServiceProcessByUserIdRequest } from '../../api/process.js';
-import { Card, CardContent, Avatar, Typography, Chip, Box, Divider, Stack } from '@mui/material';
+import { Card, CardContent, Avatar, Typography, Chip, Box, Divider, Stack, useTheme } from '@mui/material';
 import { CardActionArea } from '@mui/material';
 import { useSelector } from 'react-redux'
 import Button from '@mui/material/Button';
 import KeyboardTabIcon from '@mui/icons-material/KeyboardTab';
+import { tokens } from "../../theme";
+import LoadingModal from '../../components/LoadingModal.jsx'
+import CustomAlert from '../../components/CustomAlert.jsx'
 
 function StepTwo({ onNextTwo, onFormDataTwo }) {
     const [places, setPlaces] = useState([]);
@@ -16,6 +19,12 @@ function StepTwo({ onNextTwo, onFormDataTwo }) {
     const [processes, setProcesses] = useState([]);
     const [selectedProcesses, setSelectedProcesses] = useState({});
     const user = useSelector(state => state.user);
+    const theme = useTheme();
+    const colors = tokens(theme.palette.mode);
+    const [isLoading, setIsLoading] = useState(false)
+    const [alertOpen, setAlertOpen] = useState(false);
+    const [alertType, setAlertType] = useState("info");
+    const [alertMessage, setAlertMessage] = useState("");
 
     const getPlaces = async (user_id) => {
         try {
@@ -94,7 +103,7 @@ function StepTwo({ onNextTwo, onFormDataTwo }) {
 
             const updatedProcesses = processes.map(process =>
                 process.process_id === process_id
-                ? { ...process, active: !process.active } // Toggle active state
+                ? { ...process, active: !process.active }
                 : process
             );
             setProcesses(updatedProcesses);
@@ -106,30 +115,51 @@ function StepTwo({ onNextTwo, onFormDataTwo }) {
     const handleSubmit = (e) => {
       e.preventDefault();
 
-      onNextTwo(selectedProcesses);
-      onFormDataTwo(selectedProcesses);
+      const transformedData = transformData(selectedProcesses);
+
+      if (transformedData.length === 0) {
+        setAlertOpen(true)
+        setAlertType("error")
+        setAlertMessage("¡Error! Debes seleccionar al menos un proceso.")
+        //console.log('Debes seleccionar al menos un proceso.');
+        return;
+    }
+
+      onNextTwo(transformedData);
+      onFormDataTwo(transformedData);
+    };
+
+    const transformData = (selectedProcesses) => {
+        const transformedData = [];
+    
+        Object.keys(selectedProcesses).forEach(placeId => {
+            Object.keys(selectedProcesses[placeId]).forEach(serviceId => {
+                selectedProcesses[placeId][serviceId].forEach(processId => {
+                    transformedData.push({ placeId: parseInt(placeId), serviceId: parseInt(serviceId), processId: parseInt(processId) });
+                });
+            });
+        });
+    
+        return transformedData;
     };
 
     return (
       <form onSubmit={handleSubmit}>
         <div>
+        <LoadingModal open={isLoading}/>
+            <CustomAlert
+              alertOpen={alertOpen}
+              type={alertType}
+              message={alertMessage}
+              onClose={setAlertOpen}
+            />
             <Typography variant="h5" gutterBottom>
-                Step Two
+            Selecciona la plaza
             </Typography>
-            <Box mb={2} >
-                <Card variant="outlined">
-                    <Box sx={{ p: 1 }}>
-                        <Stack direction="row" justifyContent="space-between" alignItems="center">
-                            <Typography gutterBottom variant="h5" component="div">
-                                Plazas
-                            </Typography>
-                        </Stack>
-                    </Box>
-                    <Divider />
-                    <Box sx={{ p: 1}} >
-                        <Typography gutterBottom variant="body2">
-                            Selecciona la plaza
-                        </Typography>
+            <Divider sx={{ backgroundColor: '#5EBFFF' }} />
+            <Box mb={2} mt={1} >
+                <Card variant="outlined" sx={{ backgroundColor: 'transparent', boxShadow: 'none', border: 'none' }}>                    
+                    <Box sx={{ p: 1}} >                        
                         <Stack direction="row" spacing={1}>
                             <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap' }}>
                                 {places.map(place => (
@@ -141,7 +171,7 @@ function StepTwo({ onNextTwo, onFormDataTwo }) {
                                                 display: 'flex',
                                                 flexDirection: 'column',
                                                 justifyContent: 'space-between',
-                                                backgroundColor: selectedPlace === place.place_id ? 'green' : ''
+                                                backgroundColor: selectedPlace === place.place_id ? theme.palette.secondary.main : 'rgba(255, 255, 255, 0.1)',
                                             }}
                                             onClick={() => handleCardClick(place.place_id)}
                                         >
@@ -172,20 +202,13 @@ function StepTwo({ onNextTwo, onFormDataTwo }) {
                     </Box>
                 </Card>
             </Box>
-            <Box mt={2}>
-                <Card variant="outlined">
-                    <Box sx={{ p: 1 }}>
-                        <Stack direction="row" justifyContent="space-between" alignItems="center">
-                            <Typography gutterBottom variant="h5" component="div">
-                                Servicios
-                            </Typography>
-                        </Stack>
-                    </Box>
-                    <Divider />
-                    <Box sx={{ p: 1 }}>
-                        <Typography gutterBottom variant="body2">
-                            Selecciona un servicio
-                        </Typography>
+            <Typography variant="h5" gutterBottom>
+            Selecciona un servicio
+            </Typography>
+            <Divider sx={{ backgroundColor: '#5EBFFF' }} />
+            <Box mb={2} mt={1}>
+                <Card variant="outlined" sx={{ backgroundColor: 'transparent', boxShadow: 'none', border: 'none' }}>                    
+                    <Box sx={{ p: 1 }}>                        
                         <Stack direction="row" spacing={1}>
                             <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap' }}>
                                 {services.map(service => (
@@ -193,7 +216,7 @@ function StepTwo({ onNextTwo, onFormDataTwo }) {
                                         <Chip
                                             label={service.name}
                                             clickable
-                                            color={selectedService === service.service_id ? "success" : (service.active ? "success" : "default")}
+                                            color={selectedService === service.service_id ? "secondary" : (service.active ? "secondary" : "default")}
                                             onClick={() => handleServiceChipClick(service.service_id)}
                                         />
                                     </div>
@@ -203,21 +226,13 @@ function StepTwo({ onNextTwo, onFormDataTwo }) {
                     </Box>
                 </Card>
             </Box>
-
-            <Box mt={2}>
-                <Card variant="outlined">
-                    <Box sx={{ p: 1 }}>
-                        <Stack direction="row" justifyContent="space-between" alignItems="center">
-                            <Typography gutterBottom variant="h5" component="div">
-                                Procesos
-                            </Typography>
-                        </Stack>
-                    </Box>
-                    <Divider />
-                    <Box sx={{ p: 1 }}>
-                        <Typography gutterBottom variant="body2">
-                            Procesos relacionados
-                        </Typography>
+            <Typography variant="h5" gutterBottom>
+            selecciona los procesos
+            </Typography>
+            <Divider sx={{ backgroundColor: '#5EBFFF' }} />
+            <Box mt={1}>
+                <Card variant="outlined" sx={{ backgroundColor: 'transparent', boxShadow: 'none', border: 'none' }}>
+                    <Box sx={{ p: 1 }}>                        
                         <Stack direction="row" spacing={1}>
                             <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap' }}>
                                 {processes.map(process => (
@@ -225,7 +240,7 @@ function StepTwo({ onNextTwo, onFormDataTwo }) {
                                         <Chip
                                             label={process.name}
                                             clickable
-                                            color={process.active ? "success" : "default"}
+                                            color={process.active ? "secondary" : "default"}
                                             onClick={() => handleProcessChipClick(process.process_id)}
                                         />
                                     </div>
@@ -234,21 +249,6 @@ function StepTwo({ onNextTwo, onFormDataTwo }) {
                         </Stack>
                     </Box>
                 </Card>
-            </Box>
-
-            <Box mt={2}>
-                <Typography gutterBottom variant="h5" component="div">
-                    Procesos Seleccionados
-                </Typography>
-                {Object.keys(selectedProcesses).map(placeId => (
-                    Object.keys(selectedProcesses[placeId]).map(serviceId => (
-                        selectedProcesses[placeId][serviceId].length > 0 && (
-                            <div key={`${placeId}-${serviceId}`}>
-                                <Typography variant="body1">Plaza: {places.find(p => p.place_id === placeId)?.name}, Servicio: {services.find(s => s.service_id === serviceId)?.name}, Procesos: {selectedProcesses[placeId][serviceId].join(', ')}</Typography>
-                            </div>
-                        )
-                    ))
-                ))}
             </Box>
             <Box mt={2}>
                 <Button type="submit" sx={{ bgcolor: 'secondary.main', '&:hover': { bgcolor: 'secondary.dark' } }} variant="contained" color="secondary" endIcon={<KeyboardTabIcon />}>
