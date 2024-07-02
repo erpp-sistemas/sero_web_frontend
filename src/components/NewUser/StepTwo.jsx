@@ -28,11 +28,14 @@ function StepTwo({ onNextTwo, onFormDataTwo }) {
 
     const getPlaces = async (user_id) => {
         try {
+            setIsLoading(true)
             const response = await placeByUserIdRequest(user_id);
             setPlaces(response.data);
             console.log(response.data);
+            setIsLoading(false)
         } catch (error) {
             console.error("Error fetching places:", error);
+            setIsLoading(false)
         }
     };
 
