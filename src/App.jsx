@@ -1,106 +1,107 @@
-import { useState, useEffect } from "react";
-import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
-import { CssBaseline, ThemeProvider } from "@mui/material";
-import { ColorModeContext, useMode } from "./theme";
-import { LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { esES } from '@mui/x-date-pickers/locales';
-import 'dayjs/locale/es';
-import { useSelector } from 'react-redux';
-import { verifyTokenRequest } from "./api/auth";
+import { useState, useEffect } from "react"
+import { Routes, Route, useNavigate, useLocation } from "react-router-dom"
+import { CssBaseline, ThemeProvider } from "@mui/material"
+import { ColorModeContext, useMode } from "./theme"
+import { LocalizationProvider } from '@mui/x-date-pickers'
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+import { esES } from '@mui/x-date-pickers/locales'
+import 'dayjs/locale/es'
+import { useSelector } from 'react-redux'
+import { verifyTokenRequest } from "./api/auth"
 
-import Topbar from "./scenes/global/Topbar";
-import Sidebar from "./scenes/global/Sidebar";
-import SidebarMap from "./scenes/global/SidebarMap";
-import Dashboard from "./scenes/dashboard-direccion";
-import Team from "./scenes/team";
-import Invoices from "./scenes/invoices";
-import Contacts from "./scenes/contacts";
-import Bar from "./scenes/bar";
-import Form from "./scenes/form";
-import Line from "./scenes/line";
-import Pie from "./scenes/pie";
-import FAQ from "./scenes/faq";
-import Geography from "./scenes/geography";
-import Calendar from "./scenes/calendar/calendar";
-import Home from './scenes/home';
-import Login from './scenes/login';
-import NewUser from './scenes/new-user';
-import MapList from './scenes/maps';
-import Map from './scenes/map';
-import Maintenance from './scenes/maintenance';
-import WorkAssignment from './scenes/assignment';
-import DashboardCoordinator from './scenes/dashboard-coordinacion';
-import Geocoding from './scenes/geocoding';
-import UsersList from './scenes/users-list';
-import UserNew from './scenes/user-new';
-import WorkAttendance from './scenes/work-attendance';
-import AccountHistory from "./scenes/account-history";
-import ValidPayment from './scenes/valid-payment';
-import Task from "./scenes/task";
-import Service from "./scenes/service";
-import Process from "./scenes/process";
-import Roles from "./scenes/roles";
-import Menu from "./scenes/menu";
-import Permission from "./scenes/permission";
-import Places from "./scenes/places";
-import CoordinationDashboard from './scenes/coordination-dashboard';
-import TrafficLight from './scenes/traffic-light';
-import SurveyReport from './scenes/survey-report';
-import Records from './scenes/records';
-import RecordsBackup from './scenes/records-backup';
-import RecordsImpression from './scenes/records-impression';
+import Topbar from "./scenes/global/Topbar"
+import Sidebar from "./scenes/global/Sidebar"
+import SidebarMap from "./scenes/global/SidebarMap"
+import Dashboard from "./scenes/dashboard-direccion"
+import Team from "./scenes/team"
+import Invoices from "./scenes/invoices"
+import Contacts from "./scenes/contacts"
+import Bar from "./scenes/bar"
+import Form from "./scenes/form"
+import Line from "./scenes/line"
+import Pie from "./scenes/pie"
+import FAQ from "./scenes/faq"
+import Geography from "./scenes/geography"
+import Calendar from "./scenes/calendar/calendar"
+import Home from './scenes/home'
+import Login from './scenes/login'
+import NewUser from './scenes/new-user'
+import MapList from './scenes/maps'
+import Map from './scenes/map'
+import Maintenance from './scenes/maintenance'
+import WorkAssignment from './scenes/assignment'
+import DashboardCoordinator from './scenes/dashboard-coordinacion'
+import Geocoding from './scenes/geocoding'
+import UsersList from './scenes/users-list'
+import UserNew from './scenes/user-new'
+import WorkAttendance from './scenes/work-attendance'
+import AccountHistory from "./scenes/account-history"
+import ValidPayment from './scenes/valid-payment'
+import Task from "./scenes/task"
+import Service from "./scenes/service"
+import Process from "./scenes/process"
+import Roles from "./scenes/roles"
+import Menu from "./scenes/menu"
+import Permission from "./scenes/permission"
+import Places from "./scenes/places"
+import CoordinationDashboard from './scenes/coordination-dashboard'
+import TrafficLight from './scenes/traffic-light'
+import SurveyReport from './scenes/survey-report'
+import Records from './scenes/records'
+import RecordsBackup from './scenes/records-backup'
+import RecordsImpression from './scenes/records-impression'
+import Inventory from './scenes/inventory'
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [theme, colorMode] = useMode();
-  const [isSidebar, setIsSidebar] = useState(true);
-  const [checkingAuth, setCheckingAuth] = useState(true);  // Nuevo estado para manejar la carga inicial
-  let location = useLocation();
-  const navigate = useNavigate();
-  const mapa_seleccionado = useSelector((state) => state.plaza_mapa);
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [theme, colorMode] = useMode()
+  const [isSidebar, setIsSidebar] = useState(true)
+  const [checkingAuth, setCheckingAuth] = useState(true)
+  let location = useLocation()
+  const navigate = useNavigate()
+  const mapa_seleccionado = useSelector((state) => state.plaza_mapa)
 
   useEffect(() => {
-    checkLogin();
-  }, []);
+    checkLogin()
+  }, [])
 
   async function checkLogin() {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('token')
 
     if (!token) {
-      setIsAuthenticated(false);
-      setCheckingAuth(false);  // Finaliza la verificación
-      return;
+      setIsAuthenticated(false)
+      setCheckingAuth(false)
+      return
     }
 
     try {
-      const res = await verifyTokenRequest(token);
+      const res = await verifyTokenRequest(token)
 
       if (!res.data) {
-        setIsAuthenticated(false);
+        setIsAuthenticated(false)
       } else {
-        setIsAuthenticated(true);
+        setIsAuthenticated(true)
       }
 
     } catch (error) {
-      setIsAuthenticated(false);
+      setIsAuthenticated(false)
     } finally {
-      setCheckingAuth(false);  // Finaliza la verificación
+      setCheckingAuth(false)
     }
   }
 
   useEffect(() => {
     if (!checkingAuth) {
       if (!isAuthenticated && location.pathname !== '/') {
-        navigate('/');
+        navigate('/')
       } else if (isAuthenticated && location.pathname === '/') {
-        navigate('/home');
+        navigate('/home')
       }
     }
-  }, [isAuthenticated, navigate, location.pathname, checkingAuth]);
+  }, [isAuthenticated, navigate, location.pathname, checkingAuth])
 
   if (checkingAuth) {
-    return null; // O un componente de carga si lo prefieres
+    return null
   }
 
   return (
@@ -164,6 +165,7 @@ function App() {
                         <Route path="/records" element={<Records />} />
                         <Route path="/backup" element={<RecordsBackup />} />
                         <Route path="/impresion" element={<RecordsImpression />} />
+                        <Route path="/inventario" element={<Inventory />} />
                       </Routes>
                     </main>
                   </div>

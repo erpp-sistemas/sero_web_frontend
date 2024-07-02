@@ -1,11 +1,8 @@
-import axios from "axios"
-
-const baseURL = 'https://erpp.center/sero-web'
-// const baseURL = 'http://localhost:3001'
+import instance from "../api/axios"
 
 const getPaquetes = async () => {
 
-    const response = await axios.get(`${baseURL}/api/records/paquete`)
+    const response = await instance.get(`/records/paquete`)
 	const data = response.data
 	const paquetes = data.data.map((item) => ({
 		id: item.id,
@@ -29,7 +26,7 @@ const getPaquetes = async () => {
 const getRegistrosById = async (idPaquete) => {
 
 	try {
-		const response = await axios.get(`${baseURL}/api/records/registro/${idPaquete}`)
+		const response = await instance.get(`/records/registro/${idPaquete}`)
 		const data = response.data
 		return(data.data)
 
@@ -41,10 +38,10 @@ const getRegistrosById = async (idPaquete) => {
 
 const createRecords = async (data) => {
 	
-	const url=`${baseURL}/api/records/registro/pdf`
+	const url=`/records/registro/pdf`
 
 	try{
-		const res=await axios.post(url,data)
+		const res=await instance.post(url,data)
 		return res.status
 	}catch(error){
 		false
@@ -54,10 +51,10 @@ const createRecords = async (data) => {
 
 const deleteRecords = async (id) => {
 	
-	const url=`${baseURL}/api/records/paquete/delete/${id}`
+	const url=`/records/paquete/delete/${id}`
 
 	try{
-		const res=await axios.delete(url)
+		const res=await instance.delete(url)
 		return res.status
 	}catch(error){
 		false
@@ -80,7 +77,7 @@ const downloadZip = async (idPaq, paquetes) => {
 	const usuario = selectedPaquete.usuario
 
 	try {
-		const response = await axios.get(`${baseURL}/api/records/download/${usuario}/${nombreCarpeta}`, {
+		const response = await instance.get(`/records/download/${usuario}/${nombreCarpeta}`, {
 			responseType: 'blob', 
 		})
 
@@ -100,7 +97,7 @@ const downloadZip = async (idPaq, paquetes) => {
 const updateActiveStatus = async (cuenta) => {
 
 	try {
-		const response = await axios.put(`${baseURL}/api/records/registro/activate/${cuenta}`)
+		const response = await instance.put(`/records/registro/activate/${cuenta}`)
 		const data = response.data
 		return(data.data)
 
@@ -113,7 +110,7 @@ const updateActiveStatus = async (cuenta) => {
 const updateActivePaquete = async (id) => {
 
 	try {
-		const response = await axios.put(`${baseURL}/api/records/paquete/activate/${id}`)
+		const response = await instance.put(`/records/paquete/activate/${id}`)
 		const data = response.data
 		return(data.data)
 
