@@ -186,7 +186,7 @@ const Impression = () => {
 					registrosAgrupados[cuenta].pagos.push({
 						descripcion: registro.descripcion || "",
 						descuentos: registro.descuentos || "",
-						total_pagado: registro.total_pagado || "",
+						total_pagado: registro.total_pagado || 0,
 						fecha_pago: registro.fecha_pago || "", 
 						recibo: registro.recibo || ""
 					})
@@ -205,7 +205,6 @@ const Impression = () => {
 			})
 	
 			const registrosFaltantes = Object.keys(registrosAgrupados).length
-			console.log(registrosAgrupados)
 			setRegistros(registrosAgrupados)
 			setRango(registrosFaltantes)
 			setCargando(false)
