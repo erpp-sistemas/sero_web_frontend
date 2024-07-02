@@ -166,6 +166,7 @@ const Impression = () => {
 						status_previo: registro.status_previo, 
 						tarea_gestionada: registro.tarea_gestionada, 
 						tipo_gestion: registro.tipo_gestion, 
+						serie_medidor: registro.serie_medidor,
 						tipo_servicio: registro.tipo_servicio, 
 						tipo_tarifa: registro.tipo_tarifa, 
 						total_pagado: registro.total_pagado, 
