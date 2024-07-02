@@ -103,7 +103,7 @@ const formatearFila = async (data, folio) => {
 		descripcion: 'descripcion',
 		promocion: 'promocion',
 		fecha_pago: 'fecha de pago',
-		total_pagado: 'gran_total',
+		total_pagado: 'total_pagado',
 		porcentaje_paga: '% pagado',
 		porcentaje_descuento: '% descuento',
 		descuento: '$ descuento',
