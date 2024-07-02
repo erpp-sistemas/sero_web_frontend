@@ -91,7 +91,7 @@ const formatearFila = async (data, folio) => {
 		longitud: 'longitud',
 		tipo_servicio: 'tipo_de_servicio',
 		tipo_tarifa: 'tipo_tarifa',
-		medidor: 'serie_medidor',
+		serie_medidor: 'serie_medidor',
 		servicio: 'servicio',
 		recibo: 'recibo',
 		clave_catastral: 'clave_catastral',
