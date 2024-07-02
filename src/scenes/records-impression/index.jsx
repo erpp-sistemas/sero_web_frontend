@@ -97,6 +97,7 @@ const Impression = () => {
 			longitud: registro.longitud,
 			tarea_gestionada: registro.tarea_gestionada,
 			gestor: registro.gestor,
+			serie_medidor: registro.serie_medidor,
 			fecha_gestion: registro.fecha_gestion,
 			tipo_gestion: registro.tipo_gestion,
 			recibo: registro.recibo,
