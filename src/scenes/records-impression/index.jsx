@@ -9,6 +9,7 @@ import ModalDelete from '../../components/Records/modalDelete.jsx'
 import { useSelector } from 'react-redux'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { useTheme } from '@mui/material/styles'
+import * as XLSX from 'xlsx'
 
 /**
 	* @name CreacionImpresionFichas
@@ -159,6 +160,7 @@ const Impression = () => {
 						id_local: registro.id_local, 
 						colonia: registro.colonia, 
 						latitud: registro.latitud, 
+						folio: registro.folio,
 						gestor: registro.gestor, 
 						fecha_gestion: registro.fecha_gestion, 
 						longitud: registro.longitud, 
@@ -217,6 +219,41 @@ const Impression = () => {
 			setCargando(false)
 		}
 	}
+
+	const createExcel = () => {
+		const data = Object.values(registros).map(registro => ({
+			cuenta: registro.cuenta,
+			folio: registro.folio,
+			calle: registro.calle,
+			colonia: registro.colonia,
+			latitud: registro.latitud,
+			longitud: registro.longitud,
+			propietario: registro.propietario,
+			servicio: registro.servicio,
+			tarea_gestionada: registro.tarea_gestionada,
+			gestor: registro.gestor,
+			fecha_gestion: registro.fecha_gestion,
+			medidor: registro.medidor,
+			tipo_servicio: registro.tipo_servicio,
+			tipo_tarifa: registro.tipo_tarifa,
+			total_pagado: registro.total_pagado,
+			url_evidencia: registro.url_evidencia,
+			url_fachada: registro.url_fachada,
+			clave_catastral: registro.clave_catastral,
+			superficie_terreno: registro.superficie_terreno,
+			superficie_construccion: registro.superficie_construccion,
+			valor_terreno: registro.valor_terreno,
+			valor_construccion: registro.valor_construccion,
+			valor_catastral: registro.valor_catastral,
+			pagos: registro.pagos.map(pago => `Descripción: ${pago.descripcion}, Descuentos: ${pago.descuentos}, Total Pagado: ${pago.total_pagado}, Fecha Pago: ${pago.fecha_pago}, Recibo: ${pago.recibo}`).join('; ')
+		}))
+	
+		const worksheet = XLSX.utils.json_to_sheet(data)
+		const workbook = XLSX.utils.book_new()
+		XLSX.utils.book_append_sheet(workbook, worksheet, 'Registros')
+		
+		XLSX.writeFile(workbook, 'registros.xlsx')
+		}
 
 	useEffect(() => {
 		if (user && user.user_id) {
@@ -308,17 +345,24 @@ const Impression = () => {
 					{ registro ? <Button variant="text" sx={{ marginTop:'30px', width:'100%', maxWidth:'200px', color:  isLightMode ? '#000000' : 'white', fontWeight:'600', fontSize:'.8rem'}} fullWidth onClick={() => setOpenPreview(true)}> VER PREVIEW </Button> :false }
 
 					{ rango > 0 ? 
-						<Tooltip
-							title={generarText} 
-							enterDelay={100} 
-							leaveDelay={200}	
-						>
-							<span>
-								<Button onClick={() => handleStartUp()} variant="contained" sx={{ marginTop:'30px', width:'100%', maxWidth:'250px', color:'white', fontWeight:'600', fontSize:'.8rem'}} fullWidth> GENERAR FICHAS PDF </Button> 
-							</span>
-						</Tooltip>
+						<>
+							<Tooltip
+								title={generarText} 
+								enterDelay={100} 
+								leaveDelay={200}	
+							>
+								<span>
+									<Button onClick={() => handleStartUp()} variant="contained" sx={{ marginTop:'30px', width:'100%', maxWidth:'250px', color:'white', fontWeight:'600', fontSize:'.8rem'}} fullWidth> GENERAR FICHAS PDF </Button> 
+								</span>
+
+							</Tooltip>
+
+							<Button onClick={() => createExcel()} variant="contained" sx={{ marginTop:'30px', width:'100%', maxWidth:'150px', color:'white', fontWeight:'600', fontSize:'.8rem'}}>Crear Excel</Button>
+						</>
 						: false 
 					}
+
+					
 
 					{
 						Object.keys(paquete).length !== 0 ? (
