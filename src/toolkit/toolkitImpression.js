@@ -62,36 +62,32 @@ const deleteRecords = async (id) => {
 
 }
 
-const downloadZip = async (idPaq, paquetes) => {
+const downloadFiles = async (idPaq, paquetes) => {
+    if (idPaq === 0) {
+        console.warn('No se ha seleccionado ningún paquete')
+        return
+    }
 
-	if (idPaq === 0) {
-		console.warn('No se ha seleccionado ningún paquete')
-		return
-	}
-	const selectedPaquete = paquetes.find(item => item.id === idPaq)
-	if (!selectedPaquete) {
-		console.error('Paquete seleccionado no encontrado')
-		return
-	}
-	const nombreCarpeta = selectedPaquete.nombre
-	const usuario = selectedPaquete.usuario
+    const selectedPaquete = paquetes.find(item => item.id === idPaq)
+    if (!selectedPaquete) {
+        console.error('Paquete seleccionado no encontrado')
+        return
+    }
 
-	try {
-		const response = await instance.get(`/records/download/${usuario}/${nombreCarpeta}`, {
-			responseType: 'blob', 
-		})
+    const nombreCarpeta = selectedPaquete.nombre
+    const usuario = selectedPaquete.usuario
 
-		const url = window.URL.createObjectURL(new Blob([response.data]))
-		const link = document.createElement('a')
-		link.href = url
-		link.setAttribute('download', `${nombreCarpeta}.zip`)
-		document.body.appendChild(link)
-		link.click()
-		link.remove()
-	} catch (error) {
-		console.error('Error al descargar el archivo:', error)
-	}
-	
+    try {
+        const response = await instance.get(`/records/download/${usuario}/${nombreCarpeta}`, {
+            responseType: 'blob',
+        })
+		console.log(response)
+        alert('Descarga completada correctamente')
+
+    } catch (error) {
+        console.error('Error al descargar el archivo:', error)
+        alert('Error al descargar el archivo. Por favor, inténtelo de nuevo.')
+    }
 }
 
 const updateActiveStatus = async (cuenta) => {
@@ -126,6 +122,6 @@ export default {
 	createRecords,
 	updateActiveStatus,
 	updateActivePaquete,
-	downloadZip,
+	downloadFiles,
 	deleteRecords
 }

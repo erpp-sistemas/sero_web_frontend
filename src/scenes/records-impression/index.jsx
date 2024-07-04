@@ -57,7 +57,7 @@ const Impression = () => {
 		setCargando(true)
 	
 		try {
-			await tool.downloadZip(idPaq, paquetes)
+			await tool.downloadFiles(idPaq, paquetes)
 			setCargando(false)
 
 		} catch (error) {
@@ -221,6 +221,7 @@ const Impression = () => {
 	}
 
 	const createExcel = () => {
+
 		const data = Object.values(registros).map(registro => ({
 			cuenta: registro.cuenta,
 			folio: registro.folio,
@@ -253,7 +254,8 @@ const Impression = () => {
 		XLSX.utils.book_append_sheet(workbook, worksheet, 'Registros')
 		
 		XLSX.writeFile(workbook, 'registros.xlsx')
-		}
+
+	}
 
 	useEffect(() => {
 		if (user && user.user_id) {

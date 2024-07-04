@@ -1,9 +1,5 @@
 import { Box, Typography, Checkbox, FormControl, TextField, Button, Tooltip, InputLabel, Select, MenuItem } from '@mui/material'
 import { useEffect, useState, useMemo } from 'react'
-import { DemoContainer } from '@mui/x-date-pickers/internals/demo'
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
-import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import * as XLSX from 'xlsx'
 import tool from '../../toolkit/toolkitFicha.js'
 import LinearProgressWithLabel from '../../components/Records/LinerProgress.jsx'
@@ -23,7 +19,6 @@ function Records() {
 
 	const [selectedPlace, setSelectedPlace] = useState('')
     const [selectedService, setSelectedService] = useState('')
-    const [fechaImpresion, setFechaImpresion] = useState(null)
     const [mesFacturacion, setMesFacturacion] = useState(null)
     const [firma, setFirma] = useState(true)
 
@@ -39,8 +34,6 @@ function Records() {
 		setSelectedService('')
 	}
 
-	const [fechaCorte, setfechaCorte] = useState(null)
-	const [nombre, setNombre] = useState('nuevo')
 	const [excel, setExcel] = useState(null)
 	const user = useSelector(state => state.user)
 	const { activity, plaza, servicio, fileName, folio, selectionCompleted, registros, porcentaje, cargando, modal } = useSelector(state => state.records)
@@ -67,11 +60,18 @@ function Records() {
 		try {
 
             const excelURL = await tool.uploadS3(excel, user.name)
+
+			const fechaCorte = new Date();
+			const formattedFechaCorte = fechaCorte.toISOString().split('T')[0]
+			const horaExacta = fechaCorte.toISOString().split('T')[1].split('.')[0]
+	
+			const fullName = user.name.replace(' ', '_')
+			const newName = `${formattedFechaCorte}_${horaExacta}_${selectedPlace}_${selectedService}_${fullName}`
 			
 			const data = {
 				id_servicio: selectedService,
-				nombre: nombre,
-				fecha_corte: fechaCorte.format('YYYY-MM-DD'),
+				nombre: newName,
+				fecha_corte: formattedFechaCorte,
 				folio: folio || 'desconocido',
 				id_plaza: selectedPlace,
 				excel_document: excelURL.filePath,
@@ -79,7 +79,7 @@ function Records() {
 				activate: 0,
 				firma: firma ? 1 : 0,
 				mes_facturacion: mesFacturacion,
-				fecha_impresion: fechaImpresion,
+				fecha_impresion: formattedFechaCorte,
 			}	
 	
 			const id_paquete = await tool.generatePaquete(data)
@@ -99,28 +99,6 @@ function Records() {
         }
 
 	}	
-
-	const changeName = () => {
-
-		const now = new Date()
-
-		const formattedDate = now.toLocaleDateString('es-ES', {
-			day: '2-digit',
-			month: '2-digit',
-			year: 'numeric',
-		}).replace(/\//g, '-')
-	
-		const formattedTime = now.toLocaleTimeString('es-ES', {
-			hour: '2-digit',
-			minute: '2-digit',
-			second: '2-digit',
-		}).replace(/:/g, '-')
-	
-		const fullName = user.name.replace(' ', '_')
-		const newName = `${formattedDate}:${formattedTime}_${fullName}`
-		setNombre(newName)
-
-	}
 
 	const handleFileUpload = (e) => {
 
@@ -168,8 +146,8 @@ function Records() {
 	}, [dispatch])
 
 	useEffect(() => {
-		dispatch(setSelectionCompleted(plaza !== '' && servicio !== '' && fechaCorte !== null))
-	}, [dispatch, fechaCorte, plaza, servicio])
+		dispatch(setSelectionCompleted(plaza !== '' && servicio !== ''))
+	}, [dispatch, plaza, servicio])
 
 	const paqueteText = `Sube tu archivo excel con los registros necesarios y crea los PDF necesarios`
 	const individualesText = `Sube tu archivo excel solo con una cuenta y folio para crear un unico PDF`
@@ -255,44 +233,6 @@ function Records() {
 							/>
 
 						</FormControl>
-
-						<LocalizationProvider dateAdapter={AdapterDayjs} >
-
-							<DemoContainer components={['DatePicker']}>
-
-								<DatePicker
-									label='Fecha de corte'
-									value={fechaCorte}
-									onChange={(newValue) => { setfechaCorte(newValue), changeName() }}
-									sx={{ marginBottom:'20px', width:'100%', '& .MuiSvgIcon-root': { color:isLightMode ? '#000000' : '#ffffff', }, '& .MuiInputLabel-root': { color: isLightMode ? '#000000' : '#ffffff', }, '& .MuiInputBase-input': { color: isLightMode ? '#000000' : '#ffffff', }, }}
-								/>
-
-							</DemoContainer>
-
-						</LocalizationProvider>
-
-						{
-
-							fechaCorte !== null ? 
-
-							<FormControl fullWidth sx={{ marginTop: '1rem', marginBottom: '0.6rem' }} >
-
-								<TextField
-									sx={{
-										width: '100%',
-									}}
-									id='outlined-basic'
-									label='Nombre'
-									variant='outlined'
-									value={nombre}
-									disabled
-								/>
-
-							</FormControl>
-							
-							: false
-
-						}
 						
 						{!activity &&
 							
@@ -308,30 +248,6 @@ function Records() {
 							</Box>
 	
 						}
-
-						{
-							(selectedPlace === 4 && selectedService === 1 || selectedPlace === 2 && selectedService === 1 ) && (
-
-								<>
-
-									<br />
-									<LocalizationProvider dateAdapter={AdapterDayjs}>
-
-										<DemoContainer components={['DatePicker']}>
-
-											<DatePicker
-												label='Fecha de impresión'
-												value={fechaImpresion}
-												onChange={(newValue) => { setFechaImpresion(newValue) }}
-												sx={{ width:'100%', '& .MuiSvgIcon-root': { color: isLightMode ? '#000000' :'#ffffff', }, '& .MuiInputLabel-root': { color:isLightMode ? '#000000' : '#ffffff', }, '& .MuiInputBase-input': { color: isLightMode ? '#000000' : '#ffffff', }, }}
-											/>
-
-										</DemoContainer>
-
-									</LocalizationProvider>
-								</>
-
-						)}
 
 						{
 							(selectedPlace === 2 && selectedService === 1 ) && (
@@ -469,7 +385,7 @@ function Records() {
 
 						{cargando ? <LinearProgressWithLabel value={Progreso} /> : false}
 
-						{(registros.length === 0 || (!activity && !folio) || cargando || nombre == '') ? (
+						{(registros.length === 0 || (!activity && !folio) || cargando ) ? (
 							<Tooltip
 								title={crearText} 
 								enterDelay={100} 
@@ -515,7 +431,7 @@ function Records() {
 							</Button>
 							)}
 
-						{modal ? <ModalId  nombre={nombre}/> : false }
+						{modal ? <ModalId/> : false }
 
 					</Box>
 
