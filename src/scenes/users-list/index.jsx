@@ -468,7 +468,7 @@ function Index() {
 				rows={filteredUsers}
 				columns={buildColumns}
 				getRowId={(row) => row.user_id}
-				editable={false} 
+				editable={false}
 				slots={{ toolbar: CustomToolbar }}
 				onRowClick={(params) => handleOpenModal(params.row)}
 				/>
