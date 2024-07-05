@@ -1,4 +1,4 @@
-import { Box, Typography, Checkbox, FormControl, TextField, Button, Tooltip, InputLabel, Select, MenuItem } from '@mui/material'
+import { Box, Typography, Checkbox, FormControl, TextField, Button, Tooltip, Collapse } from '@mui/material'
 import { useEffect, useState, useMemo } from 'react'
 import * as XLSX from 'xlsx'
 import tool from '../../toolkit/toolkitFicha.js'
@@ -9,6 +9,8 @@ import { setActivity, setPlazas, setServicios, setFileName, setSelectionComplete
 import PlaceSelect from '../../components/PlaceSelect'
 import ServiceSelect from '../../components/ServiceSelect'
 import { useTheme } from '@mui/material/styles'
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
+import ClearIcon from '@mui/icons-material/Clear'
 
 /**
 	* @name PáginaPrincipalFichas
@@ -19,14 +21,34 @@ function Records() {
 
 	const [selectedPlace, setSelectedPlace] = useState('')
     const [selectedService, setSelectedService] = useState('')
-    const [mesFacturacion, setMesFacturacion] = useState(null)
+    const [condicional, setCondition] = useState('')
+    const [fecha_inicial, setStartDate] = useState(null)
+    const [fecha_final, setEndDate] = useState(null)
     const [firma, setFirma] = useState(true)
+	const [isVisible, setIsVisible] = useState(false)
+	const [conditions, setConditions] = useState([])
 
 	const theme = useTheme()
 	const isLightMode = theme.palette.mode === 'light'
 
 	const handleServiceChange = (event) => {
 		setSelectedService(event.target.value)
+	}
+
+	const handleAddCondition = () => {
+		if (fecha_inicial && fecha_final && condicional) {
+			setConditions([
+				...conditions,
+				{ fecha_inicial, fecha_final, condicional }
+			])
+			setStartDate('')
+			setEndDate('')
+			setCondition('')
+		}
+	}
+
+	const handleRemoveCondition = (index) => {
+		setConditions(conditions.filter((_, i) => i !== index))
 	}
 
 	const handlePlaceChange = (event) => {
@@ -46,10 +68,6 @@ function Records() {
 	const calcularProgreso = (total) => {
 		const calculo = total * 100 / registros.length
 		dispatch(setPorcentaje(calculo))
-	}
-
-	const handleChange = (event) => {
-		setMesFacturacion(event.target.value)
 	}
 
 	const processUpload = async () => {
@@ -78,11 +96,15 @@ function Records() {
 				id_usuario: user.user_id,
 				activate: 0,
 				firma: firma ? 1 : 0,
-				mes_facturacion: mesFacturacion,
 				fecha_impresion: formattedFechaCorte,
 			}	
 	
 			const id_paquete = await tool.generatePaquete(data)
+
+			for (let condition of conditions) {
+				await tool.generateCondicional({ id_paquete, ...condition })
+			}
+
 			let total = 0
 			for (let ficha of registros) {
 				await tool.uploadFichas({ id_paquete, ...ficha })
@@ -233,8 +255,110 @@ function Records() {
 							/>
 
 						</FormControl>
+
+						{
+							(selectedPlace === 2 && selectedService === 1 ) && (
+
+							<Box sx={{ width: '100%', mt: '20px',  background:'#17212fb6', padding:'10px', borderRadius:'7px' }} >
+
+								<Box sx={{ width: '100%', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+									<Typography sx={{ fontWeight:'600', fontSize:'20px' }}>Condiciones</Typography>
+									<Button onClick={() => (setIsVisible(!isVisible))} sx={{ transition: 'transform 1s ease' }} >
+									{isVisible ? (
+											<ArrowDropDownIcon sx={{ color:'white', fontSize:'20px', transform: 'rotate(180deg)' }} />
+										) : (
+											<ArrowDropDownIcon sx={{ color:'white', fontSize:'20px' }} />
+										)}
+									</Button>
+								</Box>
+
+									<Collapse in={isVisible} timeout="auto" unmountOnExit>
+
+										<Box sx={{ width: '100%', mt: 2, display:'flex', justifyContent:'center', alignItems:'center', gap:'1rem'}}>
+											<TextField
+												id="start-date"
+												label="Fecha de inicio"
+												type="date"
+												value={fecha_inicial}
+												onChange={(e) => (setStartDate(e.target.value))}
+												sx={{ width: '100%' }}
+												InputLabelProps={{
+													shrink: true,
+												}}
+											/>
+											<TextField
+												id="end-date"
+												label="Fecha de fin"
+												type="date"
+												value={fecha_final}
+												onChange={(e) => (setEndDate(e.target.value))}
+												sx={{ width: '100%' }}
+												InputLabelProps={{
+													shrink: true,
+												}}
+											/>
+										</Box>
+
+										<TextField
+											id="condition"
+											label="Condicion"
+											type="text"
+											value={condicional}
+											onChange={(e) => (setCondition(e.target.value))}
+											sx={{ width: '100%', mt:'12px' }}
+											InputLabelProps={{
+												shrink: true,
+											}}
+										/>
+										
+										{(fecha_inicial && fecha_final && condicional) && (
+
+											<Box sx={{ width:'100%', display:'flex', justifyContent:'center', alignItems:'center' }}>
+												<Button 
+													onClick={handleAddCondition}
+													sx={{
+														mt:'10px',
+														bgcolor: registros.length === 0 ? '#cccccc' : '#2fd968',
+														'&:hover': {
+															bgcolor: registros.length === 0 ? '#cccccc' : '#1faa4d',
+														},
+														'&:active': {
+															bgcolor: registros.length === 0 ? '#cccccc' : '#157c38',
+														},
+														}}>
+													Agregar
+												</Button>
+											</Box>
+
+										)}
+
+										{conditions.length > 0 && (
+											<>
+												<Typography sx={{ m: '20px 0px' }}>Lista de condiciones</Typography>
+												<Box sx={{ mt: 2 }}>
+												{conditions.map((cond, index) => (
+													<Box key={index} sx={{ mb: 2, p: 2, background: '#1d2b3a', borderRadius: '5px' }}>
+														<Box sx={{ width:'100%', display:'flex', justifyContent:'space-between', alignItems:'center' }} >
+															<Typography sx={{ fontSize:'10px' }} ><span style={{ fontWeight:'600', fontSize:'10px' }}>Fecha de inicio:</span> {cond.fecha_inicial}</Typography>
+															<Button onClick={() => handleRemoveCondition(index)}><ClearIcon sx={{ color:'red', fontSize:'20px' }}/></Button>
+														</Box> 
+														<Typography sx={{ width:'100%', textAlign:'start', mb:'10px', fontSize:'10px' }}><span style={{ fontWeight:'600', fontSize:'10px' }}>Fecha de fin:</span> {cond.fecha_final}</Typography>
+														<Typography sx={{ width:'100%', textAlign:'start', fontSize:'10px' }}><span style={{ fontWeight:'600', fontSize:'10px' }}>Condición:</span> {cond.condicional}</Typography>
+													</Box>
+												))}
+												</Box>
+											</>
+											)}
+									
+									</Collapse>
+
+							</Box>
+						
+						)}
 						
 						{!activity &&
+
+						<>
 							
 							<Box mt={'1rem'}>
 								<TextField
@@ -246,49 +370,10 @@ function Records() {
 									onChange={(e) => dispatch(setFolio(e.target.value))}
 								/>
 							</Box>
+
+							</>
 	
 						}
-
-						{
-							(selectedPlace === 2 && selectedService === 1 ) && (
-
-								<>
-
-								<InputLabel 
-									id="mes-facturacion-label"
-									sx={{
-										marginTop: '20px'
-									}}
-								>
-									Mes de facturación
-								</InputLabel>
-								<Select
-									labelId="mes-facturacion-label"
-									id="mes-facturacion"
-									value={mesFacturacion}
-									onChange={handleChange}
-									label="Mes de facturación"
-									sx={{
-										width:'100%'
-									}}
-								>
-									<MenuItem value="Enero">Enero</MenuItem>
-									<MenuItem value="Febrero">Febrero</MenuItem>
-									<MenuItem value="Marzo">Marzo</MenuItem>
-									<MenuItem value="Abril">Abril</MenuItem>
-									<MenuItem value="Mayo">Mayo</MenuItem>
-									<MenuItem value="Junio">Junio</MenuItem>
-									<MenuItem value="Julio">Julio</MenuItem>
-									<MenuItem value="Agosto">Agosto</MenuItem>
-									<MenuItem value="Septiembre">Septiembre</MenuItem>
-									<MenuItem value="Octubre">Octubre</MenuItem>
-									<MenuItem value="Noviembre">Noviembre</MenuItem>
-									<MenuItem value="Diciembre">Diciembre</MenuItem>
-								</Select>
-
-								</>
-
-						)}
 
 						{
 							(selectedPlace === 2 && selectedService === 2) && (
