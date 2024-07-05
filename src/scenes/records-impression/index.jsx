@@ -2,7 +2,6 @@ import { Box, Button, MenuItem, FormControl, InputLabel, Select, Typography, Too
 import ArticleIcon from '@mui/icons-material/Article'
 import { useEffect, useState } from 'react'
 import tool from '../../toolkit/toolkitImpression.js'
-import Preview from '../../components/Records/Preview.jsx'
 import ChargeCounter from '../../components/Records/chargeCounter.jsx'
 import ChargeMessage from '../../components/Records/chargeMessage.jsx'
 import ModalDelete from '../../components/Records/modalDelete.jsx'
@@ -22,15 +21,13 @@ const Impression = () => {
 	const [cargando, setCargando] = useState(false)
 	const [openDelete, setOpenDelete] = useState(false)
 	const [registros, setRegistros] = useState({})
+	const [registrosOriginales, setRegistrosOriginales] = useState({})
 	const [totalFichas, setTotalFichas] = useState(0)
 	const [id, setId] = useState(0)
-	const [registro, setRegistro] = useState(null)
 	const [rango, setRango] = useState(0)
 	const [paquetes, setPaquetes] = useState([])
 	const [paquete, setPaquete] = useState({})
-	const [selectedCuenta, setSelectedCuenta] = useState('')
 	const [idPaq, setIdPaq] = useState(0)
-	const [openPreview, setOpenPreview] = useState(0)
 	const [completedRequests, setCompletedRequests] = useState(0)
 	const user = useSelector(state => state.user)
 
@@ -66,10 +63,6 @@ const Impression = () => {
 		}
 
 	}
-	
-	const handleSeleccionRegistro = (registroN) => {
-		setRegistro(registroN)
-	}
 
 	const handleStartUp = async () => {
 		setLoading(true)
@@ -100,12 +93,15 @@ const Impression = () => {
 			gestor: registro.gestor,
 			medidor: registro.medidor,
 			fecha_gestion: registro.fecha_gestion,
+			tipo_tarifa: registro.tipo_tarifa,
+			giro: registro.giro,
 			tipo_gestion: registro.tipo_gestion,
 			recibo: registro.recibo,
 			fecha_pago: registro.fecha_pago,
 			url_evidencia: registro.url_evidencia,
 			url_fachada: registro.url_fachada,
 			paquete: paquete,
+			proceso: registro.proceso,
 			pagos: registro.pagos,
 			recibos: registro.recibos,
 			clave_catastral: registro.clave_catastral,
@@ -149,7 +145,13 @@ const Impression = () => {
 			const paquetes = await tool.getRegistrosById(idPaquete)
 			const registrosAgrupados = {}
 			const cuentasParaEliminar = new Set()
-	
+
+			const registrosO = paquetes.map(registro => ({ ...registro }))
+
+			console.log(registrosO)
+
+			setRegistrosOriginales(registrosO)
+
 			paquetes.forEach(registro => {
 				const { cuenta, activate } = registro
 				if (!registrosAgrupados[cuenta]) {
@@ -158,6 +160,7 @@ const Impression = () => {
 						cuenta, 
 						calle: registro.calle, 
 						id_local: registro.id_local, 
+						giro: registro.giro, 
 						colonia: registro.colonia, 
 						latitud: registro.latitud, 
 						folio: registro.folio,
@@ -175,6 +178,7 @@ const Impression = () => {
 						total_pagado: registro.total_pagado, 
 						url_evidencia: registro.url_evidencia, 
 						url_fachada: registro.url_fachada, 
+						proceso: registro.proceso,
 						activate, 
 						clave_catastral: registro.clave_catastral, 
 						superficie_terreno: registro.superficie_terreno, 
@@ -213,6 +217,7 @@ const Impression = () => {
 			setRango(registrosFaltantes)
 			setCargando(false)
 			apiPaquetes()
+			console.log(registrosOriginales)
 	
 		} catch (error) {
 			console.error('Ocurrió un error:', error.message)
@@ -221,8 +226,12 @@ const Impression = () => {
 	}
 
 	const createExcel = () => {
-
-		const data = Object.values(registros).map(registro => ({
+		if (Object.keys(registrosOriginales).length === 0) {
+			console.error('No hay registros para exportar a Excel.')
+			return
+		}
+	
+		const data = Object.values(registrosOriginales).map(registro => ({
 			cuenta: registro.cuenta,
 			folio: registro.folio,
 			calle: registro.calle,
@@ -236,8 +245,10 @@ const Impression = () => {
 			fecha_gestion: registro.fecha_gestion,
 			medidor: registro.medidor,
 			tipo_servicio: registro.tipo_servicio,
+			giro: registro.giro,
 			tipo_tarifa: registro.tipo_tarifa,
 			total_pagado: registro.total_pagado,
+			proceso: registro.proceso,
 			url_evidencia: registro.url_evidencia,
 			url_fachada: registro.url_fachada,
 			clave_catastral: registro.clave_catastral,
@@ -246,13 +257,16 @@ const Impression = () => {
 			valor_terreno: registro.valor_terreno,
 			valor_construccion: registro.valor_construccion,
 			valor_catastral: registro.valor_catastral,
-			pagos: registro.pagos.map(pago => `Descripción: ${pago.descripcion}, Descuentos: ${pago.descuentos}, Total Pagado: ${pago.total_pagado}, Fecha Pago: ${pago.fecha_pago}, Recibo: ${pago.recibo}`).join('; ')
+			fecha_pago: registro.fecha_pago,
+			recibo: registro.recibo,
+			descuento: registro.descuento,
+			descripcion: registro.descripcion,
 		}))
 	
 		const worksheet = XLSX.utils.json_to_sheet(data)
 		const workbook = XLSX.utils.book_new()
 		XLSX.utils.book_append_sheet(workbook, worksheet, 'Registros')
-		
+	
 		XLSX.writeFile(workbook, 'registros.xlsx')
 
 	}
@@ -268,7 +282,6 @@ const Impression = () => {
 	const excelText = `Descarga el archivo excel original de los registros`
 	const deleteText = `Borra este paquete de fichas`
 	const incompletaText = `Descarga las fichas antes de terminar la creacion de todos los PDF`
-	const completaText = `Descarga todos los PDF`
 
 	return (
 
@@ -303,7 +316,7 @@ const Impression = () => {
 
 					</Box>
 
-					{
+					{/* {
 						rango > 0 ? (
 
 							<>
@@ -340,27 +353,23 @@ const Impression = () => {
 
 						)
 
-					}
+					} */}
 
 					
 
-					{ registro ? <Button variant="text" sx={{ marginTop:'30px', width:'100%', maxWidth:'200px', color:  isLightMode ? '#000000' : 'white', fontWeight:'600', fontSize:'.8rem'}} fullWidth onClick={() => setOpenPreview(true)}> VER PREVIEW </Button> :false }
+					{/* { registro ? <Button variant="text" sx={{ marginTop:'30px', width:'100%', maxWidth:'200px', color:  isLightMode ? '#000000' : 'white', fontWeight:'600', fontSize:'.8rem'}} fullWidth onClick={() => setOpenPreview(true)}> VER PREVIEW </Button> :false } */}
 
 					{ rango > 0 ? 
-						<>
-							<Tooltip
-								title={generarText} 
-								enterDelay={100} 
-								leaveDelay={200}	
-							>
-								<span>
-									<Button onClick={() => handleStartUp()} variant="contained" sx={{ marginTop:'30px', width:'100%', maxWidth:'250px', color:'white', fontWeight:'600', fontSize:'.8rem'}} fullWidth> GENERAR FICHAS PDF </Button> 
-								</span>
+						<Tooltip
+							title={generarText} 
+							enterDelay={100} 
+							leaveDelay={200}	
+						>
+							<span>
+								<Button onClick={() => handleStartUp()} variant="contained" sx={{ marginTop:'10px', width:'100%', maxWidth:'250px', color:'white', fontWeight:'600', fontSize:'.8rem'}} fullWidth> GENERAR FICHAS PDF </Button> 
+							</span>
 
-							</Tooltip>
-
-							<Button onClick={() => createExcel()} variant="contained" sx={{ marginTop:'30px', width:'100%', maxWidth:'150px', color:'white', fontWeight:'600', fontSize:'.8rem'}}>Crear Excel</Button>
-						</>
+						</Tooltip>
 						: false 
 					}
 
@@ -383,16 +392,17 @@ const Impression = () => {
 									false
 								)
 							):(
-								<Tooltip
-									title={completaText} 
-									enterDelay={100} 
-									leaveDelay={200}	
-								>
-									<span>
-										<Button variant="contained" onClick={handleDownload} color="success" sx={{marginTop:'20px', color:'white', fontWeight:'600' }}>DESCARGAR ZIP</Button>
-									</span>
-								</Tooltip>
+								<>
+									<Box sx={{ width:'100%', mt:'10px', display:'flex', justifyContent:'center', alignItems:'center', gap:'1rem', maxWidth:'300px' }}>
+										<Button variant="contained" onClick={handleDownload} color="success" sx={{  width:'50%', color:'white', fontWeight:'600', fontSize:'.6rem' }}>DESCARGAR</Button>
+										<Button onClick={() => createExcel()} variant="contained" sx={{ width:'50%', color:'white', fontWeight:'600', fontSize:'.6rem'}}>Crear Excel</Button>
+									</Box>
+									<Box>
+										<Button variant="outlined" onClick={() => (setId(paquete.id), setOpenDelete(true))} color="error" sx={{ background:'rgba(255, 0, 0, 0.3)', width:'50%', color:'white', fontWeight:'600', fontSize:'.6rem', mt:'10px' }}><DeleteIcon sx={{ color:'red' }} /></Button>
+									</Box>
+								</>
 							)
+							
 						):(
 							false
 						)
@@ -503,7 +513,6 @@ const Impression = () => {
 
 			</Box>
 
-			{ openPreview ? <Preview setOpenPreview={setOpenPreview} registro={registro} paquete={paquete} /> : false }
 			{ loading ? <ChargeCounter value={completedRequests} /> : false}
 			{ cargando ? <ChargeMessage/> : false} 
 			{ openDelete ? <ModalDelete id={id} setOpenDelete={setOpenDelete} /> : false }
@@ -515,4 +524,3 @@ const Impression = () => {
 }
 
 export default Impression
-
