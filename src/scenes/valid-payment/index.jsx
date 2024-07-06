@@ -36,7 +36,6 @@ import IconButton from '@mui/material/IconButton';
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 import PreviewIcon from '@mui/icons-material/Preview';
 import ModalTable from '../../components/ValidPayment/ModalTable.jsx'
-import { format } from 'date-fns';
 
 const Index = () => {
     
@@ -389,19 +388,7 @@ const Index = () => {
           const worksheet = workbook.addWorksheet("Registros Encontrados");
                       
           const headers = Object.keys(result[0]);
-          worksheet.addRow(headers);              
-          
-          result.forEach(row => {
-            const values = headers.map(header => {
-                let value = row[header];
-                if (header === "fecha de pago" || header === "fecha_de_gestion") {
-                    // Cambia "fecha1" y "fecha2" por los nombres de tus columnas de fecha
-                    value = format(new Date(value), 'yyyy-MM-dd HH:mm:ss');
-                }
-                return value;
-            });
-            worksheet.addRow(values);
-        });
+          worksheet.addRow(headers);          
 
           const buffer = await workbook.xlsx.writeBuffer();
           const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
