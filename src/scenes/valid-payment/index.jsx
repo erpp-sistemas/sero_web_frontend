@@ -36,6 +36,7 @@ import IconButton from '@mui/material/IconButton';
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 import PreviewIcon from '@mui/icons-material/Preview';
 import ModalTable from '../../components/ValidPayment/ModalTable.jsx'
+import { format } from 'date-fns';
 
 const Index = () => {
     
@@ -267,6 +268,24 @@ const Index = () => {
                         
             const headers = Object.keys(result[0]);
             worksheet.addRow(headers);
+        
+          result.forEach(row => {
+            const values = headers.map(header => {
+                let value = row[header];
+                if (header === "fecha de pago" || header === "fecha_de_gestion") { 
+                    const date = new Date(value);
+                    const year = date.getUTCFullYear();
+                    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+                    const day = String(date.getUTCDate()).padStart(2, '0');
+                    const hours = String(date.getUTCHours()).padStart(2, '0');
+                    const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+                    const seconds = String(date.getUTCSeconds()).padStart(2, '0');
+                    value = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+                }
+                return value;
+            });
+            worksheet.addRow(values);
+        });
                 
             if(filter === 1)
             {
@@ -353,7 +372,7 @@ const Index = () => {
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
-            a.download = "users.xlsx";
+            a.download = "Pagos validos.xlsx";
             a.click();
             window.URL.revokeObjectURL(url);
             setIsLoading(false)
@@ -373,16 +392,23 @@ const Index = () => {
           worksheet.addRow(headers);              
           
           result.forEach(row => {
-              const values = headers.map(header => row[header]);
-              worksheet.addRow(values);
-          });
+            const values = headers.map(header => {
+                let value = row[header];
+                if (header === "fecha de pago" || header === "fecha_de_gestion") {
+                    // Cambia "fecha1" y "fecha2" por los nombres de tus columnas de fecha
+                    value = format(new Date(value), 'yyyy-MM-dd HH:mm:ss');
+                }
+                return value;
+            });
+            worksheet.addRow(values);
+        });
 
           const buffer = await workbook.xlsx.writeBuffer();
           const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
           const url = window.URL.createObjectURL(blob);
           const a = document.createElement("a");
           a.href = url;
-          a.download = "users.xlsx";
+          a.download = "Pagos validos.xlsx";
           a.click();
           window.URL.revokeObjectURL(url);
           setIsLoading(false)
