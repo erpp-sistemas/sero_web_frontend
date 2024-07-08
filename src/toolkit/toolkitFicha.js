@@ -207,8 +207,15 @@ const formatearFila = async (data, folio) => {
         }
 
     }
-	console.log(resultados)
-    return resultados
+
+	const resultadosOrdenados = resultados.sort((a, b) => {
+        const cuentaA = parseInt(a.cuenta, 10) || 0
+        const cuentaB = parseInt(b.cuenta, 10) || 0
+        return cuentaA - cuentaB
+    })
+
+    console.log(resultadosOrdenados)
+    return resultadosOrdenados
 
 }
 
