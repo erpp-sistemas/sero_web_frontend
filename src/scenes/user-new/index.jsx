@@ -28,6 +28,8 @@ function NewUser() {
     stepThree: false
   });
 
+  const [resetTrigger, setResetTrigger] = useState(0);
+
   const resetForm = () => {
     setFormData({});
     setFormDataTwo({});
@@ -39,6 +41,7 @@ function NewUser() {
       stepThree: false
     });
     setSelectedChip('Datos Generales');
+    setResetTrigger(prev => prev + 1)
   };
 
   const handleChipClick = (chipLabel) => {
@@ -87,7 +90,7 @@ const handleStepTwoNext = async data => {
 const handleStepThreeNext = async data => {
   setFormDataThree(data);
 
-  const finalFormData = { ...formDataOne, ...formDataTwo, ...data };
+  const finalFormData = { ...formData, ...formDataTwo, ...data };
 
   await registerMenuAndSubMenu(2, 2, data);
 
@@ -260,7 +263,7 @@ const registerMenuAndSubMenu = async (user_id, role_id, dataAssignedMenus) => {
         />
 
 
-        {selectedChip === 'Datos Generales' && <StepOne onNext={handleStepOneNext} onFormData={setFormData}/>}
+        {selectedChip === 'Datos Generales' && <StepOne onNext={handleStepOneNext} onFormData={setFormData} resetTrigger={resetTrigger}/>}
         {selectedChip === 'Plazas, Servicios y Procesos' && <StepTwo onNextTwo={handleStepTwoNext} onFormDataTwo={setFormDataThree} />}
         {selectedChip === 'Permisos' && <StepThree profileId={profileId} onNextThree={handleStepThreeNext} onFormDataThree={setFormDataThree} />}
         

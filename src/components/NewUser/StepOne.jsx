@@ -31,7 +31,7 @@ import MobileFriendlyIcon from '@mui/icons-material/MobileFriendly';
 import { useSelector } from 'react-redux';
 import KeyboardTabIcon from '@mui/icons-material/KeyboardTab';
 
-function StepOne({ onNext, onFormData }) {
+function StepOne({ onNext, onFormData, resetTrigger }) {
   const titleStyle = {
     color: '#5EBFFF',
   };
@@ -46,8 +46,8 @@ function StepOne({ onNext, onFormData }) {
     password: '',
     password_hash: '',
     profile_id: '',
-    active_web_access: 1,
-    active_app_movil_access: 1,
+    active_web_access: true,
+    active_app_movil_access: true,
     personal_phone: '',
     work_phone: '',
     url_image: ''
@@ -81,6 +81,25 @@ function StepOne({ onNext, onFormData }) {
   useEffect(() => {
     getProfiles();
   }, []);
+
+  useEffect(() => {    
+    setFormData({
+      name: '',
+      first_last_name: '',
+      second_last_name: '',
+      birthdate: '',
+      sex_id: '1',
+      user_name: '',
+      password: '',
+      password_hash: '',
+      profile_id: '',
+      active_web_access: true,
+      active_app_movil_access: true,
+      personal_phone: '',
+      work_phone: '',
+      url_image: ''
+    });
+  }, [resetTrigger]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -117,7 +136,10 @@ function StepOne({ onNext, onFormData }) {
   };
 
   const handleSwitchChange = (name) => (event) => {
-    setFormData({ ...formData, [name]: event.target.checked });
+    setFormData(prevState => ({
+      ...prevState,
+      [name]: event.target.checked
+    }));
   };
 
   const handleSubmit = (e) => {

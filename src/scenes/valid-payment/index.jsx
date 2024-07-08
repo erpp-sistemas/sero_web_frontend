@@ -173,12 +173,12 @@ const Index = () => {
           let countEstatusPredioNoLocalizadoAndValid = 0;
           
           response.data.forEach(item => {
-            totalSum += (selectedPlace === 2 && selectedService === 2) ? item.gran_total : item.total_pagado;
+            totalSum += (selectedPlace === 2 && selectedService === 2) ? item.total_pagado : item.total_pagado;
             uniqueAccounts.add(item.cuenta);
 
             if (item['estatus de gestion valida'] === 'valida') {
               validaCount++;
-              validaTotal += (selectedPlace === 2 && selectedService === 2) ? item.gran_total : item.total_pagado;
+              validaTotal += (selectedPlace === 2 && selectedService === 2) ? item.total_pagado : item.total_pagado;
 
               if (item.latitud === 0) {
                 countLatitudCeroAndValid++;
@@ -198,7 +198,7 @@ const Index = () => {
 
             } else {
                 noValidaCount++;
-                noValidaTotal += (selectedPlace === 2 && selectedService === 2) ? item.gran_total : item.total_pagado;
+                noValidaTotal += (selectedPlace === 2 && selectedService === 2) ? item.total_pagado : item.total_pagado;
             }
           });
 
