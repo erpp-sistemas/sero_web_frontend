@@ -176,6 +176,12 @@ const formatearFila = async (data, folio) => {
                     if (typeof ficha.fecha_gestion === 'number') {
                         ficha.fecha_gestion = NumberToDate(ficha.fecha_gestion)
                     }
+					if (typeof ficha.fecha_pago === 'string' && ficha.fecha_pago.includes('T') && ficha.fecha_pago.includes('.000Z')) {
+						ficha.fecha_pago = ficha.fecha_pago.replace('T', ' ').replace('.000Z', '')
+					}
+					if (typeof ficha.fecha_gestion === 'string' && ficha.fecha_gestion.includes('T') && ficha.fecha_gestion.includes('.000Z')) {
+						ficha.fecha_gestion = ficha.fecha_gestion.replace('T', ' ').replace('.000Z', '')
+					}
                     ficha.foto_fachada_predio = ficha.foto_fachada_predio === 'si' || ficha.foto_fachada_predio === 'Si' ? 1 : 0
                     ficha.foto_evidencia_predio = ficha.foto_evidencia_predio === 'si' || ficha.foto_evidencia_predio === 'Si' ? 1 : 0
                     ficha.promocion = String(ficha.promocion)
