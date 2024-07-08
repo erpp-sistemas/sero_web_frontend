@@ -28,7 +28,7 @@ import PhoneInTalkIcon from '@mui/icons-material/PhoneInTalk';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import ComputerIcon from '@mui/icons-material/Computer';
 import MobileFriendlyIcon from '@mui/icons-material/MobileFriendly';
-import { useSelector } from 'react-redux'
+import { useSelector } from 'react-redux';
 import KeyboardTabIcon from '@mui/icons-material/KeyboardTab';
 
 function StepOne({ onNext, onFormData }) {
@@ -46,19 +46,18 @@ function StepOne({ onNext, onFormData }) {
     password: '',
     password_hash: '',
     profile_id: '',
-    active_web_access: 0,
-    active_app_movil_access: 0,
+    active_web_access: 1,
+    active_app_movil_access: 1,
     personal_phone: '',
     work_phone: '',
-    url_image:''
-    
+    url_image: ''
   });
 
   const [loading, setLoading] = useState(false);
   const [profiles, setProfiles] = useState([]);
   const [alertOpen, setAlertOpen] = useState(false);
   const [missingFields, setMissingFields] = useState([]);
-  const user = useSelector(state => state.user)
+  const user = useSelector(state => state.user);
 
   useEffect(() => {
     setLoading(true);
@@ -90,10 +89,9 @@ function StepOne({ onNext, onFormData }) {
       [name]: value
     }));
   };
-  
+
   const handleNumericChange = (e) => {
     const { name, value } = e.target;
-    
     const numericValue = value.replace(/\D/g, '');
     setFormData(prevState => ({
       ...prevState,
@@ -101,15 +99,15 @@ function StepOne({ onNext, onFormData }) {
     }));
   };
 
-  const defaultImage = "https://ser0.mx/ser0/image/sin_foto_perfil.png"
+  const defaultImage = "https://ser0.mx/ser0/image/sin_foto_perfil.png";
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     setFormData(prevState => ({
-    ...prevState,
-    url_image: file
+      ...prevState,
+      url_image: file
     }));
-    };
+  };
 
   const handleDeletePhoto = () => {
     setFormData(prevState => ({
@@ -124,16 +122,16 @@ function StepOne({ onNext, onFormData }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-  
+
     const mandatoryFields = ['name', 'first_last_name', 'second_last_name', 'birthdate', 'sex_id', 'user_name', 'password', 'profile_id'];
-  
+
     const newMissingFields = mandatoryFields.filter(field => {
       const value = formData[field];
       return typeof value === 'string' && !value.trim();
     });
-    
+
     setMissingFields(newMissingFields);
-  
+
     if (newMissingFields.length > 0) {
       setAlertOpen(true);
       setTimeout(() => {
@@ -141,7 +139,7 @@ function StepOne({ onNext, onFormData }) {
       }, 5000);
       return;
     }
-    
+
     onNext(formData);
     onFormData(formData);
   };
