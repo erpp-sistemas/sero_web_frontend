@@ -73,6 +73,25 @@ const uploadFichas = async (data) => {
 	}
 }
 
+function NumberToDate(numeroSerie) {
+	const fechaInicioExcel = new Date(1899, 12, 1)
+	const ajuste1900 = 2
+	const milisegundos = (numeroSerie - ajuste1900) * 24 * 60 * 60 * 1000
+	const fechaHora = new Date(fechaInicioExcel.getTime() + milisegundos)
+
+	const milisegundosAjuste = 36.59 * 60 * 1000
+	fechaHora.setTime(fechaHora.getTime() - milisegundosAjuste)
+
+	const dia = fechaHora.getDate().toString().padStart(2, '0')
+	const mes = (fechaHora.getMonth() + 1).toString().padStart(2, '0')
+	const año = fechaHora.getFullYear()
+	const horas = fechaHora.getHours().toString().padStart(2, '0')
+	const minutos = fechaHora.getMinutes().toString().padStart(2, '0')
+	const segundos = fechaHora.getSeconds().toString().padStart(2, '0')
+	
+	return `${año}-${mes}-${dia} ${horas}:${minutos}:${segundos}`
+}
+
 const formatearFila = async (data, folio) => {
     const jsonData = data
     const idIndex = jsonData[0].indexOf('id')
@@ -151,6 +170,12 @@ const formatearFila = async (data, folio) => {
             let candado = true
             for (let key in ficha) {
                 if (ficha[key] !== undefined) {
+					if (typeof ficha.fecha_pago === 'number') {
+                        ficha.fecha_pago = NumberToDate(ficha.fecha_pago)
+                    }
+                    if (typeof ficha.fecha_gestion === 'number') {
+                        ficha.fecha_gestion = NumberToDate(ficha.fecha_gestion)
+                    }
                     ficha.foto_fachada_predio = ficha.foto_fachada_predio === 'si' || ficha.foto_fachada_predio === 'Si' ? 1 : 0
                     ficha.foto_evidencia_predio = ficha.foto_evidencia_predio === 'si' || ficha.foto_evidencia_predio === 'Si' ? 1 : 0
                     ficha.promocion = String(ficha.promocion)
