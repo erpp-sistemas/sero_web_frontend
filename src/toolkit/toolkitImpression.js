@@ -63,6 +63,7 @@ const deleteRecords = async (id) => {
 }
 
 const downloadFiles = async (idPaq, paquetes) => {
+	
     if (idPaq === 0) {
         console.warn('No se ha seleccionado ningún paquete')
         return
@@ -81,12 +82,18 @@ const downloadFiles = async (idPaq, paquetes) => {
         const response = await instance.get(`/records/download/${usuario}/${nombreCarpeta}`, {
             responseType: 'blob',
         })
-		console.log(response)
-        alert('Descarga completada correctamente')
+
+        const blobData = new Blob([response.data])
+        const url = window.URL.createObjectURL(blobData)
+        const link = document.createElement('a')
+        link.href = url
+        link.setAttribute('download', 'archivo_descargado.zip')
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
 
     } catch (error) {
         console.error('Error al descargar el archivo:', error)
-        alert('Error al descargar el archivo. Por favor, inténtelo de nuevo.')
     }
 }
 
