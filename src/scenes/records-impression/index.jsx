@@ -69,16 +69,20 @@ const Impression = () => {
 		await tool.updateActivePaquete(idPaq)
 		const registrosArray = Object.values(registros)
 		registrosArray.sort((a, b) => a.id - b.id)
+		let id_nuevo = (totalFichas - rango)+1
 		for (let registro of registrosArray) {
-			await handleGeneratePDF(registro)
+			await handleGeneratePDF(registro, id_nuevo)
+			id_nuevo++
 		}
 		setLoading(false)
 		window.location.reload()
 	}
 
-	const handleGeneratePDF = async (registro) => {
+	const handleGeneratePDF = async (registro, id_nuevo) => {
+
 		const data = {
 			id: registro.id,
+			id_nuevo: id_nuevo,
 			id_local: registro.id_local,
 			nombre: paquete.nombre,
 			cuenta: registro.cuenta,
@@ -232,6 +236,7 @@ const Impression = () => {
 		}
 	
 		const data = Object.values(registrosOriginales).map(registro => ({
+			id_local: registro.id_local,
 			cuenta: registro.cuenta,
 			folio: registro.folio,
 			calle: registro.calle,
