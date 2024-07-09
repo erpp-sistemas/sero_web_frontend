@@ -120,12 +120,23 @@ function StepOne({ onNext, onFormData, resetTrigger }) {
 
   const defaultImage = "https://ser0.mx/ser0/image/sin_foto_perfil.png";
 
+  // const handleFileChange = (e) => {
+  //   const file = e.target.files[0];
+  //   setFormData(prevState => ({
+  //     ...prevState,
+  //     url_image: file
+  //   }));
+  // };
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-    setFormData(prevState => ({
-      ...prevState,
-      url_image: file
-    }));
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setFormData(prevState => ({
+        ...prevState,
+        url_image: reader.result
+      }));
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleDeletePhoto = () => {
@@ -375,7 +386,7 @@ function StepOne({ onNext, onFormData, resetTrigger }) {
                   <CloudUploadIcon color="info" fontSize="large" />
                   <Avatar
                     alt="Foto"
-                    src={formData.url_image ? URL.createObjectURL(formData.url_image) : defaultImage}
+                    src={formData.url_image ? formData.url_image : defaultImage}
                     sx={{ width: 200, height: 200, borderRadius: '8px', ml: 1 }}
                   />
                 </Box>

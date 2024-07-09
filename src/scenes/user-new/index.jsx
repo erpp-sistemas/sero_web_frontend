@@ -55,6 +55,7 @@ function NewUser() {
   const handleStepOneNext = async (data) => {
     setFormData(data);
     setProfileId(data.profile_id);
+    console.log(data)
 
     if (data.profile_id === 1) {
       const signupResponse = await signup(data);
@@ -64,7 +65,7 @@ function NewUser() {
         setAlertOpen(true);
         setAlertType("success");
         setAlertMessage("El proceso se ha completado. Como perfil de administrador, tiene acceso a todas las plazas y permisos.");
-         resetForm();
+        resetForm();
       }
     } else {
       setSelectedChip('Plazas, Servicios y Procesos');
