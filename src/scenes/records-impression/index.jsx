@@ -54,7 +54,7 @@ const Impression = () => {
 		setCargando(true)
 	
 		try {
-			await tool.downloadFiles(idPaq, paquetes)
+			await tool.counterFiles(idPaq, paquetes)
 			setCargando(false)
 
 		} catch (error) {

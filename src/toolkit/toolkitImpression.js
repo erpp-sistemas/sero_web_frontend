@@ -62,8 +62,9 @@ const deleteRecords = async (id) => {
 
 }
 
-const downloadFiles = async (idPaq, paquetes) => {
-	
+const counterFiles = async (idPaq, paquetes) => {
+    let totalDeFichas = 0
+
     if (idPaq === 0) {
         console.warn('No se ha seleccionado ningún paquete')
         return
@@ -79,18 +80,31 @@ const downloadFiles = async (idPaq, paquetes) => {
     const usuario = selectedPaquete.usuario
 
     try {
-        const response = await instance.get(`/records/download/${usuario}/${nombreCarpeta}`, {
-            responseType: 'blob',
-        })
+        const response = await instance.get(`/records/download/${nombreCarpeta}/${usuario}`)
+        totalDeFichas = response.data.count
 
-        const blobData = new Blob([response.data])
-        const url = window.URL.createObjectURL(blobData)
-        const link = document.createElement('a')
-        link.href = url
-        link.setAttribute('download', 'archivo_descargado.zip')
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
+        const numParts = Math.ceil(totalDeFichas / 30)
+
+        for (let part = 1; part <= numParts; part++) {
+			const initial_id = (part - 1) * 30 + 1
+            const end_id = part * 30
+            const partResponse = await instance.get(`/records/downloadRange/${nombreCarpeta}/${usuario}/${part}/${initial_id}/${end_id}`, {
+                responseType: 'arraybuffer'
+            })
+
+            if (partResponse && partResponse.data) {
+                const blob = new Blob([partResponse.data], { type: 'application/zip' })
+                const url = window.URL.createObjectURL(blob)
+                const link = document.createElement('a')
+                link.href = url
+                link.setAttribute('download', `parte_${part}.zip`)
+                document.body.appendChild(link)
+                link.click()
+                document.body.removeChild(link)
+            } else {
+                console.error('La respuesta para la parte', part, 'no contiene datos válidos.')
+            }
+        }
 
     } catch (error) {
         console.error('Error al descargar el archivo:', error)
@@ -129,6 +143,6 @@ export default {
 	createRecords,
 	updateActiveStatus,
 	updateActivePaquete,
-	downloadFiles,
+	counterFiles,
 	deleteRecords
 }
