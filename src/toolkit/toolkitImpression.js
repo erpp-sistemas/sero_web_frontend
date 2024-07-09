@@ -83,11 +83,11 @@ const counterFiles = async (idPaq, paquetes) => {
         const response = await instance.get(`/records/download/${nombreCarpeta}/${usuario}`)
         totalDeFichas = response.data.count
 
-        const numParts = Math.ceil(totalDeFichas / 70)
+        const numParts = Math.ceil(totalDeFichas / 150)
 
         for (let part = 1; part <= numParts; part++) {
-			const initial_id = (part - 1) * 70 + 1
-            const end_id = part * 70
+			const initial_id = (part - 1) * 150 + 1
+            const end_id = part * 150
             const partResponse = await instance.get(`/records/downloadRange/${nombreCarpeta}/${usuario}/${part}/${initial_id}/${end_id}`, {
                 responseType: 'arraybuffer'
             })
