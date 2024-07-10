@@ -21,7 +21,7 @@ const DatePickerHook = ({ fecha, setFecha,label }) => {
       if (stateFecha) {
         setFecha(stateFecha.format('YYYY-MM-DD'));
       } else {
-        setFecha('');
+        setFecha(null);
       }
     }, [stateFecha, setFecha]);
   

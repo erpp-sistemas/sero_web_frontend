@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Box, Avatar, Tooltip, Button, TextField, Typography, Badge, InputAdornment, Grid, Divider, createTheme, responsiveFontSizes } from "@mui/material";
+import { Box, Avatar, Tooltip, Button, TextField, Typography, Badge, InputAdornment, Grid, createTheme, responsiveFontSizes } from "@mui/material";
 import Header from "../../components/Header";
 import { DataGrid, GridToolbarColumnsButton, GridToolbarContainer, GridToolbarDensitySelector, GridToolbarExport, GridToolbarFilterButton } from "@mui/x-data-grid";
 
@@ -8,12 +8,13 @@ import Chip from "@mui/material/Chip";
 
 import InfoIcon from "@mui/icons-material/Info";
 
-import { AddOutlined, Cancel, CheckCircle, FileDownload, Label, People, PeopleAlt, Search, TextFields } from "@mui/icons-material";
+import { AddOutlined, Cancel, CheckCircle, FileDownload, People, Search } from "@mui/icons-material";
 import { Link } from "react-router-dom";
 
 import * as ExcelJS from "exceljs";
 import { getAllEmpleados, getEmpleadoById } from "../../api/personalErpp.js";
-import DatePickerHook from "../../components/recursos-humanos/DatePickerHook.jsx";
+
+import FichaEmpleado from "../../components/recursos-humanos/FichaEmpleado.jsx";
 
 let theme = createTheme();
 theme = responsiveFontSizes(theme);
@@ -37,13 +38,7 @@ function Index() {
    }, []);
 
    const handleOpenInfoUser = (user) => {
-      getEmpleadoById(user)
-         .then((res) => {
-            setSelectedUser(res.data);
-         })
-         .catch((err) => {
-            console.log(err);
-         });
+      setSelectedUser(user)
    };
 
    const buildColumns = useMemo(() => {
@@ -90,6 +85,9 @@ function Index() {
          },
       ];
    }, []);
+
+
+
 
    const AvatarImage = ({ data, mds }) => {
       const [visibleAvatar, setVisibleAvatar] = useState(false);
@@ -189,6 +187,8 @@ function Index() {
       }
    };
 
+
+
    return (
       <Box m="20px">
          <Header title="Personal ERPP" />
@@ -261,133 +261,7 @@ function Index() {
                   <DataGrid rows={filteredUsers} columns={buildColumns} getRowId={(row) => row.id_usuario} editable={false} slots={{ toolbar: CustomToolbar }} />
                </Box>
             </Grid>
-
-            <Grid item xs={6}>
-               <Box sx={{ backgroundColor: "#425977", margin: "0 30px", height: "80vh", overflowY: "auto" }} p={3}>
-                  <Grid container spacing={2} py={2} sx={{ backgroundColor: "#15263c", borderRadius: "10px", width: "100%", margin: "auto" }}>
-                     <Grid item alignItems={"center"} justifyContent={"center"} sx={{ backgroundColor: "redd" }}>
-                        <AvatarImage data={selectedEmpleado?.foto} mds={{ width: " 100px ", height: "100px", margin: "auto", border: "3px solid #00bfff" }} />
-                     </Grid>
-
-                     <Grid item xl={7} xs={6} justifyContent={"start"}>
-                        <Typography variant="h3">{`${selectedEmpleado?.nombre} ${selectedEmpleado?.apellido_materno} ${selectedEmpleado?.apellido_paterno}`}</Typography>
-                        <Typography variant="h5" ml={2} mt={2} color={"#00bfff"}>
-                           {selectedEmpleado?.usuario_correo}
-                        </Typography>
-                        <Typography variant="h5" ml={2} mt={1} color={"secondary"}>
-                           {selectedEmpleado?.infoEmpleado?.correo || "SIN CORREO AUN"}
-                        </Typography>
-                     </Grid>
-                  </Grid>
-
-                  <Divider>
-                     <Chip label="DATOS PERSONALES" size="small" color="secondary" />
-                  </Divider>
-
-                  <Grid container spacing={2} alignItems={"end"}>
-                     <Grid item xs={6}>
-					 <DatePickerHook fecha={selectedEmpleado?.fecha_nacimiento} setFecha={(fecha) => console.log(fecha)} label={"Fecha Cumpleaños"} />
-                     </Grid>
-                     <Grid item xs={6}>
-                        <TextField sx={{ width: "100%", margin: "0" }} label="NSS" defaultValue={selectedEmpleado?.info_empleado?.rfc} />
-                     </Grid>
-                  </Grid>
-                  <Grid container spacing={2}>
-                     <Grid item xs={6}>
-                        <TextField sx={{ width: "100%", margin: "10px 0" }} label="RFC" defaultValue={selectedEmpleado?.info_empleado?.rfc} />
-                     </Grid>
-                     <Grid item xs={6}>
-					 <TextField sx={{ width: "100%", margin: "10px 0" }} label="CURP" defaultValue={selectedEmpleado?.info_empleado?.rfc} />
-                     </Grid>
-                  </Grid>
-
-                
-                  <Divider>
-                     <Chip label="DATOS DE CONTACTO" size="small" color="secondary" />
-                  </Divider>
-
-				  <Grid container spacing={2}>
-                     <Grid item xs={6}>
-						 <TextField sx={{ width: "100%", margin: "10px 0" }} label="TELÉFEONO" defaultValue={selectedEmpleado?.info_empleado?.rfc} />
-                     </Grid>
-                     <Grid item xs={6}>
-					 <TextField sx={{ width: "100%", margin: "10px 0" }} label="CORREO" defaultValue={selectedEmpleado?.info_empleado?.rfc} />
-                     </Grid>
-                  </Grid>
-				  <TextField sx={{ width: "100%", margin: "10px 0" }} label="CONTACTO DE EMERGENCIA" defaultValue={selectedEmpleado?.info_empleado?.rfc} />
-
-
-				  <Grid container spacing={2}>
-                     <Grid item xs={6}>
-					 <TextField sx={{ width: "100%", margin: "10px 0" }} label="CALLE" defaultValue={selectedEmpleado?.info_empleado?.rfc} />
-                     </Grid>
-                     <Grid item xs={6}>
-					 <TextField sx={{ width: "100%", margin: "10px 0" }} label="C.P." defaultValue={selectedEmpleado?.info_empleado?.rfc} />
-                     </Grid>
-                  </Grid>
-				  <Grid container spacing={3}>
-                     <Grid item xs={3}>
-					 <TextField sx={{ width: "100%", margin: "10px 0" }} label="NO. INT" defaultValue={selectedEmpleado?.info_empleado?.rfc} />
-                     </Grid>
-                     <Grid item xs={3}>
-					 <TextField sx={{ width: "100%", margin: "10px 0" }} label="NO. EXT" defaultValue={selectedEmpleado?.info_empleado?.rfc} />
-                     </Grid>
-                     <Grid item xs={6}>
-					 <TextField sx={{ width: "100%", margin: "10px 0" }} label="COLONIA" defaultValue={selectedEmpleado?.info_empleado?.rfc} />
-                     </Grid>
-                  </Grid>
-				  <Grid container spacing={2}>
-                     <Grid item xs={6}>
-					 <TextField sx={{ width: "100%", margin: "10px 0" }} label="ALCALDIA/MUNICIPIO" defaultValue={selectedEmpleado?.info_empleado?.rfc} />
-                     </Grid>
-                     <Grid item xs={6}>
-					 <TextField sx={{ width: "100%", margin: "10px 0" }} label="ESTADO/CIUDAD" defaultValue={selectedEmpleado?.info_empleado?.rfc} />
-                     </Grid>
-                  </Grid>
-
-                
-
-                 
-                  <Divider>
-                     <Chip label="DATOS DE CONTRATACIÓN" size="small" color="secondary" />
-                  </Divider>
-
-				  <Grid container spacing={2}>
-                     <Grid item xs={6}>
-					 <TextField sx={{ width: "100%", margin: "10px 0" }} label="CARGO" defaultValue={selectedEmpleado?.info_empleado?.rfc} />
-                     </Grid>
-                     <Grid item xs={6}>
-					 <TextField sx={{ width: "100%", margin: "10px 0" }} label="PLAZA" defaultValue={selectedEmpleado?.info_empleado?.rfc} />
-                     </Grid>
-                  </Grid>
-				  <Grid container spacing={2}>
-                     <Grid item xs={6}>
-					 <TextField sx={{ width: "100%", margin: "10px 0" }} label="FECHA INGRESO" defaultValue={selectedEmpleado?.info_empleado?.rfc} />
-                     </Grid>
-                     <Grid item xs={6}>
-					 <TextField sx={{ width: "100%", margin: "10px 0" }} label="ALTA IMMS" defaultValue={selectedEmpleado?.info_empleado?.rfc} />
-                     </Grid>
-                  </Grid>
-				  <Grid container spacing={2}>
-                     <Grid item xs={6}>
-					 <TextField sx={{ width: "100%", margin: "10px 0" }} label="C. DETERMINADO 1" defaultValue={selectedEmpleado?.info_empleado?.rfc} />
-                     </Grid>
-                     <Grid item xs={6}>
-					 <TextField sx={{ width: "100%", margin: "10px 0" }} label="C. DETERMINADO 2" defaultValue={selectedEmpleado?.info_empleado?.rfc} />
-                     </Grid>
-                  </Grid>
-				  <Grid container spacing={2}>
-                     <Grid item xs={6}>
-					 <TextField sx={{ width: "100%", margin: "10px 0" }} label="C. DETERMINADO 3" defaultValue={selectedEmpleado?.info_empleado?.rfc} />
-                     </Grid>
-                     <Grid item xs={6}>
-					 <TextField sx={{ width: "100%", margin: "10px 0" }} label="C. iINETERMINADO " defaultValue={selectedEmpleado?.info_empleado?.rfc} />
-                     </Grid>
-                  </Grid>
-				  
-    
-               </Box>
-            </Grid>
+            <FichaEmpleado user={selectedEmpleado}/>
          </Grid>
       </Box>
    );

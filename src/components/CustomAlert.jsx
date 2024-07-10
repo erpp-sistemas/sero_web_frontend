@@ -16,11 +16,13 @@ const CustomAlert = ({ alertOpen, type, message, onClose }) => {
   }, [alertOpen, onClose]);
 
   return (
+ 
     <Snackbar open={alertOpen} autoHideDuration={7000} onClose={() => onClose(false)}  anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
       <Alert variant="filled" severity={type} onClose={() => onClose(false)} sx={{ fontSize: '1rem', color: 'white' }}>
         {message}
       </Alert>
     </Snackbar>
+   
   );
 };
 
