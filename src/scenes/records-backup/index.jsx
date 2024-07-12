@@ -1,204 +1,302 @@
-import { useSelector } from 'react-redux'
-import { useEffect, useState } from 'react'
-import { Box, Typography, Button, FormControl, TextField } from '@mui/material'
-import SearchIcon from '@mui/icons-material/Search'
-import tool from '../../toolkit/toolkitFicha.js'
+import { useState, useEffect } from 'react'
+import { Box, Typography, Button, FormControl, TextField, Input } from '@mui/material'
 import ChargeMessage from '../../components/Records/chargeMessage.jsx'
-import DownloadingIcon from '@mui/icons-material/Downloading'
-import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos'
-import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos'
 import { useTheme } from '@mui/material/styles'
+import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft'
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'
+import ManageSearchIcon from '@mui/icons-material/ManageSearch'
+import CloudDownloadIcon from '@mui/icons-material/CloudDownload'
+import tool from '../../toolkit/toolkitFicha.js'
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 
 const Backup = () => {
-    const [fileName, setFileName] = useState('')
     const [archivo, setArchivo] = useState(null)
     const [cargando, setCargando] = useState(false)
     const [nombre, setNombre] = useState('')
-    const [backup, setBackup] = useState([])
-    const [currentPage, setCurrentPage] = useState(1)
-    const [itemsPerPage] = useState(4) 
+    const [zipCount, setZipCount] = useState(0)
+    const [instrucciones, setInstrucciones] = useState(false)
+    const [respaldos, setRespaldos] = useState({})
     const [searchTerm, setSearchTerm] = useState('')
-    const user = useSelector(state => state.user)
+    const [currentPage, setCurrentPage] = useState(1)
+    const itemsPerPage = 3
 
-	const theme = useTheme()
-	const isLightMode = theme.palette.mode === 'light'
+    const theme = useTheme()
+    const isLightMode = theme.palette.mode === 'light'
 
-    const handleFileUpload = (e) => {
-        const file = e.target.files?.[0]
-        if (!file) return
-        setArchivo(file)
-        const reader = new FileReader()
-        reader.readAsArrayBuffer(file)
-        setFileName(file.name)
+    const handleFileChange = (event) => {
+        const files = Array.from(event.target.files)
+        setArchivo(files)
+        setZipCount(Math.ceil(files.length / 50))
     }
 
-    const processUpload = async () => {
-        if (!nombre) {
-            alert("Por favor, ingresa un nombre para el archivo.")
-            return
-        }
+    const handleUpload = async () => {
+        if (!archivo) return
         setCargando(true)
+
         try {
-            const response = await tool.uploadBackup(archivo, nombre)
-            const data = {
-                id_usuario: 1,  
-                nombre: nombre,
-                url_respaldo: response.filePath 
+			archivo.sort((a, b) => a.name.localeCompare(b.name))
+            const totalZips = Math.ceil(archivo.length / 50)
+
+            for (let i = 0; i < totalZips; i++) {
+                const chunk = archivo.slice(i * 50, (i + 1) * 50)
+                const zip = await tool.createZipFromFiles(chunk, `parte_${i + 1}.zip`)
+                const data = await tool.uploadBackup(zip, `${nombre}_part_${i + 1}`)
+
+                const respaldoData = {
+                    id_usuario: 1,
+                    identificador: nombre,
+                    url_respaldo: data.filePath,
+                }
+
+                const response = await tool.createRespaldo(respaldoData)
+
+                if (response !== 'success') {
+                    throw new Error('Error al crear el respaldo')
+                }
             }
-            const finalResponse = await tool.createRespaldo(data)
-            if(finalResponse === 'success'){
-                window.location.reload()
-            }
-            setArchivo(null)
-            setCargando(false)
+
+            alert('Archivos subidos exitosamente')
         } catch (error) {
-            console.error('Error al subir o crear el respaldo:', error)
+            alert('Error al subir archivos')
+        } finally {
+			fetchData()
             setCargando(false)
             setArchivo(null)
+            setNombre('')
+            setZipCount(0)
         }
     }
-    
+
+	const fetchData = async () => {
+		try {
+			const response = await tool.getRespaldo()
+			setRespaldos(response)
+			console.log(response)
+		} catch (error) {
+			console.error('Error al obtener respaldos:', error)
+		}
+	}
+
+    const handleSearchChange = (event) => {
+        setSearchTerm(event.target.value)
+        setCurrentPage(1)
+    }
+
     useEffect(() => {
-        const getBackup = async () => {
-            const response = await tool.getRespaldos()
-            setBackup(response.data || [])
+        const fetchData = async () => {
+            try {
+                const response = await tool.getRespaldo()
+                setRespaldos(response)
+                console.log(response)
+            } catch (error) {
+                console.error('Error al obtener respaldos:', error)
+            }
         }
-        getBackup()
+
+        fetchData()
     }, [])
 
-    const indexOfLastItem = currentPage * itemsPerPage
-    const indexOfFirstItem = indexOfLastItem - itemsPerPage
-
-    const filteredBackup = backup.filter(respaldo => 
-        respaldo.nombre.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-
-    const currentItems = filteredBackup.slice(indexOfFirstItem, indexOfLastItem)
-    const totalPages = Math.ceil(filteredBackup.length / itemsPerPage)
+    const filteredRespaldos = Object.keys(respaldos)
+        .filter((identificador) => identificador.toLowerCase().includes(searchTerm.toLowerCase()))
+        .reduce((obj, key) => {
+            obj[key] = respaldos[key]
+            return obj
+        }, {})
 
     const paginate = (pageNumber) => setCurrentPage(pageNumber)
 
-    return (
-        <Box minHeight='100vh' width={'auto'} display={'flex'} alignItems={'center'} justifyContent={'start'} flexDirection={'column'}>
-            <Typography className='records_impression__title' mb={'2rem'} textAlign={'center'} color={isLightMode ? '#000000' :'#cff9e0'} fontSize={'2.5rem'}>Subir Respaldo de Fichas</Typography>
+    const handleDownload = (registros) => {
+        if (registros && registros.registros) { 
+            registros.registros.forEach((registro) => {
+                const { url_respaldo } = registro
+                window.open(url_respaldo, '_blank')
+            })
+        } else {
+            console.error('No se encontraron registros válidos para descargar.')
+        }
+    }
 
-            <div className={isLightMode ? 'backups__ligth' : 'backups'} >
-                <Typography className='records_impression__title' mb={'2rem'} textAlign={'center'} color={'#fffff'} fontSize={'1.3rem'}>Para subir el respaldo de fichas finales a la nube es necesario que estas se encuentren comprimidas en formato .ZIP o .RAR </Typography>
-                <Typography className='records_impression__title' mb={'2rem'} textAlign={'center'} color={'#fffff'} fontSize={'1.3rem'}>En caso de necesitar ayuda para comprimir, haz click <a href="https://www.youtube.com/watch?v=ymvMnVfwOGI" style={{ color: '#00FF00', marginLeft: '2px' }} target="_blank" rel="noopener noreferrer"> AQUÍ</a></Typography>
+    const indexOfLastItem = currentPage * itemsPerPage
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage
+    const currentRespaldos = Object.keys(filteredRespaldos).slice(indexOfFirstItem, indexOfLastItem)
+
+    return (
+
+        <Box minHeight="100vh" width="auto" display="flex" alignItems="center" justifyContent="start" flexDirection="column">
+
+            <Typography className="records_impression__title" mb="2rem" textAlign="center" color={isLightMode ? '#000000' : '#cff9e0'} fontSize="2.5rem">
+                Subir Respaldo de Fichas
+            </Typography>
+
+            <div className={isLightMode ? 'backups__ligth' : 'backups'}>
 
                 <FormControl fullWidth sx={{ width: '70%', marginTop: '1rem', marginBottom: '0.6rem' }}>
-                    <TextField
-                        sx={{ width: '100%' }}
-                        id='outlined-basic'
-                        label='Nombre del archivo'
-                        variant='outlined'
-                        value={nombre}
-                        onChange={e => setNombre(e.target.value)}
-                    />
-                </FormControl>
 
-                <Box mt={'2rem'} width={'70%'}>
-                    {fileName && (
-                        <Typography variant='body1' sx={{ marginBottom: '1rem', color: isLightMode ? '#000000' : '#fff' }}>
-                            Archivo seleccionado: {fileName}
+                    <button onClick={() => setInstrucciones(!instrucciones)}>
+                        <Typography sx={{ mb: '20px', background: !isLightMode ? '#141B2D' : '#cff9e0', textAlign: 'center', fontSize: '20px', borderRadius: '10px' }}>
+                            Instrucciones {instrucciones ? <ArrowDropDownIcon /> : <ArrowDropUpIcon />}
+                        </Typography>
+                    </button>
+
+                    {instrucciones && (
+                        <Typography
+                            sx={{
+                                mb: '20px',
+                                fontSize: '16px',
+                                opacity: instrucciones ? 1 : 0,
+                                transition: 'opacity 0.3s ease-in-out'
+                            }}>
+                            Selecciona la carpeta donde se encuentren todos los PDF. El programa automáticamente creará ZIPs y los subirá parte por parte.
                         </Typography>
                     )}
 
-                    <input 
-                        type='file' 
-                        id='file-upload' 
-                        onChange={handleFileUpload} 
-                        accept='.zip,.rar' 
-                        style={{ display: 'none', width: '80%', }} 
+                    <TextField
+                        sx={{ width: '100%', mt: '10px' }}
+                        id="outlined-basic"
+                        label="Nombre de las fichas"
+                        variant="outlined"
+                        value={nombre}
+                        onChange={(e) => setNombre(e.target.value)}
                     />
 
-                    <label htmlFor='file-upload'>
-                        <Button 
-                            sx={{
-                                border: isLightMode ? '1px solid #000000' : '1px solid #cff9e0',
-                                color: isLightMode ? '#000000' : '#cff9e0',
-                            }}
-                            component='span' 
-                            fullWidth 
-                            variant='outlined' 
-                        >
-                            SELECCIONAR ARCHIVO
-                        </Button>
-                    </label>
-                </Box>
+                </FormControl>
 
-                { archivo && (
-                    <Box mt={'1rem'} width={'70%'}>
+                <Box mt="1rem" width="70%">
+
+                    {zipCount > 0 && (
+                        <Typography variant="body1" sx={{ marginBottom: '1rem', color: isLightMode ? '#000000' : '#fff' }}>
+                            Cantidad de ZIPs que se van a subir: {zipCount}
+                        </Typography>
+                    )}
+
+                    <input
+                        type="file"
+                        id="file-upload"
+                        onChange={handleFileChange}
+                        accept=".pdf"
+                        webkitdirectory=""
+                        style={{ display: 'none', width: '80%' }}
+                    />
+
+                    <label htmlFor="file-upload">
+
                         <Button
                             sx={{
-                                backgroundColor: '#add8e6', 
-                                color: '#000000', 
-                                '&:hover': {
-                                    backgroundColor: '#87ceeb', 
-                                },
+                                border: isLightMode ? '1px solid #000000' : '1px solid #cff9e0',
+                                color: isLightMode ? '#000000' : '#cff9e0'
                             }}
-                            component='span' 
-                            fullWidth 
-                            variant='contained' 
-                            onClick={processUpload}
-                        >
+                            component="span"
+                            fullWidth
+                            variant="outlined">
+                            SELECCIONAR CARPETA
+                        </Button>
+
+                    </label>
+
+                </Box>
+
+                {archivo && (
+                    <Box mt="1rem" width="70%">
+                        <Button
+                            sx={{
+                                backgroundColor: '#add8e6',
+                                color: '#000000',
+                                '&:hover': {
+                                    backgroundColor: '#87ceeb'
+                                }
+                            }}
+                            component="span"
+                            fullWidth
+                            variant="contained"
+                            onClick={handleUpload}>
                             SUBIR
                         </Button>
                     </Box>
                 )}
+            </div>
+
+            <div className={isLightMode ? 'backups__ligth_two' : 'backups_two'}>
+
+                <Typography sx={{ mb: '20px', fontSize: '25px' }}>Descarga de Respaldos</Typography>
+
+                <Box sx={{ mb: '30px', display: 'flex', alignItems: 'center' }}>
+                    <ManageSearchIcon sx={{ fontSize: '40px', marginRight: '10px' }} />
+                    <Input
+                        type="text"
+                        sx={{ background: 'transparent', border: 'none', width: '300px' }}
+                        placeholder="Buscar por identificador..."
+                        value={searchTerm}
+                        onChange={handleSearchChange}
+                    />
+                </Box>
+
+                {currentRespaldos.length === 0 ? (
+
+                    <Typography variant="body1" sx={{ width: '80%', textAlign: 'center', mt: '20px', fontSize: '20px', color: isLightMode ? '#000000' : '#fff' }}>
+                        No se encontraron registros con ese nombre.
+                    </Typography>
+
+                ) : (
+
+                    currentRespaldos.map((identificador, index) => (
+                        <Box key={index} width={'80%'} display={'flex'} alignItems={'center'} justifyContent={'space-between'} mb={2} p={2} bgcolor={isLightMode ? 'rgba(255, 255, 255, 0.250)' : 'rgba(0, 0, 63, 0.202)'} borderRadius={'10px'}>
+                            <Typography sx={{ fontSize: '20px' }} variant="h6">
+                                {identificador}
+                            </Typography>
+                            <Button onClick={() => handleDownload(filteredRespaldos[identificador])}>
+                                <CloudDownloadIcon sx={{ color: '#fff', fontSize: '35px' }} />
+                            </Button>
+                        </Box>
+
+                    ))
+
+                )}
+
+                <Box mt="2rem" display="flex" justifyContent="center" alignItems="center">
+
+                    <Button
+                        sx={{
+                            marginRight: '10px',
+                            backgroundColor: 'transparent',
+                            color: isLightMode ? '#000000' : '#cff9e0',
+                            '&:hover': {
+                                backgroundColor: '#add8e6'
+                            }
+                        }}
+                        disabled={currentPage === 1}
+                        onClick={() => paginate(currentPage - 1)}>
+                        <KeyboardArrowLeftIcon />
+                    </Button>
+
+                    <Typography variant="body1" sx={{ margin: '0 20px', color: isLightMode ? '#000000' : '#cff9e0' }}>
+                        {currentPage} de {Math.ceil(Object.keys(filteredRespaldos).length / itemsPerPage)}
+                    </Typography>
+
+                    <Button
+                        sx={{
+                            marginLeft: '10px',
+                            backgroundColor: 'transparent',
+                            color: isLightMode ? '#000000' : '#cff9e0',
+                            '&:hover': {
+                                backgroundColor: '#add8e6'
+                            }
+                        }}
+                        disabled={currentPage === Math.ceil(Object.keys(filteredRespaldos).length / itemsPerPage)}
+                        onClick={() => paginate(currentPage + 1)}>
+                        <KeyboardArrowRightIcon />
+                    </Button>
+
+                </Box>
 
             </div>
 
-            { user.user_id !== 0 && (
-                <div className={isLightMode ? 'table__ligth' : 'table'}>
-                    <div className='table__header'>
-                        <h1 className='table__text'>Descarga de backups</h1>
-                        <div>
-                            <SearchIcon />
-                            <input 
-                                type="text" 
-                                placeholder='BUSQUEDA POR NOMBRE' 
-                                className='table__header__input'  
-                                onChange={e => {
-                                    setSearchTerm(e.target.value)
-                                    setCurrentPage(1) 
-                                }}
-                                value={searchTerm}
-                            />
-                        </div>
-                    </div>
-
-                    <div className='table__list'>
-                        <ol>
-                            {
-                                currentItems.length === 0 
-                                ? <div>No hay respaldos disponibles</div> 
-                                : currentItems.map((respaldo, index) => (
-                                    <li className={isLightMode ? 'table__list__li__ligth' : 'table__list__li'} key={index}>
-                                        {respaldo.nombre} 
-                                        <button className='table__list__li__button'>
-											<a href={respaldo.url_respaldo}>
-												<DownloadingIcon sx={{ fontSize:'30px', color:'#00FF00' }} />
-											</a>
-                                        </button>
-                                    </li>
-                                ))
-                            }
-                        </ol>
-                    </div>
-
-                    <div className="pagination">
-                        <button onClick={() => paginate(currentPage - 1)} disabled={currentPage === 1}><ArrowBackIosIcon sx={{ fontSize:'25px' }} /></button>
-                        <span className='pagination__text'>{currentPage} de {totalPages}</span>
-                        <button onClick={() => paginate(currentPage + 1)} disabled={indexOfLastItem >= filteredBackup.length}><ArrowForwardIosIcon sx={{ fontSize:'25px' }} /></button>
-                    </div>
-                </div>
-            )}
-
-            { cargando && <ChargeMessage/> } 
+            {cargando && <ChargeMessage />}
 
         </Box>
+
     )
+
 }
 
-export default Backup 	
+export default Backup
