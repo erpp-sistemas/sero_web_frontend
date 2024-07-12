@@ -1,4 +1,5 @@
 import instance from "../api/axios"
+import JSZip from 'jszip'
 
 const getPlazas=async()=>{
 	const response = await instance.get(`/places`)
@@ -12,7 +13,7 @@ const getPlazas=async()=>{
 }
 
 const getRespaldos = async () => {
-	const response = await instance.get(`/records/respaldo`)
+	const response = await instance.get(`/respaldo`)
 	const data = response.data
 	return data
 }
@@ -242,7 +243,7 @@ const uploadBackup = async (file, nombre) => {
 	formData.append('file', file)
 
 	try {
-		const response = await instance.post(`/records/backup/${nombre}`, formData, {
+		const response = await instance.post(`/respaldo/${nombre}`, formData, {
 			headers: {
 				'Content-Type': 'multipart/form-data'
 			}
@@ -256,8 +257,23 @@ const uploadBackup = async (file, nombre) => {
 
 }
 
+const createZipFromFiles = async (files, zipName) => {
+
+	const zip = new JSZip()
+
+	files.forEach(file => {
+		zip.file(file.name, file)
+	})
+
+	const content = await zip.generateAsync({ type: 'blob' })
+
+	return new File([content], zipName, { type: 'application/zip' })
+
+}
+
 const createRespaldo = async (data) => {	
-	const url = `/records/respaldo`
+	const url = `/respaldo`
+	
 	try {
 		await instance.post(url, data)
 		return "success"
@@ -265,6 +281,19 @@ const createRespaldo = async (data) => {
 		console.error("Error al crear el respaldo:", error)
 		return false
 	}
+
+}
+
+const getRespaldo = async () => {
+	const url= `/respaldo/identificador/unico`
+
+	try{
+		const data = await instance.get(url)
+		return data.data.identificadores
+	}catch(error){
+		false
+	}
+
 }
 
 export default {
@@ -278,5 +307,7 @@ export default {
 	uploadBackup,
 	createRespaldo,
 	getRespaldos,
-	generateCondicional
+	generateCondicional,
+	createZipFromFiles,
+	getRespaldo
 }
