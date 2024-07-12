@@ -60,7 +60,7 @@ function index() {
     const [paymentsProceduresByTypeServiceData , setPaymentsProceduresByTypeServiceData] = useState([]);
     const [paymentsProceduresByManagerData , setPaymentsProceduresByManagerData] = useState([]);
     const [dailyManagementNotPhotoData , setDailyManagementNotPhotoData] = useState([]);
-    const [paymentsProceduresByAmountPaidData , setPaymentsProceduresByAmountPaidData] = useState([]);    
+    //const [paymentsProceduresByAmountPaidData , setPaymentsProceduresByAmountPaidData] = useState([]);    
 
     const [isLoading, setIsLoading] = useState(false)
     const [alertOpen, setAlertOpen] = useState(false);
@@ -148,7 +148,7 @@ function index() {
         setPaymentsProceduresData(JSON.parse(response.data[0].PaymentsProcedures))
         setPaymentsProceduresByTypeServiceData(JSON.parse(response.data[0].PaymentsProceduresByTypeService))
         setPaymentsProceduresByManagerData(JSON.parse(response.data[0].PaymentsProceduresByManager))
-        setPaymentsProceduresByAmountPaidData(JSON.parse(response.data[0].PaymentsProceduresByAmountPaid))
+        //setPaymentsProceduresByAmountPaidData(JSON.parse(response.data[0].PaymentsProceduresByAmountPaid))
         setDailyManagementNotPhotoData(JSON.parse(response.data[0].DailyManagementNotPhoto))
         setResult(response.data)
         setIsLoading(false)
