@@ -57,7 +57,7 @@ function StepOne({ onNext, onFormData, resetTrigger }) {
   const [profiles, setProfiles] = useState([]);
   const [alertOpen, setAlertOpen] = useState(false);
   const [missingFields, setMissingFields] = useState([]);
-  const user = useSelector(state => state.user);
+  const [fileInputKey, setFileInputKey] = useState(Date.now());  
 
   useEffect(() => {
     setLoading(true);
@@ -99,6 +99,7 @@ function StepOne({ onNext, onFormData, resetTrigger }) {
       work_phone: '',
       url_image: ''
     });
+    setFileInputKey(Date.now());
   }, [resetTrigger]);
 
   const handleChange = (e) => {
@@ -374,6 +375,7 @@ function StepOne({ onNext, onFormData, resetTrigger }) {
           <Grid container mt={1} spacing={2} justifyContent="center">
             <Box display="flex" alignItems="center" flexDirection="column" position="relative">
               <input
+                key={fileInputKey}
                 accept="image/*"
                 id="photo-upload"
                 type="file"

@@ -18,6 +18,7 @@ function NewUser() {
   const [formDataTwo, setFormDataTwo] = useState({});
   const [formDataThree, setFormDataThree] = useState({});
   const [profileId, setProfileId] = useState(null);
+  const [userId, setUserId] = useState(null);
   const [isLoading, setIsLoading] = useState(false)
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertType, setAlertType] = useState("info");
@@ -77,7 +78,7 @@ const handleStepTwoNext = async data => {
   setFormDataTwo(data);
 
   if (profileId === 5) {
-    await registerAssignedPlaces(2, data);
+    await registerAssignedPlaces(userId, data);
     setAlertOpen(true);
     setAlertType("success");
     setAlertMessage("El proceso se ha completado. Como gestor, no es necesario tener permisos de la plataforma web.");
@@ -93,10 +94,10 @@ const handleStepThreeNext = async data => {
 
   const finalFormData = { ...formData, ...formDataTwo, ...data };
 
-  await registerMenuAndSubMenu(2, 2, data);
+  await registerMenuAndSubMenu(userId, profileId, data);
 
   if (profileId !== 5) {
-    await registerAssignedPlaces(2, formDataTwo);
+    await registerAssignedPlaces(userId, formDataTwo);
   }
 
   await signup(finalFormData);
@@ -114,6 +115,8 @@ const signup = async (user) => {
     setIsLoading(false);
 
     if (res.status === 200) {
+      const userIdFromMessage = res.data.message.match(/\d+/)[0];
+      setUserId(userIdFromMessage);
       console.log('Success:', res.data.message);
       setAlertOpen(true);
       setAlertType("success");
@@ -262,7 +265,6 @@ const registerMenuAndSubMenu = async (user_id, role_id, dataAssignedMenus) => {
           message={alertMessage}
           onClose={setAlertOpen}
         />
-
 
         {selectedChip === 'Datos Generales' && <StepOne onNext={handleStepOneNext} onFormData={setFormData} resetTrigger={resetTrigger}/>}
         {selectedChip === 'Plazas, Servicios y Procesos' && <StepTwo onNextTwo={handleStepTwoNext} onFormDataTwo={setFormDataThree} />}
