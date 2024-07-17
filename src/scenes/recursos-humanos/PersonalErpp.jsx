@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Box, Avatar, Tooltip, Button, TextField, Typography, Badge, InputAdornment, Grid, createTheme, responsiveFontSizes } from "@mui/material";
+import { Box, Avatar, Tooltip, Button, TextField, Typography, Badge, InputAdornment, Grid, createTheme, responsiveFontSizes, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 import Header from "../../components/Header";
 import { DataGrid, GridToolbarColumnsButton, GridToolbarContainer, GridToolbarDensitySelector, GridToolbarExport, GridToolbarFilterButton } from "@mui/x-data-grid";
 
@@ -12,9 +12,10 @@ import { AddOutlined, Cancel, CheckCircle, FileDownload, People, Search } from "
 import { Link } from "react-router-dom";
 
 import * as ExcelJS from "exceljs";
-import { getAllEmpleados, getEmpleadoById } from "../../api/personalErpp.js";
+import { getAllEmpleados, getAreas, getEmpleadoById } from "../../api/personalErpp.js";
 
 import FichaEmpleado from "../../components/recursos-humanos/FichaEmpleado.jsx";
+import SelectChipMultiple from "../../components/recursos-humanos/personalErpp/SelectChipMultiple.jsx";
 
 let theme = createTheme();
 theme = responsiveFontSizes(theme);
@@ -22,19 +23,38 @@ theme = responsiveFontSizes(theme);
 function Index() {
    const [selectedEmpleado, setSelectedUser] = useState(null);
 
-   const [filter, setFilter] = useState("all");
+   const [filter, setFilter] = useState("active");
    const [searchText, setSearchText] = useState("");
+   const [area, setArea] = useState([]);
+   const [areaSelect, setAreaSelect] = useState("all");
 
    const [empleados, setEmpleados] = useState([]);
 
+
+   const getEmpleados=(parametros)=>{
+      getAllEmpleados(parametros)
+      .then((res) => { 
+         setEmpleados(res.data);
+      })
+      .catch((err) => {
+         console.log(err);
+      });
+   }
+
+   const obtenerAreas=()=>{
+      getAreas()
+      .then((res) => {
+         console.log(res.data)
+         setArea(res.data);
+      })
+      .catch((err) => {
+         console.log(err);
+      });
+   }
+
    useEffect(() => {
-      getAllEmpleados()
-         .then((res) => {
-            setEmpleados(res.data);
-         })
-         .catch((err) => {
-            console.log(err);
-         });
+     getEmpleados()
+     obtenerAreas()
    }, []);
 
    const handleOpenInfoUser = (user) => {
@@ -44,29 +64,19 @@ function Index() {
    const buildColumns = useMemo(() => {
       return [
          {
-            field: "nombre",
-            renderHeader: () => <strong style={{ color: "#5EBFFF" }}>{"NOMBRE"}</strong>,
-            width: 150,
-            editable: false,
-         },
-         {
-            field: "apellido_materno",
-            renderHeader: () => <strong style={{ color: "#5EBFFF" }}>{"APELLIDO "}</strong>,
-            width: 120,
-         },
-         {
-            field: "apellido_paterno",
-            renderHeader: () => <strong style={{ color: "#5EBFFF" }}>{"APELLIDO MATERNO"}</strong>,
-            width: 120,
-         },
-         {
             field: "foto",
             renderHeader: () => <strong style={{ color: "#5EBFFF" }}>{"FOTO"}</strong>,
             width: 70,
             renderCell: (params) => <AvatarImage data={params.row.foto} />,
          },
          {
-            field: "usuario_correo",
+            field: "nombre_completo",
+            renderHeader: () => <strong style={{ color: "#5EBFFF" }}>{"NOMBRE"}</strong>,
+            width: 200,
+            editable: false,
+         },
+         {
+            field: "usuario",
             renderHeader: () => <strong style={{ color: "#5EBFFF" }}>{"CORREO"}</strong>,
             width: 200,
             renderCell: (params) => <div style={{ color: "rgba(0, 191, 255, 1)" }}>{params.value}</div>,
@@ -142,7 +152,6 @@ function Index() {
 
    const filteredUsers = useMemo(() => {
       let filtered = empleados;
-
       switch (filter) {
          case "active":
             filtered = empleados.filter((user) => user.activo == true);
@@ -157,8 +166,13 @@ function Index() {
       if (searchText) {
          filtered = filtered.filter((user) => Object.values(user).some((value) => String(value).toLowerCase().includes(searchText.toLowerCase())));
       }
+      if (areaSelect!="all") {
+         filtered = filtered.filter((user) => user.area==areaSelect);
+      }
+
+
       return filtered;
-   }, [empleados, filter, searchText]);
+   }, [empleados, filter, searchText,areaSelect]);
 
    const exportToExcel = async () => {
       try {
@@ -192,18 +206,38 @@ function Index() {
    return (
       <Box m="20px">
          <Header title="Personal ERPP" />
-         <Box mb={2}>
-            <Badge badgeContent={filter === "all" ? filteredUsers.length : 0} color="secondary" anchorOrigin={{ vertical: "top", horizontal: "right" }} max={9999}>
+         <Box mb={2} sx={{display:"flex",alignItems:"center",transition:"3s"}}>
+            {/* <Badge badgeContent={filter === "all" ? filteredUsers.length : 0} color="secondary" anchorOrigin={{ vertical: "top", horizontal: "right" }} max={9999}>
                <Chip label="Todos los usuarios" clickable color={filter === "all" ? "success" : "default"} onClick={() => handleFilterChange("all")} icon={<People />} sx={{ m: 1 }} />
-            </Badge>
+            </Badge> */}
+    <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
+      <InputLabel id="demo-select-small-label">AREAS</InputLabel>
+      <Select
+        labelId="demo-select-small-label"
+        id="demo-select-small"
+        label="Age"
+        onChange={(e)=>setAreaSelect(e.target.value)}
+      >
+      <MenuItem value="all"><em>Todas</em></MenuItem>
+        {
+         area.map(a=>(
+            <MenuItem key={a.id} value={a.id}>{a.area}</MenuItem>
+         ))
+        }
+         </Select>
+      </FormControl>
+    
             <Badge badgeContent={filter === "active" ? filteredUsers.length : 0} color="secondary" anchorOrigin={{ vertical: "top", horizontal: "right" }} max={9999}>
                <Chip label="Usuarios activos" clickable color={filter === "active" ? "success" : "default"} onClick={() => handleFilterChange("active")} icon={<CheckCircle />} sx={{ m: 1 }} />
             </Badge>
             <Badge badgeContent={filter === "inactive" ? filteredUsers.length : 0} color="error" anchorOrigin={{ vertical: "top", horizontal: "right" }} max={9999}>
                <Chip label="Usuarios baja" clickable color={filter === "inactive" ? "success" : "default"} onClick={() => handleFilterChange("inactive")} icon={<Cancel />} sx={{ m: 1 }} />
             </Badge>
+
+         <SelectChipMultiple getUsuarios={getEmpleados} />
+            
          </Box>
-         <Grid container spacing={2} alignItems="center" mb={2}>
+         <Grid container spacing={3} alignItems="center" mb={2}>
             <Grid item xs={6}>
                <TextField
                   label="Buscar"
@@ -247,7 +281,7 @@ function Index() {
          </Grid>
 
          <Grid container spacing={2} alignItems="" m={2}>
-            <Grid item xs={6}>
+            <Grid item xs={selectedEmpleado?6:9}>
                <Box
                   sx={{
                      "margin": "s",
@@ -261,7 +295,11 @@ function Index() {
                   <DataGrid rows={filteredUsers} columns={buildColumns} getRowId={(row) => row.id_usuario} editable={false} slots={{ toolbar: CustomToolbar }} />
                </Box>
             </Grid>
-            <FichaEmpleado user={selectedEmpleado}/>
+            {
+               selectedEmpleado&&
+               <FichaEmpleado user={selectedEmpleado}   />
+            }
+           
          </Grid>
       </Box>
    );

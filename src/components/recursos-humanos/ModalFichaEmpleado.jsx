@@ -12,7 +12,7 @@ const style = {
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
-  width: 400,
+  width: 460,
   bgcolor: 'background.paper',
   border: '2px primary #000',
   boxShadow: 24,
@@ -22,7 +22,7 @@ const style = {
   p: 4,
 };
 
-export default function ModalFichaEmpleado({title,open,close,action}) {
+export default function ModalFichaEmpleado({title,open,close,action,OtionesHtml2}) {
 
   const handleOpen = () => close(true);
   const handleClose = () => close(false);
@@ -52,14 +52,19 @@ export default function ModalFichaEmpleado({title,open,close,action}) {
                  <ErrorIcon color="warning"/> {title}
             </Typography>
 
+           {
+           !OtionesHtml2? 
             <Grid container spacing={2} >
-            <Button  onClick={handleClose} variant="contained" size="medium"  sx={{ margin: "23px auto" }}>
+                 <Button   onClick={handleClose} variant="contained" size="medium"  sx={{ margin: "23px auto" }}>
                      CANCELAR
                   </Button>
                   <Button onClick={action} variant="contained" size="medium" color="success" sx={{ margin: "23px auto" }}>
                     ACEPTAR
                   </Button>
             </Grid>
+            :
+            OtionesHtml2
+          }
           </Box>
         </Fade>
       </Modal>

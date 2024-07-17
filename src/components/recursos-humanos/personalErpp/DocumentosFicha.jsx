@@ -45,7 +45,7 @@ function ModalNewFile({ open, close, action, categoria, setAlert }) {
    const handleClose = () => close(false);
 
    const createKeyFile = (data) => {
-      generateKeyFile({ id_categoria: categoria.id, ...data })
+      generateKeyFile({ id_cargo: categoria.id, ...data })
          .then((res) => {
             setAlert({
                message: "Se agrego correctamente el nuevo campo de archivo",
@@ -111,9 +111,9 @@ const DocumentosFicha = ({ empleado, setAlert }) => {
  
 
    const getAllFiles = () => {
-      getAllCategoriesWhitDocuments(2, empleado.id_usuario)
+      getAllCategoriesWhitDocuments(empleado?.info_empleado?.cargo , empleado.id_usuario)
          .then((res) => {
-            console.log(res);
+            console.log(res)
             setFiles(res.data);
          })
          .catch((res) => {
@@ -124,7 +124,6 @@ const DocumentosFicha = ({ empleado, setAlert }) => {
    const getAllFilesGenerales = () => {
       getAllCategoriesWhitDocuments(1, empleado.id_usuario)
          .then((res) => {
-            console.log(res);
             setFilesGenerales(res.data);
          })
          .catch((res) => {
@@ -191,15 +190,20 @@ const DocumentosFicha = ({ empleado, setAlert }) => {
             </Tooltip>
          </Box>
 
-         {files?.ArchivoKeys?.length > 0 && (
-            <>
+                  
+            {  
+               files.nombre&&
+               <>
                <Divider>
-                  <Chip label={`ARCHIVOS DE ${files.categoria}`} size="small" color="secondary" />
+                  <Chip label={`ARCHIVOS DE ${files?.nombre?.toUpperCase()}`} size="small" color="secondary" />
                </Divider>
                <Box sx={{ display: "flex", margin: "10px 0px", flexWrap: "wrap", justifyContent: "center" }}>
-                  {files.ArchivoKeys.map((f) => (
+                  {
+                  files?.ArchivoKeys?.length>0&&
+                  files.ArchivoKeys.map((f) => (
                      <ItemFile file={f} sendFile={sendFile} key={f.id}/>
-                  ))}
+                  ))
+                  }
                   <Tooltip describeChild title="Añadir nuevo archivo">
                      <Button
                         onClick={() => {
@@ -216,7 +220,8 @@ const DocumentosFicha = ({ empleado, setAlert }) => {
                   </Tooltip>
                </Box>
             </>
-         )}
+            }
+      
       </Box>
    );
 };

@@ -1,22 +1,24 @@
-import { Avatar, Box, Button, Chip, Divider, Grid, Skeleton, Stack, TextField, Typography } from "@mui/material";
+import { Avatar, Box, Button, Grid, Skeleton, Stack, Typography } from "@mui/material";
 import React, { useState } from "react";
-import DatePickerHook from "./DatePickerHook";
+
 import Viewer from "react-viewer";
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { getEmpleadoById, updateEmpleado } from "../../api/personalErpp";
-import ModalFichaEmpleado from "./ModalFichaEmpleado";
-import CamposFichaEmpleado from "./personalErpp/CamposFichaEmpleado";
 
+import { getEmpleadoById } from "../../api/personalErpp";
+import CamposFichaEmpleado from "./personalErpp/CamposFichaEmpleado";
+import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import PropTypes from "prop-types";
 import SwipeableViews from "react-swipeable-views";
 import { useTheme } from "@mui/material/styles";
 import AppBar from "@mui/material/AppBar";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
-import CustomAlert from '../CustomAlert';
+import CustomAlert from "../CustomAlert";
 import DocumentosFicha from "./personalErpp/DocumentosFicha";
 
+import * as ExcelJS from "exceljs";
+import PDFfichaEmpleado from "./personalErpp/PDFfichaEmpleado";
+import ModalFichaEmpleado from "./ModalFichaEmpleado";
 
 function TabPanel(props) {
    const { children, value, index, ...other } = props;
@@ -72,7 +74,8 @@ const AvatarImage = ({ data, mds }) => {
 const FichaEmpleado = ({ user }) => {
    const [empleado, setEmpleado] = useState(null);
    const [cargando, setCargando] = useState(false);
-   const [dataAlert,setDataAlert]=useState(false)
+   const [dowloandfiles,setdowloandfiles]=useState(false)
+   const [dataAlert, setDataAlert] = useState(false);
    const [value, setValue] = React.useState(0);
 
    const theme = useTheme();
@@ -88,7 +91,6 @@ const FichaEmpleado = ({ user }) => {
                }, 100);
             })
             .catch((err) => {
-               console.log(err);
                setCargando(false);
             });
       }
@@ -102,9 +104,55 @@ const FichaEmpleado = ({ user }) => {
       setValue(index);
    };
 
-   return ( 
-      <Grid item xs={6}>
-          <CustomAlert alertOpen={dataAlert} type={dataAlert.type} message={dataAlert.message} onClose={setDataAlert} />
+
+   const exportToExcel = async () => {
+      try {
+         const workbook = new ExcelJS.Workbook();
+         const worksheet = workbook.addWorksheet("Información General");
+
+         const headers = Object.keys(empleado);
+         const infoEmpleado =[...empleado?.info_empleado&& Object.keys(empleado?.info_empleado)];
+
+         const allHeaders=[...headers,...infoEmpleado].map(header=>{
+           return header.toUpperCase().replace("_"," ")
+         })
+         
+         worksheet.addRow(allHeaders);
+       
+         const values = headers.map((header) => empleado[header]);
+         const valuesEmpleado = infoEmpleado.map((header) => empleado?.info_empleado[header]);
+         worksheet.addRow([...values,...valuesEmpleado]);
+         
+
+         const buffer = await workbook.xlsx.writeBuffer();
+         const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+         const url = window.URL.createObjectURL(blob);
+         const a = document.createElement("a");
+         a.href = url;
+         a.download = `${empleado.nombre}_informacion_general.xlsx`;
+         a.click();
+         window.URL.revokeObjectURL(url);
+      } catch (error) {
+         console.log(error)
+         console.error("Error:", error);
+         return null;
+      }
+   };
+
+
+   return (
+      <Grid item xs={6}> 
+         <CustomAlert alertOpen={dataAlert} type={dataAlert.type} message={dataAlert.message} onClose={setDataAlert} />
+
+         <ModalFichaEmpleado close={setdowloandfiles} open={dowloandfiles} title={"¿ Deseas descar solo la ficha o el expediente completo ?"}
+            OtionesHtml2={
+         <Grid   container spacing={2} justifyContent="center">
+               <PDFfichaEmpleado empleado={empleado} close={setdowloandfiles} />
+               <PDFfichaEmpleado empleado={empleado} expediente={true} close={setdowloandfiles}/>
+         </Grid>
+            }
+         />
+
          <Box sx={{ backgroundColor: "#425977", margin: "0 30px", height: "80vh", overflowY: "auto" }} p={1}>
             {cargando ? (
                <Stack spacing={1}>
@@ -135,31 +183,41 @@ const FichaEmpleado = ({ user }) => {
                         <Typography variant="h5" ml={2} mt={1} color={"secondary"}>
                            {empleado?.info_empleado?.correo || "SIN CORREO AUN"}
                         </Typography>
+                 
                      </Grid>
+                     <Grid container spacing={2} mt={1} justifyContent="center">
+                           <Button onClick={exportToExcel} sx={{ margin: "5px 10px", display: "flex", justifyContent: "start"}}  startIcon={<InsertDriveFileIcon />} color="success" variant="contained" >
+                             Generar Excel
+                           </Button>
+                           {
+                            empleado?.nombre&&
+                            <Button onClick={()=>setdowloandfiles(true)} sx={{ margin: "5px 10px", display: "flex", justifyContent: "start" }}  startIcon={<InsertDriveFileIcon />} color="error" variant="contained" >
+                            Descargar PDF
+                             </Button>
+                           }
+                        </Grid>
                   </Grid>
-
                   <Box sx={{ bgcolor: "background.paper", width: "100%" }}>
                      <AppBar position="static">
-                      
-                       <Tabs value={value} onChange={handleChange} indicatorColor="secondary" textColor="inherit" variant="fullWidth" aria-label="full width tabs example">
+                        <Tabs value={value} onChange={handleChange} indicatorColor="secondary" textColor="inherit" variant="fullWidth" aria-label="full width tabs example">
                            <Tab label="DATOS" {...a11yProps(0)} />
                            <Tab label="DOCUMENTOS" {...a11yProps(1)} />
                         </Tabs>
-                     
                      </AppBar>
-                   
+
                      <SwipeableViews axis={theme.direction === "rtl" ? "x-reverse" : "x"} index={value} onChangeIndex={handleChangeIndex}>
-                       
                         <TabPanel value={value} index={0} dir={theme.direction}>
                            <CamposFichaEmpleado empleado={empleado} setAlert={setDataAlert} />
                         </TabPanel>
-                       
+
                         <TabPanel value={value} index={1} dir={theme.direction}>
-                           <DocumentosFicha empleado={empleado} setAlert={setDataAlert}/>
+                           <DocumentosFicha empleado={empleado} setAlert={setDataAlert} />
                         </TabPanel>
-                    
                      </SwipeableViews>
+                     
                   </Box>
+
+                   
                </>
             )}
          </Box>

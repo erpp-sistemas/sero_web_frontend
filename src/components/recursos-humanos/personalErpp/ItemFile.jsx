@@ -50,12 +50,12 @@ function InputFileUpload({ file, sendFile,update,setUpdate }) {
       <>
          {!valueFile ? 
             <Button 
-            sx={{ margin: "5px 10px", width: "85%", display: "flex", justifyContent: "start" }} 
-            variant="contained"
-            tabIndex={-1} 
-            startIcon={<CloudUploadIcon />}
-            component="label"
-            role={undefined}
+                sx={{ margin: "5px 10px", width: "85%", display: "flex", justifyContent: "start" }} 
+                variant="contained"
+                tabIndex={-1} 
+                startIcon={<CloudUploadIcon />}
+                component="label"
+                role={undefined}
             >
                {file.nombre_archivo}
 
@@ -125,7 +125,7 @@ const ItemFile = ({ file, sendFile }) => {
 
                <Grid container spacing={2} justifyContent="end" mt={1} width="30%" >
                   <Tooltip title="Descargar Archivo">
-                     <a href={`https://pruebas-erppp.s3.us-east-2.amazonaws.com/${fileInstance.url_archivo}`}>
+                     <a href={`https://erpp-rh.s3.amazonaws.com/${fileInstance.url_archivo}`}>
                         <CloudDownloadIcon sx={{ margin: "0 10px", color: "#000" }} />
                      </a>
                   </Tooltip>

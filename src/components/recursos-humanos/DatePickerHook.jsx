@@ -6,7 +6,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import dayjs from 'dayjs'
 
 
-const DatePickerHook = ({ fecha, setFecha,label }) => {
+const DatePickerHook = ({ fecha, setFecha,label,disabled }) => {
     const [stateFecha, setStateFecha] = useState(fecha ? dayjs(fecha) : null);
   
     useEffect(() => {
@@ -26,10 +26,11 @@ const DatePickerHook = ({ fecha, setFecha,label }) => {
     }, [stateFecha, setFecha]);
   
     return (
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <DemoContainer components={['DatePicker']}>
-          <DemoItem label={label||""} sx={{backgroundColor:"green"}}>
+      <LocalizationProvider dateAdapter={AdapterDayjs} >
+        <DemoContainer components={['DatePicker']} >
+          <DemoItem label={label||""} sx={{backgroundColor:"green"}} >
             <DatePicker 
+              disabled={disabled}
               value={stateFecha}
               views={['year', 'month', 'day']}
               onChange={(date) => {

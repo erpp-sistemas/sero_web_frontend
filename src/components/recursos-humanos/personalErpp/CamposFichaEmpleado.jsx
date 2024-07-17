@@ -1,21 +1,34 @@
-import { Button, Chip, Divider, Grid, TextField } from '@mui/material'
-import React, {  useState } from 'react'
+import { Avatar, AvatarGroup, Button, Chip, Divider, FormControl, Grid, InputLabel, MenuItem, Select, TextField, Tooltip } from '@mui/material'
+import React, {  useEffect, useState } from 'react'
 import DatePickerHook from '../DatePickerHook'
-import { updateEmpleado } from '../../../api/personalErpp';
+import { getAreas, getCargos, getPlace, updateEmpleado } from '../../../api/personalErpp';
 import { useForm } from 'react-hook-form';
 import ModalFichaEmpleado from '../ModalFichaEmpleado';
-
+import SelectHook from '../SelectHook';
+import { lightBlue } from '@mui/material/colors';
 
 
 const CamposFichaEmpleado = ({empleado,setAlert}) => {
     const [openModal,setOpenModal]=useState(false)
+    const [area, setArea] = useState([]);
     const [instanceDataEmpleado,setInstanceDataEmpleado]=useState(false)
     
+    console.log(empleado) 
 
     const { handleSubmit, setValue,register } = useForm();
 
+    const obtenerCargos=()=>{
+      getCargos()
+      .then((res) => {
+         console.log(res.data)
+         setArea(res.data);
+      })
+      .catch((err) => {
+         console.log(err);
+      });
+   }
+
     const showSnackbar = (message,type) => {
-    
         setAlert({
                 message,
                 type
@@ -24,11 +37,9 @@ const CamposFichaEmpleado = ({empleado,setAlert}) => {
 
     
     const editEmpleado=()=>{
-
         updateEmpleado(empleado.id_usuario,instanceDataEmpleado)
         .then(res=>{ 
            showSnackbar("Se actualizo la informacion correctamente Holaaaaaa","success")
-            console.log(res)
         })
         .catch(res=>{
          console.log(res)
@@ -40,11 +51,14 @@ const CamposFichaEmpleado = ({empleado,setAlert}) => {
    const submitData = (datEmpleado) => {
         setInstanceDataEmpleado(datEmpleado)
         setOpenModal(true)
+         console.log(datEmpleado)
    };
 
-
+   useEffect(() => {
+      obtenerCargos()
+   }, [])
    
-
+   
   return (
     <form onSubmit={handleSubmit(submitData)}>
         <ModalFichaEmpleado close={setOpenModal} open={openModal} title={"Estas Seguro de actulizar este perfil"} action={editEmpleado}/>
@@ -55,7 +69,7 @@ const CamposFichaEmpleado = ({empleado,setAlert}) => {
 
                <Grid container spacing={2} alignItems={"end"}>
                   <Grid item xs={6}>
-                     <DatePickerHook fecha={empleado?.fecha_nacimiento} setFecha={(fecha) => setValue("fecha_nacimiento",fecha)} label={"Fecha Cumpleaños"} />
+                     <DatePickerHook disabled={true} fecha={empleado?.fecha_nacimiento} setFecha={(fecha) => setValue("fecha_nacimiento",fecha)} label={"Fecha Cumpleaños"} />
                   </Grid>
                   <Grid item xs={6}>
                      <TextField sx={{ width: "100%", margin: "0" }} inputProps={{maxLength: 11}} label="NSS" defaultValue={empleado?.info_empleado?.nss}  {...register("nss")} />
@@ -76,7 +90,7 @@ const CamposFichaEmpleado = ({empleado,setAlert}) => {
 
                <Grid container spacing={2}>
                   <Grid item xs={6}>
-                     <TextField sx={{ width: "100%", margin: "10px 0" }} label="TELÉFEONO" defaultValue={empleado?.info_empleado?.telefono}{...register("telefono")} />
+                     <TextField sx={{ width: "100%", margin: "10px 0" }} label="TELÉFEONO" defaultValue={empleado?.telefono_personal}{...register("telefono")} disabled/>
                   </Grid>
                   <Grid item xs={6}>
                      <TextField  type="email" sx={{ width: "100%", margin: "10px 0" }} label="CORREO" defaultValue={empleado?.info_empleado?.correo} {...register("correo")} />
@@ -117,11 +131,24 @@ const CamposFichaEmpleado = ({empleado,setAlert}) => {
                </Divider>
 
                <Grid container spacing={2}>
-                  <Grid item xs={6}>
-                     <TextField sx={{ width: "100%", margin: "10px 0" }} label="CARGO" defaultValue={empleado?.info_empleado?.cargo} {...register("cargo")}/>
+                  <Grid item xs={6} >
+                     <SelectHook defaultValue={empleado?.rol} itemRender={"cargo"} items={area} labele={"CARGO"} register={register} disabled={true} />
                   </Grid>
                   <Grid item xs={6}>
-                     <TextField sx={{ width: "100%", margin: "10px 0" }} label="PLAZA" defaultValue={empleado?.info_empleado?.plaza} {...register("plaza")}/>
+                     <label htmlFor="PLAZA ASIGNADAS" style={{fontSize:"10px",color:"#ababab"}}>PLAZA ASIGNADAS</label>
+                  <AvatarGroup max={10}>
+                     {empleado?.plazas?.map((place) => (
+                     <Tooltip key={place.id} title={place.place}>
+                        <Avatar sx={{ bgcolor: lightBlue[500], width: 35, height: 35, fontWeight: 'bold' }}>
+                        {place?.nombre
+                           .split(' ')
+                           .map(word => word[0])
+                           .join('')
+                           }
+                        </Avatar>
+                     </Tooltip>
+                     ))}
+                  </AvatarGroup>
                   </Grid>
                </Grid>
                <Grid container spacing={2}>
