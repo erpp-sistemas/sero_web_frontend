@@ -165,7 +165,7 @@ function App() {
                         <Route path="/records" element={<Records />} />
                         <Route path="/backup" element={<RecordsBackup />} />
                         <Route path="/impresion" element={<RecordsImpression />} />
-                        <Route path="/inventario" element={<Inventory />} />
+                        <Route path="/vehiculos" element={<Inventory />} />
                       </Routes>
                     </main>
                   </div>

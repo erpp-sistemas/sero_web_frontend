@@ -179,13 +179,36 @@ function Records() {
 
 		<Box width={'100%'} padding={'10px'} minHeight='100vh' display={'flex'} justifyContent={'start'} alignItems={'center'} flexDirection={'column'}>
 			
-			<div className='records_title'>
-				<Typography mr={'12px'} textAlign={'center'} color={isLightMode ? '#000000' : '#cff9e0'} fontSize={'2.2rem'}>Registro de fichas</Typography>
-			</div>
+			<Box sx={{ width:'100%', height:'auto', display:'flex', justifyContent:'start', alignItems:'center', flexDirection:'column', marginBottom:'20px' }}>
+
+				<Typography 
+					variant="h3"
+					fontWeight="bold"
+					color='#e0e0e0'
+					sx={{ m: "0 0 5px 0", fontSize:'24px' }}
+					width={'100%'} 
+					textAlign={'start'} 
+					padding={'0px 50px'}
+				>
+					Registro de fichas
+				</Typography>
+
+				<Typography
+					sx={{ m: "0 0 5px 0" }}
+					color={'#4cceac'}
+					width={'100%'} 
+					textAlign={'start'} 
+					fontSize={'16px'} 
+					padding={'0px 50px'}
+				>
+					Creación de registros en base de datos mediante el excel inicial.
+				</Typography>
+
+			</Box>
 			
 			<div className={isLightMode ? 'records__ligth' : 'records'}>	 
 
-				<Box className='records__checkbox' marginTop={'2rem'} display={'flex'} justifyContent={'center'} alignItems={'center'} width={'100%'}>
+				<Box className='records__checkbox' marginTop={'0rem'} display={'flex'} justifyContent={'center'} alignItems={'center'} width={'100%'}>
 
 					<Box display={'flex'} justifyContent={'center'} alignItems={'center'} flexDirection={'column'}>
 
