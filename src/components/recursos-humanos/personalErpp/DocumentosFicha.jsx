@@ -55,6 +55,7 @@ function ModalNewFile({ open, close, action, categoria, setAlert }) {
             close(false);
          })
          .catch((res) => {
+            console.log(res)
             setAlert({
                message: `Hubo un error ${res.response.data} , vuelve a intentarlo`,
                type: "error",
@@ -108,10 +109,11 @@ const DocumentosFicha = ({ empleado, setAlert }) => {
    const [openModal, setOpenModal] = useState(false);
    const [files, setFiles] = useState([]);
    const [filesGenerales, setFilesGenerales] = useState([]);
- 
 
+
+   
    const getAllFiles = () => {
-      getAllCategoriesWhitDocuments(empleado?.info_empleado?.cargo , empleado.id_usuario)
+      getAllCategoriesWhitDocuments(empleado?.rol , empleado.id_usuario)
          .then((res) => {
             console.log(res)
             setFiles(res.data);
@@ -208,7 +210,7 @@ const DocumentosFicha = ({ empleado, setAlert }) => {
                      <Button
                         onClick={() => {
                            setOpenModal(true);
-                           setCategoria({ id: files.id, categoria: files.categoria });
+                           setCategoria({ id: empleado.rol, categoria: empleado.nombre_rol });
                         }}
                         variant="contained"
                         color={"warning"}
