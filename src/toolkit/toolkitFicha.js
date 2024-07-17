@@ -142,7 +142,10 @@ const formatearFila = async (data, folio) => {
         foto_fachada_predio: 'foto fachada predio',
         url_fachada: 'urlImagenFachada',
         foto_evidencia_predio: 'foto evidencia predio',
-        url_evidencia: 'urlImagenEvidencia'
+        url_evidencia: 'urlImagenEvidencia',
+		fecha_actualizacion: 'fecha_actualizacion',
+		fecha_corte_adeudo: 'fecha_corte_adeudo',
+		monto_adeudo:'monto_adeudo'
     }
 
     const tiposDeDatos = {}

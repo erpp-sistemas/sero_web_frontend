@@ -114,6 +114,9 @@ const Impression = () => {
 			valor_terreno: registro.valor_terreno,
 			valor_contruccion: registro.valor_construccion,
 			valor_catastral: registro.valor_catastral,
+			fecha_actualizacion: registro.fecha_actualizacion,
+			fecha_corte_adeudo: registro.fecha_corte_adeudo,
+			monto_adeudo: registro.monto_adeudo,
 			user: paquete.usuario 
 		}
 
@@ -190,6 +193,9 @@ const Impression = () => {
 						valor_terreno: registro.valor_terreno, 
 						valor_construccion: registro.valor_construccion, 
 						valor_catastral: registro.valor_catastral, 
+						fecha_actualizacion: registro.fecha_actualizacion,
+						fecha_corte_adeudo: registro.fecha_corte_adeudo,
+						monto_adeudo: registro.monto_adeudo,
 						pagos: [] 
 					}
 				}
@@ -266,6 +272,9 @@ const Impression = () => {
 			recibo: registro.recibo,
 			descuento: registro.descuento,
 			descripcion: registro.descripcion,
+			fecha_actualizacion: registro.fecha_actualizacion,
+			fecha_corte_adeudo: registro.fecha_corte_adeudo,
+			monto_adeudo: registro.monto_adeudo
 		}))
 	
 		const worksheet = XLSX.utils.json_to_sheet(data)
@@ -292,7 +301,28 @@ const Impression = () => {
 
 		<Box className='records_impression' minHeight='100vh' display={'flex'} justifyContent={'start'} flexDirection={'column'}>
 
-		<Typography className='records_impression__title' mb={'2rem'} textAlign={'center'} color={ isLightMode ? '#000000' :'#cff9e0'} fontSize={'2.5rem'}>Creación de Fichas</Typography>
+			<Typography 
+				variant="h3"
+				fontWeight="bold"
+				color='#e0e0e0'
+				sx={{ m: "0 0 5px 0", fontSize:'24px' }}
+				width={'100%'} 
+				textAlign={'start'} 
+				padding={'0px 50px'}
+			>
+                Creación de fichas
+            </Typography>
+
+			<Typography
+				sx={{ m: "0 0 5px 0" }}
+				color={'#4cceac'}
+				width={'100%'} 
+				textAlign={'start'} 
+				fontSize={'16px'} 
+				padding={'0px 50px'}
+			>
+				Creación, impresión y subida de fichas al sistema online de almacenamiento.
+			</Typography>
 		
 			<Box className='records_impression__grid' sx={{ mt:'1rem', width:'auto', display:'flex', minHeight:'500px', justifyContent:'center', alignItems:'start' }} container spacing={0}>
 
@@ -497,8 +527,8 @@ const Impression = () => {
 							):(
 
 								<Box className='record_impression__empty' sx={{ display:'flex', justifyContent:'center', alignItems:'center', flexDirection:'column', width:'100%' }}>
-									<Typography width={'80%'} mb={'1rem'} fontSize={'1.5rem'} color={'#00FF00'} textAlign={'center'}>Este paquete ya creo todas las fichas posibles y esta listo para descargar, si hubo alguna correción subir ficha individual.</Typography>
-									<ArticleIcon sx={{fontSize:'3.5rem', color:'#00FF00'}}></ArticleIcon>
+									<Typography width={'80%'} mb={'1rem'} fontSize={'1.5rem'} color={'#cff9e0'} textAlign={'center'}>Este paquete ya creo todas las fichas posibles y esta listo para descargar, si hubo alguna correción subir ficha individual.</Typography>
+									<ArticleIcon sx={{fontSize:'3.5rem', color:'#cff9e0'}}></ArticleIcon>
 								</Box>
 
 							)
