@@ -167,6 +167,7 @@ body,
 	background: rgba(255, 255, 255, 0.250);
 	padding: 40px;
 	border-radius: 20px;
+	margin-top: 15px;
 }
 
 .records__ligth{
@@ -174,6 +175,7 @@ body,
 	background: rgba(0, 0, 63, 0.202);
 	padding: 40px;
 	border-radius: 20px;
+	margin-top: 15px;
 }
 
 .records_impression__content{
@@ -206,8 +208,9 @@ body,
 
 .backups{
 	width: 100%;
+	min-width: 450px;
 	background: rgba(255, 255, 255, 0.250);
-	padding: 40px;
+	padding: 50px 10px;
 	border-radius: 20px;
 	max-width: 500px;
 	justify-content: center;
@@ -236,6 +239,7 @@ body,
 	padding: 40px;
 	border-radius: 20px;
 	max-width: 500px;
+	min-width: 500px;
 	justify-content: center;
 	align-items: center;
 	display: flex;

@@ -125,175 +125,198 @@ const Backup = () => {
 
         <Box minHeight="100vh" width="auto" display="flex" alignItems="center" justifyContent="start" flexDirection="column">
 
-            <Typography className="records_impression__title" mb="2rem" textAlign="center" color={isLightMode ? '#000000' : '#cff9e0'} fontSize="2.5rem">
-                Subir Respaldo de Fichas
+			<Typography 
+				variant="h3"
+				fontWeight="bold"
+				color='#e0e0e0'
+				sx={{ m: "0 0 5px 0", fontSize:'24px' }}
+				width={'100%'} 
+				textAlign={'start'} 
+				padding={'0px 50px'}
+			>
+                Subida de Respaldos
             </Typography>
 
-            <div className={isLightMode ? 'backups__ligth' : 'backups'}>
+			<Typography
+				sx={{ m: "0 0 5px 0" }}
+				color={'#4cceac'}
+				width={'100%'} 
+				textAlign={'start'} 
+				fontSize={'16px'} 
+				padding={'0px 50px'}
+			>
+				Modulo exclusivo para administradores en donde podran subir los respaldos finales, almacenarlos y descargarlos cuando lo necesiten.
+			</Typography>
 
-                <FormControl fullWidth sx={{ width: '70%', marginTop: '1rem', marginBottom: '0.6rem' }}>
+			<Box sx={{ display:'flex', justifyContent:'center', alignItems:'center', gap:'1rem', width:'100%', padding:'0px 50px' }}>
 
-                    <button onClick={() => setInstrucciones(!instrucciones)}>
-                        <Typography sx={{ mb: '20px', background: !isLightMode ? '#141B2D' : '#cff9e0', textAlign: 'center', fontSize: '20px', borderRadius: '10px' }}>
-                            Instrucciones {instrucciones ? <ArrowDropDownIcon /> : <ArrowDropUpIcon />}
-                        </Typography>
-                    </button>
+				<div className={isLightMode ? 'backups__ligth' : 'backups'}>
 
-                    {instrucciones && (
-                        <Typography
-                            sx={{
-                                mb: '20px',
-                                fontSize: '16px',
-                                opacity: instrucciones ? 1 : 0,
-                                transition: 'opacity 0.3s ease-in-out'
-                            }}>
-                            Selecciona la carpeta donde se encuentren todos los PDF. El programa automáticamente creará ZIPs y los subirá parte por parte.
-                        </Typography>
-                    )}
+				<FormControl fullWidth sx={{ width: '70%', marginTop: '0rem', marginBottom: '0.6rem' }}>
 
-                    <TextField
-                        sx={{ width: '100%', mt: '10px' }}
-                        id="outlined-basic"
-                        label="Nombre de las fichas"
-                        variant="outlined"
-                        value={nombre}
-                        onChange={(e) => setNombre(e.target.value)}
-                    />
+					<button onClick={() => setInstrucciones(!instrucciones)}>
+						<Typography sx={{ mb: '20px', background: !isLightMode ? '#141B2D' : '#cff9e0', textAlign: 'center', fontSize: '20px', borderRadius: '10px' }}>
+							Instrucciones {instrucciones ? <ArrowDropDownIcon /> : <ArrowDropUpIcon />}
+						</Typography>
+					</button>
 
-                </FormControl>
+					{instrucciones && (
+						<Typography
+							sx={{
+								mb: '20px',
+								fontSize: '16px',
+								opacity: instrucciones ? 1 : 0,
+								transition: 'opacity 0.3s ease-in-out'
+							}}>
+							Selecciona la carpeta donde se encuentren todos los PDF. El programa automáticamente creará ZIPs y los subirá parte por parte.
+						</Typography>
+					)}
 
-                <Box mt="1rem" width="70%">
+					<TextField
+						sx={{ width: '100%', mt: '10px' }}
+						id="outlined-basic"
+						label="Nombre de las fichas"
+						variant="outlined"
+						value={nombre}
+						onChange={(e) => setNombre(e.target.value)}
+					/>
 
-                    {zipCount > 0 && (
-                        <Typography variant="body1" sx={{ marginBottom: '1rem', color: isLightMode ? '#000000' : '#fff' }}>
-                            Cantidad de ZIPs que se van a subir: {zipCount}
-                        </Typography>
-                    )}
+				</FormControl>
 
-                    <input
-                        type="file"
-                        id="file-upload"
-                        onChange={handleFileChange}
-                        accept=".pdf"
-                        webkitdirectory=""
-                        style={{ display: 'none', width: '80%' }}
-                    />
+				<Box mt="1rem" width="70%">
 
-                    <label htmlFor="file-upload">
+					{zipCount > 0 && (
+						<Typography variant="body1" sx={{ marginBottom: '1rem', color: isLightMode ? '#000000' : '#fff' }}>
+							Cantidad de ZIPs que se van a subir: {zipCount}
+						</Typography>
+					)}
 
-                        <Button
-                            sx={{
-                                border: isLightMode ? '1px solid #000000' : '1px solid #cff9e0',
-                                color: isLightMode ? '#000000' : '#cff9e0'
-                            }}
-                            component="span"
-                            fullWidth
-                            variant="outlined">
-                            SELECCIONAR CARPETA
-                        </Button>
+					<input
+						type="file"
+						id="file-upload"
+						onChange={handleFileChange}
+						accept=".pdf"
+						webkitdirectory=""
+						style={{ display: 'none', width: '80%' }}
+					/>
 
-                    </label>
+					<label htmlFor="file-upload">
 
-                </Box>
+						<Button
+							sx={{
+								border: isLightMode ? '1px solid #000000' : '1px solid #cff9e0',
+								color: isLightMode ? '#000000' : '#cff9e0'
+							}}
+							component="span"
+							fullWidth
+							variant="outlined">
+							SELECCIONAR CARPETA
+						</Button>
 
-                {archivo && (
-                    <Box mt="1rem" width="70%">
-                        <Button
-                            sx={{
-                                backgroundColor: '#add8e6',
-                                color: '#000000',
-                                '&:hover': {
-                                    backgroundColor: '#87ceeb'
-                                }
-                            }}
-                            component="span"
-                            fullWidth
-                            variant="contained"
-                            onClick={handleUpload}>
-                            SUBIR
-                        </Button>
-                    </Box>
-                )}
-            </div>
+					</label>
 
-            <div className={isLightMode ? 'backups__ligth_two' : 'backups_two'}>
+				</Box>
 
-                <Typography sx={{ mb: '20px', fontSize: '25px' }}>Descarga de Respaldos</Typography>
+				{archivo && (
+					<Box mt="1rem" width="70%">
+						<Button
+							sx={{
+								backgroundColor: '#add8e6',
+								color: '#000000',
+								'&:hover': {
+									backgroundColor: '#87ceeb'
+								}
+							}}
+							component="span"
+							fullWidth
+							variant="contained"
+							onClick={handleUpload}>
+							SUBIR
+						</Button>
+					</Box>
+				)}
+				</div>
 
-                <Box sx={{ mb: '30px', display: 'flex', alignItems: 'center' }}>
-                    <ManageSearchIcon sx={{ fontSize: '40px', marginRight: '10px' }} />
-                    <Input
-                        type="text"
-                        sx={{ background: 'transparent', border: 'none', width: '300px' }}
-                        placeholder="Buscar por identificador..."
-                        value={searchTerm}
-                        onChange={handleSearchChange}
-                    />
-                </Box>
+				<div className={isLightMode ? 'backups__ligth_two' : 'backups_two'}>
 
-                {currentRespaldos.length === 0 ? (
+				<Typography sx={{ mb: '20px', fontSize: '25px' }}>Descarga de Respaldos</Typography>
 
-                    <Typography variant="body1" sx={{ width: '80%', textAlign: 'center', mt: '20px', fontSize: '20px', color: isLightMode ? '#000000' : '#fff' }}>
-                        No se encontraron registros con ese nombre.
-                    </Typography>
+				<Box sx={{ mb: '30px', display: 'flex', alignItems: 'center' }}>
+					<ManageSearchIcon sx={{ fontSize: '40px', marginRight: '10px' }} />
+					<Input
+						type="text"
+						sx={{ background: 'transparent', border: 'none', width: '300px' }}
+						placeholder="Buscar por identificador..."
+						value={searchTerm}
+						onChange={handleSearchChange}
+					/>
+				</Box>
 
-                ) : (
+				{currentRespaldos.length === 0 ? (
 
-                    currentRespaldos.map((identificador, index) => (
-                        <Box key={index} width={'80%'} display={'flex'} alignItems={'center'} justifyContent={'space-between'} mb={2} p={2} bgcolor={isLightMode ? 'rgba(255, 255, 255, 0.250)' : 'rgba(0, 0, 63, 0.202)'} borderRadius={'10px'}>
-                            <Typography sx={{ fontSize: '20px' }} variant="h6">
-                                {identificador}
-                            </Typography>
-                            <Button onClick={() => handleDownload(filteredRespaldos[identificador])}>
-                                <CloudDownloadIcon sx={{ color: '#fff', fontSize: '35px' }} />
-                            </Button>
-                        </Box>
+					<Typography variant="body1" sx={{ width: '80%', textAlign: 'center', mt: '20px', fontSize: '20px', color: isLightMode ? '#000000' : '#fff' }}>
+						No se encontraron registros con ese nombre.
+					</Typography>
 
-                    ))
+				) : (
 
-                )}
+					currentRespaldos.map((identificador, index) => (
+						<Box key={index} width={'80%'} display={'flex'} alignItems={'center'} justifyContent={'space-between'} mb={2} p={2} bgcolor={isLightMode ? 'rgba(255, 255, 255, 0.250)' : 'rgba(0, 0, 63, 0.202)'} borderRadius={'10px'}>
+							<Typography sx={{ fontSize: '20px' }} variant="h6">
+								{identificador}
+							</Typography>
+							<Button onClick={() => handleDownload(filteredRespaldos[identificador])}>
+								<CloudDownloadIcon sx={{ color: '#fff', fontSize: '35px' }} />
+							</Button>
+						</Box>
 
-                <Box mt="2rem" display="flex" justifyContent="center" alignItems="center">
+					))
 
-                    <Button
-                        sx={{
-                            marginRight: '10px',
-                            backgroundColor: 'transparent',
-                            color: isLightMode ? '#000000' : '#cff9e0',
-                            '&:hover': {
-                                backgroundColor: '#add8e6'
-                            }
-                        }}
-                        disabled={currentPage === 1}
-                        onClick={() => paginate(currentPage - 1)}>
-                        <KeyboardArrowLeftIcon />
-                    </Button>
+				)}
 
-                    <Typography variant="body1" sx={{ margin: '0 20px', color: isLightMode ? '#000000' : '#cff9e0' }}>
-                        {currentPage} de {Math.ceil(Object.keys(filteredRespaldos).length / itemsPerPage)}
-                    </Typography>
+				<Box mt="2rem" display="flex" justifyContent="center" alignItems="center">
 
-                    <Button
-                        sx={{
-                            marginLeft: '10px',
-                            backgroundColor: 'transparent',
-                            color: isLightMode ? '#000000' : '#cff9e0',
-                            '&:hover': {
-                                backgroundColor: '#add8e6'
-                            }
-                        }}
-                        disabled={currentPage === Math.ceil(Object.keys(filteredRespaldos).length / itemsPerPage)}
-                        onClick={() => paginate(currentPage + 1)}>
-                        <KeyboardArrowRightIcon />
-                    </Button>
+					<Button
+						sx={{
+							marginRight: '10px',
+							backgroundColor: 'transparent',
+							color: isLightMode ? '#000000' : '#cff9e0',
+							'&:hover': {
+								backgroundColor: '#add8e6'
+							}
+						}}
+						disabled={currentPage === 1}
+						onClick={() => paginate(currentPage - 1)}>
+						<KeyboardArrowLeftIcon />
+					</Button>
 
-                </Box>
+					<Typography variant="body1" sx={{ margin: '0 20px', color: isLightMode ? '#000000' : '#cff9e0' }}>
+						{currentPage} de {Math.ceil(Object.keys(filteredRespaldos).length / itemsPerPage)}
+					</Typography>
 
-            </div>
+					<Button
+						sx={{
+							marginLeft: '10px',
+							backgroundColor: 'transparent',
+							color: isLightMode ? '#000000' : '#cff9e0',
+							'&:hover': {
+								backgroundColor: '#add8e6'
+							}
+						}}
+						disabled={currentPage === Math.ceil(Object.keys(filteredRespaldos).length / itemsPerPage)}
+						onClick={() => paginate(currentPage + 1)}>
+						<KeyboardArrowRightIcon />
+					</Button>
+
+				</Box>
+
+				</div>
+
+			</Box>
 
             {cargando && <ChargeMessage />}
 
-        </Box>
+        </Box>	
 
     )
 
