@@ -124,8 +124,9 @@ const DocumentosFicha = ({ empleado, setAlert }) => {
    };
 
    const getAllFilesGenerales = () => {
-      getAllCategoriesWhitDocuments(1, empleado.id_usuario)
+      getAllCategoriesWhitDocuments(5, empleado.id_usuario)
          .then((res) => {
+            console.log("restro")
             setFilesGenerales(res.data);
          })
          .catch((res) => {
@@ -166,7 +167,7 @@ const DocumentosFicha = ({ empleado, setAlert }) => {
 
    return (
       <Box sx={{ minHeight: "70vh" }}>
-         <ModalNewFile close={setOpenModal} open={openModal} categoria={categoria} action={categoria.id == 1 ? getAllFilesGenerales : getAllFiles} setAlert={setAlert} />
+         <ModalNewFile close={setOpenModal} open={openModal} categoria={categoria} action={categoria.id == 5 ? getAllFilesGenerales : getAllFiles} setAlert={setAlert} />
 
          <Divider>
             <Chip label="DOCUMENTOS GENERALES" size="small" color="secondary" />
@@ -180,7 +181,7 @@ const DocumentosFicha = ({ empleado, setAlert }) => {
                <Button
                   onClick={() => {
                      setOpenModal(true);
-                     setCategoria({ id: 1, categoria: "General" });
+                     setCategoria({ id: 5, categoria: "General" });
                   }}
                   variant="contained"
                   color={"warning"}
