@@ -6,7 +6,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { esES } from '@mui/x-date-pickers/locales'
 import 'dayjs/locale/es'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import { verifyTokenRequest } from "./api/auth"
 
 import Topbar from "./scenes/global/Topbar"
@@ -52,18 +52,25 @@ import RecordsBackup from './scenes/records-backup'
 import RecordsImpression from './scenes/records-impression'
 import Inventory from './scenes/inventory'
 
+import { initializeWebSocket } from './config/WebSocketManager'
+
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [theme, colorMode] = useMode()
   const [isSidebar, setIsSidebar] = useState(true)
   const [checkingAuth, setCheckingAuth] = useState(true)
   let location = useLocation()
+  const dispatch = useDispatch()
   const navigate = useNavigate()
   const mapa_seleccionado = useSelector((state) => state.plaza_mapa)
 
   useEffect(() => {
     checkLogin()
   }, [])
+
+  useEffect(() => {
+    initializeWebSocket(dispatch);
+  }, [dispatch]);
 
   async function checkLogin() {
     const token = localStorage.getItem('token')
