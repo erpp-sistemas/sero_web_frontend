@@ -52,6 +52,7 @@ import RecordsBackup from './scenes/records-backup'
 import RecordsImpression from './scenes/records-impression'
 import Inventory from './scenes/inventory'
 import PersonalErpp from "./scenes/recursos-humanos/PersonalErpp"
+import AusenciasErpp from "./scenes/ausencias-personal/index"
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -168,6 +169,7 @@ function App() {
                         <Route path="/impresion" element={<RecordsImpression />} />
                         <Route path="/inventario" element={<Inventory />} />
                         <Route path="/personal-erpp" element={<PersonalErpp />} />
+                        <Route path="/ausencias-personal" element={<AusenciasErpp/>} />
                       </Routes>
                     </main>
                   </div>

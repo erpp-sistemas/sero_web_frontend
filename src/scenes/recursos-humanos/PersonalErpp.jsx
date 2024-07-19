@@ -29,8 +29,8 @@ function Index() {
    const [areaSelect, setAreaSelect] = useState("all");
 
    const [empleados, setEmpleados] = useState([]);
-
-
+   
+    
    const getEmpleados=(parametros)=>{
       getAllEmpleados(parametros)
       .then((res) => { 
@@ -40,7 +40,7 @@ function Index() {
          console.log(err);
       });
    }
-
+    
    const obtenerAreas=()=>{
       getAreas()
       .then((res) => {

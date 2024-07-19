@@ -1,0 +1,26 @@
+
+
+.rbc-today{
+    background-color: #489354 ;
+}
+.rbc-off-range{
+    color: rgb(26, 26, 26) ;
+} 
+
+.rbc-btn-group button{
+    background-color: #00ff00;
+}
+.rbc-day-bg + .rbc-day-bg{
+    border-left: 1px solid #00ff00;
+}
+
+.rbc-month-row + .rbc-month-row {
+    border-top: 1px solid #00ff00;
+}
+.rbc-off-range-bg {
+    background: #e6e6e6 !important;
+}
+
+.noLaboralble{
+    background-color: #476285;
+}
