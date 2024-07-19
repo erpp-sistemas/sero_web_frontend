@@ -51,6 +51,7 @@ import Records from './scenes/records'
 import RecordsBackup from './scenes/records-backup'
 import RecordsImpression from './scenes/records-impression'
 import Inventory from './scenes/inventory'
+import ManagerDashboard from './scenes/manager-dashboard'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -166,6 +167,7 @@ function App() {
                         <Route path="/backup" element={<RecordsBackup />} />
                         <Route path="/impresion" element={<RecordsImpression />} />
                         <Route path="/vehiculos" element={<Inventory />} />
+                        <Route path="/manager-dashboard" element={<ManagerDashboard />} />
                       </Routes>
                     </main>
                   </div>
