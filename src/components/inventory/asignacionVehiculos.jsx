@@ -6,11 +6,11 @@ import { keyframes } from '@emotion/react'
 import styled from '@emotion/styled'
 import { useState } from "react"
 
-const EditVehiculo = ({ setOpenNew, setAlertClean }) => {
+const AsignacionVehiculo = ({ setOpenNew, setAlertClean }) => {
 	const theme = useTheme()
 	const isLightMode = theme.palette.mode === 'light'
 	const [animation, setAnimation] = useState(false)
-  
+
 	const slideIn = 
 		!animation ?
 		keyframes`
@@ -75,7 +75,7 @@ const EditVehiculo = ({ setOpenNew, setAlertClean }) => {
 				}}
 			>
 				<Typography sx={{ color: isLightMode ? '#000' : '#fff', fontSize: '24px', fontWeight: '500' }}>
-					Informacion de vehículo
+					Asignar vehículo
 				</Typography>
 				<Button
 					onClick={() => close()}
@@ -95,10 +95,10 @@ const EditVehiculo = ({ setOpenNew, setAlertClean }) => {
 	)
 }
 
-EditVehiculo.propTypes = {
+AsignacionVehiculo.propTypes = {
 	setOpenNew: PropTypes.func.isRequired, 
 	setAlertClean: PropTypes.func.isRequired,
 	openNew: PropTypes.bool.isRequired, 
 }
 
-export default EditVehiculo
+export default AsignacionVehiculo
