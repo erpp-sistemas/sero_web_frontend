@@ -1,12 +1,9 @@
 import axios from 'axios'
+import { mode } from '../config/credentials'
 
-// Se usa en modo local
 const instance = axios.create({
-   baseURL: 'http://127.0.0.1:3001/api',
-   withCredentials: true
-}) 
-
-// Se usa en modo produccion
-// const instance = axios.create({ baseURL: "https://erpp.center/sero-web/api"}) 
+    baseURL: mode === 'prod' ? "https://erpp.center/sero-web/api" : "http://localhost:3001/sero-web/api",
+    withCredentials: true
+})
 
 export default instance
