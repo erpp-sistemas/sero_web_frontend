@@ -19,7 +19,8 @@ import PeopleIcon from '@mui/icons-material/People'
 import MenuBookIcon from '@mui/icons-material/MenuBook'
 import InfoIcon from '@mui/icons-material/Info'
 import UserDetailsModal from '../../components/UsersList/UserDetailsModal.jsx'
-import { AddOutlined, Cancel, CheckCircle, Face, FileDownload, NoAccounts, People, PeopleAlt, Search } from "@mui/icons-material"
+import GeneralDataModal from '../../components/EditUser/GeneralDataModal.jsx'
+import { AddOutlined, Cancel, CheckCircle, Face, FileDownload, Lock, Looks, NoAccounts, People, PeopleAlt, Person, PersonOutline, Place, Search } from "@mui/icons-material"
 import { Link } from 'react-router-dom'
 import { useSelector } from 'react-redux';
 import * as ExcelJS from "exceljs";
@@ -30,13 +31,15 @@ function Index() {
 	const [users, setUsers] = React.useState([])
 	const [selectedUser, setSelectedUser] = useState(null)
 	const [openModal, setOpenModal] = useState(false)
+	const [generalDataOpenModal, setGeneralDataOpenModal] = useState(false)
 	const [filter, setFilter] = useState('all');
 	const [searchText, setSearchText] = useState('');
 
 	const UsersByUserId = async (user_id) => {
 		try {
 		const response = await getUsersByUserIdRequest(user_id)
-		setUsers(response.data)		
+		setUsers(response.data)	
+		console.log(response.data)	
 		} catch (error) {
 		console.error('Error fetching data:', error)
 		}
@@ -56,6 +59,16 @@ function Index() {
 		setOpenModal(false)
 	}
 
+	const handleGeneralDataOpenModal = (data) => {
+		setSelectedUser(data)
+		setGeneralDataOpenModal(true)
+	}
+
+	const handleGeneralDataCloseModal = () => {
+		setSelectedUser(null)
+		setGeneralDataOpenModal(false)
+	}
+
   const buildColumns = useMemo(() => {
     return [
 		{ 
@@ -67,7 +80,7 @@ function Index() {
 			editable: false,
 		},
 		{ 
-			field: 'last_name', 
+			field: 'first_last_name', 
 			renderHeader: () => (
 			<strong style={{ color: "#5EBFFF" }}>{"APELLIDO PATERNO"}</strong>
 			),
@@ -134,19 +147,54 @@ function Index() {
 		{
 			field: 'actions',
 			headerName: 'Acciones',
-			width: 150,
+			width: 180,
 			renderCell: (params) => (
-			<Tooltip title="Detalles">
-				<Button 
-				variant="outlined" 
-				color="info" 
-				size='small'
-				onClick={() => handleOpenModal(params.row)}
-				sx={{minWidth: 'auto'}}
-				>
-				<InfoIcon />
-				</Button>
-			</Tooltip>
+				<div>
+					<Tooltip title="Detalles">
+						<Button 
+						variant="outlined" 
+						color="info" 
+						size='small'
+						onClick={() => handleOpenModal(params.row)}
+						sx={{minWidth: 'auto'}}
+						>
+						<InfoIcon />
+						</Button>
+					</Tooltip>
+					 <Tooltip title="Datos Generales">
+                        <Button 
+                            variant="outlined" 
+                            color="secondary" 
+                            size='small'
+                            onClick={() => handleGeneralDataOpenModal(params.row)}
+                            sx={{ minWidth: 'auto'}}
+                        >
+                            <Person />
+                        </Button>
+                    </Tooltip>
+					<Tooltip title="Plazas, Servicios y Procesos">
+                        <Button 
+                            variant="outlined" 
+                            color="secondary" 
+                            size='small'
+                            
+                            sx={{ minWidth: 'auto'}}
+                        >
+                            <Place />
+                        </Button>
+                    </Tooltip>
+					<Tooltip title="Permisos">
+                        <Button 
+                            variant="outlined" 
+                            color="secondary" 
+                            size='small'
+                            
+                            sx={{ minWidth: 'auto'}}
+                        >
+                            <Lock />
+                        </Button>
+                    </Tooltip>
+				</div>			
 			),
 		},
 		];
@@ -470,11 +518,12 @@ function Index() {
 				getRowId={(row) => row.user_id}
 				editable={false} 
 				slots={{ toolbar: CustomToolbar }}
-				onRowClick={(params) => handleOpenModal(params.row)}
+				// onRowClick={(params) => handleOpenModal(params.row)}
 				/>
 			</Box>
 
 			<UserDetailsModal open={openModal} onClose={handleCloseModal} user={selectedUser} />
+			<GeneralDataModal open={generalDataOpenModal} onClose={handleGeneralDataCloseModal} data={selectedUser}/>
 
 		</Box>
 

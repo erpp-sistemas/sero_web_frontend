@@ -1,3 +1,5 @@
+import { Dialog, DialogContent, Divider, Chip } from '@mui/material';
+import List from '@mui/material/List';
 import React, { useState, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
@@ -15,7 +17,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import Avatar from '@mui/material/Avatar';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import CircularProgress from '@mui/material/CircularProgress';
-import { Divider, InputAdornment, MenuItem, Alert, Collapse } from '@mui/material';
+import { InputAdornment, MenuItem, Alert, Collapse } from '@mui/material';
 import PhoneIcon from '@mui/icons-material/Phone';
 import PersonIcon from '@mui/icons-material/Person';
 import FamilyIcon from '@mui/icons-material/FamilyRestroom';
@@ -29,12 +31,13 @@ import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import ComputerIcon from '@mui/icons-material/Computer';
 import MobileFriendlyIcon from '@mui/icons-material/MobileFriendly';
 import KeyboardTabIcon from '@mui/icons-material/KeyboardTab';
+import LoadingModal from '../../components/LoadingModal.jsx'
+import CustomAlert from '../../components/CustomAlert.jsx'
 
-function StepOne({ onNext, onFormData, resetTrigger }) {
-  const titleStyle = {
-    color: '#5EBFFF',
-  };
 
+const GeneralDataModal = ({ open, onClose, data, resetTrigger }) => {
+  if (!data) return null;
+  
   const [formData, setFormData] = useState({
     name: '',
     first_last_name: '',
@@ -57,10 +60,77 @@ function StepOne({ onNext, onFormData, resetTrigger }) {
   const [alertOpen, setAlertOpen] = useState(false);
   const [missingFields, setMissingFields] = useState([]);
   const [fileInputKey, setFileInputKey] = useState(Date.now());  
+  const [originalData, setOriginalData] = useState(null);
+  const [generatedValues, setGeneratedValues] = useState({
+    user_name: '',
+    password: ''
+  });
+  const [originalPassword, setOriginalPassword] = useState('');
+  const [originalUserName, setOriginalUserName] = useState('');
+  const [generateNew, setGenerateNew] = useState(false);
+  const [nameOriginal, setNameOriginal] = useState('');
+  const [firstLastNameOriginal, setFirstLastNameOriginal] = useState('');
+  const [firstLastNameModified, setFirstLastNameModified] = useState('');
+  const [isLoading, setIsLoading] = useState(false)  
+  const [alertType, setAlertType] = useState("info");
+  const [alertMessage, setAlertMessage] = useState("");
 
   useEffect(() => {
-    setLoading(true);
-    const timer = setTimeout(() => {
+    if (open && data) {
+      const firstSpaceIndex = data.name.indexOf(' ');
+      const firstWordFirstName = firstSpaceIndex === -1 ? data.name : data.name.substring(0, firstSpaceIndex);
+      const firstSpaceIndexLast = data.first_last_name.indexOf(' ');
+      const firstWordLastName = firstSpaceIndexLast === -1 ? data.first_last_name : data.first_last_name.substring(0, firstSpaceIndexLast);
+      const generatedUserName = `${firstWordFirstName.toLowerCase()}.${firstWordLastName.toLowerCase()}@ser0.mx`;
+      const generatedPassword = generatePassword(firstWordFirstName);
+
+      setGeneratedValues({
+        user_name: generatedUserName,
+        password: generatedPassword
+      });
+
+      setOriginalData({
+        name: data.name || '',
+        first_last_name: data.first_last_name || '',
+        second_last_name: data.second_last_name || '',
+        birthdate: data.birthdate || '',
+        sex_id: data.sex === 'masculino' ? '1' : '2',
+        user_name: data.user_name || generatedUserName,
+        password: data.password || generatedPassword,
+        profile_id: data.profile_id || '',
+        active_web_access: data.active_web_access === 'acceso permitido',
+        active_app_movil_access: data.active_app_movil_access === 'acceso permitido',
+        personal_phone: data.personal_phone || '',
+        work_phone: data.work_phone || '',
+        url_image: data.url_image || ''
+      });
+
+      setNameOriginal(data.name || '');
+      setFirstLastNameOriginal(data.first_last_name || '');
+      setFirstLastNameModified(data.first_last_name || '');
+      setOriginalUserName(data.user_name || '');
+      setOriginalPassword(data.password || '');
+
+      setFormData({
+        name: data.name || '',
+        first_last_name: data.first_last_name || '',
+        second_last_name: data.second_last_name || '',
+        birthdate: data.birthdate || '',
+        sex_id: data.sex === 'masculino' ? '1' : '2',
+        user_name: data.user_name || generatedUserName,
+        password: data.password || generatedPassword,
+        profile_id: data.profile_id || '',
+        active_web_access: data.active_web_access === 'acceso permitido',
+        active_app_movil_access: data.active_app_movil_access === 'acceso permitido',
+        personal_phone: data.personal_phone || '',
+        work_phone: data.work_phone || '',
+        url_image: data.url_image || ''
+      });
+    }
+  }, [data, open]);
+
+  useEffect(() => {
+    if (generateNew) {
       const firstSpaceIndex = formData.name.indexOf(' ');
       const firstWordFirstName = firstSpaceIndex === -1 ? formData.name : formData.name.substring(0, firstSpaceIndex);
       const firstSpaceIndexLast = formData.first_last_name.indexOf(' ');
@@ -73,33 +143,18 @@ function StepOne({ onNext, onFormData, resetTrigger }) {
         password: password
       }));
       setLoading(false);
-    }, 500); 
-    return () => clearTimeout(timer);
-  }, [formData.name, formData.first_last_name]);
+    }
+  }, [generateNew, formData.name, formData.first_last_name]);
 
   useEffect(() => {
     getProfiles();
   }, []);
 
-  useEffect(() => {    
-    setFormData({
-      name: '',
-      first_last_name: '',
-      second_last_name: '',
-      birthdate: '',
-      sex_id: '1',
-      user_name: '',
-      password: '',
-      password_hash: '',
-      profile_id: '',
-      active_web_access: true,
-      active_app_movil_access: true,
-      personal_phone: '',
-      work_phone: '',
-      url_image: ''
-    });
-    setFileInputKey(Date.now());
-  }, [resetTrigger]);
+  useEffect(() => {
+    if (open) {
+      setFileInputKey(Date.now());
+    }
+  }, [resetTrigger, open]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -107,6 +162,31 @@ function StepOne({ onNext, onFormData, resetTrigger }) {
       ...prevState,
       [name]: value
     }));
+
+    if (name === 'name') {
+      if (value !== nameOriginal || formData.first_last_name !== firstLastNameOriginal) {
+        setGenerateNew(true);
+      } else {
+        setGenerateNew(false);
+        setFormData(prevState => ({
+          ...prevState,
+          user_name: originalUserName,
+          password: originalPassword
+        }));
+      }
+    } else if (name === 'first_last_name') {
+      if (value !== firstLastNameOriginal || formData.name !== nameOriginal) {
+        setGenerateNew(true);
+      } else {
+        setGenerateNew(false);
+        setFormData(prevState => ({
+          ...prevState,
+          user_name: originalUserName,
+          password: originalPassword
+        }));
+      }
+      setFirstLastNameModified(value);
+    }
   };
 
   const handleNumericChange = (e) => {
@@ -138,11 +218,11 @@ function StepOne({ onNext, onFormData, resetTrigger }) {
     };
     reader.readAsDataURL(file);
   };
-
+  
   const handleDeletePhoto = () => {
     setFormData(prevState => ({
       ...prevState,
-      url_image: null
+      url_image: defaultImage
     }));
   };
 
@@ -153,29 +233,61 @@ function StepOne({ onNext, onFormData, resetTrigger }) {
     }));
   };
 
+  const getModifiedData = () => {
+    if (!originalData) return {};
+  
+    const modifiedData = Object.keys(formData).reduce((acc, key) => {
+      if (formData[key] !== originalData[key]) {
+        if (key === 'user_name' && formData[key] === generatedValues.user_name) return acc;
+        if (key === 'password' && formData[key] === generatedValues.password) {
+          acc[key] = originalPassword;
+          return acc;
+        }
+        acc[key] = formData[key];
+      } else {        
+        if (originalData[key] !== undefined) {
+          acc[key] = '';
+        }
+      }
+      
+      return acc;
+    }, {});
+  
+    return modifiedData;
+  };  
+
   const handleSubmit = (e) => {
     e.preventDefault();
+  
+    const modifiedData = getModifiedData();    
+  
+    const hasChanges = Object.values(modifiedData).some(value => value !== '');
 
+    if (!hasChanges) {
+      alert('No se han realizado cambios.');
+      return;
+    }
+
+    console.log('Datos',modifiedData)
+  
     const mandatoryFields = ['name', 'first_last_name', 'second_last_name', 'birthdate', 'sex_id', 'user_name', 'password', 'profile_id'];
-
+  
     const newMissingFields = mandatoryFields.filter(field => {
       const value = formData[field];
       return typeof value === 'string' && !value.trim();
     });
-
-    setMissingFields(newMissingFields);
-
+  
+    setMissingFields(newMissingFields);    
+  
     if (newMissingFields.length > 0) {
       setAlertOpen(true);
       setTimeout(() => {
         setAlertOpen(false);
       }, 5000);
       return;
-    }
-
-    onNext(formData);
-    onFormData(formData);
-  };
+    }    
+    
+  };  
 
   const generatePassword = (firstName) => {
     const randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+<>?';
@@ -208,8 +320,60 @@ function StepOne({ onNext, onFormData, resetTrigger }) {
     }
   };
 
+  const signup = async (user) => {
+    try {
+      setIsLoading(true);
+      const res = await registerRequest(user);
+  
+      setIsLoading(false);
+  
+      if (res.status === 200) {
+        const userIdFromMessage = res.data.message.match(/\d+/)[0];
+        setUserId(userIdFromMessage);
+        console.log('Success:', res.data.message);
+        setAlertOpen(true);
+        setAlertType("success");
+        setAlertMessage("¡Felicidades! " + res.data.message);
+        return true;
+      } else {
+        console.log(`Unexpected status code: ${res.status}`);
+        setAlertOpen(true);
+        setAlertType("error");
+        setAlertMessage(`Error! Unexpected status code: ${res.status}`);
+        return false;
+      }
+    } catch (error) {
+      setIsLoading(false);
+      if (error.response) {
+        const status = error.response.status;
+        const message = error.response.data.message;
+  
+        console.log(`Error (${status}):`, message);
+        setAlertOpen(true);
+        setAlertType("error");
+        setAlertMessage("¡Error! " + message);
+      } else {
+        console.log('Error:', error.message);
+        setAlertOpen(true);
+        setAlertType("error");
+        setAlertMessage("¡Error! " + error.message);
+      }
+      return false;
+    }
+  };
+
   return (
-    <Box m='20px'>
+    <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
+      <DialogContent>
+        <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
+        <Box m='20px'>
+        <LoadingModal open={isLoading}/>
+        <CustomAlert
+          alertOpen={alertOpen}
+          type={alertType}
+          message={alertMessage}
+          onClose={setAlertOpen}
+        />
       <Typography variant="h5" gutterBottom>
         Datos Personales
       </Typography>
@@ -499,7 +663,11 @@ function StepOne({ onNext, onFormData, resetTrigger }) {
         </Box>
       </form>      
     </Box>
+        </List>
+        <Divider sx={{ backgroundColor: '#5EBFFF' }} />
+      </DialogContent>
+    </Dialog>
   );
-}
+};
 
-export default StepOne;
+export default GeneralDataModal;

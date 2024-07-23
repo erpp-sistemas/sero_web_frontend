@@ -11,6 +11,7 @@ import StepThree from '../../components/NewUser/StepThree.jsx';
 import { registerRequest, registerAssignedPlacesRequest, registerMenuAndSubMenuRequest } from '../../api/auth';
 import LoadingModal from '../../components/LoadingModal.jsx'
 import CustomAlert from '../../components/CustomAlert.jsx'
+import { useSelector } from 'react-redux';
 
 function NewUser() {
   const [selectedChip, setSelectedChip] = useState('Datos Generales');
@@ -28,6 +29,7 @@ function NewUser() {
     stepTwo: false,
     stepThree: false
   });
+  const user = useSelector((state) => state.user);
 
   const [resetTrigger, setResetTrigger] = useState(0);
 
@@ -54,12 +56,14 @@ function NewUser() {
   };
 
   const handleStepOneNext = async (data) => {
-    setFormData(data);
-    setProfileId(data.profile_id);
-    console.log(data)
 
-    if (data.profile_id === 1) {
-      const signupResponse = await signup(data);
+    const updateData = { ...data, username_session: user.username };
+
+    setFormData(updateData);
+    setProfileId(updateData.profile_id);    
+
+    if (updateData.profile_id === 1) {
+      const signupResponse = await signup(updateData);
       
       if (signupResponse) {
         setCompletedSteps({ ...completedSteps, stepOne: true });
@@ -77,12 +81,22 @@ function NewUser() {
 const handleStepTwoNext = async data => {
   setFormDataTwo(data);
 
+  console.log(data)
+
   if (profileId === 5) {
-    await registerAssignedPlaces(userId, data);
-    setAlertOpen(true);
-    setAlertType("success");
-    setAlertMessage("El proceso se ha completado. Como gestor, no es necesario tener permisos de la plataforma web.");
-    resetForm();
+    const updateData = { ...formData, username_session: user.username };
+
+    const signupResponse = await signup(updateData);
+    console.log(data)
+
+    if (signupResponse) {
+      await registerAssignedPlaces(userId, data);
+      setAlertOpen(true);
+      setAlertType("success");
+      setAlertMessage("El proceso se ha completado. Como gestor, no es necesario tener permisos de la plataforma web.");
+      resetForm();
+    }
+    
   } else {
     setSelectedChip('Permisos');
     setCompletedSteps({ ...completedSteps, stepTwo: true });
@@ -92,19 +106,29 @@ const handleStepTwoNext = async data => {
 const handleStepThreeNext = async data => {
   setFormDataThree(data);
 
-  const finalFormData = { ...formData, ...formDataTwo, ...data };
+  console.log(data)
 
-  await registerMenuAndSubMenu(userId, profileId, data);
+  const updateData = { ...formData, username_session: user.username };
 
-  if (profileId !== 5) {
-    await registerAssignedPlaces(userId, formDataTwo);
-  }
+  const signupResponse = await signup(updateData);
 
-  await signup(finalFormData);
-  setAlertOpen(true);
-  setAlertType("success");
-  setAlertMessage("Todos los pasos se han completado correctamente.");
-  resetForm();  
+  if (signupResponse) {
+    await registerAssignedPlaces(userId, formDataTwo);  
+
+    await registerMenuAndSubMenu(userId, profileId, data);
+
+    setAlertOpen(true);
+    setAlertType("success");
+    setAlertMessage("Todos los pasos se han completado correctamente.");
+    resetForm();  
+  }  
+
+  // if (profileId !== 5) {
+    
+  // }
+  // const finalFormData = { ...formData, ...formDataTwo, ...data };
+  
+  
 };
 
 const signup = async (user) => {
