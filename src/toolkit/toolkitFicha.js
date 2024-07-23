@@ -94,13 +94,13 @@ function NumberToDate(numeroSerie) {
 }
 
 const formatearFila = async (data, folio) => {
-    const jsonData = data
-    const idIndex = jsonData[0].indexOf('id')
+    const jsonData = data;
+    const idIndex = jsonData[0].indexOf('id');
     const sortedData = [jsonData[0], ...jsonData.slice(1).sort((a, b) => {
-        const idA = parseInt(a[idIndex], 10) || 0
-        const idB = parseInt(b[idIndex], 10) || 0
-        return idA - idB
-    })]
+        const idA = parseInt(a[idIndex], 10) || 0;
+        const idB = parseInt(b[idIndex], 10) || 0;
+        return idA - idB;
+    })];
 
     const columnIndexes = {
         id_local: 'id',
@@ -129,8 +129,8 @@ const formatearFila = async (data, folio) => {
         porcentaje_descuento: '% descuento',
         descuento: '$ descuento',
         gestor: 'gestor',
-		giro: 'giro',
-		proceso: 'proceso',
+        giro: 'giro',
+        proceso: 'proceso',
         tarea_gestionada: 'tarea_gestionada',
         fecha_gestion: 'fecha_de_gestion',
         tabla_gestion: 'tabla_gestion',
@@ -143,85 +143,80 @@ const formatearFila = async (data, folio) => {
         url_fachada: 'urlImagenFachada',
         foto_evidencia_predio: 'foto evidencia predio',
         url_evidencia: 'urlImagenEvidencia',
-		fecha_actualizacion: 'fecha_actualizacion',
-		fecha_corte_adeudo: 'fecha_corte_adeudo',
-		monto_adeudo:'monto_adeudo'
-    }
+        fecha_actualizacion: 'fecha_actualizacion',
+        fecha_corte_adeudo: 'fecha_corte_adeudo',
+        monto_adeudo: 'monto_adeudo'
+    };
 
-    const tiposDeDatos = {}
-    const resultados = []
+    const tiposDeDatos = {};
+    const resultados = [];
 
     for (let index = 1; index < sortedData.length; index++) {
-        const fila = sortedData[index]
+        const fila = sortedData[index];
 
         const ficha = Object.keys(columnIndexes).reduce((ficha, columnName) => {
-            const columnIndex = sortedData[0].indexOf(columnIndexes[columnName])
-            ficha[columnName] = (columnIndex !== -1) ? fila[columnIndex] || 'desconocido' : 'desconocido'
+            const columnIndex = sortedData[0].indexOf(columnIndexes[columnName]);
+            ficha[columnName] = (columnIndex !== -1) ? fila[columnIndex] || null : null;
 
-			if (['id', 'latitud', 'longitud', 'total_pagado', 'descuento'].includes(columnName) && ficha[columnName] === 'desconocido') {
-				ficha[columnName] = 0
-			}
-
-            if (['calle', 'propietario', 'colonia', 'tipo_servicio', 'tipo_tarifa', 'medidor', 'servicio', 'recibo', 'clave_catastral', 'descripcion', 'porcentaje_paga', 'porcentaje_descuento', 'gestor', 'tarea_gestionada', 'tabla_gestion', 'tipo_gestion', 'status_predio', 'status_gestion_valida', 'status_nuestra_cartera', 'status_cuenta', 'cuenta', 'url_fachada', 'url_evidencia'].includes(columnName)) {
-                ficha[columnName] = ficha[columnName] === 'desconocido' ? '0' : String(ficha[columnName])
+            if (['id', 'latitud', 'longitud', 'total_pagado', 'descuento'].includes(columnName) && ficha[columnName] === null) {
+                ficha[columnName] = 0;
             }
 
-            return ficha
+            if (['calle', 'propietario', 'colonia', 'tipo_servicio', 'tipo_tarifa', 'medidor', 'servicio', 'recibo', 'clave_catastral', 'descripcion', 'porcentaje_paga', 'porcentaje_descuento', 'gestor', 'tarea_gestionada', 'tabla_gestion', 'tipo_gestion', 'status_predio', 'status_gestion_valida', 'status_nuestra_cartera', 'status_cuenta', 'cuenta', 'url_fachada', 'url_evidencia'].includes(columnName)) {
+                ficha[columnName] = ficha[columnName] === null ? '0' : String(ficha[columnName]);
+            }
 
-        }, {})
+            return ficha;
+        }, {});
 
-        if (ficha.cuenta !== 'desconocido') {
-            let candado = true
+        if (ficha.cuenta !== null) {
+            let candado = true;
             for (let key in ficha) {
                 if (ficha[key] !== undefined) {
-					if (typeof ficha.fecha_pago === 'number') {
-                        ficha.fecha_pago = NumberToDate(ficha.fecha_pago)
+                    if (typeof ficha.fecha_pago === 'number') {
+                        ficha.fecha_pago = NumberToDate(ficha.fecha_pago);
                     }
                     if (typeof ficha.fecha_gestion === 'number') {
-                        ficha.fecha_gestion = NumberToDate(ficha.fecha_gestion)
+                        ficha.fecha_gestion = NumberToDate(ficha.fecha_gestion);
                     }
-					if (typeof ficha.fecha_pago === 'string' && ficha.fecha_pago.includes('T') && ficha.fecha_pago.includes('.000Z')) {
-						ficha.fecha_pago = ficha.fecha_pago.replace('T', ' ').replace('.000Z', '')
-					}
-					if (typeof ficha.fecha_gestion === 'string' && ficha.fecha_gestion.includes('T') && ficha.fecha_gestion.includes('.000Z')) {
-						ficha.fecha_gestion = ficha.fecha_gestion.replace('T', ' ').replace('.000Z', '')
-					}
-                    ficha.foto_fachada_predio = ficha.foto_fachada_predio === 'si' || ficha.foto_fachada_predio === 'Si' ? 1 : 0
-                    ficha.foto_evidencia_predio = ficha.foto_evidencia_predio === 'si' || ficha.foto_evidencia_predio === 'Si' ? 1 : 0
-                    ficha.promocion = String(ficha.promocion)
+                    if (typeof ficha.fecha_pago === 'string' && ficha.fecha_pago.includes('T') && ficha.fecha_pago.includes('.000Z')) {
+                        ficha.fecha_pago = ficha.fecha_pago.replace('T', ' ').replace('.000Z', '');
+                    }
+                    if (typeof ficha.fecha_gestion === 'string' && ficha.fecha_gestion.includes('T') && ficha.fecha_gestion.includes('.000Z')) {
+                        ficha.fecha_gestion = ficha.fecha_gestion.replace('T', ' ').replace('.000Z', '');
+                    }
+                    ficha.foto_fachada_predio = ficha.foto_fachada_predio === 'si' || ficha.foto_fachada_predio === 'Si' ? 1 : 0;
+                    ficha.foto_evidencia_predio = ficha.foto_evidencia_predio === 'si' || ficha.foto_evidencia_predio === 'Si' ? 1 : 0;
+                    ficha.promocion = String(ficha.promocion);
                 } else {
-                    candado = false
+                    candado = false;
                 }
             }
 
             if (candado) {
-                ficha.activate = 0
-                resultados.push({ folio: folio ? folio : 'desconocido', ...ficha })
+                ficha.activate = 0;
+                resultados.push({ folio: folio || 'desconocido', ...ficha });
 
                 Object.keys(ficha).forEach((key) => {
                     if (!tiposDeDatos[key]) {
-                        tiposDeDatos[key] = typeof ficha[key]
+                        tiposDeDatos[key] = typeof ficha[key];
                     } else if (tiposDeDatos[key] !== typeof ficha[key]) {
-                        console.warn(`Diferente tipo de dato en la columna '${key}': Esperado '${tiposDeDatos[key]}', Encontrado '${typeof ficha[key]}'`)
+                        console.warn(`Diferente tipo de dato en la columna '${key}': Esperado '${tiposDeDatos[key]}', Encontrado '${typeof ficha[key]}'`);
                     }
-                })
-
+                });
             }
-
         }
-
     }
 
-	const resultadosOrdenados = resultados.sort((a, b) => {
-        const cuentaA = parseInt(a.cuenta, 10) || 0
-        const cuentaB = parseInt(b.cuenta, 10) || 0
-        return cuentaA - cuentaB
-    })
+    const resultadosOrdenados = resultados.sort((a, b) => {
+        const cuentaA = parseInt(a.cuenta, 10) || 0;
+        const cuentaB = parseInt(b.cuenta, 10) || 0;
+        return cuentaA - cuentaB;
+    });
 
-    console.log(resultadosOrdenados)
-    return resultadosOrdenados
-
-}
+    console.log(resultadosOrdenados);
+    return resultadosOrdenados;
+};
 
 const uploadS3 = async (file, name) => {
 	const formData = new FormData()

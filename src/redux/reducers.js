@@ -20,29 +20,38 @@ import apikeyGeocoding from './apikeyGeocodingSlice'
 import dataGeocoding from "./dataGeocodingSlice"
 import recordsSlice from "./recordsSlice"
 import impresionSlice from "./impressionSlice"
+import informacionGeneralSlice from "./vehiculosSlices/informacionGeneralSlice.js"
+import informacionGeneralErrorsSlice from "./vehiculosSlices/informacionGeneralErrorsSlice.js"
+import documentosSlice from "./vehiculosSlices/documentosSlice.js"
+import documentosErrorsSlice from "./vehiculosSlices/documentosErrorsSlice.js"
 
 const rootReducer = combineReducers({
-  user: userReducer,
-  place: placeReducer,
-  plaza_mapa: plazaMapaReducer,
-  features: featuresReducer,
-  dialog: dialogReducer,
-  mapa: mapaReducer,
-  account: accountData,
-  actions: actions,
-  alertInfo: alertInfo,
-  contributorAddress: contributorAddress,
-  debts: debts,
-  getImageData: getImageData,
-  getRowAccount:getRowAccount,
-  informationContributor:informationContributor,
-  payment:payment,
-  photo:photo,
-  plazaNumber:plazaNumber,
-  apikeyGeocoding:apikeyGeocoding,
-  dataGeocoding:dataGeocoding,
-  records: recordsSlice,
-  impression: impresionSlice,
+	user: userReducer,
+	place: placeReducer,
+	plaza_mapa: plazaMapaReducer,
+	features: featuresReducer,
+	dialog: dialogReducer,
+	mapa: mapaReducer,
+	account: accountData,
+	actions: actions,
+	alertInfo: alertInfo,
+	contributorAddress: contributorAddress,
+	debts: debts,
+	getImageData: getImageData,
+	getRowAccount:getRowAccount,
+	informationContributor:informationContributor,
+	payment:payment,
+	photo:photo,
+	plazaNumber:plazaNumber,
+	apikeyGeocoding:apikeyGeocoding,
+	dataGeocoding:dataGeocoding,
+	records: recordsSlice,
+	impression: impresionSlice,
+	informacionGeneral: informacionGeneralSlice,
+	informacionGeneralErrors: informacionGeneralErrorsSlice,
+	documentos: documentosSlice,
+	documentosErrors: documentosErrorsSlice,
+
 })
 
 export default rootReducer
