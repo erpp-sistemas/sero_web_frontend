@@ -1,12 +1,21 @@
-import React from 'react';
-import Typography from '@mui/material/Typography';
+import Typography from '@mui/material/Typography'
+import PropTypes from 'prop-types'
 
 function AlertMessage({ message, type }) {
-  return (
-    <Typography variant="body2" color={type === 'error' ? 'error' : 'textPrimary'}>
-      {message}
-    </Typography>
-  );
+
+	return (
+
+		<Typography variant="body2" color={type === 'error' ? 'error' : 'textPrimary'}>
+			{message}
+		</Typography>
+
+	)
+
 }
 
-export default AlertMessage;
+AlertMessage.propTypes = {
+	message: PropTypes.string.isRequired,
+	type: PropTypes.string.isRequired,
+}
+
+export default AlertMessage

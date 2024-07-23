@@ -481,6 +481,10 @@ body,
 	padding: 10px 10px;
 }
 
+.lable_vehiculos{
+	cursor: pointer;
+}
+
 @media screen and (max-width: 1000px) {
 
 	.inventory__table{
