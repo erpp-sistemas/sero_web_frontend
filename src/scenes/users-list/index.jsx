@@ -20,6 +20,8 @@ import MenuBookIcon from '@mui/icons-material/MenuBook'
 import InfoIcon from '@mui/icons-material/Info'
 import UserDetailsModal from '../../components/UsersList/UserDetailsModal.jsx'
 import GeneralDataModal from '../../components/EditUser/GeneralDataModal.jsx'
+import AssignedPlacesModal from '../../components/EditUser/AssignedPlacesModal.jsx'
+import AssignedMenuAndSubMenuModal from '../../components/EditUser/AssignedMenuAndSubMenuModal.jsx'
 import { AddOutlined, Cancel, CheckCircle, Face, FileDownload, Lock, Looks, NoAccounts, People, PeopleAlt, Person, PersonOutline, Place, Search } from "@mui/icons-material"
 import { Link } from 'react-router-dom'
 import { useSelector } from 'react-redux';
@@ -32,6 +34,8 @@ function Index() {
 	const [selectedUser, setSelectedUser] = useState(null)
 	const [openModal, setOpenModal] = useState(false)
 	const [generalDataOpenModal, setGeneralDataOpenModal] = useState(false)
+	const [assignedPlacesOpenModal, setAssignedPlacesOpenModal] = useState(false)
+	const [assignedMenuAndSubMenuOpenModal, setAssignedMenuAndSubMenuOpenModal] = useState(false)
 	const [filter, setFilter] = useState('all');
 	const [searchText, setSearchText] = useState('');
 
@@ -67,6 +71,25 @@ function Index() {
 	const handleGeneralDataCloseModal = () => {
 		setSelectedUser(null)
 		setGeneralDataOpenModal(false)
+	}
+
+	const handleAssignedPlacesOpenModal = (data) => {
+		setSelectedUser(data)
+		setAssignedPlacesOpenModal(true)
+	}
+
+	const handleAssignedPlacesCloseModal = () => {
+		setSelectedUser(null)
+		setAssignedPlacesOpenModal(false)
+	}
+	const handleAssignedMenuAndSubMenuOpenModal = (data) => {
+		setSelectedUser(data)
+		setAssignedMenuAndSubMenuOpenModal(true)
+	}
+
+	const handleAssignedMenuAndSubMenuCloseModal = () => {
+		setSelectedUser(null)
+		setAssignedMenuAndSubMenuOpenModal(false)
 	}
 
   const buildColumns = useMemo(() => {
@@ -148,54 +171,81 @@ function Index() {
 			field: 'actions',
 			headerName: 'Acciones',
 			width: 180,
-			renderCell: (params) => (
-				<div>
-					<Tooltip title="Detalles">
-						<Button 
-						variant="outlined" 
-						color="info" 
-						size='small'
-						onClick={() => handleOpenModal(params.row)}
-						sx={{minWidth: 'auto'}}
-						>
-						<InfoIcon />
-						</Button>
-					</Tooltip>
-					 <Tooltip title="Datos Generales">
-                        <Button 
-                            variant="outlined" 
-                            color="secondary" 
-                            size='small'
-                            onClick={() => handleGeneralDataOpenModal(params.row)}
-                            sx={{ minWidth: 'auto'}}
-                        >
-                            <Person />
-                        </Button>
-                    </Tooltip>
-					<Tooltip title="Plazas, Servicios y Procesos">
-                        <Button 
-                            variant="outlined" 
-                            color="secondary" 
-                            size='small'
-                            
-                            sx={{ minWidth: 'auto'}}
-                        >
-                            <Place />
-                        </Button>
-                    </Tooltip>
-					<Tooltip title="Permisos">
-                        <Button 
-                            variant="outlined" 
-                            color="secondary" 
-                            size='small'
-                            
-                            sx={{ minWidth: 'auto'}}
-                        >
-                            <Lock />
-                        </Button>
-                    </Tooltip>
-				</div>			
-			),
+			renderCell: (params) => {
+				const profile = params.row.profile;  // Perfil del usuario en la fila
+			
+				return (
+					<div>
+						{/* Botón Detalles */}
+						{profile === 'Administrador' || profile === 'Gestor' || profile !== 'Administrador' ? (
+							<Tooltip title="Detalles">
+								<span>
+									<Button 
+										variant="outlined" 
+										color="info" 
+										size='small'
+										onClick={() => handleOpenModal(params.row)}
+										sx={{ minWidth: 'auto' }}
+									>
+										<InfoIcon />
+									</Button>
+								</span>
+							</Tooltip>
+						) : null}
+			
+						{/* Botón Datos Generales */}
+						{profile === 'Administrador' || profile === 'Gestor' || profile !== 'Administrador' ? (
+							<Tooltip title="Datos Generales">
+								<span>
+									<Button 
+										variant="outlined" 
+										color="secondary" 
+										size='small'
+										onClick={() => handleGeneralDataOpenModal(params.row)}
+										sx={{ minWidth: 'auto' }}
+									>
+										<Person />
+									</Button>
+								</span>
+							</Tooltip>
+						) : null}
+			
+						{/* Botón Plazas, Servicios y Procesos */}
+						{profile === 'Gestor' || profile !== 'Administrador' ? (
+							<Tooltip title="Plazas, Servicios y Procesos">
+								<span>
+									<Button 
+										variant="outlined" 
+										color="secondary" 
+										size='small'
+										onClick={() => handleAssignedPlacesOpenModal(params.row)}
+										sx={{ minWidth: 'auto' }}
+									>
+										<Place />
+									</Button>
+								</span>
+							</Tooltip>
+						) : null}
+			
+						{/* Botón Permisos */}
+						{profile !== 'Administrador' && profile !== 'Gestor' ? (
+							<Tooltip title="Permisos">
+								<span>
+									<Button 
+										variant="outlined" 
+										color="secondary" 
+										size='small'
+										onClick={() => handleAssignedMenuAndSubMenuOpenModal(params.row)}
+										sx={{ minWidth: 'auto' }}
+									>
+										<Lock />
+									</Button>
+								</span>
+							</Tooltip>
+						) : null}
+					</div>
+				);
+			}			
 		},
 		];
   }, []);
@@ -524,7 +574,8 @@ function Index() {
 
 			<UserDetailsModal open={openModal} onClose={handleCloseModal} user={selectedUser} />
 			<GeneralDataModal open={generalDataOpenModal} onClose={handleGeneralDataCloseModal} data={selectedUser}/>
-
+			<AssignedPlacesModal open={assignedPlacesOpenModal} onClose={handleAssignedPlacesCloseModal} data={selectedUser}/>
+			<AssignedMenuAndSubMenuModal open={assignedMenuAndSubMenuOpenModal} onClose={handleAssignedMenuAndSubMenuCloseModal} data={selectedUser}/>
 		</Box>
 
 	)

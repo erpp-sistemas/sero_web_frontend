@@ -6,7 +6,7 @@ export const verifyTokenRequest = token => axios.post('/verify', { token })
 
 export const registerRequest = user => axios.post(`/register`, user)
 
-export const editRegisterRequest = user => axios.post(`/editRegister`, user)
+export const updateRegisterRequest = user => axios.post(`/updateRegister`, user)
 
 export const registerAssignedPlacesRequest = (user_id, dataAssignedPlaces) => axios.post(`/registerAssignedPlaces`, {user_id, dataAssignedPlaces})
 

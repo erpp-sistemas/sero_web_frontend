@@ -33,12 +33,17 @@ import MobileFriendlyIcon from '@mui/icons-material/MobileFriendly';
 import KeyboardTabIcon from '@mui/icons-material/KeyboardTab';
 import LoadingModal from '../../components/LoadingModal.jsx'
 import CustomAlert from '../../components/CustomAlert.jsx'
+import { updateRegisterRequest } from '../../api/auth.js'
+import { useSelector } from 'react-redux';
 
 
 const GeneralDataModal = ({ open, onClose, data, resetTrigger }) => {
   if (!data) return null;
+
+  console.log('data inicial: ', data)
   
   const [formData, setFormData] = useState({
+    user_id: '',
     name: '',
     first_last_name: '',
     second_last_name: '',
@@ -74,6 +79,7 @@ const GeneralDataModal = ({ open, onClose, data, resetTrigger }) => {
   const [isLoading, setIsLoading] = useState(false)  
   const [alertType, setAlertType] = useState("info");
   const [alertMessage, setAlertMessage] = useState("");
+  const user = useSelector((state) => state.user);
 
   useEffect(() => {
     if (open && data) {
@@ -90,6 +96,7 @@ const GeneralDataModal = ({ open, onClose, data, resetTrigger }) => {
       });
 
       setOriginalData({
+        user_id: data.user_id || '',
         name: data.name || '',
         first_last_name: data.first_last_name || '',
         second_last_name: data.second_last_name || '',
@@ -112,6 +119,7 @@ const GeneralDataModal = ({ open, onClose, data, resetTrigger }) => {
       setOriginalPassword(data.password || '');
 
       setFormData({
+        user_id: data.user_id || '',
         name: data.name || '',
         first_last_name: data.first_last_name || '',
         second_last_name: data.second_last_name || '',
@@ -252,19 +260,27 @@ const GeneralDataModal = ({ open, onClose, data, resetTrigger }) => {
       
       return acc;
     }, {});
+
+    // if (formData.user_id) {
+    //   modifiedData['user_id'] = formData.user_id;
+    // }
   
     return modifiedData;
   };  
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
   
     const modifiedData = getModifiedData();    
+
+    console.log('modifieData', modifiedData)
   
     const hasChanges = Object.values(modifiedData).some(value => value !== '');
 
     if (!hasChanges) {
-      alert('No se han realizado cambios.');
+      setAlertOpen(true);
+      setAlertType("success");
+      setAlertMessage("No se han realizado cambios.");      
       return;
     }
 
@@ -285,8 +301,23 @@ const GeneralDataModal = ({ open, onClose, data, resetTrigger }) => {
         setAlertOpen(false);
       }, 5000);
       return;
-    }    
+    }
+
+    const updateData = { ...modifiedData, username_session: user.username };
+
+    if (formData.user_id) {
+        updateData['user_id'] = formData.user_id;
+      }
+
+    console.log('update:', updateData)
     
+    const signupResponse = await signup(updateData);
+      
+    if (signupResponse) {      
+      setAlertOpen(true);
+      setAlertType("success");
+      setAlertMessage("El proceso se ha completado. Como perfil de administrador, tiene acceso a todas las plazas y permisos.");      
+    }
   };  
 
   const generatePassword = (firstName) => {
@@ -322,14 +353,15 @@ const GeneralDataModal = ({ open, onClose, data, resetTrigger }) => {
 
   const signup = async (user) => {
     try {
+      console.log('esete es el user de sign:', user)
       setIsLoading(true);
-      const res = await registerRequest(user);
+      const res = await updateRegisterRequest(user);
   
       setIsLoading(false);
   
       if (res.status === 200) {
         const userIdFromMessage = res.data.message.match(/\d+/)[0];
-        setUserId(userIdFromMessage);
+        
         console.log('Success:', res.data.message);
         setAlertOpen(true);
         setAlertType("success");
