@@ -65,7 +65,7 @@ const Photos = ({ photo }) => {
                 <CardHeader 
                   avatar={<AvatarImage data={ph.photo_person_who_capture} />}
                   title={ph.person_who_capture}
-                  subheader={ph.date_capture}
+                  subheader='Persona que capturo'
                   sx={{ borderLeft: '5px solid #00ff00' }}
                 />
                 <CardMedia
@@ -88,10 +88,10 @@ const Photos = ({ photo }) => {
                     {ph.task_done}
                   </Typography>                  
                   <Typography sx={{ fontSize: 14 }} color="text.secondary">
-                    Fecha en que ingreso en sistema
+                    Fecha de captura
                   </Typography>
                   <Typography variant="h4" component="div" gutterBottom>
-                    {ph.synchronization_date}
+                    {ph.date_capture}
                   </Typography>
                 </CardContent>                 
               </Card>
