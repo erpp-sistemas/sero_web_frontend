@@ -11,6 +11,8 @@ import { tokens } from "../../theme";
 import LoadingModal from '../../components/LoadingModal.jsx';
 import CustomAlert from '../../components/CustomAlert.jsx';
 import { Dialog, DialogContent } from '@mui/material';
+import { Save } from '@mui/icons-material';
+import { updateAssignedPlacesRequest } from '../../api/auth';
 
 const AssignedPlacesModal = ({ open, onClose, data }) => {
   if (!data) return null;
@@ -147,23 +149,7 @@ const AssignedPlacesModal = ({ open, onClose, data }) => {
 
       console.log(JSON.stringify(updatedSelectedProcesses, null, 2));
     }
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    const transformedData = transformData(selectedProcesses);
-
-    if (transformedData.length === 0) {
-      setAlertOpen(true);
-      setAlertType("error");
-      setAlertMessage("¡Error! Debes seleccionar al menos un proceso.");
-      return;
-    }
-
-    onNextTwo(transformedData);
-    onFormDataTwo(transformedData);
-  };
+  };  
 
   const transformData = (selectedProcesses) => {
     const transformedData = [];
@@ -179,9 +165,76 @@ const AssignedPlacesModal = ({ open, onClose, data }) => {
     return transformedData;
   };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const transformedData = transformData(selectedProcesses);
+
+    if (transformedData.length === 0) {
+      setAlertOpen(true);
+      setAlertType("error");
+      setAlertMessage("¡Error! Debes seleccionar al menos un proceso.");
+      return;
+    }
+
+    
+    console.log(transformedData) 
+    const userId = data.user_id;   
+
+    try {
+      await updateAssignedPlaces(userId, transformedData);
+      setAlertOpen(true);
+      setAlertType("success");
+      setAlertMessage("El proceso se ha completado. Como gestor, no es necesario tener permisos de la plataforma web.");
+    } catch (error) {
+      setAlertOpen(true);
+      setAlertType("error");
+      setAlertMessage(`¡Error! ${error.message}`);
+    }
+  };
+
+  const updateAssignedPlaces = async (user_id, dataAssignedPlaces) => {
+    try {
+        const res = await updateAssignedPlacesRequest(user_id, dataAssignedPlaces);
+        
+        if (res.status === 200) {
+          console.log('Success:', res.data.message);
+          // Aquí puedes manejar el éxito, por ejemplo, mostrar una notificación al usuario
+        } else {
+          console.log(`Unexpected status code: ${res.status}`);
+          // Manejar otros códigos de estado inesperados
+        }
+  
+    } catch (error) {
+       if (error.response) {
+        const status = error.response.status;
+        
+        if (status === 400) {
+          console.log('Bad Request:', error.response.data.message);
+          // Aquí puedes manejar los errores de solicitud incorrecta (400)
+        } else if (status === 500) {
+          console.log('Server Error:', error.response.data.message);
+          // Aquí puedes manejar los errores del servidor (500)
+        } else {
+          console.log(`Error (${status}):`, error.response.data.message);
+          // Manejar otros códigos de estado de error
+        }
+      } else {
+        console.log('Error:', error.message);
+        // Manejar otros tipos de errores, como problemas de red
+      }
+    }
+  }
+
   return (
     <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
-      <DialogContent>
+      <DialogContent sx={{
+        '& .MuiDialog-paper': {
+          boxShadow: '0px 5px 15px rgba(0,0,0,0.5)',
+          borderRadius: '8px', 
+        },
+        bgcolor: 'background.paper'
+      }}>
         <form onSubmit={handleSubmit}>
           <div>
             <LoadingModal open={isLoading} />
@@ -289,8 +342,8 @@ const AssignedPlacesModal = ({ open, onClose, data }) => {
               </Card>
             </Box>
             <Box mt={2}>
-              <Button type="submit" sx={{ bgcolor: 'secondary.main', '&:hover': { bgcolor: 'secondary.dark' } }} variant="contained" color="secondary" endIcon={<KeyboardTabIcon />}>
-                Siguiente
+              <Button type="submit" sx={{ bgcolor: 'secondary.main', '&:hover': { bgcolor: 'secondary.dark' } }} variant="contained" color="secondary" endIcon={<Save />}>
+                Guardar cambios
               </Button>
             </Box>
           </div>

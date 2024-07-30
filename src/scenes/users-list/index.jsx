@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react'
-import { Box, Avatar, Tooltip, Button, TextField, Typography, Badge, InputAdornment, Grid } from '@mui/material'
+import { Box, Avatar, Tooltip, Button, TextField, Typography, Badge, InputAdornment, Grid, IconButton, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material'
 import Header from '../../components/Header'
 import { DataGrid, GridToolbarColumnsButton, GridToolbarContainer, GridToolbarDensitySelector, GridToolbarExport, GridToolbarFilterButton, } from '@mui/x-data-grid'
 import { getUsersByUserIdRequest } from '../../api/user.js'
@@ -26,6 +26,7 @@ import { AddOutlined, Cancel, CheckCircle, Face, FileDownload, Lock, Looks, NoAc
 import { Link } from 'react-router-dom'
 import { useSelector } from 'react-redux';
 import * as ExcelJS from "exceljs";
+import { updateActiveUserRequest } from '../../api/auth.js'
 
 function Index() {
 
@@ -38,6 +39,9 @@ function Index() {
 	const [assignedMenuAndSubMenuOpenModal, setAssignedMenuAndSubMenuOpenModal] = useState(false)
 	const [filter, setFilter] = useState('all');
 	const [searchText, setSearchText] = useState('');
+	const [alertOpen, setAlertOpen] = useState(false);
+	const [alertType, setAlertType] = useState("info");
+	const [alertMessage, setAlertMessage] = useState("");
 
 	const UsersByUserId = async (user_id) => {
 		try {
@@ -48,6 +52,10 @@ function Index() {
 		console.error('Error fetching data:', error)
 		}
 	}
+
+	const refreshUsers = async () => {
+		await UsersByUserId(user.user_id);
+	};
 
 	useEffect(() => {
 		UsersByUserId(user.user_id)    
@@ -71,6 +79,7 @@ function Index() {
 	const handleGeneralDataCloseModal = () => {
 		setSelectedUser(null)
 		setGeneralDataOpenModal(false)
+		refreshUsers();
 	}
 
 	const handleAssignedPlacesOpenModal = (data) => {
@@ -81,6 +90,7 @@ function Index() {
 	const handleAssignedPlacesCloseModal = () => {
 		setSelectedUser(null)
 		setAssignedPlacesOpenModal(false)
+		refreshUsers();
 	}
 	const handleAssignedMenuAndSubMenuOpenModal = (data) => {
 		setSelectedUser(data)
@@ -90,6 +100,7 @@ function Index() {
 	const handleAssignedMenuAndSubMenuCloseModal = () => {
 		setSelectedUser(null)
 		setAssignedMenuAndSubMenuOpenModal(false)
+		refreshUsers();
 	}
 
   const buildColumns = useMemo(() => {
@@ -149,12 +160,17 @@ function Index() {
 			renderHeader: () => (
 			<strong style={{ color: "#5EBFFF" }}>{"ESTATUS"}</strong>
 			),
-			width:100,
+			width:130,
 			renderCell: (params) => (
 			<StatusCell 
+        user_id={params.row.user_id} 
+				name={`${params.row.name} ${params.row.first_last_name} ${params.row.second_last_name}`}
+				user_name={params.row.user_name}
+				password={params.row.password}
 				active={params.row.active} 
 				activeWeb={params.row.active_web} 
-				activeMobile={params.row.active_mobile} 
+				activeMobile={params.row.active_mobil} 
+        onStatusChange={handleStatusChange}
 			/>
 			),
 			autoHeight: true, 
@@ -172,7 +188,7 @@ function Index() {
 			headerName: 'Acciones',
 			width: 180,
 			renderCell: (params) => {
-				const profile = params.row.profile;  // Perfil del usuario en la fila
+				const profile = params.row.profile; 
 			
 				return (
 					<div>
@@ -273,52 +289,128 @@ function Index() {
 		)
 	}
 
-	const StatusCell = ({ active, activeWeb, activeMobile }) => {
+  const handleStatusChange = async (user_id, name, user_name, password, newStatus, type) => {
+  
+    console.log(`Enviando ${type} con nuevo estatus: ${newStatus} para usuario con ID: ${user_id}`);
+    try {
+      await updateActiveUser(user_id, name, user_name, password, type, newStatus);
+      setAlertOpen(true);
+      setAlertType("success");
+      setAlertMessage("Felicidades!! ... Se actualizo el estatus con exito");
+	  refreshUsers();
+    } catch (error) {
+      setAlertOpen(true);
+      setAlertType("error");
+      setAlertMessage(`¡Error! ${error.message}`);
+    }
+  };
+
+  const updateActiveUser = async (user_id, name, user_name, password, type, status_user) => {
+    try {
+        const res = await updateActiveUserRequest(user_id, name, user_name, password, type, status_user);
+        
+        if (res.status === 200) {
+          console.log('Success:', res.data.message);
+          // Aquí puedes manejar el éxito, por ejemplo, mostrar una notificación al usuario
+        } else {
+          console.log(`Unexpected status code: ${res.status}`);
+          // Manejar otros códigos de estado inesperados
+        }
+  
+    } catch (error) {
+       if (error.response) {
+        const status = error.response.status;
+        
+        if (status === 400) {
+          console.log('Bad Request:', error.response.data.message);
+          // Aquí puedes manejar los errores de solicitud incorrecta (400)
+        } else if (status === 500) {
+          console.log('Server Error:', error.response.data.message);
+          // Aquí puedes manejar los errores del servidor (500)
+        } else {
+          console.log(`Error (${status}):`, error.response.data.message);
+          // Manejar otros códigos de estado de error
+        }
+      } else {
+        console.log('Error:', error.message);
+        // Manejar otros tipos de errores, como problemas de red
+      }
+    }
+  }
+
+  const getColor = (status) => {
+    return status === 'activo' ? 'success.main' : 'error.main';
+  };
+
+	const StatusCell = ({ user_id, name, user_name, password, active, activeWeb, activeMobile, onStatusChange }) => {
+    const [open, setOpen] = useState(false);
+    const [currentStatus, setCurrentStatus] = useState('');
+    const [statusType, setStatusType] = useState('');
+  
+    const handleClickOpen = (status, type) => {
+      setCurrentStatus(status);
+      setStatusType(type);
+      setOpen(true);
+    };
+  
+    const handleClose = (confirmed) => {
+      if (confirmed) {
+        const newStatus = currentStatus === 'activo' ? 'inactivo' : 'activo';
+        onStatusChange(user_id, name, user_name, password, newStatus, statusType);
+      }
+      setOpen(false);
+    };  
+
+    const iconStyles = (status) => ({
+      color: 'white',
+      backgroundColor: getColor(status),
+      '&:hover': {
+      color: getColor(status),      
+      },
+    });
+    
 		return (
-		<AvatarGroup max={3}>
-			{active === 'activo' && (
-			<Tooltip title="Usuario activo">
-				<Avatar sx={{ bgcolor: green[500], width:26, height:26 }}>
-				<FaceIcon />
-				</Avatar>
-			</Tooltip>
-			)}
-			{active !== 'activo' && (
-			<Tooltip title="Usuario inactivo">
-				<Avatar sx={{ bgcolor: red[500], width:26, height:26 }}>
-				<FaceIcon/>
-				</Avatar>
-			</Tooltip>
-			)}
-			{activeWeb === 'activo' && (
-			<Tooltip title="Con acceso a la web">
-				<Avatar sx={{ bgcolor: green[500], width:26, height:26 }}>
-				<ComputerIcon />
-				</Avatar>
-			</Tooltip>
-			)}
-			{activeWeb !== 'activo' && (
-			<Tooltip title="Sin acceso a la web">
-				<Avatar sx={{ bgcolor: red[500], width:26, height:26 }}>
-				<ComputerIcon />
-				</Avatar>
-			</Tooltip>
-			)}
-			{activeMobile === 'activo' && (
-			<Tooltip title="Con acceso a la app móvil">
-				<Avatar sx={{ bgcolor: green[500], width:26, height:26 }}>
-				<AppShortcutIcon />
-				</Avatar>
-			</Tooltip>
-			)}
-			{activeMobile !== 'activo' && (
-			<Tooltip title="Sin acceso a la app móvil">
-				<Avatar sx={{ bgcolor: red[500], width:26, height:26 }}>
-				<AppShortcutIcon />
-				</Avatar>
-			</Tooltip>
-			)}        
-		</AvatarGroup>
+			<div>
+				<Tooltip title={active === 'activo' ? "Usuario activo" : "Usuario inactivo"}>
+        <IconButton 
+        sx={iconStyles(active)}
+        onClick={() => handleClickOpen(active, 'active')}
+        >
+          <FaceIcon />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title={activeWeb === 'activo' ? "Con acceso a la web" : "Sin acceso a la web"}>
+        <IconButton 
+        sx={iconStyles(activeWeb)}
+        onClick={() => handleClickOpen(activeWeb, 'activeWeb')}
+        >
+          <ComputerIcon />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title={activeMobile === 'activo' ? "Con acceso a la app móvil" : "Sin acceso a la app móvil"}>
+        <IconButton 
+        sx={iconStyles(activeMobile)}
+        onClick={() => handleClickOpen(activeMobile, 'activeMobile')}
+        >
+          <AppShortcutIcon />
+        </IconButton>
+      </Tooltip>
+
+      <Dialog open={open} onClose={() => handleClose(false)}>
+        <DialogTitle>Confirmar acción</DialogTitle>
+        <DialogContent>
+          ¿Estás seguro de que deseas cambiar el estado a "{currentStatus === 'activo' ? 'inactivo' : 'activo'}" para {statusType}?
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => handleClose(false)} color="error">
+            Cancelar
+          </Button>
+          <Button onClick={() => handleClose(true)} color="secondary">
+            Aceptar
+          </Button>
+        </DialogActions>
+      </Dialog>
+			</div>
 		)
 	}
   

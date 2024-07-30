@@ -52,9 +52,7 @@ const GeneralDataModal = ({ open, onClose, data, resetTrigger }) => {
     user_name: '',
     password: '',
     password_hash: '',
-    profile_id: '',
-    active_web_access: true,
-    active_app_movil_access: true,
+    profile_id: '',    
     personal_phone: '',
     work_phone: '',
     url_image: ''
@@ -104,9 +102,7 @@ const GeneralDataModal = ({ open, onClose, data, resetTrigger }) => {
         sex_id: data.sex === 'masculino' ? '1' : '2',
         user_name: data.user_name || generatedUserName,
         password: data.password || generatedPassword,
-        profile_id: data.profile_id || '',
-        active_web_access: data.active_web_access === 'acceso permitido',
-        active_app_movil_access: data.active_app_movil_access === 'acceso permitido',
+        profile_id: data.profile_id || '',        
         personal_phone: data.personal_phone || '',
         work_phone: data.work_phone || '',
         url_image: data.url_image || ''
@@ -127,9 +123,7 @@ const GeneralDataModal = ({ open, onClose, data, resetTrigger }) => {
         sex_id: data.sex === 'masculino' ? '1' : '2',
         user_name: data.user_name || generatedUserName,
         password: data.password || generatedPassword,
-        profile_id: data.profile_id || '',
-        active_web_access: data.active_web_access === 'acceso permitido',
-        active_app_movil_access: data.active_app_movil_access === 'acceso permitido',
+        profile_id: data.profile_id || '',        
         personal_phone: data.personal_phone || '',
         work_phone: data.work_phone || '',
         url_image: data.url_image || ''
@@ -308,8 +302,6 @@ const GeneralDataModal = ({ open, onClose, data, resetTrigger }) => {
     if (formData.user_id) {
         updateData['user_id'] = formData.user_id;
       }
-
-    console.log('update:', updateData)
     
     const signupResponse = await signup(updateData);
       
@@ -664,29 +656,7 @@ const GeneralDataModal = ({ open, onClose, data, resetTrigger }) => {
                 </MenuItem>
               ))}
             </TextField>
-          </Grid>
-          <Grid item xs={12} sm={4}>
-            <FormControlLabel
-              control={<Switch checked={formData.active_web_access} onChange={handleSwitchChange('active_web_access')} color='secondary' />}
-              label={
-                <React.Fragment>
-                  <ComputerIcon /> Acceso al Sistema Web
-                </React.Fragment>
-              }
-              labelPlacement="start"              
-            />
-          </Grid>
-          <Grid item xs={12} sm={4}>
-            <FormControlLabel
-              control={<Switch checked={formData.active_app_movil_access} onChange={handleSwitchChange('active_app_movil_access')} color='secondary' />}
-              label={
-                <React.Fragment>
-                  <MobileFriendlyIcon /> Acceso a la App Movil
-                </React.Fragment>
-              }
-              labelPlacement="start"
-            />
-          </Grid>
+          </Grid>          
         </Grid>
         <Box mt={2}>
           <Button type="submit" variant="contained" color="secondary" endIcon={<KeyboardTabIcon/>}>

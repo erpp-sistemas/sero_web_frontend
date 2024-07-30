@@ -6,6 +6,7 @@ import * as MUIIcons from "@mui/icons-material";
 import LoadingModal from '../LoadingModal.jsx';
 import CustomAlert from '../CustomAlert.jsx';
 import { Dialog, DialogContent } from '@mui/material';
+import { updateMenuAndSubMenuRequest } from '../../api/auth';
 
 function AssignedMenuAndSubMenu({ open, onClose, data }) {
   if (!data) return null;
@@ -36,6 +37,7 @@ function AssignedMenuAndSubMenu({ open, onClose, data }) {
 
   useEffect(() => {
     setIsLoading(true);
+    console.log(profile_id)
     getMenusProfile(profile_id);
   }, [profile_id]);
 
@@ -71,7 +73,7 @@ function AssignedMenuAndSubMenu({ open, onClose, data }) {
     console.log(newSelected);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (selectedItems.length === 0) {
@@ -81,9 +83,63 @@ function AssignedMenuAndSubMenu({ open, onClose, data }) {
       return;
     }
 
-    onNextThree(selectedItems);
-    onFormDataThree(selectedItems);
+    const filteredItems = selectedItems.filter(item => item.children.length > 0);
+
+    if (filteredItems.length === 0) {
+        setAlertOpen(true);
+        setAlertType("error");
+        setAlertMessage("¡Error! Debes seleccionar al menos un submenú.");
+        return;
+    }
+
+    console.log(filteredItems)
+    const userId = data.user_id;   
+    const roleId = data.profile_id
+    console.log(userId)
+    console.log(roleId)
+    try {
+      await updateMenuAndSubMenu(userId, roleId, filteredItems);
+      setAlertOpen(true);
+      setAlertType("success");
+      setAlertMessage("Felicidades!! los cambios se guardaron con exito");
+    } catch (error) {
+      setAlertOpen(true);
+      setAlertType("error");
+      setAlertMessage(`¡Error! ${error.message}`);
+    }
   };
+
+  const updateMenuAndSubMenu = async (user_id, role_id, dataAssignedMenus) => {
+    try {
+      const res = await updateMenuAndSubMenuRequest(user_id, role_id, dataAssignedMenus);
+      
+      if (res.status === 200) {
+        console.log('Success:', res.data.message);
+        // Aquí puedes manejar el éxito, por ejemplo, mostrar una notificación al usuario
+      } else {
+        console.log(`Unexpected status code: ${res.status}`);
+        // Manejar otros códigos de estado inesperados
+      }
+    } catch (error) {
+      if (error.response) {
+        const status = error.response.status;
+        
+        if (status === 400) {
+          console.log('Bad Request:', error.response.data.message);
+          // Aquí puedes manejar los errores de solicitud incorrecta (400)
+        } else if (status === 500) {
+          console.log('Server Error:', error.response.data.message);
+          // Aquí puedes manejar los errores del servidor (500)
+        } else {
+          console.log(`Error (${status}):`, error.response.data.message);
+          // Manejar otros códigos de estado de error
+        }
+      } else {
+        console.log('Error:', error.message);
+        // Manejar otros tipos de errores, como problemas de red
+      }
+    }
+  }
 
   if (isLoading) {
     return <CircularProgress />;
