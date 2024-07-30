@@ -1,7 +1,6 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from "react"
 import { ProSidebar, Menu, MenuItem } from "react-pro-sidebar"
-import { Box, IconButton, useTheme, Card, CardHeader, CardContent, Button, Alert } from "@mui/material"
+import { Box, IconButton, useTheme, Alert, Button } from "@mui/material"
 import "react-pro-sidebar/dist/css/styles.css"
 import { getServicesMapByIdPlaza, getLayersMapByIdPlaza } from '../../services/map.service'
 import { tokens } from "../../theme"
@@ -14,90 +13,74 @@ import SeroClaro from '../../assets/sero_claro.png'
 import SeroOscuro from '../../assets/sero-logo.png'
 import { Marker } from "mapbox-gl"
 
-const Sidebar = () => {
+const SidebarMap = () => {
 
-    const dispatch = useDispatch()
-    const mapa_seleccionado = useSelector((state) => state.plaza_mapa)
+    const theme = useTheme();
+    const colors = tokens(theme.palette.mode);
+    const dispatch = useDispatch();
+    const mapa_seleccionado = useSelector((state) => state.plaza_mapa);
     const mapa_activo = useSelector((state) => state.mapa)
-    const dialog_mapa = useSelector((state) => state.dialog)
-    const features = useSelector((state) => state.features)
-    const theme = useTheme()
-    const colors = tokens(theme.palette.mode)
-    const [isCollapsed, setIsCollapsed] = useState(false)
-    const [serviciosMapa, setServiciosMapa] = useState([])
-    const [layersMapa, setLayersMapa] = useState([])
-    const [nombreServicioActivo, setNombreServicioActivo] = useState('')
-    const [marker, setMarker] = useState(null)
-	
+    const dialog_mapa = useSelector((state) => state.dialog);
+    const features = useSelector((state) => state.features);
+
+
+    const [isCollapsed, setIsCollapsed] = useState(false);
+    const [serviciosMapa, setServiciosMapa] = useState([]);
+    const [layersMapa, setLayersMapa] = useState([]);
+    const [nombreServicioActivo, setNombreServicioActivo] = useState('');
+    const [marker, setMarker] = useState(null);
+
+
     const fillCartografia = (servicio) => {
-        const id = document.getElementById(servicio.service_id.toString())
+        const id = document.getElementById(servicio.service_id.toString());
         id.style.color = colors.greenAccent[600]
         setNombreServicioActivo(servicio.etiqueta)
         setLayersByIdServicio(servicio.service_id)
     }
 
-    const loadData = async () => {
-
-        const servicios_mapa = getServicesMapByIdPlaza(mapa_seleccionado.place_id)
-
-        const layers_mapa = getLayersMapByIdPlaza(mapa_seleccionado.place_id)
-
-        const promise = await Promise.all([servicios_mapa, layers_mapa])
-
-        setServiciosMapa(promise[0])
-        setLayersMapa(promise[1])
-		
-    }
-
     useEffect(() => {
         screen.width <= 450 ? setIsCollapsed(true) : setIsCollapsed(false)
-        loadData()
-    }, [loadData, mapa_seleccionado])
+        loadData();
+    }, [mapa_seleccionado]);
 
     useEffect(() => {
         if (serviciosMapa.length > 0) {
             serviciosMapa.forEach(servicio => {
-                if (servicio.service_id === 7) fillCartografia(servicio)
+                if (servicio.service_id === 7) fillCartografia(servicio);
             })
         }
-    }, [fillCartografia, serviciosMapa])
+    }, [serviciosMapa]);
 
     useEffect(() => {
-
+        //console.log(features.coordinates)
         if (features.coordinates && features.coordinates.length > 0 && features.coordinates[0] !== undefined) {
 
             if (marker !== null) marker.remove()
 
-            let longitud = features.coordinates[0]
-            let latitud = features.coordinates[1]
-
-            const m = new Marker({
+            setMarker(new Marker({
                 color: colors.greenAccent[500],
-            }).setLngLat([longitud, latitud]).addTo(mapa_activo.mapa)
-
-
-            setMarker(m)
-
+            }).setLngLat(features.coordinates).addTo(mapa_activo.mapa));
         } else {
             if (marker !== null) marker.remove()
         }
+    }, [features.coordinates])
 
-    }, [colors.greenAccent, features.coordinates, mapa_activo.mapa, marker])
+
+    const loadData = async () => {
+        const servicios_mapa = getServicesMapByIdPlaza(mapa_seleccionado.place_id)
+        const layers_mapa = getLayersMapByIdPlaza(mapa_seleccionado.place_id)
+        const promise = await Promise.all([servicios_mapa, layers_mapa])
+        setServiciosMapa(promise[0])
+        setLayersMapa(promise[1])
+    }
 
     const setLayersByIdServicio = (id_servicio) => {
-
         const layers_a = layersMapa.filter(layer => id_servicio === layer.servicio_id)
-
         dispatch(setLayersActivos(layers_a))
-
-        layers_a.forEach(l => {
-            document.getElementById(l.name_layer).style.display = 'block'
-        })
-
+        layers_a.forEach(layer => document.getElementById(layer.name_layer).style.display = 'block')
         layersMapa.filter(layer => id_servicio !== layer.servicio_id).forEach(l => {
             document.getElementById(l.name_layer).style.display = 'none'
         })
-
     }
 
     const handleServicioIcon = (servicio) => {
@@ -107,10 +90,8 @@ const Sidebar = () => {
     }
 
     const changeColorServicioIcon = (id_servicio) => {
-
         const id = document.getElementById(id_servicio.toString())
         id.style.color = colors.greenAccent[600]
-
         serviciosMapa.forEach(servicio => {
             if (servicio.service_id !== id_servicio) {
                 document.getElementById(servicio.service_id.toString()).style.color = colors.grey[100]
@@ -122,21 +103,19 @@ const Sidebar = () => {
         validateLayerInMap(layer)
     }
 
-    const cargarLayerMap = async(layer) => {
-
-		try {
-			if (layer.url_geoserver !== '') {
-				if (layer.tipo === 'punto') {
-					await cargaPunto(layer)
-				} else if (layer.tipo === 'poligono') {
-					await cargarPoligono(layer)
-				}
-			}
-		} catch (error) {
-			console.error(error)
-		}
-
-	}
+    const cargarLayerMap = async (layer) => {
+        try {
+            if (layer.url_geoserver !== '') {
+                if (layer.tipo === 'punto') {
+                    await cargaPunto(layer)
+                } else if (layer.tipo === 'poligono') {
+                    await cargarPoligono(layer)
+                }
+            }
+        } catch (error) {
+            console.error(error)
+        }
+    }
 
     const validateLayerInMap = (layer) => {
         if (!mapa_activo.mapa.getLayer(layer.layer_id)) {
@@ -214,6 +193,8 @@ const Sidebar = () => {
         return data
     }
 
+
+
     return (
         <Box
             sx={{
@@ -235,54 +216,39 @@ const Sidebar = () => {
                 "height": "100%"
             }}
         >
-
-
             <ProSidebar collapsed={isCollapsed} >
                 <Menu iconShape="square">
                     {/* LOGO AND MENU ICON */}
                     <MenuItem
-                        onClick={() => setIsCollapsed(!isCollapsed)}
-                        icon={isCollapsed ? <MenuOutlinedIcon /> : undefined}
-                        style={{
-                            margin: "10px 0 20px 0",
-                            color: colors.grey[100],
-                        }}
-                    >
+                        onClick={() => setIsCollapsed(!isCollapsed)} icon={isCollapsed ? <MenuOutlinedIcon /> : undefined}
+                        style={{ margin: "10px 0 20px 0", color: colors.grey[100], }} >
                         {!isCollapsed && (
-                            <Box
-                                display="flex"
-                                justifyContent="space-between"
-                                alignItems="center"
-                                ml="15px"
-                            >
+                            <div className="flex justify-between items-center ml-[15px]">
                                 <img src={theme.palette.mode === "dark" ? SeroClaro : SeroOscuro} style={{ width: '150px' }} alt="" />
                                 <IconButton onClick={() => setIsCollapsed(!isCollapsed)}>
                                     <MenuOutlinedIcon />
                                 </IconButton>
-                            </Box>
+                            </div>
                         )}
                     </MenuItem>
 
                     <Box paddingLeft={isCollapsed ? undefined : "10%"}>
 
                         {!isCollapsed && (
-                            <Box>
-
+                            <div>
                                 {/* SERVICIOS */}
-                                <Card sx={{ width: '90%', marginBottom: '15px' }}>
-                                    <CardHeader sx={{ backgroundColor: theme.palette.mode === "dark" ? colors.primary[600] : colors.grey[700], height: '30px', color: theme.palette.mode === "dark" ? colors.grey[100] : 'white' }}
-                                        title='Servicios'
-                                    />
-                                    <CardContent sx={{ backgroundColor: theme.palette.mode === 'dark' ? colors.primary[500] : colors.primary[400] }} >
-                                        <Box sx={{ display: 'flex', justifyContent: 'space-evenly', width: '100%', borderRadius: '10px', flexWrap: 'wrap' }} >
-
-                                            {serviciosMapa.length > 0 && serviciosMapa.map((servicio, index) => (
+                                <div className="w-[90%] mb-4" >
+                                    <div className="h-8 flex items-center px-3" style={{ backgroundColor: theme.palette.mode === "dark" ? colors.primary[600] : colors.grey[700], color: theme.palette.mode === "dark" ? colors.grey[100] : 'white' }} >
+                                        <h1 className="text-base">Servicios</h1>
+                                    </div>
+                                    <div style={{ backgroundColor: theme.palette.mode === 'dark' ? colors.primary[500] : colors.primary[400] }} >
+                                        <div className="flex justify-evenly w-full rounded-md flex-wrap" >
+                                            {serviciosMapa.length > 0 && serviciosMapa.map((servicio) => (
                                                 <IconButton sx={{ width: '30%' }} key={servicio.service_id} aria-label="delete" size="large" onClick={() => handleServicioIcon(servicio)}>
                                                     <i id={servicio.service_id.toString()} style={{ color: colors.grey[100] }} className={servicio.icono}></i>
                                                 </IconButton>
                                             ))}
-
-                                        </Box>
+                                        </div>
                                         <Alert severity="success" variant="outline" sx={{
                                             height: '36px', marginTop: '5px', borderRadius: '7px', display: 'flex', justifyContent: 'flex-start', alignItems: 'center',
                                             backgroundColor: colors.greenAccent[600], color: '#000000', fontWeight: 'bold'
@@ -292,56 +258,46 @@ const Sidebar = () => {
                                         {dialog_mapa.status && (
                                             <Alert sx={{ marginTop: '5px' }} severity="warning">Cargando capa...</Alert>
                                         )}
-                                    </CardContent>
-                                </Card>
-
-                                {/* LAYERS DEL SERVICIO SELECCIONADO */}
-                                <Card className="scroll" sx={{ width: '90%', maxHeight: '200px', marginBottom: '15px', overflow: 'scroll' }}>
-                                    <CardHeader sx={{ backgroundColor: theme.palette.mode === "dark" ? colors.primary[600] : colors.grey[700], height: '30px', color: theme.palette.mode === "dark" ? colors.grey[100] : 'white' }}
-                                        title='Layers'
-                                    />
-                                    <CardContent
-                                        sx={{ backgroundColor: theme.palette.mode === 'dark' ? colors.primary[500] : colors.primary[400] }} >
-
+                                    </div>
+                                </div>
+                                {/* LAYERS */}
+                                <div className="scroll w-[90%] max-h-[200px] mb-4 overflow-scroll" >
+                                    <div className="h-8 flex items-center px-3" style={{ backgroundColor: theme.palette.mode === "dark" ? colors.primary[600] : colors.grey[700], color: theme.palette.mode === "dark" ? colors.grey[100] : 'white' }} >
+                                        <h1 className="text-base">Layers</h1>
+                                    </div>
+                                    <div className="flex justify-center flex-wrap p-2" style={{ backgroundColor: theme.palette.mode === 'dark' ? colors.primary[500] : colors.primary[400] }} >
                                         {layersMapa.length > 0 && layersMapa.map((layer, index) => (
-                                            <Button id={layer.name_layer} key={index} onClick={() => handleLayer(layer)}
-                                                sx={{
-                                                    width: '100%', backgroundColor: '#e0e0e0', marginBottom: '3px', display: 'block',
-                                                    ":hover": {
-                                                        bgcolor: '#e0e0e0'
-                                                    }
-                                                }} >
+                                            <button className="w-full bg-gray-300 my-1 py-1 rounded-md text-gray-900 text-sm px-1" id={layer.name_layer} key={index} onClick={() => handleLayer(layer)}>
                                                 {layer.etiqueta}
-                                            </Button>
+                                            </button>
                                         ))}
-
-                                    </CardContent>
-                                </Card>
+                                    </div>
+                                </div>
 
                                 {/* INFORMACION */}
+                                <div className="w-[90%]">
+                                    <div className="h-8 flex items-center px-3" style={{ backgroundColor: theme.palette.mode === "dark" ? colors.primary[600] : colors.grey[700], color: theme.palette.mode === "dark" ? colors.grey[100] : 'white' }} >
+                                        <h1 className="text-base">Información</h1>
+                                    </div>
+                                    <div style={{ backgroundColor: theme.palette.mode === 'dark' ? colors.primary[500] : colors.primary[400] }} >
+                                        {Object.keys(features.features_layer).length > 0 && (features.features_layer.cuenta || features.features_layer.municipio || features.features_layer.ide) ? Object.keys(features.features_layer).map((f, index) => ( // Añadir paréntesis aquí
+                                            <Button key={index} sx={{ width: '100%', backgroundColor: theme.palette.mode === 'dark' ? colors.primary[500] : colors.primary[400], color: colors.grey[100] }}>
+                                                {`${f.replaceAll('_', ' ')} : ${features.features_layer[f]}`}
+                                            </Button>
+                                        )) : null}
+                                    </div>
+                                </div>
 
-                                <Card sx={{ width: '90%' }}>
-                                    <CardHeader sx={{ backgroundColor: theme.palette.mode === "dark" ? colors.primary[600] : colors.grey[700], height: '30px', color: theme.palette.mode === "dark" ? colors.grey[100] : 'white' }}
-                                        title='Información'
-                                    />
-                                    <CardContent
-										sx={{ backgroundColor: theme.palette.mode === 'dark' ? colors.primary[500] : colors.primary[400] }} >
-										{Object.keys(features.features_layer).length > 0 && (features.features_layer.cuenta || features.features_layer.municipio || features.features_layer.ide) ? Object.keys(features.features_layer).map((f, index) => ( // Añadir paréntesis aquí
-											<Button key={index} sx={{ width: '100%', backgroundColor: theme.palette.mode === 'dark' ? colors.primary[500] : colors.primary[400], color: colors.grey[100] }}>
-												{`${f.replaceAll('_', ' ')} : ${features.features_layer[f]}`} 
-											</Button>
-										)) : null}
-									</CardContent>
-                                </Card>
-
-                            </Box>
+                            </div>
                         )}
 
                     </Box>
+
+
                 </Menu>
             </ProSidebar>
-        </Box >
+        </Box>
     )
 }
 
-export default Sidebar
+export default SidebarMap

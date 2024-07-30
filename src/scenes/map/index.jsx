@@ -14,10 +14,10 @@ import { Button } from '@mui/material'
 import * as turf from '@turf/turf'
 
 const stylesMap = {
-    height: '88vh',
+    height: 'calc(100vh - 64px)',
     width: '100vw',
     position: 'fixed',
-    top: '12%',
+    top: '64px',
     left: 0,
 }
 
@@ -35,7 +35,8 @@ const Mapa = () => {
     const [poligonoSelected, setPoligonoSelected] = useState(false)
     const [showModalInfoPolygon, setShowModalInfoPolygon] = useState(false)
 
-    const [ setSeleccionPoligonoPuntos] = useState([])
+    const [seleccionPoligonoPuntos, setSeleccionPoligonoPuntos] = useState([]);
+    const [ultimoPoligonoCreado, setUltimoPoligonoCreado] = useState('');
 
     useEffect(() => {
 		
@@ -91,69 +92,71 @@ const Mapa = () => {
 				}
 			})
 	
-			mapa.on('click', e => {
-	
-				setPoligonoSelected(false)
-	
-				setSeleccionPoligonoPuntos([])
-	
-				var bbox = [
-					[e.point.x - 1, e.point.y - 1],
-					[e.point.x + 1, e.point.y + 1]
-				]
-	
-	
-				var features = mapa.queryRenderedFeatures(bbox)
-	
-				if (features.length > 0) {
-	
-					if (features[0].layer.type === 'fill' || features[0].layer.type === 'circle') {
-	
-						var draw_polygon = turf.bbox(features[0])
-	
-						var southWest = [draw_polygon[0], draw_polygon[1]]
-						var northEast = [draw_polygon[2], draw_polygon[3]]
-	
-						var northEastPointPixel = mapa.project(southWest)
-						var southWestPointPixel = mapa.project(northEast)
-	
-						var featuresB = mapa.queryRenderedFeatures([southWestPointPixel, northEastPointPixel])
-	
-						let poligono_info = featuresB.filter(f => f.source === 'mapbox-gl-draw-cold')
-						if (poligono_info.length > 0) {
-							setPoligonoSelected(true)
-						}
-	
-						setPoligonoSeleccionado(poligono_info[0])
-	
-						let puntos = featuresB.filter((f) => f.layer.type === 'circle')
-	
-						puntos = quitarDuplicados(puntos)
-						setPuntosInPoligonoSeleccionado(puntos)
-	
-						dispatch(setPuntosInPoligono(puntos))
-						dispatch(setFeatures(features[0].properties))
-	
-						if (features[0].geometry.type === 'Polygon') {
-							let coordenadasArray = []
-							let latitud = features[0].properties.latitud
-							let longitud = features[0].properties.longitud
-							coordenadasArray.push(longitud)
-							coordenadasArray.push(latitud)
-							dispatch(setCoordinates(coordenadasArray))
-						} else if (features[0].geometry.type === 'Point') {
-							let coordenadas = features[0].geometry.coordinates
-							dispatch(setCoordinates(coordenadas))
-						}
-	
-					} else {
-						setCoordinates([])
-						setFeatures([])
-					}
-	
-				}
-	
-			})
+            mapa.on('click', e => {
+
+                setSeleccionPoligonoPuntos([]);
+    
+                var bbox = [
+                    [e.point.x - 1, e.point.y - 1],
+                    [e.point.x + 1, e.point.y + 1]
+                ];
+    
+    
+                var features = mapa.queryRenderedFeatures(bbox)
+    
+                if (features.length > 0) {
+    
+                    if (features[0].layer.type === 'fill' || features[0].layer.type === 'circle') {
+    
+                        var draw_polygon = turf.bbox(features[0]);
+    
+                        var southWest = [draw_polygon[0], draw_polygon[1]];
+                        var northEast = [draw_polygon[2], draw_polygon[3]];
+    
+                        var northEastPointPixel = mapa.project(southWest);
+                        var southWestPointPixel = mapa.project(northEast);
+    
+                        var featuresB = mapa.queryRenderedFeatures([southWestPointPixel, northEastPointPixel])
+                        //console.log(featuresB)
+    
+                        let puntos = featuresB.filter((f) => f.layer.type === 'circle')
+                        
+    
+    
+                        puntos.forEach(p => {
+                            p.id = ultimoPoligonoCreado
+                        })
+    
+                        if(puntos.lengt > 0) puntos = quitarDuplicados(puntos);
+                        //console.log(puntos)
+    
+                        dispatch(setPuntosInPoligono(puntos))
+                        dispatch(setFeatures(features[0].properties))
+                        if (features[0].geometry.type === 'Polygon') {
+                            let coordenadasArray = [];
+                            let latitud = features[0].properties.latitud;
+                            let longitud = features[0].properties.longitud;
+                            coordenadasArray.push(longitud);
+                            coordenadasArray.push(latitud);
+                            dispatch(setCoordinates(coordenadasArray))
+                            //setInformacionBuscada([]);
+                        } else if (features[0].geometry.type === 'Point') {
+                            let coordenadas = features[0].geometry.coordinates;
+                            dispatch(setCoordinates(coordenadas))
+                            // setInformacionBuscada([]);
+                        }
+    
+                    } else {
+    
+                        setCoordinates([]);
+                        setFeatures([]);
+                        // setInformacionBuscada([]);
+                    }
+    
+                }
+    
+            })
+    
 	
 		}
 		
@@ -207,7 +210,7 @@ const Mapa = () => {
                     sx={{
                         zIndex: '100',
                         position: 'absolute',
-                        left: '300px',
+                        left: '300px', 
                         bottom: '70px',
                         width: '250px',
                     }}
