@@ -5,4 +5,5 @@ export const pagosVerificacionInicialState = {
 	costoVerificacion: 0,
 	fileNameVerificacion: '',
 	fileVerificacion: null,
+	siguientePagoVerificacion: null,
 }

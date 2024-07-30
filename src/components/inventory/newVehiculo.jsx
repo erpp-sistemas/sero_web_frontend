@@ -65,16 +65,17 @@ const NewVehiculo = ({ setOpenNew, setAlertClean }) => {
 
 	const data = {
 		kilometraje: informacionGeneral.kilometraje,
-		selectedPlace: informacionGeneral.selectedPlace,
-		image: informacionGeneral.image,
+		plaza: informacionGeneral.selectedPlace,
 		modelo: informacionGeneral.modelo,
 		placa: informacionGeneral.placa,
 		vehiculo: informacionGeneral.vehiculo,
 		marca: informacionGeneral.marca,
 		serie: informacionGeneral.serie,
 		color: informacionGeneral.color,
-		colorLlavero: informacionGeneral.colorLlavero,
-		tipoMotor: informacionGeneral.tipoMotor
+		color_llavero: informacionGeneral.colorLlavero,
+		tipo_motor: informacionGeneral.tipoMotor,
+		imagen_vehiculo: 'url.de.prueba.mx',
+		id_usuario: 1
 	}
 
 	const dataDocuments = {
