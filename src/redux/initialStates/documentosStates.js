@@ -11,4 +11,8 @@ export const documentosInicialState = {
 	nombreFactura: '',
 	nombreSeguro: '',
 	nombreGarantia: '',
+	previewFrente: null,
+	previewTrasera: null,
+	previewLadoIzquierdo: null,
+	previewLadoDerecho: null,
 }

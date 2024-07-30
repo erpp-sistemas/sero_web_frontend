@@ -64,6 +64,26 @@ const documentosSlice = (state = documentosInicialState, action) => {
 				...state,
 				ladoDerecho: action.payload,
 			}
+		case 'SET_PREVIEW_FRENTE':
+			return {
+				...state,
+				previewFrente: action.payload,
+			}
+		case 'SET_PREVIEW_TRASERA':
+			return {
+				...state,
+				previewTrasera: action.payload,
+			}
+		case 'SET_PREVIEW_LADO_DERECHO':
+			return {
+				...state,
+				previewLadoDerecho: action.payload,
+			}
+		case 'SET_PREVIEW_LADO_IZQUIERDO':
+			return {
+				...state,
+				previewLadoIzquierdo: action.payload,
+			}
 		
 	default:
 		return state
@@ -131,4 +151,24 @@ export const setLadoDerecho = (ladoDerecho) => ({
 export const setLadoIzquierdo = (ladoIzquierdo) => ({
 	type: 'SET_LADO_IZQUIERDO',
 	payload: ladoIzquierdo,
+})
+
+export const setPreviewFrente = (previewFrente) => ({
+	type: 'SET_PREVIEW_FRENTE',
+	payload: previewFrente,
+})
+
+export const setPreviewTrasera = (previewTrasera) => ({
+	type: 'SET_PREVIEW_TRASERA',
+	payload: previewTrasera,
+})
+
+export const setPreviewLadoIzquierdo = (previewLadoIzquierdo) => ({
+	type: 'SET_PREVIEW_LADO_IZQUIERDO',
+	payload: previewLadoIzquierdo,
+})
+
+export const setPreviewLadoDerecho = (previewLadoDerecho) => ({
+	type: 'SET_PREVIEW_LADO_DERECHO',
+	payload: previewLadoDerecho,
 })

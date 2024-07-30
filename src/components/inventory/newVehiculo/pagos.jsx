@@ -1,25 +1,56 @@
-import { Box, Typography, Button } from "@mui/material"
-import PropTypes from 'prop-types'
+import React from 'react'
+import { Box, Tab, Tabs, Typography } from '@mui/material'
+import Verificacion from './verificacion'
+import Tenencia from './tenencia'
+import Placas from './placas'
+import Extraordinarios from './Extraordinarios'
 
-const Pagos = ({ setNext }) => {
+function Pagos() {
+	const [selectedTab, setSelectedTab] = React.useState(0)
+
+	const handleChange = (event, newValue) => {
+		setSelectedTab(newValue)
+	}
 
 	return (
 
-		<Box sx={{ width:'100%', height:'auto' }}>
+		<Box sx={{ width: '100%', padding: '20px', backgroundColor: '#282c34', color: '#fff', mt:'30px' }}>
 
-			<Typography>Pagos</Typography>
+			<Typography variant="h4" gutterBottom>Historial de Pagos</Typography>
 
-			<Button sx={{ fontSize:'20px', color:'white' }} onClick={() => setNext('estado')}>{'<'}</Button>
-			<Typography sx={{ fontSize:'20px', color:'white' }}>Pagos</Typography>
+			<Tabs
+				value={selectedTab}
+				onChange={handleChange}
+				sx={{
+					marginBottom: '20px',
+					'& .MuiTab-root': {
+						color: 'gray',
+						transition: 'color 0.3s',
+					},
+					'& .Mui-selected': {
+						color: '#38b000', 
+						fontWeight: 'bold',
+					},
+					'& .MuiTabs-indicator': {
+						backgroundColor: '#38b000',
+					},
+				}}
+				>
+					<Tab label="Verificación" />
+					<Tab label="Tenencia" />
+					<Tab label="Placas" />
+					<Tab label="Pagos Extraordinarios" />
+				</Tabs>
+
+			{ selectedTab === 0 && <Verificacion /> }
+			{ selectedTab === 1 && <Tenencia /> }
+			{ selectedTab === 2 && <Placas /> }
+			{ selectedTab === 3 && <Extraordinarios /> }
 
 		</Box>
 
 	)
 
-}
-
-Pagos.propTypes = {
-	setNext: PropTypes.func.isRequired,
 }
 
 export default Pagos
