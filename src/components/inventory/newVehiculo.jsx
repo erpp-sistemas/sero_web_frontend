@@ -46,33 +46,12 @@ const NewVehiculo = ({ setOpenNew, setAlertClean }) => {
 	const [next, setNext] = useState('')
 	const informacionGeneral = useSelector(state => state.informacionGeneral)
 	const documentos = useSelector(state => state.documentos)
-
-	// ESTADO INICIAL DE VEHICULO
-	const [combustible, setCombustible] = useState('')
-	const [bateria, setBateria] = useState(null)
-	const [neumaticos, setNeumaticos] = useState('')
-	const [observaciones, setObservaciones] = useState('')
-	const [aceite, setAceite] = useState(false)
-	const [fugaCombustible, setFugaCombustible] = useState(false)
-	const [fugaAceite, setFugaAceite] = useState(false)
-	const [direccionalesDelanteras, setDireccionalesDelanteras] = useState(false)
-	const [direccionalesTraseras, setDireccionalesTraseras] = useState(false)
-	const [lucesTablero, setLucesTablero] = useState(false)
-	const [luzFreno, setLuzFreno] = useState(false)
-	const [llantaDelantera, setLlantaDelantera] = useState(false)
-	const [llantaTrasera, setLlantaTrasera] = useState(false)
-	const [deformaciones, setDeformaciones] = useState(false)
-	const [encendido, setEncendido] = useState(false)
-	const [tension, setTension] = useState(false)
-	const [frenoDelantero, setFrenoDelantero] = useState(false)
-	const [frenoTrasero, setFrenoTrasero] = useState(false)
-	const [amortiguadores, setAmortiguadores] = useState(false)
-	const [direccion, setDireccion] = useState(false)
-	const [silla, setSilla] = useState(false)
-	const [espejos, setEspejos] = useState(false)
-	const [velocimetro, setVelocimetro] = useState(false)
-	const [claxon, setClaxon] = useState(false)
-	const [escalapies, setEscalapies] = useState(false)
+	const estado = useSelector(state => state.estado)
+	const imagenesEstado = useSelector(state => state.imagenesEstado)
+	const pagosVerificacion = useSelector(state => state.pagosVerificacion)
+	const pagosTenencia = useSelector(state => state.pagosTenencia)
+	const pagosPlacas = useSelector(state => state.pagosPlacas)
+	const pagosExtraordinarios = useSelector(state => state.pagosExtraordinarios)
 
 	useEffect(() => {
 		if (animation) {	
@@ -89,6 +68,7 @@ const NewVehiculo = ({ setOpenNew, setAlertClean }) => {
 		selectedPlace: informacionGeneral.selectedPlace,
 		image: informacionGeneral.image,
 		modelo: informacionGeneral.modelo,
+		placa: informacionGeneral.placa,
 		vehiculo: informacionGeneral.vehiculo,
 		marca: informacionGeneral.marca,
 		serie: informacionGeneral.serie,
@@ -108,32 +88,62 @@ const NewVehiculo = ({ setOpenNew, setAlertClean }) => {
 		ladoDerecho: documentos.ladoDerecho,
 	}
 
-	const dataEstadoInicial = {
-		combustible: combustible,
-		bateria: bateria,
-		neumaticos: neumaticos,
-		observaciones: observaciones,
-		aceite: aceite,
-		fugaCombustible: fugaCombustible,
-		fugaAceite: fugaAceite,
-		direccionalesDelanteras: direccionalesDelanteras,
-		direccionalesTraseras: direccionalesTraseras,
-		lucesTablero: lucesTablero,
-		luzFreno: luzFreno,
-		llantaDelantera: llantaDelantera,
-		llantaTrasera: llantaTrasera,
-		deformaciones: deformaciones,
-		encendido: encendido,
-		tension: tension,
-		frenoDelantero: frenoDelantero,
-		frenoTrasero: frenoTrasero,
-		amortiguadores: amortiguadores,
-		direccion: direccion,
-		silla: silla,
-		espejos: espejos,
-		velocimetro: velocimetro,
-		claxon: claxon,
-		escalapies: escalapies
+	const dataEstado = {
+		combustible: estado.combustible,
+		bateria: estado.bateria,
+		neumaticos: estado.neumaticos,
+		observaciones: estado.observaciones,
+		fugaAceite: estado.fugaAceite,
+		fugaCombustible: estado.fugaCombustible,
+		fugaAceiteMotor: estado.fugaAceiteMotor,
+		direccionalesDelanteras: estado.direccionalesDelanteras,
+		direccionalesTraseras: estado.direccionalesTraseras,
+		lucesTablero: estado.lucesTablero,
+		luzFreno: estado.luzFreno,
+		llantaDelantera: estado.llantaDelantera,
+		llantaTrasera: estado.llantaTrasera,
+		deformaciones: estado.deformacionesLlanta,
+		encendido: estado.encendido,
+		tension: estado.tensionCadena,
+		frenoDelantero: estado.frenoDelantero,
+		frenoTrasero: estado.frenoTrasero,
+		amortiguadores: estado.amortiguadores,
+		direccion: estado.direccion,
+		silla: estado.silla,
+		espejos: estado.espejos,
+		velocimetro: estado.velocimetro,
+		claxon: estado.claxon,
+		escalapies: estado.palancas
+	}
+
+	const dataImagenes = {
+		imagenesFugaAceite: imagenesEstado.imagenesFugaAceite,
+		imagenesFugaCombustible: imagenesEstado.imagenesFugaCombustible,
+		imagenesFugaAceiteMotor: imagenesEstado.imagenesFugaAceiteMotor,
+		imagenesDireccionalesDelanteras: imagenesEstado.imagenesDireccionalesDelanteras,
+		imagenesDireccionalesTraseras: imagenesEstado.imagenesDireccionalesTraseras,
+		imagenesLucesTablero: imagenesEstado.imagenesLucesTablero,
+		imagenesLuzFreno: imagenesEstado.imagenesLuzFreno,
+		imagenesLlantaDelantera: imagenesEstado.imagenesLlantaDelantera,
+		imagenesLlantaTrasera: imagenesEstado.imagenesLlantaTrasera,
+		imagenesDeformacionesLlanta: imagenesEstado.imagenesDeformacionesLlanta,
+		imagenesEncendido: imagenesEstado.imagenesEncendido,
+		imagenesTensionCadena: imagenesEstado.imagenesTensionCadena,
+		imagenesFrenoDelantero: imagenesEstado.imagenesFrenoDelantero,
+		imagenesFrenoTrasero: imagenesEstado.imagenesFrenoTrasero,
+		imagenesAmortiguadores: imagenesEstado.imagenesAmortiguadores,
+		imagenesSilla: imagenesEstado.imagenesSilla,
+		imagenesEspejos: imagenesEstado.imagenesEspejos,
+		imagenesVelocimetro: imagenesEstado.imagenesVelocimetro,
+		imagenesClaxon: imagenesEstado.imagenesClaxon,
+		imagenesPalancas: imagenesEstado.imagenesPalancas,
+	}
+
+	const dataPagos = {
+		pagosVerificacion: pagosVerificacion.pagosVerificacion,
+		pagosExtraordinarios: pagosExtraordinarios.pagosExtraordinarios,
+		pagosTenencia: pagosTenencia.pagosTenencia,
+		pagosPlacas: pagosPlacas.pagosPlacas,
 	}
 
 	return (
@@ -176,30 +186,19 @@ const NewVehiculo = ({ setOpenNew, setAlertClean }) => {
 					<Header next={next} />
 
 					<Botones 
-						next={next} data={data} dataDocuments={dataDocuments} dataEstadoInicial={dataEstadoInicial}
+						next={next} data={data} dataDocuments={dataDocuments} dataEstado={dataEstado} dataImagenes={dataImagenes} dataPagos={dataPagos}
 						setNext={setNext} 
 					/>
 					
 					{
 						next === 'documentos' ? 
-							<Documentos
-								setNext={setNext} 
-							/>
+							<Documentos/>
 						: next === 'estado' ?
-							<Estado
-								setNext={setNext} setCombustible={setCombustible} setBateria={setBateria} setNeumaticos={setNeumaticos} setObservaciones={setObservaciones} setAceite={setAceite} setFugaCombustible={setFugaCombustible} setFugaAceite={setFugaAceite} setDireccionalesDelanteras={setDireccionalesDelanteras} setDireccionalesTraseras={setDireccionalesTraseras} setLucesTablero={setLucesTablero} setLuzFreno={setLuzFreno} setLlantaDelantera={setLlantaDelantera} setLlantaTrasera={setLlantaTrasera}
-								setDeformaciones={setDeformaciones} setEncendido={setEncendido} setTension={setTension} setFrenoDelantero={setFrenoDelantero} setFrenoTrasero={setFrenoTrasero} setAmortiguadores={setAmortiguadores} setDireccion={setDireccion} setSilla={setSilla} setEspejos={setEspejos} setVelocimetro={setVelocimetro} setClaxon={setClaxon} setEscalapies={setEscalapies}
-								combustible={combustible} bateria={bateria} neumaticos={neumaticos} observaciones={observaciones} aceite={aceite} fugaCombustible={fugaCombustible}	fugaAceite={fugaAceite} direccionalesDelanteras={direccionalesDelanteras} direccionalesTraseras={direccionalesTraseras} lucesTablero={lucesTablero} luzFreno={luzFreno} llantaDelantera={llantaDelantera} llantaTrasera={llantaTrasera}
-								deformaciones={deformaciones} encendido={encendido} tension={tension} frenoDelantero={frenoDelantero} frenoTrasero={frenoTrasero} amortiguadores={amortiguadores} direccion={direccion} silla={silla} espejos={espejos} velocimetro={velocimetro} claxon={claxon} escalapies={escalapies}
-							/> 
+							<Estado/> 
 						: next === 'pagos' ?
-							<Pagos
-								setNext={setNext}	
-							/>
+							<Pagos/>
 						:
-							<InformacionGeneral 
-								next={next} setNext={setNext}
-							/> 	
+							<InformacionGeneral /> 	
 					}
 					
 				</Box>

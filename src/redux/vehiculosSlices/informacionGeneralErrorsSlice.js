@@ -54,6 +54,11 @@ const informacionGeneralErrorsSlice = (state = informacionGeneralErrorsInicialSt
 				...state,
 				errorTipoMotor: action.payload,
 			}
+		case 'SET_ERROR_PLACA':
+			return {
+				...state,
+				errorPlaca: action.payload,
+			}
 	default:
 		return state
 	}
@@ -110,4 +115,9 @@ export const setErrorColorLlavero = (errorColorLlavero) => ({
 export const setErrorTipoMotor = (errorTipoMotor) => ({
 	type: 'SET_ERROR_TIPO_MOTOR',
 	payload: errorTipoMotor,
+})	
+
+export const setErrorPlaca = (errorPlaca) => ({
+	type: 'SET_ERROR_PLACA',
+	payload: errorPlaca,
 })	

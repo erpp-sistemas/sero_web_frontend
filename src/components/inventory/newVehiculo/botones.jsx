@@ -2,11 +2,12 @@ import { Box, Button } from "@mui/material"
 import PropTypes from 'prop-types'
 import { useState } from "react"
 import Alerts from '../../../components/Alerts'
-import { setErrorKilometraje, setErrorSelectedPlace, setErrorImage, setErrorModelo, setErrorVehiculo, setErrorMarca, setErrorColor, setErrorColorLlavero, setErrorSerie, setErrorTipoMotor } from '../../../redux/vehiculosSlices/informacionGeneralErrorsSlice.js'
+import { setErrorKilometraje, setErrorSelectedPlace, setErrorImage, setErrorModelo, setErrorVehiculo, setErrorMarca, setErrorColor, setErrorColorLlavero, setErrorSerie, setErrorTipoMotor, setErrorPlaca } from '../../../redux/vehiculosSlices/informacionGeneralErrorsSlice.js'
 import { setErrorFactura, setErrorGarantia, setErrorSeguro, setErrorTarjetaCirculacion, setErrorLadoDerecho, setErrorLadoIzquierdo, setErrorFrente, setErrorTrasera } from '../../../redux/vehiculosSlices/documentosErrorsSlice.js'
+import { setErrorCombustible, setErrorBateria, setErrorNeumatico } from '../../../redux/vehiculosSlices/estadoErrorsSlice.js'
 import { useDispatch } from 'react-redux'
 
-const Botones = ({ next, setNext, data, dataDocuments }) => {
+const Botones = ({ next, setNext, data, dataDocuments, dataEstado, dataPagos, dataImagenes }) => {
     const [errorText, setErrorText] = useState('')
     const [error, setError] = useState(false)
 	const dispatch = useDispatch()
@@ -59,6 +60,9 @@ const Botones = ({ next, setNext, data, dataDocuments }) => {
 				if (field === 'vehiculo') {
                     dispatch(setErrorVehiculo(true))
                 }
+				if (field === 'placa') {
+                    dispatch(setErrorPlaca(true))
+                }
             }
         })
         if (errors.length > 0) {
@@ -107,6 +111,32 @@ const Botones = ({ next, setNext, data, dataDocuments }) => {
 
 	}
 
+	const VerificacionEstado = () => {
+		const errors = []
+		const estadoFields = Object.keys(dataEstado).slice(0, 3)
+		estadoFields.forEach(field => {
+			let label = field.charAt(0).toUpperCase() + field.slice(1).replace(/([A-Z])/g, ' $1').trim()
+			if (dataEstado[field] === null || dataEstado[field] === '') {
+				errors.push(label)
+				if (field === 'combustible') dispatch(setErrorCombustible(true))
+				if (field === 'bateria') dispatch(setErrorBateria(true))
+				if (field === 'neumatico') dispatch(setErrorNeumatico(true))
+			}
+		})
+		if (errors.length > 0) {
+			if (errors.length === 1) {
+				setErrorText(`Falta el campo: ${errors[0]}`)
+			} else {
+				setErrorText('Hay múltiples datos vacíos, por favor completa el formulario.')
+			}
+			setError(true)
+			return true
+		} else {
+			setError(false)
+			return false
+		}
+	}
+
 	const VeficationData = () => {
 		
 		if(next === ''){
@@ -118,6 +148,13 @@ const Botones = ({ next, setNext, data, dataDocuments }) => {
 			}
 		} else if(next === 'documentos') {
 			const hasError = VerificacionDocumentos()
+			if (!hasError) {
+				NextPage()  
+			} else {
+				console.info(errorText)
+			}
+		} else if(next === 'estado') {
+			const hasError = VerificacionEstado()
 			if (!hasError) {
 				NextPage()  
 			} else {
@@ -135,6 +172,14 @@ const Botones = ({ next, setNext, data, dataDocuments }) => {
             setNext('')
         }
     }
+
+	const SubirVehiculo = () => {
+		console.log(data)
+		console.log(dataDocuments)
+		console.log(dataEstado)
+		console.log(dataPagos)
+		console.log(dataImagenes)
+	}	
 
     return (
         <Box 
@@ -167,6 +212,16 @@ const Botones = ({ next, setNext, data, dataDocuments }) => {
                     Siguiente
                 </Button> 
             }
+			{ next === 'pagos' && 
+                <Button 
+                    sx={{ fontSize:'12px', color:'#fff', padding:'5px 20px'}} 
+                    variant="contained" 
+                    color="success" 
+                    onClick={SubirVehiculo}
+                >
+                    CREAR VEHICULO
+                </Button> 
+            }
             { error && 
 				<Alerts message={errorText} alertOpen={error} setAlertOpen={setError} variant='error'/>
             }
@@ -179,6 +234,9 @@ Botones.propTypes = {
     next: PropTypes.string.isRequired,
     data: PropTypes.object.isRequired,
     dataDocuments: PropTypes.object.isRequired,
+    dataEstado: PropTypes.object.isRequired,
+    dataPagos: PropTypes.object.isRequired,
+    dataImagenes: PropTypes.object.isRequired,
 }
 
 export default Botones

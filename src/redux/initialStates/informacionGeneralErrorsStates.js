@@ -3,6 +3,7 @@ export const informacionGeneralErrorsInicialState = {
 	errorSelectedPlace: false,
 	errorImage: false,
 	errorModelo: false,
+	errorPlaca: false,
 	errorVehiculo: false,
 	errorMarca: false,
 	errorSerie: false,

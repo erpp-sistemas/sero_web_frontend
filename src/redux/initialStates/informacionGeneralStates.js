@@ -3,6 +3,7 @@ export const informacionGeneralInicialState = {
 	selectedPlace: '',
 	image: null,
 	modelo: '',
+	placa: '',
 	vehiculo: '',
 	marca: '',
 	serie:'',

@@ -24,6 +24,13 @@ import informacionGeneralSlice from "./vehiculosSlices/informacionGeneralSlice.j
 import informacionGeneralErrorsSlice from "./vehiculosSlices/informacionGeneralErrorsSlice.js"
 import documentosSlice from "./vehiculosSlices/documentosSlice.js"
 import documentosErrorsSlice from "./vehiculosSlices/documentosErrorsSlice.js"
+import estadoSlice from "./vehiculosSlices/estadoSlice.js"
+import estadoErrorsSlice from "./vehiculosSlices/estadoErrorsSlice.js"
+import imagenesEstadoSlice from "./vehiculosSlices/imagenesEstadoSlice.js"
+import pagosVerificacionSlice from "./vehiculosSlices/pagosVerificacionSlice.js"
+import pagosTenenciaSlice from "./vehiculosSlices/pagosTenenciaSlice.js"
+import pagosPlacasSlice from "./vehiculosSlices/pagosPlacasSlice.js"
+import pagosExtraordinariosSlice from "./vehiculosSlices/pagosExtraordinariosSlice.js"
 
 const rootReducer = combineReducers({
 	user: userReducer,
@@ -51,7 +58,13 @@ const rootReducer = combineReducers({
 	informacionGeneralErrors: informacionGeneralErrorsSlice,
 	documentos: documentosSlice,
 	documentosErrors: documentosErrorsSlice,
-
+	estado: estadoSlice,
+	estadoErrors: estadoErrorsSlice,
+	imagenesEstado: imagenesEstadoSlice,
+	pagosVerificacion: pagosVerificacionSlice,
+	pagosTenencia: pagosTenenciaSlice,
+	pagosPlacas: pagosPlacasSlice,
+	pagosExtraordinarios: pagosExtraordinariosSlice,
 })
 
 export default rootReducer

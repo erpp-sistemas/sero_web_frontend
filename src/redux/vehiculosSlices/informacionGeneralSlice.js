@@ -24,6 +24,11 @@ const informacionGeneralSlice = (state = informacionGeneralInicialState, action)
 				...state,
 				modelo: action.payload,
 			}
+		case 'SET_PLACA':
+			return {
+				...state,
+				placa: action.payload,
+			}
 		case 'SET_VEHICULO':
 			return {
 				...state,
@@ -54,6 +59,11 @@ const informacionGeneralSlice = (state = informacionGeneralInicialState, action)
 				...state,
 				tipoMotor: action.payload,
 			}
+		case 'SET_INFORMACION_GENERAL':
+			return {
+				...state,
+				...action.payload,
+			}
 	default:
 		return state
 	}
@@ -80,6 +90,11 @@ export const setImage = (image) => ({
 export const setModelo = (modelo) => ({
 	type: 'SET_MODELO',
 	payload: modelo,
+})
+
+export const setPlaca = (placa) => ({
+	type: 'SET_PLACA',
+	payload: placa,
 })
 
 export const setVehiculo = (vehiculo) => ({
@@ -111,3 +126,8 @@ export const setTipoMotor = (tipoMotor) => ({
 	type: 'SET_TIPO_MOTOR',
 	payload: tipoMotor,
 })	
+
+export const setInformacionGeneral = (data) => ({
+	type: 'SET_INFORMACION_GENERAL',
+	payload: data,
+})
