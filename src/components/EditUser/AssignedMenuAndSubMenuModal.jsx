@@ -16,7 +16,7 @@ function AssignedMenuAndSubMenu({ open, onClose, data }) {
   console.log('data inicial: ', data);
 
   const [menus, setMenus] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedItems, setSelectedItems] = useState([]);
   const [alertOpen, setAlertOpen] = useState(false);

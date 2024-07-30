@@ -27,6 +27,8 @@ import { Link } from 'react-router-dom'
 import { useSelector } from 'react-redux';
 import * as ExcelJS from "exceljs";
 import { updateActiveUserRequest } from '../../api/auth.js'
+import LoadingModal from '../../components/LoadingModal.jsx';
+import CustomAlert from '../../components/CustomAlert.jsx';
 
 function Index() {
 
@@ -39,17 +41,21 @@ function Index() {
 	const [assignedMenuAndSubMenuOpenModal, setAssignedMenuAndSubMenuOpenModal] = useState(false)
 	const [filter, setFilter] = useState('all');
 	const [searchText, setSearchText] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 	const [alertOpen, setAlertOpen] = useState(false);
 	const [alertType, setAlertType] = useState("info");
 	const [alertMessage, setAlertMessage] = useState("");
 
 	const UsersByUserId = async (user_id) => {
 		try {
-		const response = await getUsersByUserIdRequest(user_id)
-		setUsers(response.data)	
+      setIsLoading(true)
+      const response = await getUsersByUserIdRequest(user_id)
+      setUsers(response.data)	
+      setIsLoading(false)
 		console.log(response.data)	
 		} catch (error) {
 		console.error('Error fetching data:', error)
+    setIsLoading(false)
 		}
 	}
 
@@ -293,15 +299,18 @@ function Index() {
   
     console.log(`Enviando ${type} con nuevo estatus: ${newStatus} para usuario con ID: ${user_id}`);
     try {
+      setIsLoading(true)
       await updateActiveUser(user_id, name, user_name, password, type, newStatus);
       setAlertOpen(true);
       setAlertType("success");
-      setAlertMessage("Felicidades!! ... Se actualizo el estatus con exito");
-	  refreshUsers();
+      setAlertMessage("Felicidades!!... Se actualizo el estatus con exito");
+      setIsLoading(false)
+	    refreshUsers();
     } catch (error) {
       setAlertOpen(true);
       setAlertType("error");
       setAlertMessage(`¡Error! ${error.message}`);
+      setIsLoading(false)
     }
   };
 
@@ -310,11 +319,9 @@ function Index() {
         const res = await updateActiveUserRequest(user_id, name, user_name, password, type, status_user);
         
         if (res.status === 200) {
-          console.log('Success:', res.data.message);
-          // Aquí puedes manejar el éxito, por ejemplo, mostrar una notificación al usuario
+          console.log('Success:', res.data.message);          
         } else {
-          console.log(`Unexpected status code: ${res.status}`);
-          // Manejar otros códigos de estado inesperados
+          console.log(`Unexpected status code: ${res.status}`);          
         }
   
     } catch (error) {
@@ -323,17 +330,17 @@ function Index() {
         
         if (status === 400) {
           console.log('Bad Request:', error.response.data.message);
-          // Aquí puedes manejar los errores de solicitud incorrecta (400)
+          
         } else if (status === 500) {
           console.log('Server Error:', error.response.data.message);
-          // Aquí puedes manejar los errores del servidor (500)
+          
         } else {
           console.log(`Error (${status}):`, error.response.data.message);
-          // Manejar otros códigos de estado de error
+          
         }
       } else {
         console.log('Error:', error.message);
-        // Manejar otros tipos de errores, como problemas de red
+        
       }
     }
   }
@@ -368,6 +375,19 @@ function Index() {
       color: getColor(status),      
       },
     });
+
+    const getStatusTypeText = (statusType) => {
+      switch (statusType) {
+        case 'active':
+          return 'el USUARIO';
+        case 'activeWeb':
+          return 'la PLATAFORMA WEB';
+        case 'activeMobile':
+          return 'la APP MOVIL';
+        default:
+          return 'el objeto';
+      }
+    };
     
 		return (
 			<div>
@@ -399,13 +419,13 @@ function Index() {
       <Dialog open={open} onClose={() => handleClose(false)}>
         <DialogTitle>Confirmar acción</DialogTitle>
         <DialogContent>
-          ¿Estás seguro de que deseas cambiar el estado a "{currentStatus === 'activo' ? 'inactivo' : 'activo'}" para {statusType}?
+          ¿Estás seguro de que deseas cambiar el estado a "{currentStatus === 'activo' ? 'inactivo' : 'activo'}" para {getStatusTypeText(statusType)}?
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => handleClose(false)} color="error">
+          <Button onClick={() => handleClose(false)} color="error" variant='contained'>
             Cancelar
           </Button>
-          <Button onClick={() => handleClose(true)} color="secondary">
+          <Button onClick={() => handleClose(true)} color="secondary" variant='contained'>
             Aceptar
           </Button>
         </DialogActions>
@@ -596,6 +616,14 @@ function Index() {
             sx={{m:1}}
 					/>
 				</Badge>
+
+			  <LoadingModal open={isLoading} />
+        <CustomAlert
+          alertOpen={alertOpen}
+          type={alertType}
+          message={alertMessage}
+          onClose={setAlertOpen}
+        />
 
       </Box>
       <Grid container spacing={2} alignItems="center" mb={2}>
