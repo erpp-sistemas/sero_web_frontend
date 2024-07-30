@@ -34,6 +34,11 @@ const pagosVerificacionSlice = (state = pagosVerificacionInicialState, action) =
 				...state,
 				fileVerificacion: action.payload,
 			}
+		case 'SET_SIGUIENTE_PAGO_VERIFICACION':
+			return {
+				...state,
+				siguientePagoVerificacion: action.payload,
+			}
 		case 'REMOVE_PAGO_VERIFICACION':
 			return {
 				...state,
@@ -75,6 +80,11 @@ export const setFileNameVerificacion = (fileNameVerificacion) => ({
 export const setFileVerificacion = (fileVerificacion) => ({
 	type: 'SET_FILE_VERIFICACION',
 	payload: fileVerificacion,
+})
+
+export const setSiguientePagoVerificacion = (siguientePagoVerificacion) => ({
+	type: 'SET_SIGUIENTE_PAGO_VERIFICACION',
+	payload: siguientePagoVerificacion,
 })
 
 export const removePagoVerificacion = (index) => ({

@@ -6,6 +6,7 @@ import { setErrorKilometraje, setErrorSelectedPlace, setErrorImage, setErrorMode
 import { setErrorFactura, setErrorGarantia, setErrorSeguro, setErrorTarjetaCirculacion, setErrorLadoDerecho, setErrorLadoIzquierdo, setErrorFrente, setErrorTrasera } from '../../../redux/vehiculosSlices/documentosErrorsSlice.js'
 import { setErrorCombustible, setErrorBateria, setErrorNeumatico } from '../../../redux/vehiculosSlices/estadoErrorsSlice.js'
 import { useDispatch } from 'react-redux'
+import toolkitVehiculos from "../../../toolkit/toolkitVehiculos.js"
 
 const Botones = ({ next, setNext, data, dataDocuments, dataEstado, dataPagos, dataImagenes }) => {
     const [errorText, setErrorText] = useState('')
@@ -173,15 +174,17 @@ const Botones = ({ next, setNext, data, dataDocuments, dataEstado, dataPagos, da
         }
     }
 
-	const SubirVehiculo = () => {
-		console.log(data)
-		console.log(dataDocuments)
-		console.log(dataEstado)
-		console.log(dataPagos)
-		console.log(dataImagenes)
+	const SubirVehiculo = async () => {
+		try {
+			const respuesta = await toolkitVehiculos.generateVehiculo(data)
+			console.log(respuesta)
+		} catch (error) {
+			console.error('Error fetching data:', error)
+		}
 	}	
 
     return (
+
         <Box 
             sx={{
                 width:'100%', 
@@ -225,8 +228,11 @@ const Botones = ({ next, setNext, data, dataDocuments, dataEstado, dataPagos, da
             { error && 
 				<Alerts message={errorText} alertOpen={error} setAlertOpen={setError} variant='error'/>
             }
+			
         </Box>
+
     )
+
 }	
 
 Botones.propTypes = {
