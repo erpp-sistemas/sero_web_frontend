@@ -12,6 +12,8 @@ const Photos = ({ photo }) => {
   const colors = tokens(theme.palette.mode);
   const parsedPhotos = Array.isArray(photo) ? photo : JSON.parse(photo);
 
+  const [visibleImage, setVisibleImage] = React.useState(null);
+
   const AvatarImage = ({ data }) => {
     const [visibleAvatar, setVisibleAvatar] = React.useState(false);
     return (
@@ -66,6 +68,10 @@ const Photos = ({ photo }) => {
     return `${day}-${month}-${year} ${formattedHours}:${minutes}:${seconds} ${ampm}`;
   };
 
+  const handleImageClick = (image) => {
+    setVisibleImage(image); // Set the image to be visible in the Viewer
+  };
+
   return (
     <div>
       <Box          
@@ -91,11 +97,9 @@ const Photos = ({ photo }) => {
                   image={ph.image_url}
                   alt={ph.image_url}
                   sx={{ 
-                    height: 'auto', 
-                    maxWidth: '100%',
-                    objectFit: 'cover', 
-                    borderBottom: '1px solid #ddd' 
+                    height: '200px',                     
                   }}
+                  onClick={() => handleImageClick({ src: ph.image_url, alt: 'image' })}
                 />
                 <CardContent>
                   <Typography sx={{ fontSize: 14 }} color="text.secondary">
@@ -122,6 +126,15 @@ const Photos = ({ photo }) => {
             ))}
           </Grid>           
         </Box>
+        {visibleImage && (
+        <Viewer
+          visible={true}
+          onClose={() => setVisibleImage(null)}
+          images={[visibleImage]}
+          scalable={true}
+          rotatable={true}
+        />
+      )}
     </div>
   );
 };
