@@ -23,7 +23,7 @@ const Computers = () => {
       <pointLight intensity={1} />
       <primitive
         object={computer.scene}
-        scale={0.75}
+        scale={1.2}
         position={[0, -3.25, -1.5]}
         rotation={[-0.01, -0.5, -0.1]}
       />
@@ -37,6 +37,7 @@ const ComputerCanvas = () => {
       frameloop="demand"
       shadows
       camera={{ position: [20, 3, 5], fov: 25 }}
+      style={{ height: '300px' }}
       gl={{ preserveDrawingBuffer: true }}
     >
       <Suspense fallback={<CanvasLoader />}>

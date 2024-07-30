@@ -18,7 +18,7 @@ export const initializeWebSocket = (dispatch) => {
         socket = new WebSocket(url);
 
         socket.onopen = () => {
-            console.log('WebSocket connected');
+            //console.log('WebSocket connected');
             reconnectAttempts = 0;
             dispatch(setSocket(socket));
         };
@@ -29,7 +29,7 @@ export const initializeWebSocket = (dispatch) => {
         };
 
         socket.onclose = () => {
-            console.log('WebSocket disconnected');
+            //console.log('WebSocket disconnected');
             dispatch(setSocket(null));
             attemptReconnect();
         };
@@ -43,10 +43,10 @@ export const initializeWebSocket = (dispatch) => {
     const attemptReconnect = () => {
         if (reconnectAttempts < 10) { // Número máximo de intentos de reconexión
             reconnectAttempts++;
-            console.log(`Reconnection attempt #${reconnectAttempts}`);
+            //console.log(`Reconnection attempt #${reconnectAttempts}`);
             setTimeout(connect, RECONNECT_INTERVAL);
         } else {
-            console.error('Maximum reconnection attempts reached');
+            //console.error('Maximum reconnection attempts reached');
         }
     };
 

@@ -70,6 +70,10 @@ function App() {
   }, [])
 
   useEffect(() => {
+    console.log(location.pathname)
+  }, [location.pathname])
+
+  useEffect(() => {
     initializeWebSocket(dispatch);
   }, [dispatch]);
 
