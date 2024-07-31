@@ -69,7 +69,7 @@ const Photos = ({ photo }) => {
   };
 
   const handleImageClick = (image) => {
-    setVisibleImage(image); // Set the image to be visible in the Viewer
+    setVisibleImage(image); 
   };
 
   return (
