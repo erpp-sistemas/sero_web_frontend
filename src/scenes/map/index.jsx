@@ -23,10 +23,11 @@ const stylesMap = {
 
 const Mapa = () => {
 
-    const dispatch = useDispatch()
-    const mapDiv = useRef(null)
-    const { place_id } = useParams()
-    const [plaza, setPlaza] = useState([])
+    const dispatch = useDispatch();
+    const mapDiv = useRef(null);
+    const { place_id } = useParams();
+
+    const [plaza, setPlaza] = useState([]);
     const [poligonosDibujados, setPoligonosDibujados] = useState('')
     const [poligonoSeleccionado, setPoligonoSeleccionado] = useState(null)
     const [puntosInPoligonoSeleccionado, setPuntosInPoligonoSeleccionado] = useState(0)
@@ -39,15 +40,11 @@ const Mapa = () => {
     const [ultimoPoligonoCreado, setUltimoPoligonoCreado] = useState('');
 
     useEffect(() => {
-		
 		const getPlazaById = async () => {
-
 			const res = await getPlaceById(place_id)
 			dispatch(setPlazaMapa(res[0]))
 			setPlaza(res[0])
-	
 		}
-
         getPlazaById()
     }, [dispatch, place_id])
 

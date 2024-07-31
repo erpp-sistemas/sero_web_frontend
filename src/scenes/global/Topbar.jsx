@@ -2,14 +2,14 @@ import { useState } from 'react'
 import { IconButton, useTheme } from "@mui/material";
 import { useContext } from "react";
 import { ColorModeContext, tokens } from "../../theme";
-import DrawerNotification from '../../components/DrawerNotification'
 import { useLocation } from "react-router-dom";
-import DialogUI from '../../components/MaterialUI/Dialog'
+import Tools from '../../components/map/Tools'
 import { useSelector } from 'react-redux'
 import { getIcon } from '../../data/Icons';
 import Apps from '../../components/Topbar/Apps'
 import Profile from '../../components/Topbar/Profile'
-import Badge from '@mui/material/Badge';
+//import Badge from '@mui/material/Badge';
+//import DrawerNotification from '../../components/DrawerNotification'
 
 const Topbar = () => {
 
@@ -20,7 +20,7 @@ const Topbar = () => {
   const colors = tokens(theme.palette.mode);
   const colorMode = useContext(ColorModeContext);
 
-  
+
   const [state, setState] = useState({
     top: false,
     left: false,
@@ -59,7 +59,7 @@ const Topbar = () => {
       </div>
 
       {/* ICONS */}
-      <div className="flex gap-[10px]">
+      <div className="flex gap-[20px]">
         {/* BOTON PARA CAMBIO DE TEMA */}
         <IconButton sx={{ width: '50px', height: '50px' }} onClick={colorMode.toggleColorMode}>
           {theme.palette.mode === "dark" ? (
@@ -70,8 +70,8 @@ const Topbar = () => {
         </IconButton>
 
         {/* BOTON PARA VISUALIZAR LAS HERRAMIENTAS DEL MAPA */}
-        {location.pathname === `/map/${mapa_seleccionado.id_campana}` && (
-          <DialogUI id_campana={mapa_seleccionado.id_campana} />
+        {location.pathname === `/map/${mapa_seleccionado.place_id}` && (
+            <Tools id_campana={mapa_seleccionado.place_id} />
         )}
 
         {/* BOTON  PARA LAS HERRAMIENTAS COMO MAPA O WHATSAPP  */}
@@ -79,17 +79,17 @@ const Topbar = () => {
 
         {/* BOTON PARA LAS NOTIFICACIONES */}
         {/* <DrawerNotification state={state} toggleDrawer={toggleDrawer}  /> */}
-        <Badge badgeContent={2} color="success" anchorOrigin={{ vertical: 'bottom', horizontal: 'right', }}
+        {/* <Badge badgeContent={2} color="success" anchorOrigin={{ vertical: 'bottom', horizontal: 'right', }}
           sx={{ '& .MuiBadge-badge': { top: '15%', right: '25%', transform: 'translate(50%, -50%)', }, }} >
           <IconButton sx={{ width: '50px', height: '50px' }} onClick={toggleDrawer('right', true)} >
             {getIcon('NotificationsOutlinedIcon', {})}
           </IconButton>
-        </Badge>
+        </Badge> */}
 
         {/* BOTON PARA EL PERFIL */}
         <Profile />
 
-        
+
       </div>
 
     </div>

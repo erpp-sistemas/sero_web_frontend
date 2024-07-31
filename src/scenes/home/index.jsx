@@ -1,5 +1,4 @@
-import { Box, useTheme, Typography } from "@mui/material";
-import { useSelector } from 'react-redux'
+import { Box, useTheme } from "@mui/material";
 import ReactPlayer from 'react-player'
 import Slider from '../../components/Slider'
 import ToolsResume from '../../components/ToolsResume'
@@ -10,26 +9,12 @@ import { styles } from '../../styles'
 
 const Index = () => {
 
-	const user = useSelector(state => state.user)
 	const theme = useTheme()
 	const colors = tokens(theme.palette.mode)
 
 	return (
 
-		<div className="m-5 rounded-md " style={{ backgroundColor: colors.primary[500] }}>
-
-			{/* <Box sx={{ width: '100%', marginBottom: '70px' }}>
-
-				<Box sx={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-					<Box sx={{ padding: '0 20px' }}>
-						<Typography variant="h4" color={colors.grey[100]} component="div" sx={{ display: 'inline' }}>
-							Bienvenido <span className='text-[#5ebfff]'>{user.name}</span>
-						</Typography>
-					</Box>
-				</Box>
-
-			</Box> */}
-
+		<div className="m-5 rounded-md ">
 
 			<div className="mb-10 rounded-md flex items-center justify-center">
 

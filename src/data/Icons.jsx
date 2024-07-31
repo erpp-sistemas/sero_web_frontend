@@ -53,13 +53,16 @@ import AppsIcon from '@mui/icons-material/Apps';
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
+import FiberSmartRecordIcon from '@mui/icons-material/FiberSmartRecord';
+import GpsFixedIcon from '@mui/icons-material/GpsFixed';
 
 
-export const Delete = () => <DeleteIcon />
 
 export const getIcon = (icon, style) => {
 
      let obj = {
+          "GpsFixedIcon": <GpsFixedIcon sx={style} />,
+          "FiberSmartRecordIcon": <FiberSmartRecordIcon sx={style} />,
           "LightModeOutlinedIcon": <LightModeOutlinedIcon sx={style} />,
           "DarkModeOutlinedIcon": <DarkModeOutlinedIcon sx={style} />,
           "NotificationsOutlinedIcon": <NotificationsOutlinedIcon sx={style} />,
