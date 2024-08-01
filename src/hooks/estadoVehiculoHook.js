@@ -7,6 +7,15 @@ import { setEncendido, setTensionCadena, setFrenoDelantero, setFrenoTrasero, set
 	setLucesTablero, setLuzFreno, setLlantaDelantera, setLlantaTrasera, setDeformacionesLlanta
 } from '../redux/vehiculosSlices/estadoSlice.js'
 
+export const tiposPagos = [
+	{ tipo: 'pagosExtraordinarios', metodo: 'actualizarExtraordinarios', label: 'Pago Extraordinario' },
+	{ tipo: 'pagosPlacas', metodo: 'actualizarPlacas', label: 'Pago Placas' },
+	{ tipo: 'pagosTenencia', metodo: 'actualizarTenencia', label: 'Pago Tenencia' },
+	{ tipo: 'pagosVerificacion', metodo: 'actualizarVerificacion', label: 'Pago Verificacion' },
+]
+
+export const docs = ['tarjetaCirculacion', 'factura', 'seguro', 'garantia', 'frente', 'trasera', 'ladoIzquierdo', 'ladoDerecho']
+
 export const imagenesMap = {
 	fugaAceite: 'imagenesFugaAceite',
 	fugaCombustible: 'imagenesFugaCombustible',
