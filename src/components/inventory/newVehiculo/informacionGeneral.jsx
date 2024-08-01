@@ -4,7 +4,7 @@ import PlaceSelect from '../../PlaceSelect'
 import PropTypes from 'prop-types'
 import { useTheme } from '@mui/material/styles'
 import { useSelector, useDispatch } from 'react-redux'
-import { setKilometraje, setSelectedPlace, setImage, setModelo, setVehiculo, setMarca, setColor, setColorLlavero, setSerie, setTipoMotor, setPlaca } from '../../../redux/vehiculosSlices/informacionGeneralSlice.js'
+import { setKilometraje, setSelectedPlace, setImage, setModelo, setVehiculo, setMarca, setColor, setColorLlavero, setSerie, setTipoMotor, setPlaca, setImagePreview } from '../../../redux/vehiculosSlices/informacionGeneralSlice.js'
 import { setErrorKilometraje, setErrorSelectedPlace, setErrorImage, setErrorModelo, setErrorVehiculo, setErrorMarca, setErrorColor, setErrorColorLlavero, setErrorSerie, setErrorTipoMotor, setErrorPlaca } from '../../../redux/vehiculosSlices/informacionGeneralErrorsSlice.js'
 
 const InformacionGeneral = () => {
@@ -38,10 +38,11 @@ const InformacionGeneral = () => {
 	const handleImageUpload = (event) => {
 		const file = event.target.files[0]
 		dispatch(setErrorImage(false))
+		dispatch(setImage(file))
 		if (file) {
 			const reader = new FileReader()
 			reader.onloadend = () => {
-				dispatch(setImage(reader.result))
+				dispatch(setImagePreview(reader.result))
 			}
 			reader.readAsDataURL(file)
 		}
@@ -64,7 +65,7 @@ const InformacionGeneral = () => {
 
 			<Box sx={{ width:'33%', height:'100%', padding:'0', margin:'0' }}>
 
-				<Typography sx={{ fontSize:'20px', fontWeight:'500', textTransform: 'uppercase' }}>Fotografia</Typography>
+				<Typography sx={{ fontSize:'20px', fontWeight:'500' }}>Fotografia</Typography>
 
 				<Button
 					sx={{
@@ -79,14 +80,14 @@ const InformacionGeneral = () => {
 						padding:'0',
 						overflow:'hidden',
 						borderRadius:'10px',
-						background: informacionGeneral.image ? '#000' : 'transparent'
+						background: informacionGeneral.imagePreview ? '#000' : 'transparent'
 					}}
 				>
 
 					<CompareIcon sx={{ color:'#38b000', position:'absolute', fontSize:'45px' }} />
 
 					{
-						informacionGeneral.image ? <img src={informacionGeneral.image} alt="Preview" style={{ width: '100%', height: 'auto' }} /> : false
+						informacionGeneral.imagePreview ? <img src={informacionGeneral.imagePreview} alt="Preview" style={{ width: '100%', height: 'auto' }} /> : false
 					}
 
 					<input
@@ -104,7 +105,7 @@ const InformacionGeneral = () => {
 
 				</Button>
 
-				<Typography sx={{ fontSize:'20px', fontWeight:'500', mt:'20px', textTransform: 'uppercase' }}>Seleccionar Tipo de vehículo</Typography>
+				<Typography sx={{ fontSize:'20px', fontWeight:'500', mt:'20px' }}>Seleccionar Tipo de vehículo</Typography>
 
 				<Box>
 
@@ -121,8 +122,7 @@ const InformacionGeneral = () => {
 										justifyContent:'start',
 										alignItems:'center',
 										gap:'10px',
-										mt:'20px',
-										textTransform: 'uppercase'
+										mt:'20px'
 									}} 
 								>
 									<Button
@@ -161,9 +161,9 @@ const InformacionGeneral = () => {
 			</Box>
 			
 			<Box sx={{ width:'33%', height:'100%', padding:'0 20px', margin:'0' }}>
-				<TextField sx={{ textTransform: 'uppercase', width:'100%', border: informacionGeneralErrors.errorMarca ? '1px solid red' : 'none' }} id="filled-basic" label="Marca" variant="filled" value={informacionGeneral.marca} onChange={e => { const uppercaseValue = e.target.value.toUpperCase(); dispatch(setMarca(uppercaseValue)); dispatch(setErrorMarca(false)); } }/>
-				<TextField sx={{ textTransform: 'uppercase', width:'100%', mt:'10px', border: informacionGeneralErrors.errorPlaca ? '1px solid red' : 'none' }} id="filled-basic" label="Placa" variant="filled" value={informacionGeneral.placa} onChange={e => { const uppercaseValue = e.target.value.toUpperCase(); dispatch(setPlaca(uppercaseValue)); dispatch(setErrorPlaca(false)); } }/>
-				<FormControl fullWidth variant="filled" sx={{ mt:'10px', minWidth: 120, textTransform: 'uppercase' }}>
+				<TextField sx={{ width:'100%', border: informacionGeneralErrors.errorMarca ? '1px solid red' : 'none' }} id="filled-basic" label="Marca" variant="filled" value={informacionGeneral.marca} onChange={e => { const uppercaseValue = e.target.value; dispatch(setMarca(uppercaseValue)); dispatch(setErrorMarca(false)); } }/>
+				<TextField sx={{ width:'100%', mt:'10px', border: informacionGeneralErrors.errorPlaca ? '1px solid red' : 'none' }} id="filled-basic" label="Placa" variant="filled" value={informacionGeneral.placa} onChange={e => { const uppercaseValue = e.target.value.toUpperCase(); dispatch(setPlaca(uppercaseValue)); dispatch(setErrorPlaca(false)); } }/>
+				<FormControl fullWidth variant="filled" sx={{ mt:'10px', minWidth: 120 }}>
 					<InputLabel id="modelo">Modelo</InputLabel>
 					<Select
 						labelId="modelo"
@@ -180,15 +180,15 @@ const InformacionGeneral = () => {
 						))}
 					</Select>
 				</FormControl>
-				<TextField sx={{ textTransform: 'uppercase', width:'100%', mt:'10px', border: informacionGeneralErrors.errorKilometraje ? '1px solid red' : 'none' }} id="filled-basic" value={informacionGeneral.kilometraje} label="Kilometraje" variant="filled" onChange={e => { const uppercaseValue = e.target.value.toUpperCase(); dispatch(setKilometraje(uppercaseValue)); dispatch(setErrorKilometraje(false)); }}/>
-				<TextField sx={{ textTransform: 'uppercase', width:'100%', mt:'10px', border: informacionGeneralErrors.errorSerie ? '1px solid red' : 'none' }} id="filled-basic" label="Serie" variant="filled" value={informacionGeneral.serie} onChange={e => { const uppercaseValue = e.target.value.toUpperCase(); dispatch(setSerie(uppercaseValue)); dispatch(setErrorSerie(false)); }}/>
+				<TextField sx={{ width:'100%', mt:'10px', border: informacionGeneralErrors.errorKilometraje ? '1px solid red' : 'none' }} id="filled-basic" value={informacionGeneral.kilometraje} label="Kilometraje" variant="filled" onChange={e => { const uppercaseValue = e.target.value; dispatch(setKilometraje(uppercaseValue)); dispatch(setErrorKilometraje(false)); }}/>
+				<TextField sx={{ width:'100%', mt:'10px', border: informacionGeneralErrors.errorSerie ? '1px solid red' : 'none' }} id="filled-basic" label="Serie" variant="filled" value={informacionGeneral.serie} onChange={e => { const uppercaseValue = e.target.value.toUpperCase(); dispatch(setSerie(uppercaseValue)); dispatch(setErrorSerie(false)); }}/>
 			</Box>
 
 			<Box sx={{ width:'33%', minWidth:'400px', height:'100%', padding:'0 20px', margin:'0' }}>
-				<TextField sx={{ textTransform: 'uppercase', width:'100%', border: informacionGeneralErrors.errorColor ? '1px solid red' : false }} id="filled-basic" label="Color" variant="filled" value={informacionGeneral.color} onChange={e => { const uppercaseValue = e.target.value.toUpperCase(); dispatch(setColor(uppercaseValue)); dispatch(setErrorColor(false)); }} />
-				<TextField sx={{ textTransform: 'uppercase', width:'100%', mt:'10px', border: informacionGeneralErrors.errorColorLlavero ? '1px solid red' : false }} id="filled-basic" label="Color de llavero" variant="filled" value={informacionGeneral.colorLlavero} onChange={e => { const uppercaseValue = e.target.value.toUpperCase(); dispatch(setColorLlavero(uppercaseValue)); dispatch(setErrorColorLlavero(false)); }} />
-				<TextField sx={{ textTransform: 'uppercase', width:'100%', mt:'10px', mb:'10px', border: informacionGeneralErrors.errorTipoMotor ? '1px solid red' : false }} id="filled-basic" label="Tipo de motor" variant="filled" value={informacionGeneral.tipoMotor} onChange={e => { const uppercaseValue = e.target.value.toUpperCase(); dispatch(setTipoMotor(uppercaseValue)); dispatch(setErrorTipoMotor(false)); }}/>
-				<FormControl fullWidth sx={{ border: informacionGeneralErrors.errorSelectedPlace ? '1px solid red' : false, textTransform: 'uppercase' }}>
+				<TextField sx={{ width:'100%', border: informacionGeneralErrors.errorColor ? '1px solid red' : false }} id="filled-basic" label="Color" variant="filled" value={informacionGeneral.color} onChange={e => { const uppercaseValue = e.target.value; dispatch(setColor(uppercaseValue)); dispatch(setErrorColor(false)); }} />
+				<TextField sx={{ width:'100%', mt:'10px', border: informacionGeneralErrors.errorColorLlavero ? '1px solid red' : false }} id="filled-basic" label="Color de llavero" variant="filled" value={informacionGeneral.colorLlavero} onChange={e => { const uppercaseValue = e.target.value; dispatch(setColorLlavero(uppercaseValue)); dispatch(setErrorColorLlavero(false)); }} />
+				<TextField sx={{ width:'100%', mt:'10px', mb:'10px', border: informacionGeneralErrors.errorTipoMotor ? '1px solid red' : false }} id="filled-basic" label="Tipo de motor" variant="filled" value={informacionGeneral.tipoMotor} onChange={e => { const uppercaseValue = e.target.value; dispatch(setTipoMotor(uppercaseValue)); dispatch(setErrorTipoMotor(false)); }}/>
+				<FormControl fullWidth sx={{ border: informacionGeneralErrors.errorSelectedPlace ? '1px solid red' : false }}>
 					<PlaceSelect            
 						selectedPlace={informacionGeneral.selectedPlace}
 						handlePlaceChange={handlePlaceChange}

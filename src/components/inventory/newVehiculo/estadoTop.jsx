@@ -48,8 +48,8 @@ export default function EstadoTop () {
 							border: 'none'
 						}}
 					>
-						<MenuItem value={true}>Buen estado</MenuItem>
-						<MenuItem value={false}>Mal estado</MenuItem>
+						<MenuItem value={'Buen estado'}>Buen estado</MenuItem>
+						<MenuItem value={'Mal estado'}>Mal estado</MenuItem>
 					</Select>
 				</FormControl>
 
