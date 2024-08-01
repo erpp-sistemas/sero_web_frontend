@@ -19,4 +19,5 @@ export const imagenesEstadoStates = {
 	imagenesVelocimetro: null,
 	imagenesClaxon: null,
 	imagenesPalancas: null,
+	imagenesDireccion: null
 }

@@ -2,6 +2,7 @@ export const informacionGeneralInicialState = {
 	kilometraje: '',
 	selectedPlace: '',
 	image: null,
+	imagePreview: null,
 	modelo: '',
 	placa: '',
 	vehiculo: '',

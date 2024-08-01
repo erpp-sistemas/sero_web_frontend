@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Box, Typography, Button, Input, Pagination, PaginationItem, Select, FormControl, InputLabel, MenuItem } from '@mui/material'
+import { useState, useEffect } from 'react'
+import { Box, Typography, Button, Input, Pagination } from '@mui/material'
 import ConstructionIcon from '@mui/icons-material/Construction'
 import SearchIcon from '@mui/icons-material/Search'
 import NewVehiculo from '../../components/inventory/newVehiculo'
@@ -16,6 +16,7 @@ import WarningIcon from '@mui/icons-material/Warning'
 import PriorityHighIcon from '@mui/icons-material/PriorityHigh'
 import Alerts from '../../components/Alerts'
 import PagosVehiculos from '../../components/inventory/pagosVehiculos'
+import toolkitVehiculos from '../../toolkit/toolkitVehiculos'
 
 /**
  * @name PáginaPrincipalInventarios
@@ -23,23 +24,19 @@ import PagosVehiculos from '../../components/inventory/pagosVehiculos'
  * @component
 */
 function Inventory() {
-    const [filtro, setFiltro] = useState('todos')
-    const [currentPage, setCurrentPage] = useState(1)
 	const [openNew, setOpenNew] = useState(false)
 	const [openEdit, setOpenEdit] = useState(false)
 	const [openMantenimiento, setOpenMantenimiento] = useState(false)
 	const [openAsignacion, setOpenAsignacion] = useState(false)
 	const [openPagos, setOpenPagos] = useState(false)
-    const itemsPerPage = 4
 	const [alert, setAlert] = useState(false)
 	const [alertError, setAlertError] = useState(false)
 	const [alertClean, setAlertClean] = useState(false)
-	const [encargado, setEncargado] = useState('')
-
-    const handleFiltroChange = (nuevoFiltro) => {
-        setFiltro(nuevoFiltro)
-        setCurrentPage(1)
-    }
+	const [vehiculosPrueba, setVehiculosPrueba] = useState([])
+	const [busqueda, setBusqueda] = useState('')
+	const [currentPage, setCurrentPage] = useState(1)
+	const [filtro, setFiltro] = useState('todos')
+    const itemsPerPage = 4
 
 	const theme = useTheme()
 	const isLightMode = theme.palette.mode === 'light'
@@ -56,37 +53,31 @@ function Inventory() {
 		},
 	}))
 
-	const CustomPaginationItem = styled(PaginationItem)(({ selected }) => ({
-		...(selected && {
-			backgroundColor: 'green',
-			color: '#fff',
-			'&:hover': {
-				backgroundColor: 'darkgreen',
-			},
-		}),
-	}))
+	const fetchData = async () => {
+		try {
+			const response = await toolkitVehiculos.getVehiculos()
+			const data = response.data.data
+			setVehiculosPrueba(data)
+		} catch (err) {
+			console.error(err)
+		} 
+	}
 
-    const vehiculos = [
-        { id: 1, tipo: 'MOTOCICLETA', marca: 'ITALIKA', matricula: '8496F5', tenencia: 'pagado', img: 'https://dhqlmcogwd1an.cloudfront.net/images/cache/01-italika-st90-210-150.jpeg' },
-        { id: 2, tipo: 'MOTOCICLETA', marca: 'HONDA', matricula: 'FC1234', tenencia: 'noPagado', img: 'https://ss207.liverpool.com.mx/xl/1139648206.jpg'},
-        { id: 3, tipo: 'MOTOCICLETA', marca: 'ITALIKA', matricula: '8496F5', tenencia: 'pagado', img: 'https://dhqlmcogwd1an.cloudfront.net/images/cache/01-italika-st90-210-150.jpeg' },
-        { id: 4, tipo: 'CAMIONETA', marca: 'TOYOTA', matricula: 'ASD321', tenencia: 'proximo', img: 'https://www.shutterstock.com/image-photo/delivery-van-side-view-isolated-600nw-2340171635.jpg'},
-        { id: 5, tipo: 'MOTOCICLETA', marca: 'HONDA', matricula: 'FC1234', tenencia: 'noPagado', img: 'https://ss207.liverpool.com.mx/xl/1139648206.jpg'},
-        { id: 6, tipo: 'CAMIONETA', marca: 'TOYOTA', matricula: 'ASD321', tenencia: 'proximo', img: 'https://www.shutterstock.com/image-photo/delivery-van-side-view-isolated-600nw-2340171635.jpg'},
-    ]
-
-    const vehiculosFiltrados = vehiculos.filter((vehiculo) => {
-        if (filtro === 'todos') return true
-        return vehiculo.tenencia === filtro
-    })
-
-    const indexOfLastItem = currentPage * itemsPerPage
-    const indexOfFirstItem = indexOfLastItem - itemsPerPage
-    const currentItems = vehiculosFiltrados.slice(indexOfFirstItem, indexOfLastItem)
-
-    const handlePageChange = (event, value) => {
+    useEffect(() => {
+        fetchData()
+    }, [])
+	
+	const handlePageChange = (event, value) => {
         setCurrentPage(value)
     }
+
+	const filteredVehiculos = vehiculosPrueba.filter((vehiculo) =>
+        vehiculo.placa.toLowerCase().includes(busqueda.toLowerCase())
+    )
+
+    const startIndex = (currentPage - 1) * itemsPerPage
+    const currentItems = filteredVehiculos.slice(startIndex, startIndex + itemsPerPage)
+    const totalPages = Math.ceil(filteredVehiculos.length / itemsPerPage) || 1 
 
     return (
 
@@ -110,7 +101,6 @@ function Inventory() {
 			>
                 Control vehicular
             </Typography>
-
 			<Typography
 				sx={{ m: "0 0 5px 0" }}
 				color={'#4cceac'}
@@ -127,7 +117,7 @@ function Inventory() {
                 <Box sx={{ width:'auto', display:'flex', justifyContent:'center', alignItems:'center', gap:'15px' }}>
 
                     <Button 
-                        onClick={() => handleFiltroChange('todos')} 
+                        onClick={() => setFiltro('todos')} 
                         sx={{ 
                             border:'1px solid white', 
                             borderRadius:'20px', 
@@ -146,7 +136,7 @@ function Inventory() {
                     </Button> 
 
                     <Button 
-                        onClick={() => handleFiltroChange('noPagado')} 
+                        onClick={() => setFiltro('noPagado')} 
                         sx={{ 
                             border:'1px solid white', 
                             borderRadius:'20px', 
@@ -165,7 +155,7 @@ function Inventory() {
                     </Button> 
 
                     <Button 
-                        onClick={() => handleFiltroChange('proximo')} 
+                        onClick={() => setFiltro('proximo')} 
                         sx={{ 
                             border:'1px solid white', 
                             borderRadius:'20px', 
@@ -204,32 +194,7 @@ function Inventory() {
 
                 <Box sx={{ display:'flex', justifyContent:'flex-start', alignItems:'center' }}>
                     <SearchIcon />
-                    <Input type="text" placeholder='Buscar por placa'/>
-                </Box>
-
-				<Box sx={{ display:'flex', justifyContent:'flex-start', alignItems:'center' }}>
-
-					<FormControl 
-						fullWidth
-						sx={{
-							ml:'30px'
-						}}
-					>
-						<InputLabel id="encargado">ENCARGADO</InputLabel>
-						<Select
-							labelId="encargado"
-							id="encargado"
-							value={encargado}
-							label="ENCARGADO"
-							onChange={event => setEncargado(event.target.value)}
-							sx={{
-								width:'200px'
-							}}
-						>
-							<MenuItem value={'administrador'}>Administrador</MenuItem>
-						</Select>
-					</FormControl>
-
+                    <Input type="text" onChange={e => setBusqueda(e.target.value)} value={busqueda} placeholder='Buscar por placa'/>
                 </Box>
 
             </Box>
@@ -237,124 +202,120 @@ function Inventory() {
             <Box 
                 sx={{ width:'100%', height:'auto', marginTop:'10px', mb:'100px', padding:'0px 50px', display:'flex', justifyContent:'center', alignItems:'center', flexWrap:'wrap', gap:'15px' }}
             >
-                {currentItems.map((vehiculo) => (
-                    <Box 
-                        key={vehiculo.id} 
-                        sx={{ 
-                            minWidth:'250px', 
-                            height:'340px', 
-                            position:'relative', 
-                            borderRadius:'10px', 
-                            padding:'5px',
-                            mt:'100px',
-							background: 'linear-gradient(145deg, rgba(0,0,0,0.3), rgba(0,0,0,0.7))',
-							boxShadow: '5px 10px 20px rgba(0, 0, 0, 0.5)'
-                        }}
-                    >
-                        <Box 
-                            sx={{ 
-								width: '120px', 
-								height: '120px', 
-								background: '#ffffff', 
-								display: 'flex', 
-								justifyContent: 'center', 
-								alignItems: 'center', 
-								borderRadius: '50%', 
-								overflow: 'hidden', 
-								position: 'absolute', 
-								top: '0%', 
-								left: '50%', 
-								transform: 'translate(-50%,-40%)',
-								boxShadow: isLightMode ? '4px 7px 8px rgba(0,0,0,0.7)' : '', 
-                            }}
-                        >
-                            <img src={vehiculo.img} alt="" style={{ width: '100%', height: 'auto', objectFit: 'cover' }} />
-                        </Box>
-
-                        <Box sx={{ width:'100%', height:'100px', display:'flex', justifyContent:'space-between', alignItems:'start', padding:'5px' }}>
-                            <button><ConstructionIcon sx={{ color:'#003566', fontSize:'30px' }} onClick={() => setOpenMantenimiento(true)}/></button>
-                            <button><InfoIcon sx={{ color:'#2dc653', fontSize:'30px' }} onClick={() => setOpenEdit(true)}/></button>
-                        </Box>
-
-                        <Box sx={{ width:'100%', height:'auto', display:'flex', justifyContent:'center', alignItems:'center', flexDirection:'column' }}>
-                            <Typography sx={{ width:'100%', textAlign:'center', fontSize:'18px', fontWeight:'600' }}>{vehiculo.tipo}</Typography>
-                            <Typography sx={{ width:'100%', textAlign:'center', fontSize:'18px', mt:'10px' }}>{vehiculo.marca}</Typography>
-                            <Typography sx={{ width:'100%', textAlign:'center', fontSize:'18px', mt:'10px' }}>{vehiculo.matricula}</Typography>
-
-
-							<HtmlTooltip
-								title={
-									<React.Fragment>
-											{ vehiculo.tenencia === 'noPagado' ? <Typography sx={{ color:'red'}}>Tiene pagos vencidos</Typography> : vehiculo.tenencia === 'proximo' ? <Typography sx={{ color:'#ee9b00', width:'100%', textAlign:'center' }}>Los pagos estan proximos a vencer</Typography> : <Typography color={'#457b9d'}>Los pagos estan al corriente</Typography>  }
-									</React.Fragment>
-								}
-							>
-								<Box 
-									sx={{ 
-										display:'flex',
-										justifyContent:'center',
-										alignItems:'center',
-										borderRadius:'50%',
-										mt:'10px'
-									}}
-								>
-									{
-										vehiculo.tenencia === 'noPagado' 
-											? <Button onClick={() => setOpenPagos(true)} sx={{ height:'30px', cursor:'pointer', background:'none' }}>
-												<PriorityHighIcon sx={{ color:'red', fontSize:'30px'}}/>
-											</Button> : 
-												vehiculo.tenencia === 'proximo' 
-													? <Button onClick={() => setOpenPagos(true)} sx={{ height:'30px', cursor:'pointer', background:'none' }}>
-														<WarningIcon sx={{ color:'yellow', fontSize:'30px' }}/> 
-													</Button>
-														: <Button onClick={() => setOpenPagos(true)} sx={{ height:'30px', cursor:'pointer', background:'none',  }}>
-															<CheckIcon sx={{ color:'blue', fontSize:'30px' }}/> 
-														</Button>
-									}
-								</Box>
-							</HtmlTooltip>
-                        
-						</Box>
-
-						<Box sx={{ width:'100%', height:'auto', display:'flex', justifyContent:'center', alignItems:'center', mt:'20px' }}>
-							<Button
-								sx={{
-									color:'white',
-									background:'#023e8a',
-									padding:'10px 20px',
-									fontSize:'13px',
-									fontWeight:'600'
+                {
+					currentItems.map((vehiculo) => (
+						<Box 
+							key={vehiculo.id} 
+							sx={{ 
+								minWidth:'250px', 
+								height:'340px', 
+								position:'relative', 
+								borderRadius:'10px', 
+								padding:'5px',
+								mt:'100px',
+								background: 'linear-gradient(145deg, rgba(0,0,0,0.3), rgba(0,0,0,0.7))',
+								boxShadow: '5px 10px 20px rgba(0, 0, 0, 0.5)'
+							}}
+						>
+							<Box 
+								sx={{ 
+									width: '120px', 
+									height: '120px', 
+									background: '#ffffff', 
+									display: 'flex', 
+									justifyContent: 'center', 
+									alignItems: 'center', 
+									borderRadius: '50%', 
+									overflow: 'hidden', 
+									position: 'absolute', 
+									top: '0%', 
+									left: '50%', 
+									transform: 'translate(-50%,-40%)',
+									boxShadow: isLightMode ? '4px 7px 8px rgba(0,0,0,0.7)' : '', 
 								}}
-								onClick={() => setOpenAsignacion(true)}
 							>
-								ASIGNACIÓN
-							</Button>
+								<img src={vehiculo.imagen_vehiculo} alt="" style={{ width: '100%', height: 'auto', objectFit: 'cover' }} />
+							</Box>
+
+							<Box sx={{ width:'100%', height:'100px', display:'flex', justifyContent:'space-between', alignItems:'start', padding:'5px' }}>
+								<button><ConstructionIcon sx={{ color:'#003566', fontSize:'30px' }} onClick={() => setOpenMantenimiento(true)}/></button>
+								<button><InfoIcon sx={{ color:'#2dc653', fontSize:'30px' }} onClick={() => setOpenEdit(true)}/></button>
+							</Box>
+
+							<Box sx={{ width:'100%', height:'auto', display:'flex', justifyContent:'center', alignItems:'center', flexDirection:'column' }}>
+								<Typography sx={{ width:'100%', textAlign:'center', fontSize:'18px', fontWeight:'600', textTransform:'uppercase' }}>{vehiculo.vehiculo}</Typography>
+								<Typography sx={{ width:'100%', textAlign:'center', fontSize:'18px', mt:'10px', textTransform:'uppercase' }}>{vehiculo.marca}</Typography>
+								<Typography sx={{ width:'100%', textAlign:'center', fontSize:'18px', mt:'10px', textTransform:'uppercase' }}>{vehiculo.placa}</Typography>
+
+
+								<HtmlTooltip
+									title={
+										<React.Fragment>
+												{ vehiculo.tenencia === 'noPagado' ? <Typography sx={{ color:'red'}}>Tiene pagos vencidos</Typography> : vehiculo.tenencia === 'proximo' ? <Typography sx={{ color:'#ee9b00', width:'100%', textAlign:'center' }}>Los pagos estan proximos a vencer</Typography> : <Typography color={'#457b9d'}>Los pagos estan al corriente</Typography>  }
+										</React.Fragment>
+									}
+								>
+									<Box 
+										sx={{ 
+											display:'flex',
+											justifyContent:'center',
+											alignItems:'center',
+											borderRadius:'50%',
+											mt:'10px'
+										}}
+									>
+										{
+											vehiculo.tenencia === 'noPagado' 
+												? <Button onClick={() => setOpenPagos(true)} sx={{ height:'30px', cursor:'pointer', background:'none' }}>
+													<PriorityHighIcon sx={{ color:'red', fontSize:'30px'}}/>
+												</Button> : 
+													vehiculo.tenencia === 'proximo' 
+														? <Button onClick={() => setOpenPagos(true)} sx={{ height:'30px', cursor:'pointer', background:'none' }}>
+															<WarningIcon sx={{ color:'yellow', fontSize:'30px' }}/> 
+														</Button>
+															: <Button onClick={() => setOpenPagos(true)} sx={{ height:'30px', cursor:'pointer', background:'none',  }}>
+																<CheckIcon sx={{ color:'blue', fontSize:'30px' }}/> 
+															</Button>
+										}
+									</Box>
+								</HtmlTooltip>
+							
+							</Box>
+
+							<Box sx={{ width:'100%', height:'auto', display:'flex', justifyContent:'center', alignItems:'center', mt:'20px' }}>
+								<Button
+									sx={{
+										color:'white',
+										background:'#023e8a',
+										padding:'10px 20px',
+										fontSize:'13px',
+										fontWeight:'600'
+									}}
+									onClick={() => setOpenAsignacion(true)}
+								>
+									ASIGNACIÓN
+								</Button>
+							</Box>
+
 						</Box>
-
-                    </Box>
-
-                ))}
+					))
+				}
 
             </Box>
 
             <Box>
-			<Pagination
-				count={Math.ceil(vehiculosFiltrados.length / itemsPerPage)}
-				page={currentPage}
-				onChange={handlePageChange}
-				color="primary"
-				renderItem={(item) => (
-					<CustomPaginationItem
-						{...item}
-						selected={item.page === currentPage}
-					/>
-				)}
-			/>
+				<Pagination 
+                    count={totalPages} 
+                    page={currentPage} 
+                    onChange={handlePageChange} 
+					variant="outlined" color="secondary"
+                    shape="rounded"
+                />
             </Box>
 
-			{ openNew ? <NewVehiculo setOpenNew={setOpenNew} setAlertClean={setAlertClean} /> : false }
+			{ openNew ? <NewVehiculo setOpenNew={setOpenNew} setAlert={setAlert} setAlertClean={setAlertClean} fetchData={fetchData} /> : false }
 
-			{ openEdit ? <EditVehiculo setOpenNew={setOpenEdit} /> : false }
+			{ openEdit ? <EditVehiculo setOpenEdit={setOpenEdit} /> : false }
 
 			{ openMantenimiento ? <MantenimientoVehiculo setOpenNew={setOpenMantenimiento} /> : false }
 

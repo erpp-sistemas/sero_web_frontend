@@ -19,6 +19,11 @@ const informacionGeneralSlice = (state = informacionGeneralInicialState, action)
 				...state,
 				image: action.payload,
 			}
+		case 'SET_IMAGE_PREVIEW':
+			return {
+				...state,
+				imagePreview: action.payload,
+			}
 		case 'SET_MODELO':
 			return {
 				...state,
@@ -130,4 +135,9 @@ export const setTipoMotor = (tipoMotor) => ({
 export const setInformacionGeneral = (data) => ({
 	type: 'SET_INFORMACION_GENERAL',
 	payload: data,
+})
+
+export const setImagePreview = (imagePreview) => ({
+	type: 'SET_IMAGE_PREVIEW',
+	payload: imagePreview,
 })
