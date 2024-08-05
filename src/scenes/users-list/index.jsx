@@ -169,14 +169,14 @@ function Index() {
 			width:130,
 			renderCell: (params) => (
 			<StatusCell 
-        user_id={params.row.user_id} 
+        		user_id={params.row.user_id} 
 				name={`${params.row.name} ${params.row.first_last_name} ${params.row.second_last_name}`}
 				user_name={params.row.user_name}
 				password={params.row.password}
 				active={params.row.active} 
 				activeWeb={params.row.active_web} 
 				activeMobile={params.row.active_mobil} 
-        onStatusChange={handleStatusChange}
+        		onStatusChange={handleStatusChange}
 			/>
 			),
 			autoHeight: true, 
