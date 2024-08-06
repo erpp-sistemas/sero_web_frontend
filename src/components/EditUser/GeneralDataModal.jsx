@@ -35,6 +35,7 @@ import LoadingModal from '../../components/LoadingModal.jsx'
 import CustomAlert from '../../components/CustomAlert.jsx'
 import { updateRegisterRequest } from '../../api/auth.js'
 import { useSelector } from 'react-redux';
+import { Save } from '@mui/icons-material';
 
 
 const GeneralDataModal = ({ open, onClose, data, resetTrigger }) => {
@@ -302,13 +303,15 @@ const GeneralDataModal = ({ open, onClose, data, resetTrigger }) => {
     if (formData.user_id) {
         updateData['user_id'] = formData.user_id;
       }
+
+    console.log('updateData', updateData)
     
     const signupResponse = await signup(updateData);
       
     if (signupResponse) {      
       setAlertOpen(true);
       setAlertType("success");
-      setAlertMessage("El proceso se ha completado. Como perfil de administrador, tiene acceso a todas las plazas y permisos.");      
+      setAlertMessage("Felicidades!... Los datos se guardaron con exito");      
     }
   };  
 
@@ -402,13 +405,13 @@ const GeneralDataModal = ({ open, onClose, data, resetTrigger }) => {
         Datos Personales
       </Typography>
       <Divider sx={{ backgroundColor: '#5EBFFF' }} />
-      <Box mt={2}>
+      {/* <Box mt={2}>
         <Collapse in={alertOpen}>
           <Alert severity="error" onClose={() => setAlertOpen(false)}>
             Los siguientes campos son obligatorios y no tienen valor: {missingFields.join(', ')}
           </Alert>
         </Collapse>
-      </Box>
+      </Box> */}
       <form onSubmit={handleSubmit}>
       <Grid container spacing={2}>
         <Grid item xs={12} sm={8}>
@@ -427,6 +430,7 @@ const GeneralDataModal = ({ open, onClose, data, resetTrigger }) => {
                       <PersonIcon />
                     </InputAdornment>
                   ),
+                  readOnly: true
                 }}
               />
             </Grid>
@@ -444,6 +448,7 @@ const GeneralDataModal = ({ open, onClose, data, resetTrigger }) => {
                       <FamilyIcon />
                     </InputAdornment>
                   ),
+                  readOnly: true
                 }}
               />
             </Grid>
@@ -612,6 +617,7 @@ const GeneralDataModal = ({ open, onClose, data, resetTrigger }) => {
                     <AlternateEmailIcon/>
                   </InputAdornment>
                 ),
+                readOnly: true
               }}
             />
           </Grid>
@@ -630,6 +636,7 @@ const GeneralDataModal = ({ open, onClose, data, resetTrigger }) => {
                     <VpnKeyIcon/>
                   </InputAdornment>
                 ),
+                readOnly: true
               }}
             />
           </Grid>
@@ -659,8 +666,8 @@ const GeneralDataModal = ({ open, onClose, data, resetTrigger }) => {
           </Grid>          
         </Grid>
         <Box mt={2}>
-          <Button type="submit" variant="contained" color="secondary" endIcon={<KeyboardTabIcon/>}>
-            Siguiente
+          <Button type="submit" variant="contained" color="secondary" endIcon={<Save/>}>
+            Guardar
           </Button>
         </Box>
       </form>      

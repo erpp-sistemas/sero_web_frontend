@@ -52,6 +52,7 @@ import RecordsBackup from './scenes/records-backup'
 import RecordsImpression from './scenes/records-impression'
 import Inventory from './scenes/inventory'
 import ManagerDashboard from './scenes/manager-dashboard'
+import PhotoManagement from './scenes/photo-management'
 
 import { initializeWebSocket } from './config/WebSocketManager'
 
@@ -179,6 +180,7 @@ function App() {
                         <Route path="/impresion" element={<RecordsImpression />} />
                         <Route path="/vehiculos" element={<Inventory />} />
                         <Route path="/manager-dashboard" element={<ManagerDashboard />} />
+                        <Route path="/photo-management" element={<PhotoManagement />} />
                       </Routes>
                     </main>
                   </div>

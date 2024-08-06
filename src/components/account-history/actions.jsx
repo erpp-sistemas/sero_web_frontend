@@ -48,6 +48,14 @@ const Actions = ({ action }) => {
     );
   }
 
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+  
+    const datePart = date.toISOString().split('T')[0];
+    const timePart = date.toISOString().split('T')[1].split('.')[0];
+    return `${datePart} ${timePart}`;
+  };
+
   return (
     <div>
       <Box          
@@ -98,7 +106,7 @@ const Actions = ({ action }) => {
                     Fecha de gestion
                   </Typography>
                   <Typography variant="h4" component="div" gutterBottom>
-                    {actions.date_capture}
+                    {formatDate(actions.date_capture)}
                   </Typography>                                   
                 </CardContent>                 
               </Card>
