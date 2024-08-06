@@ -29,7 +29,6 @@ body,
 }
 
 
-
 /* Handle */
 ::-webkit-scrollbar-thumb {
 	background: #888;
@@ -41,13 +40,15 @@ body,
 }
 
 
-
-
-
-
+.mapboxgl-ctrl-group  {
+	display: none;
+	position: relative;
+	left: -40px;
+	top: 6px;
+  }
+  
 
 /* Login */
-
 /* canvas {
   background-color: red;
   height: 400px !important;

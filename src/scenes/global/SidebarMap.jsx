@@ -7,7 +7,7 @@ import { tokens } from "../../theme"
 import { useSelector } from 'react-redux'
 import { useDispatch } from 'react-redux'
 import { setDialog } from '../../redux/dialogSlice'
-import { setLayersActivos, setCargarLayer } from '../../redux/featuresSlice'
+import { setLayersActivos, setCargarLayer, setData } from '../../redux/featuresSlice'
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined"
 import SeroClaro from '../../assets/sero_claro.png'
 import SeroOscuro from '../../assets/sero-logo.png'
@@ -152,7 +152,6 @@ const SidebarMap = () => {
 
 
     const cargaPunto = async (layer) => {
-
         const data = await cargarFeaturesLayer(layer.url_geoserver)
         mapa_activo.mapa.addSource(layer.name_layer, { type: 'geojson', data: data })
         mapa_activo.mapa.addLayer({

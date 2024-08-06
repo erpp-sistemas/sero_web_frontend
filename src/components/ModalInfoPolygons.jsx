@@ -1,33 +1,23 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Box, Button, useTheme, Modal, Typography, Select, MenuItem } from '@mui/material';
 import GridOnIcon from '@mui/icons-material/GridOn';
 import { tokens } from "../theme";
 import { DataGrid } from "@mui/x-data-grid";
 
+import { getIcon } from '../data/Icons';
+import { CSVLink } from 'react-csv';
 
 
 
-const ModalNamePolygon = ({ setShowModal, poligonosDibujados }) => {
+const ModalNamePolygon = ({ setShowModal, polygon, setLastPolygonCreated, polygonsCreated, setPolygonsCreated, polygonsStorage }) => {
 
-    const theme = useTheme();
-    const colors = tokens(theme.palette.mode);
-
-    
-
-    const style = {
-        position: 'absolute',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        bgcolor: '#EAF0F0',
-        boxShadow: 24,
-        pt: 4,
-        px: 4,
-        pb: 4,
-        borderRadius: '10px'
-    };
-
+    //const theme = useTheme();
+    //const colors = tokens(theme.palette.mode);
     const [open, setOpen] = useState(true);
+
+    const [showFieldName, setShowFieldName] = useState(false);
+    const [namePolygon, setNamePolygon] = useState('');
+    const [properties, setProperties] = useState([]);
 
 
     const handleClose = () => {
@@ -35,138 +25,92 @@ const ModalNamePolygon = ({ setShowModal, poligonosDibujados }) => {
         setShowModal(false)
     };
 
-    const rows = [
-        { id: 1, name_polygon: 'Poligono1', cuentas: 24 },
-        { id: 2, name_polygon: 'Poligono2', cuentas: 100 },
-    ];
+    // const handleAccept = () => {
+    //     setOpen(false);
+    //     setShowModal(false)
+    // }
 
-    const columns = [
-        {
-            field: "id",
-            headerName: "Id",
-            flex: 1,
-            headerAlign: "center",
-            cellClassName: "name-column--cell",
-        },
-        {
-            field: "name_polygon",
-            headerName: "Poligono",
-            headerAlign: "center",
-            align: "center",
-            flex: 1,
-            cellClassName: "name-column--cell",
-        },
-        {
-            field: "cuentas",
-            headerName: "Número cuentas",
-            headerAlign: "center",
-            align: "center",
-            flex: 1,
-            cellClassName: "name-column--cell",
-        },
-        {
-            field: "gestor",
-            headerName: "Gestor",
-            flex: 1,
-            headerAlign: "center",
-            renderCell: () => {
-                return (
-                    <Box
-                        width="90%"
-                        m="0 auto"
-                        p="5px"
-                        display="flex"
-                        justifyContent="center"
-                        borderRadius="4px"
-                    >
-                        <Select
-                            labelId="demo-simple-select-standard-label"
-                            id="demo-simple-select-standard"
-                            value={10}
-                            //onChange={handleChange}
-                            label="Age"
-                            sx={{ color: 'black' }}
-                        >
-                            <MenuItem value={10}>Selecciona el gestor</MenuItem>
-                            <MenuItem value={40}>Ten</MenuItem>
-                            <MenuItem value={20}>Twenty</MenuItem>
-                            <MenuItem value={30}>Thirty</MenuItem>
-                        </Select>
-                    </Box>
-                );
-            },
-        },
-    ];
+    useEffect(() => {
+        const points = polygon.points;
+        const properties = points.map(p => p.properties);
+        setProperties(properties)
+    }, [polygon])
+
+    const setNamePolygonUpdate = () => {
+        const polygons_not_selected = polygonsCreated.filter(poly => poly.id !== polygon.id)
+        const polygon_new = {
+            ...polygon,
+            name: namePolygon
+        }
+        setLastPolygonCreated(polygon_new);
+        polygonsStorage.current = [...polygons_not_selected, polygon_new]
+        setPolygonsCreated([...polygons_not_selected, polygon_new])
+        setShowFieldName(false);
+        setNamePolygon('')
+    }
+
 
     return (
         <div>
-            {/* <Button onClick={handleOpen}>Open modal</Button> */}
             <Modal
                 open={open}
                 onClose={handleClose}
                 aria-labelledby="parent-modal-title"
                 aria-describedby="parent-modal-description"
             >
-                <Box sx={{ ...style, width: '66%', height: '500px' }}>
-                    <Typography
-                        sx={{ fontSize: '20px', marginBottom: '10px', color: colors.primary[500] }}>Poligonos seleccionados
-                    </Typography>
-                    <p sx={{ marginTop: '10px' }} id="parent-modal-description">
-                        <Typography sx={{ fontSize: '16px', color: colors.grey[400], display: 'inline-block' }}>
-                            Información de todos los poligonos creados, puedes crear una asignación a partir de estos poligonos
-                        </Typography>
-                    </p>
-                    <Box
-                        sx={{ marginTop: '15px' }}
-                    >
+                {polygon && (
+                    <div className='w-1/5 h-[80%] p-4 bg-blue-50 absolute top-[50%] left-[89%] translate-x-[-50%] translate-y-[-45%] rounded-md shadow-lg shadow-slate-700'>
+                        <p className=" text-gray-900 text-base text-center font-bold font-sans"> Poligono creado con éxito </p>
+                        <hr className='bg-gray-900 m-2' />
+                        <p className=" text-gray-900 text-base mt-6"> Número de puntos: <span className='text-emerald-700 font-bold'> {polygon.number_points} </span> </p>
+                        <p className=" text-gray-900 text-base mt-2"> Área: <span className='text-emerald-700 font-bold'> {polygon.area} </span> </p>
+                        {polygon.name && polygon.name !== '' && (<p className=" text-gray-900 text-base mt-2"> Nombre: <span className='text-emerald-700 font-bold'> {polygon.name} </span> </p>)}
+                        <div className='w-full mx-auto mt-3 py-2 flex flex-col justify-center items-center gap-3'>
 
-                        <Box
-                            m="20px auto"
-                            height="50vh"
-                            sx={{
-                                "& .MuiDataGrid-root": {
-                                    border: "none",
-                                    textAlign: "center"
-                                },
-                                "& .MuiDataGrid-cell": {
-                                    borderBottom: "none",
-                                    textAlign: "center !important"
-                                },
-                                "& .name-column--cell": {
-                                    color: 'black',
-                                    fontSize: "14px"
-                                },
-                                "& .MuiDataGrid-columnHeaders": {
-                                    backgroundColor: colors.grey[600],
-                                    borderBottomColor: colors.greenAccent[700],
-                                },
-                                "& .MuiDataGrid-virtualScroller": {
-                                    backgroundColor: '#EAF0F0',
-                                    color: 'black'
-                                },
-                                "& .MuiDataGrid-footerContainer": {
-                                    borderTop: "none",
-                                    backgroundColor: colors.grey[600],
-                                },
-                                "& .MuiCheckbox-root": {
-                                    color: `${colors.greenAccent[200]} !important`,
-                                },
-                                "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
-                                    color: `${colors.grey[100]} !important`,
-                                },
-                            }}
-                        >
-                            <DataGrid rows={poligonosDibujados} columns={columns} autoPageSize />
-                        </Box>
+                            {!showFieldName && (
+                                <button className='w-full bg-gray-200 px-2 rounded-md py-1 gap-1 flex justify-center items-center hover:bg-gray-300'
+                                    onClick={() => setShowFieldName(true)}
+                                >
+                                    {getIcon('EditIcon', { fontSize: '20px', color: '#03af6e' })}
+                                    <p className='text-gray-900'>
+                                        {!polygon.name ? 'Nombrar poligono' : 'Renombrar poligono'}
+                                    </p>
+                                </button>
+                            )}
 
-                        <Button variant="contained" endIcon={<GridOnIcon />}
-                            sx={{ backgroundColor: colors.greenAccent[600], margin: '10px 0' }}
+                            {showFieldName && (
+                                <button className='w-full bg-gray-200 px-2 rounded-md py-1 gap-1 flex justify-center items-center hover:bg-gray-300'
+                                    onClick={() => setShowFieldName(false)}
+                                >
+                                    {getIcon('DeleteIcon', { fontSize: '20px', color: '#af0300' })}
+                                    <p className='text-gray-900'>Cancelar nombre</p>
+                                </button>
+                            )}
 
-                        >
-                            Aceptar
-                        </Button>
-                    </Box>
-                </Box>
+                            <CSVLink data={properties} filename={ (polygon.name && polygon.name !== '') ? polygon.name : 'Registros seleccionados' } style={{ width: '100%', margin: '0 auto' }} >
+                                <button className='w-full bg-gray-200 px-2 rounded-md py-1 gap-1 flex justify-center items-center hover:bg-gray-300' >
+                                    {getIcon('CloudDownloadIcon', { fontSize: '20px', color: '#03af6e' })}
+                                    <p className='text-gray-900'>Descargar información</p>
+
+                                </button>
+                            </CSVLink>
+                        </div>
+
+                        {showFieldName && (
+                            <>
+                                <p className='text-gray-900 text-center mt-4 italic text-xs'> --- Asignale un nombre al poligono para identificarlo posteriormente. --- </p>
+                                <div className="w-full mx-auto">
+                                    <input type="text" className='w-full mt-3 py-1 px-2 rounded-md text-gray-900' placeholder='Nombre del poligono' onChange={e => setNamePolygon(e.target.value)} />
+                                    <button className="w-full bg-emerald-500 text-gray-900 py-1 mt-4 rounded-md font-bold hover:bg-emerald-600"
+                                        onClick={setNamePolygonUpdate}
+                                    >Aceptar</button>
+                                </div>
+                            </>
+                        )}
+
+                    </div>
+                )}
+
             </Modal>
         </div>
     )

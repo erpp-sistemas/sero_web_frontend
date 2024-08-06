@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit'
 
 const initialState = {
+    data: null,
     features_layer: [],
     coordinates: {},
     layers_activos: [],
@@ -13,6 +14,9 @@ export const featuresSlice = createSlice({
     name: 'features',
     initialState,
     reducers: {
+        setData: ( state, action ) => {
+            state.data = action.payload;
+        },
         setFeatures: (state, action) => {
             state.features_layer = action.payload
         },
@@ -35,5 +39,5 @@ export const featuresSlice = createSlice({
 })
 
 
-export const { setFeatures, setCoordinates, setLayersActivos, setDraw, setPuntosInPoligono, setCargarLayer } = featuresSlice.actions
+export const { setData, setFeatures, setCoordinates, setLayersActivos, setDraw, setPuntosInPoligono, setCargarLayer } = featuresSlice.actions
 export default featuresSlice.reducer
