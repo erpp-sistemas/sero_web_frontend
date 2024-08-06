@@ -22,7 +22,7 @@ import { DataGrid,
   GridToolbarExport,
   GridToolbarFilterButton, } from '@mui/x-data-grid';
 import Chip from '@mui/material/Chip';
-import { Balance, CalendarToday, MarkEmailRead, ReceiptLong, Search, WaterDrop } from "@mui/icons-material";
+import { Balance, CalendarToday, DoneAll, LocationOff, MarkEmailRead, NotListedLocation, ReceiptLong, Search, WaterDrop, WrongLocation } from "@mui/icons-material";
 import PhotoViewModal from '../../components/PhotoManagement/PhotoViewModal.jsx'
 
 const esES = {
@@ -473,6 +473,48 @@ const Index = () => {
               }}
             />
           )
+        },
+        { 
+          field: 'estatus_predio',
+          renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>{"ESTATUS DEL PREDIO"}</strong>
+          ),
+          width: 200,
+          editable: false,
+          renderCell: (params) => {
+            let color;
+            let icon;
+    
+            if (params.value === 'Predio localizado') {
+              color = 'secondary';
+              icon = <DoneAll sx={{ color: 'secondary' }} />;
+            } else if (params.value === 'Predio baldío') {
+              color = 'info';
+              icon = <WrongLocation sx={{ color: 'info' }} />;
+            } else if (params.value === 'Predio abandonado') {
+              color = 'warning';
+              icon = <NotListedLocation sx={{ color: 'warning' }} />;            
+            } else if (params.value === 'Predio no localizado') {
+              color = 'error';
+              icon = <LocationOff sx={{ color: 'error' }} />;
+            } else {
+              color = 'success';
+              icon = <ReceiptLong sx={{ color: 'success' }} />;
+            }
+    
+            return (
+              <Chip
+                icon={icon}
+                label={
+                  <Typography variant="body1" sx={{ fontWeight: 'bold', fontSize: '1.2em' }}>
+                    {params.value}
+                  </Typography>
+                }
+                variant="outlined"
+                color={color}
+              />
+            );
+          },
         },
         { 
           field: 'proceso',
