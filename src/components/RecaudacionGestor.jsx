@@ -1,20 +1,12 @@
-import React from 'react'
-import { Box, useTheme, Typography, IconButton } from "@mui/material";
-import { DataGrid } from "@mui/x-data-grid";
-import FaceIcon from '@mui/icons-material/Face';
-import {  tokens } from "../theme";
+import { Box, useTheme } from "@mui/material"
+import { DataGrid } from "@mui/x-data-grid"
+import {  tokens } from "../theme"
 import { recaudadoGestor } from '../data/recaudado'
-
+import PropTypes from 'prop-types'
 
 const RecaudacionGestor = ({size_grid}) => {
-
-    const theme = useTheme();
-    const colors = tokens(theme.palette.mode);
-
-    const handleSeeUser = (id_usuario) => {
-
-    }
-
+    const theme = useTheme()
+    const colors = tokens(theme.palette.mode)
 
     const columns = [
         {
@@ -31,9 +23,9 @@ const RecaudacionGestor = ({size_grid}) => {
                         justifyContent="center"
                         borderRadius="4px"
                     >
-                        <img style={{ width: '45px', height: '45px', borderRadius: '50%' }} src={photo} alt="foto usuario" />
+                        <img style={{ width: '45px', height: '45px', minWidth: '45px', minHeight: '45px', borderRadius: '50%', background:'white' }} src={photo} alt="foto usuario" />
                     </Box>
-                );
+                )
             },
         },
         {
@@ -50,10 +42,10 @@ const RecaudacionGestor = ({size_grid}) => {
             align: "center",
             cellClassName: "name-column--cell",
         },
-    ];
-
+    ]
 
     return (
+
         <Box
             backgroundColor={colors.primary[700]}
             gridColumn={`span ${size_grid}`}
@@ -100,7 +92,13 @@ const RecaudacionGestor = ({size_grid}) => {
             </Box>
 
         </Box>
+
     )
+
+}
+
+RecaudacionGestor.propTypes = { 
+    size_grid: PropTypes.number.isRequired, 
 }
 
 export default RecaudacionGestor

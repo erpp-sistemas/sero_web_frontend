@@ -1,19 +1,13 @@
-import React from 'react'
-import { Box, useTheme, Typography, Avatar, Chip } from "@mui/material";
-import { DataGrid } from "@mui/x-data-grid";
-import { tokens } from "../theme";
+import { Box, useTheme, Avatar, Chip } from "@mui/material"
+import { DataGrid } from "@mui/x-data-grid"
+import { tokens } from "../theme"
 import { recaudadoGestor } from '../data/recaudado'
+import PropTypes from 'prop-types'
 
-
-const PorcentajeGestor = ({ size_grid }) => {
+const 	PorcentajeGestor = ({ size_grid }) => {
 
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
-
-    const handleSeeUser = (id_usuario) => {
-
-    }
-
     const color_porcentaje_mayor = 'linear-gradient(to right bottom, #004789, #12FB0A)'
     const color_porcentaje_medio = 'linear-gradient(to right bottom, #004789, #3da58a)'
     const color_porcentaje_bajo = 'linear-gradient(to right bottom, #004789, #bd2308)'
@@ -45,29 +39,26 @@ const PorcentajeGestor = ({ size_grid }) => {
                             style={{ color: colors.grey[100], fontSize: '15px', width: (porcentaje * 4), height: '15px', background: porcentaje >= 40 ? color_porcentaje_mayor : (porcentaje < 40 && porcentaje >= 20 ? color_porcentaje_medio : color_porcentaje_bajo) }}>
                         </Chip>
                     </Box>
-                );
+                )
             },
         },
-    ];
+    ]
 
 
     return (
+
         <Box
             backgroundColor={colors.primary[700]}
             gridColumn={`span ${size_grid}`}
             borderRadius='10px'
             height='390px'
+			sx={{
+				marginTop:{
+					xs:'20px',
+					md:'0px'
+				}
+			}}
         >
-
-            {/* <Box sx={{ marginTop: '20px', backgroundColor: colors.primary[400] }}>
-                <Typography
-                    variant="h5"
-                    color={colors.greenAccent[400]}
-                    sx={{ paddingTop: '10px', paddingLeft: '30px' }}
-                >
-                    Porcentaje por gestor
-                </Typography>
-            </Box> */}
 
             <Box
                 m="0px 0 0 0"
@@ -109,7 +100,13 @@ const PorcentajeGestor = ({ size_grid }) => {
             </Box>
 
         </Box>
+
     )
+	
+}
+
+PorcentajeGestor.propTypes = { 
+    size_grid: PropTypes.number.isRequired, 
 }
 
 export default PorcentajeGestor

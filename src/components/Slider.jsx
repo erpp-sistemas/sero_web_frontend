@@ -1,19 +1,16 @@
-import React, { useState } from "react";
-import { Container, Grid, Stack, Tab, Tabs, Typography } from "@mui/material";
-
+import { useState } from "react"
+import { Container, Grid, Stack, Tab, Tabs, Typography } from "@mui/material"
 import { section4Content } from "../data/slider"
 
-const { bottom } = section4Content;
-import Title from './Title'
-import { styles } from '../styles'
+const { bottom } = section4Content
 
 const Slider = () => {
 
-    const [tabValue, setTabValue] = useState(0);
+    const [tabValue, setTabValue] = useState(0)
 
     return (
-        <Container sx={{ mt: { xs: 5, md: 5, lg: 5 } }}>
 
+        <Container sx={{ mt: { xs: 5, md: 5, lg: 5 } }}>
 
             <Grid
                 container
@@ -22,7 +19,7 @@ const Slider = () => {
                 alignItems="center"
                 sx={{ mt: { xs: 10, md: 15 } }}
             >
-                {/* Left */}
+
                 <Grid item xs={12} md={6}>
                     <img
                         src={bottom.TABS[tabValue].image}
@@ -30,12 +27,26 @@ const Slider = () => {
                     />
                 </Grid>
 
-                {/* Right */}
                 <Grid item xs={12} md={6}>
+
                     <Stack spacing={2} sx={{ maxWidth: 480 }}>
-                        {/* <Title variant={{ xs: "h3", md: "h2" }}>{bottom.title}</Title> */}
-                        <h1 className={`${styles.heroHeadText} text-white text-lg`}><span className='text-[#5ebfff]'>{bottom.title}</span></h1>
-                        <Tabs
+
+                        <Typography 
+							sx={{ 
+								color:'white', 
+								fontSize:'1.125rem', 
+								lineHeight:'1.75rem', 
+								fontWeight:'800' ,
+								textAlign:{
+									xs:'center',
+									md:'start'
+								}
+							}}
+						>
+							<span className='text-[#5ebfff]'>{bottom.title}</span>
+						</Typography>
+                       
+						<Tabs
                             value={tabValue}
                             onChange={(e, v) => setTabValue(v)}
                             variant="scrollable"
@@ -56,18 +67,28 @@ const Slider = () => {
                         <Typography
                             variant="h4"
                             color="text.secondary"
-                            sx={{ pb: 2, minHeight: 70 }}
+                            sx={{ 
+								pb: 2, 
+								minHeight: 70,
+								textAlign:{
+									xs:'center',
+									md:'start'
+								}
+							}}
                         >
                             {bottom.TABS[tabValue].subtitle}
                         </Typography>
 
-
                     </Stack>
+
                 </Grid>
+
             </Grid>
 
         </Container>
+
     )
+
 }
 
 export default Slider

@@ -607,21 +607,22 @@ const Index = () => {
               message={alertMessage}
               onClose={setAlertOpen}
             />
-            <Grid container spacing={2}>
-              <Grid item xs={4}>
+
+            <Grid item container xs={12} md={12} spacing={2}>
+              <Grid item xs={12} md={4}>
                 <PlaceSelect                
                   selectedPlace={selectedPlace}
                   handlePlaceChange={handlePlaceChange}
                 />
               </Grid>
-              <Grid item xs={4}>
+              <Grid item xs={12} md={4}>
                 <ServiceSelect
                   selectedPlace={selectedPlace}                  
                   selectedService={selectedService}
                   handleServiceChange={handleServiceChange}
                 />
               </Grid>
-              <Grid item xs={4}>
+              <Grid item xs={12} md={4}>
                 <ProcessSelect
                   selectedPlace={selectedPlace}
                   selectedService={selectedService}
@@ -631,8 +632,8 @@ const Index = () => {
               </Grid>
             </Grid>
             
-            <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
-              <Grid item xs={3}>
+            <Grid item xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
+              <Grid item xs={12} md={3}>
                 <FormControl variant="filled" sx={{ width: '100%' }}>
                   <InputLabel id="demo-simple-select-standard-label">Numero de dias antes del pago:</InputLabel>
                   <Select
@@ -652,7 +653,7 @@ const Index = () => {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item xs={3}>
+              <Grid item xs={12} md={3}>
                 <TextField
                   id="start-date"
                   label="Fecha de inicio"
@@ -665,7 +666,7 @@ const Index = () => {
                   }}                  
                 />
               </Grid>
-              <Grid item xs={3}>
+              <Grid item xs={12} md={3}>
                 <TextField
                   id="finish-date"
                   label="Fecha final"
@@ -678,7 +679,7 @@ const Index = () => {
                   }}
                 />
               </Grid>
-              <Grid item xs={3}>
+              <Grid item xs={12} md={3}>
                 <Button 
                   variant="contained"                   
                   style={{ width: '100%', height: '100%' }}
@@ -692,8 +693,9 @@ const Index = () => {
                 </Button>
               </Grid>
             </Grid>
-            <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
-              <Grid item xs={4}>
+
+            <Grid item xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
+              <Grid item xs={12} md={4}>
                 <Card variant="outlined" sx={{ maxWidth: 360, backgroundColor: 'rgba(128, 128, 128, 0.1)', borderLeft: '5px solid #00ff00'  }}>
                   <Box sx={{ p: 2, textAlign: 'center' }}>                    
                     <Typography variant="h2" component="div">
@@ -722,7 +724,7 @@ const Index = () => {
                   </Box>                  
                 </Card>
               </Grid>
-              <Grid item xs={4}>
+              <Grid item xs={12} md={4}>
                 <Card variant="outlined" sx={{ maxWidth: 360, backgroundColor: 'rgba(128, 128, 128, 0.1)', borderLeft: '5px solid #00ff00'  }}>
                   <Box sx={{ p: 3, textAlign: 'center' }}>                    
                     <Typography variant="h2" component="div">
@@ -734,7 +736,7 @@ const Index = () => {
                   </Box>                  
                 </Card>
               </Grid>
-              <Grid item xs={4}>
+              <Grid item xs={12} md={4}>
                 <Card variant="outlined" sx={{ maxWidth: 360, backgroundColor: 'rgba(128, 128, 128, 0.1)', borderLeft: '5px solid #00ff00'  }}>
                   <Box sx={{ p: 3, textAlign: 'center' }}>                    
                     <Typography variant="h2" component="div">
@@ -748,8 +750,8 @@ const Index = () => {
               </Grid>
             </Grid>
 
-            <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
-              <Grid item xs={3}>
+            <Grid item xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
+              <Grid item xs={12} md={3}>
                 <Card variant="outlined" sx={{ maxWidth: 360, backgroundColor: 'rgba(128, 128, 128, 0.1)', borderLeft: '5px solid #00ff00'  }}>
                   <Box sx={{ p: 2, textAlign: 'center' }}>                    
                     <Typography variant="h3" component="div">
@@ -788,7 +790,7 @@ const Index = () => {
                   </Box>                  
                 </Card>
               </Grid>
-              <Grid item xs={3}>
+              <Grid item xs={12} md={3}>
                 <Card variant="outlined" sx={{ maxWidth: 360, backgroundColor: 'rgba(128, 128, 128, 0.1)', borderLeft: '5px solid #00ff00'  }}>
                   <Box sx={{ p: 2, textAlign: 'center' }}>                    
                     <Typography variant="h3" component="div">
@@ -827,7 +829,7 @@ const Index = () => {
                   </Box>
                 </Card>
               </Grid>
-              <Grid item xs={3}>
+              <Grid item xs={12} md={3}>
                 <Card variant="outlined" sx={{ maxWidth: 360, backgroundColor: 'rgba(128, 128, 128, 0.1)', borderLeft: '5px solid #00ff00'  }}>
                   <Box sx={{ p: 3, textAlign: 'center' }}>                    
                     <Typography variant="h3" component="div">
@@ -847,7 +849,7 @@ const Index = () => {
                   </Box>                  
                 </Card>
               </Grid>
-              <Grid item xs={3}>
+              <Grid item xs={12} md={3}>
                 <Card variant="outlined" sx={{ maxWidth: 360, backgroundColor: 'rgba(128, 128, 128, 0.1)', borderLeft: '5px solid #00ff00'  }}>
                   <Box sx={{ p: 3, textAlign: 'center' }}>                    
                     <Typography variant="h3" component="div">
@@ -869,10 +871,8 @@ const Index = () => {
               </Grid>
             </Grid>
 
-
-            
-            <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
-              <Grid item xs={3}>
+            <Grid item xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
+              <Grid item xs={12} md={3}>
                 <Card variant="outlined" sx={{ maxWidth: 360, backgroundColor: 'rgba(128, 128, 128, 0.1)', borderLeft: '5px solid #00ff00'  }}>
                   <Box sx={{ p: 2, textAlign: 'center' }}>                    
                     <Typography variant="h3" component="div">
@@ -911,7 +911,7 @@ const Index = () => {
                   </Box>
                 </Card>
               </Grid>
-              <Grid item xs={3}>
+              <Grid item xs={12} md={3}>
                 <Card variant="outlined" sx={{ maxWidth: 360, backgroundColor: 'rgba(128, 128, 128, 0.1)', borderLeft: '5px solid #00ff00'  }}>
                   <Box sx={{ p: 2, textAlign: 'center' }}>                    
                     <Typography variant="h3" component="div">
@@ -950,7 +950,7 @@ const Index = () => {
                   </Box>
                 </Card>
               </Grid>
-              <Grid item xs={3}>
+              <Grid item xs={12} md={3}>
                 <Card variant="outlined" sx={{ maxWidth: 360, backgroundColor: 'rgba(128, 128, 128, 0.1)', borderLeft: '5px solid #00ff00'  }}>
                   <Box sx={{ p: 2, textAlign: 'center' }}>                    
                     <Typography variant="h3" component="div">
@@ -989,7 +989,7 @@ const Index = () => {
                   </Box>
                 </Card>
               </Grid>
-              <Grid item xs={3}>
+              <Grid item xs={12} md={3}>
                 <Card variant="outlined" sx={{ maxWidth: 360, backgroundColor: 'rgba(128, 128, 128, 0.1)', borderLeft: '5px solid #00ff00'  }}>
                   <Box sx={{ p: 2, textAlign: 'center' }}>                    
                     <Typography variant="h3" component="div">
