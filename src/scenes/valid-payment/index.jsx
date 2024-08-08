@@ -589,7 +589,7 @@ const Index = () => {
     }
 
     return (
-        <>
+        <Box sx={{ margin:'20px' }}>
           <Box
               m='20px 0'
               display='flex'
@@ -597,7 +597,7 @@ const Index = () => {
               flexWrap='wrap'
               gap='20px'
               sx={{ backgroundColor: colors.primary[400], width: '100%' }}
-              padding='15px 10px'
+              padding='15px'
               borderRadius='10px'
           >
             <LoadingModal open={isLoading}/>
@@ -1061,7 +1061,7 @@ const Index = () => {
             <ModalTable open={openModal} onClose={handleCloseModal} data={modalData} />
           </Box>                 
           
-        </>
+        </Box>
 
     );
 };
