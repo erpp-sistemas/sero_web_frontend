@@ -6,9 +6,7 @@ import Grid from '@mui/material/Grid'
 import Viewer from 'react-viewer';
 
 
-const Photos = ({ photo }) => {
-
-  console.log(photo)
+const Photos = ({ photo }) => {  
 
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
