@@ -9,7 +9,7 @@ import { Dialog, DialogContent } from '@mui/material';
 import { Cancel, CloudUpload, Delete, Save } from '@mui/icons-material';
 import { savePhotoRequest } from '../../api/photo.js';
 
-const PhotoViewModal = ({ open, onClose, selectedPlace, selectedService, data, onImageUrlUpdate }) => {
+const PhotoViewModal = ({ open, onClose, selectedPlace, selectedService, data }) => {
   if (!data) return null;
 
   const formatDate = (dateString) => {
@@ -20,7 +20,6 @@ const PhotoViewModal = ({ open, onClose, selectedPlace, selectedService, data, o
     return `${datePart} ${timePart}`;
   };
 
-  console.log('selectesPlace', selectedPlace)
   console.log('data inicial: ', data);
 
   const theme = useTheme();
@@ -92,27 +91,27 @@ const PhotoViewModal = ({ open, onClose, selectedPlace, selectedService, data, o
       date,
       photoType,
       url_image: formData.url_image
-    };
-
-    console.log(photo_data)
-  
-    // Llamar a la función savePhotoRequest
+    };  
+    
     try {
-      setIsLoading(true); // Opcional: Muestra un indicador de carga
+      setIsLoading(true);
       const response = await savePhotoRequest( photo_data );
       const updatedImageUrl = response.data.message;
-      console.log(response.data.message)
+      setFormData(prevState => ({
+        ...prevState,
+        url_image: updatedImageUrl
+      }));
       setAlertOpen(true);
       setAlertType("success");
       setAlertMessage("¡Foto guardada exitosamente!");
-      onImageUrlUpdate(updatedImageUrl);
+      //onImageUrlUpdate(updatedImageUrl);
     } catch (error) {
       console.error('Error al guardar la foto:', error);
       setAlertOpen(true);
       setAlertType("error");
       setAlertMessage("Hubo un error al guardar la foto. Inténtalo de nuevo.");
     } finally {
-      setIsLoading(false); // Opcional: Oculta el indicador de carga
+      setIsLoading(false);
     }
   };
 

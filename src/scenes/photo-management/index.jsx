@@ -930,7 +930,7 @@ const Index = () => {
             selectedPlace={selectedPlace} 
             selectedService={selectedService} 
             data={selectedRow} 
-            onImageUrlUpdate={handleImageUrlUpdate}
+            // onImageUrlUpdate={handleImageUrlUpdate}
             />
           </Box>                 
           
