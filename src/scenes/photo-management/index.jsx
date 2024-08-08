@@ -94,6 +94,7 @@ const Index = () => {
     const [filteredResult, setFilteredResult] = useState([]);
     const [filterText, setFilterText] = useState('');
     const [showNoResultsMessage, setShowNoResultsMessage] = useState(false)
+    const [newImageUrl, setNewImageUrl] = useState('');
     
 
       const handlePlaceChange = (event) => {
@@ -200,13 +201,33 @@ const Index = () => {
         } catch (error) {
           setIsLoading(false)
 
-          if(error.response.status === 400){
-            setAlertOpen(true)
-            setAlertType("warning")
-            setAlertMessage("¡Atencion! No se encontraron pagos")
+          if (error.response) {
+            // Si hay un error en la respuesta del backend
+            if (error.response.status === 400) {
+                setAlertOpen(true);
+                setAlertType("warning");
+                setAlertMessage("¡Atención! No se encontraron pagos");
+                setResult([]);
+            } else {
+                // Manejo de otros códigos de estado
+                setAlertOpen(true);
+                setAlertType("error");
+                setAlertMessage(`¡Error! ${error.response.status}: ${error.response.statusText}`);
+                setResult([]);
+            }
+        } else if (error.request) {
+            // Error en la solicitud, podría ser un error de red
+            setAlertOpen(true);
+            setAlertType("error");
+            setAlertMessage("¡Error! No se pudo contactar con el servidor");
             setResult([]);
-          }       
-        setResult([]);
+        } else {
+            // Error en la configuración de la solicitud
+            setAlertOpen(true);
+            setAlertType("error");
+            setAlertMessage(`¡Error! ${error.message}`);
+            setResult([]);
+        }
           
         }        
       };
@@ -763,10 +784,31 @@ const Index = () => {
         return `${datePart} ${timePart}`;
       };      
     
-      const handleImageUrlUpdate = (newUrl) => {
-        console.log(selectedRow)
-        console.log(newUrl)
+      const handleImageUrlUpdate = (updatedImageUrl) => {
+        
+        console.log("URL de la imagen actualizada:", updatedImageUrl);
+
+        // setNewImageUrl(updatedImageUrl);
+        
+        // setFilteredResult(prev =>
+        //     prev.map(row => row.id_registro === selectedRow.id_registro
+        //         ? { ...row, foto_fachada_1: updatedImageUrl }
+        //         : row
+        //     )
+        // );
       };
+
+    //   useEffect(() => {
+    //     if (newImageUrl && selectedRow) {
+    //         // Actualizar el resultado filtrado si hay una nueva URL de imagen
+    //         setFilteredResult(prev =>
+    //             prev.map(row => row.id_registro === selectedRow.id_registro
+    //                 ? { ...row, foto_fachada_1: newImageUrl }
+    //                 : row
+    //             )
+    //         );
+    //     }
+    // }, [newImageUrl]);
       
 
     return (
@@ -930,7 +972,7 @@ const Index = () => {
             selectedPlace={selectedPlace} 
             selectedService={selectedService} 
             data={selectedRow} 
-            // onImageUrlUpdate={handleImageUrlUpdate}
+            onImageUrlUpdate={handleImageUrlUpdate}
             />
           </Box>                 
           

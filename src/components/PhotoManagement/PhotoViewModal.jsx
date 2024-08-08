@@ -9,7 +9,7 @@ import { Dialog, DialogContent } from '@mui/material';
 import { Cancel, CloudUpload, Delete, Save } from '@mui/icons-material';
 import { savePhotoRequest } from '../../api/photo.js';
 
-const PhotoViewModal = ({ open, onClose, selectedPlace, selectedService, data }) => {
+const PhotoViewModal = ({ open, onClose, selectedPlace, selectedService, data, onImageUrlUpdate }) => {
   if (!data) return null;
 
   const formatDate = (dateString) => {
@@ -19,8 +19,6 @@ const PhotoViewModal = ({ open, onClose, selectedPlace, selectedService, data })
     const timePart = date.toISOString().split('T')[1].split('.')[0];
     return `${datePart} ${timePart}`;
   };
-
-  console.log('data inicial: ', data);
 
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -43,7 +41,7 @@ const PhotoViewModal = ({ open, onClose, selectedPlace, selectedService, data })
       setTask(data.tarea_gestionada || '');
       setManager(data.foto === defaultImage ? user.name : data.nombre_gestor)
       setDate(data.fecha_gestion ? formatDate(data.fecha_gestion) : '');
-      setPhotoType(data.tipo || '');
+      setPhotoType(data.tipo || '');      
     }
   }, [data]);
 
@@ -101,10 +99,15 @@ const PhotoViewModal = ({ open, onClose, selectedPlace, selectedService, data })
         ...prevState,
         url_image: updatedImageUrl
       }));
+
       setAlertOpen(true);
       setAlertType("success");
       setAlertMessage("¡Foto guardada exitosamente!");
-      //onImageUrlUpdate(updatedImageUrl);
+
+      if (onImageUrlUpdate) {
+        onImageUrlUpdate(updatedImageUrl);
+      }
+
     } catch (error) {
       console.error('Error al guardar la foto:', error);
       setAlertOpen(true);
@@ -151,6 +154,7 @@ const PhotoViewModal = ({ open, onClose, selectedPlace, selectedService, data })
           >
             <CardMedia
               component="img"
+              key={formData.url_image}
               sx={{ 
                 width: 500, 
                 height: 500, 
