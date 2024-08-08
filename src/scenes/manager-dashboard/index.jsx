@@ -105,7 +105,7 @@ function index() {
     };
 
   return (
-    <>
+    <Box sx={{ margin:'20px' }}>
        <Box
               m='20px 0'
               display='flex'
@@ -113,7 +113,7 @@ function index() {
               flexWrap='wrap'
               gap='20px'
               sx={{ backgroundColor: colors.primary[400], width: '100%' }}
-              padding='15px 10px'
+              padding='15px'
               borderRadius='10px'
           >
             <LoadingModal open={isLoading}/>
@@ -199,7 +199,7 @@ function index() {
               </>
             {/* )} */}
           </Box>
-    </>
+    </Box>
   )
 }
 

@@ -1,197 +1,181 @@
-import React, { useState, useEffect } from "react";
-import Grid from '@mui/material/Grid';
-import { tokens } from "../../theme";
+import React, { useState } from "react"
+import Grid from '@mui/material/Grid'
+import { tokens } from "../../theme"
 import PlaceSelect from '../../components/PlaceSelect'
 import ServiceSelect from '../../components/ServiceSelect'
 import ProcessSelect from '../../components/ProcessSelectMultipleChip'
 import { trafficLightRequest, trafficLightByTypeRequest } from '../../api/trafficlight.js'
-import { Box, useTheme, Button, Tooltip, IconButton} from "@mui/material";
-import TextField from '@mui/material/TextField';
+import { Box, useTheme, Button, Tooltip, IconButton} from "@mui/material"
+import TextField from '@mui/material/TextField'
 import LoadingModal from '../../components/LoadingModal.jsx'
 import CustomAlert from '../../components/CustomAlert.jsx'
-import ManageSearchIcon from '@mui/icons-material/ManageSearch';
+import ManageSearchIcon from '@mui/icons-material/ManageSearch'
 import TrafficLightCountingProcedures from '../../components/TrafficLight/TrafficLightCountingProcedures.jsx'
 import TrafficLightDebitProcedures from '../../components/TrafficLight/TrafficLightDebitProcedures.jsx'
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import Divider from '@mui/material/Divider';
-import ListItemText from '@mui/material/ListItemText';
-import ListItemAvatar from '@mui/material/ListItemAvatar';
-import Avatar from '@mui/material/Avatar';
-import Typography from '@mui/material/Typography';
-import Badge from '@mui/material/Badge';
-import DownloadIcon from '@mui/icons-material/Download';
-import * as ExcelJS from "exceljs";
+import List from '@mui/material/List'
+import ListItem from '@mui/material/ListItem'
+import ListItemText from '@mui/material/ListItemText'
+import Typography from '@mui/material/Typography'
+import Badge from '@mui/material/Badge'
+import DownloadIcon from '@mui/icons-material/Download'
+import * as ExcelJS from "exceljs"
 
 const Index = () => {
     
     const theme = useTheme();
-    const colors = tokens(theme.palette.mode);    
-    const [selectedPlace, setSelectedPlace] = useState('');
-    const [selectedService, setSelectedService] = useState('');
-    const [selectedProcess, setSelectedProcess] = useState([]);    
-    const [selectedDate, setSelectedDate] = useState('');    
+    const colors = tokens(theme.palette.mode)
+    const [selectedPlace, setSelectedPlace] = useState('')
+    const [selectedService, setSelectedService] = useState('')
+    const [selectedProcess, setSelectedProcess] = useState([])  
+    const [selectedDate, setSelectedDate] = useState('')  
     const [isLoading, setIsLoading] = useState(false)
-    const [alertOpen, setAlertOpen] = useState(false);
-    const [alertType, setAlertType] = useState("info");
-    const [alertMessage, setAlertMessage] = useState("");    
-    const [result, setResult] = useState([]);
-    const [trafficLightCountingProceduresData, setTrafficLightCountingProceduresData] = useState([]);
-    const [trafficLightDebitProceduresData, setTrafficLightDebitProceduresData] = useState([]);
+    const [alertOpen, setAlertOpen] = useState(false)
+    const [alertType, setAlertType] = useState("info")
+    const [alertMessage, setAlertMessage] = useState("")
+    const [result, setResult] = useState([])
+    const [trafficLightCountingProceduresData, setTrafficLightCountingProceduresData] = useState([])
+    const [trafficLightDebitProceduresData, setTrafficLightDebitProceduresData] = useState([])
     const [countingData, setCountingData] = useState({
-      thirtyDays: {},
-      twentyOneDays: {},
-      currentManagement: {},
-      expired: {},
-      sevenDays: {},
-      noManagement: {},
-      inProcess: {},
-      fourteenDays: {}
-  });
+		thirtyDays: {},
+		twentyOneDays: {},
+		currentManagement: {},
+		expired: {},
+		sevenDays: {},
+		noManagement: {},
+		inProcess: {},
+		fourteenDays: {}
+	})
 
-      const handlePlaceChange = (event) => {
-        setSelectedPlace(event.target.value);  
-        setSelectedService('');      
-      };
+	const handlePlaceChange = (event) => {
+		setSelectedPlace(event.target.value)
+		setSelectedService('')  
+	}
 
-      const handleServiceChange = (event) => {
-        setSelectedService(event.target.value);
-        setSelectedProcess([])
-      };
+	const handleServiceChange = (event) => {
+		setSelectedService(event.target.value)
+		setSelectedProcess([])
+	}
 
-      const handleProcessChange = (event) => {        
-        setSelectedProcess(Array.isArray(event.target.value) ? event.target.value : [event.target.value]);
-      };
+	const handleProcessChange = (event) => {        
+		setSelectedProcess(Array.isArray(event.target.value) ? event.target.value : [event.target.value])
+	}
 
-      const handleDateChange = (event) => {
-        setSelectedDate(event.target.value);
-      };
+	const handleDateChange = (event) => {
+		setSelectedDate(event.target.value)
+	}
 
-      const handleGetTrafficLight = async () => {
-        try {
+	const handleGetTrafficLight = async () => {
+		try {
+			if(!selectedPlace){
+				setAlertOpen(true)
+				setAlertType("error")
+				setAlertMessage("¡Error! Debes seleccionar una plaza")
+				return
+			}
+			else if(!selectedService){
+				setAlertOpen(true)
+				setAlertType("error")
+				setAlertMessage("¡Error! Debes seleccionar un servicio")
+				return
+			}
+			else if(selectedProcess.length===0){
+				setAlertOpen(true)
+				setAlertType("error")
+				setAlertMessage("¡Error! Debes seleccionar uno o mas procesos")
+				return
+			}          
+			else if(!selectedDate){
+				setAlertOpen(true)
+				setAlertType("error")
+				setAlertMessage("¡Error! Debes seleccionar una fecha")
+				return
+			}          
 
-          if(!selectedPlace){
-            setAlertOpen(true)
-            setAlertType("error")
-            setAlertMessage("¡Error! Debes seleccionar una plaza")
-            return
-          }
-          else if(!selectedService){
-            setAlertOpen(true)
-            setAlertType("error")
-            setAlertMessage("¡Error! Debes seleccionar un servicio")
-            return
-          }
-          else if(selectedProcess.length===0){
-            setAlertOpen(true)
-            setAlertType("error")
-            setAlertMessage("¡Error! Debes seleccionar uno o mas procesos")
-            return
-          }          
-          else if(!selectedDate){
-            setAlertOpen(true)
-            setAlertType("error")
-            setAlertMessage("¡Error! Debes seleccionar una fecha")
-            return
-          }          
+			setIsLoading(true)
 
-          setIsLoading(true)
+			const response = await trafficLightRequest(selectedPlace, selectedService, selectedProcess, selectedDate)
 
-          const response = await trafficLightRequest(selectedPlace, selectedService, selectedProcess, selectedDate);
+			const countingDataArray = JSON.parse(response.data[0].TrafficLightCountingProcedures)
+			
+			const newCountingData = {
+				thirtyDays: countingDataArray.find(data => data.color_meaning === "30 dias") || {},
+				twentyOneDays: countingDataArray.find(data => data.color_meaning === "21 dias") || {},
+				currentManagement: countingDataArray.find(data => data.color_meaning === "gestion actual") || {},
+				expired: countingDataArray.find(data => data.color_meaning === "vencidas") || {},
+				sevenDays: countingDataArray.find(data => data.color_meaning === "7 dias") || {},
+				noManagement: countingDataArray.find(data => data.color_meaning === "sin gestion") || {},
+				inProcess: countingDataArray.find(data => data.color_meaning === "en proceso") || {},
+				fourteenDays: countingDataArray.find(data => data.color_meaning === "14 dias") || {}
+			}
 
-          const countingDataArray = JSON.parse(response.data[0].TrafficLightCountingProcedures);
-            
-          const newCountingData = {
-              thirtyDays: countingDataArray.find(data => data.color_meaning === "30 dias") || {},
-              twentyOneDays: countingDataArray.find(data => data.color_meaning === "21 dias") || {},
-              currentManagement: countingDataArray.find(data => data.color_meaning === "gestion actual") || {},
-              expired: countingDataArray.find(data => data.color_meaning === "vencidas") || {},
-              sevenDays: countingDataArray.find(data => data.color_meaning === "7 dias") || {},
-              noManagement: countingDataArray.find(data => data.color_meaning === "sin gestion") || {},
-              inProcess: countingDataArray.find(data => data.color_meaning === "en proceso") || {},
-              fourteenDays: countingDataArray.find(data => data.color_meaning === "14 dias") || {}
-          };
+			setCountingData(newCountingData)
+			
+			setTrafficLightCountingProceduresData(countingDataArray)
+			setTrafficLightDebitProceduresData(JSON.parse(response.data[0].TrafficLightDebitProcedures))
+			setResult(response.data)          
+			setIsLoading(false)
+			setAlertOpen(true)
+			setAlertType("success")
+			setAlertMessage("¡Felicidades! Se genero el proceso correctamente")
+			
+		} catch (error) {
+			setIsLoading(false)
+			if(error.response.status === 400){
+				setAlertOpen(true)
+				setAlertType("warning")
+				setAlertMessage("¡Atencion! No se encontraron cuentas")
+				setResult([])
+			}    
+			setResult([])
+		}        
+	}
 
-          setCountingData(newCountingData);
-          
-          setTrafficLightCountingProceduresData(countingDataArray);
-          setTrafficLightDebitProceduresData(JSON.parse(response.data[0].TrafficLightDebitProcedures));
-          setResult(response.data)          
-
-          setIsLoading(false)
-
-          setAlertOpen(true)
-          setAlertType("success")
-          setAlertMessage("¡Felicidades! Se genero el proceso correctamente")
-          
-        } catch (error) {
-          setIsLoading(false)
-
-          if(error.response.status === 400){
-            setAlertOpen(true)
-            setAlertType("warning")
-            setAlertMessage("¡Atencion! No se encontraron cuentas")
-            setResult([]);
-          }    
-        setResult([]);
-          
-        }        
-      };
-
-      const formatNumber = (number) => {
-        return number.toLocaleString();
-    };
+	const formatNumber = (number) => {
+		return number.toLocaleString()
+    }
 
     const handleDownload = async (type, concept) => {
       
-      try {
-
-        if(!selectedPlace){
-          setAlertOpen(true)
-          setAlertType("error")
-          setAlertMessage("¡Error! Debes seleccionar una plaza")
-          return
-        }
-        else if(!selectedService){
-          setAlertOpen(true)
-          setAlertType("error")
-          setAlertMessage("¡Error! Debes seleccionar un servicio")
-          return
-        }
-        else if(selectedProcess.length===0){
-          setAlertOpen(true)
-          setAlertType("error")
-          setAlertMessage("¡Error! Debes seleccionar uno o mas procesos")
-          return
-        }          
-        else if(!selectedDate){
-          setAlertOpen(true)
-          setAlertType("error")
-          setAlertMessage("¡Error! Debes seleccionar una fecha")
-          return
-        }          
-
-        setIsLoading(true)
-
-        const response = await trafficLightByTypeRequest(selectedPlace, selectedService, selectedProcess, selectedDate, type);        
-        
-        exportToExcel(response.data, concept)
-
-        setIsLoading(false)        
-        
-      } catch (error) {
-        setIsLoading(false)
-
-        if(error.response.status === 400){
-          setAlertOpen(true)
-          setAlertType("warning")
-          setAlertMessage("¡Atencion! No se encontraron cuentas")
-          setResult([]);
-        }    
-      setResult([]);
-        
-      }
-    };
+		try {
+			if(!selectedPlace){
+				setAlertOpen(true)
+					setAlertType("error")
+				setAlertMessage("¡Error! Debes seleccionar una plaza")
+				return
+			}
+			else if(!selectedService){
+				setAlertOpen(true)
+				setAlertType("error")
+				setAlertMessage("¡Error! Debes seleccionar un servicio")
+				return
+			}
+			else if(selectedProcess.length===0){
+				setAlertOpen(true)
+				setAlertType("error")
+				setAlertMessage("¡Error! Debes seleccionar uno o mas procesos")
+				return
+			}          
+			else if(!selectedDate){
+				setAlertOpen(true)
+				setAlertType("error")
+				setAlertMessage("¡Error! Debes seleccionar una fecha")
+				return
+			}          
+			setIsLoading(true)
+			const response = await trafficLightByTypeRequest(selectedPlace, selectedService, selectedProcess, selectedDate, type);        
+			exportToExcel(response.data, concept)
+			setIsLoading(false)        
+		} catch (error) {
+			setIsLoading(false)
+			if(error.response.status === 400){
+				setAlertOpen(true)
+				setAlertType("warning")
+				setAlertMessage("¡Atencion! No se encontraron cuentas")
+				setResult([])
+			}    
+			setResult([])
+		}
+    }
 
     const exportToExcel = async (data, concept) => {
       try {
@@ -224,17 +208,19 @@ const Index = () => {
 
 
     return (
-        <>
-          <Box
-              m='20px 0'
-              display='flex'
-              justifyContent='space-evenly'
-              flexWrap='wrap'
-              gap='20px'
-              sx={{ backgroundColor: colors.primary[400], width: '100%' }}
-              padding='15px 10px'
-              borderRadius='10px'
-          >
+
+        <Box sx={{ margin:'20px' }}>
+
+			<Box
+				m='20px 0'
+				display='flex'
+				justifyContent='space-evenly'
+				flexWrap='wrap'
+				gap='20px'
+				sx={{ backgroundColor: colors.primary[400], width: '100%' }}
+				padding='15px'
+				borderRadius='10px'
+			>
             <LoadingModal open={isLoading}/>
             <CustomAlert
               alertOpen={alertOpen}
@@ -704,8 +690,10 @@ const Index = () => {
             </Grid>
           </Box>                 
           
-        </>
+        </Box>
 
-    );
-};
-export default Index;
+    )
+
+}
+
+export default Index
