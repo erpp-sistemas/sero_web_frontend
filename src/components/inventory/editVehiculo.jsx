@@ -42,7 +42,6 @@ const NewVehiculo = ({ setOpenEdit, setAlertClean }) => {
 		if (animation) {	
 			const timer = setTimeout(() => {
 				setOpenEdit(false)
-				setAlertClean(true)
 			}, 700)
 			return () => clearTimeout(timer)
 		}
