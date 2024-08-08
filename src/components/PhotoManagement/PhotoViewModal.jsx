@@ -7,9 +7,9 @@ import LoadingModal from '../../components/LoadingModal.jsx';
 import CustomAlert from '../../components/CustomAlert.jsx';
 import { Dialog, DialogContent } from '@mui/material';
 import { Cancel, CloudUpload, Delete, Save } from '@mui/icons-material';
-import { updateAssignedPlacesRequest } from '../../api/auth';
+import { savePhotoRequest } from '../../api/photo.js';
 
-const PhotoViewModal = ({ open, onClose, data }) => {
+const PhotoViewModal = ({ open, onClose, selectedPlace, selectedService, data, onImageUrlUpdate }) => {
   if (!data) return null;
 
   const formatDate = (dateString) => {
@@ -20,6 +20,7 @@ const PhotoViewModal = ({ open, onClose, data }) => {
     return `${datePart} ${timePart}`;
   };
 
+  console.log('selectesPlace', selectedPlace)
   console.log('data inicial: ', data);
 
   const theme = useTheme();
@@ -72,7 +73,7 @@ const PhotoViewModal = ({ open, onClose, data }) => {
     }));
   };
   
-  const handleSave = () => {    
+  const handleSave = async () => {    
     if (formData.url_image === 'https://ser0.mx/ser0/image/sin_foto.jpg') {
       setAlertOpen(true);
       setAlertType("warning");
@@ -80,7 +81,39 @@ const PhotoViewModal = ({ open, onClose, data }) => {
       return;
     }
 
-    console.log('Datos guardados:', { task, manager, date, photoType, url_image: formData.url_image });
+    const photo_data = {
+      account: data.cuenta,
+      place_id: selectedPlace,
+      service_id: selectedService,
+      record_id: data.id_registro,
+      photo_record_id: data.id_registro_foto,
+      task,
+      manager,
+      date,
+      photoType,
+      url_image: formData.url_image
+    };
+
+    console.log(photo_data)
+  
+    // Llamar a la función savePhotoRequest
+    try {
+      setIsLoading(true); // Opcional: Muestra un indicador de carga
+      const response = await savePhotoRequest( photo_data );
+      const updatedImageUrl = response.data.message;
+      console.log(response.data.message)
+      setAlertOpen(true);
+      setAlertType("success");
+      setAlertMessage("¡Foto guardada exitosamente!");
+      onImageUrlUpdate(updatedImageUrl);
+    } catch (error) {
+      console.error('Error al guardar la foto:', error);
+      setAlertOpen(true);
+      setAlertType("error");
+      setAlertMessage("Hubo un error al guardar la foto. Inténtalo de nuevo.");
+    } finally {
+      setIsLoading(false); // Opcional: Oculta el indicador de carga
+    }
   };
 
   return (
