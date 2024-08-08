@@ -50,6 +50,7 @@
     "antd": "^5.11.1",
     "antd-img-crop": "^4.21.0",
     "apexcharts": "^3.44.0",
+    "autosuggest-highlight": "^3.3.4",
     "axios": "^1.5.0",
     "chart.js": "^4.4.0",
     "compromise": "^14.11.2",

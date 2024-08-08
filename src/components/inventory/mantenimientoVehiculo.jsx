@@ -1,49 +1,51 @@
-import { Box, Typography, Button } from "@mui/material"
+import { Box } from "@mui/material"
 import PropTypes from 'prop-types'
-import CloseFullscreenIcon from '@mui/icons-material/CloseFullscreen'
 import { useTheme } from '@mui/material/styles'
 import { keyframes } from '@emotion/react'
 import styled from '@emotion/styled'
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import Title from "./mantenimiento/title"
+import Content from "./mantenimiento/content"
 
-const MantenimientoVehiculo = ({ setOpenNew, setAlertClean }) => {
+const slideIn = keyframes`
+	from {
+		transform: translateY(110%) scale(0);
+		opacity: 0;
+	}
+	to {
+		transform: translateY(0) scale(1);
+		opacity: 1;
+	}
+`
+
+const slideOut = keyframes`
+	from {
+		transform: translateY(0%) scale(1);
+		opacity: 1;
+	}
+	to {
+		transform: translateY(110%) scale(0);
+		opacity: 0;
+	}
+`
+
+const AnimatedBox = styled(Box)`
+	animation: ${props => props.animation ? slideOut : slideIn} 710ms ease-out;
+`
+
+const EditVehiculo = ({ setOpenMantenimiento, setAlertClean }) => {
 	const theme = useTheme()
 	const isLightMode = theme.palette.mode === 'light'
 	const [animation, setAnimation] = useState(false)
 
-	const slideIn = 
-		!animation ?
-		keyframes`
-			from {
-				transform: translateY(110%) scale(0.1);
-				opacity: 0;
-			}
-			to {
-				transform: translateY(0) scale(1);
-				opacity: 1;
-			}
-		` : keyframes`
-			from {
-				transform: translateY(0%) scale(1);
-				opacity: 1;
-			}
-			to {
-				transform: translateY(110%) scale(0.1);
-				opacity: 0;
-			}
-		`
-
-		const AnimatedBox = styled(Box)`
-			animation: ${slideIn} 510ms ease-out;
-		`
-
-	const close = () => {
-		setAnimation(true)
-		setTimeout(() => {
-			setOpenNew(false)
-			setAlertClean(true)
-		}, 500)
-	}
+	useEffect(() => {
+		if (animation) {	
+			const timer = setTimeout(() => {
+				setOpenMantenimiento(false)
+			}, 700)
+			return () => clearTimeout(timer)
+		}
+	}, [animation, setOpenMantenimiento, setAlertClean])
 
 	return (
 
@@ -58,47 +60,42 @@ const MantenimientoVehiculo = ({ setOpenNew, setAlertClean }) => {
 				alignItems: 'center',
 				height: '100vh',
 				background: 'rgba(0,0,0,0.3)',
-				zIndex: '9999',
+				zIndex: '1200'
 			}}
 		>
 			<AnimatedBox 
+				animation={animation}
 				sx={{
-				width: '90%',
-				height: '90%',
-				background: isLightMode ? '#fff' : '#17212F',
-				borderRadius: '20px',
-				display: 'flex',
-				justifyContent: 'space-between',
-				alignItems: 'start',
-				padding: '30px',
-				border: isLightMode ? '1px solid #17212F' : '2px solid #fff',
+					width: '90%',
+					height: '90%',
+					background: isLightMode ? '#fff' : '#17212F',
+					borderRadius: '20px',
+					display: 'flex',
+					justifyContent: 'start',
+					alignItems: 'center',
+					flexDirection:'column',
+					padding: '30px',
+					border: isLightMode ? '1px solid #17212F' : '2px solid #fff',
+					overflowX:'hidden',
+					overflowY:'scroll'
 				}}
 			>
-				<Typography sx={{ color: isLightMode ? '#000' : '#fff', fontSize: '24px', fontWeight: '500' }}>
-					Mantenimiento de vehículo
-				</Typography>
-				<Button
-					onClick={() => close()}
-					sx={{ color: 'black' }}
-				>
-					<CloseFullscreenIcon 
-						sx={{
-						color: 'red',
-						fontSize: '24px',
-						fontWeight: '500'
-						}}
-					/>
-				</Button>
+				<Title setOpenEdit={setOpenMantenimiento} setAnimation={setAnimation} />
+				<Content />
 			</AnimatedBox>
-
+		
 		</Box>
+	
 	)
+
 }
 
-MantenimientoVehiculo.propTypes = {
-	setOpenNew: PropTypes.func.isRequired, 
+EditVehiculo.propTypes = {
+	setOpenMantenimiento: PropTypes.func.isRequired, 
 	setAlertClean: PropTypes.func.isRequired,
-	openNew: PropTypes.bool.isRequired, 
+	openEdit: PropTypes.bool.isRequired, 
+	fetchData: PropTypes.func.isRequired,
+	setAlert: PropTypes.func.isRequired
 }
 
-export default MantenimientoVehiculo
+export default EditVehiculo

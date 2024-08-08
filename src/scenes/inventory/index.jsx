@@ -17,6 +17,9 @@ import PriorityHighIcon from '@mui/icons-material/PriorityHigh'
 import Alerts from '../../components/Alerts'
 import PagosVehiculos from '../../components/inventory/pagosVehiculos'
 import toolkitVehiculos from '../../toolkit/toolkitVehiculos'
+import { setEditColor, setEditKilometraje, setEditColorLlavero, setEditImagePreview, setEditMarca, setEditModelo, setEditPlaca, setEditSelectedPlace, setEditSerie, setEditTipoMotor, setEditVehiculo } from '../../redux/vehiculosSlices/editarInformacionGeneral.js'
+import { useDispatch } from 'react-redux'
+import { Download } from "@mui/icons-material"
 
 /**
  * @name PáginaPrincipalInventarios
@@ -37,6 +40,7 @@ function Inventory() {
 	const [currentPage, setCurrentPage] = useState(1)
 	const [filtro, setFiltro] = useState('todos')
     const itemsPerPage = 4
+	const dispatch = useDispatch()
 
 	const theme = useTheme()
 	const isLightMode = theme.palette.mode === 'light'
@@ -53,7 +57,21 @@ function Inventory() {
 		},
 	}))
 
-	const fetchData = async () => {
+	const setCambiarVehiculo = async (vehiculo) => {
+		dispatch(setEditColorLlavero(vehiculo.color_llavero))
+		dispatch(setEditColor(vehiculo.color))
+		dispatch(setEditKilometraje(vehiculo.kilometraje))
+		dispatch(setEditImagePreview(vehiculo.imagen_vehiculo))
+		dispatch(setEditMarca(vehiculo.marca))
+		dispatch(setEditModelo(vehiculo.modelo))
+		dispatch(setEditPlaca(vehiculo.placa))
+		dispatch(setEditSelectedPlace(vehiculo.plaza))
+		dispatch(setEditSerie(vehiculo.serie))
+		dispatch(setEditTipoMotor(vehiculo.tipo_motor))
+		dispatch(setEditVehiculo(vehiculo.vehiculo))
+	}
+
+	const dataVeiculos = async () => {
 		try {
 			const response = await toolkitVehiculos.getVehiculos()
 			const data = response.data.data
@@ -64,7 +82,7 @@ function Inventory() {
 	}
 
     useEffect(() => {
-        fetchData()
+        dataVeiculos()
     }, [])
 	
 	const handlePageChange = (event, value) => {
@@ -190,12 +208,25 @@ function Inventory() {
 
             </Box>
 
-            <Box sx={{ width:'100%', mt:'30px', padding:'0px 50px', display:'flex', justifyContent:'start', alignItems:'center' }}>
+            <Box sx={{ width:'100%', mt:'30px', padding:'0px 50px', display:'flex', justifyContent:'start', alignItems:'center', gap:'2rem' }}>
 
                 <Box sx={{ display:'flex', justifyContent:'flex-start', alignItems:'center' }}>
                     <SearchIcon />
                     <Input type="text" onChange={e => setBusqueda(e.target.value)} value={busqueda} placeholder='Buscar por placa'/>
                 </Box>
+
+				<Button 
+					variant="outlined"                             
+					color="secondary"       
+					sx={{ width:'auto' }}                     
+					onClick={() => {
+						console.log('exportar')                 
+					}}
+					size="small"
+					startIcon={<Download />}
+				>                                                        
+						Exportar
+				</Button>
 
             </Box>
 
@@ -239,14 +270,13 @@ function Inventory() {
 
 							<Box sx={{ width:'100%', height:'100px', display:'flex', justifyContent:'space-between', alignItems:'start', padding:'5px' }}>
 								<button><ConstructionIcon sx={{ color:'#003566', fontSize:'30px' }} onClick={() => setOpenMantenimiento(true)}/></button>
-								<button><InfoIcon sx={{ color:'#2dc653', fontSize:'30px' }} onClick={() => setOpenEdit(true)}/></button>
+								<button><InfoIcon sx={{ color:'#2dc653', fontSize:'30px' }} onClick={() => { setOpenEdit(true); setCambiarVehiculo(vehiculo) }}/></button>
 							</Box>
 
 							<Box sx={{ width:'100%', height:'auto', display:'flex', justifyContent:'center', alignItems:'center', flexDirection:'column' }}>
 								<Typography sx={{ width:'100%', textAlign:'center', fontSize:'18px', fontWeight:'600', textTransform:'uppercase' }}>{vehiculo.vehiculo}</Typography>
 								<Typography sx={{ width:'100%', textAlign:'center', fontSize:'18px', mt:'10px', textTransform:'uppercase' }}>{vehiculo.marca}</Typography>
 								<Typography sx={{ width:'100%', textAlign:'center', fontSize:'18px', mt:'10px', textTransform:'uppercase' }}>{vehiculo.placa}</Typography>
-
 
 								<HtmlTooltip
 									title={
@@ -313,15 +343,15 @@ function Inventory() {
                 />
             </Box>
 
-			{ openNew ? <NewVehiculo setOpenNew={setOpenNew} setAlert={setAlert} setAlertClean={setAlertClean} fetchData={fetchData} /> : false }
+			{ openNew ? <NewVehiculo setOpenNew={setOpenNew} setAlert={setAlert} setAlertClean={setAlertClean} dataVeiculos={dataVeiculos} /> : false }
 
 			{ openEdit ? <EditVehiculo setOpenEdit={setOpenEdit} /> : false }
 
-			{ openMantenimiento ? <MantenimientoVehiculo setOpenNew={setOpenMantenimiento} /> : false }
+			{ openMantenimiento ? <MantenimientoVehiculo setOpenMantenimiento={setOpenMantenimiento} /> : false }
 
-			{ openAsignacion ? <AsignacionVehiculos setOpenNew={setOpenAsignacion} /> : false }
+			{ openAsignacion ? <AsignacionVehiculos setOpenAsignacion={setOpenAsignacion} /> : false }
 
-			{ openPagos ? <PagosVehiculos setOpenNew={setOpenPagos} /> : false }
+			{ openPagos ? <PagosVehiculos setOpenPagos={setOpenPagos} /> : false }
 
 			<Alerts message='VEHICULO AGREGADO CORRECTAMENTE' alertOpen={alert} setAlertOpen={setAlert} variant='success'/>
 

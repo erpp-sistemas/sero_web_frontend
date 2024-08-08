@@ -11,5 +11,4 @@ export const informacionGeneralInicialState = {
 	color:'',
 	colorLlavero:'',
 	tipoMotor:'',
-
 }
