@@ -95,7 +95,7 @@ const Index = () => {
     const [filterText, setFilterText] = useState('');
     const [showNoResultsMessage, setShowNoResultsMessage] = useState(false)
     const [newImageUrl, setNewImageUrl] = useState('');
-    
+    const [rows, setRows] = useState([]);
 
       const handlePlaceChange = (event) => {
         setSelectedPlace(event.target.value);  
@@ -173,7 +173,7 @@ const Index = () => {
           const response = await photoManagementRequest(selectedPlace, selectedService, selectedProcess, selectedStartDate, selectedFinishDate);
 
           setResult(response.data)
-          setRows(response.data)
+          // setRows(response.data)
 
           console.log(response.data)
 
@@ -202,27 +202,27 @@ const Index = () => {
           setIsLoading(false)
 
           if (error.response) {
-            // Si hay un error en la respuesta del backend
+            
             if (error.response.status === 400) {
                 setAlertOpen(true);
                 setAlertType("warning");
                 setAlertMessage("¡Atención! No se encontraron pagos");
                 setResult([]);
             } else {
-                // Manejo de otros códigos de estado
+                
                 setAlertOpen(true);
                 setAlertType("error");
                 setAlertMessage(`¡Error! ${error.response.status}: ${error.response.statusText}`);
                 setResult([]);
             }
         } else if (error.request) {
-            // Error en la solicitud, podría ser un error de red
+            
             setAlertOpen(true);
             setAlertType("error");
             setAlertMessage("¡Error! No se pudo contactar con el servidor");
             setResult([]);
         } else {
-            // Error en la configuración de la solicitud
+            
             setAlertOpen(true);
             setAlertType("error");
             setAlertMessage(`¡Error! ${error.message}`);
@@ -606,7 +606,8 @@ const Index = () => {
                   fecha_gestion: params.row.fecha_gestion,
                   proceso: params.row.proceso,
                   tipo: params.row.tipo_foto_fachada_1,
-                  num_foto: 1
+                  num_foto: 1,
+                  celda: 'foto_fachada_1'
                 })}
                 />                
               </Card>
@@ -651,7 +652,8 @@ const Index = () => {
                     fecha_gestion: params.row.fecha_gestion,
                     proceso: params.row.proceso,
                     tipo: params.row.tipo_foto_fachada_2,
-                    num_foto: 2
+                    num_foto: 2,
+                    celda: 'foto_fachada_2'
                   })}
                 />                
               </Card>
@@ -696,7 +698,8 @@ const Index = () => {
                     fecha_gestion: params.row.fecha_gestion,
                     proceso: params.row.proceso,
                     tipo: params.row.tipo_foto_evidencia_1,
-                    num_foto: 1
+                    num_foto: 1,
+                    celda: 'foto_evidencia_1'
                   })}
                 />                
               </Card>
@@ -741,7 +744,8 @@ const Index = () => {
                     fecha_gestion: params.row.fecha_gestion,
                     proceso: params.row.proceso,
                     tipo: params.row.tipo_foto_evidencia_2,
-                    num_foto: 1
+                    num_foto: 2,
+                    celda: 'foto_evidencia_2'
                   })}
                 />                
               </Card>
@@ -784,31 +788,46 @@ const Index = () => {
         return `${datePart} ${timePart}`;
       };      
     
-      const handleImageUrlUpdate = (updatedImageUrl) => {
-        
-        console.log("URL de la imagen actualizada:", updatedImageUrl);
+      const handleImageUrlUpdate = (response_photo) => {        
 
-        // setNewImageUrl(updatedImageUrl);
+         setNewImageUrl(response_photo.image_url);
+         const photo_field = response_photo.celda
         
-        // setFilteredResult(prev =>
-        //     prev.map(row => row.id_registro === selectedRow.id_registro
-        //         ? { ...row, foto_fachada_1: updatedImageUrl }
-        //         : row
-        //     )
-        // );
+        setFilteredResult(prev =>
+            prev.map(row => row.id_registro === selectedRow.id_registro
+                ? { ...row, [photo_field]: response_photo.image_url }
+                : row
+            )
+        );
+
+        setResult(prev =>
+          prev.map(row => row.id_registro === selectedRow.id_registro
+              ? { ...row, [photo_field]: response_photo.image_url }
+              : row
+          )
+      );
       };
 
-    //   useEffect(() => {
-    //     if (newImageUrl && selectedRow) {
-    //         // Actualizar el resultado filtrado si hay una nueva URL de imagen
-    //         setFilteredResult(prev =>
-    //             prev.map(row => row.id_registro === selectedRow.id_registro
-    //                 ? { ...row, foto_fachada_1: newImageUrl }
-    //                 : row
-    //             )
-    //         );
-    //     }
-    // }, [newImageUrl]);
+      useEffect(() => {
+        if (newImageUrl && selectedRow) {
+          const photo_image_url = newImageUrl.image_url
+          const photo_field = newImageUrl.celda
+
+          setFilteredResult(prev =>
+              prev.map(row => row.id_registro === selectedRow.id_registro
+                  ? { ...row, [photo_field]: photo_image_url }
+                  : row
+              )
+          );
+
+          setResult(prev =>
+            prev.map(row => row.id_registro === selectedRow.id_registro
+                ? { ...row, [photo_field]: photo_image_url }
+                : row
+            )
+        );
+        }
+    }, [newImageUrl]);
       
 
     return (

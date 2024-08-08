@@ -6,17 +6,20 @@ import { tokens } from "../../theme";
 import LoadingModal from '../../components/LoadingModal.jsx';
 import CustomAlert from '../../components/CustomAlert.jsx';
 import { Dialog, DialogContent } from '@mui/material';
-import { Cancel, CloudUpload, Delete, Save } from '@mui/icons-material';
+import { Cancel, CloudUpload, Delete } from '@mui/icons-material';
 import { savePhotoRequest } from '../../api/photo.js';
 
 const PhotoViewModal = ({ open, onClose, selectedPlace, selectedService, data, onImageUrlUpdate }) => {
   if (!data) return null;
 
+  console.log(data)
+
+
   const formatDate = (dateString) => {
     const date = new Date(dateString);
 
-    const datePart = date.toISOString().split('T')[0];
-    const timePart = date.toISOString().split('T')[1].split('.')[0];
+    const datePart = date.toLocaleDateString();
+    const timePart = date.toLocaleTimeString();
     return `${datePart} ${timePart}`;
   };
 
@@ -78,12 +81,13 @@ const PhotoViewModal = ({ open, onClose, selectedPlace, selectedService, data, o
       return;
     }
 
-    const photo_data = {
-      account: data.cuenta,
+    const photo_data = {      
       place_id: selectedPlace,
-      service_id: selectedService,
+      service_id: selectedService,      
       record_id: data.id_registro,
       photo_record_id: data.id_registro_foto,
+      account: data.cuenta,
+      date_capture: data.fecha_gestion,
       task,
       manager,
       date,
@@ -95,17 +99,25 @@ const PhotoViewModal = ({ open, onClose, selectedPlace, selectedService, data, o
       setIsLoading(true);
       const response = await savePhotoRequest( photo_data );
       const updatedImageUrl = response.data.message;
-      setFormData(prevState => ({
-        ...prevState,
-        url_image: updatedImageUrl
-      }));
+      console.log(updatedImageUrl)
+      // setFormData(prevState => ({
+      //   ...prevState,
+      //   url_image: updatedImageUrl
+      // }));
 
       setAlertOpen(true);
       setAlertType("success");
       setAlertMessage("¡Foto guardada exitosamente!");
 
       if (onImageUrlUpdate) {
-        onImageUrlUpdate(updatedImageUrl);
+        const response_photo = {
+          image_url: updatedImageUrl,
+          celda: data.celda          
+        };  
+
+        data.foto = updatedImageUrl;        
+        onImageUrlUpdate(response_photo);
+        //onImageUrlUpdate(updatedImageUrl);
       }
 
     } catch (error) {
@@ -195,7 +207,7 @@ const PhotoViewModal = ({ open, onClose, selectedPlace, selectedService, data, o
                 />
                 <TextField
                   label="Fecha de gestión"
-                  value={formatDate(date)}
+                  value={date}
                   fullWidth
                   margin="normal"
                   variant="outlined"                
