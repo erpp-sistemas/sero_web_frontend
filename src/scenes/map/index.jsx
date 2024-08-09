@@ -8,11 +8,12 @@ import { setPlazaMapa } from '../../redux/plazaMapa.Slice'
 import { setMapa } from '../../redux/mapaSlice'
 import { setFeatures, setCoordinates, setPuntosInPoligono } from '../../redux/featuresSlice'
 import MapboxDraw from "@mapbox/mapbox-gl-draw"
-import ModalNamePolygon from '../../components/ModalNamePolygon'
-import ModalInfoPolygon from '../../components/ModalInfoPolygons'
-import { Button } from '@mui/material'
+//import ModalNamePolygon from '../../components/ModalNamePolygon'
+import ModalInfoPolygon from '../../components/map/ModalInfoPolygon'
+import ModalInfoPolygons from '../../components/map/ModalInfoPolygons'
 import * as turf from '@turf/turf'
-import { useSelector } from 'react-redux'
+import { getIcon } from '../../data/Icons'
+
 
 const stylesMap = {
     height: 'calc(100vh - 64px)',
@@ -33,6 +34,12 @@ const Mapa = () => {
     const [lastPolygonCreated, setLastPolygonCreated] = useState(null);
     const polygonsStorage = useRef(null);
 
+    const mapRef = useRef(null);
+    const [drawMap, setDrawMap] = useState(null)
+
+    const [showModalInfoPolygon, setShowModalInfoPolygon] = useState(false)
+    const [showModalInfoPolygons, setShowModalInfoPolygons] = useState(false)
+
 
     const [poligonosDibujados, setPoligonosDibujados] = useState('')
     const [poligonoSeleccionado, setPoligonoSeleccionado] = useState()
@@ -40,7 +47,7 @@ const Mapa = () => {
     const [showModalFeaturePolygon, setShowModalFeaturePolygon] = useState(false)
     const [nombrePoligonoSeleccionado, setNombrePoligonoSeleccionado] = useState('')
     const [poligonoSelected, setPoligonoSelected] = useState(false)
-    const [showModalInfoPolygon, setShowModalInfoPolygon] = useState(false)
+
 
     const [seleccionPoligonoPuntos, setSeleccionPoligonoPuntos] = useState([]);
     const [ultimoPoligonoCreado, setUltimoPoligonoCreado] = useState('');
@@ -75,7 +82,6 @@ const Mapa = () => {
         });
 
         dispatch(setMapa(map));
-
         const draw = new MapboxDraw({
             displayControlsDefault: false,
             controls: {
@@ -83,6 +89,9 @@ const Mapa = () => {
                 trash: true
             },
         });
+
+        mapRef.current = map;
+        setDrawMap(draw);
 
         map.addControl(draw)
         dispatch(setDraw(draw))
@@ -141,7 +150,13 @@ const Mapa = () => {
                 console.log(`Number of points inside the polygon: ${pointsInPolygon.length}`);
             }
         });
-        map.on('draw.delete', () => console.log('Polygon deleted'));
+
+        map.on('draw.delete', (e) => {
+            const polygon = e.features[0]; //? obtengo el poligono eliminado
+            enabledPoints(map, polygon.id)
+            deletePolygonStorage(polygon, map);
+        });
+
     }
 
     const getLayersVisiblesInMap = (map) => {
@@ -161,9 +176,14 @@ const Mapa = () => {
     const createPolygon = (map, polygon) => {
         if (!polygon.area) {
             const layers_in_map = getLayersVisiblesInMap(map);
+            if (layers_in_map.status === 0) {
+                alert("No hay ningun layer prendido")
+                return;
+            }
             const features_layer = map.getSource(layers_in_map.layers_visibles[0].source)._data.features;
             const area = turf.area(polygon);
             const pointsInPolygon = features_layer.filter(point => turf.booleanPointInPolygon(point, polygon));
+
             const data_polygon = {
                 id: polygon.id, number_points: pointsInPolygon.length, points: pointsInPolygon,
                 area: `${((area / 1000)).toFixed(2)} km2`, coordenadas: polygon.geometry.coordinates
@@ -189,10 +209,71 @@ const Mapa = () => {
         }
     }
 
-    const deletePolygonStorage = (polygon_id) => {
-        //todo borrar poligono del state y del mapa
+    const deletePolygonStorage = (polygon) => {
+        const new_polygons = polygonsStorage.current.filter(poly => poly.id !== polygon.id);
+        polygonsStorage.current = new_polygons;
+        setPolygonsCreated(new_polygons)
     }
 
+    const disabledPoints = (map, polygon_id) => {
+        const polygon = drawMap.get(polygon_id);
+        const layers_in_map = getLayersVisiblesInMap(map);
+        const source = layers_in_map.layers_visibles[0].source;
+        const layer = layers_in_map.layers_visibles[0].id;
+        const color = layers_in_map.layers_visibles[0].paint['circle-color'];
+
+        const points = mapRef.current.getSource(source)._data.features;
+        points.forEach((point) => {
+            if (turf.booleanPointInPolygon(point, polygon)) {
+                point.properties.disabled = true;  // Marcar el punto como deshabilitado
+                point.properties.pid = polygon.id // le damos al punto su poligono
+            }
+        });
+
+        // Actualizar la fuente de datos para reflejar los cambios
+        mapRef.current.getSource(source).setData({
+            type: 'FeatureCollection',
+            features: points,
+        });
+
+        // Cambiar el estilo de los puntos deshabilitados
+        mapRef.current.setPaintProperty(layer, 'circle-color', [
+            'case',
+            ['boolean', ['get', 'disabled'], false],
+            '#B0B0B0', // Color gris para puntos deshabilitados
+            color  // Color original para puntos activos
+        ]);
+    }
+
+    const enabledPoints = (map, polygon_id) => {
+        
+        const layers_in_map = getLayersVisiblesInMap(map);
+        const source = layers_in_map.layers_visibles[0].source;
+        const layer = layers_in_map.layers_visibles[0].id;
+        const color_circle = layers_in_map.layers_visibles[0].paint['circle-color'];
+        const color = color_circle[3];
+        const points = mapRef.current.getSource(source)._data.features;        
+        points.forEach((point) => {
+            if (point.properties.pid && point.properties.pid === polygon_id) {
+                point.properties.disabled = false;  // Marcar el punto como habilitado
+                delete point.properties.pid;
+            }
+        });
+        
+        // Actualizar la fuente de datos para reflejar los cambios
+        mapRef.current.getSource(source).setData({
+            type: 'FeatureCollection',
+            features: points,
+        });
+
+        // Cambiar el estilo de los puntos deshabilitados
+        mapRef.current.setPaintProperty(layer, 'circle-color', [
+            'case',
+            ['==', ['get', 'pid'], polygon_id],
+            color, // Color verde para puntos con pid igual a 'perros'
+            color  // Color rojo para otros puntos
+        ]);
+    }
 
 
     const quitarDuplicados = (array) => {
@@ -205,59 +286,33 @@ const Mapa = () => {
         return arrayTemp
     }
 
-    const mostrarIdsPoligonos = () => {
-        setShowModalInfoPolygon(true)
-        console.log(polygonsCreated)
-    }
-
-
-    const addNamePolygonSelected = () => {
-        setPoligonosDibujados([...poligonosDibujados, {
-            name_polygon: nombrePoligonoSeleccionado,
-            cuentas: puntosInPoligonoSeleccionado,
-            id: poligonoSeleccionado.properties.id
-        }])
-        setShowModalFeaturePolygon(false)
-    }
 
     return (
 
         <div ref={mapDiv} style={stylesMap}>
 
-            {showModalFeaturePolygon && <ModalNamePolygon
-                setShowModal={setShowModalFeaturePolygon}
-                setNombrePoligono={setNombrePoligonoSeleccionado}
-                aceptName={addNamePolygonSelected}
-            />}
+            {showModalInfoPolygon && <ModalInfoPolygon
+                setShowModal={setShowModalInfoPolygon} polygon={lastPolygonCreated}
+                setLastPolygonCreated={setLastPolygonCreated} setPolygonsCreated={setPolygonsCreated}
+                polygonsCreated={polygonsCreated} polygonsStorage={polygonsStorage}
+                disabledPoints={disabledPoints} />}
 
-            {showModalInfoPolygon && <ModalInfoPolygon setShowModal={setShowModalInfoPolygon} polygon={lastPolygonCreated} setLastPolygonCreated={setLastPolygonCreated}
-                setPolygonsCreated={setPolygonsCreated} polygonsCreated={polygonsCreated} polygonsStorage={polygonsStorage} />}
-
-            {/* {poligonoSelected && (
-                <Button variant="contained"
-                    onClick={() => setShowModalFeaturePolygon(true)}
-                    sx={{
-                        zIndex: '100',
-                        position: 'absolute',
-                        left: '300px',
-                        bottom: '70px',
-                        width: '250px',
-                    }}
-                >Agregar feature</Button>
-            )}
+            {showModalInfoPolygons && <ModalInfoPolygons setShowModal={setShowModalInfoPolygons} polygons={polygonsCreated} draw={drawMap} map={mapRef} disablePoints={disabledPoints} />}
 
             {polygonsCreated && polygonsCreated.length > 0 && (
-                <Button variant="contained"
-                    onClick={mostrarIdsPoligonos}
-                    sx={{
-                        zIndex: '100',
-                        position: 'absolute',
-                        left: '300px',
-                        bottom: '30px',
-                        width: '250px'
-                    }}
-                >Mostrar información poligonos</Button>
-            )} */}
+                <>
+                    <button className="z-[100] absolute left-[300px] bottom-3 w-[100px] py-2 px-2 rounded bg-emerald-700 hover:bg-emerald-500 shadow-xl shadow-gray-700"
+                        onClick={() => setShowModalInfoPolygons(true)} >
+                        {getIcon('PolylineIcon', { marginRight: '10px' })}
+                        Poligonos
+                    </button>
+                    <button className="z-[100] absolute left-[410px] bottom-3 w-[100px] py-2 px-2 rounded bg-cyan-600 hover:bg-cyan-500  shadow-xl shadow-gray-700"
+                        onClick={() => { }} >
+                        {getIcon('SaveIcon', { marginRight: '10px' })}
+                        Guardar
+                    </button>
+                </>
+            )}
 
         </div>
 

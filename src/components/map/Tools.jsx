@@ -129,8 +129,8 @@ export default function AlertDialogSlide() {
             source: layer.name_layer,
             filter: ['has', 'point_count'],
             paint: {
-                'circle-color': [ 'step', ['get', 'point_count'], '#51bbd6', 200, '#75f183', 750, '#dde25c' ],
-                'circle-radius': [ 'step', ['get', 'point_count'], 20, 200, 30, 750, 40 ]
+                'circle-color': ['step', ['get', 'point_count'], '#51bbd6', 200, '#75f183', 750, '#dde25c'],
+                'circle-radius': ['step', ['get', 'point_count'], 20, 200, 30, 750, 40]
             }
         })
 
@@ -211,7 +211,7 @@ export default function AlertDialogSlide() {
                             <ButtonUi title='Dibujar poligono' bgColor={colors.greenAccent[600]} width='300px' padding='6px' fontWeight='' bgColorHover={colors.greenAccent[400]} handle={() => handleButtonHerramienta('Dibujar poligono')} mt='10px' icon={getIcon('PolylineIcon', {})} />
 
                             {features.puntos_in_poligono.length > 0 && (
-                                <ButtonUi title='Ver información' bgColor={colors.greenAccent[600]} width='300px' padding='6px' fontWeight='' bgColorHover={colors.greenAccent[400]} handle={() => handleButtonHerramienta('Ver información')} mt='10px' icon={getIcon('ContactsIcon', {})} />
+                                <ButtonUi title='Ver información' bgColor={colors.greenAccent[600]} width='300px' padding='6px' fontWeight='' bgColorHover={colors.greenAccent[400]} handle={() => handleButtonHerramienta('Ver información')} mt='10px' icon={getIcon('RectangleIcon', {})} />
                             )}
 
                             <ButtonUi title='Mapa de calor' bgColor={colors.greenAccent[600]} width='300px' padding='6px' fontWeight='' bgColorHover={colors.greenAccent[400]} handle={() => handleButtonHerramienta('Mapa de calor')} mt='10px' icon={getIcon('FiberSmartRecordIcon', {})} />
@@ -259,8 +259,7 @@ export default function AlertDialogSlide() {
                         </div>
                     )}
 
-
-
+                  
                     {nombreHerramientaSeleccionada === 'ver información' && (
                         <Box sx={{ width: '300px' }}>
                             <>

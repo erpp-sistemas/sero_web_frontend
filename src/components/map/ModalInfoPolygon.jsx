@@ -1,18 +1,14 @@
 import { useState, useEffect } from 'react'
-import { Box, Button, useTheme, Modal, Typography, Select, MenuItem } from '@mui/material';
-import GridOnIcon from '@mui/icons-material/GridOn';
-import { tokens } from "../theme";
-import { DataGrid } from "@mui/x-data-grid";
+import { Modal } from '@mui/material';
 
-import { getIcon } from '../data/Icons';
+import { getIcon } from '../../data/Icons';
 import { CSVLink } from 'react-csv';
 
 
 
-const ModalNamePolygon = ({ setShowModal, polygon, setLastPolygonCreated, polygonsCreated, setPolygonsCreated, polygonsStorage }) => {
+const ModalInfoPolygon = ({ setShowModal, polygon, setLastPolygonCreated, polygonsCreated, setPolygonsCreated, polygonsStorage }) => {
 
-    //const theme = useTheme();
-    //const colors = tokens(theme.palette.mode);
+
     const [open, setOpen] = useState(true);
 
     const [showFieldName, setShowFieldName] = useState(false);
@@ -25,10 +21,6 @@ const ModalNamePolygon = ({ setShowModal, polygon, setLastPolygonCreated, polygo
         setShowModal(false)
     };
 
-    // const handleAccept = () => {
-    //     setOpen(false);
-    //     setShowModal(false)
-    // }
 
     useEffect(() => {
         const points = polygon.points;
@@ -87,13 +79,14 @@ const ModalNamePolygon = ({ setShowModal, polygon, setLastPolygonCreated, polygo
                                 </button>
                             )}
 
-                            <CSVLink data={properties} filename={ (polygon.name && polygon.name !== '') ? polygon.name : 'Registros seleccionados' } style={{ width: '100%', margin: '0 auto' }} >
+                            <CSVLink data={properties} filename={(polygon.name && polygon.name !== '') ? polygon.name : 'Registros seleccionados'} style={{ width: '100%', margin: '0 auto' }} >
                                 <button className='w-full bg-gray-200 px-2 rounded-md py-1 gap-1 flex justify-center items-center hover:bg-gray-300' >
                                     {getIcon('CloudDownloadIcon', { fontSize: '20px', color: '#03af6e' })}
                                     <p className='text-gray-900'>Descargar información</p>
 
                                 </button>
                             </CSVLink>
+                            
                         </div>
 
                         {showFieldName && (
@@ -116,4 +109,4 @@ const ModalNamePolygon = ({ setShowModal, polygon, setLastPolygonCreated, polygo
     )
 }
 
-export default ModalNamePolygon
+export default ModalInfoPolygon

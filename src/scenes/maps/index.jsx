@@ -4,23 +4,12 @@ import { useSelector } from 'react-redux';
 import { getPlacesByUserId } from '../../services/place.service';
 import { useNavigate } from 'react-router-dom';
 
-import axios from 'axios'
-
 const Index = () => {
 
     const user = useSelector(state => state.user);
     const [plazas, setPlazas] = useState([]);
     
     const navigation = useNavigate();
-
-
-    useEffect(() => {
-        const getTest = async () => {
-            const response = await axios.post('https://erpp.center/waterloo/api/erppay/generate-edocta', { account: '73211' })
-            console.log(response.data)
-        };
-        getTest();
-    }, [])
 
     useEffect(() => {
         const getPlazasByUser = async () => {

@@ -55,12 +55,14 @@ import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
 import FiberSmartRecordIcon from '@mui/icons-material/FiberSmartRecord';
 import GpsFixedIcon from '@mui/icons-material/GpsFixed';
-
-
+import ZoomInMapIcon from '@mui/icons-material/ZoomInMap';
+import SaveIcon from '@mui/icons-material/Save';
 
 export const getIcon = (icon, style) => {
 
      let obj = {
+          "SaveIcon": <SaveIcon sx={style} />,
+          "ZoomInMapIcon": <ZoomInMapIcon sx={style} />,
           "GpsFixedIcon": <GpsFixedIcon sx={style} />,
           "FiberSmartRecordIcon": <FiberSmartRecordIcon sx={style} />,
           "LightModeOutlinedIcon": <LightModeOutlinedIcon sx={style} />,
