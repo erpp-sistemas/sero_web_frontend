@@ -18,9 +18,16 @@ const PhotoViewModal = ({ open, onClose, selectedPlace, selectedService, data, o
   const formatDate = (dateString) => {
     const date = new Date(dateString);
 
-    const datePart = date.toLocaleDateString();
-    const timePart = date.toLocaleTimeString();
-    return `${datePart} ${timePart}`;
+    const year = date.getUTCFullYear();
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(date.getUTCDate()).padStart(2, '0');
+    const hours = String(date.getUTCHours()).padStart(2, '0');
+    const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+    const seconds = String(date.getUTCSeconds()).padStart(2, '0');
+    const milliseconds = String(date.getUTCMilliseconds()).padStart(3, '0');
+    
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
+    
   };
 
   const theme = useTheme();
@@ -83,16 +90,19 @@ const PhotoViewModal = ({ open, onClose, selectedPlace, selectedService, data, o
 
     const photo_data = {      
       place_id: selectedPlace,
-      service_id: selectedService,      
+      service_id: selectedService,
+      account: data.cuenta,
       record_id: data.id_registro,
       photo_record_id: data.id_registro_foto,
-      account: data.cuenta,
+      task: data.tarea_gestionada,
+      manager: data.nombre_gestor,
       date_capture: data.fecha_gestion,
-      task,
-      manager,
-      date,
-      photoType,
-      url_image: formData.url_image
+      process: data.proceso,
+      type: data.tipo,
+      num_photo: data.num_foto,
+      cell: data.celda,      
+      url_image: formData.url_image,
+      user_session: user.name
     };  
     
     try {

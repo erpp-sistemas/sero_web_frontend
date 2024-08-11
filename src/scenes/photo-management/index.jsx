@@ -96,6 +96,7 @@ const Index = () => {
     const [showNoResultsMessage, setShowNoResultsMessage] = useState(false)
     const [newImageUrl, setNewImageUrl] = useState('');
     const [rows, setRows] = useState([]);
+    const [page, setPage] = useState(0);
 
       const handlePlaceChange = (event) => {
         setSelectedPlace(event.target.value);  
@@ -168,7 +169,8 @@ const Index = () => {
             return
           }
 
-          setIsLoading(true)         
+          setIsLoading(true)
+          setPage(0);
 
           const response = await photoManagementRequest(selectedPlace, selectedService, selectedProcess, selectedStartDate, selectedFinishDate);
 
@@ -783,9 +785,15 @@ const Index = () => {
       const formatDate = (dateString) => {
         const date = new Date(dateString);
   
-        const datePart = date.toISOString().split('T')[0];
-        const timePart = date.toISOString().split('T')[1].split('.')[0];
-        return `${datePart} ${timePart}`;
+        const year = date.getUTCFullYear();
+        const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(date.getUTCDate()).padStart(2, '0');
+        const hours = String(date.getUTCHours()).padStart(2, '0');
+        const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+        const seconds = String(date.getUTCSeconds()).padStart(2, '0');
+        const milliseconds = String(date.getUTCMilliseconds()).padStart(3, '0');
+        
+        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
       };      
     
       const handleImageUrlUpdate = (response_photo) => {        
@@ -977,7 +985,10 @@ const Index = () => {
                         editable={false}                         
                         slots={{ toolbar: CustomToolbar}}
                         rowHeight={130}
-                        localeText={esES}                     
+                        localeText={esES}
+                        pagination
+                        page={page}
+                        onPageChange={(newPage) => setPage(newPage)}
                       />
                     )}
                   </Box>
