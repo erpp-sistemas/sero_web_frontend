@@ -1,12 +1,14 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable no-unused-vars */
 import { useState, useEffect } from "react"
-import { Box, useTheme, Avatar, Typography, LinearProgress, InputAdornment, FormControl, FormHelperText, TextField, Chip } from "@mui/material"
+import { Box, useTheme, Avatar, Typography, LinearProgress, InputAdornment, FormControl, FormHelperText, TextField, Chip, Button } from "@mui/material"
 import Grid from '@mui/material/Grid'
 import { DataGrid } from '@mui/x-data-grid'
 import Viewer from 'react-viewer'
 import { TaskAlt, Search, CalendarToday, AccessTime } from "@mui/icons-material"
 import PropTypes from 'prop-types'
+import Download from "@mui/icons-material/Download"
+import * as ExcelJS from "exceljs";
 
 function BatteryMeter({ data }) {
 
@@ -127,37 +129,37 @@ function BatteryMeter({ data }) {
 					)
 				}
 			}, 
-            { 
-                field: 'last_hour_percentage',
-                renderHeader: () => (
-                    <strong style={{ color: "#5EBFFF" }}>{"ULTIMA HORA"}</strong>
-                ),
-                width: 150,
-                editable: false,
-                renderCell: (params) => {                    
-                    let color;
-                    color = theme.palette.warning.main;                    
-            
-                    return (
-                    <Chip
-                        icon={<AccessTime />}
-                        label={
-                        <Typography variant="body1" sx={{ fontWeight: 'bold', fontSize: '1.2em' }}>
-                            {params.value}
-                        </Typography>
-                        }
-                        variant="outlined"
-                        sx={{
-                        borderColor: color,
-                        color: color,
-                        '& .MuiChip-icon': {
-                            color: color
-                        }
-                        }}
-                    />
-                    );
-                }
-            },
+      { 
+          field: 'last_hour_percentage',
+          renderHeader: () => (
+              <strong style={{ color: "#5EBFFF" }}>{"ULTIMA HORA"}</strong>
+          ),
+          width: 150,
+          editable: false,
+          renderCell: (params) => {                    
+              let color;
+              color = theme.palette.warning.main;                    
+      
+              return (
+              <Chip
+                  icon={<AccessTime />}
+                  label={
+                  <Typography variant="body1" sx={{ fontWeight: 'bold', fontSize: '1.2em' }}>
+                      {params.value}
+                  </Typography>
+                  }
+                  variant="outlined"
+                  sx={{
+                  borderColor: color,
+                  color: color,
+                  '& .MuiChip-icon': {
+                      color: color
+                  }
+                  }}
+              />
+              );
+          }
+      },
 			{ 
 				field: 'last_percentage',
 				renderHeader: () => (
@@ -255,6 +257,56 @@ function BatteryMeter({ data }) {
 		setSearchTerm(event.target.value.toLowerCase())
 	}
 
+  const handleDownloadExcelDataGrid = async () => {
+    try {
+      // setIsLoading(true);
+  
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("Registros Encontrados");  
+  
+      const columnHeaders = {
+        user: "GESTOR",
+        date: "FECHA",
+        first_hour_percentage: "PRIMER HORA ",
+        first_percentage: "PRIMER PORCENTAGE",
+        last_hour_percentage: "ULTIMA HORA",
+        last_percentage: "ULTIMO PORCENTAGE",        
+      };
+  
+      const addRowsToWorksheet = (data) => {
+        const headers = Object.keys(columnHeaders);
+        const headerRow = headers.map(header => columnHeaders[header]);
+        worksheet.addRow(headerRow);
+  
+        data.forEach((row) => {
+          const values = headers.map((header) => row[header]);
+          worksheet.addRow(values);
+        });
+      };
+  
+      if (filteredUsers.length > 0) {
+        addRowsToWorksheet(filteredUsers);
+      } else {
+        addRowsToWorksheet(data);
+      }
+  
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `Registros_Medidor_Pila.xlsx`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+      // setIsLoading(false);
+    } catch (error) {
+      console.error("Error:", error);
+      // setIsLoading(false);
+    }
+  };
+
 	return (
 
 		<Box
@@ -274,32 +326,45 @@ function BatteryMeter({ data }) {
 				{data.length > 0 && (
 				<>
 					<Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2} >
-					<Grid item xs={6} sx={{ paddingBottom: 1 }}>
-						<FormControl>
-						<TextField                              
-							fullWidth                            
-							value={searchTerm}              
-							onChange={handleChange}              
-							color='secondary'
-							size="small"
-							placeholder="Ingresa tu búsqueda"
-							InputProps={{
-							endAdornment: (
-								<InputAdornment position="end">
-								<Search color="secondary"/>
-								</InputAdornment>
-							),
-							}}
-						/>
-						
-						{( noResults ) && (
-							<FormHelperText  style={{ color: 'red' }}>
-							No se encontraron resultados
-							</FormHelperText>
-						)}
-						
-						</FormControl>
-					</Grid>
+            <Grid item xs={6} sx={{ paddingBottom: 1 }}>
+                <FormControl>
+                <TextField                              
+                    fullWidth                            
+                    value={searchTerm}              
+                    onChange={handleChange}              
+                    color='secondary'
+                    size="small"
+                    placeholder="Ingresa tu búsqueda"
+                    InputProps={{
+                    endAdornment: (
+                        <InputAdornment position="end">
+                        <Search color="secondary"/>
+                        </InputAdornment>
+                    ),
+                    }}
+                />
+                
+                {( noResults ) && (
+                    <FormHelperText  style={{ color: 'red' }}>
+                    No se encontraron resultados
+                    </FormHelperText>
+                )}
+                
+                </FormControl>
+            </Grid>
+            <Grid item xs={2}>
+              <Button 
+                variant="outlined"                             
+                color="secondary"                            
+                onClick={() => {
+                  handleDownloadExcelDataGrid();                    
+                }}
+                size="small"
+                startIcon={<Download/>}
+                >                                                        
+                Exportar
+              </Button>
+            </Grid>
 					</Grid>
 					<Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>              
 					<Grid item xs={12} style={{ height: 400, width: '100%' }}>         
