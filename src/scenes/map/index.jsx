@@ -167,7 +167,7 @@ const Mapa = () => {
 
             const data_polygon = {
                 id: polygon.id, number_points: pointsInPolygon.length, points: pointsInPolygon,
-                area: `${((area / 1000)).toFixed(2)} km2`, coordenadas: polygon.geometry.coordinates
+                area: `${((area / 1000000)).toFixed(2)} km2`, coordenadas: polygon.geometry.coordinates
             }
             setLastPolygonCreated(data_polygon);
             return;
