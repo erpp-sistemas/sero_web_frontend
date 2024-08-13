@@ -392,10 +392,10 @@ function Index() {
 		return (
 			<div>
 				<Tooltip title={active === 'activo' ? "Usuario activo" : "Usuario inactivo"}>
-        <IconButton 
-        sx={iconStyles(active)}
-        onClick={() => handleClickOpen(active, 'active')}
-        >
+			<IconButton 
+			sx={iconStyles(active)}
+			onClick={() => handleClickOpen(active, 'active')}
+			>
           <FaceIcon />
           </IconButton>
         </Tooltip>
@@ -583,14 +583,14 @@ function Index() {
 						color={filter === 'all' ? 'success' : 'default'}
 						onClick={() => handleFilterChange('all')}
 						icon={<People />}
-            sx={{m:1}}
+						sx={{m:1}}
 					/>
 				</Badge>
 				<Badge
 					badgeContent={filter === 'active' ? filteredUsers.length : 0}
 					color="secondary"
 					anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-          max={9999} 
+         			max={9999} 
 				>
 					<Chip
 						label="Usuarios activos"
@@ -616,8 +616,7 @@ function Index() {
             sx={{m:1}}
 					/>
 				</Badge>
-
-			  <LoadingModal open={isLoading} />
+			<LoadingModal open={isLoading} />
         <CustomAlert
           alertOpen={alertOpen}
           type={alertType}
@@ -626,8 +625,8 @@ function Index() {
         />
 
       </Box>
-      <Grid container spacing={2} alignItems="center" mb={2}>
-        <Grid item xs={6}>
+      <Grid container spacing={2} xs={12} alignItems="center" mb={2}>
+        <Grid item xs={12} md={6}>
             <TextField
                 label="Buscar"
                 variant="outlined"
@@ -662,12 +661,13 @@ function Index() {
                 </Typography>
             )}
         </Grid>
-        <Grid item xs={3}>
+        <Grid item xs={12} md={3}>
             <Button
                 variant="contained"
                 color="secondary"
                 onClick={exportToExcel}
                 startIcon={<FileDownload />}
+				width={'100%'}
             >
                 Exportar a Excel
             </Button>

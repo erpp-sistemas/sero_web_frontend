@@ -110,14 +110,14 @@ const Index = () => {
 				padding='15px 10px'
 				borderRadius='10px'
 			>
-			<Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
-				<Grid item xs={4}> 
+			<Grid item xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
+				<Grid item xs={12} md={4}> 
 				<PlaceSelect                
 					selectedPlace={selectedPlace}
 					handlePlaceChange={handlePlaceChange}
 				/> 
 				</Grid>
-				<Grid item xs={4}> 
+				<Grid item xs={12} md={4}> 
 				<TextField
 					fullWidth
 					label="Ingresa una cuenta"  
@@ -133,7 +133,7 @@ const Index = () => {
 					}}
 				/>
 				</Grid>
-				<Grid item xs={3}> 
+				<Grid item xs={12} md={4}> 
 				<Button 
 					variant="contained" 
 					sx={{ bgcolor: 'secondary.main', '&:hover': { bgcolor: 'secondary.dark' } }}

@@ -7,6 +7,7 @@ import { useDispatch } from "react-redux"
 import { setUser } from "../../features/user/userSlice"
 import LoadingModal from "../../components/LoadingModal"
 import PropTypes from "prop-types"
+import { Box } from "@mui/material"
 
 const Login = ({ setLogin }) => {
 	const navigate = useNavigate()
@@ -81,10 +82,17 @@ const Login = ({ setLogin }) => {
 	}, [signinErrors])
 
   return (
-    <div className="bg-no-repeat bg-cover bg-center relative" style={{ backgroundImage: "url(fondo-login.jpeg)" }}>
+
+    <Box className="bg-no-repeat bg-cover bg-center relative" style={{ backgroundImage: "url(fondo-login.jpeg)" }}>
+
       <LoadingModal open={isLoading} />
-      <div className="absolute bg-gradient-to-b from-blue-900 to-blue-800 opacity-25 inset-0 z-0"></div>
+
+      <Box className="absolute bg-gradient-to-b from-blue-900 to-blue-800 opacity-25 inset-0 z-0" sx={{ display:{
+		xs:'none',
+		md:'flex'} }} ></Box>
+
       <div className="min-h-screen sm:flex sm:flex-row mx-0 justify-center">
+
         <div className="flex-col flex self-center p-10 sm:max-w-5xl xl:max-w-2xl z-10">
           <div className="self-start hidden lg:flex flex-col text-gray-200 text-center">
             <img src="erpp-logo.png" width={200} className="mb-3 mx-auto" />
@@ -95,7 +103,8 @@ const Login = ({ setLogin }) => {
             </p>
           </div>
         </div>
-        <div className="flex justify-center self-center z-10 ml-10">
+		
+        <div className="flex justify-center self-center z-10 ml-0 p-4">
           <div className="p-12 bg-gray-50 mx-auto rounded-2xl w-100 border-2 border-green-500">
             <div className="mb-4">
               <img src="sero-logo.png" width={200} className="mb-3 mx-auto" />
@@ -148,7 +157,7 @@ const Login = ({ setLogin }) => {
           </div>
         </div>
       </div>
-    </div>
+    </Box>
   )
 }
 

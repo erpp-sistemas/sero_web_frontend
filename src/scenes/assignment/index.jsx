@@ -421,70 +421,139 @@ const Index = () => {
 				padding='15px 10px'
 				borderRadius='10px'
 			>
+
 				<CustomAlert
 					alertOpen={alertOpen}
 					type={alertType}
 					message={alertMessage}
 					onClose={setAlertOpen}
 				/>
+
 				<LoadingModal open={isLoading}/>
-				<Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
-				<Grid item xs={6}>
-					<PlaceSelect                
-					selectedPlace={selectedPlace}
-					handlePlaceChange={handlePlaceChange}
-				/>
+
+				<Grid item xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
+					<Grid item xs={12} md={6}>
+						<PlaceSelect                
+							selectedPlace={selectedPlace}
+							handlePlaceChange={handlePlaceChange}
+						/>
+					</Grid>
+					<Grid item xs={12} md={6}>
+						<ServiceSelect
+							selectedPlace={selectedPlace}                  
+							selectedService={selectedService}
+							handleServiceChange={handleServiceChange}
+						/>
+					</Grid>
 				</Grid>
-				<Grid item xs={6}>
-					<ServiceSelect
-					selectedPlace={selectedPlace}                  
-					selectedService={selectedService}
-					handleServiceChange={handleServiceChange}
-					/>
-				</Grid>
-				</Grid>
-				<Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
-				<Grid item xs={6}>
-					<Box>
-					<label htmlFor="file-upload-excel">                  
-					<Button
+
+				<Grid xs={12} md={12} container spacing={2}
+					sx={{
+						width:'100%',
+						display:{
+							xs:'flex'
+						},
+						justifyContent:{
+							xs:'center',
+							md:'space-between'
+						},
+						alignItems:{
+							xs:'center',
+							md:'stretch'
+						},
+
+					}}
+				>
+					<Grid item xs={12} md={6}
+						sx={{
+							width:'100%',
+							display:{
+								xs:'flex'
+							},
+							justifyContent:{
+								xs:'center',
+								md:'space-between'
+							},
+							alignItems:{
+								xs:'center',
+								md:'stretch'
+							},
+	
+						}}
+					>
+						<Box 
+							sx={{
+								width:'100%',
+								display:{
+									xs:'flex'
+								},
+								justifyContent:{
+									xs:'center',
+									md:'space-between'
+								},
+								alignItems:{
+									xs:'center',
+									md:'stretch'
+								},
+		
+							}}
+						>
+						<label htmlFor="file-upload-excel">                  
+						<Button
+							variant="contained"
+							component="span"
+							color="primary"
+							sx={{ bgcolor: 'info.main', '&:hover': { bgcolor: 'info.dark' }, width:'100%' }}
+						>
+							<CloudUploadIcon style={{ marginRight: '5px' }}/>
+							Seleccionar archivo
+						</Button>
+						<Input
+						key={fileKey}
+						accept=".xlsx, .xls"
+						id="file-upload-excel"
+						type="file"
+						style={{ display: 'none' }}
+						onChange={handleFileChange}
+						/>                
+						<Typography variant="body2">
+						Archivo seleccionado: {selectedFile ? selectedFile.name : 'Ningún archivo seleccionado'}
+						</Typography>
+					</label>
+						</Box>
+					</Grid>
+					<Grid item xs={12} md={6}
+						sx={{
+							width:'100%',
+							display:{
+								xs:'flex'
+							},
+							justifyContent:{
+								xs:'center',
+								md:'space-between'
+							},
+							alignItems:{
+								xs:'center',
+								md:'stretch'
+							},
+	
+						}}
+					>
+						<Button
 						variant="contained"
-						component="span"
 						color="primary"
-						sx={{ bgcolor: 'info.main', '&:hover': { bgcolor: 'info.dark' } }}
-					>
-						<CloudUploadIcon style={{ marginRight: '5px' }}/>
-						Seleccionar archivo
-					</Button>
-					<Input
-					key={fileKey}
-					accept=".xlsx, .xls"
-					id="file-upload-excel"
-					type="file"
-					style={{ display: 'none' }}
-					onChange={handleFileChange}
-					/>                
-					<Typography variant="body2">
-					Archivo seleccionado: {selectedFile ? selectedFile.name : 'Ningún archivo seleccionado'}
-					</Typography>
-				</label>
-					</Box>
+						sx={{ bgcolor: 'secondary.main', '&:hover': { bgcolor: 'secondary.dark' } }}
+						onClick={() => {
+							handleConvertExcelToArray();
+							
+						}}                
+						>
+							<UploadFileIcon style={{ marginRight: '5px' }} />
+						Carga Asignaciones
+						</Button>
+					</Grid>
 				</Grid>
-				<Grid item xs={6}>
-					<Button
-					variant="contained"
-					color="primary"
-					sx={{ bgcolor: 'secondary.main', '&:hover': { bgcolor: 'secondary.dark' } }}
-					onClick={() => {
-						handleConvertExcelToArray();
-						
-					}}                
-					>
-						<UploadFileIcon style={{ marginRight: '5px' }} />
-					Carga Asignaciones
-					</Button>
-				</Grid>
-				</Grid>
+
 			</Box>
    
             <Box m="20px">            
@@ -498,8 +567,8 @@ const Index = () => {
                 },
               }}
             >
-              <Grid container spacing={2}>                   
-                  <Grid item xs={8}>
+              <Grid container xs={12} md={12} spacing={2}>                   
+                  <Grid item xs={12} md={8}>
                   <Box
                     sx={{
                       height: 450,
@@ -523,7 +592,7 @@ const Index = () => {
                       )}
                     </Box>
                   </Grid>
-                  <Grid item xs={4}>
+                  <Grid item xs={12} md={4}>
                   <Box
                     m='5px 0'
                     display='flex'
