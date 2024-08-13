@@ -1,44 +1,33 @@
-import React from 'react';
-import { Card, CardContent, Typography, useTheme, InputAdornment, Divider, CardMedia } from '@mui/material';
-import Box from '@mui/material/Box';
-import { tokens } from '../../theme';
-import Grid from '@mui/material/Grid';
-import TextField from '@mui/material/TextField';
-import PersonIcon from '@mui/icons-material/Person';
+import { Typography, useTheme, InputAdornment, Divider } from '@mui/material'
+import Box from '@mui/material/Box'
+import { tokens } from '../../theme'
+import Grid from '@mui/material/Grid'
+import TextField from '@mui/material/TextField'
+import PersonIcon from '@mui/icons-material/Person'
 import MapboxMap from '../../components/account-history/google-map.jsx'
-import MapsHomeWorkIcon from '@mui/icons-material/MapsHomeWork';
-import RoomPreferencesIcon from '@mui/icons-material/RoomPreferences';
-import { LocationOff } from '@mui/icons-material';
+import MapsHomeWorkIcon from '@mui/icons-material/MapsHomeWork'
+import RoomPreferencesIcon from '@mui/icons-material/RoomPreferences'
 
 const AccountDetails = ({ accountDetails }) => {
   
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
+	const theme = useTheme()
+	const colors = tokens(theme.palette.mode)
 
-  if (accountDetails.length === 0) {
-    return (
-      <Grid item container xs={12}>
-        <Grid item xs={12}>
-          <Typography variant="h4" component="h4" sx={{ fontWeight: 'bold', color: 'secondary'}}>
-            <Divider>No se encontraron detalle de la cuenta</Divider>
-          </Typography>
-        </Grid>            
-      </Grid>
-      
-    );
-  }
+	if (accountDetails.length === 0) {
 
-  // const mapComponent = accountDetails.latitude > 0 ? (
-  //   <GoogleMaps latitude={accountDetails.latitude} longitude={accountDetails.longitude}/>              
-  // ) : (
-  //   <Grid item container xs={12}>
-  //     <Grid item xs={12}>
-  //       <Typography variant="h4" component="h4" sx={{ fontWeight: 'bold', color: 'secondary'}}>
-  //         <Divider><span><LocationOff sx={{ fontSize: '42px', color: 'orange' }}/></span>Sin geolocalizacion</Divider>
-  //       </Typography>
-  //     </Grid>            
-  //   </Grid>    
-  // );
+		return (
+
+			<Grid item container xs={12}>
+				<Grid item xs={12}>
+				<Typography variant="h4" component="h4" sx={{ fontWeight: 'bold', color: 'secondary'}}>
+					<Divider>No se encontraron detalle de la cuenta</Divider>
+				</Typography>
+				</Grid>            
+			</Grid>
+
+		)
+
+	}
 
   return (
     <div>       
@@ -52,8 +41,8 @@ const AccountDetails = ({ accountDetails }) => {
             padding='5px 10px'
             borderRadius='10px'
         >
-          <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
-            <Grid item xs={4}>
+          <Grid item xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
+            <Grid item xs={12} md={4}>
               <TextField
                 fullWidth
                 disabled
@@ -69,7 +58,7 @@ const AccountDetails = ({ accountDetails }) => {
                 }}         
               />
             </Grid>
-            <Grid item xs={8}>
+            <Grid item xs={12} md={8}>
               <TextField
                 fullWidth
                 disabled
@@ -86,8 +75,9 @@ const AccountDetails = ({ accountDetails }) => {
               />
             </Grid>                       
           </Grid>
-          <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
-            <Grid item xs={3}>
+
+          <Grid item xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
+            <Grid item xs={12} md={3}>
               <TextField
                 fullWidth
                 disabled
@@ -103,7 +93,7 @@ const AccountDetails = ({ accountDetails }) => {
                 }}
               />
             </Grid> 
-            <Grid item xs={3}>
+            <Grid item xs={12} md={3}>
             <TextField
                 fullWidth
                 disabled
@@ -119,7 +109,7 @@ const AccountDetails = ({ accountDetails }) => {
                 }}
               />
             </Grid>
-            <Grid item xs={3}>
+            <Grid item xs={12} md={3}>
             <TextField
                 fullWidth
                 disabled
@@ -135,7 +125,7 @@ const AccountDetails = ({ accountDetails }) => {
                 }}
               />
             </Grid>
-            <Grid item xs={3}>
+            <Grid item xs={12} md={3}>
               <TextField
                 fullWidth
                 disabled
@@ -152,6 +142,7 @@ const AccountDetails = ({ accountDetails }) => {
               />
             </Grid>
           </Grid>
+
           <Grid item container xs={12}>
             <Grid item xs={12}>
               <Typography variant="h3" component="h3" sx={{ fontWeight: 'bold', fontSize: '2rem'}}>
@@ -159,8 +150,11 @@ const AccountDetails = ({ accountDetails }) => {
               </Typography>
             </Grid>
           </Grid>
-          <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
-            <Grid item xs={8}>
+
+          <Grid item xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
+
+            <Grid item xs={12} md={8}>
+
               <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
                 <Grid item xs={12}>
                   <TextField
@@ -179,8 +173,9 @@ const AccountDetails = ({ accountDetails }) => {
                   />
                 </Grid>                 
               </Grid>
-              <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2} paddingTop={2}>
-                <Grid item xs={6}>
+
+              <Grid item xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2} paddingTop={2}>
+                <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth
                     disabled
@@ -196,7 +191,7 @@ const AccountDetails = ({ accountDetails }) => {
                     }}
                   />
                 </Grid> 
-                <Grid item xs={6}>
+                <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth
                     disabled
@@ -213,8 +208,9 @@ const AccountDetails = ({ accountDetails }) => {
                   />
                 </Grid>
               </Grid>
-              <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2} paddingTop={2}>
-                <Grid item xs={6}>
+
+              <Grid item xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2} paddingTop={2}>
+                <Grid item xs={12} md={6}>
                 <TextField
                     fullWidth
                     disabled
@@ -230,7 +226,7 @@ const AccountDetails = ({ accountDetails }) => {
                     }}
                   />
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth
                     disabled
@@ -247,8 +243,9 @@ const AccountDetails = ({ accountDetails }) => {
                   />
                 </Grid>
               </Grid>
-              <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2} paddingTop={2}>
-                <Grid item xs={6}>
+
+              <Grid item xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2} paddingTop={2}>
+                <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth
                     disabled
@@ -264,7 +261,7 @@ const AccountDetails = ({ accountDetails }) => {
                     }}
                   />
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth
                     disabled
@@ -281,8 +278,9 @@ const AccountDetails = ({ accountDetails }) => {
                   />
                 </Grid>
               </Grid>
-              <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2} paddingTop={2}>                
-                <Grid item xs={6}>
+
+              <Grid item xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2} paddingTop={2}>                
+                <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth
                     disabled
@@ -298,7 +296,7 @@ const AccountDetails = ({ accountDetails }) => {
                     }}
                   />
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth
                     disabled
@@ -315,8 +313,9 @@ const AccountDetails = ({ accountDetails }) => {
                   />
                 </Grid>
               </Grid>
-              <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2} paddingTop={2}>
-                <Grid item xs={6}>
+
+              <Grid item xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2} paddingTop={2}>
+                <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth
                     disabled
@@ -332,7 +331,7 @@ const AccountDetails = ({ accountDetails }) => {
                     }}
                   />
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth
                     disabled
@@ -349,14 +348,21 @@ const AccountDetails = ({ accountDetails }) => {
                   />
                 </Grid>                
               </Grid>
+
             </Grid>
-            <Grid item xs={4}>              
+
+            <Grid item xs={12} md={4}>              
                 <MapboxMap latitude={accountDetails.latitude} longitude={accountDetails.longitude}/>                 
             </Grid>
-          </Grid>          
-        </Box>      
+
+          </Grid>   
+
+        </Box>   
+
     </div>
-  );
+
+  )
+
 }
 
-export default AccountDetails;
+export default AccountDetails

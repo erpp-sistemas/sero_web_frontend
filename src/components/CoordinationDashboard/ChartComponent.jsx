@@ -15,9 +15,13 @@ const ChartComponent = ({ data, field, title }) => {
     }));
 
     return (
-        <div style={{ height: '400px', width:'100%', marginBottom: '40px' }}>
+        <div style={{ height: '400px', width:'110%', marginBottom: '40px' }}>
             <h3>{title}</h3>
             <ResponsiveBar
+				sx={{
+					width:'150%',
+					minWidth:'400px'
+				}}
                 data={chartData}
                 keys={['count']}
                 indexBy="answer"

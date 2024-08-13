@@ -665,15 +665,16 @@ const Index = () => {
               sx={{ backgroundColor: colors.primary[400], width: '100%' }}
               padding='15px'
               borderRadius='10px'
-          >            
-            <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
-              <Grid item xs={3}>              
+          >     
+
+            <Grid item xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
+              <Grid item xs={12} md={3}>              
                 <PlaceSelect                
                   selectedPlace={selectedPlace}
                   handlePlaceChange={handlePlaceChange}
                 />              
               </Grid>
-              <Grid item xs={3}>
+              <Grid item xs={12} md={3}>
                 <TextField
                   id="start-date"
                   label="Fecha de inicio"
@@ -686,7 +687,7 @@ const Index = () => {
                   }}                  
                 />
               </Grid>
-              <Grid item xs={3}>
+              <Grid item xs={12} md={3}>
                 <TextField
                   id="finish-date"
                   label="Fecha final"
@@ -699,7 +700,7 @@ const Index = () => {
                   }}
                 />
               </Grid>
-              <Grid item xs={3}>
+              <Grid item xs={12} md={3}>
                 <Button 
                   variant="contained" 
                   sx={{ bgcolor: 'secondary.main', '&:hover': { bgcolor: 'secondary.dark' } }}
@@ -713,8 +714,10 @@ const Index = () => {
                 </Button>
               </Grid>
             </Grid>
-            <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
-                <Grid item xs={8}>
+
+            <Grid item xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
+
+                <Grid item xs={12} md={8}>
                   <Box m="20px">
                     <Header title="Listado de asistencia" />
                     <Box
@@ -726,7 +729,15 @@ const Index = () => {
                         },
                       }}
                     >
-                      <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2} >
+
+                      <Grid item xs={12} container alignItems="stretch" spacing={2}
+							sx={{
+								justifyContent:{
+									xs:'start',
+									md:'space-between'
+								}
+							}}
+						>
                         <Grid item xs={6}>
                           <FormControl>
                             <TextField                              
@@ -782,7 +793,7 @@ const Index = () => {
                   </Box>
 
                 </Grid>
-                <Grid item xs={4}>
+                <Grid item xs={12} md={4}>
                 <Box
                     m='5px 0'
                     display='flex'
@@ -879,6 +890,7 @@ const Index = () => {
                     </List>
                   </Box>
                 </Grid>
+			
               </Grid>
 
               <ModalTable open={openModal} onClose={handleCloseModal} data={modalData} />
