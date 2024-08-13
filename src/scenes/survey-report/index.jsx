@@ -1,37 +1,14 @@
-import React, { useState, useEffect } from "react";
-import { tokens } from "../../theme";
+import React, { useState, useEffect } from "react"
+import { tokens } from "../../theme"
 import PlaceSelect from '../../components/PlaceSelect'
-import ServiceSelect from '../../components/ServiceSelect'
-import ProcessSelect from '../../components/ProcessSelect'
-import { Box, useTheme, Button, Avatar, Typography} from "@mui/material";
+import { Box, useTheme, Button } from "@mui/material"
 import LoadingModal from '../../components/LoadingModal.jsx'
 import CustomAlert from '../../components/CustomAlert.jsx'
-import Grid from '@mui/material/Grid';
-import TextField from '@mui/material/TextField';
-import { ManageSearch, Newspaper } from "@mui/icons-material";
+import Grid from '@mui/material/Grid'
+import TextField from '@mui/material/TextField'
+import { ManageSearch } from "@mui/icons-material"
 import {surveyReportRequest} from '../../api/survey.js'
-import RowOne from '../../components/CoordinationDashboard/RowOne.jsx'
-import DataGridManagementByManager from '../../components/CoordinationDashboard/DataGridManagementByManager.jsx'
-import PieManagementByTypeOfServiceAndLocationStatus from '../../components/CoordinationDashboard/PieManagementByTypeOfServiceAndLocationStatus.jsx'
-import BarStackManagementsByManagerAndLocationStatus from "../../components/CoordinationDashboard/BarStackManagementsByManagerAndLocationStatus.jsx";
-import ProgressCircle from "../../components/ProgressCircle";
-import LineNumberOFTotalProcedures from '../../components/CoordinationDashboard/LineNumberOFTotalProcedures.jsx'
-import Legend from '../../components/LightweightCharts/Legend'
-import Card from '@mui/material/Card';
-import ManagedTask from '../../components/CoordinationDashboard/ManagedTask.jsx'
-import LocationStatus from '../../components/CoordinationDashboard/LocationStatus.jsx'
-import TypeService from '../../components/CoordinationDashboard/TypeService.jsx'
-import TypeProperty from '../../components/CoordinationDashboard/TypeProperty.jsx'
-import Header from '../../components/Header';
-import { DataGrid,
-  GridToolbarColumnsButton,
-  GridToolbarContainer,  
-  GridToolbarDensitySelector,
-  GridToolbarExport,  
-  GridToolbarFilterButton, } from '@mui/x-data-grid';
-import Question from '../../components/CoordinationDashboard/Question.jsx'
 import ChartComponent from '../../components/CoordinationDashboard/ChartComponent.jsx'
-
 
 function index() {
 
@@ -178,7 +155,11 @@ function index() {
               justifyContent='space-evenly'
               flexWrap='wrap'
               gap='20px'
-              sx={{ backgroundColor: colors.primary[400], width: '100%' }}
+              sx={{ 
+				backgroundColor: colors.primary[400], 
+				width: '100%',
+				overflow:'scroll'
+			}}
               padding='15px'
               borderRadius='10px'
           >
@@ -190,14 +171,14 @@ function index() {
               onClose={setAlertOpen}
             />
 
-            <Grid container spacing={2}>
-              <Grid item xs={3}>
+            <Grid container xs={12} md={12} spacing={2}>
+              <Grid item xs={12} md={3}>
                 <PlaceSelect                
                   selectedPlace={selectedPlace}
                   handlePlaceChange={handlePlaceChange}
                 />
               </Grid>
-              <Grid item xs={3}>
+              <Grid item xs={12} md={3}>
                 <TextField
                   id="start-date"
                   label="Fecha de inicio"
@@ -210,7 +191,7 @@ function index() {
                   }}                  
                 />
               </Grid>
-              <Grid item xs={3}>
+              <Grid item xs={12} md={3}>
                 <TextField
                   id="finish-date"
                   label="Fecha final"
@@ -223,7 +204,7 @@ function index() {
                   }}
                 />
               </Grid>
-              <Grid item xs={3}>
+              <Grid item xs={12} md={3}>
                 <Button 
                   variant="contained"                   
                   style={{ width: '100%', height: '100%' }}
@@ -239,7 +220,12 @@ function index() {
             </Grid>
 
             <Box
-              width='100%'
+				width='100%'
+				sx={{
+					padding:'0px',
+					margin:'0px',
+					minWidth:'900px'
+				}}
             >
               
                 {Object.keys(result).map(field => (
