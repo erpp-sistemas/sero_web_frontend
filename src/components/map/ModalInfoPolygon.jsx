@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Modal } from '@mui/material';
 
 import { getIcon } from '../../data/Icons';
@@ -15,7 +15,7 @@ const ModalInfoPolygon = ({ setShowModal, polygon, setLastPolygonCreated, polygo
     const [namePolygon, setNamePolygon] = useState('');
     const [properties, setProperties] = useState([]);
 
-
+    
     const handleClose = () => {
         setOpen(false);
         setShowModal(false)
@@ -28,7 +28,11 @@ const ModalInfoPolygon = ({ setShowModal, polygon, setLastPolygonCreated, polygo
         setProperties(properties)
     }, [polygon])
 
-    const setNamePolygonUpdate = () => {
+
+
+    const setNamePolygonUpdate = (e) => {
+        e.preventDefault();
+        if (namePolygon === '') return alert('Ingresa un nombre para el poligono');
         const polygons_not_selected = polygonsCreated.filter(poly => poly.id !== polygon.id)
         const polygon_new = {
             ...polygon,
@@ -83,21 +87,18 @@ const ModalInfoPolygon = ({ setShowModal, polygon, setLastPolygonCreated, polygo
                                 <button className='w-full bg-gray-200 px-2 rounded-md py-1 gap-1 flex justify-center items-center hover:bg-gray-300' >
                                     {getIcon('CloudDownloadIcon', { fontSize: '20px', color: '#03af6e' })}
                                     <p className='text-gray-900'>Descargar información</p>
-
                                 </button>
                             </CSVLink>
-                            
+
                         </div>
 
                         {showFieldName && (
                             <>
                                 <p className='text-gray-900 text-center mt-4 italic text-xs'> --- Asignale un nombre al poligono para identificarlo posteriormente. --- </p>
-                                <div className="w-full mx-auto">
-                                    <input type="text" className='w-full mt-3 py-1 px-2 rounded-md text-gray-900' placeholder='Nombre del poligono' onChange={e => setNamePolygon(e.target.value)} />
-                                    <button className="w-full bg-emerald-500 text-gray-900 py-1 mt-4 rounded-md font-bold hover:bg-emerald-600"
-                                        onClick={setNamePolygonUpdate}
-                                    >Aceptar</button>
-                                </div>
+                                <form className="w-full mx-auto" onSubmit={setNamePolygonUpdate}>
+                                    <input autoFocus={true} type="text" className='w-full mt-3 py-1 px-2 rounded-md text-gray-900' placeholder='Nombre del poligono' onChange={e => setNamePolygon(e.target.value)} />
+                                    <input type='submit' value="Aceptar" className="w-full bg-emerald-500 text-gray-900 py-1 mt-4 rounded-md font-bold hover:bg-emerald-600" />
+                                </form>
                             </>
                         )}
 

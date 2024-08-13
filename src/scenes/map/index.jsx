@@ -41,18 +41,6 @@ const Mapa = () => {
     const [showModalInfoPolygons, setShowModalInfoPolygons] = useState(false)
 
 
-    const [poligonosDibujados, setPoligonosDibujados] = useState('')
-    const [poligonoSeleccionado, setPoligonoSeleccionado] = useState()
-    const [puntosInPoligonoSeleccionado, setPuntosInPoligonoSeleccionado] = useState(0)
-    const [showModalFeaturePolygon, setShowModalFeaturePolygon] = useState(false)
-    const [nombrePoligonoSeleccionado, setNombrePoligonoSeleccionado] = useState('')
-    const [poligonoSelected, setPoligonoSelected] = useState(false)
-
-
-    const [seleccionPoligonoPuntos, setSeleccionPoligonoPuntos] = useState([]);
-    const [ultimoPoligonoCreado, setUltimoPoligonoCreado] = useState('');
-
-
     useEffect(() => {
         const getPlazaById = async () => {
             const res = await getPlaceById(place_id);
@@ -118,17 +106,8 @@ const Mapa = () => {
             }
         });
 
-        map.on('draw.create', (e) => {
-            const polygon = e.features[0]; //? obtengo el poligono dibujado
-            if (polygon) {
-                const res_layers_in_map = getLayersVisiblesInMap(map);
-                if (res_layers_in_map.status === 2) {
-                    alert("Hay mas de un layer en el mapa")
-                    deletePolygonStorage(polygon);
-                }
-                createPolygon(map, polygon);
-            }
-        });
+        map.on('draw.create', (e) => beforeCreatePolygon(e, map));
+        map.on('draw.update', (e) => beforeCreatePolygon(e, map));
 
         map.on('click', 'gl-draw-polygon-fill-inactive.cold', function (e) {
             const features = map.queryRenderedFeatures(e.point, { layers: ['gl-draw-polygon-fill-inactive.cold'] });
@@ -137,17 +116,6 @@ const Mapa = () => {
                 const id_polygon_selected = clickedPolygon.properties.id;
                 const polygon_selected = polygonsStorage.current.filter(poly => poly.id === id_polygon_selected)[0];
                 createPolygon(map, polygon_selected)
-            }
-        });
-
-        map.on('draw.update', (e) => {
-            const polygon = draw.getAll().features[0];
-            if (polygon) {
-                const pointsInPolygon = points.features.filter(point => {
-                    return turf.booleanPointInPolygon(point, polygon);
-                });
-
-                console.log(`Number of points inside the polygon: ${pointsInPolygon.length}`);
             }
         });
 
@@ -172,6 +140,19 @@ const Mapa = () => {
             status: 1, message: 'Un layer en el mapa', layers_visibles: layers_visibles
         }
     }
+
+    const beforeCreatePolygon = (e, map) => {
+        const polygon = e.features[0]; //? obtengo el poligono dibujado
+        if (polygon) {
+            const res_layers_in_map = getLayersVisiblesInMap(map);
+            if (res_layers_in_map.status === 2) {
+                alert("Hay mas de un layer en el mapa")
+                deletePolygonStorage(polygon);
+            }
+            createPolygon(map, polygon);
+        }
+    }
+
 
     const createPolygon = (map, polygon) => {
         if (!polygon.area) {
@@ -243,35 +224,31 @@ const Mapa = () => {
             '#B0B0B0', // Color gris para puntos deshabilitados
             color  // Color original para puntos activos
         ]);
+
     }
 
     const enabledPoints = (map, polygon_id) => {
-        
+
         const layers_in_map = getLayersVisiblesInMap(map);
         const source = layers_in_map.layers_visibles[0].source;
         const layer = layers_in_map.layers_visibles[0].id;
         const color_circle = layers_in_map.layers_visibles[0].paint['circle-color'];
         const color = color_circle[3];
-        const points = mapRef.current.getSource(source)._data.features;        
+        const points = mapRef.current.getSource(source)._data.features;
         points.forEach((point) => {
             if (point.properties.pid && point.properties.pid === polygon_id) {
                 point.properties.disabled = false;  // Marcar el punto como habilitado
                 delete point.properties.pid;
             }
         });
-        
-        // Actualizar la fuente de datos para reflejar los cambios
-        mapRef.current.getSource(source).setData({
-            type: 'FeatureCollection',
-            features: points,
-        });
 
-        // Cambiar el estilo de los puntos deshabilitados
+        mapRef.current.getSource(source).setData({  type: 'FeatureCollection',  features: points,  });
+
         mapRef.current.setPaintProperty(layer, 'circle-color', [
             'case',
             ['==', ['get', 'pid'], polygon_id],
-            color, // Color verde para puntos con pid igual a 'perros'
-            color  // Color rojo para otros puntos
+            color, 
+            color  
         ]);
     }
 

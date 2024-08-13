@@ -50,7 +50,7 @@ const Topbar = () => {
             {getIcon('LayersIcon', { fontSize: '36px' })}
             <p className="text-[22px]">
               Sistema de información geográfica
-              <span style={{ marginLeft: '15px', color: theme.palette.mode === "dark" ? colors.greenAccent[400] : 'black', fontSize: '20px', fontWeight: 'bold' }}>
+              <span style={{ color: theme.palette.mode === "dark" ? colors.greenAccent[400] : 'black', fontSize: '20px', fontWeight: 'bold' }}>
                 {` ${mapa_seleccionado.name}`}
               </span>
             </p>
