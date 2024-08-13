@@ -22,6 +22,7 @@ import PaymentsProcedures from '../../components/CoordinationDashboard/PaymentsP
 import PaymentsProceduresByTypeService from '../../components/CoordinationDashboard/PaymentsProceduresByTypeService.jsx'
 import PaymentsProceduresByManager from '../../components/CoordinationDashboard/PaymentsProceduresByManager.jsx'
 import DailyManagementNotPhoto from '../../components/CoordinationDashboard/DailyManagementNotPhoto.jsx'
+import BatteryMeter from '../../components/CoordinationDashboard/BatteryMeter.jsx'
 
 function Index() {
     const theme = useTheme()
@@ -50,7 +51,8 @@ function Index() {
     const [paymentsProceduresData , setPaymentsProceduresData] = useState([])
     const [paymentsProceduresByTypeServiceData , setPaymentsProceduresByTypeServiceData] = useState([])
     const [paymentsProceduresByManagerData , setPaymentsProceduresByManagerData] = useState([])
-    const [dailyManagementNotPhotoData , setDailyManagementNotPhotoData] = useState([])  
+    const [dailyManagementNotPhotoData , setDailyManagementNotPhotoData] = useState([])
+	const [batteryMeterData , setBatteryMeterData] = useState([])  
     const [isLoading, setIsLoading] = useState(false)
     const [alertOpen, setAlertOpen] = useState(false)
     const [alertType, setAlertType] = useState("info")
@@ -135,6 +137,7 @@ function Index() {
 			setPaymentsProceduresByTypeServiceData(JSON.parse(response.data[0].PaymentsProceduresByTypeService))
 			setPaymentsProceduresByManagerData(JSON.parse(response.data[0].PaymentsProceduresByManager))
 			setDailyManagementNotPhotoData(JSON.parse(response.data[0].DailyManagementNotPhoto))
+			setBatteryMeterData(JSON.parse(response.data[0].BatteryMeter))
 			setResult(response.data)
 			setIsLoading(false)
 			setAlertOpen(true)
@@ -341,6 +344,12 @@ function Index() {
 								<PaymentsProceduresByManager data={ paymentsProceduresByManagerData }/>
 							</Grid>
 
+						</Grid>
+
+						<Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
+							<Grid item xs={12}>
+								<BatteryMeter data={ batteryMeterData}/>
+							</Grid>
 						</Grid>
 
 					</>
