@@ -6,21 +6,29 @@ import { tokens } from "../../theme";
 import LoadingModal from '../../components/LoadingModal.jsx';
 import CustomAlert from '../../components/CustomAlert.jsx';
 import { Dialog, DialogContent } from '@mui/material';
-import { Cancel, CloudUpload, Delete, Save } from '@mui/icons-material';
-import { updateAssignedPlacesRequest } from '../../api/auth';
+import { Cancel, CloudUpload, Delete } from '@mui/icons-material';
+import { savePhotoRequest } from '../../api/photo.js';
 
-const PhotoViewModal = ({ open, onClose, data }) => {
+const PhotoViewModal = ({ open, onClose, selectedPlace, selectedService, data, onImageUrlUpdate }) => {
   if (!data) return null;
+
+  console.log(data)
+
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
 
-    const datePart = date.toISOString().split('T')[0];
-    const timePart = date.toISOString().split('T')[1].split('.')[0];
-    return `${datePart} ${timePart}`;
+    const year = date.getUTCFullYear();
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(date.getUTCDate()).padStart(2, '0');
+    const hours = String(date.getUTCHours()).padStart(2, '0');
+    const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+    const seconds = String(date.getUTCSeconds()).padStart(2, '0');
+    const milliseconds = String(date.getUTCMilliseconds()).padStart(3, '0');
+    
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
+    
   };
-
-  console.log('data inicial: ', data);
 
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -43,7 +51,7 @@ const PhotoViewModal = ({ open, onClose, data }) => {
       setTask(data.tarea_gestionada || '');
       setManager(data.foto === defaultImage ? user.name : data.nombre_gestor)
       setDate(data.fecha_gestion ? formatDate(data.fecha_gestion) : '');
-      setPhotoType(data.tipo || '');
+      setPhotoType(data.tipo || '');      
     }
   }, [data]);
 
@@ -72,7 +80,7 @@ const PhotoViewModal = ({ open, onClose, data }) => {
     }));
   };
   
-  const handleSave = () => {    
+  const handleSave = async () => {    
     if (formData.url_image === 'https://ser0.mx/ser0/image/sin_foto.jpg') {
       setAlertOpen(true);
       setAlertType("warning");
@@ -80,7 +88,56 @@ const PhotoViewModal = ({ open, onClose, data }) => {
       return;
     }
 
-    console.log('Datos guardados:', { task, manager, date, photoType, url_image: formData.url_image });
+    const photo_data = {      
+      place_id: selectedPlace,
+      service_id: selectedService,
+      account: data.cuenta,
+      record_id: data.id_registro,
+      photo_record_id: data.id_registro_foto,
+      task: data.tarea_gestionada,
+      manager: data.nombre_gestor,
+      date_capture: data.fecha_gestion,
+      process: data.proceso,
+      type: data.tipo,
+      num_photo: data.num_foto,
+      cell: data.celda,      
+      url_image: formData.url_image,
+      user_session: user.name
+    };  
+    
+    try {
+      setIsLoading(true);
+      const response = await savePhotoRequest( photo_data );
+      const updatedImageUrl = response.data.message;
+      console.log(updatedImageUrl)
+      // setFormData(prevState => ({
+      //   ...prevState,
+      //   url_image: updatedImageUrl
+      // }));
+
+      setAlertOpen(true);
+      setAlertType("success");
+      setAlertMessage("¡Foto guardada exitosamente!");
+
+      if (onImageUrlUpdate) {
+        const response_photo = {
+          image_url: updatedImageUrl,
+          celda: data.celda          
+        };  
+
+        data.foto = updatedImageUrl;        
+        onImageUrlUpdate(response_photo);
+        //onImageUrlUpdate(updatedImageUrl);
+      }
+
+    } catch (error) {
+      console.error('Error al guardar la foto:', error);
+      setAlertOpen(true);
+      setAlertType("error");
+      setAlertMessage("Hubo un error al guardar la foto. Inténtalo de nuevo.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -119,6 +176,7 @@ const PhotoViewModal = ({ open, onClose, data }) => {
           >
             <CardMedia
               component="img"
+              key={formData.url_image}
               sx={{ 
                 width: 500, 
                 height: 500, 
@@ -159,7 +217,7 @@ const PhotoViewModal = ({ open, onClose, data }) => {
                 />
                 <TextField
                   label="Fecha de gestión"
-                  value={formatDate(date)}
+                  value={date}
                   fullWidth
                   margin="normal"
                   variant="outlined"                

@@ -6,12 +6,16 @@ import { getIcon } from '../../data/Icons';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import Avatar from '@mui/material/Avatar'
+import Cookies from 'js-cookie'
+import { useDispatch } from 'react-redux'
+import { logoutUser } from '../../features/user/userSlice'
 
 const Profile = () => {
 
     const navigation = useNavigate();
     const user = useSelector((state) => state.user);
-
+	const dispatch = useDispatch()
+	
     const [anchorElUser, setAnchorElUser] = useState(null);
 
     const handleOpenUserMenu = (event) => {
@@ -27,12 +31,12 @@ const Profile = () => {
         navigation('/profile')
     }
 
-    const handleCerrarSesion = () => {
-        sessionStorage.removeItem('user_session')
-        dispatch(setUser({ id: 0, nombre: '', apellido_paterno: '', apellido_materno: '', correo: '', usuario: '', sexo: '', id_rol: [], url_foto: '' }))
-        navigation('/')
-        window.location.reload()
-    }
+	const handleCerrarSesion = () => {
+		localStorage.removeItem('token')
+		Cookies.remove('token')
+		dispatch(logoutUser())
+		window.location.reload()
+	}
 
 
     return (
@@ -64,7 +68,7 @@ const Profile = () => {
 
                 <MenuItem key={1} onClick={handleCerrarSesion}>
                     {getIcon('LogoutIcon', { marginRight: '10px', color: '#ff0000' })}
-                    <p>Logout</p>
+                    <p>Cerrar sesión</p>
                 </MenuItem>
             </Menu>
         </>

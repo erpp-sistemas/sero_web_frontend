@@ -39,7 +39,7 @@ const AnimatedBox = styled(Box)`
 	animation: ${props => props.animation ? slideOut : slideIn} 710ms ease-out;
 `
 
-const NewVehiculo = ({ setOpenNew, setAlertClean, fetchData, setAlert }) => {
+const NewVehiculo = ({ setOpenNew, setAlertClean, dataVeiculos, setAlert }) => {
 	const theme = useTheme()
 	const isLightMode = theme.palette.mode === 'light'
 	const [animation, setAnimation] = useState(false)
@@ -189,7 +189,7 @@ const NewVehiculo = ({ setOpenNew, setAlertClean, fetchData, setAlert }) => {
 
 					<Botones 
 						next={next} data={data} dataDocuments={dataDocuments} dataEstado={dataEstado} dataImagenes={dataImagenes} dataPagos={dataPagos}
-						setNext={setNext} setOpenNew={setOpenNew} fetchData={fetchData} setAlert={setAlert}
+						setNext={setNext} setOpenNew={setOpenNew} dataVeiculos={dataVeiculos} setAlert={setAlert}
 					/>
 					
 					{
@@ -217,7 +217,7 @@ NewVehiculo.propTypes = {
 	setOpenNew: PropTypes.func.isRequired, 
 	setAlertClean: PropTypes.func.isRequired,
 	openNew: PropTypes.bool.isRequired, 
-	fetchData: PropTypes.func.isRequired,
+	dataVeiculos: PropTypes.func.isRequired,
 	setAlert: PropTypes.func.isRequired
 }
 

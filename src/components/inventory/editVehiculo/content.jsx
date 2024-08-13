@@ -1,142 +1,187 @@
-import { Box, TextField, Button } from "@mui/material"
-import { useState } from "react"
+	import { Box, TextField, Button, FormControl, InputLabel, Select, MenuItem } from "@mui/material"
+	import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
+	import EditIcon from '@mui/icons-material/Edit'
+	import { useSelector, useDispatch } from 'react-redux'
+	import { setEditColor, setEditKilometraje, setEditColorLlavero, setEditMarca, setEditModelo, setEditPlaca, setEditSelectedPlace, setEditSerie, setEditTipoMotor, setEditVehiculo } from '../../../redux/vehiculosSlices/editarInformacionGeneral.js'
+	import PlaceSelectDisabled from '../../PlaceSelectDisabled.jsx'
+	import jsPDF from 'jspdf'
+	import html2canvas from 'html2canvas'
 
-const Content = () => {
+	const Content = () => {
+		const editarInformacionGeneral = useSelector(state => state.editarInformacionGeneral)
+		const dispatch = useDispatch()
 
-	const [prueba, setPrueba] = useState('')
+		const currentYear = new Date().getFullYear()
+		const years = Array.from({ length: 7 }, (_, i) => currentYear - 5 + i)
 
-	return(
+		const handlePlaceChange = (event) => {
+			dispatch(setEditSelectedPlace(event.target.value))
+		}
 
-		<Box sx={{ width:'100%', height:'100%', display:'flex', justifyContent:'start', alignItems:'center', flexDirection:'column' }}>
+		const handleChange = (event) => {
+			dispatch(setEditModelo(event.target.value))
+		}
 
-			<Box sx={{ m:'50px', display:'flex', justifyContent:'start', alignItems:'center', width:'100%', gap:'20px' }}>
+		const generatePDF = () => {
+			fetch('../plantillas/informacionGeneral.html')
+				.then(response => response.text())
+				.then(html => {
+					const parser = new DOMParser()
+					const doc = parser.parseFromString(html, 'text/html')
+					const pdfContent = doc.getElementById('pdf-content')
+		
+					pdfContent.querySelector('#placa').textContent = editarInformacionGeneral.editPlaca
+					pdfContent.querySelector('#marca').textContent = editarInformacionGeneral.editMarca
+					pdfContent.querySelector('#modelo').textContent = editarInformacionGeneral.editModelo
+					pdfContent.querySelector('#vehiculo').textContent = editarInformacionGeneral.editVehiculo
+					pdfContent.querySelector('#tipoMotor').textContent = editarInformacionGeneral.editTipoMotor
+					pdfContent.querySelector('#color').textContent = editarInformacionGeneral.editColor
+					pdfContent.querySelector('#colorLlavero').textContent = editarInformacionGeneral.editColorLlavero
+					pdfContent.querySelector('#kilometraje').textContent = editarInformacionGeneral.editKilometraje
+					pdfContent.querySelector('#lugar').textContent = editarInformacionGeneral.editSelectedPlace
+					pdfContent.querySelector('#serie').textContent = editarInformacionGeneral.editSerie
+		
+					html2canvas(pdfContent).then((canvas) => {
+						const imgData = canvas.toDataURL('image/png')
+						const pdf = new jsPDF()
+						pdf.addImage(imgData, 'PNG', 10, 10)
+						pdf.save('vehiculo.pdf')
+					})
+				})
+				.catch(error => {
+					console.error('Error loading HTML template:', error)
+				})
+		}
 
-				<Box sx={{ width:'20%', display:'flex', justifyContent:'center', alignItems:'center' }}>
-					<Box sx={{ width:'200px', height:'200px', border:'1px solid grey', borderRadius:'50%', background:'rgba(0,0,0,0.3)' }}>
-						<img src="" alt="" width={'100%'} height={'100%'} />
+		return (
+
+			<Box sx={{ width:'100%', height:'100%', display:'flex', justifyContent:'start', alignItems:'center', flexDirection:'column' }}>
+
+				<Box sx={{ m:'50px', display:'flex', justifyContent:'start', alignItems:'center', width:'100%', gap:'20px' }}>
+					<Box sx={{ width:'20%', display:'flex', justifyContent:'center', alignItems:'center', flexDirection:'column', gap:'2rem' }}>
+					<Box sx={{ width:'200px', height:'200px', border:'1px solid grey', borderRadius:'50%', background:'rgba(0,0,0,0.3)', overflow:'hidden', display:'flex', justifyContent:'center' }}>
+						<img src={editarInformacionGeneral.editImagePreview} alt="" width={'100%'} height={'100%'} />
 					</Box>
-				</Box>
-
-				<Box sx={{ width:'35%', display:'flex', justifyContent:'center', alignItems:'center', flexDirection:'column', gap:'1.5rem' }}>
-
+					<Box sx={{ width:'100%', display:'flex', justifyContent:'center', alignItems:'center', gap:'1rem', mt:'50px' }}>
+						<Button sx={{ color:'white', background:'rgba(0,0,0,0.6)', border:'1px solid white', padding:'5px 30px', margin:'0', minWidth:'0', borderRadius:'7px' }}>
+						<EditIcon sx={{ fontSize:'30px', color:'white' }} />
+						</Button>
+						<Button 
+						sx={{ color:'white', background:'rgba(0,0,0,0.6)', border:'1px solid white', padding:'5px 30px', margin:'0', minWidth:'0', borderRadius:'7px' }}
+						onClick={generatePDF}
+						>
+						<PictureAsPdfIcon sx={{ fontSize:'30px', color:'red' }} />
+						</Button>
+					</Box>
+					</Box>
+					<Box sx={{ width:'35%', display:'flex', justifyContent:'center', alignItems:'center', flexDirection:'column', gap:'1.5rem' }}>
 					<TextField
 						sx={{ width:'90%' }}
 						id="Placa"
 						label="Placa"
-						defaultValue={prueba}
+						value={ editarInformacionGeneral.editPlaca }
 						variant="outlined"
-						onChange={event => setPrueba(event.target.value)}
+						onChange={event => dispatch(setEditPlaca(event.target.value))}
 						disabled
 					/>
-
 					<TextField
 						sx={{ width:'90%' }}
 						id="Marca"
 						label="Marca"
-						defaultValue={prueba}
+						defaultValue={ editarInformacionGeneral.editMarca }
 						variant="outlined"
-						onChange={event => setPrueba(event.target.value)}
+						onChange={event => dispatch(setEditMarca(event.target.value))}
 						disabled
 					/>
-
-					<TextField
-						sx={{ width:'90%' }}
-						id="Modelo"
+					<FormControl fullWidth variant="filled" sx={{ width:'90%' }}>
+						<InputLabel id="modelo">Modelo</InputLabel>
+						<Select
+						labelId="modelo"
+						id="modelo"
+						value={ editarInformacionGeneral.editModelo }
 						label="Modelo"
-						defaultValue={prueba}
-						variant="outlined"
-						onChange={event => setPrueba(event.target.value)}
+						onChange={(handleChange)}
 						disabled
-					/>
-
+						>
+						{years.map((year) => (
+							<MenuItem key={year} value={year}>{year}</MenuItem>
+						))}
+						</Select>
+					</FormControl>
 					<TextField
 						sx={{ width:'90%' }}
 						id="Vehiculo"
 						label="Vehiculo"
-						defaultValue={prueba}
+						defaultValue={ editarInformacionGeneral.editVehiculo }
 						variant="outlined"
-						onChange={event => setPrueba(event.target.value)}
+						onChange={event => dispatch(setEditVehiculo(event.target.value))}
 						disabled
 					/>
-
 					<TextField
 						sx={{ width:'90%' }}
 						id="Tipo de motor"
 						label="Tipo de motor"
-						defaultValue={prueba}
+						defaultValue={ editarInformacionGeneral.editTipoMotor }
 						variant="outlined"
-						onChange={event => setPrueba(event.target.value)}
+						onChange={event => dispatch(setEditTipoMotor(event.target.value))}
 						disabled
 					/>
-
-				</Box>
-
-				<Box sx={{ width:'35%', display:'flex', justifyContent:'center', alignItems:'center', flexDirection:'column', gap:'1.5rem' }}>
-
+					</Box>
+					<Box sx={{ width:'35%', display:'flex', justifyContent:'center', alignItems:'center', flexDirection:'column', gap:'1.5rem' }}>
 					<TextField
 						sx={{ width:'90%' }}
 						id="Color"
 						label="Color"
-						defaultValue={prueba}
+						defaultValue={ editarInformacionGeneral.editColor }
 						variant="outlined"
-						onChange={event => setPrueba(event.target.value)}
+						onChange={event => dispatch(setEditColor(event.target.value))}
 						disabled
 					/>
-
 					<TextField
 						sx={{ width:'90%' }}
 						id="Color llavero"
 						label="Color llavero"
-						defaultValue={prueba}
+						defaultValue={ editarInformacionGeneral.editColorLlavero }
 						variant="outlined"
-						onChange={event => setPrueba(event.target.value)}
+						onChange={event => dispatch(setEditColorLlavero(event.target.value))}
 						disabled
 					/>
-
 					<TextField
 						sx={{ width:'90%' }}
 						id="Kilometraje"
 						label="Kilometraje"
-						defaultValue={prueba}
+						defaultValue={ editarInformacionGeneral.editKilometraje }
 						variant="outlined"
-						onChange={event => setPrueba(event.target.value)}
+						onChange={event => dispatch(setEditKilometraje(event.target.value))}
 						disabled
 					/>
-
-					<TextField
-						sx={{ width:'90%' }}
-						id="Plaza"
-						label="Plaza"
-						defaultValue={prueba}
-						variant="outlined"
-						onChange={event => setPrueba(event.target.value)}
-						disabled
-					/>
-
-					<TextField
+					<FormControl fullWidth sx={{ width:'90%' }} disabled>
+						<PlaceSelectDisabled      
+						disabled      
+						selectedPlace={editarInformacionGeneral.editSelectedPlace}
+						handlePlaceChange={handlePlaceChange}
+						/>
+					</FormControl>
+					<TextField	
 						sx={{ width:'90%' }}
 						id="# Serie"
 						label="# Serie"
-						defaultValue={prueba}
+						defaultValue={ editarInformacionGeneral.editSerie }
 						variant="outlined"
-						onChange={event => setPrueba(event.target.value)}
+						onChange={event => dispatch(setEditSerie(event.target.value))}
 						disabled
 					/>
+					</Box>
+				</Box>
 
+				<Box>
+					
 				</Box>
 
 			</Box>
 
-			<Box sx={{ width:'100%', height:'auto', display:'flex', justifyContent:'center', alignItems:'center', gap:'1.5rem' }}>
-				<Button sx={{ fontSize:'20px', color:'white', background:'' }}>ficha informativa</Button>
-			</Box>
+		)
 
-		</Box>
+	}
 
-		
-
-	)
-
-}
-
-export default Content
+	export default Content

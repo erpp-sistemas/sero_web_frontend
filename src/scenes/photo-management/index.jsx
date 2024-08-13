@@ -94,7 +94,9 @@ const Index = () => {
     const [filteredResult, setFilteredResult] = useState([]);
     const [filterText, setFilterText] = useState('');
     const [showNoResultsMessage, setShowNoResultsMessage] = useState(false)
-    
+    const [newImageUrl, setNewImageUrl] = useState('');
+    const [rows, setRows] = useState([]);
+    const [page, setPage] = useState(0);
 
       const handlePlaceChange = (event) => {
         setSelectedPlace(event.target.value);  
@@ -122,7 +124,8 @@ const Index = () => {
         setFilterText(event.target.value);
       } 
 
-      const handleOpenModal = (rowData) => {
+      const handleOpenModal = (rowData) => {        
+
         setSelectedRow(rowData);
         setOpenModal(true)
       }
@@ -166,11 +169,13 @@ const Index = () => {
             return
           }
 
-          setIsLoading(true)         
+          setIsLoading(true)
+          setPage(0);
 
           const response = await photoManagementRequest(selectedPlace, selectedService, selectedProcess, selectedStartDate, selectedFinishDate);
 
           setResult(response.data)
+          // setRows(response.data)
 
           console.log(response.data)
 
@@ -198,13 +203,33 @@ const Index = () => {
         } catch (error) {
           setIsLoading(false)
 
-          if(error.response.status === 400){
-            setAlertOpen(true)
-            setAlertType("warning")
-            setAlertMessage("¡Atencion! No se encontraron pagos")
+          if (error.response) {
+            
+            if (error.response.status === 400) {
+                setAlertOpen(true);
+                setAlertType("warning");
+                setAlertMessage("¡Atención! No se encontraron pagos");
+                setResult([]);
+            } else {
+                
+                setAlertOpen(true);
+                setAlertType("error");
+                setAlertMessage(`¡Error! ${error.response.status}: ${error.response.statusText}`);
+                setResult([]);
+            }
+        } else if (error.request) {
+            
+            setAlertOpen(true);
+            setAlertType("error");
+            setAlertMessage("¡Error! No se pudo contactar con el servidor");
             setResult([]);
-          }       
-        setResult([]);
+        } else {
+            
+            setAlertOpen(true);
+            setAlertType("error");
+            setAlertMessage(`¡Error! ${error.message}`);
+            setResult([]);
+        }
           
         }        
       };
@@ -312,16 +337,8 @@ const Index = () => {
       a.download = 'datos.xlsx'; // Puedes ajustar el nombre del archivo aquí
       a.click();
       window.URL.revokeObjectURL(url);
-    };
-    
+    };  
   
-  
-  
-  
-  
-  
-  
-
       const CustomToolbar = () => (
         <GridToolbarContainer>
             <GridToolbarColumnsButton color="secondary">
@@ -581,14 +598,18 @@ const Index = () => {
                  sx={{ 
                    objectFit: 'cover'
                  }}
-                 onClick={() => handleOpenModal({
+                 onClick={() => handleOpenModal({                  
+                  cuenta: params.row.cuenta,
                   id_registro: params.row.id_registro,
+                  id_registro_foto: params.row.id_foto_fachada_1,
                   foto: params.row.foto_fachada_1,
                   tarea_gestionada: params.row.tarea_gestionada,
                   nombre_gestor: params.row.nombre_gestor,
                   fecha_gestion: params.row.fecha_gestion,
                   proceso: params.row.proceso,
-                  tipo: params.row.tipo_foto_fachada_1
+                  tipo: params.row.tipo_foto_fachada_1,
+                  num_foto: 1,
+                  celda: 'foto_fachada_1'
                 })}
                 />                
               </Card>
@@ -623,14 +644,18 @@ const Index = () => {
                   sx={{ 
                     objectFit: 'cover'
                   }}
-                  onClick={() => handleOpenModal({
+                  onClick={() => handleOpenModal({                    
+                    cuenta: params.row.cuenta,
                     id_registro: params.row.id_registro,
+                    id_registro_foto: params.row.id_foto_fachada_2,
                     foto: params.row.foto_fachada_2,
                     tarea_gestionada: params.row.tarea_gestionada,
                     nombre_gestor: params.row.nombre_gestor,
                     fecha_gestion: params.row.fecha_gestion,
                     proceso: params.row.proceso,
-                    tipo: params.row.tipo_foto_fachada_2
+                    tipo: params.row.tipo_foto_fachada_2,
+                    num_foto: 2,
+                    celda: 'foto_fachada_2'
                   })}
                 />                
               </Card>
@@ -665,14 +690,18 @@ const Index = () => {
                   sx={{ 
                     objectFit: 'cover'
                   }}
-                  onClick={() => handleOpenModal({
+                  onClick={() => handleOpenModal({                    
+                    cuenta: params.row.cuenta,
                     id_registro: params.row.id_registro,
+                    id_registro_foto: params.row.id_foto_evidencia_1,
                     foto: params.row.foto_evidencia_1,
                     tarea_gestionada: params.row.tarea_gestionada,
                     nombre_gestor: params.row.nombre_gestor,
                     fecha_gestion: params.row.fecha_gestion,
                     proceso: params.row.proceso,
-                    tipo: params.row.tipo_foto_evidencia_1
+                    tipo: params.row.tipo_foto_evidencia_1,
+                    num_foto: 1,
+                    celda: 'foto_evidencia_1'
                   })}
                 />                
               </Card>
@@ -707,14 +736,18 @@ const Index = () => {
                   sx={{ 
                     objectFit: 'cover'
                   }}
-                  onClick={() => handleOpenModal({
+                  onClick={() => handleOpenModal({                    
+                    cuenta: params.row.cuenta,
                     id_registro: params.row.id_registro,
+                    id_registro_foto: params.row.id_foto_evidencia_2,
                     foto: params.row.foto_evidencia_2,
                     tarea_gestionada: params.row.tarea_gestionada,
                     nombre_gestor: params.row.nombre_gestor,
                     fecha_gestion: params.row.fecha_gestion,
                     proceso: params.row.proceso,
-                    tipo: params.row.tipo_foto_evidencia_2
+                    tipo: params.row.tipo_foto_evidencia_2,
+                    num_foto: 2,
+                    celda: 'foto_evidencia_2'
                   })}
                 />                
               </Card>
@@ -752,11 +785,57 @@ const Index = () => {
       const formatDate = (dateString) => {
         const date = new Date(dateString);
   
-        const datePart = date.toISOString().split('T')[0];
-        const timePart = date.toISOString().split('T')[1].split('.')[0];
-        return `${datePart} ${timePart}`;
+        const year = date.getUTCFullYear();
+        const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(date.getUTCDate()).padStart(2, '0');
+        const hours = String(date.getUTCHours()).padStart(2, '0');
+        const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+        const seconds = String(date.getUTCSeconds()).padStart(2, '0');
+        const milliseconds = String(date.getUTCMilliseconds()).padStart(3, '0');
+        
+        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
+      };      
+    
+      const handleImageUrlUpdate = (response_photo) => {        
+
+         setNewImageUrl(response_photo.image_url);
+         const photo_field = response_photo.celda
+        
+        setFilteredResult(prev =>
+            prev.map(row => row.id_registro === selectedRow.id_registro
+                ? { ...row, [photo_field]: response_photo.image_url }
+                : row
+            )
+        );
+
+        setResult(prev =>
+          prev.map(row => row.id_registro === selectedRow.id_registro
+              ? { ...row, [photo_field]: response_photo.image_url }
+              : row
+          )
+      );
       };
 
+      useEffect(() => {
+        if (newImageUrl && selectedRow) {
+          const photo_image_url = newImageUrl.image_url
+          const photo_field = newImageUrl.celda
+
+          setFilteredResult(prev =>
+              prev.map(row => row.id_registro === selectedRow.id_registro
+                  ? { ...row, [photo_field]: photo_image_url }
+                  : row
+              )
+          );
+
+          setResult(prev =>
+            prev.map(row => row.id_registro === selectedRow.id_registro
+                ? { ...row, [photo_field]: photo_image_url }
+                : row
+            )
+        );
+        }
+    }, [newImageUrl]);
       
 
     return (
@@ -907,6 +986,9 @@ const Index = () => {
                         slots={{ toolbar: CustomToolbar}}
                         rowHeight={130}
                         localeText={esES}
+                        pagination
+                        page={page}
+                        onPageChange={(newPage) => setPage(newPage)}
                       />
                     )}
                   </Box>
@@ -914,7 +996,14 @@ const Index = () => {
               </Grid>              
             </Grid>
 
-            <PhotoViewModal open={openModal} onClose={handleCloseModal} data={selectedRow} />
+            <PhotoViewModal 
+            open={openModal} 
+            onClose={handleCloseModal} 
+            selectedPlace={selectedPlace} 
+            selectedService={selectedService} 
+            data={selectedRow} 
+            onImageUrlUpdate={handleImageUrlUpdate}
+            />
           </Box>                 
           
         </>

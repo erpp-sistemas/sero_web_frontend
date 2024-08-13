@@ -121,7 +121,11 @@ const Sidebar = () => {
 				"& .pro-menu-item.active": {
 				color: "#6EBE71 !important",
 				},
-				"height": "100%"
+				"height": "100%",
+				display:{
+					xs:'none',
+					md:'inline',
+				}
 			}}
 		>
 

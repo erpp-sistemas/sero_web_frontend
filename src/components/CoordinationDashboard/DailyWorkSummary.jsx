@@ -578,7 +578,14 @@ console.log(data)
       >
         {data.length > 0 && (
           <>
-           <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2} >
+           <Grid item xs={12} container alignItems="stretch" spacing={2}
+				sx={{
+					justifyContent:{
+						xs:'start',
+						md:'space-betweeen'
+					}
+				}}
+			>
             <Grid item xs={6} sx={{ paddingBottom: 1 }}>
               <FormControl>
                 <TextField                              
@@ -619,7 +626,7 @@ console.log(data)
               </Button>
             </Grid>
            </Grid>
-          <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>              
+          <Grid item xs={12} container justifyContent="space-between" alignItems="center" spacing={2}>              
             <Grid item xs={12} style={{ height: 400, width: '100%' }}>         
               <DataGrid
                   rows={filteredUsers.length > 0 ? filteredUsers : data}

@@ -6,7 +6,7 @@ import Grid from '@mui/material/Grid'
 import Viewer from 'react-viewer';
 
 
-const Photos = ({ photo }) => {
+const Photos = ({ photo }) => {  
 
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -53,8 +53,8 @@ const Photos = ({ photo }) => {
   const formatDate = (dateString) => {
     const date = new Date(dateString);
   
-    const datePart = date.toISOString().split('T')[0];
-    const timePart = date.toISOString().split('T')[1].split('.')[0];
+    const datePart = date.toLocaleDateString();
+    const timePart = date.toLocaleTimeString();
     return `${datePart} ${timePart}`;
   };
 
