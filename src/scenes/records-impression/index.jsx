@@ -293,13 +293,24 @@ const Impression = () => {
 	}, [user])
 
 	const generarText = `Comienza la creación de los archivos PDF`
-	const excelText = `Descarga el archivo excel original de los registros`
 	const deleteText = `Borra este paquete de fichas`
 	const incompletaText = `Descarga las fichas antes de terminar la creacion de todos los PDF`
 
 	return (
 
-		<Box className='records_impression' minHeight='100vh' display={'flex'} justifyContent={'start'} flexDirection={'column'}>
+		<Box 
+			sx={{
+				minHeight:'100vh',
+				display:'flex',
+				justifyContent:'start',
+				alignItems:'center',
+				flexDirection:'column',
+				padding:{
+					xs:'20px',
+					md:'40px'
+				}
+			}}
+		>
 
 			<Typography 
 				variant="h3"
@@ -308,7 +319,6 @@ const Impression = () => {
 				sx={{ m: "0 0 5px 0", fontSize:'24px' }}
 				width={'100%'} 
 				textAlign={'start'} 
-				padding={'0px 50px'}
 			>
                 Creación de fichas
             </Typography>
@@ -319,12 +329,31 @@ const Impression = () => {
 				width={'100%'} 
 				textAlign={'start'} 
 				fontSize={'16px'} 
-				padding={'0px 50px'}
 			>
 				Creación, impresión y subida de fichas al sistema online de almacenamiento.
 			</Typography>
 		
-			<Box className='records_impression__grid' sx={{ mt:'1rem', width:'auto', display:'flex', minHeight:'500px', justifyContent:'center', alignItems:'start' }} container spacing={0}>
+			<Box 
+				sx={{ 
+					mt:'1rem', 
+					width:{
+						xs:'100%',
+						md:'100%'
+					}, 
+					display:'flex', 
+					minHeight:'500px', 
+					justifyContent:'center', 
+					alignItems:'center',
+					flexDirection:{
+						xs:'column',
+						md:'row'
+					},
+					gap:{
+						xs:'20px',
+						md:'0px'
+					},
+				}} 
+			>
 
 				<Box className='records_impression__content' sx={{ minHeight: '600px', width:'100%', height:'auto', backgroundColor:  isLightMode ? 'rgba(0, 0, 63, 0.202)' : 'rgba(255, 255, 255, 0.250)', borderTopLeftRadius:'10px', borderBottomLeftRadius:'10px', display:'flex', justifyContent:'center', alignItems:'center', flexDirection:'column' }}>
 					
@@ -351,49 +380,6 @@ const Impression = () => {
 
 					</Box>
 
-					{/* {
-						rango > 0 ? (
-
-							<>
-								<Typography color={  isLightMode ? '#000000' : '#fffff'} fontSize={'1rem'} mb={'10px'} mt={'10px'}> Ficha Preview</Typography>
-								
-								<Box sx={{ width:'100%', maxWidth:'300px' }} display={'flex'} justifyContent={'space-between'} >
-
-									<FormControl sx={{ width:'100%' }} className='inputCustom'>
-
-										<InputLabel id='demo-simple-select-label' color='primary' sx={{ color:  isLightMode ? '#000000' : '#fff', width:'100%' }}> FICHA </InputLabel>
-
-										<Select
-											labelId='demo-simple-select-label'
-											id='demo-simple-select'
-											value={selectedCuenta}
-											label='FICHA'
-											onChange={(event) => setSelectedCuenta(event.target.value)}
-											sx={{ color:  isLightMode ? '#000000' : '#ffffff', '& .MuiSelect-select': { borderColor: '#ffffff', }, '& .MuiSvgIcon-root': { color: '#ffffff', }, }}
-										>
-											{Object.keys(registros).slice(0, 5).map((cuenta, index) => (
-												<MenuItem key={index} value={cuenta} onClick={() => handleSeleccionRegistro(registros[cuenta])}>{cuenta}</MenuItem>
-											))}
-										</Select>	
-
-									</FormControl>
-
-								</Box>
-
-							</>
-
-						):(
-
-							false
-
-						)
-
-					} */}
-
-					
-
-					{/* { registro ? <Button variant="text" sx={{ marginTop:'30px', width:'100%', maxWidth:'200px', color:  isLightMode ? '#000000' : 'white', fontWeight:'600', fontSize:'.8rem'}} fullWidth onClick={() => setOpenPreview(true)}> VER PREVIEW </Button> :false } */}
-
 					{ rango > 0 ? 
 						<Tooltip
 							title={generarText} 
@@ -407,8 +393,6 @@ const Impression = () => {
 						</Tooltip>
 						: false 
 					}
-
-					
 
 					{
 						Object.keys(paquete).length !== 0 ? (
@@ -456,7 +440,7 @@ const Impression = () => {
 								<>
 
 									<Box className='records_impression__data__box' display={'flex'} justifyContent={'center'} alignItems={'center'}>
-										<Typography sx={{ fontWeight:'600', fontSize:'1.1rem', color:  isLightMode ? '#000000' : '#cff9e0' }}>Nombre de paquete:</Typography><Typography sx={{ fontSize:'1rem' }}>{paquete.nombre}</Typography>
+										<Typography sx={{ fontWeight:'600', fontSize:'1.1rem', color:  isLightMode ? '#000000' : '#cff9e0' }}>Nombre de paquete:</Typography><Typography sx={{ fontSize:'1rem', textAlign:'center', }}>{paquete.nombre}</Typography>
 										<Tooltip
 											title={deleteText} 
 											enterDelay={100} 
@@ -475,34 +459,6 @@ const Impression = () => {
 									</Box>
 									<Box className='records_impression__data__box' display={'flex'} justifyContent={'center'} alignItems={'center'}>
 										<Typography sx={{ fontWeight:'600', fontSize:'1.1rem', color: isLightMode ? '#000000' : '#cff9e0' }}>Servicio:</Typography><Typography sx={{ fontSize:'1rem' }}>{paquete.servicio}</Typography> 
-									</Box>
-									<Box className='records_impression__data__box' display={'flex'} justifyContent={'center'} alignItems={'center'}>
-										<Typography sx={{ fontWeight:'600', fontSize:'1.1rem', color: isLightMode ? '#000000' : '#cff9e0' }}>Fecha de corte:</Typography><Typography sx={{ fontSize:'1rem' }}>{paquete.fecha_corte}</Typography> 
-									</Box>
-									<Box className='records_impression__data__box' display={'flex'} justifyContent={'center'} alignItems={'center'}>
-										<Typography sx={{ fontWeight:'600', fontSize:'1.1rem', color: isLightMode ? '#000000' : '#cff9e0' }}>Documento Excel:</Typography>
-										<Tooltip
-											title={excelText} 
-											enterDelay={100} 
-											leaveDelay={200}	
-										>
-											<a 
-												href={paquete.excel_document} 
-												style={{ 
-													textDecoration: 'none',
-													color: '#fff',
-													cursor: 'pointer',
-													background: '#151e27',
-													padding: '5px 15px',
-													borderRadius: '20px',
-													transition: 'background-color 0.3s, color 0.3s', 
-												}}
-												onMouseOver={(e) => e.target.style.backgroundColor = '#273543'} 
-												onMouseOut={(e) => e.target.style.backgroundColor = '#151e27'}
-											>
-												Descargar
-											</a>
-										</Tooltip>
 									</Box>
 									{
 										paquete.folio !== 'desconocido' ? (

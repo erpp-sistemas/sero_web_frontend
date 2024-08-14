@@ -39,16 +39,20 @@ function TypeService({ data }) {
       id="grid-1"
       display="grid"
       gridTemplateColumns="repeat(12, 1fr)"
-      gridAutoRows="390px"
+      gridAutoRows="490px"
       gap="15px"
       width='100%'      
       padding='5px'
     >   
       <Box
-        gridColumn='span 12'
-        backgroundColor='rgba(128, 128, 128, 0.1)'
-        borderRadius="10px"
-        sx={{ cursor: 'pointer' }}
+		sx={{ 
+			cursor: 'pointer',
+			gridColumn:'span 12',
+			backgroundColor:'rgba(128, 128, 128, 0.1)',
+			borderRadius:"10px",
+			overflowY:'hidden',
+			overflowX:'scroll'
+		}}
       >
 
             <Box

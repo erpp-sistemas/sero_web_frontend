@@ -12,11 +12,11 @@ export default function EstadoTop () {
 	
 	return (
 
-		<Box sx={{ width:'100%', display:'flex', justifyContent:'start', alignItems:'start' }}>
+		<Box sx={{ width:'100%', display:'flex', justifyContent:'start', alignItems:'start', flexWrap:'wrap' }}>
 		
-			<Box sx={{ width:'25%', height:'100%', display:'flex', justifyContent:'flex-start', alignItems:'flex-start', gap:'10px', flexDirection:'column', marginTop:'10px' }}>
+			<Box sx={{ width:{ xs:'100%', md:'23%' }, height:'100%', display:'flex', justifyContent:{ xs:'center', md:'flex-start' }, alignItems:{ xs:'center', md:'flex-start' }, gap:'10px', flexDirection:'column', marginTop:'10px' }}>
 
-				<FormControl fullWidth variant="filled" sx={{ mt:'10px', minWidth: 150, border: estadoErrors.errorCombustible ? '1px solid red' : false }}>
+				<FormControl fullWidth variant="filled" sx={{ mt:'10px', minWidth:'270px', width:'100%',  border: estadoErrors.errorCombustible ? '1px solid red' : false }}>
 					<InputLabel id="combustible">Combustible</InputLabel>
 					<Select
 						labelId="combustible"
@@ -25,7 +25,8 @@ export default function EstadoTop () {
 						label="Combustible"
 						onChange={( event => (dispatch(setCombustible(event.target.value)), dispatch(setErrorCombustible(false))))}
 						sx={{
-							border: 'none'
+							border: 'none',
+							width:'100%'
 						}}
 					>
 						<MenuItem value='1'>Lleno</MenuItem>
@@ -36,7 +37,7 @@ export default function EstadoTop () {
 					</Select>
 				</FormControl>
 
-				<FormControl fullWidth variant="filled" sx={{ mt:'10px', minWidth: 150, border: estadoErrors.errorCombustible ? '1px solid red' : false }}>
+				<FormControl fullWidth variant="filled" sx={{ mt:'10px', minWidth:'270px', width:'100%', border: estadoErrors.errorCombustible ? '1px solid red' : false }}>
 					<InputLabel id="bateria">Bateria</InputLabel>
 					<Select
 						labelId="bateria"
@@ -53,7 +54,7 @@ export default function EstadoTop () {
 					</Select>
 				</FormControl>
 
-				<FormControl fullWidth variant="filled" sx={{ mt:'10px', minWidth: 150, border: estadoErrors.errorCombustible ? '1px solid red' : false }}>
+				<FormControl fullWidth variant="filled" sx={{ mt:'10px', minWidth:'270px', width:'100%', border: estadoErrors.errorCombustible ? '1px solid red' : false }}>
 					<InputLabel id="neumaticos">Neumaticos</InputLabel>
 					<Select
 						labelId="neumaticos"
@@ -73,9 +74,9 @@ export default function EstadoTop () {
 
 			</Box>
 
-			<Box sx={{ width:'75%', height:'auto', display:'flex', justifyContent:'start', alignItems:'start', gap:'40px', marginLeft:'40px', marginTop:'10px' }}>
+			<Box sx={{ width:{ xs:'100%', md:'73%' }, height:'auto', display:'flex', justifyContent:'start', alignItems:'start', gap:'40px', marginTop:{ xs:'30px', md:'10px' }, flexWrap:'wrap', marginLeft:{ xs:'0px', md:'20px' }, }}>
 
-				<Box sx={{ width:'33.3%', height:'auto' }}>
+				<Box sx={{ width:{ xs:'100%', md:'30%' }, height:'auto' }}>
 
 					<Typography sx={{ fontSize:'16px', textAlign:'center', marginBottom:'20px' }}>NIVELES Y PERDIDAS DE LIQUIDOS</Typography>
 
@@ -120,7 +121,7 @@ export default function EstadoTop () {
 
 				</Box>
 
-				<Box sx={{ width:'33.3%', height:'auto' }}>
+				<Box sx={{ width:{ xs:'100%', md:'30%' }, height:'auto' }}>
 
 					<Typography sx={{ fontSize:'16px', textAlign:'center', marginBottom:'20px' }}>ESTADO DE LAS LUCES</Typography>
 
@@ -165,7 +166,7 @@ export default function EstadoTop () {
 					
 				</Box>
 
-				<Box sx={{ width:'33.3%', height:'auto' }}>
+				<Box sx={{ width:{ xs:'100%', md:'30%' }, height:'auto' }}>
 
 					<Typography sx={{ fontSize:'16px', textAlign:'center', marginBottom:'20px' }}>ESTADO DE LAS LLANTAS</Typography>
 

@@ -8,7 +8,7 @@ function Menu() {
 		
 		<Box m="20px">
 
-			<Header title="Gestiòn de Menus" subtitle="Operaciones de Crear, Leer, Actualizar y Eliminar Menus en el Sistema" />
+			<Header title="Gestión de Menus" subtitle="Operaciones de Crear, Leer, Actualizar y Eliminar Menus en el Sistema" />
 
 			<MenuCrud/>
 

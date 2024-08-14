@@ -74,7 +74,7 @@ const EditVehiculo = ({ setOpenMantenimiento, setAlertClean }) => {
 					justifyContent: 'start',
 					alignItems: 'center',
 					flexDirection:'column',
-					padding: '30px',
+					padding: { xs:'10px', md:'30px' },
 					border: isLightMode ? '1px solid #17212F' : '2px solid #fff',
 					overflowX:'hidden',
 					overflowY:'scroll'

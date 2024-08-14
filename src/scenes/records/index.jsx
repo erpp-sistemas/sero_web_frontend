@@ -188,7 +188,7 @@ function Records() {
 					sx={{ m: "0 0 5px 0", fontSize:'24px' }}
 					width={'100%'} 
 					textAlign={'start'} 
-					padding={'0px 50px'}
+					padding={'0px 15px'}
 				>
 					Registro de fichas
 				</Typography>
@@ -199,14 +199,23 @@ function Records() {
 					width={'100%'} 
 					textAlign={'start'} 
 					fontSize={'16px'} 
-					padding={'0px 50px'}
+					padding={'0px 15px'}
 				>
 					Creación de registros en base de datos mediante el excel inicial.
 				</Typography>
 
 			</Box>
 			
-			<div className={isLightMode ? 'records__ligth' : 'records'}>	 
+			<Box 
+				sx={{
+					width:'90%',
+					maxWidth:'400px',
+					background:!isLightMode ? 'rgba(255, 255, 255, 0.250)' : 'rgba(0, 0, 63, 0.202)',
+					padding:'20px',
+					borderRadius:'20px',
+					margin:'15px',
+				}}
+			>	 
 
 				<Box className='records__checkbox' marginTop={'0rem'} display={'flex'} justifyContent={'center'} alignItems={'center'} width={'100%'}>
 
@@ -258,7 +267,7 @@ function Records() {
 
 				<Box marginTop={'2rem'}>
 
-					<Box className='' width={'350px'} >
+					<Box className='' width={'100%'} >
 
 						<FormControl fullWidth>
 
@@ -545,7 +554,7 @@ function Records() {
 
 				</Box>
 
-			</div>
+			</Box>
 
 		</Box>
 

@@ -839,7 +839,12 @@ const Index = () => {
       
 
     return (
-        <>
+        <Box 
+			sx={{
+				padding:'20px'
+			}}
+		>
+
           <Box
               m='20px 0'
               display='flex'
@@ -850,28 +855,31 @@ const Index = () => {
               padding='15px 10px'
               borderRadius='10px'
           >
+
             <LoadingModal open={isLoading}/>
+
             <CustomAlert
               alertOpen={alertOpen}
               type={alertType}
               message={alertMessage}
               onClose={setAlertOpen}
             />
-            <Grid container spacing={2}>
-              <Grid item xs={4}>
+
+            <Grid container xs={12} md={12} spacing={2}>
+              <Grid item xs={12} md={4}>
                 <PlaceSelect                
                   selectedPlace={selectedPlace}
                   handlePlaceChange={handlePlaceChange}
                 />
               </Grid>
-              <Grid item xs={4}>
+              <Grid item xs={12} md={4}>
                 <ServiceSelect
                   selectedPlace={selectedPlace}                  
                   selectedService={selectedService}
                   handleServiceChange={handleServiceChange}
                 />
               </Grid>
-              <Grid item xs={4}>
+              <Grid item xs={12} md={4}>
                 <ProcessSelect
                   selectedPlace={selectedPlace}
                   selectedService={selectedService}
@@ -881,8 +889,8 @@ const Index = () => {
               </Grid>
             </Grid>
             
-            <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>              
-              <Grid item xs={4}>
+            <Grid item xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>              
+              <Grid item xs={12} md={4}>
                 <TextField
                   id="start-date"
                   label="Fecha de inicio"
@@ -895,7 +903,7 @@ const Index = () => {
                   }}                  
                 />
               </Grid>
-              <Grid item xs={4}>
+              <Grid item xs={12} md={4}>
                 <TextField
                   id="finish-date"
                   label="Fecha final"
@@ -908,7 +916,7 @@ const Index = () => {
                   }}
                 />
               </Grid>
-              <Grid item xs={4}>
+              <Grid item xs={12} md={4}>
                 <Button 
                   variant="contained"                   
                   style={{ width: '100%', height: '100%' }}
@@ -997,17 +1005,20 @@ const Index = () => {
             </Grid>
 
             <PhotoViewModal 
-            open={openModal} 
-            onClose={handleCloseModal} 
-            selectedPlace={selectedPlace} 
-            selectedService={selectedService} 
-            data={selectedRow} 
-            onImageUrlUpdate={handleImageUrlUpdate}
+				open={openModal} 
+				onClose={handleCloseModal} 
+				selectedPlace={selectedPlace} 
+				selectedService={selectedService} 
+				data={selectedRow} 
+				onImageUrlUpdate={handleImageUrlUpdate}
             />
+
           </Box>                 
           
-        </>
+        </Box>
 
-    );
-};
-export default Index;
+    )
+
+}
+
+export default Index

@@ -53,7 +53,7 @@ export default function Verificacion() {
 
 	return (
 
-		<Box sx={{ width: '100%', height: 'auto' }}>
+		<Box sx={{ width: '100%', height: 'auto', minWidth:'800px' }}>
 
 			<Box sx={{ width: '100%', height: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '20px' }}>
 
@@ -62,12 +62,12 @@ export default function Verificacion() {
 					<FormControl fullWidth variant="filled" sx={{ minWidth: 150, width: '180px' }}>
 						<InputLabel id="mes">Mes</InputLabel>
 						<Select
-						labelId="mes"
-						id="mes"
-						value={pagosVerificacion.mesVerificacion}
-						label="Mes"
-						onChange={(event) => dispatch(setMesVerificacion(event.target.value))}
-						sx={{ border: 'none' }}
+							labelId="mes"
+							id="mes"
+							value={pagosVerificacion.mesVerificacion}
+							label="Mes"
+							onChange={(event) => dispatch(setMesVerificacion(event.target.value))}
+							sx={{ border: 'none' }}
 						>
 						{Meses.map((mes, index) => (
 							<MenuItem key={index} value={mes}>
@@ -80,12 +80,12 @@ export default function Verificacion() {
 					<FormControl fullWidth variant="filled" sx={{ minWidth: 150, width: '180px' }}>
 						<InputLabel id="año">Año</InputLabel>
 						<Select
-						labelId="año"
-						id="año"
-						value={pagosVerificacion.añoVerificacion}
-						label="Año"
-						onChange={(event) => dispatch(setAñoVerificacion(event.target.value))}
-						sx={{ border: 'none' }}
+							labelId="año"
+							id="año"
+							value={pagosVerificacion.añoVerificacion}
+							label="Año"
+							onChange={(event) => dispatch(setAñoVerificacion(event.target.value))}
+							sx={{ border: 'none' }}
 						>
 						{years.map((year, index) => (
 							<MenuItem key={index} value={year}>

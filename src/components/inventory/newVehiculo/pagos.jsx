@@ -14,7 +14,7 @@ function Pagos() {
 
 	return (
 
-		<Box sx={{ width: '100%', padding: '20px', backgroundColor: '#282c34', color: '#fff', mt:'30px' }}>
+		<Box sx={{ width:'100%', padding:'20px', backgroundColor:'#282c34', color:'#fff', mt:'30px', overflowY:'hidden', overflowX:'scroll' }}>
 
 			<Typography variant="h4" gutterBottom>Historial de Pagos</Typography>
 
@@ -22,6 +22,8 @@ function Pagos() {
 				value={selectedTab}
 				onChange={handleChange}
 				sx={{
+					width:'100%',
+					minWidth:'700px',
 					marginBottom: '20px',
 					'& .MuiTab-root': {
 						color: 'gray',
@@ -34,6 +36,7 @@ function Pagos() {
 					'& .MuiTabs-indicator': {
 						backgroundColor: '#38b000',
 					},
+					overflow:'scroll'
 				}}
 				>
 					<Tab label="Verificación" />

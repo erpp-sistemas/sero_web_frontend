@@ -4,7 +4,7 @@ import ImageIcon from '@mui/icons-material/Image'
 
 const ImageIndividual = ({ label, onClick, fileRef, onChange, preview, error }) => (
 
-	<Box sx={{ height: '270px' }}>
+	<Box sx={{ height:{ xs:'260px', md:'300px' }, }}>
 
 		<Typography sx={{ fontSize: '18px', color: '#fff', width: '100%', textAlign: 'center' }}>{label}</Typography>
 

@@ -15,13 +15,13 @@ const Content = () => {
     const handleImageChange = (e) => {
         const files = Array.from(e.target.files)
         setImagenes((prevImages) => [...prevImages, ...files])
-    };
+    }
 
     return (
 
-        <Box sx={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'start', mt: '40px' }}>
+        <Box sx={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'start', alignItems: 'start', mt: '40px', flexDirection:{ xs:'column', md:'row' } }}>
             
-			<Box sx={{ width: '60%', height: '550px', minHeight: '550px', display: 'flex', justifyContent: 'start', alignItems: 'start', flexDirection: 'column', border: '1px solid #fff', padding: '20px', borderRadius: '5px' }}>
+			<Box sx={{ width:{ xs:'100%', md:'60%' }, height: '550px', minHeight: '550px', display: 'flex', justifyContent: 'start', alignItems: 'start', flexDirection: 'column', border: '1px solid #fff', padding: '20px', borderRadius: '5px' }}>
                 
 				<Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'center', width:'100%'  }}>
 
@@ -48,7 +48,7 @@ const Content = () => {
                         
 						<Box sx={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
 							
-                            <Box sx={{ width: 'auto', display: 'flex', justifyContent: 'center', alignItems: 'start', gap: '20px' }}>
+                            <Box sx={{ width: 'auto', display: 'flex', justifyContent: 'center', alignItems: 'start', gap: '20px', flexDirection:{ xs:'column', md:'row' } }}>
 
 								<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px' }}>
                                     <Typography>Tipo:</Typography>
@@ -64,23 +64,30 @@ const Content = () => {
                                 </Box>
 								
                             </Box>
+
                             <Box sx={{ width: 'auto', height: 'auto' }}>
                                 {
 									isImagesOpen ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />
 								}
                             </Box>
+
                         </Box>
+
                         <Box sx={{ width: '100%', height: 'auto', display: isImagesOpen ? 'flex' : 'none', justifyContent: 'start', alignItems: 'center', gap: '15px', flexWrap: 'wrap' }}>
                             {imagenes.map((imagen, index) => (
-                                <Box key={index} sx={{ width: '150px', minWidth: '150px', height: '150px', background: '#fff', borderRadius: '5px', overflow: 'hidden', display:'flex', justifyContent:'center', alignItems:'center' }}>
+                                <Box key={index} sx={{ width:{  xs:'90px', md:'150px' }, minWidth:{  xs:'90px', md:'150px' }, height:{  xs:'90px', md:'150px' }, minHeight:{  xs:'90px', md:'150px' }, background:'#fff', borderRadius:'5px', overflow:'hidden', display:'flex', justifyContent:'center', alignItems:'center' }}>
 									<img src={URL.createObjectURL(imagen)} alt={`imagen-${index}`} width={'100%'} height={'100%'} />
 								</Box>
                             ))}
                         </Box>
+
                     </Box>
+
                 </Box>
+
             </Box>
-            <Box sx={{ width: '40%', height: 'auto', minHeight: '500px', display: 'flex', justifyContent: 'start', alignItems: 'center', flexDirection: 'column' }}>
+
+            <Box sx={{ width:{ xs:'100%', md:'40%' }, height: 'auto', minHeight: '500px', display: 'flex', justifyContent: 'start', alignItems: 'center', flexDirection: 'column', margin:{ xs:'40px 0px', md:'0px' } }}>
 
                 <Typography sx={{ width: '100%', textAlign: 'center', fontSize: '24px' }}>Agregar mantenimiento</Typography>
 
@@ -169,7 +176,7 @@ const Content = () => {
                     ))}
                 </Box>
 
-                <Button sx={{ color: '#ffffff', background: '#66bb6a', mt: '20px', p: '5px 35px', fontSize: '14px' }}>Crear</Button>
+                <Button sx={{ color: '#ffffff', background: '#66bb6a', mt: '20px', p: '5px 35px', fontSize: '14px', marginBottom:'30px' }}>Crear</Button>
 
             </Box>
 

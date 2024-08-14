@@ -112,27 +112,39 @@ function Inventory() {
 				variant="h3"
 				fontWeight="bold"
 				color={ isLightMode ? '#000' : '#e0e0e0' }
-				sx={{ m: "0 0 5px 0", fontSize:'24px' }}
-				width={'100%'} 
-				textAlign={'start'} 
-				padding={'0px 50px'}
+				sx={{ 
+					m: "0 0 5px 0", 
+					fontSize:'24px',
+					padding:{
+						xs:'0px 5px',
+						md:'0px 50px'
+					},
+					width:'100%',
+					textAlign:'start'
+				}}
 			>
                 Control vehicular
             </Typography>
 			<Typography
-				sx={{ m: "0 0 5px 0" }}
+				sx={{
+					m: "0 0 5px 0",
+					padding:{
+						xs:'0px 5px',
+						md:'0px 50px'
+					},
+				}}
 				color={'#4cceac'}
 				width={'100%'} 
 				textAlign={'start'} 
 				fontSize={'16px'} 
-				padding={'0px 50px'}
+				
 			>
 				Creación, asignación, historial y manejo de vehículos entre otras opciones en el sistema.
 			</Typography>
 
-            <Box sx={{ width:'100%', padding:'0px 50px', mt:'30px', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+            <Box sx={{ width:'100%', padding:{ xs:'0px 5px', md:'0px 50px' }, mt:'30px', display:'flex', justifyContent:'space-between', alignItems:'center', flexDirection:{ xs:'column', md:'row' }, gap:{ xs:'20px', md:'0px' } }}>
 
-                <Box sx={{ width:'auto', display:'flex', justifyContent:'center', alignItems:'center', gap:'15px' }}>
+                <Box sx={{ width:'auto', display:'flex', justifyContent:'center', alignItems:'center', gap:'15px', flexDirection:{ xs:'column', md:'row' } }}>
 
                     <Button 
                         onClick={() => setFiltro('todos')} 

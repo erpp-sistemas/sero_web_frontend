@@ -19,7 +19,7 @@ import MenuIcon from "@mui/icons-material/Menu"
 
 const Item = ({ title, to, icon, selected, setSelected, color, isCollapsed = false }) => {
 
-  const isValidIcon = typeof icon === 'string' && MUIIcons[icon]
+	const isValidIcon = typeof icon === 'string' && MUIIcons[icon]
 
 	
 	return (
@@ -70,7 +70,7 @@ const Sidebar = () => {
 	const [menu, setMenu] = React.useState([])
 	const [subMenu, setSubMenu] = React.useState([])
 	const dispatch = useDispatch()
-
+    const isLightMode = theme.palette.mode === 'light'
 	const [open, setOpen] = useState(false)
 
 	const toggleMenu = () => {
@@ -254,7 +254,7 @@ const Sidebar = () => {
 				zIndex: 99999, 
 				width: '80%', 
 				height: '100%',
-				transform:open ? 'translate(-99%, 0%)' : 'translate(0%,0%)',
+				transform:!open ? 'translate(-99%, 0%)' : 'translate(0%,0%)',
 				transition: 'transform 0.3s ease-in-out',
 				display: {
 					xs: 'flex',
@@ -265,9 +265,9 @@ const Sidebar = () => {
 				<Box sx={{ 
 					width: '100%', 
 					height: '100%', 
-					background: '#17212F', 
+					background:isLightMode ? 'white' : '#17212F', 
 					position: 'relative', 
-					border: '2px solid white',
+					border:isLightMode ? '2px solid #17212F' : '2px solid white',
 					display:'flex',
 					justifyContent:'center',
 					alignItems:'start',
@@ -333,7 +333,7 @@ const Sidebar = () => {
 												}}
 												onClick={() => setSelected(submenus.name)}
 											>
-												<Link to={submenus.route} >
+												<Link to={submenus.route} onClick={toggleMenu} >
 												
 													<Box
 														sx={{	
@@ -405,14 +405,14 @@ const Sidebar = () => {
 							position: 'absolute',
 							width: '50px',
 							height: '50px',
-							background: '#17212F',
+							background: isLightMode ? 'white' : '#17212F',
 							borderRadius: '2px',
 							display: 'flex',
 							alignItems: 'center',
 							justifyContent: 'center',
 							top: '2%',
 							left: '100%',
-							border: '2px solid white',
+							border: isLightMode ? '2px solid #17212F' : '2px solid white',
 							transform: 'translate(-0%, -2%)',
 							cursor: 'pointer',
 							borderTopRightRadius: '10px',
@@ -420,7 +420,7 @@ const Sidebar = () => {
 						}}
 						onClick={toggleMenu}
 					>
-						<IconButton sx={{ color: 'white' }}>
+						<IconButton sx={{ color: isLightMode ? '#17212F' : 'white' }}>
 							<MenuIcon sx={{ fontSize: '30px' }} />
 						</IconButton>
 					</Box>

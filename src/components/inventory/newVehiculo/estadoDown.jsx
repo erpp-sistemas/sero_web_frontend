@@ -11,9 +11,9 @@ export default function EstadoDown() {
 
 	return (
 
-		<Box sx={{ width:'100%', height:'auto', display:'flex', justifyContent:'start', alignItems:'start', gap:'40px', marginLeft:'0px', marginTop:'50px' }}>
+		<Box sx={{ width:'100%', height:'auto', display:'flex', justifyContent:'start', alignItems:'start', gap:'40px', marginLeft:'0px', marginTop:'50px', flexWrap:'wrap' }}>
 					
-			<Box sx={{ width:'33.3%', height:'auto' }}>
+			<Box sx={{ width:{ xs:'100%', md:'31%'}, height:'auto' }}>
 
 				<Typography sx={{ fontSize:'16px', textAlign:'center', marginBottom:'20px' }}>ESTADO MECANICO</Typography>
 
@@ -58,7 +58,7 @@ export default function EstadoDown() {
 
 			</Box>
 
-			<Box sx={{ width:'33.3%', height:'auto' }}>
+			<Box sx={{ width:{ xs:'100%', md:'31%'}, height:'auto' }}>
 
 				<Typography sx={{ fontSize:'16px', textAlign:'center', marginBottom:'20px' }}>ESTADO DE ADICIONALES</Typography>
 
@@ -103,7 +103,7 @@ export default function EstadoDown() {
 
 			</Box>
 
-			<Box sx={{ width:'33.3%', height:'auto', display:'flex', justifyContent:'space-between', alignItems:'center', gap:'30px', flexDirection:'column' }}>
+			<Box sx={{ width:{ xs:'100%', md:'31%'}, height:'auto', display:'flex', justifyContent:'space-between', alignItems:'center', gap:'30px', flexDirection:'column' }}>
 				<Typography sx={{ width:'100%', height:'auto', fontSize:'16px', textAlign:'center' }}>OBSERVACIONES</Typography>
 				<Box
 					component="form"

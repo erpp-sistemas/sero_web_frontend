@@ -15,7 +15,7 @@ function Content() {
 
 	return (
 
-		<Box sx={{ width: '100%', padding: '20px', backgroundColor: '#282c34', color: '#fff', mt:'30px' }}>
+		<Box sx={{ width: '100%', padding: '20px', backgroundColor: '#282c34', color: '#fff', mt:'30px', overflowY:'hidden', overflowX:'scroll' }}>
 
 			<Typography variant="h4" gutterBottom>Historial de Pagos</Typography>
 
@@ -24,6 +24,7 @@ function Content() {
 				onChange={handleChange}
 				sx={{
 					marginBottom: '20px',
+					minWidth:'700px',
 					'& .MuiTab-root': {
 						color: 'gray',
 						transition: 'color 0.3s',

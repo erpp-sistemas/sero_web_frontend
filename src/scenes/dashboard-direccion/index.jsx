@@ -195,7 +195,16 @@ const Home = () => {
 				
 				</Box>
 
-				<Box width="100%" height="250px" m="-20px 0 0 0" >
+				<Box 
+					sx={{
+						width:"100%",
+						height:"250px",
+						m:"-20px 0 0 0" ,
+						background:'transparent',
+						overflowY:'hidden',
+						overflowX:'scroll'
+					}}
+				>
 					<LineChart isDashboard={true} dataChart={numero_gestiones} isTotal={true} />
 				</Box>
 
@@ -245,8 +254,17 @@ const Home = () => {
 				</Typography>
 				</Box>
 
-				<Box height="270px">
-				<BarChart data={mockBarData} /> 
+				<Box 
+					sx={{
+						height:"270px",
+						m:"-20px 0 0 0" ,
+						background:'transparent',
+						overflowY:'hidden',
+						overflowX:'scroll',
+						width:'100%'
+					}}
+				>
+					<BarChart data={mockBarData} /> 
 				</Box>
 			</Box>
 

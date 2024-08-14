@@ -57,120 +57,123 @@
 
 			<Box sx={{ width:'100%', height:'100%', display:'flex', justifyContent:'start', alignItems:'center', flexDirection:'column' }}>
 
-				<Box sx={{ m:'50px', display:'flex', justifyContent:'start', alignItems:'center', width:'100%', gap:'20px' }}>
+				<Box sx={{ m:'50px', display:'flex', justifyContent:'start', alignItems:'center', width:'100%', gap:'20px', flexDirection:{ xs:'column', md:'row'} }}>
+
 					<Box sx={{ width:'20%', display:'flex', justifyContent:'center', alignItems:'center', flexDirection:'column', gap:'2rem' }}>
-					<Box sx={{ width:'200px', height:'200px', border:'1px solid grey', borderRadius:'50%', background:'rgba(0,0,0,0.3)', overflow:'hidden', display:'flex', justifyContent:'center' }}>
-						<img src={editarInformacionGeneral.editImagePreview} alt="" width={'100%'} height={'100%'} />
+						<Box sx={{ width:'200px', height:'200px', border:'1px solid grey', borderRadius:'50%', background:'rgba(0,0,0,0.3)', overflow:'hidden', display:'flex', justifyContent:'center' }}>
+							<img src={editarInformacionGeneral.editImagePreview} alt="" width={'100%'} height={'100%'} />
+						</Box>
+						<Box sx={{ width:'100%', display:'flex', justifyContent:'center', alignItems:'center', gap:'1rem', mt:{ xs:'0px', md:'50px' }, mb:{ xs:'30px', mb:'0px' } }}>
+							<Button sx={{ color:'white', background:'rgba(0,0,0,0.6)', border:'1px solid white', padding:'5px 30px', margin:'0', minWidth:'0', borderRadius:'7px' }}>
+							<EditIcon sx={{ fontSize:'30px', color:'white' }} />
+							</Button>
+							<Button 
+							sx={{ color:'white', background:'rgba(0,0,0,0.6)', border:'1px solid white', padding:'5px 30px', margin:'0', minWidth:'0', borderRadius:'7px' }}
+							onClick={generatePDF}
+							>
+							<PictureAsPdfIcon sx={{ fontSize:'30px', color:'red' }} />
+							</Button>
+						</Box>
 					</Box>
-					<Box sx={{ width:'100%', display:'flex', justifyContent:'center', alignItems:'center', gap:'1rem', mt:'50px' }}>
-						<Button sx={{ color:'white', background:'rgba(0,0,0,0.6)', border:'1px solid white', padding:'5px 30px', margin:'0', minWidth:'0', borderRadius:'7px' }}>
-						<EditIcon sx={{ fontSize:'30px', color:'white' }} />
-						</Button>
-						<Button 
-						sx={{ color:'white', background:'rgba(0,0,0,0.6)', border:'1px solid white', padding:'5px 30px', margin:'0', minWidth:'0', borderRadius:'7px' }}
-						onClick={generatePDF}
-						>
-						<PictureAsPdfIcon sx={{ fontSize:'30px', color:'red' }} />
-						</Button>
-					</Box>
-					</Box>
-					<Box sx={{ width:'35%', display:'flex', justifyContent:'center', alignItems:'center', flexDirection:'column', gap:'1.5rem' }}>
-					<TextField
-						sx={{ width:'90%' }}
-						id="Placa"
-						label="Placa"
-						value={ editarInformacionGeneral.editPlaca }
-						variant="outlined"
-						onChange={event => dispatch(setEditPlaca(event.target.value))}
-						disabled
-					/>
-					<TextField
-						sx={{ width:'90%' }}
-						id="Marca"
-						label="Marca"
-						defaultValue={ editarInformacionGeneral.editMarca }
-						variant="outlined"
-						onChange={event => dispatch(setEditMarca(event.target.value))}
-						disabled
-					/>
-					<FormControl fullWidth variant="filled" sx={{ width:'90%' }}>
-						<InputLabel id="modelo">Modelo</InputLabel>
-						<Select
-						labelId="modelo"
-						id="modelo"
-						value={ editarInformacionGeneral.editModelo }
-						label="Modelo"
-						onChange={(handleChange)}
-						disabled
-						>
-						{years.map((year) => (
-							<MenuItem key={year} value={year}>{year}</MenuItem>
-						))}
-						</Select>
-					</FormControl>
-					<TextField
-						sx={{ width:'90%' }}
-						id="Vehiculo"
-						label="Vehiculo"
-						defaultValue={ editarInformacionGeneral.editVehiculo }
-						variant="outlined"
-						onChange={event => dispatch(setEditVehiculo(event.target.value))}
-						disabled
-					/>
-					<TextField
-						sx={{ width:'90%' }}
-						id="Tipo de motor"
-						label="Tipo de motor"
-						defaultValue={ editarInformacionGeneral.editTipoMotor }
-						variant="outlined"
-						onChange={event => dispatch(setEditTipoMotor(event.target.value))}
-						disabled
-					/>
-					</Box>
-					<Box sx={{ width:'35%', display:'flex', justifyContent:'center', alignItems:'center', flexDirection:'column', gap:'1.5rem' }}>
-					<TextField
-						sx={{ width:'90%' }}
-						id="Color"
-						label="Color"
-						defaultValue={ editarInformacionGeneral.editColor }
-						variant="outlined"
-						onChange={event => dispatch(setEditColor(event.target.value))}
-						disabled
-					/>
-					<TextField
-						sx={{ width:'90%' }}
-						id="Color llavero"
-						label="Color llavero"
-						defaultValue={ editarInformacionGeneral.editColorLlavero }
-						variant="outlined"
-						onChange={event => dispatch(setEditColorLlavero(event.target.value))}
-						disabled
-					/>
-					<TextField
-						sx={{ width:'90%' }}
-						id="Kilometraje"
-						label="Kilometraje"
-						defaultValue={ editarInformacionGeneral.editKilometraje }
-						variant="outlined"
-						onChange={event => dispatch(setEditKilometraje(event.target.value))}
-						disabled
-					/>
-					<FormControl fullWidth sx={{ width:'90%' }} disabled>
-						<PlaceSelectDisabled      
-						disabled      
-						selectedPlace={editarInformacionGeneral.editSelectedPlace}
-						handlePlaceChange={handlePlaceChange}
+
+					<Box sx={{ width:{ xs:'100%', md:'35%'}, display:'flex', justifyContent:'center', alignItems:'center', flexDirection:'column', gap:'1.5rem' }}>
+						<TextField
+							sx={{ width:'90%' }}
+							id="Placa"
+							label="Placa"
+							value={ editarInformacionGeneral.editPlaca }
+							variant="outlined"
+							onChange={event => dispatch(setEditPlaca(event.target.value))}
+							disabled
 						/>
-					</FormControl>
-					<TextField	
-						sx={{ width:'90%' }}
-						id="# Serie"
-						label="# Serie"
-						defaultValue={ editarInformacionGeneral.editSerie }
-						variant="outlined"
-						onChange={event => dispatch(setEditSerie(event.target.value))}
-						disabled
-					/>
+						<TextField
+							sx={{ width:'90%' }}
+							id="Marca"
+							label="Marca"
+							defaultValue={ editarInformacionGeneral.editMarca }
+							variant="outlined"
+							onChange={event => dispatch(setEditMarca(event.target.value))}
+							disabled
+						/>
+						<FormControl fullWidth variant="filled" sx={{ width:'90%' }}>
+							<InputLabel id="modelo">Modelo</InputLabel>
+							<Select
+							labelId="modelo"
+							id="modelo"
+							value={ editarInformacionGeneral.editModelo }
+							label="Modelo"
+							onChange={(handleChange)}
+							disabled
+							>
+							{years.map((year) => (
+								<MenuItem key={year} value={year}>{year}</MenuItem>
+							))}
+							</Select>
+						</FormControl>
+						<TextField
+							sx={{ width:'90%' }}
+							id="Vehiculo"
+							label="Vehiculo"
+							defaultValue={ editarInformacionGeneral.editVehiculo }
+							variant="outlined"
+							onChange={event => dispatch(setEditVehiculo(event.target.value))}
+							disabled
+						/>
+						<TextField
+							sx={{ width:'90%' }}
+							id="Tipo de motor"
+							label="Tipo de motor"
+							defaultValue={ editarInformacionGeneral.editTipoMotor }
+							variant="outlined"
+							onChange={event => dispatch(setEditTipoMotor(event.target.value))}
+							disabled
+						/>
+					</Box>
+
+					<Box sx={{ width:{ xs:'100%', md:'35%'}, display:'flex', justifyContent:'center', alignItems:'center', flexDirection:'column', gap:'1.5rem', mb:{ xs:'60px', mb:'0px' } }}>
+						<TextField
+							sx={{ width:'90%' }}
+							id="Color"
+							label="Color"
+							defaultValue={ editarInformacionGeneral.editColor }
+							variant="outlined"
+							onChange={event => dispatch(setEditColor(event.target.value))}
+							disabled
+						/>
+						<TextField
+							sx={{ width:'90%' }}
+							id="Color llavero"
+							label="Color llavero"
+							defaultValue={ editarInformacionGeneral.editColorLlavero }
+							variant="outlined"
+							onChange={event => dispatch(setEditColorLlavero(event.target.value))}
+							disabled
+						/>
+						<TextField
+							sx={{ width:'90%' }}
+							id="Kilometraje"
+							label="Kilometraje"
+							defaultValue={ editarInformacionGeneral.editKilometraje }
+							variant="outlined"
+							onChange={event => dispatch(setEditKilometraje(event.target.value))}
+							disabled
+						/>
+						<FormControl fullWidth sx={{ width:'90%' }} disabled>
+							<PlaceSelectDisabled      
+							disabled      
+							selectedPlace={editarInformacionGeneral.editSelectedPlace}
+							handlePlaceChange={handlePlaceChange}
+							/>
+						</FormControl>
+						<TextField	
+							sx={{ width:'90%' }}
+							id="# Serie"
+							label="# Serie"
+							defaultValue={ editarInformacionGeneral.editSerie }
+							variant="outlined"
+							onChange={event => dispatch(setEditSerie(event.target.value))}
+							disabled
+						/>
 					</Box>
 				</Box>
 

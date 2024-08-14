@@ -19,51 +19,51 @@ const Header = ({ next }) => {
 	
 	return(
 
-		<Box sx={{ width:'100%', height:'auto', display:'flex', alignItems:'center', justifyContent:'space-between', gap:'20px' }}>
+		<Box sx={{ width:'100%', height:'auto', display:'flex', alignItems:'center', justifyContent:'space-between', gap:{ xs:'5px', md:'20px' } }}>
 
 			<Box sx={{ width:'10%', height:'auto', display:'flex', justifyContent:'center', alignItems:'center', flexDirection:'column' }}>
-				<CheckCircleIcon sx={{ fontSize:'25px', marginBottom:'5px', color:'#38b000' }} />
-				<Typography sx={{ fontSize:'12px', width:'100%', textAlign:'center', color:'#38b000' }} >Informacion Básica</Typography>
+				<CheckCircleIcon sx={{ fontSize:{ xs:'15px', md:'25px' }, marginBottom:'5px', color:'#38b000' }} />
+				<Typography sx={{ fontSize:{ xs:'7px', md:'12px' }, width:'100%', textAlign:'center', color:'#38b000' }} >Informacion Básica</Typography>
 			</Box>
 
-			<Box sx={{ width:'20%', height:'auto' }}>
+			<Box sx={{ width:{ xs:'10%', md:'20%'}, height:'auto' }}>
 				<Box sx={{ width:'100%', background:'#38b000', height:'3px', animation: next === '' ? `${expandWidth} 4s infinite` : false }}></Box>
 			</Box>
 
 			<Box sx={{ width:'10%', height:'auto', display:'flex', justifyContent:'center', alignItems:'center', flexDirection:'column' }}>
-				{ next !== '' ? <CheckCircleIcon sx={{ fontSize:'25px', marginBottom:'5px', color:'#38b000' }} /> : false }
-				{ next === '' ? <RemoveCircleIcon sx={{ fontSize:'25px', marginBottom:'5px', color:'grey' }} /> : false }
-				<Typography sx={{ fontSize:'12px', width:'100%', textAlign:'center',color:next === '' ? 'grey' : '#38b000' }}>Documentos</Typography>
+				{ next !== '' ? <CheckCircleIcon sx={{ fontSize:{ xs:'15px', md:'25px' }, marginBottom:'5px', color:'#38b000' }} /> : false }
+				{ next === '' ? <RemoveCircleIcon sx={{ fontSize:{ xs:'15px', md:'25px' }, marginBottom:'5px', color:'grey' }} /> : false }
+				<Typography sx={{ fontSize:{  xs:'7px', md:'12px' }, width:'100%', textAlign:'center',color:next === '' ? 'grey' : '#38b000' }}>Documentos</Typography>
 			</Box>
 
 			{  
 				next === '' ? 
-					<Box sx={{ width:'20%', background:'grey', height:'2px'  }}></Box> 
+					<Box sx={{ width:{ xs:'10%', md:'20%'}, background:'grey', height:'2px'  }}></Box> 
 				: 
-					<Box sx={{ width:'20%', height:'auto' }}>
+					<Box sx={{ width:{ xs:'10%', md:'20%'}, height:'auto' }}>
 						<Box sx={{ width:'100%', background:'#38b000', height:'3px', animation: next === 'documentos' ? `${expandWidth} 4s infinite` : false }}></Box>
 					</Box>
 			}
 
 			<Box sx={{ width:'10%', height:'auto', display:'flex', justifyContent:'center', alignItems:'center', flexDirection:'column' }}>
-				{ next !== '' && next !== 'documentos' ? <CheckCircleIcon sx={{ fontSize:'25px', marginBottom:'5px', color:'#38b000' }}/> : false }
-				{ next !== 'estado' && next !== 'pagos' ? <RemoveCircleIcon sx={{ fontSize:'25px', marginBottom:'5px', color:'grey' }}/> : false }
-				<Typography sx={{ fontSize:'12px', width:'100%', textAlign:'center', color:next !== 'estado' && next !== 'pagos' ? 'grey' : '#38b000' }}>Estado Inicial del vehiculo</Typography>
+				{ next !== '' && next !== 'documentos' ? <CheckCircleIcon sx={{ fontSize:{ xs:'15px', md:'25px' }, marginBottom:'5px', color:'#38b000' }}/> : false }
+				{ next !== 'estado' && next !== 'pagos' ? <RemoveCircleIcon sx={{ fontSize:{ xs:'15px', md:'25px' }, marginBottom:'5px', color:'grey' }}/> : false }
+				<Typography sx={{ fontSize:{  xs:'7px', md:'12px' }, width:'100%', textAlign:'center', color:next !== 'estado' && next !== 'pagos' ? 'grey' : '#38b000' }}>Estado Inicial del vehiculo</Typography>
 			</Box>
 
 			{  
 				next !== 'estado' && next !== 'pagos' ? 
-					<Box sx={{ width:'20%', background:'grey', height:'2px'  }}></Box>
+					<Box sx={{ width:{ xs:'10%', md:'20%'}, background:'grey', height:'2px'  }}></Box>
 				: 
-					<Box sx={{ width:'20%', height:'auto' }}>
+					<Box sx={{ width:{ xs:'10%', md:'20%'}, height:'auto' }}>
 						<Box sx={{ width:'100%', background:'#38b000', height:'3px', animation: next === 'estado' ? `${expandWidth} 4s infinite` : false }}></Box>
 					</Box>
 			}
 
 			<Box sx={{ width:'10%', height:'auto', display:'flex', justifyContent:'center', alignItems:'center', flexDirection:'column' }}>
-				{ next === 'pagos' ? <CheckCircleIcon sx={{ fontSize:'25px', marginBottom:'5px', color:'#38b000' }}/> : false }
-				{ next !== 'pagos' ? <RemoveCircleIcon sx={{ fontSize:'25px', marginBottom:'5px', color:'grey' }}/> : false }
-				<Typography sx={{ fontSize:'12px', width:'100%', textAlign:'center', color:next !== 'pagos' ? 'grey' : '#38b000' }}>Pagos del vehiculo</Typography>
+				{ next === 'pagos' ? <CheckCircleIcon sx={{ fontSize:{ xs:'15px', md:'25px' }, marginBottom:'5px', color:'#38b000' }}/> : false }
+				{ next !== 'pagos' ? <RemoveCircleIcon sx={{ fontSize:{ xs:'15px', md:'25px' }, marginBottom:'5px', color:'grey' }}/> : false }
+				<Typography sx={{ fontSize:{  xs:'7px', md:'12px' }, width:'100%', textAlign:'center', color:next !== 'pagos' ? 'grey' : '#38b000' }}>Pagos del vehiculo</Typography>
 			</Box>
 
 		</Box>

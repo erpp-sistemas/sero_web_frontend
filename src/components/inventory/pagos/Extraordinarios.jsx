@@ -55,7 +55,7 @@ export default function Extraordinarios() {
 
 	return (
 
-		<Box sx={{ width: '100%', height: 'auto' }}>
+		<Box sx={{ width: '100%', height: 'auto', minWidth:'800px' }}>
 
 			<Box sx={{ width: '100%', height: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '20px' }}>
 

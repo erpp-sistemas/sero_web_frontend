@@ -5,16 +5,21 @@ import BoxGeoconding from '../../components/geocoding/BoxGeoconding'
 
 const Index = () => {
 
-	const apikeySlice = useSelector((a)=>a.apikeyGeocoding)
+	const apikeySlice = useSelector( (a) => a.apikeyGeocoding )
  
 	return (	
 		
 		<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
 
 			<Grow  in={!apikeySlice} style={{ transformOrigin: '0 20 0' }}   {...(!apikeySlice ? { timeout:2000 } : {})}>
-			{!apikeySlice?<div style={{width:'100%',display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-				<InserApikey /> 
-			</div>:<span></span>}
+				{
+					!apikeySlice?
+						<div style={{width:'100%',display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+							<InserApikey /> 
+						</div>
+					:
+						<span></span>
+				}
 			</Grow>
 
 			<Slide direction="up" in={apikeySlice} mountOnEnter unmountOnExit>

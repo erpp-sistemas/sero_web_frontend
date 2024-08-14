@@ -58,7 +58,7 @@ const Title = ({ setAnimation }) => {
 				<CloseFullscreenIcon 
 					sx={{
 						color: 'red',
-						fontSize: '24px',
+						fontSize: '30px',
 						fontWeight: '500'
 					}}
 				/>

@@ -325,8 +325,8 @@ function BatteryMeter({ data }) {
 			>
 				{data.length > 0 && (
 				<>
-					<Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2} >
-            <Grid item xs={6} sx={{ paddingBottom: 1 }}>
+			<Grid item xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2} >
+            <Grid item xs={4} md={6} sx={{ paddingBottom: 1 }}>
                 <FormControl>
                 <TextField                              
                     fullWidth                            
@@ -352,7 +352,7 @@ function BatteryMeter({ data }) {
                 
                 </FormControl>
             </Grid>
-            <Grid item xs={2}>
+            <Grid item xs={6} md={2}>
               <Button 
                 variant="outlined"                             
                 color="secondary"                            

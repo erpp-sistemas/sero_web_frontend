@@ -14,7 +14,7 @@ const LineChart = ({ isDashboard = false, dataChart, tipo, isTotal = false }) =>
     <Line
       data={dataChart}
       height={250}
-      width={480}
+      width={580}
       theme={{
         axis: {
           domain: {

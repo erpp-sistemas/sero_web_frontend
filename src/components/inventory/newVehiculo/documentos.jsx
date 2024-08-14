@@ -50,9 +50,9 @@ const Documentos = () => {
 
 		<Box sx={{ width: '100%', height: 'auto' }}>
 
-			<Typography sx={{ fontSize: '24px', width: '100%', textAlign: 'start', mb: '20px', mt: '40px', textTransform: 'uppercase' }}>Documentos</Typography>
+			<Typography sx={{ fontSize:{ xs:'20px', md:'24px' }, width: '100%', textAlign: 'start', mb: '20px', mt: '40px', textTransform: 'uppercase' }}>Documentos</Typography>
 
-			<Box sx={{ width: '100%', height: 'auto',  display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '40px' }}>
+			<Box sx={{ width: '100%', height: 'auto',  display:'flex', justifyContent: 'center', alignItems: 'center', gap:{ xs:'0px', md:'40px' }, flexWrap:'wrap' }}>
 		
 				<DocumentoIndividual
 					label="Tarjeta de circulación"
@@ -92,9 +92,9 @@ const Documentos = () => {
 
 			</Box>
 
-			<Typography sx={{ fontSize: '24px', width: '100%', textAlign: 'start', mb: '20px', mt: '40px', textTransform: 'uppercase' }}>Imagenes</Typography>
+			<Typography sx={{ fontSize:{ xs:'20px', md:'24px' }, width: '100%', textAlign: 'start', mb: '20px', mt: '40px', textTransform: 'uppercase' }}>Imagenes</Typography>
 
-			<Box sx={{ width: '100%', height: 'auto', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '40px' }}>
+			<Box sx={{ width: '100%', height: 'auto', display: 'flex', justifyContent: 'center', alignItems: 'center', gap:{ xs:'0px', md:'40px' }, flexWrap:'wrap' }}>
 
 				<ImageIndividual
 					label="Frente"

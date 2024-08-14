@@ -58,10 +58,14 @@ function TrafficLightCountingProcedures({ data }) {
       padding='5px'
     >   
       <Box
-        gridColumn='span 12'
-        backgroundColor='rgba(128, 128, 128, 0.1)'
-        borderRadius="10px"
-        sx={{ cursor: 'pointer' }}
+        sx={{ 
+			cursor: 'pointer',
+			gridColumn:'span 12',
+			backgroundColor:'rgba(128, 128, 128, 0.1)',
+			borderRadius:"10px",
+			overflowY:'hidden',
+			overflowX:'scroll'
+		}}
       >
 
             <Box

@@ -1,5 +1,5 @@
 import { Box, useTheme, Typography} from "@mui/material"
-import { tokens } from "../../theme";
+import { tokens } from "../../theme"
 import Line from '../../components/NivoChart/Line'
 import PropTypes from 'prop-types'
 
@@ -14,20 +14,29 @@ function MonthlyPayments({ data, typeConcept }) {
 	return (
 
 		<Box
-			id="grid-1"
-			display="grid"
-			gridTemplateColumns="repeat(12, 1fr)"
-			gridAutoRows="490px"
-			gap="15px"
-			width='100%'      
-			padding='5px'
+
+			sx={{
+				gap:"15px",
+				width:'100%',    
+				maxWidth:'100%',    
+				padding:'5px',
+				gridTemplateColumns:"repeat(12, 1fr)",
+				gridAutoRows:'490px',
+				id:"grid-1",
+				display:"grid",
+				overflowY:'hidden',
+				overflowX:'scroll',
+			}}
 		>   
 
-			<Box
-				gridColumn='span 12'
-				backgroundColor='rgba(128, 128, 128, 0.1)'
-				borderRadius="10px"
-				sx={{ cursor: 'pointer' }}
+			<Box		
+				sx={{ 
+					minWidth:'1000px',
+					cursor:'pointer',
+					gridColumn:'span 12',
+					backgroundColor:'rgba(128, 128, 128, 0.1)',
+					borderRadius:"10px"
+				}}
 			>
 
 				<Box
@@ -41,7 +50,14 @@ function MonthlyPayments({ data, typeConcept }) {
 					<Typography
 						variant="h5"
 						fontWeight="600"
-						sx={{ padding: "2px 30px 0 5px" }}
+						sx={{ 
+							padding: "2px 30px 0 5px",
+							width:'100%',
+							textAlign:{
+								xs:'start',
+								md:'center'
+							}
+						}}
 						color={colors.grey[200]}
 						textAlign={'center'}
 					>

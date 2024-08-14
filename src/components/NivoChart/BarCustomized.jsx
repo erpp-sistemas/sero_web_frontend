@@ -13,6 +13,7 @@ const Bar = ({ data, index, keys, position, format }) => {
         <ResponsiveBar
             data={data}
             keys={keys}
+			width={1100}
             indexBy={index}
             margin={{ top: 50, right: 30, bottom: 100, left: 90 }}
             padding={0.3}            

@@ -63,7 +63,7 @@ const InformacionGeneral = () => {
 			}}
 		>
 
-			<Box sx={{ width:'33%', height:'100%', padding:'0', margin:'0' }}>
+			<Box sx={{ width:{ sx:'100%', md:'33%' }, height:'100%', padding:'0', margin:'0' }}>
 
 				<Typography sx={{ fontSize:'20px', fontWeight:'500' }}>Fotografia</Typography>
 
@@ -160,7 +160,7 @@ const InformacionGeneral = () => {
 
 			</Box>
 			
-			<Box sx={{ width:'33%', height:'100%', padding:'0 20px', margin:'0' }}>
+			<Box sx={{ width:{ sx:'100%', md:'33%' }, height:'100%', padding:{ sx:'0px 0px', md:'0px 20px' }, margin:{xs:'30px 0px', md:'0'} }}>
 				<TextField sx={{ width:'100%', border: informacionGeneralErrors.errorMarca ? '1px solid red' : 'none' }} id="filled-basic" label="Marca" variant="filled" value={informacionGeneral.marca} onChange={e => { const uppercaseValue = e.target.value; dispatch(setMarca(uppercaseValue)); dispatch(setErrorMarca(false)); } }/>
 				<TextField sx={{ width:'100%', mt:'10px', border: informacionGeneralErrors.errorPlaca ? '1px solid red' : 'none' }} id="filled-basic" label="Placa" variant="filled" value={informacionGeneral.placa} onChange={e => { const uppercaseValue = e.target.value.toUpperCase(); dispatch(setPlaca(uppercaseValue)); dispatch(setErrorPlaca(false)); } }/>
 				<FormControl fullWidth variant="filled" sx={{ mt:'10px', minWidth: 120 }}>
@@ -184,7 +184,7 @@ const InformacionGeneral = () => {
 				<TextField sx={{ width:'100%', mt:'10px', border: informacionGeneralErrors.errorSerie ? '1px solid red' : 'none' }} id="filled-basic" label="Serie" variant="filled" value={informacionGeneral.serie} onChange={e => { const uppercaseValue = e.target.value.toUpperCase(); dispatch(setSerie(uppercaseValue)); dispatch(setErrorSerie(false)); }}/>
 			</Box>
 
-			<Box sx={{ width:'33%', minWidth:'400px', height:'100%', padding:'0 20px', margin:'0' }}>
+			<Box sx={{ width:{ sx:'100%', md:'33%' }, minWidth:{ xs:'100px', md:'400px'}, height:'100%', padding:{ sx:'0px 0px', md:'0px 20px' }, margin:{xs:'10px 0px', md:'0'} }}>
 				<TextField sx={{ width:'100%', border: informacionGeneralErrors.errorColor ? '1px solid red' : false }} id="filled-basic" label="Color" variant="filled" value={informacionGeneral.color} onChange={e => { const uppercaseValue = e.target.value; dispatch(setColor(uppercaseValue)); dispatch(setErrorColor(false)); }} />
 				<TextField sx={{ width:'100%', mt:'10px', border: informacionGeneralErrors.errorColorLlavero ? '1px solid red' : false }} id="filled-basic" label="Color de llavero" variant="filled" value={informacionGeneral.colorLlavero} onChange={e => { const uppercaseValue = e.target.value; dispatch(setColorLlavero(uppercaseValue)); dispatch(setErrorColorLlavero(false)); }} />
 				<TextField sx={{ width:'100%', mt:'10px', mb:'10px', border: informacionGeneralErrors.errorTipoMotor ? '1px solid red' : false }} id="filled-basic" label="Tipo de motor" variant="filled" value={informacionGeneral.tipoMotor} onChange={e => { const uppercaseValue = e.target.value; dispatch(setTipoMotor(uppercaseValue)); dispatch(setErrorTipoMotor(false)); }}/>

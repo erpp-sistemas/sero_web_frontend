@@ -123,7 +123,17 @@ const Backup = () => {
 
     return (
 
-        <Box minHeight="100vh" width="auto" display="flex" alignItems="center" justifyContent="start" flexDirection="column">
+        <Box 
+			sx={{
+				minHeight:"100vh", 
+				width:"100%" ,
+				display:"flex" ,
+				alignItems:"center" ,
+				justifyContent:"center" ,
+				flexDirection:"column",
+				padding:'20px'
+			}}
+		>
 
 			<Typography 
 				variant="h3"
@@ -132,7 +142,6 @@ const Backup = () => {
 				sx={{ m: "0 0 5px 0", fontSize:'24px' }}
 				width={'100%'} 
 				textAlign={'start'} 
-				padding={'0px 50px'}
 			>
                 Subida de Respaldos
             </Typography>
@@ -143,101 +152,137 @@ const Backup = () => {
 				width={'100%'} 
 				textAlign={'start'} 
 				fontSize={'16px'} 
-				padding={'0px 50px'}
 			>
 				Modulo exclusivo para administradores en donde podran subir los respaldos finales, almacenarlos y descargarlos cuando lo necesiten.
 			</Typography>
 
-			<Box sx={{ display:'flex', justifyContent:'center', alignItems:'center', gap:'1rem', width:'100%', padding:'0px 50px' }}>
+			<Box 
+				sx={{ 
+					display:'flex', 
+					justifyContent:'center',
+					alignItems:'center', 
+					gap:'1rem', 
+					width:'100%',
+					mt:'10px', 
+					padding:'0px 10px',
+					flexDirection:{
+						xs:'column',
+						md:'row'
+					}
+				}}
+			>
 
-				<div className={isLightMode ? 'backups__ligth' : 'backups'}>
+				<Box 
+					sx={{ 
+						width:'100%',
+						background: isLightMode ? 'rgba(0, 0, 63, 0.202)' : 'rgba(255, 255, 255, 0.250)',
+						padding: '50px 10px',
+						borderRadius:'20px',
+						justifyContent:'center',
+						alignItems:'center',
+						display:'flex',
+						flexDirection:'column',
+					}}
+				>
 
-				<FormControl fullWidth sx={{ width: '70%', marginTop: '0rem', marginBottom: '0.6rem' }}>
+					<FormControl fullWidth sx={{ width: '100%', marginTop: '0rem', marginBottom: '0.6rem' }}>
 
-					<button onClick={() => setInstrucciones(!instrucciones)}>
-						<Typography sx={{ mb: '20px', background: !isLightMode ? '#141B2D' : '#cff9e0', textAlign: 'center', fontSize: '20px', borderRadius: '10px' }}>
-							Instrucciones {instrucciones ? <ArrowDropDownIcon /> : <ArrowDropUpIcon />}
-						</Typography>
-					</button>
+						<button onClick={() => setInstrucciones(!instrucciones)}>
+							<Typography sx={{ mb: '20px', background: !isLightMode ? '#141B2D' : '#cff9e0', textAlign: 'center', fontSize: '20px', borderRadius: '10px' }}>
+								Instrucciones {instrucciones ? <ArrowDropDownIcon /> : <ArrowDropUpIcon />}
+							</Typography>
+						</button>
 
-					{instrucciones && (
-						<Typography
-							sx={{
-								mb: '20px',
-								fontSize: '16px',
-								opacity: instrucciones ? 1 : 0,
-								transition: 'opacity 0.3s ease-in-out'
-							}}>
-							Selecciona la carpeta donde se encuentren todos los PDF. El programa automáticamente creará ZIPs y los subirá parte por parte.
-						</Typography>
+						{instrucciones && (
+							<Typography
+								sx={{
+									mb: '20px',
+									fontSize: '16px',
+									opacity: instrucciones ? 1 : 0,
+									transition: 'opacity 0.3s ease-in-out'
+								}}>
+								Selecciona la carpeta donde se encuentren todos los PDF. El programa automáticamente creará ZIPs y los subirá parte por parte.
+							</Typography>
+						)}
+
+						<TextField
+							sx={{ width: '100%', mt: '10px' }}
+							id="outlined-basic"
+							label="Nombre de las fichas"
+							variant="outlined"
+							value={nombre}
+							onChange={(e) => setNombre(e.target.value)}
+						/>
+
+					</FormControl>
+
+					<Box mt="1rem" width="70%">
+
+						{zipCount > 0 && (
+							<Typography variant="body1" sx={{ marginBottom: '1rem', color: isLightMode ? '#000000' : '#fff' }}>
+								Cantidad de ZIPs que se van a subir: {zipCount}
+							</Typography>
+						)}
+
+						<input
+							type="file"
+							id="file-upload"
+							onChange={handleFileChange}
+							accept=".pdf"
+							webkitdirectory=""
+							style={{ display: 'none', width: '80%' }}
+						/>
+
+						<label htmlFor="file-upload">
+
+							<Button
+								sx={{
+									border: isLightMode ? '1px solid #000000' : '1px solid #cff9e0',
+									color: isLightMode ? '#000000' : '#cff9e0'
+								}}
+								component="span"
+								fullWidth
+								variant="outlined">
+								SELECCIONAR CARPETA
+							</Button>
+
+						</label>
+
+					</Box>
+
+					{archivo && (
+						<Box mt="1rem" width="70%">
+							<Button
+								sx={{
+									backgroundColor: '#add8e6',
+									color: '#000000',
+									'&:hover': {
+										backgroundColor: '#87ceeb'
+									}
+								}}
+								component="span"
+								fullWidth
+								variant="contained"
+								onClick={handleUpload}>
+								SUBIR
+							</Button>
+						</Box>
 					)}
-
-					<TextField
-						sx={{ width: '100%', mt: '10px' }}
-						id="outlined-basic"
-						label="Nombre de las fichas"
-						variant="outlined"
-						value={nombre}
-						onChange={(e) => setNombre(e.target.value)}
-					/>
-
-				</FormControl>
-
-				<Box mt="1rem" width="70%">
-
-					{zipCount > 0 && (
-						<Typography variant="body1" sx={{ marginBottom: '1rem', color: isLightMode ? '#000000' : '#fff' }}>
-							Cantidad de ZIPs que se van a subir: {zipCount}
-						</Typography>
-					)}
-
-					<input
-						type="file"
-						id="file-upload"
-						onChange={handleFileChange}
-						accept=".pdf"
-						webkitdirectory=""
-						style={{ display: 'none', width: '80%' }}
-					/>
-
-					<label htmlFor="file-upload">
-
-						<Button
-							sx={{
-								border: isLightMode ? '1px solid #000000' : '1px solid #cff9e0',
-								color: isLightMode ? '#000000' : '#cff9e0'
-							}}
-							component="span"
-							fullWidth
-							variant="outlined">
-							SELECCIONAR CARPETA
-						</Button>
-
-					</label>
 
 				</Box>
 
-				{archivo && (
-					<Box mt="1rem" width="70%">
-						<Button
-							sx={{
-								backgroundColor: '#add8e6',
-								color: '#000000',
-								'&:hover': {
-									backgroundColor: '#87ceeb'
-								}
-							}}
-							component="span"
-							fullWidth
-							variant="contained"
-							onClick={handleUpload}>
-							SUBIR
-						</Button>
-					</Box>
-				)}
-				</div>
-
-				<div className={isLightMode ? 'backups__ligth_two' : 'backups_two'}>
+				<Box 
+					sx={{
+						width: '100%',
+						background: isLightMode ? 'rgba(0, 0, 63, 0.202)' : 'rgba(255, 255, 255, 0.250)',
+						padding: '50px 0px',
+						borderRadius: '20px',
+						justifyContent: 'center',
+						alignItems: 'center',
+						display: 'flex',
+						flexDirection: 'column',
+					}}	
+				>
 
 				<Typography sx={{ mb: '20px', fontSize: '25px' }}>Descarga de Respaldos</Typography>
 
@@ -245,7 +290,7 @@ const Backup = () => {
 					<ManageSearchIcon sx={{ fontSize: '40px', marginRight: '10px' }} />
 					<Input
 						type="text"
-						sx={{ background: 'transparent', border: 'none', width: '300px' }}
+						sx={{ background: 'transparent', border: 'none', width:'100%' }}
 						placeholder="Buscar por identificador..."
 						value={searchTerm}
 						onChange={handleSearchChange}
@@ -310,7 +355,7 @@ const Backup = () => {
 
 				</Box>
 
-				</div>
+				</Box>
 
 			</Box>
 
