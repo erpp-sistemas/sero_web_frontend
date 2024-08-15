@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { IconButton, useTheme } from "@mui/material";
 import { useContext } from "react";
 import { ColorModeContext, tokens } from "../../theme";
@@ -12,33 +11,30 @@ import Profile from '../../components/Topbar/Profile'
 //import DrawerNotification from '../../components/DrawerNotification'
 
 const Topbar = () => {
+	const mapa_seleccionado = useSelector((state) => state.plaza_mapa)
+	let location = useLocation()
+	const theme = useTheme();
+	const colors = tokens(theme.palette.mode);
+	const colorMode = useContext(ColorModeContext);
 
-  const mapa_seleccionado = useSelector((state) => state.plaza_mapa)
-  let location = useLocation()
+//   const [state, setState] = useState({
+//     top: false,
+//     left: false,
+//     bottom: false,
+//     right: false,
+//   });
 
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
-  const colorMode = useContext(ColorModeContext);
+//   const toggleDrawer = (anchor, open) => (event) => {
+//     if (
+//       event &&
+//       event.type === 'keydown' &&
+//       (event.key === 'Tab' || event.key === 'Shift')
+//     ) {
+//       return;
+//     }
 
-
-  const [state, setState] = useState({
-    top: false,
-    left: false,
-    bottom: false,
-    right: false,
-  });
-
-  const toggleDrawer = (anchor, open) => (event) => {
-    if (
-      event &&
-      event.type === 'keydown' &&
-      (event.key === 'Tab' || event.key === 'Shift')
-    ) {
-      return;
-    }
-
-    setState({ ...state, [anchor]: open });
-  };
+//     setState({ ...state, [anchor]: open });
+//   };
 
 
   return (

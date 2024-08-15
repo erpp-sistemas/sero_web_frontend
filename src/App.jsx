@@ -8,7 +8,7 @@ import { esES } from '@mui/x-date-pickers/locales'
 import 'dayjs/locale/es'
 import { useSelector, useDispatch } from 'react-redux'
 import { verifyTokenRequest } from "./api/auth"
-
+import { Box } from '@mui/material'
 import Topbar from "./scenes/global/Topbar"
 import Sidebar from "./scenes/global/Sidebar"
 import SidebarMap from "./scenes/global/SidebarMap"
@@ -53,7 +53,6 @@ import RecordsImpression from './scenes/records-impression'
 import Inventory from './scenes/inventory'
 import ManagerDashboard from './scenes/manager-dashboard'
 import PhotoManagement from './scenes/photo-management'
-
 import { initializeWebSocket } from './config/WebSocketManager'
 
 function App() {
@@ -132,7 +131,7 @@ function App() {
               <Route
                 path="*"
                 element={
-                  <div className="app">
+                  <Box sx={{ overflowY:'scroll', overflowX:'hidden' }} className="app">
                     {location.pathname !== `/map/${mapa_seleccionado.place_id}` ? (
                       <Sidebar isSidebar={isSidebar} />
                     ) : (
@@ -183,7 +182,7 @@ function App() {
                         <Route path="/photo-management" element={<PhotoManagement />} />
                       </Routes>
                     </main>
-                  </div>
+                  </Box>
                 }
               />
             )}
