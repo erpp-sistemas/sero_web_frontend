@@ -9,6 +9,7 @@ import { TaskAlt, Search, CalendarToday, AccessTime } from "@mui/icons-material"
 import PropTypes from 'prop-types'
 import Download from "@mui/icons-material/Download"
 import * as ExcelJS from "exceljs";
+import LoadingModal from '../../components/LoadingModal.jsx'
 
 function BatteryMeter({ data }) {
 
@@ -18,6 +19,7 @@ function BatteryMeter({ data }) {
 	const [matching, setMatching] = useState(-1)
 	const [noResults, setNoResults] = useState(false)
 	const [searchPerformed, setSearchPerformed] = useState(false)
+	const [isLoading, setIsLoading] = useState(false)
 
 	if (!data) {
 		return null
@@ -259,7 +261,7 @@ function BatteryMeter({ data }) {
 
   const handleDownloadExcelDataGrid = async () => {
     try {
-      // setIsLoading(true);
+      setIsLoading(true);
   
       const workbook = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet("Registros Encontrados");  
@@ -300,10 +302,10 @@ function BatteryMeter({ data }) {
       a.download = `Registros_Medidor_Pila.xlsx`;
       a.click();
       window.URL.revokeObjectURL(url);
-      // setIsLoading(false);
+      setIsLoading(false);
     } catch (error) {
       console.error("Error:", error);
-      // setIsLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -380,8 +382,9 @@ function BatteryMeter({ data }) {
 				</>
 				)}  
 			</Box>
-
+			<LoadingModal open={isLoading}/>
 		</Box>  
+		
 
 	)
 
