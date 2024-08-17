@@ -54,6 +54,7 @@ import Inventory from './scenes/inventory'
 import ManagerDashboard from './scenes/manager-dashboard'
 import PhotoManagement from './scenes/photo-management'
 import { initializeWebSocket } from './config/WebSocketManager'
+import { submenuAccessLogRequest } from './api/submenu'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -64,14 +65,30 @@ function App() {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const mapa_seleccionado = useSelector((state) => state.plaza_mapa)
+  const user = useSelector((state) => state.user);
 
   useEffect(() => {
     checkLogin()
   }, [])
 
   useEffect(() => {
-    console.log(location.pathname)
+    SubmenuAccessLog(location.pathname)
+    // console.log(location.pathname)
   }, [location.pathname])
+
+  const SubmenuAccessLog = async (menu) => {
+		try {
+      const submenu_access_data = {      
+        username: user.username,
+        menu_name: menu
+      }; 
+  
+      await submenuAccessLogRequest( submenu_access_data );
+		
+		} catch (error) {
+		  console.error('Error fetching data:', error)    
+		}
+	}
 
   useEffect(() => {
     initializeWebSocket(dispatch);

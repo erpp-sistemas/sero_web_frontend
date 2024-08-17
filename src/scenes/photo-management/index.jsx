@@ -208,14 +208,16 @@ const Index = () => {
             if (error.response.status === 400) {
                 setAlertOpen(true);
                 setAlertType("warning");
-                setAlertMessage("¡Atención! No se encontraron pagos");
+                setAlertMessage("¡Atención! No se encontraron gestiones");
                 setResult([]);
+                setGestores([])
             } else {
                 
                 setAlertOpen(true);
                 setAlertType("error");
                 setAlertMessage(`¡Error! ${error.response.status}: ${error.response.statusText}`);
                 setResult([]);
+                setGestores([])
             }
         } else if (error.request) {
             
@@ -223,12 +225,14 @@ const Index = () => {
             setAlertType("error");
             setAlertMessage("¡Error! No se pudo contactar con el servidor");
             setResult([]);
+            setGestores([])
         } else {
             
             setAlertOpen(true);
             setAlertType("error");
             setAlertMessage(`¡Error! ${error.message}`);
             setResult([]);
+            setGestores([])
         }
           
         }        
@@ -260,84 +264,149 @@ const Index = () => {
     }, [selectedGestores, result, filterText]);
 
     const handleExportToExcel = async () => {
-      const workbook = new ExcelJS.Workbook();
-      const worksheet = workbook.addWorksheet('Datos');
+      try {
+        setIsLoading(true);
     
-      // Agregar encabezados de columna
-      worksheet.columns = [
-        { header: 'CUENTA', key: 'cuenta', width: 15 },
-        { header: 'GESTOR', key: 'nombre_gestor', width: 20 },
-        { header: 'SERVICIO', key: 'nombre_servicio', width: 20 },
-        { header: 'PROCESO', key: 'nombre_proceso', width: 20 },
-        { header: 'FECHA CAPTURA', key: 'fechaCaptura', width: 15 },
-        { header: 'FOTO FACHADA', key: 'foto_fachada_1', width: 30 },
-      ];
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet("Registros Encontrados");  
     
-      // Agregar datos
-      filteredResult.forEach(row => {
-        worksheet.addRow({
-          cuenta: row.cuenta,
-          nombre_gestor: row.nombre_gestor,
-          nombre_servicio: row.nombre_servicio,
-          nombre_proceso: row.nombre_proceso,
-          fechaCaptura: row.fechaCaptura,
-          foto_fachada_1: '', // Inicialmente vacío, se actualizará más tarde con la imagen
-        });
-      });
+        const columnHeaders = {
+          id_registro: "id_registro",
+          cuenta: "cuenta",
+          propietario: "propietario",
+          calle: "calle",
+          num_ext: "num_ext",
+          num_int: "num_int",
+          colonia: "colonia",
+          codigo_postal: "codigo_postal",
+          tarea_gestionada: "tarea_gestionada",          
+          nombre_gestor: "nombre_gestor",
+          fecha_gestion: "fecha_gestion",
+          estatus_predio: "estatus_predio",
+          proceso: "proceso",          
+          foto_fachada_1:"foto_fachada_1",
+          tipo_foto_fachada_1: "tipo_foto_fachada_1",          
+          foto_fachada_2: "foto_fachada_2",
+          tipo_foto_fachada_2: "tipo_foto_fachada_2",          
+          foto_evidencia_1: "foto_evidencia_1",
+          tipo_foto_evidencia_1: "tipo_foto_evidencia_1",          
+          foto_evidencia_2: "foto_evidencia_2",
+          tipo_foto_evidencia_2: "tipo_foto_evidencia_2",          
+        };
     
-      // Función para convertir una URL de imagen a base64
-      const urlToBase64 = async (url) => {
-        console.log('url', url)
-        const response = await fetch(url);
-        const blob = await response.blob();
-        return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result.split(',')[1]);
-          reader.onerror = reject;
-          reader.readAsDataURL(blob);
-        });
-      };
+        const addRowsToWorksheet = (data) => {
+          const headers = Object.keys(columnHeaders);
+          const headerRow = headers.map(header => columnHeaders[header]);
+          worksheet.addRow(headerRow);
     
-      // Agregar imágenes
-      for (let i = 0; i < filteredResult.length; i++) {
-        const row = filteredResult[i];
-        if (row.foto_fachada_1) {
-          const base64Image = await urlToBase64(row.foto_fachada_1);
-          const imageId = workbook.addImage({
-            base64: base64Image,
-            extension: 'jpeg', // Ajusta la extensión según el formato de tu imagen
+          data.forEach((row) => {
+            const values = headers.map((header) => row[header]);
+            worksheet.addRow(values);
           });
+        };
     
-          // Ajustar tamaño de la celda
-          worksheet.getCell(i + 2, 6).alignment = { vertical: 'middle', horizontal: 'center' };
-          worksheet.getCell(i + 2, 6).fill = {
-            type: 'pattern',
-            pattern: 'solid',
-            fgColor: { argb: 'FFFFFF' } // Fondo blanco para la celda
-          };
-    
-          // Agregar la imagen a la celda específica
-          worksheet.addImage(imageId, {
-            tl: { col: 5, row: i + 1 }, // Columna y fila donde se añadirá la imagen
-            ext: { width: 30, height: 30 }, // Ajusta el tamaño de la imagen si es necesario
-            editAs: 'oneCell', // Asegura que la imagen esté contenida en una celda
-          });
-    
-          // Ajustar el tamaño de la columna
-          worksheet.getColumn(6).width = 30;
+        if (filteredUsers.length > 0) {
+          addRowsToWorksheet(filteredUsers);
+        } else {
+          addRowsToWorksheet(data);
         }
-      }
     
-      // Guardar archivo
-      const buffer = await workbook.xlsx.writeBuffer();
-      const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = 'datos.xlsx'; // Puedes ajustar el nombre del archivo aquí
-      a.click();
-      window.URL.revokeObjectURL(url);
-    };  
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], {
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `Registros_Medidor_Pila.xlsx`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Error:", error);
+        setIsLoading(false);
+      }
+    };
+
+    // const handleExportToExcel = async () => {
+    //   const workbook = new ExcelJS.Workbook();
+    //   const worksheet = workbook.addWorksheet('Datos');
+    
+    //   // Agregar encabezados de columna
+    //   worksheet.columns = [
+    //     { header: 'CUENTA', key: 'cuenta', width: 15 },
+    //     { header: 'GESTOR', key: 'nombre_gestor', width: 20 },
+    //     { header: 'SERVICIO', key: 'nombre_servicio', width: 20 },
+    //     { header: 'PROCESO', key: 'nombre_proceso', width: 20 },
+    //     { header: 'FECHA CAPTURA', key: 'fechaCaptura', width: 15 },
+    //     { header: 'FOTO FACHADA', key: 'foto_fachada_1', width: 30 },
+    //   ];
+    
+    //   // Agregar datos
+    //   filteredResult.forEach(row => {
+    //     worksheet.addRow({
+    //       cuenta: row.cuenta,
+    //       nombre_gestor: row.nombre_gestor,
+    //       nombre_servicio: row.nombre_servicio,
+    //       nombre_proceso: row.nombre_proceso,
+    //       fechaCaptura: row.fechaCaptura,
+    //       foto_fachada_1: '', // Inicialmente vacío, se actualizará más tarde con la imagen
+    //     });
+    //   });
+    
+    //   // Función para convertir una URL de imagen a base64
+    //   const urlToBase64 = async (url) => {
+    //     console.log('url', url)
+    //     const response = await fetch(url);
+    //     const blob = await response.blob();
+    //     return new Promise((resolve, reject) => {
+    //       const reader = new FileReader();
+    //       reader.onloadend = () => resolve(reader.result.split(',')[1]);
+    //       reader.onerror = reject;
+    //       reader.readAsDataURL(blob);
+    //     });
+    //   };
+    
+    //   // Agregar imágenes
+    //   for (let i = 0; i < filteredResult.length; i++) {
+    //     const row = filteredResult[i];
+    //     if (row.foto_fachada_1) {
+    //       const base64Image = await urlToBase64(row.foto_fachada_1);
+    //       const imageId = workbook.addImage({
+    //         base64: base64Image,
+    //         extension: 'jpeg', // Ajusta la extensión según el formato de tu imagen
+    //       });
+    
+    //       // Ajustar tamaño de la celda
+    //       worksheet.getCell(i + 2, 6).alignment = { vertical: 'middle', horizontal: 'center' };
+    //       worksheet.getCell(i + 2, 6).fill = {
+    //         type: 'pattern',
+    //         pattern: 'solid',
+    //         fgColor: { argb: 'FFFFFF' } // Fondo blanco para la celda
+    //       };
+    
+    //       // Agregar la imagen a la celda específica
+    //       worksheet.addImage(imageId, {
+    //         tl: { col: 5, row: i + 1 }, // Columna y fila donde se añadirá la imagen
+    //         ext: { width: 30, height: 30 }, // Ajusta el tamaño de la imagen si es necesario
+    //         editAs: 'oneCell', // Asegura que la imagen esté contenida en una celda
+    //       });
+    
+    //       // Ajustar el tamaño de la columna
+    //       worksheet.getColumn(6).width = 30;
+    //     }
+    //   }
+    
+    //   // Guardar archivo
+    //   const buffer = await workbook.xlsx.writeBuffer();
+    //   const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+    //   const url = window.URL.createObjectURL(blob);
+    //   const a = document.createElement("a");
+    //   a.href = url;
+    //   a.download = 'datos.xlsx'; // Puedes ajustar el nombre del archivo aquí
+    //   a.click();
+    //   window.URL.revokeObjectURL(url);
+    // };      
   
       const CustomToolbar = () => (
         <GridToolbarContainer>
