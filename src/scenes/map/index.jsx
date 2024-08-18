@@ -8,11 +8,11 @@ import { setPlazaMapa } from '../../redux/plazaMapa.Slice'
 import { setMapa } from '../../redux/mapaSlice'
 import { setFeatures, setCoordinates, setPuntosInPoligono } from '../../redux/featuresSlice'
 import MapboxDraw from "@mapbox/mapbox-gl-draw"
-//import ModalNamePolygon from '../../components/ModalNamePolygon'
 import ModalInfoPolygon from '../../components/map/ModalInfoPolygon'
 import ModalInfoPolygons from '../../components/map/ModalInfoPolygons'
 import * as turf from '@turf/turf'
 import { getIcon } from '../../data/Icons'
+import Tooltip from '@mui/material/Tooltip';
 
 
 const stylesMap = {
@@ -57,7 +57,6 @@ const Mapa = () => {
     useEffect(() => {
         if (lastPolygonCreated) {
             addPolygonStorage(lastPolygonCreated);
-            setShowModalInfoPolygon(true);
         }
     }, [lastPolygonCreated])
 
@@ -155,6 +154,7 @@ const Mapa = () => {
 
 
     const createPolygon = (map, polygon) => {
+        setShowModalInfoPolygon(true);
         if (!polygon.area) {
             const layers_in_map = getLayersVisiblesInMap(map);
             if (layers_in_map.status === 0) {
@@ -173,20 +173,30 @@ const Mapa = () => {
             return;
         }
         setLastPolygonCreated(polygon);
-        setShowModalInfoPolygon(true);
     }
 
 
     const addPolygonStorage = (polygon) => {
+        console.log(polygon)
         if (polygonsCreated.length === 0) {
             setPolygonsCreated([polygon])
             polygonsStorage.current = [polygon];
         } else {
             const have_id_polygon = polygonsCreated.find(poly => poly.id === polygon.id);
+            console.log(have_id_polygon)
             if (!have_id_polygon) {
-                setPolygonsCreated([...polygonsCreated, polygon])
-                polygonsStorage.current = [...polygonsCreated, polygon]
+                setPolygonsCreated([...polygonsCreated, polygon]);
+                polygonsStorage.current = [...polygonsCreated, polygon];
+                return;
             }
+
+            const polygons_not_selected = polygonsCreated.filter(poly => poly.id !== polygon.id);
+            if (have_id_polygon.name) polygon.name = have_id_polygon.name;
+            if (have_id_polygon.user) polygon.user = have_id_polygon.user;
+
+            setPolygonsCreated([...polygons_not_selected, polygon]);
+            polygonsStorage.current = [...polygons_not_selected, polygon];
+
         }
     }
 
@@ -242,13 +252,13 @@ const Mapa = () => {
             }
         });
 
-        mapRef.current.getSource(source).setData({  type: 'FeatureCollection',  features: points,  });
+        mapRef.current.getSource(source).setData({ type: 'FeatureCollection', features: points, });
 
         mapRef.current.setPaintProperty(layer, 'circle-color', [
             'case',
             ['==', ['get', 'pid'], polygon_id],
-            color, 
-            color  
+            color,
+            color
         ]);
     }
 
@@ -274,21 +284,26 @@ const Mapa = () => {
                 polygonsCreated={polygonsCreated} polygonsStorage={polygonsStorage}
                 disabledPoints={disabledPoints} />}
 
-            {showModalInfoPolygons && <ModalInfoPolygons setShowModal={setShowModalInfoPolygons} polygons={polygonsCreated} draw={drawMap} map={mapRef} disablePoints={disabledPoints} />}
+            {showModalInfoPolygons && <ModalInfoPolygons setShowModal={setShowModalInfoPolygons} polygons={polygonsCreated} draw={drawMap} map={mapRef} disablePoints={disabledPoints}
+                setPolygonsCreated={setPolygonsCreated} setLastPolygonCreated={setLastPolygonCreated}
+            />}
 
             {polygonsCreated && polygonsCreated.length > 0 && (
-                <>
-                    <button className="z-[100] absolute left-[300px] bottom-3 w-[100px] py-2 px-2 rounded bg-emerald-700 hover:bg-emerald-500 shadow-xl shadow-gray-700"
-                        onClick={() => setShowModalInfoPolygons(true)} >
-                        {getIcon('PolylineIcon', { marginRight: '10px' })}
-                        Poligonos
-                    </button>
-                    <button className="z-[100] absolute left-[410px] bottom-3 w-[100px] py-2 px-2 rounded bg-cyan-600 hover:bg-cyan-500  shadow-xl shadow-gray-700"
-                        onClick={() => { }} >
-                        {getIcon('SaveIcon', { marginRight: '10px' })}
-                        Guardar
-                    </button>
-                </>
+                <div className="z-[100] absolute right-[20px] top-3 p-2 flex flex-col justify-center gap-2 bg-gray-600 shadow-xl shadow-slate-600 rounded-md">
+                    <Tooltip placement="left-start" title="Mostrar poligonos">
+                        <button className="py-2 px-2 rounded bg-cyan-600 hover:bg-cyan-500"
+                            onClick={() => setShowModalInfoPolygons(true)} >
+                            {getIcon('PolylineIcon', {})}
+                        </button>
+                    </Tooltip>
+                    <Tooltip placement="left-start" title="Guardar proyecto">
+                        <button className="py-2 px-2 rounded bg-cyan-600 hover:bg-cyan-500"
+                            onClick={() => { }} >
+                            {getIcon('SaveIcon', {})}
+                        </button>
+                    </Tooltip>
+                    
+                </div>
             )}
 
         </div>

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { Modal } from '@mui/material';
 
 import { getIcon } from '../../data/Icons';
@@ -8,14 +8,14 @@ import { CSVLink } from 'react-csv';
 
 const ModalInfoPolygon = ({ setShowModal, polygon, setLastPolygonCreated, polygonsCreated, setPolygonsCreated, polygonsStorage }) => {
 
-
+    //console.log(polygon)
     const [open, setOpen] = useState(true);
 
     const [showFieldName, setShowFieldName] = useState(false);
     const [namePolygon, setNamePolygon] = useState('');
     const [properties, setProperties] = useState([]);
 
-    
+
     const handleClose = () => {
         setOpen(false);
         setShowModal(false)
@@ -56,13 +56,15 @@ const ModalInfoPolygon = ({ setShowModal, polygon, setLastPolygonCreated, polygo
             >
                 {polygon && (
                     <div className='w-1/5 h-[80%] p-4 bg-blue-50 absolute top-[50%] left-[89%] translate-x-[-50%] translate-y-[-45%] rounded-md shadow-lg shadow-slate-700'>
-                        <p className=" text-gray-900 text-base text-center font-bold font-sans"> Poligono creado con éxito </p>
+                        <p className=" text-gray-900 text-base text-center font-bold font-sans"> Poligono </p>
                         <hr className='bg-gray-900 m-2' />
                         <p className=" text-gray-900 text-base mt-6"> Número de puntos: <span className='text-emerald-700 font-bold'> {polygon.number_points} </span> </p>
                         <p className=" text-gray-900 text-base mt-2"> Área: <span className='text-emerald-700 font-bold'> {polygon.area} </span> </p>
                         {polygon.name && polygon.name !== '' && (<p className=" text-gray-900 text-base mt-2"> Nombre: <span className='text-emerald-700 font-bold'> {polygon.name} </span> </p>)}
+                        {polygon.user && (
+                            <p className="text-gray-900 text-base mt-1">Usuario: <span className="text-emerald-700 font-bold">{polygon.user.nombre} {polygon.user.apellido_paterno}</span> </p>
+                        )}
                         <div className='w-full mx-auto mt-3 py-2 flex flex-col justify-center items-center gap-3'>
-
                             {!showFieldName && (
                                 <button className='w-full bg-gray-200 px-2 rounded-md py-1 gap-1 flex justify-center items-center hover:bg-gray-300'
                                     onClick={() => setShowFieldName(true)}
