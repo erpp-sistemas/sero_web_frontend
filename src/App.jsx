@@ -55,6 +55,7 @@ import ManagerDashboard from './scenes/manager-dashboard'
 import PhotoManagement from './scenes/photo-management'
 import { initializeWebSocket } from './config/WebSocketManager'
 import { submenuAccessLogRequest } from './api/submenu'
+import DebtRecord from './scenes/debt-record'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -191,6 +192,7 @@ function App() {
                         <Route path="/coordination-dashboard" element={<CoordinationDashboard />} />
                         <Route path="/survey-report" element={<SurveyReport />} />
                         <Route path="/traffic-light" element={<TrafficLight />} />
+                        {/* <Route path="/debt-record" element={<DebtRecord />} /> */}
                         <Route path="/records" element={<Records />} />
                         <Route path="/backup" element={<RecordsBackup />} />
                         <Route path="/impresion" element={<RecordsImpression />} />

@@ -96,6 +96,8 @@ const Index = () => {
 			const response = await trafficLightRequest(selectedPlace, selectedService, selectedProcess, selectedDate)
 
 			const countingDataArray = JSON.parse(response.data[0].TrafficLightCountingProcedures)
+
+      console.log(countingDataArray)
 			
 			const newCountingData = {
 				thirtyDays: countingDataArray.find(data => data.color_meaning === "30 dias") || {},
