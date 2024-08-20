@@ -17,7 +17,7 @@ import { setPagosTenencia } from '../../../redux/vehiculosSlices/pagosTenenciaSl
 import { removeAllPagoPlacas } from '../../../redux/vehiculosSlices/pagosPlacasSlice.js'
 import { setPagosExtraordinarios } from '../../../redux/vehiculosSlices/pagosExtraordinariosSlice.js'
 
-const Botones = ({ next, setNext, data, dataDocuments, dataEstado, dataPagos, dataImagenes, setOpenNew, dataVeiculos, setAlert }) => {
+const 	Botones = ({ next, setNext, data, dataDocuments, dataEstado, dataPagos, dataImagenes, setOpenNew, dataVeiculos, setAlert }) => {
     const [errorText, setErrorText] = useState('')
     const [error, setError] = useState(false)
 	const [charge, setCharge] = useState(false)
@@ -331,12 +331,13 @@ const Botones = ({ next, setNext, data, dataDocuments, dataEstado, dataPagos, da
             }
 
 			{ charge ? <Charge /> : false }
-			
+		
         </Box>
 
     )
 
 }	
+
 
 Botones.propTypes = {
     setNext: PropTypes.func.isRequired,

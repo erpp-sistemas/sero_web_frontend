@@ -1,4 +1,4 @@
-import { Box, Typography, TextField, Button } from "@mui/material"
+import { Box, Typography, TextField, Button, FormControl, Select, MenuItem } from "@mui/material"
 import { useState } from "react"
 import AddBoxIcon from '@mui/icons-material/AddBox'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
@@ -11,6 +11,7 @@ const Content = () => {
     const [date, setDate] = useState(null)
     const [isImagesOpen, setIsImagesOpen] = useState(false)
     const [imagenes, setImagenes] = useState([])
+	const [tipo, setTipo] = useState('')
 
     const handleImageChange = (e) => {
         const files = Array.from(e.target.files)
@@ -91,30 +92,25 @@ const Content = () => {
 
                 <Typography sx={{ width: '100%', textAlign: 'center', fontSize: '24px' }}>Agregar mantenimiento</Typography>
 
-				<TextField
-                    sx={{
-                        width: '100%',
-                        maxWidth: '320px',
-                        marginTop: '20px',
-                        '& input[type=number]': {
-                            '-moz-appearance': 'textfield',
-                        },
-                        '& input[type=number]::-webkit-outer-spin-button': {
-                            '-webkit-appearance': 'none',
-                            margin: 0,
-                        },
-                        '& input[type=number]::-webkit-inner-spin-button': {
-                            '-webkit-appearance': 'none',
-                            margin: 0,
-                        },
-                    }}
-                    id="Tipo"
-                    label="Tipo"
-                    value={prueba}
-                    variant="outlined"
-                    onChange={event => setPrueba(event.target.value)}
-                    type="text"
-                />
+				<FormControl fullWidth variant="filled" sx={{ width:'100%', display: 'flex', justifyContent: 'start', alignItems: 'center', }}>
+					<Typography sx={{ width:'100%', maxWidth:'320px', marginTop:'20px' }	}>Tipo</Typography>
+					<Select
+						labelId="Tipo"
+						id="tipo"
+						value={tipo}
+						label="Tipo"
+						onChange={ event => setTipo(event.target.value) }
+						sx={{
+							border: 'none',
+							width:'100%',
+							maxWidth:'320px',
+						}}
+					>
+						<MenuItem value='Servicio'>Servicio</MenuItem>
+						<MenuItem value='Espejos'>Espejos</MenuItem>
+						<MenuItem value='Palancas'>Palancas</MenuItem>
+					</Select>
+				</FormControl>
 
                 <TextField
                     sx={{ width: '100%', maxWidth: '320px', marginTop: '20px' }}

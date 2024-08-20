@@ -60,7 +60,8 @@ const PagosVehiculo = ({ setOpenPagos, setAlertClean }) => {
 				alignItems: 'center',
 				height: '100vh',
 				background: 'rgba(0,0,0,0.3)',
-				zIndex: '1200'
+				zIndex: '1200',
+				ml:{ xs:'0px', md:'20px' }
 			}}
 		>
 			<AnimatedBox 
