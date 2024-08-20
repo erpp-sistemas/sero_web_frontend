@@ -15,7 +15,7 @@ const Title = ({ setAnimation }) => {
 			<Typography sx={{ color: isLightMode ? '#000' : '#fff', fontSize: '24px', fontWeight: '500' }}>
 				Asignación de vehiculo
 			</Typography>
-
+			
 			<Button
 				onClick={() => {setAnimation(true)}}
 				sx={{ color: 'black' }}
@@ -23,7 +23,7 @@ const Title = ({ setAnimation }) => {
 				<CloseFullscreenIcon 
 					sx={{
 					color: 'red',
-					fontSize: '24px',
+					fontSize: '30px',
 					fontWeight: '500'
 					}}
 				/>

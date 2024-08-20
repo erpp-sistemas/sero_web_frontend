@@ -8,7 +8,7 @@ import Avatar from '@mui/material/Avatar'
 import Cookies from 'js-cookie'
 import { useDispatch } from 'react-redux'
 import { logoutUser } from '../../features/user/userSlice'
-import { Box, Typography } from '@mui/material'
+import { Box, Typography, useTheme } from '@mui/material'
 import InputIcon from '@mui/icons-material/Input'
 
 const Profile = () => {
@@ -17,6 +17,8 @@ const Profile = () => {
 	const [profile, setProfile] = useState(false)
     const [anchorElUser, setAnchorElUser] = useState(null)
 	const profileRef = useRef(null)
+	const theme = useTheme()
+	const isLightMode = theme.palette.mode === 'light'
 
     const handleOpenUserMenu = (event) => {
         setAnchorElUser(event.currentTarget)
@@ -95,7 +97,7 @@ const Profile = () => {
 					top:'0',
 					right: profile ? '0%' : { xs:'-100%', md:'-50%' },
 					zIndex:9999,
-					background:'rgb(23, 33, 47, 0.95)',
+					background:isLightMode ? 'rgb(255, 255, 255, 0.95)' : 'rgb(23, 33, 47, 0.95)',
 					padding:'20px 30px',
 					display:'flex',
 					justifyContent:'start',
@@ -112,7 +114,7 @@ const Profile = () => {
 				</Box>
 
 				<Box sx={{ mt:'40px', height:'auto', width:'100%', display:'flex', justifyContent:'center', alignItems:'center',}}>
-					<Box sx={{ width:'180px', height:'180px', minWidth:'180px', minHeight:'180px', borderRadius:'50%', display:'flex', justifyContent:'center', alignItems:'center', overflow:'hidden', background:'rgba(0,0,0,0.3)' }}>
+					<Box sx={{ width:'180px', height:'180px', minWidth:'180px', minHeight:'180px', borderRadius:'50%', display:'flex', justifyContent:'center', alignItems:'center', overflow:'hidden', background:isLightMode ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)', border:isLightMode ? '1px solid black' : false }}>
 						<img src={user.photo} alt=""  width={'100%'} height={'100%'}/>
 					</Box>
 				</Box>
