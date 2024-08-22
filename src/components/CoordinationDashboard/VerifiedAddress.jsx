@@ -5,11 +5,11 @@ import Grid from '@mui/material/Grid';
 import { tokens } from "../../theme";
 import { DataGrid } from '@mui/x-data-grid';
 import Viewer from 'react-viewer';
-import { Search, CalendarToday, AccessTime, Download } from "@mui/icons-material";
+import { Search, CalendarToday, AccessTime, Download, PersonPinCircle } from "@mui/icons-material";
 import LoadingModal from '../../components/LoadingModal.jsx'
 import * as ExcelJS from "exceljs";
 
-function BatteryMeter({data}) {
+function VerifiedAddress({data}) {
 
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -28,10 +28,26 @@ function BatteryMeter({data}) {
 
   const buildColumns = () => {   
     const columns = [
-		{ 
-			field: 'user',
+        { 
+			field: 'account',
 			renderHeader: () => (
-				<strong style={{ color: "#5EBFFF" }}>{"NOMBRE"}</strong>
+				<strong style={{ color: "#5EBFFF" }}>{"CUENTA"}</strong>
+			),
+			width: 270,
+			editable: false,			
+		}, 
+    { 
+			field: 'street',
+			renderHeader: () => (
+				<strong style={{ color: "#5EBFFF" }}>{"CALLE"}</strong>
+			),
+			width: 270,
+			editable: false,			
+		}, 
+		{ 
+			field: 'manager',
+			renderHeader: () => (
+				<strong style={{ color: "#5EBFFF" }}>{"GESTOR"}</strong>
 			),
 			width: 270,
 			editable: false,
@@ -43,7 +59,7 @@ function BatteryMeter({data}) {
 			)
 		}, 
 		{ 
-			field: 'date',
+			field: 'date_capture',
 			renderHeader: () => (
 				<strong style={{ color: "#5EBFFF" }}>{"FECHA"}</strong>
 			),
@@ -69,133 +85,20 @@ function BatteryMeter({data}) {
 			  )
 		},
     { 
-      field: 'first_hour_percentage',
+      field: 'position',
       renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"PRIMER HORA"}</strong>
+      <strong style={{ color: "#5EBFFF" }}>{"Posicion"}</strong>
       ),
-      width: 150,
-      editable: false,
-      renderCell: (params) => {                    
-          let color;
-          color = theme.palette.secondary.main;                    
-  
-          return (
-          <Chip
-              icon={<AccessTime />}
-              label={
-              <Typography variant="body1" sx={{ fontWeight: 'bold', fontSize: '1.2em' }}>
-                  {params.value}
-              </Typography>
-              }
-              variant="outlined"
-              sx={{
-              borderColor: color,
-              color: color,
-              '& .MuiChip-icon': {
-                  color: color
-              }
-              }}
-          />
-          );
-      }
-  }, 
-  { 
-    field: 'first_percentage',
-    renderHeader: () => (
-    <strong style={{ color: "#5EBFFF" }}>{"PRIMER PORCENTAGE"}</strong>
-    ),
-    width: 150,
-    editable: false,
-    renderCell: (params) => {
-    const percentage = params.value
-    let progressColor
-    if (percentage <= 33) {
-      progressColor = 'error'
-    } else if (percentage <= 66) {
-      progressColor = 'warning'
-    } else {
-      progressColor = 'secondary'
-    }
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '90px' }}>							
-        <LinearProgress
-          variant="determinate"
-          value={params.value}
-          sx={{ width: '60%', height: '8px' }}
-          style={{ marginTop: '5px' }}
-          color={progressColor}
-        />
-        <Typography variant="body1" sx={{ fontSize: '1.2em' }}>
-          {`${Math.round(params.value)}%`}
-        </Typography>
-      </div>
-    )
-    }
-  }, 
-  { 
-    field: 'last_hour_percentage',
-    renderHeader: () => (
-        <strong style={{ color: "#5EBFFF" }}>{"ULTIMA HORA"}</strong>
-    ),
-    width: 150,
-    editable: false,
-    renderCell: (params) => {                    
-        let color;
-        color = theme.palette.warning.main;                    
-
-        return (
-        <Chip
-            icon={<AccessTime />}
-            label={
-            <Typography variant="body1" sx={{ fontWeight: 'bold', fontSize: '1.2em' }}>
-                {params.value}
-            </Typography>
-            }
-            variant="outlined"
-            sx={{
-            borderColor: color,
-            color: color,
-            '& .MuiChip-icon': {
-                color: color
-            }
-            }}
-        />
-        );
-    }
-  },
-  { 
-    field: 'last_percentage',
-    renderHeader: () => (
-    <strong style={{ color: "#5EBFFF" }}>{"ULTIMO PORCENTAGE"}</strong>
-    ),
-    width: 150,
-    editable: false,
-    renderCell: (params) => {
-    const percentage = params.value
-    let progressColor
-    if (percentage <= 33) {
-      progressColor = 'error'
-    } else if (percentage <= 66) {
-      progressColor = 'warning'
-    } else {
-      progressColor = 'secondary'
-    }
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '90px' }}>							
-        <LinearProgress
-          variant="determinate"
-          value={params.value}
-          sx={{ width: '60%', height: '8px' }}
-          style={{ marginTop: '5px' }}
-          color={progressColor}
-        />
-        <Typography variant="body1" sx={{ fontSize: '1.2em' }}>
-          {`${Math.round(params.value)}%`}
-        </Typography>
-      </div>
-    )
-    }
-  }
+      width: 120,
+      renderCell: (params) => (
+      <PersonPinCircle 
+        style={{ cursor: 'pointer', color: 'lightblue', fontSize: 40 }} 
+        onClick={() => {
+        window.open(params.value, '_blank');
+        }}
+      />
+      ),
+    },    
     ];
   
     return columns;
@@ -269,12 +172,13 @@ function BatteryMeter({data}) {
       const worksheet = workbook.addWorksheet("Registros Encontrados");  
   
       const columnHeaders = {
-        user: "GESTOR",
-        date: "FECHA",
-        first_hour_percentage: "PRIMER HORA ",
-        first_percentage: "PRIMER PORCENTAGE",
-        last_hour_percentage: "ULTIMA HORA",
-        last_percentage: "ULTIMO PORCENTAGE",        
+        account: "Cuenta",
+        street: "Direccion",
+        latitude: "Latitud",
+        longitude: "Longitud",
+        position: "Posicion",
+        manager: "Gestor que Gestiono",
+        date_capture: "Fecha de Captura"
       };
   
       const addRowsToWorksheet = (data) => {
@@ -301,7 +205,7 @@ function BatteryMeter({data}) {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `Registros_Medidor_Pila.xlsx`;
+      a.download = `Registros_Domicilio_verificado.xlsx`;
       a.click();
       window.URL.revokeObjectURL(url);
       setIsLoading(false);
@@ -328,9 +232,9 @@ function BatteryMeter({data}) {
         {data.length > 0 && (
           <>
           <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2} >
-          <Grid item xs={12}>
+            <Grid item xs={12}>
               <Typography variant="h4" align="center" sx={{ fontWeight: 'bold', paddingTop: 1 }}>
-                Medidor de Bateria
+                Domicilios Verificados
               </Typography>
             </Grid>
             <Grid item xs={6} sx={{ paddingBottom: 1 }}>
@@ -392,4 +296,4 @@ function BatteryMeter({data}) {
      
   )
 }
-export default BatteryMeter
+export default VerifiedAddress
