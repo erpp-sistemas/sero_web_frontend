@@ -33,6 +33,7 @@ import pagosPlacasSlice from "./vehiculosSlices/pagosPlacasSlice.js"
 import pagosExtraordinariosSlice from "./vehiculosSlices/pagosExtraordinariosSlice.js"
 import editarInformacionGeneralSlice from "./vehiculosSlices/editarInformacionGeneral.js"
 import estadoAsignacionSlice from "./vehiculosSlices/estadoAsignacion.js"
+import editarVehiculoSlice from "./vehiculosSlices/editarVehiculoSlice.js"
 
 const rootReducer = combineReducers({
 	user: userReducer,
@@ -68,7 +69,8 @@ const rootReducer = combineReducers({
 	pagosPlacas: pagosPlacasSlice,
 	pagosExtraordinarios: pagosExtraordinariosSlice,
 	editarInformacionGeneral: editarInformacionGeneralSlice,
-	estadoAsignacion: estadoAsignacionSlice
+	estadoAsignacion: estadoAsignacionSlice,
+	editarVehiculo: editarVehiculoSlice
 })
 
 export default rootReducer

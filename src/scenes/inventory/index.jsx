@@ -18,7 +18,8 @@ import Alerts from '../../components/Alerts'
 import PagosVehiculos from '../../components/inventory/pagosVehiculos'
 import toolkitVehiculos from '../../toolkit/toolkitVehiculos'
 import { setEditColor, setEditKilometraje, setEditColorLlavero, setEditImagePreview, setEditMarca, setEditModelo, setEditPlaca, setEditSelectedPlace, setEditSerie, setEditTipoMotor, setEditVehiculo } from '../../redux/vehiculosSlices/editarInformacionGeneral.js'
-import { useDispatch } from 'react-redux'
+import { setOpen } from '../../redux/vehiculosSlices/editarVehiculoSlice.js'
+import { useDispatch, useSelector } from 'react-redux'
 import { Download } from "@mui/icons-material"
 
 /**
@@ -28,7 +29,6 @@ import { Download } from "@mui/icons-material"
 */
 function Inventory() {
 	const [openNew, setOpenNew] = useState(false)
-	const [openEdit, setOpenEdit] = useState(false)
 	const [openMantenimiento, setOpenMantenimiento] = useState(false)
 	const [openAsignacion, setOpenAsignacion] = useState(false)
 	const [openPagos, setOpenPagos] = useState(false)
@@ -39,11 +39,14 @@ function Inventory() {
 	const [busqueda, setBusqueda] = useState('')
 	const [currentPage, setCurrentPage] = useState(1)
 	const [filtro, setFiltro] = useState('todos')
-    const itemsPerPage = 4
+
+	const editarVehiculo = useSelector(state => state.editarVehiculo)
 	const dispatch = useDispatch()
 
 	const theme = useTheme()
 	const isLightMode = theme.palette.mode === 'light'
+
+	const itemsPerPage = 4
 
 	const HtmlTooltip = styled(({ className, ...props }) => (
 		<Tooltip {...props} classes={{ popper: className }} />
@@ -57,7 +60,8 @@ function Inventory() {
 		},
 	}))
 
-	const setCambiarVehiculo = async (vehiculo) => {
+	const CambiarVehiculo = async (vehiculo) => {
+		console.log(vehiculo)
 		dispatch(setEditColorLlavero(vehiculo.color_llavero))
 		dispatch(setEditColor(vehiculo.color))
 		dispatch(setEditKilometraje(vehiculo.kilometraje))
@@ -149,15 +153,14 @@ function Inventory() {
                     <Button 
                         onClick={() => setFiltro('todos')} 
                         sx={{ 
-                            border:'1px solid white', 
                             borderRadius:'20px', 
 							padding:'5px 20px',
 							color:'#fff',
-							fontWeight:'500',
-							fontSize:'14px',
-                            background: filtro === 'todos' ? isLightMode ? '#4cceac' : 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)',
+							fontWeight:'700',
+							fontSize:'12px',
+                            background: filtro === 'todos' ? '#00ff00' : 'rgba(255,255,255, 0.4)' ,
 							'&:hover': {
-								background: isLightMode ? 'rgba(0, 178, 139, 0.4)' : 'rgba(255,255,255,0.3)', 
+								background: 'rgba(255,255,255, 0.6)', 
 								cursor: 'pointer'
 							}
                         }}
@@ -168,15 +171,14 @@ function Inventory() {
                     <Button 
                         onClick={() => setFiltro('noPagado')} 
                         sx={{ 
-                            border:'1px solid white', 
                             borderRadius:'20px', 
 							padding:'5px 20px',
 							color:'#fff',
-							fontWeight:'500',
-							fontSize:'14px',
-                            background: filtro === 'noPagado' ? isLightMode ? '#4cceac' : 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)',
+							fontWeight:'700',
+							fontSize:'12px',
+							background: filtro === 'noPagado' ? '#00ff00' : 'rgba(255,255,255, 0.4)' ,
 							'&:hover': {
-								background: isLightMode ? 'rgba(0, 178, 139, 0.4)' : 'rgba(255,255,255,0.3)', 
+								background: 'rgba(255,255,255, 0.6)', 
 								cursor: 'pointer'
 							}
                         }}
@@ -187,15 +189,14 @@ function Inventory() {
                     <Button 
                         onClick={() => setFiltro('proximo')} 
                         sx={{ 
-                            border:'1px solid white', 
                             borderRadius:'20px', 
 							padding:'5px 20px',
 							color:'#fff',
-							fontWeight:'500',
-							fontSize:'14px',
-                            background: filtro === 'proximo' ? isLightMode ? '#4cceac' : 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)',
+							fontWeight:'700',
+							fontSize:'12px',
+							background: filtro === 'proximo' ? '#00ff00' : 'rgba(255,255,255, 0.4)' ,
 							'&:hover': {
-								background: isLightMode ? 'rgba(0, 178, 139, 0.4)' : 'rgba(255,255,255,0.3)', 
+								background: 'rgba(255,255,255, 0.6)', 
 								cursor: 'pointer'
 							}
                         }}
@@ -207,12 +208,13 @@ function Inventory() {
 
                 <Button 
 					variant="contained" 
-					color="success" 
 					onClick={() => setOpenNew(!openNew)}
 					sx={{
 						color:'white',
 						fontSize:'14px',
-						fontWeight:'500'
+						fontWeight:'500',
+						bgcolor: 'secondary.main', 
+						'&:hover': { bgcolor: 'secondary.dark' }
 					}}
 				>
 					+ Agregar vehículo
@@ -282,7 +284,7 @@ function Inventory() {
 
 							<Box sx={{ width:'100%', height:'100px', display:'flex', justifyContent:'space-between', alignItems:'start', padding:'5px' }}>
 								<button><ConstructionIcon sx={{ color:'#003566', fontSize:'30px' }} onClick={() => setOpenMantenimiento(true)}/></button>
-								<button><InfoIcon sx={{ color:'#2dc653', fontSize:'30px' }} onClick={() => { setOpenEdit(true); setCambiarVehiculo(vehiculo) }}/></button>
+								<button><InfoIcon sx={{ color:'#2dc653', fontSize:'30px' }} onClick={() => { dispatch(setOpen(true)); CambiarVehiculo(vehiculo) }}/></button>
 							</Box>
 
 							<Box sx={{ width:'100%', height:'auto', display:'flex', justifyContent:'center', alignItems:'center', flexDirection:'column' }}>
@@ -327,11 +329,12 @@ function Inventory() {
 							<Box sx={{ width:'100%', height:'auto', display:'flex', justifyContent:'center', alignItems:'center', mt:'20px' }}>
 								<Button
 									sx={{
-										color:'white',
-										background:'#023e8a',
 										padding:'10px 20px',
 										fontSize:'13px',
-										fontWeight:'600'
+										fontWeight:'600',
+										color:'white',
+										bgcolor: 'secondary.main', 
+										'&:hover': { bgcolor: 'secondary.dark' }
 									}}
 									onClick={() => setOpenAsignacion(true)}
 								>
@@ -357,7 +360,7 @@ function Inventory() {
 
 			{ openNew ? <NewVehiculo setOpenNew={setOpenNew} setAlert={setAlert} setAlertClean={setAlertClean} dataVeiculos={dataVeiculos} /> : false }
 
-			{ openEdit ? <EditVehiculo setOpenEdit={setOpenEdit} /> : false }
+			{ editarVehiculo.open ? <EditVehiculo /> : false }
 
 			{ openMantenimiento ? <MantenimientoVehiculo setOpenMantenimiento={setOpenMantenimiento} /> : false }
 

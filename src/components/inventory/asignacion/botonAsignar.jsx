@@ -12,7 +12,9 @@ const BotonAsignar = () => {
 				sx={{
 					color:'white',
 					fontSize:'14px',
-					fontWeight:'500'
+					fontWeight:'500',
+					bgcolor: 'secondary.main', 
+					'&:hover': { bgcolor: 'secondary.dark' }
 				}}
 			>
 				Asignar
