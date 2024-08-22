@@ -1,9 +1,5 @@
-import PeopleOutlinedIcon from "@mui/icons-material/PeopleOutlined";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import LogoutIcon from '@mui/icons-material/Logout';
-import StackedLineChartIcon from '@mui/icons-material/StackedLineChart';
-import LeaderboardIcon from '@mui/icons-material/Leaderboard';
-import DonutLargeIcon from '@mui/icons-material/DonutLarge';
 import ArticleIcon from '@mui/icons-material/Article';
 import AccessAlarmIcon from '@mui/icons-material/AccessAlarm';
 import GroupsIcon from '@mui/icons-material/Groups';
@@ -57,10 +53,19 @@ import FiberSmartRecordIcon from '@mui/icons-material/FiberSmartRecord';
 import GpsFixedIcon from '@mui/icons-material/GpsFixed';
 import ZoomInMapIcon from '@mui/icons-material/ZoomInMap';
 import SaveIcon from '@mui/icons-material/Save';
+import ViewKanbanIcon from '@mui/icons-material/ViewKanban';
+import CloseIcon from '@mui/icons-material/Close';
+import AltRouteIcon from '@mui/icons-material/AltRoute';
+import PieChartIcon from '@mui/icons-material/PieChart';
+
 
 export const getIcon = (icon, style) => {
 
      let obj = {
+          "PieChartIcon": <PieChartIcon sx={style} />,
+          "AltRouteIcon": <AltRouteIcon sx={style} />,
+          "CloseIcon": <CloseIcon sx={style} />,
+          "ViewKanbanIcon": <ViewKanbanIcon sx={style} />,
           "SaveIcon": <SaveIcon sx={style} />,
           "ZoomInMapIcon": <ZoomInMapIcon sx={style} />,
           "GpsFixedIcon": <GpsFixedIcon sx={style} />,
@@ -98,12 +103,8 @@ export const getIcon = (icon, style) => {
           "PhonelinkSetupIcon": <PhonelinkSetupIcon sx={style} />,
           "AssignmentIndIcon": <AssignmentIndIcon sx={style} />,
           "BlurLinearIcon": <BlurLinearIcon sx={style} />,
-          "PeopleOutlinedIcon": <PeopleOutlinedIcon sx={style} />,
           "MenuOutlinedIcon": <MenuOutlinedIcon sx={style} />,
           "LogoutIcon": <LogoutIcon sx={style} />,
-          "StackedLineChartIcon": <StackedLineChartIcon sx={style} />,
-          "LeaderboardIcon": <LeaderboardIcon sx={style} />,
-          "DonutLargeIcon": <DonutLargeIcon sx={style} />,
           "ArticleIcon": <ArticleIcon sx={style} />,
           "AccessAlarmIcon": <AccessAlarmIcon sx={style} />,
           "GroupsIcon": <GroupsIcon sx={style} />,

@@ -177,13 +177,11 @@ const Mapa = () => {
 
 
     const addPolygonStorage = (polygon) => {
-        console.log(polygon)
         if (polygonsCreated.length === 0) {
             setPolygonsCreated([polygon])
             polygonsStorage.current = [polygon];
         } else {
             const have_id_polygon = polygonsCreated.find(poly => poly.id === polygon.id);
-            console.log(have_id_polygon)
             if (!have_id_polygon) {
                 setPolygonsCreated([...polygonsCreated, polygon]);
                 polygonsStorage.current = [...polygonsCreated, polygon];

@@ -51,6 +51,85 @@ body,
 	display: none !important;
 }
 
+.ag-theme-quartz {
+	/* Changes the color of the grid text */
+	--ag-foreground-color: rgb(14, 68, 145);
+	/* Changes the color of the grid background */
+	--ag-background-color: rgb(241, 247, 255);
+	/* Changes the header color of the top row */
+	--ag-header-background-color: rgb(228, 237, 250);
+	/* Changes the hover color of the row*/
+	--ag-row-hover-color: rgb(216, 226, 255);
+}
+
+
+/* DraggableModal.css */
+.modal-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 1400;
+  }
+  
+  .draggable-modal {
+	position: absolute;
+	width: 40%;
+	background: rgba(55, 56, 56);
+	border-radius: 8px;
+	box-shadow: 0 10px 10px rgba(6, 111, 209, 0.1);
+	cursor: move;
+	padding: 10px;
+  }
+
+/* FloatingWindow.css */
+.floating-window {
+	position: absolute;
+	background: white;
+	width: 30%;
+	border-radius: 10px;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+	z-index: 1500;
+	cursor: move;
+	resize: both;
+	overflow: hidden;
+  }
+  
+  .window-header {
+	padding: 2px 10px;
+	background: #2a4d7a;
+	color: white;
+	display: flex;
+	justify-content: end;
+	align-items: center;
+	cursor: move;
+  }
+  
+  .close-button {
+	background: none;
+	border: none;
+	color: white;
+	font-size: 16px;
+	cursor: pointer;
+  }
+  
+  .window-content {
+	padding: 20px;
+  }
+
+  .resize-handle {
+	width: 16px;
+	height: 16px;
+	background: transparent;
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	cursor: se-resize;
+  }
+  
+  
+
 
 /* Login */
 /* canvas {
