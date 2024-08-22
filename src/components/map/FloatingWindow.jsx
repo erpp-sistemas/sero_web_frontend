@@ -12,17 +12,29 @@ const FloatingWindow = ({ chartData, onClose, type, title }) => {
     const chartRef = useRef(null);
 
     const optionsBar = {
-        title: [
-            {
-                text: title
-            }
-        ],
         xAxis: {
             type: 'category',
-            data: chartData.map(c => c.name)
+            data: chartData.map(c => c.name),
+            axisLabel: {
+                fontSize: 12
+            },
+        },
+        // colorBy: 'series',
+        color: ['#73c0de'],
+        // gradientColor: ['#73c0de', '#d88273', '#bf444c'],
+        stateAnimation: {
+            animation: 'auto',
+            animationDuration: 5000,
+            animationEasing: 'cubicInOut'
+        },
+        tooltip: {
+            show: true
         },
         yAxis: {
             type: 'value'
+        },
+        textStyle: {
+            fontWeight: "bold"
         },
         series: [{
             data: chartData.map(c => c.value),
@@ -30,32 +42,32 @@ const FloatingWindow = ({ chartData, onClose, type, title }) => {
             label: {
                 show: true,
                 formatter: (params) => params.value.toLocaleString('en-US', {
-                    minimumFractionDigits: 2,
+                    minimumFractionDigits: 0,
                     maximumFractionDigits: 2
                 })
-            },
-            barWidth: '90%',
+            }
         }]
     }
 
     const optionsPie = {
-        title: [
-            {
-                text: title
-            }
-        ],
         legend: {
-            top: '1%',
-            left: 'center'
+            top: 0,
+            left: 'start',
+            itemWidth: 10
         },
-        tooltip: {
-            trigger: 'item'
+        // tooltip: {
+        //     trigger: 'item'
+        // },
+        aria: {
+            decal: {
+                show: true
+            }
         },
         series: [
             {
                 type: type,
                 data: chartData,
-                radius: ['36%', '81%'],
+                radius: ['36%', '75%'],
                 avoidLabelOverlap: false,
                 padAngle: 5,
                 itemStyle: {
@@ -65,7 +77,7 @@ const FloatingWindow = ({ chartData, onClose, type, title }) => {
                     show: false,
                     position: 'center',
                     formatter: (params) => params.value.toLocaleString('en-US', {
-                        minimumFractionDigits: 2,
+                        minimumFractionDigits: 0,
                         maximumFractionDigits: 2
                     })
                 },
@@ -115,6 +127,11 @@ const FloatingWindow = ({ chartData, onClose, type, title }) => {
             const chartInstance = echarts.init(chartRef.current);
             chartInstance.setOption(type === 'bar' ? optionsBar : optionsPie);
 
+            new ResizeObserver(() => {
+                if (chartRef.current.clientWidth != chartInstance.getWidth() || chartRef.current.clientHeight != chartInstance.getHeight()) {
+                    chartInstance.resize();
+                }
+            }).observe(chartRef.current);
 
             return () => {
                 chartInstance.dispose();
@@ -136,12 +153,13 @@ const FloatingWindow = ({ chartData, onClose, type, title }) => {
             onMouseUp={handleMouseUp}
         >
             <div className="window-header" onMouseDown={handleMouseDown}>
+                {title}
                 <button onClick={onClose} className="close-button">
                     {getIcon('CloseIcon', {})}
                 </button>
             </div>
             <div className="window-content">
-                <div ref={chartRef} style={{ width: '100%', height: '250px' }}></div>
+                <div ref={chartRef} style={{ width: '100%', height: '300px' }}></div>
             </div>
             <div className="resize-handle" onMouseDown={handleResizeMouseDown} />
         </div>,

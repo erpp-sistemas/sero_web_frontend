@@ -212,7 +212,7 @@ const ModalInfoPolygons = ({ setShowModal, polygons, draw, map, disablePoints, s
                 id: Date.now(),
                 chartData: data,
                 type: type,
-                title: `Gráfico ${field}`
+                title: `Gráfico ${field.replace('_', ' ')} - ${option === '1' ? 'Conteo' : 'Suma'}`
             };
 
             setWindows([...windows, newWindow]);
@@ -264,9 +264,6 @@ const ModalInfoPolygons = ({ setShowModal, polygons, draw, map, disablePoints, s
         setWindows(windows.filter((window) => window.id !== id));
     };
 
-    const handleResize = () => {
-        console.log("handleresize")
-    };
 
 
     return (
@@ -374,7 +371,6 @@ const ModalInfoPolygons = ({ setShowModal, polygons, draw, map, disablePoints, s
                                 </div>
                                 <div className="flex justify-end">
                                     <div className="w-1/3 mt-4">
-                                        <h2 className='text-center text-base text-gray-900'>Gráficar</h2>
                                         <div className="flex justify-center gap-3">
                                             <button className='bg-blue-600 p-1 rounded w-36 hover:bg-blue-500' onClick={() => askField('bar')}>
                                                 {getIcon('BarChartIcon', { marginRight: '5px' })}
@@ -392,7 +388,6 @@ const ModalInfoPolygons = ({ setShowModal, polygons, draw, map, disablePoints, s
                                                 onClose={() => closeWindow(window.id)}
                                                 title={window.title}
                                                 type={window.type}
-                                                onResize={handleResize}
                                             />
                                         ))}
                                     </div>

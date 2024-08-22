@@ -57,7 +57,7 @@ const ModalFieldChart = ({ setShowModal, fields, responseField }) => {
                     <select className='py-1 w-full rounded-md text-gray-900 mb-3' name="field" id="field" onChange={e => setField(e.target.value)}>
                         <option value="---">---</option>
                         {fields.map(field => (
-                            <option key={field} value={field}> {field} </option>
+                            <option key={field} value={field}> {field.replace('_', ' ')} </option>
                         ))}
                     </select>
                     <label htmlFor="option" className="text-blue-900"> Selecciona el tipo </label>
@@ -72,7 +72,7 @@ const ModalFieldChart = ({ setShowModal, fields, responseField }) => {
                             <select className='py-1 w-full rounded-md text-gray-900 mb-3' name="field-plus" id="field-plus" onChange={e => setFieldPlus(e.target.value)}>
                                 <option value="---">---</option>
                                 {fields.map(field => (
-                                    <option key={field} value={field}> {field} </option>
+                                    <option key={field} value={field}> {field.replace('_', ' ')} </option>
                                 ))}
                             </select>
                         </div>
