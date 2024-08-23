@@ -328,9 +328,13 @@ function BatteryMeter({data}) {
         {data.length > 0 && (
           <>
           <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2} >
-          <Grid item xs={12}>
-              <Typography variant="h4" align="center" sx={{ fontWeight: 'bold', paddingTop: 1 }}>
-                Medidor de Bateria
+            <Grid item xs={12}>
+              <Typography 
+                variant="h4" 
+                align="center" 
+                sx={{ fontWeight: 'bold', paddingTop: 1 }}
+              >
+                MEDIDOR DE BATERIA
               </Typography>
             </Grid>
             <Grid item xs={6} sx={{ paddingBottom: 1 }}>

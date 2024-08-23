@@ -51,7 +51,7 @@ function DailyManagementNotPhoto({ data, typeConcept }) {
 			sx={{
 				overflow: 'auto', 
 				width: '100%',
-				height: '450px'
+				height: '480px'
 			}}
 		>   
 			
@@ -79,14 +79,9 @@ function DailyManagementNotPhoto({ data, typeConcept }) {
 				>
 
 					<Typography
-						variant="h5"
-						fontWeight="600"
-						sx={{ 
-							padding: "2px 30px 0 5px",
-							textAlign: { xs: 'start', md: 'center' }
-						}}
-						color={colors.grey[200]}
-						textAlign={'center'}
+						variant="h4" 
+						align="center" 
+						sx={{ fontWeight: 'bold', paddingTop: 1 }}
 					>
 						GESTIONES REALIZADAS SIN FOTO TOMADAS
 					</Typography>

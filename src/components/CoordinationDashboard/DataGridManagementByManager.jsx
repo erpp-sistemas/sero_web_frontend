@@ -198,7 +198,7 @@ function DataGridManagementByManager({ data }) {
 			id="grid-1"
 			display="grid"
 			gridTemplateColumns="repeat(12, 1fr)"
-			gridAutoRows="450px"
+			gridAutoRows="480px"
 			gap="15px"
 		>   
 
@@ -211,6 +211,15 @@ function DataGridManagementByManager({ data }) {
 				{data.length > 0 && (
 				<>
 					<Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2} >
+						<Grid item xs={12}>
+						<Typography 
+              variant="h4" 
+              align="center" 
+              sx={{ fontWeight: 'bold', paddingTop: 1 }}
+            >
+							GESTIONES LOCALIZADAS
+						</Typography>
+						</Grid>
 					<Grid item xs={6} sx={{ paddingBottom: 1 }}>
 						<FormControl>
 						<TextField                              

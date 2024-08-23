@@ -564,7 +564,7 @@ function DataGridManagementByManager({data, placeId, serviceId, proccessId}) {
       id="grid-1"
       display="grid"
       gridTemplateColumns="repeat(12, 1fr)"
-      gridAutoRows="450px"
+      gridAutoRows="480px"
       gap="15px"
     >
       <LoadingModal open={isLoading}/>
@@ -581,13 +581,22 @@ function DataGridManagementByManager({data, placeId, serviceId, proccessId}) {
         {data.length > 0 && (
           <>
            <Grid item xs={12} container alignItems="stretch" spacing={2}
-				sx={{
-					justifyContent:{
-						xs:'start',
-						md:'space-betweeen'
-					}
-				}}
-			>
+              sx={{
+                justifyContent:{
+                  xs:'start',
+                  md:'space-betweeen'
+                }
+              }}
+            >
+            <Grid item xs={12}>
+              <Typography 
+                variant="h4" 
+                align="center" 
+                sx={{ fontWeight: 'bold', paddingTop: 1 }}
+              >
+                RESUMEN DE ACTIVIDADES
+              </Typography>
+            </Grid>
             <Grid item xs={6} sx={{ paddingBottom: 1 }}>
               <FormControl>
                 <TextField                              

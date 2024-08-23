@@ -62,13 +62,11 @@ function TypeProperty({ data }) {
                 alignItems="center"
             >
 
-                <Typography
-                    variant="h5"
-                    fontWeight="600"
-                    sx={{ padding: "2px 30px 0 5px" }}
-                    color={colors.grey[200]}
-                    textAlign={'center'}
-                >
+              <Typography 
+                variant="h4" 
+                align="center" 
+                sx={{ fontWeight: 'bold', paddingTop: 1 }}
+              >
                     TIPO DE PREDIO
                 </Typography>
             </Box>
