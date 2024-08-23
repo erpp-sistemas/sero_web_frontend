@@ -19,6 +19,7 @@ import Typography from '@mui/material/Typography'
 import Badge from '@mui/material/Badge'
 import DownloadIcon from '@mui/icons-material/Download'
 import * as ExcelJS from "exceljs"
+import Download from "@mui/icons-material/Download"
 
 const Index = () => {
     
@@ -282,7 +283,18 @@ const Index = () => {
                 </Button>
               </Grid>
               <Grid item xs={4}>
-
+                <Button 
+                  variant="contained"                   
+                  style={{ width: '100%', height: '100%' }}
+                  // onClick={() => {
+                  //   handleGetTrafficLight();                    
+                  // }}
+                  onClick={() => handleDownload('full', 'Padron_completo')}
+                  sx={{ bgcolor: 'info.main', '&:hover': { bgcolor: 'info.dark' } }}
+                  >
+                    <Download fontSize="large"/>
+                    Descargar Padron Completo                  
+                </Button>
               </Grid>
             </Grid>
             <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
