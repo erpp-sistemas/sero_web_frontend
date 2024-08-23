@@ -9,14 +9,14 @@ const InformacionPrincipal = () => {
 
 	return (
 
-		<Box sx={{ width:'100%', height:'auto', display:'flex', justifyContent:'start', alignItems:'start', flexDirection:{xs:'column', md:'row'}, gap:'10px', flexWrap:'wrap'}}>
+		<Box sx={{ width:'100%', height:'auto', display:'flex', justifyContent:'start', alignItems:'start', flexDirection:{xs:'column', md:'row'}, gap:'10px', flexWrap:'wrap', }}>
 
-			<Box sx={{ width:'32%', height:'auto', padding:{ xs:'0px', md:'0px 0px' } }}>
+			<Box sx={{ width:{ xs:'100%', md:'32%' }, height:'auto', padding:{ xs:'0px', md:'0px 0px' } }}>
 				<Typography>Encargado</Typography>
 				<TextField sx={{ width:'100%', mt:'10px' }} disabled id="filled-basic" value={encargado} variant="filled" onChange={e => setEncargado(e.target.value) }/>
 			</Box>	
 
-			<Box sx={{ width:'32%', height:'auto', padding:{ xs:'0px', md:'0px 0px' }, marginTop:'10px'}}>
+			<Box sx={{ width:{ xs:'100%', md:'32%' }, height:'auto', padding:{ xs:'0px', md:'0px 0px' }, marginTop:'10px'}}>
 				<Typography>Asignado</Typography>
 				<FormControl fullWidth>
 					<Select
@@ -32,12 +32,12 @@ const InformacionPrincipal = () => {
 				</FormControl>
 			</Box>	
 
-			<Box sx={{ width:'32%', height:'auto', padding:{ xs:'0px', md:'0px 0px' } }}>
+			<Box sx={{ width:{ xs:'100%', md:'32%' }, height:'auto', padding:{ xs:'0px', md:'0px 0px' } }}>
 				<Typography>Tarea</Typography>
 				<TextField sx={{ width:'100%', mt:'10px' }} id="filled-basic" value={tarea} variant="filled" onChange={e => setTarea(e.target.value) }/>
 			</Box>	
 			
-			<Box sx={{ width:'32%', height:'auto', padding:{ xs:'0px', md:'0px 0px' } }}>
+			<Box sx={{ width:{ xs:'100%', md:'32%' }, height:'auto', padding:{ xs:'0px', md:'0px 0px' } }}>
 				<Typography>Kilometraje Inicial</Typography>
 				<TextField 
 					sx={{ 

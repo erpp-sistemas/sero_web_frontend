@@ -28,9 +28,9 @@ const EstadoActual = () => {
 
 				<>
 
-					<Box sx={{ width:'100%', height:'auto', display:'flex', justifyContent:'center', alignItems:'center', mt:'20px' }}>
+					<Box sx={{ width:'100%', height:'auto', display:'flex', justifyContent:'center', alignItems:'center', mt:'20px', flexDirection:{ xs:'column', md:'row'} }}>
 
-						<Box sx={{ height:'100%', display:'flex', justifyContent:{ xs:'center', md:'flex-start' }, alignItems:{ xs:'center', md:'flex-start' }, gap:'10px', flexDirection:'row', marginTop:'10px', width:'100%'}}>
+						<Box sx={{ height:'100%', display:'flex', justifyContent:{ xs:'center', md:'flex-start' }, alignItems:{ xs:'center', md:'flex-start' }, gap:'10px', marginTop:'10px', width:'100%', flexDirection:{ xs:'column', md:'row'} }}>
 
 							<FormControl fullWidth variant="filled" sx={{ mt:'10px', minWidth:'auto', width:'100%' }}>
 								<InputLabel id="combustible">Combustible</InputLabel>
@@ -93,7 +93,7 @@ const EstadoActual = () => {
 
 					</Box>
 
-					<Box sx={{ width:'100%', display:'flex', justifyContent:'space-between', alignItems:'start', mt:'40px', padding:{ xs:'0px', md:'0px 0px' } }}>
+					<Box sx={{ width:'100%', display:'flex', justifyContent:'space-between', alignItems:'start', mt:'40px', padding:{ xs:'0px', md:'0px 0px' }, flexDirection:{ xs:'column', md:'row'} }}>
 
 						<Box sx={{ width:{ xs:'100%', md:'30%' }, height:'auto', mt:'20px' }}>
 
@@ -235,7 +235,7 @@ const EstadoActual = () => {
 
 					</Box>
 					
-					<Box sx={{ width:'100%', display:'flex', justifyContent:'space-between', alignItems:'start', m:'40px 0px', padding:{ xs:'0px', md:'0px 0px' } }}>
+					<Box sx={{ width:'100%', display:'flex', justifyContent:'space-between', alignItems:'start', m:'40px 0px', padding:{ xs:'0px', md:'0px 0px' }, flexDirection:{ xs:'column', md:'row'} }}>
 
 						<Box sx={{ width:{ xs:'100%', md:'30%' }, height:'auto', mt:'20px' }}>
 

@@ -308,7 +308,13 @@ const 	Botones = ({ next, setNext, data, dataDocuments, dataEstado, dataPagos, d
             }
             { next !== 'pagos' && 
                 <Button 
-                    sx={{ fontSize:'12px', color:'#fff', padding:'5px 20px'}} 
+                    sx={{ 
+						fontSize:'12px',
+						color:'#fff', 
+						padding:'5px 20px',
+						bgcolor: 'secondary.main', 
+						'&:hover': { bgcolor: 'secondary.dark' }
+					}} 
                     variant="contained" 
                     color="success" 
                     onClick={VeficationData}
@@ -318,7 +324,13 @@ const 	Botones = ({ next, setNext, data, dataDocuments, dataEstado, dataPagos, d
             }
 			{ next === 'pagos' && 
                 <Button 
-                    sx={{ fontSize:'12px', color:'#fff', padding:'5px 20px'}} 
+                    sx={{ 
+						fontSize:'12px', 
+						color:'#fff', 
+						padding:'5px 20px',
+						bgcolor: 'secondary.main', 
+						'&:hover': { bgcolor: 'secondary.dark' }
+					}} 
                     variant="contained" 
                     color="success" 
                     onClick={SubirVehiculo}

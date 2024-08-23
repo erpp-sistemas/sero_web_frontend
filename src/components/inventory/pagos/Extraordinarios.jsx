@@ -144,7 +144,7 @@ export default function Extraordinarios() {
 								sx={{
 									width: 'auto',
 									height: 'auto',
-									background: '#66bb6a',
+									background: '#00ff00',
 									minHeight: '0px',
 									minWidth: '0px',
 									margin: '0',
@@ -163,7 +163,19 @@ export default function Extraordinarios() {
 				</Box>
 
 				<Box sx={{ width: 'auto', height: 'auto', display: 'flex', justifyContent: 'end', alignItems: 'center' }}>
-					<Button sx={{ color: '#fff', background: '#66bb6a' }} onClick={handleAgregarPago}>AGREGAR PAGO</Button>
+					<Button 
+						variant="contained" 
+						color="success" 
+						sx={{ 
+							color: '#fff', 
+							background: '#66bb6a', 
+							bgcolor: 'secondary.main', 
+							'&:hover': { bgcolor: 'secondary.dark' }
+						}}  
+						onClick={handleAgregarPago}
+					>
+						AGREGAR PAGO
+					</Button>
 				</Box>
 
 			</Box>

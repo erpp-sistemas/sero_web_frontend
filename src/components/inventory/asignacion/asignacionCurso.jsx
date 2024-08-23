@@ -26,7 +26,10 @@ const AsignacionCurso = () => {
 					sx={{
 						color:'white',
 						fontSize:'14px',
-						fontWeight:'500'
+						fontWeight:'500',
+						bgcolor: 'secondary.main', 
+						'&:hover': { bgcolor: 'secondary.dark' },
+						mb:{ xs:'30px', md:'0px' }
 					}}
 				>
 					terminar Viaje
@@ -44,7 +47,7 @@ const AsignacionCurso = () => {
 				<Typography sx={{ fontSize:'20px', mt:'10px' }} ><span style={{ fontWeight: 700 }}>Fecha y hora de asignacion:</span> 12/08/2024 11:12:40</Typography>
 			</Box>
 
-			<Box sx={{ width:'100%', height:'auto', mt:'20px', borderTop:'1px solid #fff', paddingTop:'20px', display:'flex', justifyContent:'center', alignItems:'center', gap:'15px' }} >
+			<Box sx={{ width:'100%', height:'auto', mt:'20px', borderTop:'1px solid #fff', paddingTop:'20px', display:'flex', justifyContent:'center', alignItems:'center', gap:'15px', flexDirection:{ xs:'column', md:'row' } }} >
 
 				<Box sx={{ width:'100%', height:'auto', padding:{ xs:'0px', md:'0px 0px' } }}>
 					<Typography>Kilometraje Final</Typography>
@@ -108,7 +111,7 @@ const AsignacionCurso = () => {
 
 					<>
 
-						<Box sx={{ width:'100%', display:'flex', justifyContent:'space-between', alignItems:'start', mt:'40px', padding:{ xs:'0px', md:'0px 0px' } }}>
+						<Box sx={{ width:'100%', display:'flex', justifyContent:'space-between', alignItems:'start', mt:'40px', padding:{ xs:'0px', md:'0px 0px' }, flexDirection:{ xs:'column', md:'row'},  }}>
 
 							<Box sx={{ width:{ xs:'100%', md:'30%' }, height:'auto', mt:'20px' }}>
 
@@ -145,7 +148,7 @@ const AsignacionCurso = () => {
 														}
 													}}
 												>
-													{estado[variable] ? <Box sx={{ width:'70%', height:'70%', background:'red' , borderRadius:'50%' }}></Box> : null}
+													{estado[variable] ? <Box sx={{ width:'70%', height:'70%', background:'red' , borderRadius:'50%',  }}></Box> : null}
 												</Button>
 											</Box>
 
@@ -250,7 +253,7 @@ const AsignacionCurso = () => {
 
 						</Box>
 
-						<Box sx={{ width:'100%', display:'flex', justifyContent:'start', alignItems:'start', m:'40px 0px', padding:{ xs:'0px', md:'0px 0px' }, gap:'35px' }}>
+						<Box sx={{ width:'100%', display:'flex', justifyContent:'start', alignItems:'start', m:'40px 0px', padding:{ xs:'0px', md:'0px 0px' }, gap:'35px', flexDirection:{ xs:'column', md:'row'} }}>
 
 							<Box sx={{ width:{ xs:'100%', md:'30%' }, height:'auto', mt:'20px' }}>
 

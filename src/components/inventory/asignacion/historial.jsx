@@ -1,4 +1,4 @@
-import { Box, Typography, Button } from "@mui/material"
+import { Box, Typography, Button, Card , CardContent} from "@mui/material"
 import PropTypes from "prop-types"
 
 const Historial = ({ asignar, setAsignar, selection, setSelection, active, setActive }) => {
@@ -15,7 +15,7 @@ const Historial = ({ asignar, setAsignar, selection, setSelection, active, setAc
 				{
 					active ? 
 						<Button 
-							sx={{ fontSize:'12px', color:'#fff', padding:'5px 20px' }} 
+							sx={{ fontSize:'12px', padding:'5px 20px' }} 
 							variant="outlined" 
 							color={ !asignar ? 'success' : 'error' } 
 							onClick={() => { selection ? (setSelection(false), setAsignar(!asignar)) : setAsignar(!asignar) }} 
@@ -29,13 +29,15 @@ const Historial = ({ asignar, setAsignar, selection, setSelection, active, setAc
 
 			<Box sx={{ width:'100%', height:'90%', overflowX:'hidden', overflowY:'scroll', mt:'10px', display:'flex', justifyContent:'start', alignItems:'center', flexDirection:'column', margin:'10px 0px', padding:'0', maxHeight:'500px' }}>
 				
-				<Box onClick={() => { asignar ? setSelection(true) : setSelection(!selection), setAsignar(false) }} sx={{ width:'98%', height:'205px', minWidth:'98%', minHeight:'200px', borderRadius:'5px', border:'1px solid white', mt:'20px', padding:'15px', cursor:'pointer' }}>
-					<Typography sx={{ mb:'5px', fontSize:{ xs:'18px', md:'20px' } }}>Fecha de asignación: 02-08-2024</Typography>
-					<Typography sx={{ mb:'5px', fontSize:{ xs:'18px', md:'20px' } }}>Encargado: Antonio Ticante</Typography>
-					<Typography sx={{ mb:'5px', fontSize:{ xs:'18px', md:'20px' } }}>Asignado: Iván Sánchez</Typography>
-					<Typography sx={{ mb:'5px', fontSize:{ xs:'18px', md:'20px' } }}>Tarea: Ruta en campo</Typography>
-					<Typography sx={{ mb:'5px', fontSize:{ xs:'18px', md:'20px' } }}>Estatus: Terminado</Typography>
-				</Box>
+				<Card onClick={() => { asignar ? setSelection(true) : setSelection(!selection), setAsignar(false) }} sx={{ width:'98%', height:'auto', minWidth:'98%', minHeight:'200px', borderRadius:'10px', mt:'20px', padding:'15px', cursor:'pointer' }}>
+					<CardContent>
+						<Typography color="text.secondary" sx={{ mb:'5px', fontSize:{ xs:'18px', md:'20px' } }}>Fecha de asignación: 02-08-2024</Typography>
+						<Typography color="text.secondary" sx={{ mb:'5px', fontSize:{ xs:'18px', md:'20px' } }}>Encargado: Antonio Ticante</Typography>
+						<Typography color="text.secondary" sx={{ mb:'5px', fontSize:{ xs:'18px', md:'20px' } }}>Asignado: Iván Sánchez</Typography>
+						<Typography color="text.secondary" sx={{ mb:'5px', fontSize:{ xs:'18px', md:'20px' } }}>Tarea: Ruta en campo</Typography>
+						<Typography color="text.secondary" sx={{ mb:'5px', fontSize:{ xs:'18px', md:'20px' } }}>Estatus: Terminado</Typography>
+					</CardContent>
+				</Card>
 
 			</Box>
 
