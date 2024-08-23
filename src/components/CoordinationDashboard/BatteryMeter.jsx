@@ -11,6 +11,10 @@ import * as ExcelJS from "exceljs";
 
 function BatteryMeter({data}) {
 
+  if (!data) {
+    return null;
+  }
+
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [searchTerm, setSearchTerm] = useState(null);
@@ -20,11 +24,7 @@ function BatteryMeter({data}) {
   const [noResults, setNoResults] = useState(false);
   const [searchPerformed, setSearchPerformed] = useState(false);
 
-  const [isLoading, setIsLoading] = useState(false)
-
-  if (!data) {
-    return null;
-}
+  const [isLoading, setIsLoading] = useState(false)  
 
   const buildColumns = () => {   
     const columns = [
@@ -316,7 +316,7 @@ function BatteryMeter({data}) {
       id="grid-1"
       display="grid"
       gridTemplateColumns="repeat(12, 1fr)"
-      gridAutoRows="450px"
+      gridAutoRows="480px"
       gap="15px"
     >   
       <Box

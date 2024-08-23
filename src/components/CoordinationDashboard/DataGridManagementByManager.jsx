@@ -10,16 +10,16 @@ import PropTypes from 'prop-types'
 
 function DataGridManagementByManager({ data }) {
 
+	if (!data) {
+		return null
+	}
+
 	const theme = useTheme()
 	const [searchTerm, setSearchTerm] = useState(null)
 	const [filteredUsers, setFilteredUsers] = useState([])
 	const [matching, setMatching] = useState(-1)
 	const [noResults, setNoResults] = useState(false)
 	const [searchPerformed, setSearchPerformed] = useState(false)
-
-	if (!data) {
-		return null
-	}
 
 	const buildColumns = () => {   
 		const columns = [

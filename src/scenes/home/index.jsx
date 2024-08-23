@@ -48,11 +48,30 @@ const Index = () => {
 							md:'start'
 						} 
 					}}>
-						<Typography sx={{ color:'white', fontSize:'1.125rem', lineHeight:'1.75rem', fontWeight:'800' }}><span className='text-blue-300'>SISTEMA ESTRATÉGICO DE RECAUDACIÓN Y ORDENAMIENTO</span></Typography>
-						<p className={`${styles.heroSubText} mt-2 text-white-100`}>
+						<Typography 
+							sx={{ 
+                fontSize:'1.125rem', 
+                lineHeight:'1.75rem', 
+                fontWeight:'800',
+                textAlign:{
+									xs:'center',
+									md:'start'
+								}
+                }}
+            >
+              <span className='text-[#5ebfff]'>
+                SISTEMA ESTRATÉGICO DE RECAUDACIÓN Y ORDENAMIENTO
+              </span>
+            </Typography>
+						
+						<Typography 
+              variant="h5" 
+              color="text.secondary" 
+              sx={{ textAlign: 'left', pt: 1 }}
+            >
 							Todo nuestro equipo en campo, alimentando la plataforma en tiempo real, generando información
-							para un soporte documental más robusto y certero. <br className='sm:block hidden' />
-						</p>
+							para un soporte documental más robusto y certero.
+						</Typography>						
 					</Box>
 					
 				</Box>

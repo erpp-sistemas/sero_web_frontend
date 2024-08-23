@@ -5,11 +5,15 @@ import Grid from '@mui/material/Grid';
 import { tokens } from "../../theme";
 import { DataGrid } from '@mui/x-data-grid';
 import Viewer from 'react-viewer';
-import { Search, CalendarToday, AccessTime, Download, PersonPinCircle } from "@mui/icons-material";
+import { Search, CalendarToday, AccessTime, Download, PersonPinCircle, TaskAlt, AddBusiness, ViewAgenda } from "@mui/icons-material";
 import LoadingModal from '../../components/LoadingModal.jsx'
 import * as ExcelJS from "exceljs";
 
 function VerifiedAddress({data}) {
+
+  if (!data) {
+      return null;
+  }
 
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -22,30 +26,12 @@ function VerifiedAddress({data}) {
 
   const [isLoading, setIsLoading] = useState(false)
 
-  if (!data) {
-    return null;
-}
+ 
 
   const buildColumns = () => {   
-    const columns = [
-        { 
-			field: 'account',
-			renderHeader: () => (
-				<strong style={{ color: "#5EBFFF" }}>{"CUENTA"}</strong>
-			),
-			width: 270,
-			editable: false,			
-		}, 
-    { 
-			field: 'street',
-			renderHeader: () => (
-				<strong style={{ color: "#5EBFFF" }}>{"CALLE"}</strong>
-			),
-			width: 270,
-			editable: false,			
-		}, 
+    const columns = [       
 		{ 
-			field: 'manager',
+			field: 'user',
 			renderHeader: () => (
 				<strong style={{ color: "#5EBFFF" }}>{"GESTOR"}</strong>
 			),
@@ -83,22 +69,69 @@ function VerifiedAddress({data}) {
 				  }}
 				/>
 			  )
-		},
+		},    
     { 
-      field: 'position',
+      field: 'count',
       renderHeader: () => (
-      <strong style={{ color: "#5EBFFF" }}>{"Posicion"}</strong>
+        <strong style={{ color: "#5EBFFF" }}>{"GESTIONES"}</strong>
       ),
-      width: 120,
+      width: 100,
+      editable: false,
+      renderCell: (params) => {          
+        let color = theme.palette.secondary.main
+        return (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>            
+            <Typography variant="body1" sx={{ fontWeight: 'bold', fontSize: '1.2em' }}>
+              {params.value}
+            </Typography>
+            <TaskAlt sx={{ color: color }} />
+          </div>
+        )          
+      }
+    },
+    { 
+      field: 'verified_address',
+      renderHeader: () => (
+        <strong style={{ color: "#5EBFFF" }}>{"DOMICILIOS VERIFICADOS"}</strong>
+      ),
+      width: 170,
+      editable: false,
+      renderCell: (params) => {          
+        let color = theme.palette.secondary.main
+        if(params.value == '0'){
+          color = theme.palette.error.main
+        }
+        else{
+          color = theme.palette.secondary.main
+        }
+
+        return (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>            
+            <Typography variant="body1" sx={{ fontWeight: 'bold', fontSize: '1.2em', padding: 1 }}>
+              {params.value}
+            </Typography>
+            <AddBusiness sx={{ color: color }} />
+          </div>
+        )          
+      }
+    },
+    { 
+      field: 'actions',      
+      renderHeader: () => (
+        <strong style={{ color: "#5EBFFF" }}>{"ACCION"}</strong>
+      ),
+      width: 150,
       renderCell: (params) => (
-      <PersonPinCircle 
-        style={{ cursor: 'pointer', color: 'lightblue', fontSize: 40 }} 
-        onClick={() => {
-        window.open(params.value, '_blank');
-        }}
-      />
-      ),
-    },    
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<ViewAgenda />}
+          // onClick={() => handleOpenPopup(params.row.user_id, params.row.date_capture)}
+        >
+          Ver
+        </Button>
+      )
+    } 
     ];
   
     return columns;
@@ -220,7 +253,7 @@ function VerifiedAddress({data}) {
       id="grid-1"
       display="grid"
       gridTemplateColumns="repeat(12, 1fr)"
-      gridAutoRows="450px"
+      gridAutoRows="480px"
       gap="15px"
     >   
       <Box

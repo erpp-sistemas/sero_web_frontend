@@ -56,6 +56,7 @@ import PhotoManagement from './scenes/photo-management'
 import { initializeWebSocket } from './config/WebSocketManager'
 import { submenuAccessLogRequest } from './api/submenu'
 import DebtRecord from './scenes/debt-record'
+import DirectionDashboard from './scenes/direction-dashboard'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -197,8 +198,9 @@ function App() {
                         <Route path="/backup" element={<RecordsBackup />} />
                         <Route path="/impresion" element={<RecordsImpression />} />
                         <Route path="/vehiculos" element={<Inventory />} />
-                        <Route path="/manager-dashboard" element={<ManagerDashboard />} />
+                        <Route path="/manager-dashboard" element={<ManagerDashboard />} />                        
                         <Route path="/photo-management" element={<PhotoManagement />} />
+                        <Route path="/direction-dashboard" element={<DirectionDashboard />} />
                       </Routes>
                     </main>
                   </Box>

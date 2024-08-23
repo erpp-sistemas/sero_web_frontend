@@ -14,6 +14,10 @@ import { TaskAlt, Search } from "@mui/icons-material";
 
 function PaymentsProceduresByManager({data}) {
 
+  if (!data) {
+    return null;
+  }
+
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [searchTerm, setSearchTerm] = useState(null);
@@ -21,11 +25,7 @@ function PaymentsProceduresByManager({data}) {
   const [matching, setMatching] = useState(-1);
 
   const [noResults, setNoResults] = useState(false);
-  const [searchPerformed, setSearchPerformed] = useState(false);
-
-  if (!data) {
-    return null;
-}
+  const [searchPerformed, setSearchPerformed] = useState(false);  
 
   const buildColumns = () => {   
     const columns = [

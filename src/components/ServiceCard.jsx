@@ -27,9 +27,29 @@ const ServiceCard = ({ title, subtitle, image, animation }) => {
       }}
     >
       <Stack sx={{ height: "100%" }} spacing={1}>
-        <Title variant={{ xs: "h5", sm: "h4" }}>{title}</Title>
+        <Title 
+        sx={{ 
+          fontSize:'1.125rem', 
+          lineHeight:'1.75rem', 
+          fontWeight:'800',
+          textAlign:{
+            xs:'center',
+            md:'start'
+          },
+          textTransform: 'uppercase'
+          }}
+          
+      >
+        <span className='text-[#5ebfff]'>
+          {title}
+        </span>        
+      </Title>
 
-        <Typography variant="h5" color="text.secondary">
+        <Typography 
+           variant="h5" 
+           color="text.secondary" 
+           sx={{ textAlign: 'left'}}
+        >
           {subtitle}
         </Typography>
 
