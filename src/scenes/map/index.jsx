@@ -40,15 +40,17 @@ const Mapa = () => {
     const [showModalInfoPolygon, setShowModalInfoPolygon] = useState(false)
     const [showModalInfoPolygons, setShowModalInfoPolygons] = useState(false)
 
-
+    
     useEffect(() => {
         const getPlazaById = async () => {
             const res = await getPlaceById(place_id);
+            console.log(res)
             dispatch(setPlazaMapa(res[0]))
             setPlaza(res[0])
         }
         getPlazaById()
     }, [])
+
 
     useEffect(() => {
         if (plaza) generateMap();
@@ -120,7 +122,7 @@ const Mapa = () => {
 
         map.on('draw.delete', (e) => {
             const polygon = e.features[0]; //? obtengo el poligono eliminado
-            enabledPoints(map, polygon.id)
+            enabledPoints(map, polygon.id);
             deletePolygonStorage(polygon, map);
         });
 
@@ -272,6 +274,7 @@ const Mapa = () => {
     }
 
 
+
     return (
 
         <div ref={mapDiv} style={stylesMap}>
@@ -282,7 +285,8 @@ const Mapa = () => {
                 polygonsCreated={polygonsCreated} polygonsStorage={polygonsStorage}
                 disabledPoints={disabledPoints} />}
 
-            {showModalInfoPolygons && <ModalInfoPolygons setShowModal={setShowModalInfoPolygons} polygons={polygonsCreated} draw={drawMap} map={mapRef} disablePoints={disabledPoints}
+            {showModalInfoPolygons && <ModalInfoPolygons setShowModal={setShowModalInfoPolygons} polygons={polygonsCreated} draw={drawMap} map={mapRef}
+                disablePoints={disabledPoints} enabledPoints={enabledPoints} 
                 setPolygonsCreated={setPolygonsCreated} setLastPolygonCreated={setLastPolygonCreated}
             />}
 
@@ -300,7 +304,7 @@ const Mapa = () => {
                             {getIcon('SaveIcon', {})}
                         </button>
                     </Tooltip>
-                    
+
                 </div>
             )}
 

@@ -57,11 +57,13 @@ import ViewKanbanIcon from '@mui/icons-material/ViewKanban';
 import CloseIcon from '@mui/icons-material/Close';
 import AltRouteIcon from '@mui/icons-material/AltRoute';
 import PieChartIcon from '@mui/icons-material/PieChart';
+import BrushIcon from '@mui/icons-material/Brush';
 
 
 export const getIcon = (icon, style) => {
 
      let obj = {
+          "BrushIcon": <BrushIcon sx={style} />,
           "PieChartIcon": <PieChartIcon sx={style} />,
           "AltRouteIcon": <AltRouteIcon sx={style} />,
           "CloseIcon": <CloseIcon sx={style} />,

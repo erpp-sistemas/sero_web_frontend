@@ -8,7 +8,7 @@ import { CSVLink } from 'react-csv';
 
 const ModalInfoPolygon = ({ setShowModal, polygon, setLastPolygonCreated, polygonsCreated, setPolygonsCreated, polygonsStorage }) => {
 
-    //console.log(polygon)
+    console.log(polygon)
     const [open, setOpen] = useState(true);
 
     const [showFieldName, setShowFieldName] = useState(false);
@@ -63,6 +63,9 @@ const ModalInfoPolygon = ({ setShowModal, polygon, setLastPolygonCreated, polygo
                         {polygon.name && polygon.name !== '' && (<p className=" text-gray-900 text-base mt-2"> Nombre: <span className='text-emerald-700 font-bold'> {polygon.name} </span> </p>)}
                         {polygon.user && (
                             <p className="text-gray-900 text-base mt-1">Usuario: <span className="text-emerald-700 font-bold">{polygon.user.nombre} {polygon.user.apellido_paterno}</span> </p>
+                        )}
+                        {polygon.distancia && (
+                            <p className="text-gray-900 text-base mt-1">Distancia: <span className="text-emerald-700 font-bold">{polygon.distancia.toFixed(2)} km</span> </p>
                         )}
                         <div className='w-full mx-auto mt-3 py-2 flex flex-col justify-center items-center gap-3'>
                             {!showFieldName && (

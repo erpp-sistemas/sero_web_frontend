@@ -200,23 +200,20 @@ export default function AlertDialogSlide() {
                 keepMounted
                 onClose={handleClose}
                 aria-describedby="alert-dialog-slide-description"
+                sx={{ width: '100%' }}
             >
                 <DialogTitle>{showButtonsHerramientas ? "HERRAMIENTAS DEL MAPA" : nombreHerramientaSeleccionada.toUpperCase()}</DialogTitle>
-                <DialogContent sx={{ width: '100%' }}>
+                <DialogContent>
 
                     {showButtonsHerramientas && (
                         <div className="flex flex-col justify-center">
-                            <ButtonUi title='Cambio de color' bgColor={colors.greenAccent[600]} width='300px' padding='6px' fontWeight='' bgColorHover={colors.greenAccent[400]} handle={() => handleButtonHerramienta('Cambio de color')} mt='10px' icon={getIcon('ColorLensIcon', {})} />
+                            <ButtonUi title='Cambio de color' bgColor={colors.blueAccent[400]} width='300px' padding='6px' fontWeight='' bgColorHover={colors.blueAccent[300]} handle={() => handleButtonHerramienta('Cambio de color')} mt='10px' icon={getIcon('ColorLensIcon', {})} />
 
-                            <ButtonUi title='Dibujar poligono' bgColor={colors.greenAccent[600]} width='300px' padding='6px' fontWeight='' bgColorHover={colors.greenAccent[400]} handle={() => handleButtonHerramienta('Dibujar poligono')} mt='10px' icon={getIcon('PolylineIcon', {})} />
+                            <ButtonUi title='Dibujar poligono' bgColor={colors.blueAccent[400]} width='300px' padding='6px' fontWeight='' bgColorHover={colors.blueAccent[300]} handle={() => handleButtonHerramienta('Dibujar poligono')} mt='10px' icon={getIcon('PolylineIcon', {})} />
 
-                            {features.puntos_in_poligono.length > 0 && (
-                                <ButtonUi title='Ver información' bgColor={colors.greenAccent[600]} width='300px' padding='6px' fontWeight='' bgColorHover={colors.greenAccent[400]} handle={() => handleButtonHerramienta('Ver información')} mt='10px' icon={getIcon('RectangleIcon', {})} />
-                            )}
+                            <ButtonUi title='Mapa de calor' bgColor={colors.blueAccent[400]} width='300px' padding='6px' fontWeight='' bgColorHover={colors.blueAccent[300]} handle={() => handleButtonHerramienta('Mapa de calor')} mt='10px' icon={getIcon('FiberSmartRecordIcon', {})} />
 
-                            <ButtonUi title='Mapa de calor' bgColor={colors.greenAccent[600]} width='300px' padding='6px' fontWeight='' bgColorHover={colors.greenAccent[400]} handle={() => handleButtonHerramienta('Mapa de calor')} mt='10px' icon={getIcon('FiberSmartRecordIcon', {})} />
-
-                            <ButtonUi title='Tracking a gestores' bgColor={colors.greenAccent[600]} width='300px' padding='6px' fontWeight='' bgColorHover={colors.greenAccent[400]} handle={() => handleButtonHerramienta('tracking')} mt='10px' icon={getIcon('GpsFixedIcon', {})} />
+                            <ButtonUi title='Tracking a gestores' bgColor={colors.blueAccent[400]} width='300px' padding='6px' fontWeight='' bgColorHover={colors.blueAccent[300]} handle={() => handleButtonHerramienta('tracking')} mt='10px' icon={getIcon('GpsFixedIcon', {})} />
                         </div>
                     )}
 
@@ -259,24 +256,7 @@ export default function AlertDialogSlide() {
                         </div>
                     )}
 
-                  
-                    {nombreHerramientaSeleccionada === 'ver información' && (
-                        <Box sx={{ width: '300px' }}>
-                            <>
-                                {console.log(features.puntos_in_poligono)}
-                            </>
-                            <Typography sx={{ display: 'inline-block' }}>
-                                Número de registros: <Typography sx={{ display: 'inline-block', color: colors.greenAccent[600], marginLeft: '7px' }}> {features.puntos_in_poligono.length}  </Typography>
-                            </Typography>
-                            <CSVLink data={generateCSV()}
-                                style={{
-                                    display: 'block', width: '200px', color: 'black', backgroundColor: colors.greenAccent[600],
-                                    padding: '5px', borderRadius: '5px', marginTop: '10px', paddingLeft: '10px'
-                                }}
-                                filename="registros_seleccionados" >Descargar datos</CSVLink>
-                        </Box>
-                    )}
-
+                
                 </DialogContent>
 
             </Dialog>
