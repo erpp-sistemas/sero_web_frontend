@@ -239,6 +239,7 @@ const ModalInfoPolygons = ({ setShowModal, polygons, draw, map, disablePoints, e
 
     const deleteRoute = (polygon) => {
         map_active.mapa.removeLayer(`route-${polygon.id}`);
+        map_active.mapa.removeSource(`route-${polygon.id}`);
         zoomToPolygon(polygon.id);
         polygonDeleteData(polygon, 'distancia');
     }
