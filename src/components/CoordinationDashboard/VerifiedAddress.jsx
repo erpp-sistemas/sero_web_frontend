@@ -8,8 +8,9 @@ import Viewer from 'react-viewer';
 import { Search, CalendarToday, AccessTime, Download, PersonPinCircle, TaskAlt, AddBusiness, ViewAgenda } from "@mui/icons-material";
 import LoadingModal from '../../components/LoadingModal.jsx'
 import * as ExcelJS from "exceljs";
+import PopupViewPositionVerifiedAddress from '../../components/CoordinationDashboard/PopupViewPositionVerifiedAddress.jsx'
 
-function VerifiedAddress({data}) {
+function VerifiedAddress({ data, placeId, serviceId, proccessId }) {
 
   if (!data) {
       return null;
@@ -26,6 +27,18 @@ function VerifiedAddress({data}) {
 
   const [isLoading, setIsLoading] = useState(false)
 
+  const [popupOpen, setPopupOpen] = useState(false);
+  const [popupData, setPopupData] = useState({ userId: null, dateCapture: null });
+
+  const handleOpenPopup = (userId, dateCapture) => {
+    setPopupData({ userId, dateCapture });
+    setPopupOpen(true);
+  };
+
+  const handleClosePopup = () => {
+    setPopupOpen(false);
+    setPopupData({ userId: null, dateCapture: null });
+  };
  
 
   const buildColumns = () => {   
@@ -126,7 +139,8 @@ function VerifiedAddress({data}) {
           variant="contained"
           color="primary"
           startIcon={<ViewAgenda />}
-          // onClick={() => handleOpenPopup(params.row.user_id, params.row.date_capture)}
+          onClick={() => handleOpenPopup(params.row.user_id, params.row.date_capture)}
+          disabled={params.row.verified_address == 0}
         >
           Ver
         </Button>
@@ -325,6 +339,15 @@ function VerifiedAddress({data}) {
         )}  
       </Box>
       <LoadingModal open={isLoading}/>
+      <PopupViewPositionVerifiedAddress
+        open={popupOpen} 
+        onClose={handleClosePopup} 
+        userId={popupData.userId} 
+        dateCapture={popupData.dateCapture}
+        placeId={placeId} 
+        serviceId={serviceId} 
+        proccessId={proccessId} 
+      />
   </Box>
      
   )

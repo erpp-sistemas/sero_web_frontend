@@ -357,7 +357,12 @@ function Index() {
 						
 						<Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
 							<Grid item xs={12}>
-								<VerifiedAddress data={ verifiedAddressData }/>
+								<VerifiedAddress 
+								  data={ verifiedAddressData }
+                  placeId={ selectedPlace } 
+									serviceId={ selectedService }
+									proccessId={ selectedProcess }
+                  />
 							</Grid>
 						</Grid>					
 
