@@ -8,7 +8,7 @@ import { CSVLink } from 'react-csv';
 
 const ModalInfoPolygon = ({ setShowModal, polygon, setLastPolygonCreated, polygonsCreated, setPolygonsCreated, polygonsStorage }) => {
 
-    console.log(polygon)
+    //console.log(polygon)
     const [open, setOpen] = useState(true);
 
     const [showFieldName, setShowFieldName] = useState(false);

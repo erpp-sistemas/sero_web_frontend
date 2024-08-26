@@ -35,12 +35,15 @@ const Mapa = () => {
     const polygonsStorage = useRef(null);
 
     const mapRef = useRef(null);
-    const [drawMap, setDrawMap] = useState(null)
+    const childRef = useRef();
+    const [drawMap, setDrawMap] = useState(null);
 
-    const [showModalInfoPolygon, setShowModalInfoPolygon] = useState(false)
-    const [showModalInfoPolygons, setShowModalInfoPolygons] = useState(false)
+    const [showModalInfoPolygon, setShowModalInfoPolygon] = useState(false);
+    const [showModalInfoPolygons, setShowModalInfoPolygons] = useState(false);
 
-    
+    const functionDelete = useRef(null)
+
+
     useEffect(() => {
         const getPlazaById = async () => {
             const res = await getPlaceById(place_id);
@@ -123,6 +126,7 @@ const Mapa = () => {
         map.on('draw.delete', (e) => {
             const polygon = e.features[0]; //? obtengo el poligono eliminado
             enabledPoints(map, polygon.id);
+            deleteUserAndRoute(polygon.id);
             deletePolygonStorage(polygon, map);
         });
 
@@ -243,7 +247,13 @@ const Mapa = () => {
         const source = layers_in_map.layers_visibles[0].source;
         const layer = layers_in_map.layers_visibles[0].id;
         const color_circle = layers_in_map.layers_visibles[0].paint['circle-color'];
-        const color = color_circle[3];
+        let color;
+        if (color_circle[0] === 'case') {
+            color = color_circle[3];
+        } else {
+            color = color_circle
+        }
+
         const points = mapRef.current.getSource(source)._data.features;
         points.forEach((point) => {
             if (point.properties.pid && point.properties.pid === polygon_id) {
@@ -273,6 +283,10 @@ const Mapa = () => {
         return arrayTemp
     }
 
+    const deleteUserAndRoute = (polygon_id) => {
+        const polygon = polygonsStorage.current.filter(poly => poly.id === polygon_id)[0];
+        functionDelete.current(polygon);
+    }
 
 
     return (
@@ -286,8 +300,8 @@ const Mapa = () => {
                 disabledPoints={disabledPoints} />}
 
             {showModalInfoPolygons && <ModalInfoPolygons setShowModal={setShowModalInfoPolygons} polygons={polygonsCreated} draw={drawMap} map={mapRef}
-                disablePoints={disabledPoints} enabledPoints={enabledPoints} 
-                setPolygonsCreated={setPolygonsCreated} setLastPolygonCreated={setLastPolygonCreated}
+                disablePoints={disabledPoints} enabledPoints={enabledPoints}
+                setPolygonsCreated={setPolygonsCreated} setLastPolygonCreated={setLastPolygonCreated} setFunction={functionDelete}
             />}
 
             {polygonsCreated && polygonsCreated.length > 0 && (

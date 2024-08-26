@@ -18,7 +18,7 @@ import TablePolygons from './TablePolygons';
 import GridRegisterPolygon from './GridRegisterPolygon';
 
 
-const ModalInfoPolygons = ({ setShowModal, polygons, draw, map, disablePoints, enabledPoints, setPolygonsCreated, setLastPolygonCreated }) => {
+const ModalInfoPolygons = ({ setShowModal, polygons, draw, map, disablePoints, enabledPoints, setPolygonsCreated, setLastPolygonCreated, setFunction }) => {
 
     //console.log(polygons);
     const map_active = useSelector((state) => state.mapa);
@@ -38,6 +38,7 @@ const ModalInfoPolygons = ({ setShowModal, polygons, draw, map, disablePoints, e
 
     useEffect(() => {
         getUsers();
+        setFunction.current = childFunction;
     }, [])
 
 
@@ -104,8 +105,8 @@ const ModalInfoPolygons = ({ setShowModal, polygons, draw, map, disablePoints, e
         if (!idUserSeleccionado) return alert("Elige un usuario de la lista")
         const user = users.filter(user => user.id_usuario === Number(idUserSeleccionado))[0]
         const marker = addImageInPolygon(polygon.id, user.foto)
-        polygonAddData(polygon, { user, marker });
-        //userPolygonUpdate(polygon, user, marker);
+        polygonAddData(polygon, { user, marker, disabled_points: true });
+        disablePoints(map_active.mapa, polygon.id);
         zoomToPolygon(polygon.id);
     }
 
@@ -134,16 +135,6 @@ const ModalInfoPolygons = ({ setShowModal, polygons, draw, map, disablePoints, e
         return img;
     }
 
-    // const userPolygonUpdate = (polygon, user, marker) => {
-    //     const polygons_not_selected = polygons.filter(poly => poly.id !== polygon.id)
-    //     const polygon_new = {
-    //         ...polygon,
-    //         user: user,
-    //         marker: marker
-    //     }
-    //     setPolygonsCreated([...polygons_not_selected, polygon_new])
-    //     setLastPolygonCreated(polygon_new)
-    // }
 
     const polygonAddData = (polygon, dataObj) => {
         const polygons_not_selected = polygons.filter(poly => poly.id !== polygon.id);
@@ -158,10 +149,12 @@ const ModalInfoPolygons = ({ setShowModal, polygons, draw, map, disablePoints, e
     const polygonDeleteData = (polygon, fieldName) => delete polygon[fieldName];
 
     const deleteAssigmentUser = (poly) => {
-        poly.marker.remove();
-        zoomToPolygon(poly.id);
-        delete poly.user;
-        delete poly.marker;
+        if (poly.marker) {
+            poly.marker.remove();
+            zoomToPolygon(poly.id);
+            delete poly.user;
+            delete poly.marker;
+        }
     }
 
 
@@ -238,10 +231,12 @@ const ModalInfoPolygons = ({ setShowModal, polygons, draw, map, disablePoints, e
     }
 
     const deleteRoute = (polygon) => {
-        map_active.mapa.removeLayer(`route-${polygon.id}`);
-        map_active.mapa.removeSource(`route-${polygon.id}`);
-        zoomToPolygon(polygon.id);
-        polygonDeleteData(polygon, 'distancia');
+        if (map_active.mapa.getLayer(`route-${polygon.id}`)) {
+            map_active.mapa.removeLayer(`route-${polygon.id}`);
+            map_active.mapa.removeSource(`route-${polygon.id}`);
+            zoomToPolygon(polygon.id);
+            polygonDeleteData(polygon, 'distancia');
+        }
     }
 
     const enablePointsBefore = (polygon) => {
@@ -250,7 +245,10 @@ const ModalInfoPolygons = ({ setShowModal, polygons, draw, map, disablePoints, e
         zoomToPolygon(polygon.id)
     }
 
-
+    function childFunction(polygon) {
+        deleteRoute(polygon);
+        deleteAssigmentUser(polygon);
+    }
 
 
     const functions = {
@@ -266,7 +264,7 @@ const ModalInfoPolygons = ({ setShowModal, polygons, draw, map, disablePoints, e
                 aria-labelledby="parent-modal-title"
                 aria-describedby="parent-modal-description"
             >
-                {polygons.length > 0 && (
+                {polygons && polygons.length > 0 && (
                     <div className='w-[93%] h-[97%] p-4 bg-blue-50 absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] rounded-md shadow-lg shadow-slate-700'>
                         <div className='flex justify-between px-3'>
                             <h1 className='text-center text-base font-bold text-gray-900'>

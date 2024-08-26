@@ -9,7 +9,7 @@ import { getIcon } from '../../data/Icons';
 
 const TablePolygons = ({ polygons, setidUserSeleccionado, users, functions, data, nameFile, csvLinkRef }) => {
 
-
+    console.log(polygons)
     return (
         <table className='w-full px-2 text-gray-900 text-center mt-2'>
             <tr className='bg-gray-700 font-bold text-white'>
