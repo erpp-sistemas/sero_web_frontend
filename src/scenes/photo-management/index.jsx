@@ -255,7 +255,7 @@ const Index = () => {
 
       if (filterText) {
           filtered = filtered.filter(item =>
-              Object.values(item).some(value => value.toString().toLowerCase().includes(filterText.toLowerCase()))
+              Object.values(item).some(value => value != null && value.toString().toLowerCase().includes(filterText.toLowerCase()))
           );
       }
 
@@ -327,86 +327,6 @@ const Index = () => {
         setIsLoading(false);
       }
     };
-
-    // const handleExportToExcel = async () => {
-    //   const workbook = new ExcelJS.Workbook();
-    //   const worksheet = workbook.addWorksheet('Datos');
-    
-    //   // Agregar encabezados de columna
-    //   worksheet.columns = [
-    //     { header: 'CUENTA', key: 'cuenta', width: 15 },
-    //     { header: 'GESTOR', key: 'nombre_gestor', width: 20 },
-    //     { header: 'SERVICIO', key: 'nombre_servicio', width: 20 },
-    //     { header: 'PROCESO', key: 'nombre_proceso', width: 20 },
-    //     { header: 'FECHA CAPTURA', key: 'fechaCaptura', width: 15 },
-    //     { header: 'FOTO FACHADA', key: 'foto_fachada_1', width: 30 },
-    //   ];
-    
-    //   // Agregar datos
-    //   filteredResult.forEach(row => {
-    //     worksheet.addRow({
-    //       cuenta: row.cuenta,
-    //       nombre_gestor: row.nombre_gestor,
-    //       nombre_servicio: row.nombre_servicio,
-    //       nombre_proceso: row.nombre_proceso,
-    //       fechaCaptura: row.fechaCaptura,
-    //       foto_fachada_1: '', // Inicialmente vacío, se actualizará más tarde con la imagen
-    //     });
-    //   });
-    
-    //   // Función para convertir una URL de imagen a base64
-    //   const urlToBase64 = async (url) => {
-    //     console.log('url', url)
-    //     const response = await fetch(url);
-    //     const blob = await response.blob();
-    //     return new Promise((resolve, reject) => {
-    //       const reader = new FileReader();
-    //       reader.onloadend = () => resolve(reader.result.split(',')[1]);
-    //       reader.onerror = reject;
-    //       reader.readAsDataURL(blob);
-    //     });
-    //   };
-    
-    //   // Agregar imágenes
-    //   for (let i = 0; i < filteredResult.length; i++) {
-    //     const row = filteredResult[i];
-    //     if (row.foto_fachada_1) {
-    //       const base64Image = await urlToBase64(row.foto_fachada_1);
-    //       const imageId = workbook.addImage({
-    //         base64: base64Image,
-    //         extension: 'jpeg', // Ajusta la extensión según el formato de tu imagen
-    //       });
-    
-    //       // Ajustar tamaño de la celda
-    //       worksheet.getCell(i + 2, 6).alignment = { vertical: 'middle', horizontal: 'center' };
-    //       worksheet.getCell(i + 2, 6).fill = {
-    //         type: 'pattern',
-    //         pattern: 'solid',
-    //         fgColor: { argb: 'FFFFFF' } // Fondo blanco para la celda
-    //       };
-    
-    //       // Agregar la imagen a la celda específica
-    //       worksheet.addImage(imageId, {
-    //         tl: { col: 5, row: i + 1 }, // Columna y fila donde se añadirá la imagen
-    //         ext: { width: 30, height: 30 }, // Ajusta el tamaño de la imagen si es necesario
-    //         editAs: 'oneCell', // Asegura que la imagen esté contenida en una celda
-    //       });
-    
-    //       // Ajustar el tamaño de la columna
-    //       worksheet.getColumn(6).width = 30;
-    //     }
-    //   }
-    
-    //   // Guardar archivo
-    //   const buffer = await workbook.xlsx.writeBuffer();
-    //   const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-    //   const url = window.URL.createObjectURL(blob);
-    //   const a = document.createElement("a");
-    //   a.href = url;
-    //   a.download = 'datos.xlsx'; // Puedes ajustar el nombre del archivo aquí
-    //   a.click();
-    //   window.URL.revokeObjectURL(url);
-    // };      
   
       const CustomToolbar = () => (
         <GridToolbarContainer>
