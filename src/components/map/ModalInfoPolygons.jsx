@@ -18,7 +18,7 @@ import TablePolygons from './TablePolygons';
 import GridRegisterPolygon from './GridRegisterPolygon';
 
 
-const ModalInfoPolygons = ({ setShowModal, polygons, draw, map, disablePoints, enabledPoints, setPolygonsCreated, setLastPolygonCreated, setFunction }) => {
+const ModalInfoPolygons = ({ setShowModal, polygons, draw, map, disablePoints, enabledPoints, setPolygonsCreated, setLastPolygonCreated, setFunction, setShowModalPdf, setDataPdf }) => {
 
     //console.log(polygons);
     const map_active = useSelector((state) => state.mapa);
@@ -32,6 +32,7 @@ const ModalInfoPolygons = ({ setShowModal, polygons, draw, map, disablePoints, e
     const [dataGrid, setDataGrid] = useState([]);
     const [colDefs, setColDefs] = useState([]);
     const [titles, setTitles] = useState([]);
+
 
 
     const csvLinkRef = useRef();
@@ -250,14 +251,22 @@ const ModalInfoPolygons = ({ setShowModal, polygons, draw, map, disablePoints, e
         deleteAssigmentUser(polygon);
     }
 
+    const getInfoPolygon = (polygon) => {
+        console.log(polygon)
+        setDataPdf(polygon);
+        setShowModalPdf(true);
+        setShowModal(false);
+    }
+
 
     const functions = {
-        zoomToPolygon, downloadPropertiesCsv, generateGrid, disabledPointsSelected, assigmentUser, deleteAssigmentUser, getRoute, deleteRoute, enablePointsBefore
+        zoomToPolygon, downloadPropertiesCsv, generateGrid, disabledPointsSelected, assigmentUser, deleteAssigmentUser, getRoute, deleteRoute, enablePointsBefore, getInfoPolygon
     }
 
 
     return (
         <div className='z-[1000]'>
+
             <Modal
                 open={open}
                 onClose={handleClose}

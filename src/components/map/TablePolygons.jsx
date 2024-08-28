@@ -9,7 +9,7 @@ import { getIcon } from '../../data/Icons';
 
 const TablePolygons = ({ polygons, setidUserSeleccionado, users, functions, data, nameFile, csvLinkRef }) => {
 
-    console.log(polygons)
+
     return (
         <table className='w-full px-2 text-gray-900 text-center mt-2'>
             <tr className='bg-gray-700 font-bold text-white'>
@@ -104,6 +104,11 @@ const TablePolygons = ({ polygons, setidUserSeleccionado, users, functions, data
                                 </button>
                             </Tooltip>
                         )}
+                        <Tooltip placement="top" title="Información">
+                            <button className="bg-cyan-600" onClick={() => functions.getInfoPolygon(poly)}>
+                                {getIcon('InfoIcon', { color: 'white', fontSize: '26px' })}
+                            </button>
+                        </Tooltip>
 
                     </td>
                 </tr>

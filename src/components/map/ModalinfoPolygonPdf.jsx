@@ -1,0 +1,374 @@
+import React, { useState, useEffect, useRef, useLayoutEffect } from 'react'
+import { Modal } from '@mui/material'
+import { Map } from "mapbox-gl"
+
+
+import Logo from '../../assets/ser0_space_fondoclaro.png'
+import { getIcon } from '../../data/Icons';
+import html2Canvas from 'html2canvas'
+import { PDFDownloadLink } from '@react-pdf/renderer';
+import PdfView from './PdfView';
+
+const stylesMap = {
+    width: '90%',
+    height: '300px',
+    marginTop: '20px'
+}
+
+const ModalinfoPolygonPdf = ({ setShowModal, polygon }) => {
+
+    const [open, setOpen] = useState(true);
+    const [resultado, setResultado] = useState([]);
+    const [serviciosUnicos, setServiciosUnicos] = useState([]);
+    const [totales, setTotales] = useState();
+    const [totalGeneral, setTotalGeneral] = useState();
+    const [pdfCreated, setPdfCreated] = useState(false);
+    const [imagePdf, setImagePdf] = useState();
+
+
+    const handleClose = () => {
+        setOpen(false);
+        setShowModal(false)
+    };
+
+
+    useEffect(() => {
+        const properties = polygon.points.map(poly => poly.properties);
+        const { resultado, serviciosUnicos, totales, totalGeneral } = transformarDatos(properties);
+        setResultado(resultado);
+        setServiciosUnicos(serviciosUnicos);
+        setTotales(totales);
+        setTotalGeneral(totalGeneral);
+    }, [])
+
+
+    const transformarDatos = (data) => {
+        const resultado = {};
+        const serviciosUnicos = new Set();
+        const totales = {};
+
+        data.forEach(item => {
+            const tipoUsuario = item.tipo_usuario;
+            const tipoServicio = item.tipo_servicio;
+            const adeudoReal = item.adeudo_real;
+
+            serviciosUnicos.add(tipoServicio);
+
+            if (!resultado[tipoUsuario]) {
+                resultado[tipoUsuario] = {
+                    totalSum: 0,
+                    totalCount: 0,
+                    servicios: {}
+                };
+            }
+
+            if (!resultado[tipoUsuario].servicios[tipoServicio]) {
+                resultado[tipoUsuario].servicios[tipoServicio] = {
+                    sum: 0,
+                    count: 0
+                };
+            }
+
+            resultado[tipoUsuario].servicios[tipoServicio].sum += adeudoReal;
+            resultado[tipoUsuario].servicios[tipoServicio].count += 1;
+            resultado[tipoUsuario].totalSum += adeudoReal;
+            resultado[tipoUsuario].totalCount += 1;
+
+            // Calcular totales para cada servicio
+            if (!totales[tipoServicio]) {
+                totales[tipoServicio] = {
+                    totalSum: 0,
+                    totalCount: 0
+                };
+            }
+            totales[tipoServicio].totalSum += adeudoReal;
+            totales[tipoServicio].totalCount += 1;
+        });
+
+        const totalGeneral = Object.values(totales).reduce((acc, val) => {
+            acc.totalSum += val.totalSum;
+            acc.totalCount += val.totalCount;
+            return acc;
+        }, { totalSum: 0, totalCount: 0 });
+
+
+        return {
+            resultado,
+            serviciosUnicos: Array.from(serviciosUnicos),
+            totales,
+            totalGeneral
+        };
+    };
+
+
+    // useEffect(() => {
+    //     const properties = polygon.points.map(poly => poly.properties);
+    //     const result_process = processData(properties)
+
+    //     const serviceT = Object.keys(properties.reduce((acc, item) => {
+    //         acc[item.tipo_servicio] = true;
+    //         return acc;
+    //     }, {}));
+
+    //     console.log(result_process)
+    //     console.log(serviceT)
+    //     setResult(result_process)
+    //     setServiceTypes(serviceT)
+    // }, [])
+
+
+
+    // const processData = (data) => {
+    //     return data.reduce((acc, item) => {
+    //         const userType = item.tipo_usuario;
+    //         const serviceType = item.tipo_servicio;
+
+    //         if (!acc[serviceType]) {
+    //             acc[serviceType] = {};
+    //         }
+
+    //         if (!acc[serviceType][userType]) {
+    //             acc[serviceType][userType] = {
+    //                 count: 0,
+    //                 sum: 0
+    //             };
+    //         }
+
+    //         acc[serviceType][userType].count += 1;
+    //         acc[serviceType][userType].sum += item.adeudo_real;
+
+    //         return acc;
+    //     }, {});
+
+    // };
+
+    const handleConvertDivImg = async () => {
+        const canvas_img = await html2Canvas(document.getElementById('pdf'))
+        setImagePdf(canvas_img.toDataURL('image/png'));
+        setTimeout(() => {
+            setPdfCreated(true);
+        }, 3000)
+
+    }
+
+
+    return (
+        <div id="pdf" className='z-[1000]'>
+            <Modal
+                open={open}
+                onClose={handleClose}
+                aria-labelledby="parent-modal-title"
+                aria-describedby="parent-modal-description"
+            >
+
+                <div className='h-[95%] p-4 bg-blue-50 absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] rounded-md shadow-lg shadow-slate-700 overflow-scroll'>
+
+                    <div className="mt-2 flex justify-between">
+                        <img className='w-1/3' src={Logo} alt="" />
+
+                        {!pdfCreated ? (
+                            <button className="py-1 w-[100px]" onClick={handleConvertDivImg}>
+                                {getIcon('PictureAsPdfIcon', { fontSize: '36px', color: 'red' })}
+                            </button>
+                        ) : (
+                            <PDFDownloadLink
+                                document={<PdfView img={imagePdf} />}
+                                fileName='test'
+                            >
+                                {
+                                    ({ url, loading }) => (loading ? (<p>Por favor espere</p>) : (
+                                        <>
+                                            {url ? (
+                                                setPdfCreated(false),
+                                                window.open(url)
+                                            ) : null}
+                                        </>
+                                    ))
+                                }
+                            </PDFDownloadLink>
+                        )}
+
+                    </div>
+
+                    <h1 className='text-white text-center mt-7 font-bold uppercase bg-gray-700 py-1'>Información del poligono </h1>
+
+                    <div className='mt-4 bg-slate-200 py-2 px-4 rounded-md text-gray-900 font-bold'>
+                        <p>Nombre: <span className='text-blue-600 uppercase'> {polygon.name ? polygon.name : 'Sin nombre'} </span></p>
+                        <p>Área: <span className='text-blue-600 uppercase'> {polygon.area} </span></p>
+                        <p>Distancia: <span className='text-blue-600 uppercase'> {polygon.distancia ? `${polygon.distancia.toLocaleString('en-US', { minimumFractionDigits: 2 })} km` : 'No trazada'} </span></p>
+                        <p>Número de puntos: <span className='text-blue-600 uppercase'>  {polygon.number_points} </span> </p>
+                        <p>Usuario asignado: <span className='text-blue-600 uppercase'>  {polygon.user ? `${polygon.user.nombre} ${polygon.user.apellido_paterno} ${polygon.user.apellido_materno}` : 'Sin asignación'} </span> </p>
+                    </div>
+
+                    <div className="mt-4 w-full mx-auto">
+                        {serviciosUnicos.length > 0 && (
+                            <>
+                                <table className='text-gray-900 w-full text-center' >
+                                    <thead>
+                                        <tr className='bg-gray-600 text-blue-200'>
+                                            <th className="bg-emerald-500 text-gray-900 px-1"> Uso </th>
+                                            {serviciosUnicos.map(servicio => (
+                                                <th className="border border-black px-1" key={servicio} colSpan="2">{servicio}</th>
+                                            ))}
+                                            <th className='border border-black px-1' colSpan="2">TOTAL</th>
+                                        </tr>
+                                        <tr className='bg-gray-400'>
+                                            <th></th>
+                                            {serviciosUnicos.map(servicio => (
+                                                <>
+                                                    <th className='border border-black px-1' key={`${servicio}-count`}>Número</th>
+                                                    <th className='border border-black px-1' key={`${servicio}-sum`}>Adeudo</th>
+                                                </>
+                                            ))}
+                                            <th className='border border-black px-1'>Número</th>
+                                            <th className='border border-black px-1'>Adeudo</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {Object.keys(resultado).map(tipoUsuario => (
+                                            <tr key={tipoUsuario}>
+                                                <td className="border border-black font-bold">{tipoUsuario}</td>
+                                                {serviciosUnicos.map(servicio => (
+                                                    <>
+                                                        <td className='border border-y-black border-l-black border-r-cyan-500 px-1' key={`${tipoUsuario}-${servicio}-count`}>
+                                                            {resultado[tipoUsuario].servicios[servicio]?.count || 0}
+                                                        </td>
+                                                        <td className='border border-y-black border-r-black border-l-cyan-500 px-1' key={`${tipoUsuario}-${servicio}-sum`}>
+                                                            {resultado[tipoUsuario].servicios[servicio]?.sum.toLocaleString('en-US', { minimumFractionDigits: 2 }) || 0}
+                                                        </td>
+                                                    </>
+                                                ))}
+                                                <td className='border border-y-black border-l-black border-r-cyan-500 px-1'>{resultado[tipoUsuario].totalCount}</td>
+                                                <td className='border border-y-black border-r-black border-l-cyan-500 px-1'>{resultado[tipoUsuario].totalSum.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+                                            </tr>
+                                        ))}
+                                        <tr className='bg-gray-200'>
+                                            <td></td>
+                                            {serviciosUnicos.map(servicio => (
+                                                <>
+                                                    <td className='border border-black' key={`total-${servicio}-count`}><strong>{totales[servicio]?.totalCount || 0}</strong></td>
+                                                    <td className='border border-black' key={`total-${servicio}-sum`}><strong>{totales[servicio]?.totalSum.toLocaleString('en-US', { minimumFractionDigits: 2 }) || 0}</strong></td>
+                                                </>
+                                            ))}
+                                            <td className="border border-black"><strong>{totalGeneral.totalCount}</strong></td>
+                                            <td className="border border-black"><strong>{totalGeneral.totalSum.toLocaleString('en-US', { minimumFractionDigits: 2 })}</strong></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                                <MapPolygon polygon={polygon} />
+                            </>
+                        )}
+                    </div>
+                </div>
+
+            </Modal>
+
+        </div>
+    )
+}
+
+export default ModalinfoPolygonPdf
+
+
+const MapPolygon = ({ polygon }) => {
+
+    const mapContainerRef = useRef(null);
+    const mapInstanceRef = useRef(null);
+
+    useLayoutEffect(() => {
+        if (open && mapContainerRef.current) {
+            // Inicializar el mapa
+            const center = polygon.points[0].geometry.coordinates;
+            mapInstanceRef.current = new Map({
+                container: mapContainerRef.current,
+                style: 'mapbox://styles/mapbox/streets-v11',
+                center: center,
+                zoom: 12,
+            });
+
+            // Agregar el polígono después de que el mapa se haya cargado
+            mapInstanceRef.current.on('load', () => {
+                // Agregar una fuente para el polígono
+                mapInstanceRef.current.addSource('polygon', {
+                    type: 'geojson',
+                    data: {
+                        type: 'Feature',
+                        geometry: {
+                            type: 'Polygon',
+                            coordinates: polygon.coordenadas
+                        },
+                    },
+                });
+
+                // Agregar una capa para dibujar el polígono
+                mapInstanceRef.current.addLayer({
+                    id: 'polygon-layer',
+                    type: 'fill',
+                    source: 'polygon', // ID de la fuente añadida
+                    layout: {},
+                    paint: {
+                        'fill-color': '#088', // Color del relleno del polígono
+                        'fill-opacity': 0.2,  // Opacidad del relleno
+                    },
+                });
+
+                // Opcional: agregar un borde al polígono
+                mapInstanceRef.current.addLayer({
+                    id: 'polygon-outline',
+                    type: 'line',
+                    source: 'polygon',
+                    layout: {},
+                    paint: {
+                        'line-color': '#000', // Color del borde
+                        'line-width': 2,      // Ancho del borde
+                    },
+                });
+
+
+                mapInstanceRef.current.addSource('points-source', {
+                    type: 'geojson',
+                    data: {
+                        type: 'FeatureCollection',
+                        features: polygon.points
+                    }
+                });
+
+                // Agregar una capa para los puntos
+                mapInstanceRef.current.addLayer({
+                    id: 'points-layer',
+                    type: 'circle', // Tipo de capa para representar puntos
+                    source: 'points-source',
+                    paint: {
+                        'circle-radius': 4, // Tamaño del círculo
+                        'circle-color': '#007cbf' // Color del círculo
+                    }
+                });
+
+            });
+
+        }
+
+        setTimeout(() => {
+            // Redimensionar el mapa cuando el modal se abra
+            if (mapInstanceRef.current) {
+                mapInstanceRef.current.resize();
+            }
+        }, 2000);
+
+        return () => {
+            if (mapInstanceRef.current) {
+                mapInstanceRef.current.remove();
+                mapInstanceRef.current = null;
+            }
+        };
+    }, [open, polygon.coordenadas]);
+
+
+    return (
+        <div ref={mapContainerRef} className='mx-auto' style={stylesMap}>
+
+        </div>
+    )
+}
+

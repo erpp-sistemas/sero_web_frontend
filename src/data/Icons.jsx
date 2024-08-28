@@ -58,11 +58,14 @@ import CloseIcon from '@mui/icons-material/Close';
 import AltRouteIcon from '@mui/icons-material/AltRoute';
 import PieChartIcon from '@mui/icons-material/PieChart';
 import BrushIcon from '@mui/icons-material/Brush';
-
+import InfoIcon from '@mui/icons-material/Info';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 
 export const getIcon = (icon, style) => {
 
      let obj = {
+          "PictureAsPdfIcon": <PictureAsPdfIcon sx={style} />,
+          "InfoIcon": <InfoIcon sx={style} />,
           "BrushIcon": <BrushIcon sx={style} />,
           "PieChartIcon": <PieChartIcon sx={style} />,
           "AltRouteIcon": <AltRouteIcon sx={style} />,

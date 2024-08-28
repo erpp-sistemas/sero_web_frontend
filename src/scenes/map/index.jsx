@@ -13,6 +13,7 @@ import ModalInfoPolygons from '../../components/map/ModalInfoPolygons'
 import * as turf from '@turf/turf'
 import { getIcon } from '../../data/Icons'
 import Tooltip from '@mui/material/Tooltip';
+import ModalinfoPolygonPdf from '../../components/map/ModalinfoPolygonPdf'
 
 
 const stylesMap = {
@@ -32,22 +33,21 @@ const Mapa = () => {
     const [plaza, setPlaza] = useState(null);
     const [polygonsCreated, setPolygonsCreated] = useState([]);
     const [lastPolygonCreated, setLastPolygonCreated] = useState(null);
-    const polygonsStorage = useRef(null);
-
-    const mapRef = useRef(null);
-    const childRef = useRef();
     const [drawMap, setDrawMap] = useState(null);
 
     const [showModalInfoPolygon, setShowModalInfoPolygon] = useState(false);
     const [showModalInfoPolygons, setShowModalInfoPolygons] = useState(false);
+    const [showModalPdf, setShowModalPdf] = useState(false);
+    const [dataPdf, setDataPdf] = useState([])
 
+    const polygonsStorage = useRef(null);
+    const mapRef = useRef(null);
     const functionDelete = useRef(null)
 
 
     useEffect(() => {
         const getPlazaById = async () => {
             const res = await getPlaceById(place_id);
-            console.log(res)
             dispatch(setPlazaMapa(res[0]))
             setPlaza(res[0])
         }
@@ -293,6 +293,8 @@ const Mapa = () => {
 
         <div ref={mapDiv} style={stylesMap}>
 
+            {showModalPdf && <ModalinfoPolygonPdf setShowModal={setShowModalPdf} polygon={dataPdf} />}
+
             {showModalInfoPolygon && <ModalInfoPolygon
                 setShowModal={setShowModalInfoPolygon} polygon={lastPolygonCreated}
                 setLastPolygonCreated={setLastPolygonCreated} setPolygonsCreated={setPolygonsCreated}
@@ -300,8 +302,8 @@ const Mapa = () => {
                 disabledPoints={disabledPoints} />}
 
             {showModalInfoPolygons && <ModalInfoPolygons setShowModal={setShowModalInfoPolygons} polygons={polygonsCreated} draw={drawMap} map={mapRef}
-                disablePoints={disabledPoints} enabledPoints={enabledPoints}
-                setPolygonsCreated={setPolygonsCreated} setLastPolygonCreated={setLastPolygonCreated} setFunction={functionDelete}
+                disablePoints={disabledPoints} enabledPoints={enabledPoints} setPolygonsCreated={setPolygonsCreated} setLastPolygonCreated={setLastPolygonCreated} 
+                setFunction={functionDelete} setShowModalPdf={setShowModalPdf} setDataPdf={setDataPdf}
             />}
 
             {polygonsCreated && polygonsCreated.length > 0 && (
