@@ -7,6 +7,7 @@ import { opcionesLiquidos, opcionesLuces, opcionesLlantas } from "../../../hooks
 
 export default function EstadoTop () {
 	const estado = useSelector(state => state.estado)
+	const comentarios = useSelector(state => state.comentarios)
 	const estadoErrors = useSelector(state => state.estadoErrors)
 	const dispatch = useDispatch()
 	
@@ -81,7 +82,7 @@ export default function EstadoTop () {
 					<Typography sx={{ fontSize:'16px', textAlign:'center', marginBottom:'20px' }}>NIVELES Y PERDIDAS DE LIQUIDOS</Typography>
 
 					{
-						opcionesLiquidos.map(({ nombre, variable, set, setImagen }, index) => (
+						opcionesLiquidos.map(({ nombre, variable, set, setImagen, comentario, setComentario }, index) => (
 							<Box key={index}>
 								<Box sx={{ width:'100%', height:'auto', display:'flex', justifyContent:'space-between', alignItems:'center', gap:'30px', marginTop:'10px' }}>
 									<Typography sx={{ fontSize:'12px' }}>{nombre}</Typography>
@@ -114,7 +115,7 @@ export default function EstadoTop () {
 									</Button>
 								</Box>
 
-								<MiniGallery condicional={estado[variable]} type={variable} />
+								<MiniGallery condicional={estado[variable]} type={variable} comentario={comentarios[comentario]} setComentario={setComentario} />
 							</Box>
 						))
 					}
@@ -126,7 +127,7 @@ export default function EstadoTop () {
 					<Typography sx={{ fontSize:'16px', textAlign:'center', marginBottom:'20px' }}>ESTADO DE LAS LUCES</Typography>
 
 					{
-						opcionesLuces.map(({ nombre, variable, set, setImagen }, index) => (
+						opcionesLuces.map(({ nombre, variable, set, setImagen, comentario, setComentario }, index) => (
 							<Box key={index}>
 								<Box sx={{ width:'100%', height:'auto', display:'flex', justifyContent:'space-between', alignItems:'center', gap:'30px', marginTop:'10px' }}>
 									<Typography sx={{ fontSize:'12px' }}>{nombre}</Typography>
@@ -159,7 +160,7 @@ export default function EstadoTop () {
 									</Button>
 								</Box>
 
-								<MiniGallery condicional={estado[variable]} type={variable} />
+								<MiniGallery condicional={estado[variable]} type={variable} comentario={comentarios[comentario]} setComentario={setComentario} />
 							</Box>
 						))
 					}
@@ -171,7 +172,7 @@ export default function EstadoTop () {
 					<Typography sx={{ fontSize:'16px', textAlign:'center', marginBottom:'20px' }}>ESTADO DE LAS LLANTAS</Typography>
 
 					{
-						opcionesLlantas.map(({ nombre, variable, set, setImagen }, index) => (
+						opcionesLlantas.map(({ nombre, variable, set, setImagen, comentario, setComentario }, index) => (
 							<Box key={index}>
 								<Box sx={{ width:'100%', height:'auto', display:'flex', justifyContent:'space-between', alignItems:'center', gap:'30px', marginTop:'10px' }}>
 									<Typography sx={{ fontSize:'12px' }}>{nombre}</Typography>
@@ -204,7 +205,7 @@ export default function EstadoTop () {
 									</Button>
 								</Box>
 
-								<MiniGallery condicional={estado[variable]} type={variable} />
+								<MiniGallery condicional={estado[variable]} type={variable} comentario={comentarios[comentario]} setComentario={setComentario} />
 							</Box>
 						))
 					}

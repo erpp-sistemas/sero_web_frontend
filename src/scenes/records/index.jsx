@@ -27,6 +27,7 @@ function Records() {
     const [firma, setFirma] = useState(true)
 	const [isVisible, setIsVisible] = useState(false)
 	const [conditions, setConditions] = useState([])
+	const [idInicio, setIdInicio] = useState(1)
 
 	const theme = useTheme()
 	const isLightMode = theme.palette.mode === 'light'
@@ -97,6 +98,7 @@ function Records() {
 				activate: 0,
 				firma: firma ? 1 : 0,
 				fecha_impresion: formattedFechaCorte,
+				id_inicio: idInicio
 			}	
 	
 			const id_paquete = await tool.generatePaquete(data)
@@ -287,6 +289,27 @@ function Records() {
 							/>
 
 						</FormControl>
+
+						<TextField
+							sx={{ width:'100%', mt:'10px' }}
+							id="ID de inicio"
+							label="ID de inicio"
+							value={ idInicio }
+							variant="outlined"
+							type='number'
+							onChange={event => setIdInicio(event.target.value)}
+							InputProps={{
+								sx: {
+									'input::-webkit-outer-spin-button, input::-webkit-inner-spin-button': {
+										WebkitAppearance: 'none',
+										margin: 0,
+									},
+									'input[type="number"]': {
+										MozAppearance: 'textfield',
+									}
+								}
+							}}
+						/>
 
 						{
 							(selectedPlace === 2 && selectedService === 1 ) && (
