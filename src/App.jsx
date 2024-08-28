@@ -57,6 +57,7 @@ import { initializeWebSocket } from './config/WebSocketManager'
 import { submenuAccessLogRequest } from './api/submenu'
 import DebtRecord from './scenes/debt-record'
 import DirectionDashboard from './scenes/direction-dashboard'
+import Manuals from './scenes/manuals'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -201,6 +202,7 @@ function App() {
                         <Route path="/manager-dashboard" element={<ManagerDashboard />} />                        
                         <Route path="/photo-management" element={<PhotoManagement />} />
                         <Route path="/direction-dashboard" element={<DirectionDashboard />} />
+                        <Route path="/manuals" element={<Manuals />} />
                       </Routes>
                     </main>
                   </Box>

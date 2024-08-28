@@ -12,7 +12,7 @@ const Content = () => {
 	const [asignar, setAsignar] = useState(false)
 	const [active, setActive] = useState(true)
 	const [selection, setSelection] = useState(false)
-	const [ tipo ] = useState(false)
+	const [ tipo ] = useState(true)
 	const [incidencia, setIncidencia] = useState(false)
 
 	return(

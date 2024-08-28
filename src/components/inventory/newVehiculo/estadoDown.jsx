@@ -7,6 +7,7 @@ import { opcionesAdicionales } from "../../../hooks/estadoVehiculoHook.js"
 
 export default function EstadoDown() {
 	const estado = useSelector(state => state.estado)
+	const comentarios = useSelector(state => state.comentarios)
 	const dispatch = useDispatch()
 
 	return (
@@ -18,7 +19,7 @@ export default function EstadoDown() {
 				<Typography sx={{ fontSize:'16px', textAlign:'center', marginBottom:'20px' }}>ESTADO MECANICO</Typography>
 
 				{
-					opcionesMecanicas.map(({ nombre, variable, set, setImagen }, index) => (
+					opcionesMecanicas.map(({ nombre, variable, set, setImagen, comentario, setComentario }, index) => (
 						<Box key={index}>
 							<Box sx={{ width:'100%', height:'auto', display:'flex', justifyContent:'space-between', alignItems:'center', gap:'30px', marginTop:'10px' }}>
 								<Typography sx={{ fontSize:'12px' }}>{nombre}</Typography>
@@ -51,7 +52,7 @@ export default function EstadoDown() {
 								</Button>
 							</Box>
 
-							<MiniGallery condicional={estado[variable]} type={variable} />
+							<MiniGallery condicional={estado[variable]} type={variable} comentario={comentarios[comentario]} setComentario={setComentario} />
 						</Box>
 					))
 				}
@@ -63,7 +64,7 @@ export default function EstadoDown() {
 				<Typography sx={{ fontSize:'16px', textAlign:'center', marginBottom:'20px' }}>ESTADO DE ADICIONALES</Typography>
 
 				{
-					opcionesAdicionales.map(({ nombre, variable, set, setImagen }, index) => (
+					opcionesAdicionales.map(({ nombre, variable, set, setImagen, comentario, setComentario }, index) => (
 						<Box key={index}>
 							<Box sx={{ width:'100%', height:'auto', display:'flex', justifyContent:'space-between', alignItems:'center', gap:'30px', marginTop:'10px' }}>
 								<Typography sx={{ fontSize:'12px' }}>{nombre}</Typography>
@@ -96,7 +97,7 @@ export default function EstadoDown() {
 								</Button>
 							</Box>
 
-							<MiniGallery condicional={estado[variable]} type={variable} />
+							<MiniGallery condicional={estado[variable]} type={variable} comentario={comentarios[comentario]} setComentario={setComentario} />
 						</Box>
 					))
 				}
