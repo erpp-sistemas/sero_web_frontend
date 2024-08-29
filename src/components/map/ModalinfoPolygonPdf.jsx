@@ -8,6 +8,7 @@ import { getIcon } from '../../data/Icons';
 import html2Canvas from 'html2canvas'
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import PdfView from './PdfView';
+import TableInfoPdf from './TableInfoPdf';
 
 const stylesMap = {
     width: '90%',
@@ -18,12 +19,9 @@ const stylesMap = {
 const ModalinfoPolygonPdf = ({ setShowModal, polygon }) => {
 
     const [open, setOpen] = useState(true);
-    const [resultado, setResultado] = useState([]);
-    const [serviciosUnicos, setServiciosUnicos] = useState([]);
-    const [totales, setTotales] = useState();
-    const [totalGeneral, setTotalGeneral] = useState();
     const [pdfCreated, setPdfCreated] = useState(false);
     const [imagePdf, setImagePdf] = useState();
+    const [data, setData] = useState({})
 
 
     const handleClose = () => {
@@ -35,10 +33,7 @@ const ModalinfoPolygonPdf = ({ setShowModal, polygon }) => {
     useEffect(() => {
         const properties = polygon.points.map(poly => poly.properties);
         const { resultado, serviciosUnicos, totales, totalGeneral } = transformarDatos(properties);
-        setResultado(resultado);
-        setServiciosUnicos(serviciosUnicos);
-        setTotales(totales);
-        setTotalGeneral(totalGeneral);
+        setData({resultado, serviciosUnicos, totales, totalGeneral})
     }, [])
 
 
@@ -143,12 +138,9 @@ const ModalinfoPolygonPdf = ({ setShowModal, polygon }) => {
     // };
 
     const handleConvertDivImg = async () => {
-        const canvas_img = await html2Canvas(document.getElementById('pdf'))
+        const canvas_img = await html2Canvas(document.getElementById('map'))
         setImagePdf(canvas_img.toDataURL('image/png'));
-        setTimeout(() => {
-            setPdfCreated(true);
-        }, 3000)
-
+        setPdfCreated(true);
     }
 
 
@@ -172,7 +164,7 @@ const ModalinfoPolygonPdf = ({ setShowModal, polygon }) => {
                             </button>
                         ) : (
                             <PDFDownloadLink
-                                document={<PdfView img={imagePdf} />}
+                                document={<PdfView polygon={polygon} data={data} imageMap={imagePdf} />}
                                 fileName='test'
                             >
                                 {
@@ -201,61 +193,9 @@ const ModalinfoPolygonPdf = ({ setShowModal, polygon }) => {
                     </div>
 
                     <div className="mt-4 w-full mx-auto">
-                        {serviciosUnicos.length > 0 && (
+                        {Object.keys(data).length > 0 && (
                             <>
-                                <table className='text-gray-900 w-full text-center' >
-                                    <thead>
-                                        <tr className='bg-gray-600 text-blue-200'>
-                                            <th className="bg-emerald-500 text-gray-900 px-1"> Uso </th>
-                                            {serviciosUnicos.map(servicio => (
-                                                <th className="border border-black px-1" key={servicio} colSpan="2">{servicio}</th>
-                                            ))}
-                                            <th className='border border-black px-1' colSpan="2">TOTAL</th>
-                                        </tr>
-                                        <tr className='bg-gray-400'>
-                                            <th></th>
-                                            {serviciosUnicos.map(servicio => (
-                                                <>
-                                                    <th className='border border-black px-1' key={`${servicio}-count`}>Número</th>
-                                                    <th className='border border-black px-1' key={`${servicio}-sum`}>Adeudo</th>
-                                                </>
-                                            ))}
-                                            <th className='border border-black px-1'>Número</th>
-                                            <th className='border border-black px-1'>Adeudo</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {Object.keys(resultado).map(tipoUsuario => (
-                                            <tr key={tipoUsuario}>
-                                                <td className="border border-black font-bold">{tipoUsuario}</td>
-                                                {serviciosUnicos.map(servicio => (
-                                                    <>
-                                                        <td className='border border-y-black border-l-black border-r-cyan-500 px-1' key={`${tipoUsuario}-${servicio}-count`}>
-                                                            {resultado[tipoUsuario].servicios[servicio]?.count || 0}
-                                                        </td>
-                                                        <td className='border border-y-black border-r-black border-l-cyan-500 px-1' key={`${tipoUsuario}-${servicio}-sum`}>
-                                                            {resultado[tipoUsuario].servicios[servicio]?.sum.toLocaleString('en-US', { minimumFractionDigits: 2 }) || 0}
-                                                        </td>
-                                                    </>
-                                                ))}
-                                                <td className='border border-y-black border-l-black border-r-cyan-500 px-1'>{resultado[tipoUsuario].totalCount}</td>
-                                                <td className='border border-y-black border-r-black border-l-cyan-500 px-1'>{resultado[tipoUsuario].totalSum.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
-                                            </tr>
-                                        ))}
-                                        <tr className='bg-gray-200'>
-                                            <td></td>
-                                            {serviciosUnicos.map(servicio => (
-                                                <>
-                                                    <td className='border border-black' key={`total-${servicio}-count`}><strong>{totales[servicio]?.totalCount || 0}</strong></td>
-                                                    <td className='border border-black' key={`total-${servicio}-sum`}><strong>{totales[servicio]?.totalSum.toLocaleString('en-US', { minimumFractionDigits: 2 }) || 0}</strong></td>
-                                                </>
-                                            ))}
-                                            <td className="border border-black"><strong>{totalGeneral.totalCount}</strong></td>
-                                            <td className="border border-black"><strong>{totalGeneral.totalSum.toLocaleString('en-US', { minimumFractionDigits: 2 })}</strong></td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-
+                                <TableInfoPdf data={data} />
                                 <MapPolygon polygon={polygon} />
                             </>
                         )}
@@ -285,6 +225,7 @@ const MapPolygon = ({ polygon }) => {
                 style: 'mapbox://styles/mapbox/streets-v11',
                 center: center,
                 zoom: 12,
+                preserveDrawingBuffer: true
             });
 
             // Agregar el polígono después de que el mapa se haya cargado
@@ -366,7 +307,7 @@ const MapPolygon = ({ polygon }) => {
 
 
     return (
-        <div ref={mapContainerRef} className='mx-auto' style={stylesMap}>
+        <div id="map" ref={mapContainerRef} className='mx-auto' style={stylesMap}>
 
         </div>
     )
