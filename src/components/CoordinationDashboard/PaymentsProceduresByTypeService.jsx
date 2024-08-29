@@ -26,7 +26,7 @@ function PaymentsProceduresByTypeService({data}) {
       id="grid-1"
       display="grid"
       gridTemplateColumns="repeat(12, 1fr)"
-      gridAutoRows="450px"
+      gridAutoRows="480px"
       gap="15px"
       width='100%'      
     >   
@@ -37,11 +37,10 @@ function PaymentsProceduresByTypeService({data}) {
         sx={{ cursor: 'pointer' }}
       >
         <Box>
-          <Typography
-            variant="h6"          
-            sx={{ padding: "2px 30px 0 5px" }}
-            color={colors.grey[200]}
-            textAlign={'center'}
+        <Typography 
+            variant="h4" 
+            align="center" 
+            sx={{ fontWeight: 'bold', paddingTop: 1 }}
           >
             GESTIONES CON PAGO POR TIPO DE SERVICIO
           </Typography>

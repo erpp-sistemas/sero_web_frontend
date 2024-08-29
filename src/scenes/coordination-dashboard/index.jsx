@@ -23,6 +23,7 @@ import PaymentsProceduresByTypeService from '../../components/CoordinationDashbo
 import PaymentsProceduresByManager from '../../components/CoordinationDashboard/PaymentsProceduresByManager.jsx'
 import DailyManagementNotPhoto from '../../components/CoordinationDashboard/DailyManagementNotPhoto.jsx'
 import BatteryMeter from '../../components/CoordinationDashboard/BatteryMeter.jsx'
+import VerifiedAddress from '../../components/CoordinationDashboard/VerifiedAddress.jsx'
 
 function Index() {
     const theme = useTheme()
@@ -53,6 +54,7 @@ function Index() {
     const [paymentsProceduresByManagerData , setPaymentsProceduresByManagerData] = useState([])
     const [dailyManagementNotPhotoData , setDailyManagementNotPhotoData] = useState([])
 	const [batteryMeterData , setBatteryMeterData] = useState([])  
+	const [verifiedAddressData , setVerifiedAddressData] = useState([])
     const [isLoading, setIsLoading] = useState(false)
     const [alertOpen, setAlertOpen] = useState(false)
     const [alertType, setAlertType] = useState("info")
@@ -138,6 +140,7 @@ function Index() {
 			setPaymentsProceduresByManagerData(JSON.parse(response.data[0].PaymentsProceduresByManager))
 			setDailyManagementNotPhotoData(JSON.parse(response.data[0].DailyManagementNotPhoto))
 			setBatteryMeterData(JSON.parse(response.data[0].BatteryMeter))
+			setVerifiedAddressData(JSON.parse(response.data[0].VerifiedAddress))			
 			setResult(response.data)
 			setIsLoading(false)
 			setAlertOpen(true)
@@ -351,6 +354,17 @@ function Index() {
 								<BatteryMeter data={ batteryMeterData}/>
 							</Grid>
 						</Grid>
+						
+						<Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
+							<Grid item xs={12}>
+								<VerifiedAddress 
+								  data={ verifiedAddressData }
+                  placeId={ selectedPlace } 
+									serviceId={ selectedService }
+									proccessId={ selectedProcess }
+                  />
+							</Grid>
+						</Grid>					
 
 					</>
 

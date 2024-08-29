@@ -19,6 +19,7 @@ import Typography from '@mui/material/Typography'
 import Badge from '@mui/material/Badge'
 import DownloadIcon from '@mui/icons-material/Download'
 import * as ExcelJS from "exceljs"
+import Download from "@mui/icons-material/Download"
 
 const Index = () => {
     
@@ -96,6 +97,8 @@ const Index = () => {
 			const response = await trafficLightRequest(selectedPlace, selectedService, selectedProcess, selectedDate)
 
 			const countingDataArray = JSON.parse(response.data[0].TrafficLightCountingProcedures)
+
+      console.log(countingDataArray)
 			
 			const newCountingData = {
 				thirtyDays: countingDataArray.find(data => data.color_meaning === "30 dias") || {},
@@ -280,7 +283,18 @@ const Index = () => {
                 </Button>
               </Grid>
               <Grid item xs={4}>
-
+                <Button 
+                  variant="contained"                   
+                  style={{ width: '100%', height: '100%' }}
+                  // onClick={() => {
+                  //   handleGetTrafficLight();                    
+                  // }}
+                  onClick={() => handleDownload('full', 'Padron_completo')}
+                  sx={{ bgcolor: 'info.main', '&:hover': { bgcolor: 'info.dark' } }}
+                  >
+                    <Download fontSize="large"/>
+                    Descargar Padron Completo                  
+                </Button>
               </Grid>
             </Grid>
             <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>

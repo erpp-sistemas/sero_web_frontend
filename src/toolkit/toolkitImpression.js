@@ -19,6 +19,7 @@ const getPaquetes = async () => {
 		firma: item.firma,
 		cfdi: item.cfdi,
 		mes_facturacion: item.mes_facturacion,
+		id_inicio: item.id_inicio
 	}))
 	return paquetes
 }

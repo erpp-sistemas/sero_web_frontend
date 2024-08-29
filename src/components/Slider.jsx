@@ -51,6 +51,11 @@ const Slider = () => {
                             onChange={(e, v) => setTabValue(v)}
                             variant="scrollable"
                             scrollButtons="auto"
+                            sx={{ 
+								"& .MuiTabs-indicator": {
+									backgroundColor: "#5ebfff",
+								}
+							}}
                         >
                             {bottom.TABS.map(({ name }) => (
                                 <Tab
@@ -58,15 +63,20 @@ const Slider = () => {
                                     key={name}
                                     sx={{
                                         minWidth: 60,
-                                        "&.Mui-selected": { color: "text.primary" },
+                                        color: "text.secondary",
+                                        "&.Mui-selected": {
+                                            color: "#5ebfff",
+                                            borderBottom: "2px solid #5ebfff",
+                                        },
                                     }}
                                 />
                             ))}
                         </Tabs>
 
                         <Typography
-                            variant="h4"
-                            color="text.secondary"
+                           variant="h5" 
+                           color="text.secondary" 
+                          
                             sx={{ 
 								pb: 2, 
 								minHeight: 70,

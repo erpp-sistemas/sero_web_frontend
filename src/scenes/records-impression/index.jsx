@@ -40,6 +40,7 @@ const Impression = () => {
 		setIdPaq(event.target.value)
 		const selectedPaquete = paquetes.find(item => item.id === selectedId)
 		setPaquete(selectedPaquete)
+		console.log(selectedPaquete)
 		try {
 			await handleRegistro(selectedId)
 			setCargando(false)
@@ -140,6 +141,7 @@ const Impression = () => {
 	const apiPaquetes = async () => {
 		try {
 			const paquetes = await tool.getPaquetes()
+			console.log(paquetes)
 			const userPaquetes = paquetes.filter(item => item.id_usuario === user.user_id)
 			setPaquetes(userPaquetes)
 		} catch (error) {
@@ -152,10 +154,7 @@ const Impression = () => {
 			const paquetes = await tool.getRegistrosById(idPaquete)
 			const registrosAgrupados = {}
 			const cuentasParaEliminar = new Set()
-
 			const registrosO = paquetes.map(registro => ({ ...registro }))
-
-			console.log(registrosO)
 
 			setRegistrosOriginales(registrosO)
 
@@ -227,7 +226,6 @@ const Impression = () => {
 			setRango(registrosFaltantes)
 			setCargando(false)
 			apiPaquetes()
-			console.log(registrosOriginales)
 	
 		} catch (error) {
 			console.error('Ocurrió un error:', error.message)

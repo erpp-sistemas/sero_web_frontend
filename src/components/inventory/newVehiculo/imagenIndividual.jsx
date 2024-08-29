@@ -9,11 +9,11 @@ const ImageIndividual = ({ label, onClick, fileRef, onChange, preview, error }) 
 		<Typography sx={{ fontSize: '18px', color: '#fff', width: '100%', textAlign: 'center' }}>{label}</Typography>
 
 		<Button
-			sx={{ width: '170px', height: '170px', background: 'rgba(0,0,0,0.2)', mt: '10px', borderRadius: '10px', border: !error ? '1px solid #fff' : '1px solid red', justifyContent: 'center', alignItems: 'center', overflow: 'hidden' }}
+			sx={{ padding:'0px', width: '170px', height: '170px', background: 'rgba(255,255,255)', mt: '10px', borderRadius: '10px', border: !error ? '1px solid #fff' : '1px solid red', justifyContent: 'center', alignItems: 'center', overflow: 'hidden' }}
 			onClick={onClick}
 		>
 			{preview ? (
-				<img src={preview} alt={label} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+				<img src={preview} alt={label} style={{ width: 'auto', height: '100%', objectFit: 'cover' }} />
 			) : (
 				<ImageIcon sx={{ color: '#fff', fontSize: '60px' }} />
 			)}
@@ -31,17 +31,17 @@ const ImageIndividual = ({ label, onClick, fileRef, onChange, preview, error }) 
 )
 
 ImageIndividual.propTypes = {
-  label: PropTypes.string.isRequired,
-  onClick: PropTypes.func.isRequired,
-  fileRef: PropTypes.func.isRequired,
-  onChange: PropTypes.func.isRequired,
-  preview: PropTypes.string,
-  error: PropTypes.bool,
+	label: PropTypes.string.isRequired,
+	onClick: PropTypes.func.isRequired,	
+	fileRef: PropTypes.func.isRequired,
+	onChange: PropTypes.func.isRequired,
+	preview: PropTypes.string,
+	error: PropTypes.bool,
 }
 
 ImageIndividual.defaultProps = {
-  preview: '',
-  error: false,
+	preview: '',
+	error: false,
 }
 
 export default ImageIndividual

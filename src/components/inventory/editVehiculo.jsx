@@ -6,6 +6,8 @@ import styled from '@emotion/styled'
 import { useState, useEffect } from "react"
 import Content from "./editVehiculo/content"
 import Title from "./editVehiculo/title"
+import { setOpen } from '../../redux/vehiculosSlices/editarVehiculoSlice.js'
+import { useDispatch } from 'react-redux'
 
 const slideIn = keyframes`
 	from {
@@ -33,19 +35,20 @@ const AnimatedBox = styled(Box)`
 	animation: ${props => props.animation ? slideOut : slideIn} 710ms ease-out;
 `
 
-const NewVehiculo = ({ setOpenEdit, setAlertClean }) => {
+const NewVehiculo = ({ setAlertClean }) => {
 	const theme = useTheme()
 	const isLightMode = theme.palette.mode === 'light'
 	const [animation, setAnimation] = useState(false)
+	const dispatch = useDispatch()
 
 	useEffect(() => {
 		if (animation) {	
 			const timer = setTimeout(() => {
-				setOpenEdit(false)
+				dispatch(setOpen(false))
 			}, 700)
 			return () => clearTimeout(timer)
 		}
-	}, [animation, setOpenEdit, setAlertClean])
+	}, [animation, dispatch, setAlertClean])
 
 	return (
 
@@ -60,7 +63,8 @@ const NewVehiculo = ({ setOpenEdit, setAlertClean }) => {
 				alignItems: 'center',
 				height: '100vh',
 				background: 'rgba(0,0,0,0.3)',
-				zIndex: '1200'
+				zIndex: '1200',
+				ml:{ xs:'0px', md:'20px' }
 			}}
 		>
 			<AnimatedBox 
@@ -80,7 +84,7 @@ const NewVehiculo = ({ setOpenEdit, setAlertClean }) => {
 					overflowY:'scroll'
 				}}
 			>
-				<Title setOpenEdit={setOpenEdit} setAnimation={setAnimation} />
+				<Title setAnimation={setAnimation} />
 				<Content />
 			</AnimatedBox>
 		

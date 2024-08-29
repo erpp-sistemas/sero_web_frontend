@@ -35,7 +35,7 @@ const getName = async (nombre) => {
 	return resposeName
 }
 
-const generatePaquete=async(data)=>{
+const generatePaquete = async (data) => {
 	const url=`/records/paquete`
 
 	try{

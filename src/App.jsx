@@ -8,7 +8,7 @@ import { esES } from '@mui/x-date-pickers/locales'
 import 'dayjs/locale/es'
 import { useSelector, useDispatch } from 'react-redux'
 import { verifyTokenRequest } from "./api/auth"
-
+import { Box } from '@mui/material'
 import Topbar from "./scenes/global/Topbar"
 import Sidebar from "./scenes/global/Sidebar"
 import SidebarMap from "./scenes/global/SidebarMap"
@@ -53,8 +53,11 @@ import RecordsImpression from './scenes/records-impression'
 import Inventory from './scenes/inventory'
 import ManagerDashboard from './scenes/manager-dashboard'
 import PhotoManagement from './scenes/photo-management'
-
 import { initializeWebSocket } from './config/WebSocketManager'
+import { submenuAccessLogRequest } from './api/submenu'
+import DebtRecord from './scenes/debt-record'
+import DirectionDashboard from './scenes/direction-dashboard'
+import Manuals from './scenes/manuals'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -65,14 +68,30 @@ function App() {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const mapa_seleccionado = useSelector((state) => state.plaza_mapa)
+  const user = useSelector((state) => state.user);
 
   useEffect(() => {
     checkLogin()
   }, [])
 
   useEffect(() => {
-    console.log(location.pathname)
+    SubmenuAccessLog(location.pathname)
+    // console.log(location.pathname)
   }, [location.pathname])
+
+  const SubmenuAccessLog = async (menu) => {
+		try {
+      const submenu_access_data = {      
+        username: user.username,
+        menu_name: menu
+      }; 
+  
+      await submenuAccessLogRequest( submenu_access_data );
+		
+		} catch (error) {
+		  console.error('Error fetching data:', error)    
+		}
+	}
 
   useEffect(() => {
     initializeWebSocket(dispatch);
@@ -132,7 +151,7 @@ function App() {
               <Route
                 path="*"
                 element={
-                  <div className="app">
+                  <Box sx={{ overflowY:'scroll', overflowX:'hidden' }} className="app">
                     {location.pathname !== `/map/${mapa_seleccionado.place_id}` ? (
                       <Sidebar isSidebar={isSidebar} />
                     ) : (
@@ -175,15 +194,18 @@ function App() {
                         <Route path="/coordination-dashboard" element={<CoordinationDashboard />} />
                         <Route path="/survey-report" element={<SurveyReport />} />
                         <Route path="/traffic-light" element={<TrafficLight />} />
+                        {/* <Route path="/debt-record" element={<DebtRecord />} /> */}
                         <Route path="/records" element={<Records />} />
                         <Route path="/backup" element={<RecordsBackup />} />
                         <Route path="/impresion" element={<RecordsImpression />} />
                         <Route path="/vehiculos" element={<Inventory />} />
-                        <Route path="/manager-dashboard" element={<ManagerDashboard />} />
+                        <Route path="/manager-dashboard" element={<ManagerDashboard />} />                        
                         <Route path="/photo-management" element={<PhotoManagement />} />
+                        <Route path="/direction-dashboard" element={<DirectionDashboard />} />
+                        <Route path="/manuals" element={<Manuals />} />
                       </Routes>
                     </main>
-                  </div>
+                  </Box>
                 }
               />
             )}

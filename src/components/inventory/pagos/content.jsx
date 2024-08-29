@@ -30,7 +30,7 @@ function Content() {
 						transition: 'color 0.3s',
 					},
 					'& .Mui-selected': {
-						color: '#38b000', 
+						color: 'white', 
 						fontWeight: 'bold',
 					},
 					'& .MuiTabs-indicator': {

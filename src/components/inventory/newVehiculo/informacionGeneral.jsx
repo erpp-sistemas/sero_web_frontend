@@ -80,14 +80,14 @@ const InformacionGeneral = () => {
 						padding:'0',
 						overflow:'hidden',
 						borderRadius:'10px',
-						background: informacionGeneral.imagePreview ? '#000' : 'transparent'
+						background: informacionGeneral.imagePreview ? '#fff' : 'transparent'
 					}}
 				>
 
 					<CompareIcon sx={{ color:'#38b000', position:'absolute', fontSize:'45px' }} />
 
 					{
-						informacionGeneral.imagePreview ? <img src={informacionGeneral.imagePreview} alt="Preview" style={{ width: '100%', height: 'auto' }} /> : false
+						informacionGeneral.imagePreview ? <img src={informacionGeneral.imagePreview} alt="Preview" style={{ width: 'auto', height: '100%', objectFit: 'cover' }} /> : false
 					}
 
 					<input

@@ -13,7 +13,7 @@ function ServiceSelect({ selectedPlace, selectedService, handleServiceChange }) 
     if (selectedPlace) {
       async function loadServices() {
         const res = await getPlaceServiceByUserId(user.user_id, selectedPlace);
-        setServices(res);
+        setServices(res);        
       }
 
       loadServices();

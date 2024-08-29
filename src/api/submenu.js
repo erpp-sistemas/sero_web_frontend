@@ -1,4 +1,5 @@
-import instance from './axios'
+// import instance from './axios'
+import axios from './axios'
 
 export const createSubMenu = async (subMenuData) => {
 
@@ -79,6 +80,8 @@ const handleAxiosError = (error) => {
 	}
 
 }
+
+export const submenuAccessLogRequest = ( submenu_access) => axios.post(`/SubmenuAccessLog`, submenu_access)
 
 
 

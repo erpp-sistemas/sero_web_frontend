@@ -77,14 +77,10 @@ function DailyManagement({ data, typeConcept }) {
 					alignItems="center"
 				>
 
-					<Typography
-						variant="h5"
-						fontWeight="600"
-						sx={{ 
-							padding: "2px 30px 0 5px",
-							textAlign: { xs: 'start', md: 'center' }
-						}}
-						color={colors.grey[200]}
+					<Typography 
+						variant="h4" 
+						align="center" 
+						sx={{ fontWeight: 'bold', paddingTop: 1 }}
 					>
 						GESTIONES REALIZADAS
 					</Typography>

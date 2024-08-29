@@ -23,5 +23,5 @@ export const estadoInicialState = {
 	velocimetro: false,
 	claxon: false,
 	palancas: false,
-	observaciones: ''
+	observaciones: '',
 }

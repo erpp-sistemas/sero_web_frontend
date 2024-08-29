@@ -11,14 +11,20 @@ import Tooltip, { tooltipClasses } from '@mui/material/Tooltip'
 import * as React from 'react'
 import { styled } from '@mui/material/styles'
 import { useTheme } from '@mui/material/styles'
-import CheckIcon from '@mui/icons-material/Check'
+import CheckIcon from '@mui/icons-material/Check'	
 import WarningIcon from '@mui/icons-material/Warning'
 import PriorityHighIcon from '@mui/icons-material/PriorityHigh'
 import Alerts from '../../components/Alerts'
 import PagosVehiculos from '../../components/inventory/pagosVehiculos'
 import toolkitVehiculos from '../../toolkit/toolkitVehiculos'
-import { setEditColor, setEditKilometraje, setEditColorLlavero, setEditImagePreview, setEditMarca, setEditModelo, setEditPlaca, setEditSelectedPlace, setEditSerie, setEditTipoMotor, setEditVehiculo } from '../../redux/vehiculosSlices/editarInformacionGeneral.js'
-import { useDispatch } from 'react-redux'
+import { 
+	setEditColor, setEditKilometraje, setEditColorLlavero, setEditImagePreview, setEditMarca, setEditModelo, setEditPlaca, setEditSelectedPlace, setEditSerie, 
+	setEditTipoMotor, setEditVehiculo, setEditCirculacion, setEditFactura, setEditGarantia, setEditImagenDelanteraPreview, 
+	setEditImagenDerechaPreview, setEditImagenIzquierdaPreview, setEditImagenTraseraPreview, 
+	setEditSeguro
+} from '../../redux/vehiculosSlices/editarInformacionGeneral.js'
+import { setOpen } from '../../redux/vehiculosSlices/editarVehiculoSlice.js'
+import { useDispatch, useSelector } from 'react-redux'
 import { Download } from "@mui/icons-material"
 
 /**
@@ -27,8 +33,7 @@ import { Download } from "@mui/icons-material"
  * @component
 */
 function Inventory() {
-	const [openNew, setOpenNew] = useState(false)
-	const [openEdit, setOpenEdit] = useState(false)
+	const [	openNew, setOpenNew] = useState(false)
 	const [openMantenimiento, setOpenMantenimiento] = useState(false)
 	const [openAsignacion, setOpenAsignacion] = useState(false)
 	const [openPagos, setOpenPagos] = useState(false)
@@ -39,11 +44,14 @@ function Inventory() {
 	const [busqueda, setBusqueda] = useState('')
 	const [currentPage, setCurrentPage] = useState(1)
 	const [filtro, setFiltro] = useState('todos')
-    const itemsPerPage = 4
+
+	const editarVehiculo = useSelector(state => state.editarVehiculo)
 	const dispatch = useDispatch()
 
 	const theme = useTheme()
 	const isLightMode = theme.palette.mode === 'light'
+
+	const itemsPerPage = 4
 
 	const HtmlTooltip = styled(({ className, ...props }) => (
 		<Tooltip {...props} classes={{ popper: className }} />
@@ -57,18 +65,27 @@ function Inventory() {
 		},
 	}))
 
-	const setCambiarVehiculo = async (vehiculo) => {
-		dispatch(setEditColorLlavero(vehiculo.color_llavero))
-		dispatch(setEditColor(vehiculo.color))
-		dispatch(setEditKilometraje(vehiculo.kilometraje))
-		dispatch(setEditImagePreview(vehiculo.imagen_vehiculo))
-		dispatch(setEditMarca(vehiculo.marca))
-		dispatch(setEditModelo(vehiculo.modelo))
-		dispatch(setEditPlaca(vehiculo.placa))
-		dispatch(setEditSelectedPlace(vehiculo.plaza))
-		dispatch(setEditSerie(vehiculo.serie))
-		dispatch(setEditTipoMotor(vehiculo.tipo_motor))
-		dispatch(setEditVehiculo(vehiculo.vehiculo))
+	const CambiarVehiculo = async (vehiculo) => {
+		console.log(vehiculo)
+		dispatch(setEditColorLlavero(vehiculo.vehiculo.color_llavero))
+		dispatch(setEditColor(vehiculo.vehiculo.color))
+		dispatch(setEditKilometraje(vehiculo.vehiculo.kilometraje))
+		dispatch(setEditImagePreview(vehiculo.vehiculo.imagen_vehiculo))
+		dispatch(setEditMarca(vehiculo.vehiculo.marca))
+		dispatch(setEditModelo(vehiculo.vehiculo.modelo))
+		dispatch(setEditPlaca(vehiculo.vehiculo.placa))
+		dispatch(setEditSelectedPlace(vehiculo.vehiculo.plaza))
+		dispatch(setEditSerie(vehiculo.vehiculo.serie))
+		dispatch(setEditTipoMotor(vehiculo.vehiculo.tipo_motor))
+		dispatch(setEditVehiculo(vehiculo.vehiculo.vehiculo))
+		dispatch(setEditCirculacion(vehiculo.documentos.tarjeta_circulacion))
+		dispatch(setEditFactura(vehiculo.documentos.factura))
+		dispatch(setEditGarantia(vehiculo.documentos.garantia))
+		dispatch(setEditSeguro(vehiculo.documentos.seguro))	
+		dispatch(setEditImagenDelanteraPreview(vehiculo.documentos.imagen_frente))
+		dispatch(setEditImagenDerechaPreview(vehiculo.documentos.imagen_lado_izquierdo))
+		dispatch(setEditImagenIzquierdaPreview(vehiculo.documentos.imagen_lado_derecho))
+		dispatch(setEditImagenTraseraPreview(vehiculo.documentos.imagen_trasera))
 	}
 
 	const dataVeiculos = async () => {
@@ -76,6 +93,7 @@ function Inventory() {
 			const response = await toolkitVehiculos.getVehiculos()
 			const data = response.data.data
 			setVehiculosPrueba(data)
+			console.log(data)
 		} catch (err) {
 			console.error(err)
 		} 
@@ -90,11 +108,13 @@ function Inventory() {
     }
 
 	const filteredVehiculos = vehiculosPrueba.filter((vehiculo) =>
-        vehiculo.placa.toLowerCase().includes(busqueda.toLowerCase())
-    )
+		vehiculo.placa?.toLowerCase().includes(busqueda.toLowerCase())
+	)
 
-    const startIndex = (currentPage - 1) * itemsPerPage
-    const currentItems = filteredVehiculos.slice(startIndex, startIndex + itemsPerPage)
+	console.log(busqueda, filteredVehiculos)
+
+    // const startIndex = (currentPage - 1) * itemsPerPage
+    // const currentItems = filteredVehiculos.slice(startIndex, startIndex + itemsPerPage)
     const totalPages = Math.ceil(filteredVehiculos.length / itemsPerPage) || 1 
 
     return (
@@ -149,15 +169,14 @@ function Inventory() {
                     <Button 
                         onClick={() => setFiltro('todos')} 
                         sx={{ 
-                            border:'1px solid white', 
                             borderRadius:'20px', 
 							padding:'5px 20px',
 							color:'#fff',
-							fontWeight:'500',
-							fontSize:'14px',
-                            background: filtro === 'todos' ? isLightMode ? '#4cceac' : 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)',
+							fontWeight:'700',
+							fontSize:'12px',
+                            background: filtro === 'todos' ? '#00ff00' : 'rgba(255,255,255, 0.4)' ,
 							'&:hover': {
-								background: isLightMode ? 'rgba(0, 178, 139, 0.4)' : 'rgba(255,255,255,0.3)', 
+								background: 'rgba(255,255,255, 0.6)', 
 								cursor: 'pointer'
 							}
                         }}
@@ -168,15 +187,14 @@ function Inventory() {
                     <Button 
                         onClick={() => setFiltro('noPagado')} 
                         sx={{ 
-                            border:'1px solid white', 
                             borderRadius:'20px', 
 							padding:'5px 20px',
 							color:'#fff',
-							fontWeight:'500',
-							fontSize:'14px',
-                            background: filtro === 'noPagado' ? isLightMode ? '#4cceac' : 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)',
+							fontWeight:'700',
+							fontSize:'12px',
+							background: filtro === 'noPagado' ? '#00ff00' : 'rgba(255,255,255, 0.4)' ,
 							'&:hover': {
-								background: isLightMode ? 'rgba(0, 178, 139, 0.4)' : 'rgba(255,255,255,0.3)', 
+								background: 'rgba(255,255,255, 0.6)', 
 								cursor: 'pointer'
 							}
                         }}
@@ -187,15 +205,14 @@ function Inventory() {
                     <Button 
                         onClick={() => setFiltro('proximo')} 
                         sx={{ 
-                            border:'1px solid white', 
                             borderRadius:'20px', 
 							padding:'5px 20px',
 							color:'#fff',
-							fontWeight:'500',
-							fontSize:'14px',
-                            background: filtro === 'proximo' ? isLightMode ? '#4cceac' : 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)',
+							fontWeight:'700',
+							fontSize:'12px',
+							background: filtro === 'proximo' ? '#00ff00' : 'rgba(255,255,255, 0.4)' ,
 							'&:hover': {
-								background: isLightMode ? 'rgba(0, 178, 139, 0.4)' : 'rgba(255,255,255,0.3)', 
+								background: 'rgba(255,255,255, 0.6)', 
 								cursor: 'pointer'
 							}
                         }}
@@ -207,12 +224,13 @@ function Inventory() {
 
                 <Button 
 					variant="contained" 
-					color="success" 
 					onClick={() => setOpenNew(!openNew)}
 					sx={{
 						color:'white',
 						fontSize:'14px',
-						fontWeight:'500'
+						fontWeight:'500',
+						bgcolor: 'secondary.main', 
+						'&:hover': { bgcolor: 'secondary.dark' }
 					}}
 				>
 					+ Agregar vehículo
@@ -246,10 +264,10 @@ function Inventory() {
                 sx={{ width:'100%', height:'auto', marginTop:'10px', mb:'100px', padding:'0px 50px', display:'flex', justifyContent:'center', alignItems:'center', flexWrap:'wrap', gap:'15px' }}
             >
                 {
-					currentItems.map((vehiculo) => (
+					vehiculosPrueba.map((vehiculo) => (
 						<Box 
 							key={vehiculo.id} 
-							sx={{ 
+							sx={{ 	
 								minWidth:'250px', 
 								height:'340px', 
 								position:'relative', 
@@ -277,23 +295,23 @@ function Inventory() {
 									boxShadow: isLightMode ? '4px 7px 8px rgba(0,0,0,0.7)' : '', 
 								}}
 							>
-								<img src={vehiculo.imagen_vehiculo} alt="" style={{ width: '100%', height: 'auto', objectFit: 'cover' }} />
+								<img src={vehiculo.vehiculo.imagen_vehiculo} alt="" style={{ width: '100%', height: 'auto', objectFit: 'cover' }} />
 							</Box>
 
 							<Box sx={{ width:'100%', height:'100px', display:'flex', justifyContent:'space-between', alignItems:'start', padding:'5px' }}>
 								<button><ConstructionIcon sx={{ color:'#003566', fontSize:'30px' }} onClick={() => setOpenMantenimiento(true)}/></button>
-								<button><InfoIcon sx={{ color:'#2dc653', fontSize:'30px' }} onClick={() => { setOpenEdit(true); setCambiarVehiculo(vehiculo) }}/></button>
+								<button><InfoIcon sx={{ color:'#2dc653', fontSize:'30px' }} onClick={() => { dispatch(setOpen(true)); CambiarVehiculo(vehiculo) }}/></button>
 							</Box>
 
 							<Box sx={{ width:'100%', height:'auto', display:'flex', justifyContent:'center', alignItems:'center', flexDirection:'column' }}>
-								<Typography sx={{ width:'100%', textAlign:'center', fontSize:'18px', fontWeight:'600', textTransform:'uppercase' }}>{vehiculo.vehiculo}</Typography>
-								<Typography sx={{ width:'100%', textAlign:'center', fontSize:'18px', mt:'10px', textTransform:'uppercase' }}>{vehiculo.marca}</Typography>
-								<Typography sx={{ width:'100%', textAlign:'center', fontSize:'18px', mt:'10px', textTransform:'uppercase' }}>{vehiculo.placa}</Typography>
+								<Typography sx={{ width:'100%', textAlign:'center', fontSize:'18px', fontWeight:'600', textTransform:'uppercase' }}>{vehiculo.vehiculo.vehiculo}</Typography>
+								<Typography sx={{ width:'100%', textAlign:'center', fontSize:'18px', mt:'10px', textTransform:'uppercase' }}>{vehiculo.vehiculo.marca}</Typography>
+								<Typography sx={{ width:'100%', textAlign:'center', fontSize:'18px', mt:'10px', textTransform:'uppercase' }}>{vehiculo.vehiculo.placa}</Typography>
 
 								<HtmlTooltip
 									title={
 										<React.Fragment>
-												{ vehiculo.tenencia === 'noPagado' ? <Typography sx={{ color:'red'}}>Tiene pagos vencidos</Typography> : vehiculo.tenencia === 'proximo' ? <Typography sx={{ color:'#ee9b00', width:'100%', textAlign:'center' }}>Los pagos estan proximos a vencer</Typography> : <Typography color={'#457b9d'}>Los pagos estan al corriente</Typography>  }
+												{ vehiculo.vehiculo.tenencia === 'noPagado' ? <Typography sx={{ color:'red'}}>Tiene pagos vencidos</Typography> : vehiculo.vehiculo.tenencia === 'proximo' ? <Typography sx={{ color:'#ee9b00', width:'100%', textAlign:'center' }}>Los pagos estan proximos a vencer</Typography> : <Typography color={'#457b9d'}>Los pagos estan al corriente</Typography>  }
 										</React.Fragment>
 									}
 								>
@@ -307,11 +325,11 @@ function Inventory() {
 										}}
 									>
 										{
-											vehiculo.tenencia === 'noPagado' 
+											vehiculo.vehiculo.tenencia === 'noPagado' 
 												? <Button onClick={() => setOpenPagos(true)} sx={{ height:'30px', cursor:'pointer', background:'none' }}>
 													<PriorityHighIcon sx={{ color:'red', fontSize:'30px'}}/>
 												</Button> : 
-													vehiculo.tenencia === 'proximo' 
+													vehiculo.vehiculo.tenencia === 'proximo' 
 														? <Button onClick={() => setOpenPagos(true)} sx={{ height:'30px', cursor:'pointer', background:'none' }}>
 															<WarningIcon sx={{ color:'yellow', fontSize:'30px' }}/> 
 														</Button>
@@ -327,11 +345,12 @@ function Inventory() {
 							<Box sx={{ width:'100%', height:'auto', display:'flex', justifyContent:'center', alignItems:'center', mt:'20px' }}>
 								<Button
 									sx={{
-										color:'white',
-										background:'#023e8a',
 										padding:'10px 20px',
 										fontSize:'13px',
-										fontWeight:'600'
+										fontWeight:'600',
+										color:'white',
+										bgcolor: 'secondary.main', 
+										'&:hover': { bgcolor: 'secondary.dark' }
 									}}
 									onClick={() => setOpenAsignacion(true)}
 								>
@@ -357,7 +376,7 @@ function Inventory() {
 
 			{ openNew ? <NewVehiculo setOpenNew={setOpenNew} setAlert={setAlert} setAlertClean={setAlertClean} dataVeiculos={dataVeiculos} /> : false }
 
-			{ openEdit ? <EditVehiculo setOpenEdit={setOpenEdit} /> : false }
+			{ editarVehiculo.open ? <EditVehiculo /> : false }
 
 			{ openMantenimiento ? <MantenimientoVehiculo setOpenMantenimiento={setOpenMantenimiento} /> : false }
 

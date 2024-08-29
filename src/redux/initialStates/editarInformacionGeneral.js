@@ -10,6 +10,18 @@ export const editarInformacionGeneralInitialState = {
 	editSerie:'',
 	editColor:'',
 	editColorLlavero:'',
-	editTipoMotor:''
+	editTipoMotor:'',
+	editImagenDelantera:null,
+	editImagenTrasera:null,
+	editImagenIzquierda:null,
+	editImagenDerecha:null,
+	editImagenDelanteraPreview:null,
+	editImagenTraseraPreview:null,
+	editImagenIzquierdaPreview:null,
+	editImagenDerechaPreview:null,
+	editFactura:'',
+	editCirculacion:'',
+	editSeguro:'',
+	editGarantia:'',
 }
 

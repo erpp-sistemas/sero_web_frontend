@@ -1,4 +1,4 @@
-import { Box } from "@mui/material"
+import { Box, Typography } from "@mui/material"
 import PropTypes from 'prop-types'
 import { useTheme } from '@mui/material/styles'
 import { keyframes } from '@emotion/react'
@@ -37,6 +37,7 @@ const NewVehiculo = ({ setOpenAsignacion, setAlertClean }) => {
 	const theme = useTheme()
 	const isLightMode = theme.palette.mode === 'light'
 	const [animation, setAnimation] = useState(false)
+	const [estadoVehiculo, setEstadoVehiculo] = useState('asignable')
 
 	useEffect(() => {
 		if (animation) {	
@@ -60,7 +61,8 @@ const NewVehiculo = ({ setOpenAsignacion, setAlertClean }) => {
 				alignItems: 'center',
 				height: '100vh',
 				background: 'rgba(0,0,0,0.3)',
-				zIndex: '1200'
+				zIndex: '1200',
+				ml:{ xs:'0px', md:'20px' },
 			}}
 		>
 			<AnimatedBox 
@@ -74,13 +76,14 @@ const NewVehiculo = ({ setOpenAsignacion, setAlertClean }) => {
 					justifyContent: 'start',
 					alignItems: 'center',
 					flexDirection:'column',
-					padding: '30px',
+					padding:{ xs:'10px', md:'30px' },
 					border: isLightMode ? '1px solid #17212F' : '2px solid #fff',
 					overflowX:'hidden',
 					overflowY:'scroll'
 				}}
 			>
 				<Title setOpenEdit={setOpenAsignacion} setAnimation={setAnimation} />
+				<Typography sx={{ m:'20px 0px', width:'100%', textAlign:'start', color: estadoVehiculo === 'asignable' ? 'green' : estadoVehiculo === 'fallas' ? 'yellow' : 'red' , fontSize:'24px', fontWeight:'600' }}>{ estadoVehiculo === 'asignable' ? 'Vehiculo asignable' : estadoVehiculo === 'fallas' ? 'Vehiculo con fallas' : 'Vehiculo no asignable' }</Typography>
 				<Content />
 			</AnimatedBox>
 		
