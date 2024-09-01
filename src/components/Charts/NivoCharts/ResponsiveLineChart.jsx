@@ -4,8 +4,7 @@ import { Box, useTheme } from "@mui/material"
 import { tokens } from "../../../theme.js"
 
 const ResponsiveLineChart = ({ 
-  data, 
-  lineColor, 
+  data,   
   showLegend, 
   tooltipFormat, 
   margin,
@@ -61,7 +60,7 @@ const ResponsiveLineChart = ({
                 legendOffset: axisLeftLegendOffset,
                 legendPosition: 'middle'
             }}
-            colors={lineColor}
+            colors={d => d.color}
             lineWidth={4}
             pointSize={10}
             pointColor={{ theme: 'background' }}

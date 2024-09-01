@@ -16,6 +16,7 @@ const ResponsiveBarChart = ({
   axisLeftLegend,
   axisLeftLegendOffset, 
   showBarValues,
+  groupMode 
 }) => {    
 
     const theme = useTheme()
@@ -24,9 +25,15 @@ const ResponsiveBarChart = ({
     const themeBackgroundColor = theme.palette.background.paper;
     const gradientId = `gradient-${Math.random().toString(36).substring(2, 11)}`;
 
-    const getBarColor = (bar) => {
-        return bar.data.accountColor;
+    const getBarColor = ({ id, data }) => {
+        return data[`${id}Color`] || barColor || colors.primary[500];
     };
+
+    const getTooltipColor = (id) => {
+      
+      const color = data.find(item => item[`${id}Color`])?.[`${id}Color`];
+      return color || colors.primary[500];
+  };
 
     return (
       <Box 
@@ -49,6 +56,7 @@ const ResponsiveBarChart = ({
                 modifiers: [['darker', 1.6]]
             }}
             yFormat={ tooltipFormat }
+            groupMode={groupMode} 
             axisTop={null}
             axisRight={null}
             axisBottom={{
@@ -145,24 +153,29 @@ const ResponsiveBarChart = ({
                             itemOpacity: 1
                         }
                     }
-                ]
+                ],                
             }] : []}
             role="application"
             ariaLabel="Nivo bar chart demo"
             barAriaLabel={e => `${e.id}: ${e.formattedValue} in month: ${e.indexValue}`}
-            tooltip={({ id, value, indexValue }) => (
-                <div
-                    style={{
-                        padding: '12px',
-                        background: '#333333',
-                        color: '#ffffff',
-                    }}
-                >
-                    <strong>Cuentas</strong>: {tooltipFormat ? tooltipFormat(value) : value}
-                    <br />
-                    <strong>Mes</strong>: {indexValue}
-                </div>
-            )}
+            tooltip={({ id, value, indexValue }) => {
+              const color = getTooltipColor(id);
+              const label = keys.find(key => key === id);
+              return (
+                  <div
+                      style={{
+                          padding: '12px',
+                          background: '#333333',
+                          color: '#ffffff',
+                          borderLeft: `4px solid ${color}`,
+                      }}
+                  >
+                      <strong>{label}</strong>: {tooltipFormat ? tooltipFormat(value) : value}
+                      <br />
+                      <strong>{axisBottomLegend}</strong>: {indexValue}
+                  </div>
+              );
+          }}
         />
     </Box>
     ) 

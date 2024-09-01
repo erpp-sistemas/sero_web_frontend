@@ -3,24 +3,33 @@ import { Box, useTheme, Typography } from "@mui/material"
 import { tokens } from "../../../theme.js"
 import ResponsiveBarChart from '../../../components/Charts/NivoCharts/ResponsiveBarChart.jsx'
 
-function AccountsWithDebtChart({ data }) {
+function ReportedPaymentsAndValidPaymentsChart({ data }) {
 
   if (!data) {
 		return null
-	}  
-
+}  
   const theme = useTheme()
   const colors = tokens(theme.palette.mode) 
 
-  const transformData = (data) => {
-    return data.map((item) => ({
-        month: item.name_month.slice(0, 3),
-        account: item.account_debt,
-        accountColor: colors.greenAccent[500]
+  const formatData = (data) => {    
+    const uniqueMonths = new Set();
+    
+    const filteredData = data.filter((item) => {
+      const isDuplicate = uniqueMonths.has(item.name_month);
+      uniqueMonths.add(item.name_month);
+      return !isDuplicate;
+    });
+    
+    return filteredData.map((item) => ({
+      month: item.name_month.slice(0, 3),
+      payments: item.number_payments,
+      paymentsColor: colors.greenAccent[500],
+      paymentsValid: item.number_payments_valid,
+      paymentsValidColor: colors.blueAccent[500]
     }));
   };
   
-  const formattedData = transformData(data);
+  const formattedData = formatData(data);
 
   return (
     <Box
@@ -44,7 +53,7 @@ function AccountsWithDebtChart({ data }) {
           textAlign: 'center'
         }}
       >
-        CUENTAS CON DEUDA
+        PAGOS REGISTRADOS Y PAGOS VALIDOS
       </Typography>
     <Box
       sx={{
@@ -62,24 +71,25 @@ function AccountsWithDebtChart({ data }) {
     {formattedData.length > 0 && (
         <ResponsiveBarChart 
             data={ formattedData }
-            barColor={ colors.greenAccent[500] }
-            showLegend={ false }
+            barColor={({ id, data }) => data[`${id}Color`]}
+            showLegend={ true }
             tooltipFormat={value => `${value.toLocaleString()}`}
-            margin = {{ top: 30, right: 30, bottom: 50, left: 75 }}
+            margin = {{ top: 30, right: 130, bottom: 50, left: 75 }}
             backgroundColor="paper"    
-            keys={['account']}
+            keys={['payments', 'paymentsValid']}
             indexBy="month"
             axisBottomLegend="Mes"
-            axisLeftLegend="Cuentas"
+            axisLeftLegend="Pagos"
             axisLeftLegendOffset={ -60 }
             showBarValues={ false }
+            groupMode="grouped"            
           />
-				)}
+        )}
 
-			</Box>
+        </Box>
 
-		</Box>
+    </Box>
   )
 }
 
-export default AccountsWithDebtChart
+export default ReportedPaymentsAndValidPaymentsChart

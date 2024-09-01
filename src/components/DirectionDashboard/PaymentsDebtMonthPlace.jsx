@@ -17,7 +17,9 @@ from '@mui/material';
 import buildColumns from '../../components/DirectionDashboard/PaymentsDebtMonthPlace/buildColumns.jsx'
 import { tokens } from "../../theme"
 import AmountDebitChart from '../../components/DirectionDashboard/PaymentsDebtMonthPlace/AmountDebitChart.jsx'
-import AccountsWithDebtChart from '../../components/DirectionDashboard/PaymentsDebtMonthPlace/AccountsWithDebt.jsx'                                         
+import AccountsWithDebtChart from '../../components/DirectionDashboard/PaymentsDebtMonthPlace/AccountsWithDebt.jsx'
+import AmountPaidChart from '../../components/DirectionDashboard/PaymentsDebtMonthPlace/AmountPaidChart.jsx'
+import ReportedPaymentsAndValidPaymentsChart from '../../components/DirectionDashboard/PaymentsDebtMonthPlace/ReportedPaymentsAndValidPaymentsChart.jsx'
 import { CalendarMonth, DesignServices, Public } from '@mui/icons-material';
 
 function PaymentsDebtMonthPlace({ data }) {
@@ -104,16 +106,18 @@ function PaymentsDebtMonthPlace({ data }) {
     const totals = filteredData.reduce((acc, item) => {
       acc.account_debt += item.account_debt || 0;
       acc.amount_debt += item.amount_debt || 0;
-      acc.number_payments += item.number_payments || 0;
-      acc.account_payments += item.account_payments || 0;
+      acc.number_payments += item.number_payments || 0;      
       acc.amount_paid += item.amount_paid || 0;
+      acc.number_payments_valid += item.number_payments_valid || 0;      
+      acc.amount_paid_valid += item.amount_paid_valid || 0;
       return acc;
     }, {
       account_debt: 0,
       amount_debt: 0,
-      number_payments: 0,
-      account_payments: 0,
-      amount_paid: 0
+      number_payments: 0,      
+      amount_paid: 0,
+      number_payments_valid: 0,      
+      amount_paid_valid: 0
     });
   
 
@@ -260,15 +264,7 @@ function PaymentsDebtMonthPlace({ data }) {
                       }}
                     >
                       {totals.number_payments.toLocaleString('es-MX')}
-                    </TableCell>
-                    <TableCell
-                      sx={{ 
-                        fontSize: '1rem',
-                        fontWeight: 'bold'
-                      }}
-                    >
-                      {totals.account_payments.toLocaleString('es-MX')}
-                    </TableCell>
+                    </TableCell>                    
                     <TableCell
                       sx={{ 
                         fontSize: '1rem',
@@ -276,6 +272,22 @@ function PaymentsDebtMonthPlace({ data }) {
                       }}
                     >
                       {totals.amount_paid.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
+                    </TableCell>
+                    <TableCell
+                      sx={{ 
+                        fontSize: '1rem',
+                        fontWeight: 'bold'
+                      }}
+                    >
+                      {totals.number_payments_valid.toLocaleString('es-MX')}
+                    </TableCell>                    
+                    <TableCell
+                      sx={{ 
+                        fontSize: '1rem',
+                        fontWeight: 'bold'
+                      }}
+                    >
+                      {totals.amount_paid_valid.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
                     </TableCell>
                     <TableCell colSpan={2}></TableCell>
                   </TableRow>
@@ -289,6 +301,14 @@ function PaymentsDebtMonthPlace({ data }) {
             </Grid>
             <Grid item xs={12} md={6}>
               <AmountDebitChart data={ filteredData } />
+            </Grid>
+          </Grid>
+          <Grid container justifyContent="space-between" alignItems="stretch" spacing={2}>
+            <Grid item xs={12} md={6}>
+              <ReportedPaymentsAndValidPaymentsChart data={ filteredData } />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <AmountPaidChart data={ filteredData } />
             </Grid>
           </Grid>
         </>

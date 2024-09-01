@@ -66,26 +66,39 @@ function buildColumns() {
           {Number(value).toLocaleString('es-MX')}
         </Typography>
       ),
-    },
-    { 
-      headerName: 'CUENTAS PAGADAS',
-      field: 'account_payments',
-      minWidth: 120,
-      renderHeader: () => (
-        <strong style={{ color: "#5EBFFF" }}>{"CUENTAS PAGADAS"}</strong>
-      ),
-      renderCell: (value) => (
-        <Typography>
-          {Number(value).toLocaleString('es-MX')}
-        </Typography>
-      ),
-    },
+    },    
     { 
       headerName: 'MONTO PAGADO',
       field: 'amount_paid',
       minWidth: 120,
       renderHeader: () => (
         <strong style={{ color: "#5EBFFF" }}>{"MONTO PAGADO"}</strong>
+      ),
+      renderCell: (value) => (
+        <Typography>
+          {`${Number(value).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}`}
+        </Typography>
+      ),
+    },
+    { 
+      headerName: 'PAGOS REGISTRADOS VALIDOS',
+      field: 'number_payments_valid',
+      minWidth: 120,
+      renderHeader: () => (
+        <strong style={{ color: "#5EBFFF" }}>{"PAGOS REGISTRADOS VALIDOS"}</strong>
+      ),
+      renderCell: (value) => (
+        <Typography>
+          {Number(value).toLocaleString('es-MX')}
+        </Typography>
+      ),
+    },    
+    { 
+      headerName: 'MONTO PAGADO',
+      field: 'amount_paid_valid',
+      minWidth: 120,
+      renderHeader: () => (
+        <strong style={{ color: "#5EBFFF" }}>{"MONTO PAGADO VALIDO"}</strong>
       ),
       renderCell: (value) => (
         <Typography>

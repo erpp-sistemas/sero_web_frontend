@@ -3,7 +3,7 @@ import { Box, useTheme, Typography } from "@mui/material"
 import { tokens } from "../../../theme.js"
 import ResponsiveLineChart from '../../../components/Charts/NivoCharts/ResponsiveLineChart.jsx'
 
-function AmountDebitChart({ data }) {
+function AmountPaidChart({ data }) {
 
   if (!data) {
 		return null
@@ -14,33 +14,46 @@ function AmountDebitChart({ data }) {
 
   const transformData = (data) => {    
     const groupedData = data.reduce((acc, curr) => {
-      const { name_place, name_month, amount_debt } = curr;
+      const { name_place, name_month, amount_paid, amount_paid_valid } = curr;
 
       const truncatedMonth = name_month.slice(0, 3);
   
       if (!acc[name_place]) {
-        acc[name_place] = [];
+        acc[name_place] = { paid: [], paid_valid: [] };
       }
   
-      acc[name_place].push({
+      acc[name_place].paid.push({
         x: truncatedMonth,
-        y: amount_debt,
+        y: amount_paid,
+      });
+
+      acc[name_place].paid_valid.push({
+        x: truncatedMonth,
+        y: amount_paid_valid,
       });
   
       return acc;
     }, {});
-  
     
-    const transformedData = Object.keys(groupedData).map((key) => ({
-      id: key,
-      color: colors.greenAccent[500],
-      data: groupedData[key],
-    }));
+    const transformedData = Object.keys(groupedData).flatMap((key) => [
+      {
+        id: "payments",
+        color: colors.greenAccent[500],
+        data: groupedData[key].paid,
+      },
+      {
+        id: "paymentsValid",
+        color: colors.blueAccent[500],
+        data: groupedData[key].paid_valid,
+      },
+    ]);
   
     return transformedData;
   };  
   
   const formattedData = transformData(data);
+
+  console.log(formattedData)
 
   return (
     <Box
@@ -64,7 +77,7 @@ function AmountDebitChart({ data }) {
           textAlign: 'center'
         }}
       >
-        MONTO DE DEUDA
+        MONTO PAGADO
       </Typography>
     <Box
       sx={{
@@ -78,14 +91,13 @@ function AmountDebitChart({ data }) {
         height: '100%',
         overflow: 'hidden'        
       }}
-    >
-				{formattedData.length > 0 && (
-					<ResponsiveLineChart 
-            data={ formattedData }
-            lineColor={ colors.greenAccent[500] }
-            showLegend={ false }
+>
+    {formattedData.length > 0 && (
+        <ResponsiveLineChart 
+            data={ formattedData }            
+            showLegend={ true }
             tooltipFormat="$,.2f"
-            margin = {{ top: 30, right: 30, bottom: 50, left: 100 }}
+            margin = {{ top: 30, right: 120, bottom: 50, left: 100 }}
             axisBottomLegend="Mes"
             axisLeftLegend="Monto"
             axisLeftLegendOffset={ -85 }
@@ -102,4 +114,4 @@ function AmountDebitChart({ data }) {
   )
 }
 
-export default AmountDebitChart
+export default AmountPaidChart
