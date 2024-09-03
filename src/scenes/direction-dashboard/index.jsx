@@ -9,6 +9,7 @@ import { tokens } from "../../theme"
 import PaymentsDebtMonthPlace from '../../components/DirectionDashboard/paymentsDebtMonthPlace.jsx'
 import LoadingModal from '../../components/LoadingModal.jsx'
 
+
 function index() {
 
   const theme = useTheme()
