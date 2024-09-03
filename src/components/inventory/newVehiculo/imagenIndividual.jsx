@@ -9,7 +9,7 @@ const ImageIndividual = ({ label, onClick, fileRef, onChange, preview, error }) 
 		<Typography sx={{ fontSize: '18px', color: '#fff', width: '100%', textAlign: 'center' }}>{label}</Typography>
 
 		<Button
-			sx={{ padding:'0px', width: '170px', height: '170px', background: 'rgba(255,255,255)', mt: '10px', borderRadius: '10px', border: !error ? '1px solid #fff' : '1px solid red', justifyContent: 'center', alignItems: 'center', overflow: 'hidden' }}
+			sx={{ padding:'0px', width: '170px', height: '170px', background: 'rgba(255,255,255,0.1)', mt: '10px', borderRadius: '10px', border: !error ? '1px solid #fff' : '1px solid red', justifyContent: 'center', alignItems: 'center', overflow: 'hidden' }}
 			onClick={onClick}
 		>
 			{preview ? (

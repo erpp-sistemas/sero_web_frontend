@@ -58,6 +58,7 @@ import { submenuAccessLogRequest } from './api/submenu'
 import DebtRecord from './scenes/debt-record'
 import DirectionDashboard from './scenes/direction-dashboard'
 import Manuals from './scenes/manuals'
+import Individual from './scenes/inventory/individual'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -203,6 +204,7 @@ function App() {
                         <Route path="/photo-management" element={<PhotoManagement />} />
                         <Route path="/direction-dashboard" element={<DirectionDashboard />} />
                         <Route path="/manuals" element={<Manuals />} />
+						<Route path="/vehiculos/:vehicleNumber" element={<Individual />} />
                       </Routes>
                     </main>
                   </Box>
