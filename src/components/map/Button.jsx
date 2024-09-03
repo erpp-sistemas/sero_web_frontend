@@ -4,7 +4,7 @@ import { Button } from '@mui/material'
 const ButtonUi = ({ width, padding, bgColor, bgColorHover, mt, fontWeight, handle, title, icon = '' }) => {
     return (
         <Button sx={{
-            backgroundColor: bgColor, width, padding, fontWeight, marginTop: mt, fontWeight: 'bold', ":hover": {
+            backgroundColor: bgColor, width, padding, marginTop: mt, fontWeight: 'bold', ":hover": {
                 bgcolor: bgColorHover
             }
         }} startIcon={icon !== '' ? icon : ''}

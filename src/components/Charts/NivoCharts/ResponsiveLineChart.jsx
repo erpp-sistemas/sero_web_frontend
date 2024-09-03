@@ -61,6 +61,7 @@ const ResponsiveLineChart = ({
                 legendPosition: 'middle'
             }}
             colors={d => d.color}
+            enablePoints={ true }
             lineWidth={4}
             pointSize={10}
             pointColor={{ theme: 'background' }}
