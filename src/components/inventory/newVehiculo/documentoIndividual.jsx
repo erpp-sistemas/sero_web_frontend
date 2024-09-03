@@ -12,7 +12,7 @@ const DocumentoIndividual = ({ label, onClick, fileRef, onChange, nombreDocument
 		</Typography>
 
 		<Button
-			sx={{ width: '170px', height: '170px', background: 'rgba(0,0,0,0.2)', mt:'5px', borderRadius: '10px', border: !error ? '1px solid #fff' : '1px solid red', justifyContent: 'center', alignItems: 'center' }}
+			sx={{ width: '170px', height: '170px',  background: 'rgba(255,255,255,0.1)', mt:'5px', borderRadius: '10px', border: !error ? '1px solid #fff' : '1px solid red', justifyContent: 'center', alignItems: 'center' }}
 			onClick={onClick}
 		>
 			{nombreDocumento ? (
@@ -24,7 +24,7 @@ const DocumentoIndividual = ({ label, onClick, fileRef, onChange, nombreDocument
 
 		<input
 			type="file"
-			style={{ display: 'none' }}
+			style={{ display: 'none' }}	
 			ref={fileRef}
 			onChange={onChange}
 			accept="application/pdf"

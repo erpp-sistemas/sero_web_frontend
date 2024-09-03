@@ -48,6 +48,7 @@ const NewVehiculo = ({ setOpenNew, setAlertClean, dataVeiculos, setAlert }) => {
 	const documentos = useSelector(state => state.documentos)
 	const estado = useSelector(state => state.estado)
 	const imagenesEstado = useSelector(state => state.imagenesEstado)
+	const comentarios = useSelector(state => state.comentarios)
 	const pagosVerificacion = useSelector(state => state.pagosVerificacion)
 	const pagosTenencia = useSelector(state => state.pagosTenencia)
 	const pagosPlacas = useSelector(state => state.pagosPlacas)
@@ -141,6 +142,30 @@ const NewVehiculo = ({ setOpenNew, setAlertClean, dataVeiculos, setAlert }) => {
 		palancas: imagenesEstado.imagenesPalancas,
 	}
 
+	const dataComentarios = {
+		fugaAceite: comentarios.comentarioFugaAceite,
+		fugaCombustible: comentarios.comentarioFugaCombustible,
+		fugaAceiteMotor: comentarios.comentarioFugaAceiteMotor,
+		direccionalesDelanteras: comentarios.comentarioDireccionalesDelanteras,
+		direccionalesTraseras: comentarios.comentarioDireccionalesTraseras,
+		direccion: comentarios.comentarioDireccion,
+		lucesTablero: comentarios.comentarioLucesTablero,
+		luzFreno: comentarios.comentarioLuzFreno,
+		llantaDelantera: comentarios.comentarioLlantaDelantera,
+		llantaTrasera: comentarios.comentarioLlantaTrasera,
+		deformaciones: comentarios.comentarioDeformacionesLlanta,
+		encendido: comentarios.comentarioEncendido,
+		tensionCadena: comentarios.comentarioTensionCadena,
+		frenoDelantero: comentarios.comentarioFrenoDelantero,
+		frenoTrasero: comentarios.comentarioFrenoTrasero,
+		amortiguadores: comentarios.comentarioAmortiguadores,
+		silla: comentarios.comentarioSilla,
+		espejos: comentarios.comentarioEspejos,
+		velocimetro: comentarios.comentarioVelocimetro,
+		claxon: comentarios.comentarioClaxon,
+		palancas: comentarios.comentarioPalancas,
+	}
+
 	const dataPagos = {
 		pagosVerificacion: pagosVerificacion.pagosVerificacion,
 		pagosExtraordinarios: pagosExtraordinarios.pagosExtraordinarios,
@@ -171,7 +196,7 @@ const NewVehiculo = ({ setOpenNew, setAlertClean, dataVeiculos, setAlert }) => {
 					width: '90%',
 					height: '90%',
 					background: isLightMode ? '#fff' : '#17212F',
-					borderRadius: '20px',
+					borderRadius: '20px',	
 					display: 'flex',
 					justifyContent: 'start',
 					alignItems: 'center',
@@ -192,8 +217,8 @@ const NewVehiculo = ({ setOpenNew, setAlertClean, dataVeiculos, setAlert }) => {
 					<Header next={next} />
 
 					<Botones 
-						next={next} data={data} dataDocuments={dataDocuments} dataEstado={dataEstado} dataImagenes={dataImagenes} dataPagos={dataPagos}
-						setNext={setNext} setOpenNew={setOpenNew} dataVeiculos={dataVeiculos} setAlert={setAlert}
+						next={next} data={data} dataDocuments={dataDocuments} dataEstado={dataEstado} dataImagenes={dataImagenes} dataPagos={dataPagos} dataComentarios={dataComentarios}
+						setNext={setNext} setOpenNew={setOpenNew} dataVeiculos={dataVeiculos} setAlert={setAlert} 
 					/>
 					
 					{

@@ -58,6 +58,16 @@ const actualizarImagenes = async ( data, name ) => {
 	}
 }
 
+const actualizarComentarios = async ( data, name ) => {
+	const url=`/vehiculos/comentario/${name}`
+	try{
+		const response = await instance.post( url, data )
+		return response
+	}catch(error){
+		console.error(error)
+	}
+}
+
 const crearEstadoVehiculo = async ( data ) => {
 	const url=`/vehiculos/estado`
 	try{
@@ -108,15 +118,29 @@ const actualizarExtraordinarios = async ( data ) => {
 	}
 }
 
+const crearQr = async ( data ) => {
+	const url=`/vehiculos/qr`
+	console.log(data)
+	try{
+		const response = await instance.post( url, data )
+		return response
+	}catch(error){
+		console.error(error)
+	}
+
+}
+
 export default {
 	generateVehiculo,
 	subirImagen,
 	actualizarDocumentos,
+	actualizarComentarios,
 	crearEstadoVehiculo,
 	actualizarImagenes,
 	actualizarVerificacion,
 	actualizarTenencia,
 	actualizarPlacas,
 	actualizarExtraordinarios,
-	getVehiculos
+	getVehiculos, 
+	crearQr,
 }

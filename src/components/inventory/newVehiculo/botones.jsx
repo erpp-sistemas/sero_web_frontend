@@ -17,7 +17,7 @@ import { setPagosTenencia } from '../../../redux/vehiculosSlices/pagosTenenciaSl
 import { removeAllPagoPlacas } from '../../../redux/vehiculosSlices/pagosPlacasSlice.js'
 import { setPagosExtraordinarios } from '../../../redux/vehiculosSlices/pagosExtraordinariosSlice.js'
 
-const 	Botones = ({ next, setNext, data, dataDocuments, dataEstado, dataPagos, dataImagenes, setOpenNew, dataVeiculos, setAlert }) => {
+const 	Botones = ({ next, setNext, data, dataDocuments, dataEstado, dataPagos, dataImagenes, setOpenNew, dataVeiculos, setAlert, dataComentarios }) => {
     const [errorText, setErrorText] = useState('')
     const [error, setError] = useState(false)
 	const [charge, setCharge] = useState(false)
@@ -222,68 +222,75 @@ const 	Botones = ({ next, setNext, data, dataDocuments, dataEstado, dataPagos, d
 	}
 		
 	const SubirVehiculo = async () => {
+		setCharge(true)
+		try{	
+			const imagenResponse = await toolkitVehiculos.subirImagen(data.imagen, 'Imagen Vehiculo')
+			const imagen_vehiculo = imagenResponse.data.fileUrl
+			const vehiculoResponse = await toolkitVehiculos.generateVehiculo({ ...data, imagen_vehiculo })
+			const vehiculo = vehiculoResponse.data
+			const docs = ['tarjetaCirculacion', 'factura', 'seguro', 'garantia', 'frente', 'trasera', 'ladoIzquierdo', 'ladoDerecho']
+			const documentPromises = docs.map(doc => subirDocumento(dataDocuments[doc], doc.replace(/([A-Z])/g, ' $1').trim()))
+			const documentUrls = await Promise.all(documentPromises)
+			if (documentUrls.some(url => !url)) {
+				console.error('Los documentos no se subieron correctamente')
+				return
+			}
+			const urlCodigo = { url: `https://ser0-f7d42.web.app/vehiculos/${vehiculo.data.id_vehiculo}` }
+			const qr = await toolkitVehiculos.crearQr(urlCodigo)
+			const qrFinal = qr.data.qrUrl
+			console.log(qrFinal)	
+			const newDocuments = {
+				id_vehiculo: vehiculo.data.id_vehiculo,
+				tarjeta_circulacion: documentUrls[0],
+				factura: documentUrls[1],
+				seguro: documentUrls[2],
+				garantia: documentUrls[3],
+				imagen_frente: documentUrls[4],
+				imagen_trasera: documentUrls[5],
+				imagen_lado_izquierdo: documentUrls[6],
+				imagen_lado_derecho: documentUrls[7]
+			}
+			const documentos = await toolkitVehiculos.actualizarDocumentos(newDocuments)
+			if (documentos.status !== 201) {
+				console.error('Hubo un problema al actualizar los documentos')
+				return
+			}
+			dataEstado.id_vehiculo = vehiculo.data.id_vehiculo
+			const estado = await toolkitVehiculos.crearEstadoVehiculo(dataEstado)
+			if (estado.status !== 201) {
+				console.error('Hubo un problema al crear el estado del vehiculo')
+				return
+			}
+			for (const key in dataImagenes) {
+				if (dataImagenes[key]) {
+				const imagePromises = dataImagenes[key].map(image => subirDocumento(image.file, key))
+				const imageResponses = await Promise.all(imagePromises)
+				const uploadPromises = imageResponses.map((fileUrl) => toolkitVehiculos.actualizarImagenes({
+					id_vehiculo: vehiculo.data.id_vehiculo,
+					imagen: fileUrl
+				}, key))
+				await Promise.all(uploadPromises)
+				}
+			}
 
-		console.log(dataImagenes)
-
-		// setCharge(true)
-
-		// try{
-
-		// 	const imagenResponse = await toolkitVehiculos.subirImagen(data.imagen, 'Imagen Vehiculo')
-		// 	const imagen_vehiculo = imagenResponse.data.fileUrl
-		// 	const vehiculoResponse = await toolkitVehiculos.generateVehiculo({ ...data, imagen_vehiculo })
-		// 	const vehiculo = vehiculoResponse.data
-		// 	const docs = ['tarjetaCirculacion', 'factura', 'seguro', 'garantia', 'frente', 'trasera', 'ladoIzquierdo', 'ladoDerecho']
-		// 	const documentPromises = docs.map(doc => subirDocumento(dataDocuments[doc], doc.replace(/([A-Z])/g, ' $1').trim()))
-		// 	const documentUrls = await Promise.all(documentPromises)
-		// 	if (documentUrls.some(url => !url)) {
-		// 		console.error('Los documentos no se subieron correctamente')
-		// 		return
-		// 	}
-		// 	const newDocuments = {
-		// 		id_vehiculo: vehiculo.data.id_vehiculo,
-		// 		tarjeta_circulacion: documentUrls[0],
-		// 		factura: documentUrls[1],
-		// 		seguro: documentUrls[2],
-		// 		garantia: documentUrls[3],
-		// 		imagen_frente: documentUrls[4],
-		// 		imagen_trasera: documentUrls[5],
-		// 		imagen_lado_izquierdo: documentUrls[6],
-		// 		imagen_lado_derecho: documentUrls[7]
-		// 	}
-		// 	const documentos = await toolkitVehiculos.actualizarDocumentos(newDocuments)
-		// 	if (documentos.status !== 201) {
-		// 		console.error('Hubo un problema al actualizar los documentos')
-		// 		return
-		// 	}
-		// 	dataEstado.id_vehiculo = vehiculo.data.id_vehiculo
-		// 	const estado = await toolkitVehiculos.crearEstadoVehiculo(dataEstado)
-		// 	if (estado.status !== 201) {
-		// 		console.error('Hubo un problema al crear el estado del vehiculo')
-		// 		return
-		// 	}
-		// 	for (const key in dataImagenes) {
-		// 		if (dataImagenes[key]) {
-		// 		const imagePromises = dataImagenes[key].map(image => subirDocumento(image.file, key))
-		// 		const imageResponses = await Promise.all(imagePromises)
-		// 		const uploadPromises = imageResponses.map((fileUrl) => toolkitVehiculos.actualizarImagenes({
-		// 			id_vehiculo: vehiculo.data.id_vehiculo,
-		// 			imagen: fileUrl
-		// 		}, key))
-		// 		await Promise.all(uploadPromises)
-		// 		}
-		// 	}
-		// 	await procesarPagos(dataPagos, vehiculo.data.id_vehiculo)
-		// 	setCharge(false)
-		// 	dataVeiculos()
-		// 	ResetData()
-		// 	setAlert(true)
-		// 	setOpenNew(false)
-
-		// } catch(error) {
-		// 	console.error(error.message)
-		// }
-		
+			for (const key in dataComentarios) {
+				if (dataComentarios[key]) {
+					await toolkitVehiculos.actualizarComentarios({
+						id_vehiculo: vehiculo.data.id_vehiculo,
+						comentario: dataComentarios[key]
+					}, key)
+				}
+			}
+			await procesarPagos(dataPagos, vehiculo.data.id_vehiculo)
+			
+			setCharge(false)
+			dataVeiculos()
+			ResetData()
+			setAlert(true)
+			setOpenNew(false)
+		} catch(error) {
+			console.error(error.message)
+		}
 	}
 
     return (
@@ -358,6 +365,7 @@ Botones.propTypes = {
     next: PropTypes.string.isRequired,
     data: PropTypes.object.isRequired,
     dataDocuments: PropTypes.object.isRequired,
+    dataComentarios: PropTypes.object.isRequired,
     dataEstado: PropTypes.object.isRequired,
     dataPagos: PropTypes.object.isRequired,
     dataImagenes: PropTypes.object.isRequired,
