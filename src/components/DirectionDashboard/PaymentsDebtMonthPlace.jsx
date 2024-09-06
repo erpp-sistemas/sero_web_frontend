@@ -21,9 +21,10 @@ import AccountsWithDebtChart from '../../components/DirectionDashboard/PaymentsD
 import AmountPaidChart from '../../components/DirectionDashboard/PaymentsDebtMonthPlace/AmountPaidChart.jsx'
 import ReportedPaymentsAndValidPaymentsChart from '../../components/DirectionDashboard/PaymentsDebtMonthPlace/ReportedPaymentsAndValidPaymentsChart.jsx'
 import { CalendarMonth, DesignServices, Public } from '@mui/icons-material';
+import ManagementsPlaceServiceProccess from '../../components/DirectionDashboard/PaymentsDebtMonthPlace/ManagementsPlaceServiceProccess.jsx'
 
-function PaymentsDebtMonthPlace({ data }) {
-   if (!data || data.length === 0) {
+function PaymentsDebtMonthPlace({ paymentsDebtMonthPlaceData, managementsPlaceServiceProccessData }) {
+   if (!paymentsDebtMonthPlaceData  || paymentsDebtMonthPlaceData .length === 0) {
     return (
       <Typography variant="h6" color="textSecondary">
         No data available
@@ -34,7 +35,9 @@ function PaymentsDebtMonthPlace({ data }) {
   const theme = useTheme()
 	const colors = tokens(theme.palette.mode)
 
-  const [filteredData, setFilteredData] = useState(data);
+  const [filteredPaymentsData, setFilteredPaymentsData] = useState(paymentsDebtMonthPlaceData);
+  const [filteredManagementsData, setFilteredManagementsData] = useState(managementsPlaceServiceProccessData);
+
   const [uniquePlaces, setUniquePlaces] = useState([]);
   const [selectedPlace, setSelectedPlace] = useState(null);
   const [uniqueServices, setUniqueServices] = useState([]);
@@ -45,48 +48,62 @@ function PaymentsDebtMonthPlace({ data }) {
   const useBuildColumns = buildColumns();   
 
     useEffect(() => {    
-      const places = [...new Set(data.map(item => item.name_place))];
+      const places = [...new Set(paymentsDebtMonthPlaceData.map(item => item.name_place))];
       places.sort();
       setUniquePlaces(places);
       if (places.length > 0) {
         setSelectedPlace(places[0]);
       }
-    }, [data]);  
+    }, [paymentsDebtMonthPlaceData]);  
     
     useEffect(() => {
       if (selectedPlace) {
-        const years = [...new Set(data.filter(item => item.name_place === selectedPlace).map(item => item.year_number))];
+        const years = [...new Set(paymentsDebtMonthPlaceData.filter(item => item.name_place === selectedPlace).map(item => item.year_number))];
         years.sort((a, b) => a - b);
         setUniqueYears(years);
         if (years.length > 0) {
           setSelectedYear(years[0]);
         }
       }
-    }, [selectedPlace, data]);  
+    }, [selectedPlace, paymentsDebtMonthPlaceData]);  
     
     useEffect(() => {
       if (selectedPlace && selectedYear) {
-        const services = [...new Set(data.filter(item => item.name_place === selectedPlace && item.year_number === selectedYear).map(item => item.name_service))];
+        const services = [...new Set(paymentsDebtMonthPlaceData.filter(item => item.name_place === selectedPlace && item.year_number === selectedYear).map(item => item.name_service))];
         services.sort();
         setUniqueServices(services);
         if (services.length > 0) {
           setSelectedService(services[0]);
         }
       }
-    }, [selectedPlace, selectedYear, data]);  
+    }, [selectedPlace, selectedYear, paymentsDebtMonthPlaceData]);  
     
     useEffect(() => {
       if (selectedPlace && selectedYear && selectedService) {
-        const filtered = data.filter(item => 
+        const filteredPayments  = paymentsDebtMonthPlaceData.filter(item => 
           item.name_place === selectedPlace &&
           item.year_number === selectedYear &&
           item.name_service === selectedService
         );
-        setFilteredData(filtered);
+        setFilteredPaymentsData( filteredPayments );
       } else {
-        setFilteredData(data);
+        setFilteredPaymentsData( paymentsDebtMonthPlaceData );
       }
-    }, [selectedPlace, selectedYear, selectedService, data]);
+    }, [selectedPlace, selectedYear, selectedService, paymentsDebtMonthPlaceData]);
+
+    useEffect(() => {
+      if (selectedPlace && selectedYear && selectedService) {
+        const filteredManagements = managementsPlaceServiceProccessData.filter(item => 
+          item.name_place === selectedPlace &&
+          item.year_number === selectedYear &&
+          item.name_service === selectedService
+        );
+        setFilteredManagementsData(filteredManagements);
+      } else {
+        setFilteredManagementsData(managementsPlaceServiceProccessData);
+      }
+    }, [selectedPlace, selectedYear, selectedService, managementsPlaceServiceProccessData]);
+  
   
     const handlePlaceChange = (place) => {
       setSelectedPlace(place);
@@ -103,7 +120,7 @@ function PaymentsDebtMonthPlace({ data }) {
       setSelectedService(service);
     };
 
-    const totals = filteredData.reduce((acc, item) => {
+    const paymentsTotals  = filteredPaymentsData.reduce((acc, item) => {
       acc.account_debt += item.account_debt || 0;
       acc.amount_debt += item.amount_debt || 0;
       acc.number_payments += item.number_payments || 0;      
@@ -195,7 +212,7 @@ function PaymentsDebtMonthPlace({ data }) {
           ADEUDOS Y PAGOS
         </Typography>
 
-      {filteredData.length > 0 && (
+      {filteredPaymentsData.length > 0 && (
         <>
           <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" sx={{ padding: 1 }}>
             <TableContainer component={Paper}>
@@ -214,7 +231,7 @@ function PaymentsDebtMonthPlace({ data }) {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {filteredData.map((row, index) => (
+                  {filteredPaymentsData.map((row, index) => (
                     <TableRow key={index}>
                       {useBuildColumns.map((column) => (
                         <TableCell key={column.field}>
@@ -247,7 +264,7 @@ function PaymentsDebtMonthPlace({ data }) {
                         fontWeight: 'bold'
                       }}
                     >
-                      {totals.account_debt.toLocaleString('es-MX')}
+                      {paymentsTotals .account_debt.toLocaleString('es-MX')}
                     </TableCell>
                     <TableCell
                       sx={{ 
@@ -255,7 +272,7 @@ function PaymentsDebtMonthPlace({ data }) {
                         fontWeight: 'bold'
                       }}
                     >
-                      {totals.amount_debt.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
+                      {paymentsTotals .amount_debt.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
                     </TableCell>
                     <TableCell
                       sx={{ 
@@ -263,7 +280,7 @@ function PaymentsDebtMonthPlace({ data }) {
                         fontWeight: 'bold'
                       }}
                     >
-                      {totals.number_payments.toLocaleString('es-MX')}
+                      {paymentsTotals .number_payments.toLocaleString('es-MX')}
                     </TableCell>                    
                     <TableCell
                       sx={{ 
@@ -271,7 +288,7 @@ function PaymentsDebtMonthPlace({ data }) {
                         fontWeight: 'bold'
                       }}
                     >
-                      {totals.amount_paid.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
+                      {paymentsTotals .amount_paid.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
                     </TableCell>
                     <TableCell
                       sx={{ 
@@ -279,7 +296,7 @@ function PaymentsDebtMonthPlace({ data }) {
                         fontWeight: 'bold'
                       }}
                     >
-                      {totals.number_payments_valid.toLocaleString('es-MX')}
+                      {paymentsTotals .number_payments_valid.toLocaleString('es-MX')}
                     </TableCell>                    
                     <TableCell
                       sx={{ 
@@ -287,7 +304,7 @@ function PaymentsDebtMonthPlace({ data }) {
                         fontWeight: 'bold'
                       }}
                     >
-                      {totals.amount_paid_valid.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
+                      {paymentsTotals .amount_paid_valid.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
                     </TableCell>
                     <TableCell colSpan={2}></TableCell>
                   </TableRow>
@@ -297,18 +314,23 @@ function PaymentsDebtMonthPlace({ data }) {
           </Grid>
           <Grid container justifyContent="space-between" alignItems="stretch" spacing={2}>
             <Grid item xs={12} md={6}>
-              <AccountsWithDebtChart data={ filteredData } />
+              <AccountsWithDebtChart data={ filteredPaymentsData } />
             </Grid>
             <Grid item xs={12} md={6}>
-              <AmountDebitChart data={ filteredData } />
+              <AmountDebitChart data={ filteredPaymentsData } />
             </Grid>
           </Grid>
           <Grid container justifyContent="space-between" alignItems="stretch" spacing={2}>
             <Grid item xs={12} md={6}>
-              <ReportedPaymentsAndValidPaymentsChart data={ filteredData } />
+              <ReportedPaymentsAndValidPaymentsChart data={ filteredPaymentsData } />
             </Grid>
             <Grid item xs={12} md={6}>
-              <AmountPaidChart data={ filteredData } />
+              <AmountPaidChart data={ filteredPaymentsData } />
+            </Grid>
+          </Grid>
+          <Grid container justifyContent="space-between" alignItems="stretch" spacing={2}>
+            <Grid item xs={12} md={12}>
+              <ManagementsPlaceServiceProccess data={ filteredManagementsData } />
             </Grid>
           </Grid>
         </>

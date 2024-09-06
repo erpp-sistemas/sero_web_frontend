@@ -18,12 +18,15 @@ function index() {
 
   const user = useSelector((state) => state.user);
   const [paymentsDebtMonthPlaceData, setPaymentsDebtMonthPlaceData] = useState([]);
+  const [managementsPlaceServiceProccessData, setManagementsPlaceServiceProccessData] = useState([]);
 
   useEffect(() => {
     async function loadDirectionDashboard() {
       setIsLoading(true)   
       const response = await directionDashboardRequest(user.user_id);
       setPaymentsDebtMonthPlaceData(JSON.parse(response.data[0].payments_debt_month_place));
+      setManagementsPlaceServiceProccessData(JSON.parse(response.data[0].managements_place_service_proccess))
+      console.log(JSON.parse(response.data[0].managements_place_service_proccess))
       setIsLoading(false)   
     }
 
@@ -45,7 +48,10 @@ function index() {
 			>
       <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2} >
         <Grid item xs={12}>
-          <PaymentsDebtMonthPlace data={ paymentsDebtMonthPlaceData }/> 
+          <PaymentsDebtMonthPlace 
+            paymentsDebtMonthPlaceData={paymentsDebtMonthPlaceData} 
+            managementsPlaceServiceProccessData={managementsPlaceServiceProccessData} 
+          /> 
         </Grid>        
       </Grid>				 
 			</Box>
