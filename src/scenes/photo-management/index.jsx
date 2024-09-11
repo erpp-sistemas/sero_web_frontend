@@ -94,7 +94,7 @@ const Index = () => {
     const [filteredResult, setFilteredResult] = useState([]);
     const [filterText, setFilterText] = useState('');
     const [showNoResultsMessage, setShowNoResultsMessage] = useState(false)
-    const [newImageUrl, setNewImageUrl] = useState('');
+    const [newImageUrl, setNewImageUrl] = useState([]);
     const [rows, setRows] = useState([]);
     const [page, setPage] = useState(0);
 
@@ -787,19 +787,30 @@ const Index = () => {
     
       const handleImageUrlUpdate = (response_photo) => {        
 
-         setNewImageUrl(response_photo.image_url);
+         setNewImageUrl(response_photo);
          const photo_field = response_photo.celda
+
+         console.log(response_photo)
+         console.log(photo_field)
         
         setFilteredResult(prev =>
             prev.map(row => row.id_registro === selectedRow.id_registro
-                ? { ...row, [photo_field]: response_photo.image_url }
+                ? { 
+                    ...row, 
+                    [photo_field]: response_photo.image_url,
+                    [`id_${photo_field}`]: response_photo.photo_record_id
+                  }
                 : row
             )
         );
 
         setResult(prev =>
           prev.map(row => row.id_registro === selectedRow.id_registro
-              ? { ...row, [photo_field]: response_photo.image_url }
+              ? { 
+                  ...row, 
+                  [photo_field]: response_photo.image_url,
+                  [`id_${photo_field}`]: response_photo.photo_record_id
+                }
               : row
           )
       );
@@ -809,17 +820,29 @@ const Index = () => {
         if (newImageUrl && selectedRow) {
           const photo_image_url = newImageUrl.image_url
           const photo_field = newImageUrl.celda
+          const photo_record_id = newImageUrl.photo_record_id;
+
+          console.log(photo_record_id)
+          console.log(photo_field)
 
           setFilteredResult(prev =>
               prev.map(row => row.id_registro === selectedRow.id_registro
-                  ? { ...row, [photo_field]: photo_image_url }
+                  ? { 
+                      ...row, 
+                      [photo_field]: photo_image_url,
+                      [`id_${photo_field}`]: photo_record_id
+                    }
                   : row
               )
           );
 
           setResult(prev =>
             prev.map(row => row.id_registro === selectedRow.id_registro
-                ? { ...row, [photo_field]: photo_image_url }
+                ? { 
+                    ...row, 
+                    [photo_field]: photo_image_url,
+                    [`id_${photo_field}`]: photo_record_id
+                  }
                 : row
             )
         );

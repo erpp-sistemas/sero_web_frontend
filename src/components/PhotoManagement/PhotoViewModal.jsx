@@ -108,8 +108,11 @@ const PhotoViewModal = ({ open, onClose, selectedPlace, selectedService, data, o
     try {
       setIsLoading(true);
       const response = await savePhotoRequest( photo_data );
-      const updatedImageUrl = response.data.message;
-      console.log(updatedImageUrl)
+      const updatedImageUrl = response.data.image_url;
+      const updatedPhotoRecordId = response.data.photo_record_id;
+      console.log(data.id_registro_foto)
+      // const updatedImageUrl = response.data.message;
+      // console.log(updatedImageUrl)
       // setFormData(prevState => ({
       //   ...prevState,
       //   url_image: updatedImageUrl
@@ -122,8 +125,11 @@ const PhotoViewModal = ({ open, onClose, selectedPlace, selectedService, data, o
       if (onImageUrlUpdate) {
         const response_photo = {
           image_url: updatedImageUrl,
-          celda: data.celda          
+          celda: data.celda,
+          photo_record_id: updatedPhotoRecordId
         };  
+
+        console.log(response_photo)
 
         data.foto = updatedImageUrl;        
         onImageUrlUpdate(response_photo);
