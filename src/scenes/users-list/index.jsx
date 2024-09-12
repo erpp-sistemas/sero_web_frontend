@@ -51,8 +51,7 @@ function Index() {
       setIsLoading(true)
       const response = await getUsersByUserIdRequest(user_id)
       setUsers(response.data)	
-      setIsLoading(false)
-		console.log(response.data)	
+      setIsLoading(false)		
 		} catch (error) {
 		console.error('Error fetching data:', error)
     setIsLoading(false)

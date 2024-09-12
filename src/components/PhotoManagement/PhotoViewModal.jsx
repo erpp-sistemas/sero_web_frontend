@@ -6,7 +6,7 @@ import { tokens } from "../../theme";
 import LoadingModal from '../../components/LoadingModal.jsx';
 import CustomAlert from '../../components/CustomAlert.jsx';
 import { Dialog, DialogContent } from '@mui/material';
-import { Cancel, CloudUpload, Delete } from '@mui/icons-material';
+import { Cancel, CloudUpload, Delete, SaveAs } from '@mui/icons-material';
 import { savePhotoRequest } from '../../api/photo.js';
 
 const PhotoViewModal = ({ open, onClose, selectedPlace, selectedService, data, onImageUrlUpdate }) => {
@@ -109,8 +109,7 @@ const PhotoViewModal = ({ open, onClose, selectedPlace, selectedService, data, o
       setIsLoading(true);
       const response = await savePhotoRequest( photo_data );
       const updatedImageUrl = response.data.image_url;
-      const updatedPhotoRecordId = response.data.photo_record_id;
-      console.log(data.id_registro_foto)
+      const updatedPhotoRecordId = response.data.photo_record_id;      
       // const updatedImageUrl = response.data.message;
       // console.log(updatedImageUrl)
       // setFormData(prevState => ({
@@ -127,9 +126,7 @@ const PhotoViewModal = ({ open, onClose, selectedPlace, selectedService, data, o
           image_url: updatedImageUrl,
           celda: data.celda,
           photo_record_id: updatedPhotoRecordId
-        };  
-
-        console.log(response_photo)
+        };
 
         data.foto = updatedImageUrl;        
         onImageUrlUpdate(response_photo);
@@ -276,10 +273,10 @@ const PhotoViewModal = ({ open, onClose, selectedPlace, selectedService, data, o
               
               <Button 
                 onClick={handleSave}
-                variant="contained" 
-                color="primary"
-                sx={{ mt: 2 }}
+                variant="contained"                 
+                sx={{ bgcolor: 'secondary.main', '&:hover': { bgcolor: 'secondary.dark' } }}
               >
+                <SaveAs fontSize="large"/>
                 Guardar
               </Button>
             </CardContent>

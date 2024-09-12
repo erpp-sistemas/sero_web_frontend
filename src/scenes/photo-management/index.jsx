@@ -789,9 +789,6 @@ const Index = () => {
 
          setNewImageUrl(response_photo);
          const photo_field = response_photo.celda
-
-         console.log(response_photo)
-         console.log(photo_field)
         
         setFilteredResult(prev =>
             prev.map(row => row.id_registro === selectedRow.id_registro
@@ -820,10 +817,7 @@ const Index = () => {
         if (newImageUrl && selectedRow) {
           const photo_image_url = newImageUrl.image_url
           const photo_field = newImageUrl.celda
-          const photo_record_id = newImageUrl.photo_record_id;
-
-          console.log(photo_record_id)
-          console.log(photo_field)
+          const photo_record_id = newImageUrl.photo_record_id;          
 
           setFilteredResult(prev =>
               prev.map(row => row.id_registro === selectedRow.id_registro
