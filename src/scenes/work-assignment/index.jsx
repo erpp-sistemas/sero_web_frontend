@@ -43,7 +43,8 @@ const Index = () => {
 
       const handlePlaceChange = (event) => {
         setSelectedPlace(event.target.value);  
-        setSelectedService('');      
+        setSelectedService('');
+        console.log(user)
       };
 
       const handleServiceChange = (event) => {
@@ -107,7 +108,11 @@ const Index = () => {
               }              
               dataArray.shift();
 
-              const result = await workAssignmentRequest(selectedPlace, selectedService, dataArray);           
+              const user_id_session = 1 //user.user_id
+
+              console.log(user_id_session)
+
+              const result = await workAssignmentRequest(selectedPlace, selectedService, dataArray, user_id_session);
 
               setResultAssignment(result.data)
 

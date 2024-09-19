@@ -41,6 +41,7 @@ import UploadFileIcon from '@mui/icons-material/UploadFile'
 import ModalTable from '../../components/Assignment/ModalTable.jsx'
 import PreviewIcon from '@mui/icons-material/Preview'
 import PersonOffIcon from '@mui/icons-material/PersonOff'
+import { useSelector } from 'react-redux'
 
 const Index = () => {
     
@@ -60,6 +61,7 @@ const Index = () => {
     const [alertMessage, setAlertMessage] = useState("")
     const [openModal, setOpenModal] = useState(false)
     const [modalData, setModalData] = useState([])
+	const user = useSelector(state => state.user) 
 
 	const handlePlaceChange = (event) => {
 		setSelectedPlace(event.target.value)
@@ -161,7 +163,8 @@ const Index = () => {
 				}))     
 				
 				try {
-					const result = await workAssignmentRequest(selectedPlace, selectedService, mappedData)
+					const user_id_session = user.user_id
+					const result = await workAssignmentRequest(selectedPlace, selectedService, mappedData, user_id_session)
 					setResultAssignment(result.data)
 					setIsLoading(false)
 					setError(null)
