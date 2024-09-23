@@ -59,6 +59,7 @@ import DebtRecord from './scenes/debt-record'
 import DirectionDashboard from './scenes/direction-dashboard'
 import Manuals from './scenes/manuals'
 import Individual from './scenes/inventory/individual'
+import Credict from './scenes/credit'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -90,7 +91,7 @@ function App() {
       await submenuAccessLogRequest( submenu_access_data );
 		
 		} catch (error) {
-		  console.error('Error fetching data:', error)    
+			console.error('Error fetching data:', error)    
 		}
 	}
 
@@ -205,6 +206,7 @@ function App() {
                         <Route path="/direction-dashboard" element={<DirectionDashboard />} />
                         <Route path="/manuals" element={<Manuals />} />
 						<Route path="/vehiculos/:vehicleNumber" element={<Individual />} />
+						<Route path="/credit" element={<Credict />} />
                       </Routes>
                     </main>
                   </Box>

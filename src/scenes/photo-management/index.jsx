@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useMemo } from "react";
 import Grid from '@mui/material/Grid';
-import { tokens } from "../../theme";
-import PlaceSelect from '../../components/PlaceSelect'
-import ServiceSelect from '../../components/ServiceSelect'
-import ProcessSelect from '../../components/ProcessSelectMultipleChip'
+import { tokens } from "../../theme.js";
+import PlaceSelect from '../../components/PlaceSelect.jsx'
+import ServiceSelect from '../../components/ServiceSelect.jsx'
+import ProcessSelect from '../../components/ProcessSelectMultipleChip.jsx'
 import { photoManagementRequest } from '../../api/management.js'
 import { useSelector } from 'react-redux'
 import { Box, useTheme, Button, Avatar, Card, CardMedia, InputAdornment, Tooltip, Modal} from "@mui/material";
