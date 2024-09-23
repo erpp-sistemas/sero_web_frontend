@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useMemo } from "react";
 import Grid from '@mui/material/Grid';
-import { tokens } from "../../theme.js";
-import PlaceSelect from '../../components/PlaceSelect.jsx'
-import ServiceSelect from '../../components/ServiceSelect.jsx'
-import ProcessSelect from '../../components/ProcessSelectMultipleChip.jsx'
+import { tokens } from "../../theme";
+import PlaceSelect from '../../components/PlaceSelect'
+import ServiceSelect from '../../components/ServiceSelect'
+import ProcessSelect from '../../components/ProcessSelectMultipleChip'
 import { photoManagementRequest } from '../../api/management.js'
 import { useSelector } from 'react-redux'
-import { Box, useTheme, Button, Avatar, Card, CardMedia, InputAdornment, Tooltip, Modal} from "@mui/material";
+import { Box, useTheme, Button, Avatar, Card, CardMedia, InputAdornment} from "@mui/material";
 import Viewer from 'react-viewer';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
@@ -21,7 +21,7 @@ import { DataGrid,
   GridToolbarExport,
   GridToolbarFilterButton, } from '@mui/x-data-grid';
 import Chip from '@mui/material/Chip';
-import { Balance, CalendarToday, DoneAll, Download, LocationOff, MarkEmailRead, NotListedLocation, Photo, PhotoLibrary, ReceiptLong, Search, WaterDrop, WrongLocation } from "@mui/icons-material";
+import { Balance, CalendarToday, DoneAll, LocationOff, MarkEmailRead, NotListedLocation, ReceiptLong, Search, WaterDrop, WrongLocation } from "@mui/icons-material";
 import PhotoViewModal from '../../components/PhotoManagement/PhotoViewModal.jsx'
 import buildColumns2 from '../../components/PhotoManagement/buildColumns.jsx'
 
@@ -177,7 +177,7 @@ const Index = () => {
           setResult(response.data)
           // setRows(response.data)
 
-          //console.log(response.data)
+          console.log(response.data)
 
           const groupedGestores = response.data.reduce((acc, item) => {
             if (!acc[item.nombre_gestor]) {
@@ -339,7 +339,451 @@ const Index = () => {
                 Exportar a Excel
             </Button>
         </GridToolbarContainer>
-    );      
+    );
+
+      const buildColumns = useMemo(() => {
+        return [
+        { 
+          field: 'cuenta',
+          renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>{"CUENTA"}</strong>
+          ),
+          width: 150,
+          editable: false,
+        },
+        { 
+          field: 'propietario',
+          renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>{"PROPIETARIO"}</strong>
+          ),
+          width: 300,
+          editable: false,
+        },
+        { 
+          field: 'calle',
+          renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>{"CALLE"}</strong>
+          ),
+          width: 300,
+          editable: false,
+        },
+        { 
+          field: 'num_ext',
+          renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>{"NUM EXT"}</strong>
+          ),
+          width: 150,
+          editable: false,
+        },
+        { 
+          field: 'num_int',
+          renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>{"NUM INT"}</strong>
+          ),
+          width: 150,
+          editable: false,
+        },
+        { 
+          field: 'colonia',
+          renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>{"COLONIA"}</strong>
+          ),
+          width: 150,
+          editable: false,
+        },
+        { 
+          field: 'codigo_postal',
+          renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>{"CODIGO POSTAL"}</strong>
+          ),
+          width: 150,
+          editable: false,
+        },
+        { 
+          field: 'tarea_gestionada',
+          renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>{"TAREA GESTIONADA"}</strong>
+          ),
+          width: 200,
+          editable: false,
+          renderCell: (params) => {
+            let color;
+            let icon;
+    
+            if (params.value === '1ra Carta Invitación') {
+              color = 'secondary';
+              icon = <MarkEmailRead sx={{ color: 'secondary' }} />;
+            } else if (params.value === '2da Carta Invitación') {
+              color = 'warning';
+              icon = <MarkEmailRead sx={{ color: 'warning' }} />;
+            } else if (params.value === '3ra Carta Invitación') {
+              color = 'warning';
+              icon = <MarkEmailRead sx={{ color: 'warning' }} />;
+            } else if (params.value === '4ta Carta Invitación') {
+              color = 'error';
+              icon = <MarkEmailRead sx={{ color: 'error' }} />;
+            } else {
+              color = 'info';
+              icon = <ReceiptLong sx={{ color: 'info' }} />;
+            }
+    
+            return (
+              <Chip
+                icon={icon}
+                label={
+                  <Typography variant="body1" sx={{ fontWeight: 'bold', fontSize: '1.2em' }}>
+                    {params.value}
+                  </Typography>
+                }
+                variant="outlined"
+                color={color}
+              />
+            );
+          },
+        },        
+        { 
+          field: 'nombre_gestor',
+          renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>{"NOMBRE DE GESTOR"}</strong>
+          ),
+          width: 290,
+          renderCell: (params) => (
+            <Box sx={{ display: 'flex', alignItems: 'center', p: '2px' }}>
+              <AvatarImage data={params.row.foto} />
+              <Typography variant="h6" sx={{ marginLeft: 1 }}>{params.value}</Typography>
+            </Box>
+          )
+        },
+        { 
+          field: 'fecha_gestion',
+          renderHeader: () => (
+            <strong style={{ color: "#5EBFFF" }}>{"FECHA DE GESTION"}</strong>
+          ),
+          width: 210,
+          editable: false,
+          renderCell: (params) => (
+            <Chip
+              icon={<CalendarToday />}
+              label={
+                <Typography variant="body1" sx={{ fontWeight: 'bold', fontSize: '1.2em' }}>
+                  {formatDate(params.value)}
+                </Typography>
+              }
+              variant="outlined"
+              sx={{
+                borderColor: theme.palette.info.main,
+                color: theme.palette.info.main,
+                '& .MuiChip-icon': {
+                  color: theme.palette.info.main
+                }
+              }}
+            />
+          )
+        },
+        { 
+          field: 'estatus_predio',
+          renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>{"ESTATUS DEL PREDIO"}</strong>
+          ),
+          width: 200,
+          editable: false,
+          renderCell: (params) => {
+            let color;
+            let icon;
+    
+            if (params.value === 'Predio localizado') {
+              color = 'secondary';
+              icon = <DoneAll sx={{ color: 'secondary' }} />;
+            } else if (params.value === 'Predio baldío') {
+              color = 'info';
+              icon = <WrongLocation sx={{ color: 'info' }} />;
+            } else if (params.value === 'Predio abandonado') {
+              color = 'warning';
+              icon = <NotListedLocation sx={{ color: 'warning' }} />;            
+            } else if (params.value === 'Predio no localizado') {
+              color = 'error';
+              icon = <LocationOff sx={{ color: 'error' }} />;
+            } else {
+              color = 'success';
+              icon = <ReceiptLong sx={{ color: 'success' }} />;
+            }
+    
+            return (
+              <Chip
+                icon={icon}
+                label={
+                  <Typography variant="body1" sx={{ fontWeight: 'bold', fontSize: '1.2em' }}>
+                    {params.value}
+                  </Typography>
+                }
+                variant="outlined"
+                color={color}
+              />
+            );
+          },
+        },
+        { 
+          field: 'proceso',
+          renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>{"PROCESO"}</strong>
+          ),
+          width: 200,
+          editable: false,
+          renderCell: (params) => {
+            let color;
+            let icon;
+    
+            if (params.value === 'carta_invitacion') {
+              color = 'secondary';
+              icon = <MarkEmailRead sx={{ color: 'secondary' }} />;
+            } else if (params.value === 'cortes') {
+              color = 'info';
+              icon = <WaterDrop sx={{ color: 'info' }} />;
+            } else if (params.value === 'ejecucion_fiscal') {
+              color = 'warning';
+              icon = <Balance sx={{ color: 'warning' }} />;            
+            } else {
+              color = 'info';
+              icon = <ReceiptLong sx={{ color: 'info' }} />;
+            }
+    
+            return (
+              <Chip
+                icon={icon}
+                label={
+                  <Typography variant="body1" sx={{ fontWeight: 'bold', fontSize: '1.2em' }}>
+                    {params.value}
+                  </Typography>
+                }
+                variant="outlined"
+                color={color}
+              />
+            );
+          },
+        }, 
+        { 
+          field: 'foto_fachada_1',
+          renderHeader: () => (
+            <strong style={{ color: "#5EBFFF" }}>{"FOTO FACHADA 1"}</strong>
+          ),
+          width: 150,
+          renderCell: (params) => (
+            params.row.foto_fachada_1 ? (
+              <Card 
+                sx={{ 
+                  maxWidth: 150,
+                  height: '100%', 
+                  display: 'flex',
+                  alignItems: 'center',
+                  border: '2px solid #5EBFFF',
+                  overflow: 'hidden'
+                }}
+              >
+                <CardMedia
+                 component="img"
+                 height="100%"
+                 image={params.row.foto_fachada_1}
+                 alt="Foto fachada 1"
+                 sx={{ 
+                   objectFit: 'cover'
+                 }}
+                 onClick={() => handleOpenModal({                  
+                  cuenta: params.row.cuenta,
+                  id_registro: params.row.id_registro,
+                  id_registro_foto: params.row.id_foto_fachada_1,
+                  foto: params.row.foto_fachada_1,
+                  tarea_gestionada: params.row.tarea_gestionada,
+                  nombre_gestor: params.row.nombre_gestor,
+                  fecha_gestion: params.row.fecha_gestion,
+                  proceso: params.row.proceso,
+                  tipo: params.row.tipo_foto_fachada_1,
+                  num_foto: 1,
+                  celda: 'foto_fachada_1'
+                })}
+                />                
+              </Card>
+            ) : (
+              <Typography>No disponible</Typography>
+            )
+          )
+        },
+        { 
+          field: 'foto_fachada_2',
+          renderHeader: () => (
+            <strong style={{ color: "#5EBFFF" }}>{"FOTO FACHADA 2"}</strong>
+          ),
+          width: 150,
+          renderCell: (params) => (
+            params.row.foto_fachada_2 ? (
+              <Card 
+                sx={{ 
+                  maxWidth: 150,
+                  height: '100%', 
+                  display: 'flex',
+                  alignItems: 'center',
+                  border: '2px solid #5EBFFF',
+                  overflow: 'hidden'
+                }}
+              >
+                <CardMedia
+                  component="img"
+                  height="100%"
+                  image={params.row.foto_fachada_2}
+                  alt="Foto fachada 2"
+                  sx={{ 
+                    objectFit: 'cover'
+                  }}
+                  onClick={() => handleOpenModal({                    
+                    cuenta: params.row.cuenta,
+                    id_registro: params.row.id_registro,
+                    id_registro_foto: params.row.id_foto_fachada_2,
+                    foto: params.row.foto_fachada_2,
+                    tarea_gestionada: params.row.tarea_gestionada,
+                    nombre_gestor: params.row.nombre_gestor,
+                    fecha_gestion: params.row.fecha_gestion,
+                    proceso: params.row.proceso,
+                    tipo: params.row.tipo_foto_fachada_2,
+                    num_foto: 2,
+                    celda: 'foto_fachada_2'
+                  })}
+                />                
+              </Card>
+            ) : (
+              <Typography>No disponible</Typography>
+            )
+          )
+        },
+        { 
+          field: 'foto_evidencia_1',
+          renderHeader: () => (
+            <strong style={{ color: "#5EBFFF" }}>{"FOTO EVIDENCIA 1"}</strong>
+          ),
+          width: 150,
+          renderCell: (params) => (
+            params.row.foto_evidencia_1 ? (
+              <Card 
+                sx={{ 
+                  maxWidth: 150,
+                  height: '100%', 
+                  display: 'flex',
+                  alignItems: 'center',
+                  border: '2px solid #5EBFFF',
+                  overflow: 'hidden'
+                }}
+              >
+                <CardMedia
+                  component="img"
+                  height="100%"
+                  image={params.row.foto_evidencia_1}
+                  alt="Foto evidencia 1"
+                  sx={{ 
+                    objectFit: 'cover'
+                  }}
+                  onClick={() => handleOpenModal({                    
+                    cuenta: params.row.cuenta,
+                    id_registro: params.row.id_registro,
+                    id_registro_foto: params.row.id_foto_evidencia_1,
+                    foto: params.row.foto_evidencia_1,
+                    tarea_gestionada: params.row.tarea_gestionada,
+                    nombre_gestor: params.row.nombre_gestor,
+                    fecha_gestion: params.row.fecha_gestion,
+                    proceso: params.row.proceso,
+                    tipo: params.row.tipo_foto_evidencia_1,
+                    num_foto: 1,
+                    celda: 'foto_evidencia_1'
+                  })}
+                />                
+              </Card>
+            ) : (
+              <Typography>No disponible</Typography>
+            )
+          )
+        },
+        { 
+          field: 'foto_evidencia_2',
+          renderHeader: () => (
+            <strong style={{ color: "#5EBFFF" }}>{"FOTO EVIDENCIA 2"}</strong>
+          ),
+          width: 150,
+          renderCell: (params) => (
+            params.row.foto_evidencia_2 ? (
+              <Card 
+                sx={{ 
+                  maxWidth: 150,
+                  height: '100%', 
+                  display: 'flex',
+                  alignItems: 'center',
+                  border: '2px solid #5EBFFF',
+                  overflow: 'hidden'
+                }}
+              >
+                <CardMedia
+                  component="img"
+                  height="100%"
+                  image={params.row.foto_evidencia_2}
+                  alt="Foto evidencia 2"
+                  sx={{ 
+                    objectFit: 'cover'
+                  }}
+                  onClick={() => handleOpenModal({                    
+                    cuenta: params.row.cuenta,
+                    id_registro: params.row.id_registro,
+                    id_registro_foto: params.row.id_foto_evidencia_2,
+                    foto: params.row.foto_evidencia_2,
+                    tarea_gestionada: params.row.tarea_gestionada,
+                    nombre_gestor: params.row.nombre_gestor,
+                    fecha_gestion: params.row.fecha_gestion,
+                    proceso: params.row.proceso,
+                    tipo: params.row.tipo_foto_evidencia_2,
+                    num_foto: 2,
+                    celda: 'foto_evidencia_2'
+                  })}
+                />                
+              </Card>
+            ) : (
+              <Typography>No disponible</Typography>
+            )
+          )
+        },
+        ];
+      }, []);
+
+      const AvatarImage = ({ data }) => {
+        const [visibleAvatar, setVisibleAvatar] = React.useState(false)
+        return (
+        <>
+          <Avatar
+          onClick={() => {
+            setVisibleAvatar(true)
+          }}
+          alt="Remy Sharp"
+          src={data}
+          />
+      
+          <Viewer
+          visible={visibleAvatar}
+          onClose={() => {
+            setVisibleAvatar(false)
+          }}
+          images={[{ src: data, alt: 'avatar' }]}          
+          />
+        </>
+        )
+      }
+
+      const formatDate = (dateString) => {
+        const date = new Date(dateString);
+  
+        const year = date.getUTCFullYear();
+        const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(date.getUTCDate()).padStart(2, '0');
+        const hours = String(date.getUTCHours()).padStart(2, '0');
+        const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+        const seconds = String(date.getUTCSeconds()).padStart(2, '0');
+        const milliseconds = String(date.getUTCMilliseconds()).padStart(3, '0');
+        
+        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
+      };      
     
       const handleImageUrlUpdate = (response_photo) => {        
 
@@ -403,125 +847,7 @@ const Index = () => {
       handleOpenModal,
       handleImageUrlUpdate,
     });
-
-    const [openModalDownload, setOpenModalDownload] = useState(false);
-    const [modalTitleDownload, setModalTitleDownload] = useState('');
-    const [modalContentDownload, setModalContentDownload] = useState('');
-
-    const handleOpenModalDownload = (title, content, tipoFoto) => {      
-      setModalTitleDownload(title);
-      setModalContentDownload(content);
-      setTipoFotoSeleccionada(tipoFoto);
-      setOpenModalDownload(true);
-    };
-
-    const handleCloseModalDownload = () => {
-      setOpenModalDownload(false);
-    };
-
-    const [fotosDescargadas, setFotosDescargadas] = useState(0);
-    const [totalFotos, setTotalFotos] = useState(0);
-    const [tipoFotoSeleccionada, setTipoFotoSeleccionada] = useState('');
-    const [descargaCancelada, setDescargaCancelada] = useState(false);
-    const [fotosSinFoto, setFotosSinFoto] = useState(0);
-
-    const getFotosParaDescargar = () => {
-      const data = filteredResult.length > 0 ? filteredResult : result; // Usa el resultado filtrado o todos los datos
-      const fotosParaDescargar = [];
-    
-      data.forEach(row => {
-        let fotoUrl = '';
-    
-        switch (tipoFotoSeleccionada) {
-          case 'Fachada 1':
-            fotoUrl = row.foto_fachada_1;
-            break;
-          case 'Fachada 2':
-            fotoUrl = row.foto_fachada_2;
-            break;
-          case 'Evidencia 1':
-            fotoUrl = row.evidencia_1;
-            break;
-          case 'Evidencia 2':
-            fotoUrl = row.evidencia_2;
-            break;
-          default:
-            break;
-        }
-    
-        // Siempre añade la foto para el conteo, aunque sea sin imagen
-        fotosParaDescargar.push({
-          url: fotoUrl,
-          cuenta: row.cuenta,
-          fecha_gestion: row.fecha_gestion,
-          isSinFoto: fotoUrl === 'https://ser0.mx/ser0/image/sin_foto.jpg' // Flag para saber si es sin foto
-        });
-      });
-    
-      return fotosParaDescargar;
-    };
-    
-    const handleDescargarFotos = async () => {
-      setDescargaCancelada(false); // Reinicia el estado de cancelación
-      const fotos = getFotosParaDescargar(tipoFotoSeleccionada); // Obtener las fotos según el tipo seleccionado
-    
-      const totalFotos = fotos.length;        
-      setTotalFotos(totalFotos);              
-      setFotosDescargadas(0);                
-      setFotosSinFoto(0); // Reiniciar contador de fotos sin imagen
-    
-      for (const foto of fotos) {
-        // Verificamos si la descarga fue cancelada
-        if (descargaCancelada) {
-          console.log('Descarga cancelada');
-          alert('La descarga ha sido cancelada.'); // Informar al usuario
-          return; // Detenemos la descarga completamente
-        }
-    
-        // Validar si la foto es una URL sin imagen
-        if (foto.isSinFoto) {
-          setFotosSinFoto(prev => prev + 1); // Incrementar contador de fotos sin imagen
-          continue; // Omitir descarga de fotos sin imagen
-        }
-    
-        try {
-          const response = await fetch(foto.url);
-          if (!response.ok) {
-            console.error(`Error descargando la imagen: ${foto.url}`);
-            continue; // Si hay error en la descarga, pasar a la siguiente foto
-          }
-    
-          const blob = await response.blob();
-          const url = window.URL.createObjectURL(blob);
-          const nombreArchivo = `${foto.cuenta}_${foto.fecha_gestion}.jpg`;
-    
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = nombreArchivo;
-          a.click();
-          window.URL.revokeObjectURL(url);
-    
-          setFotosDescargadas(prev => prev + 1); // Incrementar contador de fotos descargadas
-    
-        } catch (error) {
-          console.error('Error al descargar la foto:', error);
-        }
-    
-        // Pausa breve para permitir que React procese el estado
-        await new Promise(resolve => setTimeout(resolve, 100)); // Espera 100ms
-      }
-    };
-    
-    // Asegurarse de que el botón "Cancelar" esté visible cuando comienza la descarga
-    useEffect(() => {
-      if (descargaCancelada) {
-        console.log('El estado de descarga fue cancelado');
-      }
-    }, [descargaCancelada]);
-
-    const handleCancelarDescarga = () => {
-      setDescargaCancelada(true);
-    };
+      
 
     return (
         <Box 
@@ -634,7 +960,7 @@ const Index = () => {
             </Box>
 
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={4}>
+              <Grid item xs={12} sm={6}>
                 <TextField
                     label="Ingresa tu busqueda"
                     value={filterText}
@@ -653,55 +979,9 @@ const Index = () => {
                   }}
                 />
               </Grid>
-              <Grid item xs={12} md={2}>
-                <Tooltip title="Descargar foto fachada 1">
-                  <Button 
-                    variant="contained" 
-                    color="primary" 
-                    startIcon={<PhotoLibrary />} 
-                    endIcon={<Download /> }
-                    onClick={() => handleOpenModalDownload('Fachada 1', 'Aquí puedes incluir la información de la foto de la fachada 1.', 'Fachada 1')}
-                  >
-                    Fachada 1
-                  </Button>
-                </Tooltip>
-              </Grid>
-              <Grid item xs={12} md={2}>
-                <Button 
-                  variant="contained" 
-                  color="primary"
-                  startIcon={<PhotoLibrary />} 
-                  endIcon={<Download /> }
-                  onClick={() => handleOpenModalDownload('Fachada 2', 'Aquí puedes incluir la información de la foto de la fachada 2.', 'Fachada 2')}
-                >
-                  Fachada 2
-                </Button>
-              </Grid>
-              <Grid item xs={12} md={2}>
-                <Button 
-                  variant="contained" 
-                  color="primary"
-                  startIcon={<PhotoLibrary />} 
-                  endIcon={<Download /> }  
-                  onClick={() => handleOpenModalDownload('Evidencia 1', 'Aquí puedes incluir la información de la evidencia 1.', 'Evidencia 1')}
-                >
-                  Evidencia 1
-                </Button>
-              </Grid>
-              <Grid item xs={12} md={2}>
-                <Button 
-                  variant="contained" 
-                  color="primary"
-                  startIcon={<PhotoLibrary />} 
-                  endIcon={<Download /> }  
-                  onClick={() => handleOpenModalDownload('Evidencia 2', 'Aquí puedes incluir la información de la evidencia 2.', 'Evidencia 2')}
-                >
-                  Evidencia 2
-                </Button>
-              </Grid>
             </Grid>
 
-            <Grid xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
+            <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
               <Grid item xs={12}>
                 <Box >                  
                   <Box
@@ -734,41 +1014,6 @@ const Index = () => {
                 </Box>
               </Grid>              
             </Grid>
-
-            <Modal
-              open={openModalDownload}
-              onClose={handleCloseModalDownload}
-              aria-labelledby="modal-title"
-              aria-describedby="modal-description"
-            >
-              <Box sx={{ 
-                bgcolor: 'background.paper', 
-                boxShadow: 24, 
-                p: 4, 
-                width: 400, 
-                margin: 'auto', 
-                borderRadius: 2 
-              }}>
-                <h2 id="modal-title">{modalTitleDownload}</h2>
-                <p id="modal-description">{modalContentDownload}</p>
-
-                <p>Total fotos: {totalFotos}</p>
-                <p>Fotos descargadas: {fotosDescargadas}/{totalFotos}</p>
-                <p>Sin foto: {fotosSinFoto}</p> {/* Indicador de fotos sin imagen */}
-
-                <Button variant="contained" color="primary" onClick={handleDescargarFotos}>
-                  Iniciar Descarga
-                </Button>
-
-                <Button variant="contained" color="warning" onClick={handleCancelarDescarga} disabled={descargaCancelada}>
-                  Cancelar Descarga
-                </Button>
-
-                <Button variant="contained" color="secondary" onClick={handleCloseModalDownload}>
-                  Cerrar
-                </Button>
-              </Box>
-            </Modal>
 
             <PhotoViewModal 
               open={openModal} 

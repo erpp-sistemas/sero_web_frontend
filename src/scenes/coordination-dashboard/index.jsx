@@ -280,7 +280,7 @@ function Index() {
 							</Grid>
 						</Grid>
 
-						<Grid item xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
+						<Grid xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
 
 							<Grid item xs={12} md={6}>
 								<DailyManagementNotPhoto data={ dailyManagementNotPhotoData } typeConcept={ typeDailyManagementData }/>
@@ -337,7 +337,7 @@ function Index() {
 
 						</Grid>
 
-						<Grid item xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
+						<Grid xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
 
 							<Grid item xs={12} md={6}>    
 								<PaymentsProceduresByTypeService data={ paymentsProceduresByTypeServiceData } />

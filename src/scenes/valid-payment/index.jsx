@@ -632,7 +632,7 @@ const Index = () => {
               </Grid>
             </Grid>
             
-            <Grid item xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
+            <Grid xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
               <Grid item xs={12} md={3}>
                 <FormControl variant="filled" sx={{ width: '100%' }}>
                   <InputLabel id="demo-simple-select-standard-label">Numero de dias antes del pago:</InputLabel>
@@ -694,7 +694,7 @@ const Index = () => {
               </Grid>
             </Grid>
 
-            <Grid item xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
+            <Grid xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
               <Grid item xs={12} md={4}>
                 <Card variant="outlined" sx={{ maxWidth: 360, backgroundColor: 'rgba(128, 128, 128, 0.1)', borderLeft: '5px solid #00ff00'  }}>
                   <Box sx={{ p: 2, textAlign: 'center' }}>                    
@@ -750,7 +750,7 @@ const Index = () => {
               </Grid>
             </Grid>
 
-            <Grid item xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
+            <Grid xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
               <Grid item xs={12} md={3}>
                 <Card variant="outlined" sx={{ maxWidth: 360, backgroundColor: 'rgba(128, 128, 128, 0.1)', borderLeft: '5px solid #00ff00'  }}>
                   <Box sx={{ p: 2, textAlign: 'center' }}>                    
@@ -871,7 +871,7 @@ const Index = () => {
               </Grid>
             </Grid>
 
-            <Grid item xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
+            <Grid xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
               <Grid item xs={12} md={3}>
                 <Card variant="outlined" sx={{ maxWidth: 360, backgroundColor: 'rgba(128, 128, 128, 0.1)', borderLeft: '5px solid #00ff00'  }}>
                   <Box sx={{ p: 2, textAlign: 'center' }}>                    
