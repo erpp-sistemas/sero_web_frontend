@@ -41,7 +41,7 @@ const AccountDetails = ({ accountDetails }) => {
             padding='5px 10px'
             borderRadius='10px'
         >
-          <Grid item xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
+          <Grid xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
             <Grid item xs={12} md={4}>
               <TextField
                 fullWidth
@@ -151,7 +151,7 @@ const AccountDetails = ({ accountDetails }) => {
             </Grid>
           </Grid>
 
-          <Grid item xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
+          <Grid xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
 
             <Grid item xs={12} md={8}>
 
@@ -174,7 +174,7 @@ const AccountDetails = ({ accountDetails }) => {
                 </Grid>                 
               </Grid>
 
-              <Grid item xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2} paddingTop={2}>
+              <Grid xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2} paddingTop={2}>
                 <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth
@@ -209,7 +209,7 @@ const AccountDetails = ({ accountDetails }) => {
                 </Grid>
               </Grid>
 
-              <Grid item xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2} paddingTop={2}>
+              <Grid xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2} paddingTop={2}>
                 <Grid item xs={12} md={6}>
                 <TextField
                     fullWidth
@@ -244,7 +244,7 @@ const AccountDetails = ({ accountDetails }) => {
                 </Grid>
               </Grid>
 
-              <Grid item xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2} paddingTop={2}>
+              <Grid xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2} paddingTop={2}>
                 <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth
@@ -279,7 +279,7 @@ const AccountDetails = ({ accountDetails }) => {
                 </Grid>
               </Grid>
 
-              <Grid item xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2} paddingTop={2}>                
+              <Grid xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2} paddingTop={2}>                
                 <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth
@@ -314,7 +314,7 @@ const AccountDetails = ({ accountDetails }) => {
                 </Grid>
               </Grid>
 
-              <Grid item xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2} paddingTop={2}>
+              <Grid xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2} paddingTop={2}>
                 <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth

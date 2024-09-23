@@ -123,7 +123,7 @@ function RowOne({data, placeId, serviceId, proccessId, startDate, finishDate}) {
 
 				<>
 
-				<Grid item xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
+				<Grid xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
 
 					<Grid item xs={12} md={2.4}>
 

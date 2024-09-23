@@ -12,9 +12,6 @@ import { savePhotoRequest } from '../../api/photo.js';
 const PhotoViewModal = ({ open, onClose, selectedPlace, selectedService, data, onImageUrlUpdate }) => {
   if (!data) return null;
 
-  console.log(data)
-
-
   const formatDate = (dateString) => {
     const date = new Date(dateString);
 

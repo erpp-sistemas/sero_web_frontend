@@ -110,7 +110,7 @@ const Index = () => {
 				padding='15px 10px'
 				borderRadius='10px'
 			>
-			<Grid item xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
+			<Grid xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
 				<Grid item xs={12} md={4}> 
 				<PlaceSelect                
 					selectedPlace={selectedPlace}
