@@ -174,10 +174,7 @@ const Index = () => {
 
           const response = await photoManagementRequest(selectedPlace, selectedService, selectedProcess, selectedStartDate, selectedFinishDate);
 
-          setResult(response.data)
-          // setRows(response.data)
-
-          //console.log(response.data)
+          setResult(response.data)          
 
           const groupedGestores = response.data.reduce((acc, item) => {
             if (!acc[item.nombre_gestor]) {
@@ -426,7 +423,7 @@ const Index = () => {
     const [fotosSinFoto, setFotosSinFoto] = useState(0);
 
     const getFotosParaDescargar = () => {
-      const data = filteredResult.length > 0 ? filteredResult : result; // Usa el resultado filtrado o todos los datos
+      const data = filteredResult.length > 0 ? filteredResult : result;
       const fotosParaDescargar = [];
     
       data.forEach(row => {
@@ -447,14 +444,13 @@ const Index = () => {
             break;
           default:
             break;
-        }
-    
-        // Siempre añade la foto para el conteo, aunque sea sin imagen
+        }    
+        
         fotosParaDescargar.push({
           url: fotoUrl,
           cuenta: row.cuenta,
           fecha_gestion: row.fecha_gestion,
-          isSinFoto: fotoUrl === 'https://ser0.mx/ser0/image/sin_foto.jpg' // Flag para saber si es sin foto
+          isSinFoto: fotoUrl === 'https://ser0.mx/ser0/image/sin_foto.jpg'
         });
       });
     
@@ -462,33 +458,32 @@ const Index = () => {
     };
     
     const handleDescargarFotos = async () => {
-      setDescargaCancelada(false); // Reinicia el estado de cancelación
-      const fotos = getFotosParaDescargar(tipoFotoSeleccionada); // Obtener las fotos según el tipo seleccionado
+      setDescargaCancelada(false);
+      const fotos = getFotosParaDescargar(tipoFotoSeleccionada);
     
       const totalFotos = fotos.length;        
       setTotalFotos(totalFotos);              
       setFotosDescargadas(0);                
-      setFotosSinFoto(0); // Reiniciar contador de fotos sin imagen
+      setFotosSinFoto(0);
     
       for (const foto of fotos) {
-        // Verificamos si la descarga fue cancelada
+        
         if (descargaCancelada) {
           console.log('Descarga cancelada');
-          alert('La descarga ha sido cancelada.'); // Informar al usuario
-          return; // Detenemos la descarga completamente
+          alert('La descarga ha sido cancelada.');
+          return;
         }
-    
-        // Validar si la foto es una URL sin imagen
+            
         if (foto.isSinFoto) {
-          setFotosSinFoto(prev => prev + 1); // Incrementar contador de fotos sin imagen
-          continue; // Omitir descarga de fotos sin imagen
+          setFotosSinFoto(prev => prev + 1);
+          continue;
         }
     
         try {
           const response = await fetch(foto.url);
           if (!response.ok) {
             console.error(`Error descargando la imagen: ${foto.url}`);
-            continue; // Si hay error en la descarga, pasar a la siguiente foto
+            continue;
           }
     
           const blob = await response.blob();
@@ -501,18 +496,16 @@ const Index = () => {
           a.click();
           window.URL.revokeObjectURL(url);
     
-          setFotosDescargadas(prev => prev + 1); // Incrementar contador de fotos descargadas
+          setFotosDescargadas(prev => prev + 1);
     
         } catch (error) {
           console.error('Error al descargar la foto:', error);
-        }
-    
-        // Pausa breve para permitir que React procese el estado
-        await new Promise(resolve => setTimeout(resolve, 100)); // Espera 100ms
+        }    
+        
+        await new Promise(resolve => setTimeout(resolve, 100));
       }
-    };
+    };        
     
-    // Asegurarse de que el botón "Cancelar" esté visible cuando comienza la descarga
     useEffect(() => {
       if (descargaCancelada) {
         console.log('El estado de descarga fue cancelado');
@@ -754,7 +747,7 @@ const Index = () => {
 
                 <p>Total fotos: {totalFotos}</p>
                 <p>Fotos descargadas: {fotosDescargadas}/{totalFotos}</p>
-                <p>Sin foto: {fotosSinFoto}</p> {/* Indicador de fotos sin imagen */}
+                <p>Sin foto: {fotosSinFoto}</p>
 
                 <Button variant="contained" color="primary" onClick={handleDescargarFotos}>
                   Iniciar Descarga

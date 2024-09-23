@@ -59,7 +59,7 @@ function buildColumns() {
       renderHeader: () => (
       <strong style={{ color: "#5EBFFF" }}>{"FECHA DE CAPTURA"}</strong>
       ),
-      width: 120,
+      width: 140,
       renderCell: (params) => (
       <>
         {params.value}
@@ -68,11 +68,24 @@ function buildColumns() {
       ),
     },
     { 
+      field: 'hora_entrada_sistema',
+      renderHeader: () => (
+      <strong style={{ color: "#5EBFFF" }}>{"HORA DE ENTRADA SISTEMA"}</strong>
+      ),
+      width: 190,
+      renderCell: (params) => (
+      <>
+        {params.value}
+        <AccessTime style={{ marginLeft: '5px' }} />
+      </>
+      ),
+    },
+    { 
       field: 'hora_entrada',
       renderHeader: () => (
       <strong style={{ color: "#5EBFFF" }}>{"HORA DE ENTRADA"}</strong>
       ),
-      width: 120,
+      width: 140,
       renderCell: (params) => (
       <>
         {params.value}
@@ -182,11 +195,24 @@ function buildColumns() {
       ),
     },
     { 
+      field: 'hora_salida_sistema',
+      renderHeader: () => (
+      <strong style={{ color: "#5EBFFF" }}>{"HORA DE SALIDA SISTEMA"}</strong>
+      ),
+      width: 190,
+      renderCell: (params) => (
+      <>
+        {params.value}
+        <AccessTimeRounded style={{ marginLeft: '5px' }} />
+      </>
+      ),
+    },
+    { 
       field: 'hora_salida',
       renderHeader: () => (
       <strong style={{ color: "#5EBFFF" }}>{"HORA DE SALIDA"}</strong>
       ),
-      width: 100,
+      width: 120,
       renderCell: (params) => (
       <>
         {params.value}
@@ -199,7 +225,7 @@ function buildColumns() {
       renderHeader: () => (
       <strong style={{ color: "#5EBFFF" }}>{"ESTATUS DE SALIDA"}</strong>
       ),
-      width: 150,
+      width: 160,
       renderCell: (params) => {
       let icon = null;
       let chipColor = 'primary';
@@ -216,7 +242,7 @@ function buildColumns() {
         chipLabel = 'Retardo';
         break;
         case 'Falta':
-        icon = <DangerousIcon/>;
+        icon = <Dangerous/>;
         chipColor = 'error';
         chipLabel = 'Falta';
         break;
@@ -247,7 +273,7 @@ function buildColumns() {
       renderHeader: () => (
       <strong style={{ color: "#5EBFFF" }}>{"ESTATUS DE PUNTO DE SALIDA"}</strong>
       ),
-      width: 180,
+      width: 200,
       renderCell: (params) => {
       let icon = null;
       let chipColor = 'primary';
@@ -313,7 +339,7 @@ function buildColumns() {
       renderHeader: () => (
       <strong style={{ color: "#5EBFFF" }}>{"LUGAR DE ENTRADA DE COMIDA"}</strong>
       ),
-      width: 200,
+      width: 210,
       renderCell: (params) => (
       <PersonPinCircle 
         style={{ cursor: 'pointer', color: 'lightblue', fontSize: 40 }} 
