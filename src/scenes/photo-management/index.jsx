@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useMemo } from "react";
 import Grid from '@mui/material/Grid';
-import { tokens } from "../../theme";
-import PlaceSelect from '../../components/PlaceSelect'
-import ServiceSelect from '../../components/ServiceSelect'
-import ProcessSelect from '../../components/ProcessSelectMultipleChip'
+import { tokens } from "../../theme.js";
+import PlaceSelect from '../../components/PlaceSelect.jsx'
+import ServiceSelect from '../../components/ServiceSelect.jsx'
+import ProcessSelect from '../../components/ProcessSelectMultipleChip.jsx'
 import { photoManagementRequest } from '../../api/management.js'
 import { useSelector } from 'react-redux'
 import { Box, useTheme, Button, Avatar, Card, CardMedia, InputAdornment} from "@mui/material";
@@ -14,7 +14,7 @@ import * as ExcelJS from "exceljs";
 import LoadingModal from '../../components/LoadingModal.jsx'
 import CustomAlert from '../../components/CustomAlert.jsx'
 import ManageSearchIcon from '@mui/icons-material/ManageSearch';
-import Header from '../../components/Header';
+import Header from '../../components/Header.jsx';
 import { DataGrid,
   GridToolbarColumnsButton,
   GridToolbarContainer,

@@ -232,7 +232,7 @@ const NewVehiculo = ({ setOpenNew, setAlertClean, dataVeiculos, setAlert }) => {
 							<InformacionGeneral /> 	
 					}
 					
-				</Box>
+				</Box>	
 
 			</AnimatedBox>
 		
