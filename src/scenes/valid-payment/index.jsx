@@ -58,6 +58,7 @@ const Index = () => {
     const [countResult, setCountResult] = useState(0);
     const [totalAmount, setTotalAmount] = useState(0);
     const [countUniqueAccount, setCountUniqueAccount] = useState(0);
+    const [paymentDateRange, setPaymentDateRange] = useState('');
     const [countValidProcedures, setCountValidProcedures] = useState(0);
     const [countInvalidProcedures, setCountInvalidProcedures] = useState(0);
     const [percentageValidProcedures, setPercentageValidProcedures] = useState(0);
@@ -154,6 +155,18 @@ const Index = () => {
           const response = await validPaymentRequest(selectedPlace, selectedService, selectedProcess,selectedValidDays, selectedStartDate, selectedFinishDate, type);
 
           setResult(response.data)
+          console.log(response.data)
+
+          const fechas = response.data.map(item => new Date(item["fecha de pago"]));
+          
+          const fechaMasGrande = new Date(Math.max(...fechas));
+          const fechaMasChica = new Date(Math.min(...fechas));          
+          
+          const opciones = { year: 'numeric', month: '2-digit', day: '2-digit' };
+          const fechaMayorFormateada = fechaMasGrande.toLocaleDateString('es-ES', opciones);
+          const fechaMenorFormateada = fechaMasChica.toLocaleDateString('es-ES', opciones);
+          
+          setPaymentDateRange(`${fechaMenorFormateada} - ${fechaMayorFormateada}`)
 
           let countPayments = 0
 
@@ -695,7 +708,7 @@ const Index = () => {
             </Grid>
 
             <Grid xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
-              <Grid item xs={12} md={4}>
+              <Grid item xs={12} md={3}>
                 <Card variant="outlined" sx={{ maxWidth: 360, backgroundColor: 'rgba(128, 128, 128, 0.1)', borderLeft: '5px solid #00ff00'  }}>
                   <Box sx={{ p: 2, textAlign: 'center' }}>                    
                     <Typography variant="h2" component="div">
@@ -724,7 +737,7 @@ const Index = () => {
                   </Box>                  
                 </Card>
               </Grid>
-              <Grid item xs={12} md={4}>
+              <Grid item xs={12} md={3}>
                 <Card variant="outlined" sx={{ maxWidth: 360, backgroundColor: 'rgba(128, 128, 128, 0.1)', borderLeft: '5px solid #00ff00'  }}>
                   <Box sx={{ p: 3, textAlign: 'center' }}>                    
                     <Typography variant="h2" component="div">
@@ -736,7 +749,7 @@ const Index = () => {
                   </Box>                  
                 </Card>
               </Grid>
-              <Grid item xs={12} md={4}>
+              <Grid item xs={12} md={3}>
                 <Card variant="outlined" sx={{ maxWidth: 360, backgroundColor: 'rgba(128, 128, 128, 0.1)', borderLeft: '5px solid #00ff00'  }}>
                   <Box sx={{ p: 3, textAlign: 'center' }}>                    
                     <Typography variant="h2" component="div">
@@ -744,6 +757,18 @@ const Index = () => {
                     </Typography>
                     <Typography color="text.secondary" variant="h5">
                       Monto ingresado                      
+                    </Typography>
+                  </Box>                  
+                </Card>
+              </Grid>
+              <Grid item xs={12} md={3}>
+                <Card variant="outlined" sx={{ maxWidth: 360, backgroundColor: 'rgba(128, 128, 128, 0.1)', borderLeft: '5px solid #00ff00'  }}>
+                  <Box sx={{ p: 4, textAlign: 'center' }}>                    
+                    <Typography variant="h4" component="div">
+                    {paymentDateRange}
+                    </Typography>
+                    <Typography color="text.secondary" variant="h5">
+                      Rango de fechas de pagos
                     </Typography>
                   </Box>                  
                 </Card>
