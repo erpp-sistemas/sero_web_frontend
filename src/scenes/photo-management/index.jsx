@@ -6,7 +6,7 @@ import ServiceSelect from '../../components/ServiceSelect.jsx'
 import ProcessSelect from '../../components/ProcessSelectMultipleChip.jsx'
 import { photoManagementRequest } from '../../api/management.js'
 import { useSelector } from 'react-redux'
-import { Box, useTheme, Button, Avatar, Card, CardMedia, InputAdornment, Tooltip, Modal} from "@mui/material";
+import { Box, useTheme, Button, Avatar, Card, CardMedia, InputAdornment, Tooltip, Modal, Badge} from "@mui/material";
 import Viewer from 'react-viewer';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
@@ -97,6 +97,13 @@ const Index = () => {
     const [newImageUrl, setNewImageUrl] = useState([]);
     const [rows, setRows] = useState([]);
     const [page, setPage] = useState(0);
+
+    const [totalFotoFachadaUno, setTotalFotoFachadaUno] = useState(0);
+    const [totalFotoFachadaDos, setTotalFotoFachadaDos] = useState(0);
+    const [totalFotoEvidenciaUno, setTotalFotoEvidenciaUno] = useState(0);
+    const [totalFotoEvidenciaDos, setTotalFotoEvidenciaDos] = useState(0);
+
+    const [totalResultados, setTotalResultados] = useState(0);
 
       const handlePlaceChange = (event) => {
         setSelectedPlace(event.target.value);  
@@ -189,7 +196,7 @@ const Index = () => {
         }, {});
 
         setGestores(Object.values(groupedGestores));
-        setFilteredResult(response.data);
+        //setFilteredResult(response.data);
 
           setIsLoading(false)
 
@@ -259,6 +266,32 @@ const Index = () => {
       setFilteredResult(filtered);
       setShowNoResultsMessage(filtered.length === 0 && filterText.length > 0);
     }, [selectedGestores, result, filterText]);
+
+    useEffect(() => {      
+      const countValidFotoFachadaUno = (rows) => {
+        return rows.filter(row => row.foto_fachada_1 && row.foto_fachada_1 !== 'https://ser0.mx/ser0/image/sin_foto.jpg').length;
+      };
+
+      const countValidFotoFachadaDos = (rows) => {
+        return rows.filter(row => row.foto_fachada_2 && row.foto_fachada_2 !== 'https://ser0.mx/ser0/image/sin_foto.jpg').length;
+      };
+      
+      const countValidFotoEvidenciaUno = (rows) => {
+        return rows.filter(row => row.foto_evidencia_1 && row.foto_evidencia_1 !== 'https://ser0.mx/ser0/image/sin_foto.jpg').length;
+      };
+
+      const countValidFotoEvidenciaDos = (rows) => {
+        return rows.filter(row => row.foto_evidencia_2 && row.foto_evidencia_2 !== 'https://ser0.mx/ser0/image/sin_foto.jpg').length;
+      };
+      
+      const rows = filteredResult.length > 0 ? filteredResult : result;
+      setTotalResultados(rows.length);
+      setTotalFotoFachadaUno(countValidFotoFachadaUno(rows));
+      setTotalFotoFachadaDos(countValidFotoFachadaDos(rows));
+      setTotalFotoEvidenciaUno(countValidFotoEvidenciaUno(rows));
+      setTotalFotoEvidenciaDos(countValidFotoEvidenciaDos(rows));
+  
+    }, [result, filteredResult]);
 
     const handleExportToExcel = async () => {
       try {
@@ -424,6 +457,7 @@ const Index = () => {
 
     const getFotosParaDescargar = () => {
       const data = filteredResult.length > 0 ? filteredResult : result;
+      console.log(data)
       const fotosParaDescargar = [];
     
       data.forEach(row => {
@@ -437,10 +471,10 @@ const Index = () => {
             fotoUrl = row.foto_fachada_2;
             break;
           case 'Evidencia 1':
-            fotoUrl = row.evidencia_1;
+            fotoUrl = row.foto_evidencia_1;
             break;
           case 'Evidencia 2':
-            fotoUrl = row.evidencia_2;
+            fotoUrl = row.foto_evidencia_2;
             break;
           default:
             break;
@@ -477,18 +511,37 @@ const Index = () => {
         if (foto.isSinFoto) {
           setFotosSinFoto(prev => prev + 1);
           continue;
-        }
+        }        
     
         try {
-          const response = await fetch(foto.url);
+          const response = await fetch(foto.url);          
+          
           if (!response.ok) {
             console.error(`Error descargando la imagen: ${foto.url}`);
             continue;
           }
+
+          const contentType = response.headers.get('Content-Type');
+
+          let extension = '';
+          if (contentType.includes('jpeg')) {
+            extension = 'jpg';
+          } else if (contentType.includes('png')) {
+            extension = 'png';
+          } else if (contentType.includes('gif')) {
+            extension = 'gif';
+          } else if (contentType.includes('bmp')) {
+            extension = 'bmp';
+          } else {
+            extension = 'jpg';
+          }
     
           const blob = await response.blob();
           const url = window.URL.createObjectURL(blob);
-          const nombreArchivo = `${foto.cuenta}_${foto.fecha_gestion}.jpg`;
+          //const nombreArchivo = `${foto.cuenta}_${foto.fecha_gestion}.jpg`;
+          const nombreArchivo = `${foto.cuenta}_${foto.fecha_gestion}.${extension}`;
+
+          console.log(nombreArchivo)
     
           const a = document.createElement('a');
           a.href = url;
@@ -499,7 +552,7 @@ const Index = () => {
           setFotosDescargadas(prev => prev + 1);
     
         } catch (error) {
-          console.error('Error al descargar la foto:', error);
+          console.error('Error al descargar la foto:', foto.url);
         }    
         
         await new Promise(resolve => setTimeout(resolve, 100));
@@ -647,50 +700,80 @@ const Index = () => {
                 />
               </Grid>
               <Grid item xs={12} md={2}>
-                <Tooltip title="Descargar foto fachada 1">
-                  <Button 
-                    variant="contained" 
-                    color="primary" 
-                    startIcon={<PhotoLibrary />} 
-                    endIcon={<Download /> }
-                    onClick={() => handleOpenModalDownload('Fachada 1', 'Aquí puedes incluir la información de la foto de la fachada 1.', 'Fachada 1')}
-                  >
-                    Fachada 1
-                  </Button>
-                </Tooltip>
+                <Badge 
+                  badgeContent={totalFotoFachadaUno}
+                  color={totalFotoFachadaUno === totalResultados ? 'secondary' : 'error'}
+                  max={9999}                  
+                >
+                  <Tooltip title="Descargar foto fachada 1">
+                    <Button 
+                      variant="contained" 
+                      color="primary" 
+                      startIcon={<PhotoLibrary />} 
+                      endIcon={<Download /> }
+                      onClick={() => handleOpenModalDownload('Fachada 1', 'Aquí vas a poder descargar las foto de la fachada 1.', 'Fachada 1')}
+                    >
+                      Fachada 1
+                    </Button>
+                  </Tooltip>
+                </Badge>
               </Grid>
               <Grid item xs={12} md={2}>
-                <Button 
-                  variant="contained" 
-                  color="primary"
-                  startIcon={<PhotoLibrary />} 
-                  endIcon={<Download /> }
-                  onClick={() => handleOpenModalDownload('Fachada 2', 'Aquí puedes incluir la información de la foto de la fachada 2.', 'Fachada 2')}
+                <Badge 
+                  badgeContent={totalFotoFachadaDos} 
+                  color={totalFotoFachadaDos === totalResultados ? 'secondary' : 'error'}
+                  max={9999}
                 >
-                  Fachada 2
-                </Button>
+                  <Tooltip title="Descargar foto fachada 2">
+                    <Button 
+                      variant="contained" 
+                      color="primary"
+                      startIcon={<PhotoLibrary />} 
+                      endIcon={<Download /> }
+                      onClick={() => handleOpenModalDownload('Fachada 2', 'Aquí vas a poder descargar las foto de la fachada 2.', 'Fachada 2')}
+                    >
+                      Fachada 2
+                    </Button>
+                  </Tooltip>
+                </Badge>
               </Grid>
               <Grid item xs={12} md={2}>
-                <Button 
-                  variant="contained" 
-                  color="primary"
-                  startIcon={<PhotoLibrary />} 
-                  endIcon={<Download /> }  
-                  onClick={() => handleOpenModalDownload('Evidencia 1', 'Aquí puedes incluir la información de la evidencia 1.', 'Evidencia 1')}
+                <Badge 
+                  badgeContent={totalFotoEvidenciaUno} 
+                  color={totalFotoEvidenciaUno === totalResultados ? 'secondary' : 'error'}
+                  max={9999}
                 >
-                  Evidencia 1
-                </Button>
+                  <Tooltip title="Descargar foto evidencia 1">
+                    <Button 
+                      variant="contained" 
+                      color="primary"
+                      startIcon={<PhotoLibrary />} 
+                      endIcon={<Download /> }  
+                      onClick={() => handleOpenModalDownload('Evidencia 1', 'Aquí vas a poder descargar las evidencia 1.', 'Evidencia 1')}
+                    >
+                      Evidencia 1
+                    </Button>
+                  </Tooltip>
+                </Badge>
               </Grid>
               <Grid item xs={12} md={2}>
-                <Button 
-                  variant="contained" 
-                  color="primary"
-                  startIcon={<PhotoLibrary />} 
-                  endIcon={<Download /> }  
-                  onClick={() => handleOpenModalDownload('Evidencia 2', 'Aquí puedes incluir la información de la evidencia 2.', 'Evidencia 2')}
+                <Badge 
+                  badgeContent={totalFotoEvidenciaDos} 
+                  color={totalFotoEvidenciaDos === totalResultados ? 'secondary' : 'error'}
+                  max={9999}
                 >
-                  Evidencia 2
-                </Button>
+                  <Tooltip title="Descargar foto evidencia 2">
+                    <Button
+                      variant="contained" 
+                      color="primary"
+                      startIcon={<PhotoLibrary />} 
+                      endIcon={<Download /> }  
+                      onClick={() => handleOpenModalDownload('Evidencia 2', 'Aquí vas a poder descargar las evidencia 2.', 'Evidencia 2')}
+                    >
+                      Evidencia 2
+                    </Button>
+                  </Tooltip>
+                </Badge>
               </Grid>
             </Grid>
 
