@@ -55,6 +55,8 @@ function GeneralAttendanceReport({ data, reportWorkHoursData }) {
         return '#00ff00';
       case 'error':
         return '#EF5350';
+      case 'info':
+        return '#03a9f4';
       default:
         return '#000';
     }
@@ -127,7 +129,10 @@ function GeneralAttendanceReport({ data, reportWorkHoursData }) {
               color = 'warning';
             } else if (value <= 7) {
               color = 'error';
+            } else {
+              color = 'info';
             }
+
       
             return (
               <strong style={{ color: getColor(color) }}>
