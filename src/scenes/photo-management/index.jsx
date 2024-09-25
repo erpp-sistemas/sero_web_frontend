@@ -553,6 +553,11 @@ const Index = () => {
           setFotosDescargadas(prev => prev + 1);
     
         } catch (error) {
+          if (descargaCancelada) {
+            console.log('Descarga cancelada');
+            alert('La descarga ha sido cancelada.');
+            return;
+          }
           console.error('Error al descargar la foto:', foto.url);
         }    
         
