@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import Grid from '@mui/material/Grid';
 import { tokens } from "../../theme.js";
 import PlaceSelect from '../../components/PlaceSelect.jsx'
@@ -437,6 +437,7 @@ const Index = () => {
     const [openModalDownload, setOpenModalDownload] = useState(false);
     const [modalTitleDownload, setModalTitleDownload] = useState('');
     const [modalContentDownload, setModalContentDownload] = useState('');
+    const abortControllerRef = useRef(null);
 
     const handleOpenModalDownload = (title, content, tipoFoto) => {      
       setModalTitleDownload(title);
@@ -456,8 +457,7 @@ const Index = () => {
     const [fotosSinFoto, setFotosSinFoto] = useState(0);
 
     const getFotosParaDescargar = () => {
-      const data = filteredResult.length > 0 ? filteredResult : result;
-      console.log(data)
+      const data = filteredResult.length > 0 ? filteredResult : result;      
       const fotosParaDescargar = [];
     
       data.forEach(row => {
@@ -499,6 +499,9 @@ const Index = () => {
       setTotalFotos(totalFotos);              
       setFotosDescargadas(0);                
       setFotosSinFoto(0);
+
+      abortControllerRef.current = new AbortController();
+      const signal = abortControllerRef.current.signal;
     
       for (const foto of fotos) {
         
@@ -514,10 +517,10 @@ const Index = () => {
         }        
     
         try {
-          const response = await fetch(foto.url);          
+          const response = await fetch(foto.url, { signal });          
           
           if (!response.ok) {
-            console.error(`Error descargando la imagen: ${foto.url}`);
+            //console.error(`Error descargando la imagen: ${foto.url}`);
             continue;
           }
 
@@ -540,8 +543,6 @@ const Index = () => {
           const url = window.URL.createObjectURL(blob);
           //const nombreArchivo = `${foto.cuenta}_${foto.fecha_gestion}.jpg`;
           const nombreArchivo = `${foto.cuenta}_${foto.fecha_gestion}.${extension}`;
-
-          console.log(nombreArchivo)
     
           const a = document.createElement('a');
           a.href = url;
@@ -560,8 +561,8 @@ const Index = () => {
     };        
     
     useEffect(() => {
-      if (descargaCancelada) {
-        console.log('El estado de descarga fue cancelado');
+      if (descargaCancelada && abortControllerRef.current) {
+        abortControllerRef.current.abort();
       }
     }, [descargaCancelada]);
 
