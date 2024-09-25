@@ -6,7 +6,7 @@ import ServiceSelect from '../../components/ServiceSelect.jsx'
 import ProcessSelect from '../../components/ProcessSelectMultipleChip.jsx'
 import { photoManagementRequest } from '../../api/management.js'
 import { useSelector } from 'react-redux'
-import { Box, useTheme, Button, Avatar, Card, CardMedia, InputAdornment, Tooltip, Modal, Badge} from "@mui/material";
+import { Box, useTheme, Button, Avatar, Card, CardMedia, InputAdornment, Tooltip, Modal, Badge, ButtonGroup} from "@mui/material";
 import Viewer from 'react-viewer';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
@@ -21,7 +21,7 @@ import { DataGrid,
   GridToolbarExport,
   GridToolbarFilterButton, } from '@mui/x-data-grid';
 import Chip from '@mui/material/Chip';
-import { Balance, CalendarToday, DoneAll, Download, LocationOff, MarkEmailRead, NotListedLocation, Photo, PhotoLibrary, ReceiptLong, Search, WaterDrop, WrongLocation } from "@mui/icons-material";
+import { Balance, CalendarToday, Cancel, Close, DoneAll, Download, DownloadDone, LocationOff, MarkEmailRead, NotListedLocation, Photo, PhotoLibrary, ReceiptLong, Search, WaterDrop, WrongLocation } from "@mui/icons-material";
 import PhotoViewModal from '../../components/PhotoManagement/PhotoViewModal.jsx'
 import buildColumns2 from '../../components/PhotoManagement/buildColumns.jsx'
 
@@ -503,7 +503,7 @@ const Index = () => {
       abortControllerRef.current = new AbortController();
       const signal = abortControllerRef.current.signal;
     
-      for (const foto of fotos) {
+      for (const foto of fotos) {        
         
         if (descargaCancelada) {
           console.log('Descarga cancelada');
@@ -556,6 +556,10 @@ const Index = () => {
           if (descargaCancelada) {
             console.log('Descarga cancelada');
             alert('La descarga ha sido cancelada.');
+            return;
+          }
+          if (error.name === 'AbortError') {
+            console.log('Descarga abortada');
             return;
           }
           console.error('Error al descargar la foto:', foto.url);
@@ -819,36 +823,59 @@ const Index = () => {
 
             <Modal
               open={openModalDownload}
-              onClose={handleCloseModalDownload}
+              //onClose={handleCloseModalDownload}
               aria-labelledby="modal-title"
               aria-describedby="modal-description"
             >
               <Box sx={{ 
-                bgcolor: 'background.paper', 
-                boxShadow: 24, 
-                p: 4, 
-                width: 400, 
-                margin: 'auto', 
-                borderRadius: 2 
+                bgcolor: 'background.paper',
+                boxShadow: 24,
+                p: 4,
+                width: 500,
+                margin: 'auto',
+                borderRadius: 2,
+                border: '1px solid #e0e0e0',
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                textAlign: 'center'
               }}>
-                <h2 id="modal-title">{modalTitleDownload}</h2>
-                <p id="modal-description">{modalContentDownload}</p>
+                <h2 id="modal-title" style={{ marginBottom: '16px' }}>{modalTitleDownload} </h2>
+                <p id="modal-description" style={{ marginBottom: '16px' }}>{modalContentDownload}</p>
 
                 <p>Total fotos: {totalFotos}</p>
                 <p>Fotos descargadas: {fotosDescargadas}/{totalFotos}</p>
                 <p>Sin foto: {fotosSinFoto}</p>
 
-                <Button variant="contained" color="primary" onClick={handleDescargarFotos}>
-                  Iniciar Descarga
-                </Button>
-
-                <Button variant="contained" color="warning" onClick={handleCancelarDescarga} disabled={descargaCancelada}>
-                  Cancelar Descarga
-                </Button>
-
-                <Button variant="contained" color="secondary" onClick={handleCloseModalDownload}>
-                  Cerrar
-                </Button>
+                
+                <ButtonGroup variant="contained" aria-label="button group">
+                  <Button                     
+                    color="secondary" 
+                    onClick={handleDescargarFotos}
+                    startIcon={<Download />} 
+                  >
+                    Iniciar Descarga
+                  </Button>
+                  <Button                     
+                    color="warning" 
+                    onClick={handleCancelarDescarga} 
+                    disabled={descargaCancelada}
+                    startIcon={<Cancel />}
+                  >
+                    Cancelar Descarga
+                  </Button>
+                  <Button                     
+                    color="error" 
+                    onClick={handleCloseModalDownload}
+                    startIcon={<Close />}
+                  >
+                    Cerrar
+                  </Button>
+                </ButtonGroup>
+                  
+                
+                
               </Box>
             </Modal>
 
