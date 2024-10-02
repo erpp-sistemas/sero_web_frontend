@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Box, useTheme, Modal} from "@mui/material";
+import { Box, useTheme, Modal, Button} from "@mui/material";
 import Typography from '@mui/material/Typography';
 import AmountOfProcedures from '../SecondSection/ModalChart/AmountOfProcedures.jsx'
+import { Close, CloseFullscreen, CloseOutlined, CloseRounded } from "@mui/icons-material";
 
 
 function ModalChart({ open, onClose, amountValidProcedures, amountInvalidProcedures }) {    
@@ -42,6 +43,16 @@ function ModalChart({ open, onClose, amountValidProcedures, amountInvalidProcedu
                   amountValidProcedures ={amountValidProcedures}
                   amountInvalidProcedures={amountInvalidProcedures}
                 /> 
+            </Box>
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+              <Button
+                onClick={onClose}
+                variant="contained"
+                color="error"
+                startIcon={<Close />}
+              >
+                Cerrar
+              </Button>
             </Box>
         </Box>
     </Modal>

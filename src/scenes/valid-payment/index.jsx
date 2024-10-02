@@ -661,12 +661,12 @@ const Index = () => {
     return (
       <Box 
         sx={{
-          padding:'20px'
+          padding:'10px'
         }}
       >   
 
         <Box
-            m='20px 0'
+            m='0 0'
             display='flex'
             justifyContent='space-evenly'
             flexWrap='wrap'
