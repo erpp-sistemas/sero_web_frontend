@@ -35,6 +35,7 @@ import editarInformacionGeneralSlice from "./vehiculosSlices/editarInformacionGe
 import estadoAsignacionSlice from "./vehiculosSlices/estadoAsignacion.js"
 import editarVehiculoSlice from "./vehiculosSlices/editarVehiculoSlice.js"
 import comentariosSlice from "./vehiculosSlices/comentariosSlice.js"
+import creditSlice from "./creditSlice.js"
 
 const rootReducer = combineReducers({
 	user: userReducer,
@@ -73,6 +74,7 @@ const rootReducer = combineReducers({
 	estadoAsignacion: estadoAsignacionSlice,
 	editarVehiculo: editarVehiculoSlice,
 	comentarios: comentariosSlice,
+	credit: creditSlice,
 })
 
 export default rootReducer
