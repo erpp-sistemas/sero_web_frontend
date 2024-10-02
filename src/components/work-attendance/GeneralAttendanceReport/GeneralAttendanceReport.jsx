@@ -476,7 +476,7 @@ function GeneralAttendanceReport({ data, reportWorkHoursData }) {
             </Grid>
           </Grid>
            <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>              
-              <Grid item xs={12} md={ 8 } style={{ height: 560, width: '100%' }}>         
+              <Grid item xs={12} md={ 8 } style={{ height: 560, width: '100%' }}>
                 <DataGrid
                     rows={filteredUsers.length > 0 ? filteredUsers : data}
                     columns={useBuildColumns}

@@ -6,36 +6,30 @@ import ServiceSelect from '../../components/ServiceSelect'
 import ProcessSelect from '../../components/ProcessSelectMultipleChip'
 import { validPaymentRequest } from '../../api/payment.js'
 import { useSelector } from 'react-redux'
-import { Box, useTheme, Button, Avatar} from "@mui/material";
+import { Box, useTheme, Button, Avatar, InputAdornment, Divider, Typography } from "@mui/material";
 import Viewer from 'react-viewer';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import TextField from '@mui/material/TextField';
-import LinearProgress from '@mui/material/LinearProgress';
-import Card from '@mui/material/Card';
-import Divider from '@mui/material/Divider';
-import Typography from '@mui/material/Typography';
 import * as ExcelJS from "exceljs";
 import LoadingModal from '../../components/LoadingModal.jsx'
 import CustomAlert from '../../components/CustomAlert.jsx'
 import ManageSearchIcon from '@mui/icons-material/ManageSearch';
-import Header from '../../components/Header';
 import { DataGrid,
   GridToolbarColumnsButton,
   GridToolbarContainer,
-  GridToolbarDensitySelector,
-  GridToolbarExport,
+  GridToolbarDensitySelector,  
   GridToolbarFilterButton, } from '@mui/x-data-grid';
 import Chip from '@mui/material/Chip';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
-import Tooltip from '@mui/material/Tooltip';
-import IconButton from '@mui/material/IconButton';
-import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
-import PreviewIcon from '@mui/icons-material/Preview';
-import ModalTable from '../../components/ValidPayment/ModalTable.jsx'
+import FirstSection from '../../components/ValidPayment/FirstSection.jsx'
+import SecondSection from "../../components/ValidPayment/SecondSection.jsx";
+import ThirdSection from "../../components/ValidPayment/ThirdSection.jsx";
+import { Download, Search } from "@mui/icons-material";
+
 
 const Index = () => {
     
@@ -53,12 +47,18 @@ const Index = () => {
     const [alertType, setAlertType] = useState("info");
     const [alertMessage, setAlertMessage] = useState("");
     const [columns, setColumns] = useState([]);
-
+    
+    const [resultOriginal, setResultOriginal] = useState([]);
     const [result, setResult] = useState([]);
+    const [filteredResult, setFilteredResult] = useState([]);    
+    const [filterText, setFilterText] = useState('');
+    const [typeFilter, setTypeFilter] = useState(0);
+    const [titleFilter, setTitleFilter] = useState('');
+    const [showNoResultsMessage, setShowNoResultsMessage] = useState(false)
     const [countResult, setCountResult] = useState(0);
     const [totalAmount, setTotalAmount] = useState(0);
     const [countUniqueAccount, setCountUniqueAccount] = useState(0);
-    const [paymentDateRange, setPaymentDateRange] = useState('');
+    const [paymentDateRange, setPaymentDateRange] = useState('1999-09-09');
     const [countValidProcedures, setCountValidProcedures] = useState(0);
     const [countInvalidProcedures, setCountInvalidProcedures] = useState(0);
     const [percentageValidProcedures, setPercentageValidProcedures] = useState(0);
@@ -146,15 +146,15 @@ const Index = () => {
             return
           }
 
-          setIsLoading(true)
-          
-          const concatenatedValues = selectedProcess.join(', ');
+          setIsLoading(true)          
           
           const type = 1
 
           const response = await validPaymentRequest(selectedPlace, selectedService, selectedProcess,selectedValidDays, selectedStartDate, selectedFinishDate, type);
 
-          setResult(response.data)
+          setResultOriginal(response.data)
+          setTypeFilter(1)
+          setTitleFilter('Registros Encontrados')
           console.log(response.data)
 
           const fechas = response.data.map(item => new Date(item["fecha de pago"]));
@@ -278,37 +278,19 @@ const Index = () => {
             const workbook = new ExcelJS.Workbook();
             const worksheet = workbook.addWorksheet("Registros Encontrados");
                         
-            const headers = Object.keys(result[0]);
-            worksheet.addRow(headers);
-        
-        //   result.forEach(row => {
-        //     const values = headers.map(header => {
-        //         let value = row[header];
-        //         if (header === "fecha de pago" || header === "fecha_de_gestion") { 
-        //             const date = new Date(value);
-        //             const year = date.getUTCFullYear();
-        //             const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-        //             const day = String(date.getUTCDate()).padStart(2, '0');
-        //             const hours = String(date.getUTCHours()).padStart(2, '0');
-        //             const minutes = String(date.getUTCMinutes()).padStart(2, '0');
-        //             const seconds = String(date.getUTCSeconds()).padStart(2, '0');
-        //             value = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-        //         }
-        //         return value;
-        //     });
-        //     worksheet.addRow(values);
-        // });
+            const headers = Object.keys(resultOriginal[0]);
+            worksheet.addRow(headers);        
                 
             if(filter === 1)
             {
-              result.forEach(row => {
+              resultOriginal.forEach(row => {
                   const values = headers.map(header => row[header]);
                   worksheet.addRow(values);
               });
             }
             else if(filter === 2)
             {
-              result.forEach(row => {
+              resultOriginal.forEach(row => {
                 if (row['estatus de gestion valida'] === 'valida')
                 {
                   const values = headers.map(header => row[header]);
@@ -318,7 +300,7 @@ const Index = () => {
             }
             else if(filter === 3)
             {
-              result.forEach(row => {
+              resultOriginal.forEach(row => {
                 if (row['estatus de gestion valida'] !== 'valida')
                 {
                   const values = headers.map(header => row[header]);
@@ -328,7 +310,7 @@ const Index = () => {
             }
             else if(filter === 4)
             {
-              result.forEach(row => {
+              resultOriginal.forEach(row => {
                 if (row['estatus de gestion valida'] === 'valida')
                 {
                   if (row.latitud === 0)
@@ -341,7 +323,7 @@ const Index = () => {
             }
             else if(filter === 5)
             {
-              result.forEach(row => {
+              resultOriginal.forEach(row => {
                 if (row['estatus de gestion valida'] === 'valida')
                 {
                   if (row['foto fachada predio'] === 'no')
@@ -354,7 +336,7 @@ const Index = () => {
             }
             else if(filter === 6)
             {
-              result.forEach(row => {
+              resultOriginal.forEach(row => {
                 if (row['estatus de gestion valida'] === 'valida')
                 {
                   if (row['foto evidencia predio'] === 'no')
@@ -367,7 +349,7 @@ const Index = () => {
             }
             else if(filter === 7)
             {
-              result.forEach(row => {
+              resultOriginal.forEach(row => {
                 if (row['estatus de gestion valida'] === 'valida')
                 {
                   if (row['estatus_predio'] !== 'Predio localizado')
@@ -400,7 +382,7 @@ const Index = () => {
           const workbook = new ExcelJS.Workbook();
           const worksheet = workbook.addWorksheet("Registros Encontrados");
                       
-          const headers = Object.keys(result[0]);
+          const headers = Object.keys(resultOriginal[0]);
           worksheet.addRow(headers);          
 
           const buffer = await workbook.xlsx.writeBuffer();
@@ -409,6 +391,49 @@ const Index = () => {
           const a = document.createElement("a");
           a.href = url;
           a.download = "Pagos validos.xlsx";
+          a.click();
+          window.URL.revokeObjectURL(url);
+          setIsLoading(false)
+      } catch (error) {
+          console.error("Error:", error);
+          return null;
+      }
+  };
+  
+    const handleExportToExcelDataGrid = async () => {
+      try {
+        setIsLoading(true)
+          const workbook = new ExcelJS.Workbook();
+          const worksheet = workbook.addWorksheet("Registros Encontrados");
+                      
+          //const headers = Object.keys(resultOriginal[0]);
+          //worksheet.addRow(headers);
+
+          if (filteredResult.length > 0){
+            const headers = Object.keys(filteredResult[0]);
+            worksheet.addRow(headers);
+  
+            filteredResult.forEach((row) => {
+                const values = headers.map((header) => row[header]);
+                worksheet.addRow(values);
+            });
+          }
+          else {
+            const headers = Object.keys(result[0]);
+            worksheet.addRow(headers);
+  
+            result.forEach((row) => {
+                const values = headers.map((header) => row[header]);
+                worksheet.addRow(values);
+            });
+          } 
+
+          const buffer = await workbook.xlsx.writeBuffer();
+          const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = "Pagos_Validos.xlsx";
           a.click();
           window.URL.revokeObjectURL(url);
           setIsLoading(false)
@@ -566,527 +591,310 @@ const Index = () => {
         </>
       );
     };
-
-    const handleOpenModal = (type) => {
-
-       let filteredData       
-
-       if(type === 1){
-         filteredData = result         
-       }
-       else if(type === 2){
-         filteredData = result.filter(row => row['estatus de gestion valida'] === 'valida');
-       }
-       else if(type === 3){
-        filteredData = result.filter(row => row['estatus de gestion valida'] === 'no valida');
-      }
-      else if (type === 4) {
-        filteredData = result.filter(row => row['estatus de gestion valida'] === 'valida' && row.latitud === 0);
-      }
-      else if (type === 5) {
-        filteredData = result.filter(row => row['estatus de gestion valida'] === 'valida' && row['foto fachada predio'] === 'no');
-      }
-      else if (type === 6) {
-        filteredData = result.filter(row => row['estatus de gestion valida'] === 'valida' && row['foto evidencia predio'] === 'no');
-      }
-      else if (type === 7) {
-        filteredData = result.filter(row => row['estatus de gestion valida'] === 'valida' && row['estatus_predio'] !== 'Predio localizado');
-      }
-
-       setModalData(filteredData);
-       setOpenModal(true);       
-    }
   
     const handleCloseModal = () => {
       setOpenModal(false);
     }
 
+    const handleFilteredRows = (type) => {
+
+      if(type === 1){
+        setResult(resultOriginal)
+        setTypeFilter(1)
+        setTitleFilter('Registros Encontrados')
+      }
+      else if(type === 2){
+        setResult(resultOriginal.filter(row => row['estatus de gestion valida'] === 'valida'))
+        setTypeFilter(2)
+        setTitleFilter('Gestiones Validas')
+      }
+      else if(type === 3){
+        setResult(resultOriginal.filter(row => row['estatus de gestion valida'] === 'no valida'))
+        setTypeFilter(3)
+        setTitleFilter('Gestiones no validas')
+     }
+     else if (type === 4) {
+      setResult(resultOriginal.filter(row => row['estatus de gestion valida'] === 'valida' && row.latitud === 0))
+      setTypeFilter(4)
+      setTitleFilter('Registros sin posicion')
+     }
+     else if (type === 5) {
+      setResult(resultOriginal.filter(row => row['estatus de gestion valida'] === 'valida' && row['foto fachada predio'] === 'no'))
+      setTypeFilter(5)
+      setTitleFilter('Registros sin foto de fachada')
+     }
+     else if (type === 6) {
+      setResult(resultOriginal.filter(row => row['estatus de gestion valida'] === 'valida' && row['foto evidencia predio'] === 'no'))
+      setTypeFilter(6)
+      setTitleFilter('Registros sin foto de evidencia')
+     }
+     else if (type === 7) {
+      setResult(resultOriginal.filter(row => row['estatus de gestion valida'] === 'valida' && row['estatus_predio'] !== 'Predio localizado'))
+      setTypeFilter(7)
+      setTitleFilter('Registro de predios no localizados')
+     }
+   }
+
+   const handleFilterChange = (event) => {
+    setFilterText(event.target.value);
+  }
+
+  useEffect(() => {
+    setResult(resultOriginal)  
+  }, [resultOriginal]);
+
+  useEffect(() => {
+    let filtered = result;
+
+      if (filterText) {
+          filtered = filtered.filter(item =>
+              Object.values(item).some(value => value != null && value.toString().toLowerCase().includes(filterText.toLowerCase()))
+          );
+      }
+
+      setFilteredResult(filtered);
+      setShowNoResultsMessage(filtered.length === 0 && filterText.length > 0);      
+
+  }, [result, filterText]);
+
+
     return (
-        <Box sx={{ margin:'20px' }}>
+      <Box 
+        sx={{
+          padding:'20px'
+        }}
+      >   
+
+        <Box
+            m='20px 0'
+            display='flex'
+            justifyContent='space-evenly'
+            flexWrap='wrap'
+            gap='20px'
+            sx={{ backgroundColor: colors.primary[400], width: '100%' }}
+            padding='15px 10px'
+            borderRadius='10px'
+        >
+          <LoadingModal open={isLoading}/>
+          <CustomAlert
+            alertOpen={alertOpen}
+            type={alertType}
+            message={alertMessage}
+            onClose={setAlertOpen}
+          />
+          <Grid container xs={12} md={12} spacing={2}>
+            <Grid item xs={12} md={4}>
+              <PlaceSelect                
+                selectedPlace={selectedPlace}
+                handlePlaceChange={handlePlaceChange}
+              />
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <ServiceSelect
+                selectedPlace={selectedPlace}                  
+                selectedService={selectedService}
+                handleServiceChange={handleServiceChange}
+              />
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <ProcessSelect
+                selectedPlace={selectedPlace}
+                selectedService={selectedService}
+                selectedProcess={selectedProcess}
+                handleProcessChange={handleProcessChange}
+              />
+            </Grid>
+          </Grid>
+          <Grid xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
+            <Grid item xs={12} md={3}>
+              <FormControl variant="filled" sx={{ width: '100%' }}>
+                <InputLabel id="demo-simple-select-standard-label">Numero de dias antes del pago:</InputLabel>
+                <Select
+                  labelId="demo-simple-select-standard-label"
+                  id="demo-simple-select-standard"
+                  value={selectedValidDays}
+                  onChange={handleValidDaysChange}
+                  label="Days"
+                >
+                  <MenuItem value="">
+                    <em>None</em>
+                  </MenuItem>
+                  <MenuItem value={30}>30 dias</MenuItem>
+                  <MenuItem value={60}>60 dias</MenuItem>
+                  <MenuItem value={90}>90 dias</MenuItem>
+                  <MenuItem value={120}>120 dias</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} md={3}>
+              <TextField
+                id="start-date"
+                label="Fecha de inicio"
+                type="date"
+                sx={{ width: '100%' }}
+                value={selectedStartDate}
+                onChange={handleStartDateChange}                  
+                InputLabelProps={{
+                  shrink: true,
+                }}                  
+              />
+            </Grid>
+            <Grid item xs={12} md={3}>
+              <TextField
+                id="finish-date"
+                label="Fecha final"
+                type="date"
+                sx={{ width: '100%' }}
+                value={selectedFinishDate}
+                onChange={handleFinishDateChange}                  
+                InputLabelProps={{
+                  shrink: true,
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} md={3}>
+              <Button 
+                variant="contained"                   
+                style={{ width: '100%', height: '100%' }}
+                onClick={() => {
+                  handleGetValidPayment();                    
+                }}                  
+                sx={{ 
+                  bgcolor: 'secondary.main', 
+                  '&:hover': { bgcolor: 'secondary.dark' },
+                  maxHeight: '56px'
+                }}
+                >
+                  <ManageSearchIcon fontSize="large"/>
+                  Buscar                  
+              </Button>
+            </Grid>
+          </Grid>
+          <Grid xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
+            <Grid item xs={12} md={4}>
+              <FirstSection                
+                countResult={countResult}
+                countUniqueAccount={countUniqueAccount}
+                totalAmount={totalAmount}
+                paymentDateRange={paymentDateRange}
+                handleExportToExcel={handleExportToExcel}
+                handleFilteredRows={handleFilteredRows}
+                typeFilter={typeFilter}
+              />
+            </Grid>
+
+            <Grid item xs={12} md={ 4 }>
+              <SecondSection
+                countValidProcedures={countValidProcedures}
+                countInvalidProcedures={countInvalidProcedures}
+                percentageValidProcedures={percentageValidProcedures}
+                percentageInvalidProcedures={percentageInvalidProcedures}
+                amountValidProcedures={amountValidProcedures}
+                percentageAmountValidProcedures={percentageAmountValidProcedures}
+                amountInvalidProcedures={amountInvalidProcedures}
+                percentageAmountInvalidProcedures={percentageAmountInvalidProcedures}
+                handleExportToExcel={handleExportToExcel}
+                handleFilteredRows={handleFilteredRows}
+                typeFilter={typeFilter}
+              />
+            </Grid>
+
+            <Grid item xs={12} md={ 4 } >
+              <ThirdSection
+                countNoPosition={ countNoPosition } 
+                percentageCountNoPosition={ percentageCountNoPosition }
+                countWithoutPropertyPhoto={ countWithoutPropertyPhoto }
+                percentageCountWithoutPropertyPhoto={ percentageCountWithoutPropertyPhoto }
+                countWithoutEvidencePhoto={ countWithoutEvidencePhoto }
+                percentageCountWithoutEvidencePhoto={ percentageCountWithoutEvidencePhoto }
+                countPropertyNotLocated={ countPropertyNotLocated }
+                percentageCountPropertyNotLocated={ percentageCountPropertyNotLocated }
+                handleExportToExcel={handleExportToExcel}
+                handleFilteredRows={handleFilteredRows}
+                typeFilter={typeFilter}
+              />
+            </Grid>
+          </Grid>
+
           <Box
-              m='20px 0'
-              display='flex'
-              justifyContent='space-evenly'
-              flexWrap='wrap'
-              gap='20px'
-              sx={{ backgroundColor: colors.primary[400], width: '100%' }}
-              padding='15px'
-              borderRadius='10px'
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            sx={{ marginBottom: '0px' }}
           >
-            <LoadingModal open={isLoading}/>
-            <CustomAlert
-              alertOpen={alertOpen}
-              type={alertType}
-              message={alertMessage}
-              onClose={setAlertOpen}
-            />
-
-            <Grid item container xs={12} md={12} spacing={2}>
-              <Grid item xs={12} md={4}>
-                <PlaceSelect                
-                  selectedPlace={selectedPlace}
-                  handlePlaceChange={handlePlaceChange}
-                />
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <ServiceSelect
-                  selectedPlace={selectedPlace}                  
-                  selectedService={selectedService}
-                  handleServiceChange={handleServiceChange}
-                />
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <ProcessSelect
-                  selectedPlace={selectedPlace}
-                  selectedService={selectedService}
-                  selectedProcess={selectedProcess}
-                  handleProcessChange={handleProcessChange}
-                />
-              </Grid>
+            <Typography 
+              variant="h4"
+              component="h1" 
+              align="center"
+              sx={{
+                fontWeight: 'bold',
+                color: colors.grey[100],
+              }}
+            >
+              {titleFilter}
+            </Typography>
+          </Box>
+          
+          <Grid container alignItems="stretch" spacing={2}>
+            <Grid item xs={12} sm={4}>
+              <TextField
+                label="Ingresa tu busqueda"
+                value={filterText}
+                onChange={handleFilterChange}
+                fullWidth
+                helperText={showNoResultsMessage ? 'No se encontraron resultados' : ''}
+                FormHelperTextProps={{ style: { color: 'red' } }}
+                color='secondary'
+                size="small"
+                InputProps={{
+                  endAdornment: (
+                      <InputAdornment position="end">
+                          <Search color="secondary"/>
+                      </InputAdornment>
+                  ),                            
+                }}
+              />
             </Grid>
-            
-            <Grid xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
-              <Grid item xs={12} md={3}>
-                <FormControl variant="filled" sx={{ width: '100%' }}>
-                  <InputLabel id="demo-simple-select-standard-label">Numero de dias antes del pago:</InputLabel>
-                  <Select
-                    labelId="demo-simple-select-standard-label"
-                    id="demo-simple-select-standard"
-                    value={selectedValidDays}
-                    onChange={handleValidDaysChange}
-                    label="Days"
-                  >
-                    <MenuItem value="">
-                      <em>None</em>
-                    </MenuItem>
-                    <MenuItem value={30}>30 dias</MenuItem>
-                    <MenuItem value={60}>60 dias</MenuItem>
-                    <MenuItem value={90}>90 dias</MenuItem>
-                    <MenuItem value={120}>120 dias</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} md={3}>
-                <TextField
-                  id="start-date"
-                  label="Fecha de inicio"
-                  type="date"
-                  sx={{ width: '100%' }}
-                  value={selectedStartDate}
-                  onChange={handleStartDateChange}                  
-                  InputLabelProps={{
-                    shrink: true,
-                  }}                  
-                />
-              </Grid>
-              <Grid item xs={12} md={3}>
-                <TextField
-                  id="finish-date"
-                  label="Fecha final"
-                  type="date"
-                  sx={{ width: '100%' }}
-                  value={selectedFinishDate}
-                  onChange={handleFinishDateChange}                  
-                  InputLabelProps={{
-                    shrink: true,
+            <Grid item xs={12} sm={4}>
+              <Button 
+                variant="outlined" 
+                color="secondary"
+                startIcon={<Download />}
+                onClick={handleExportToExcelDataGrid}
+              >
+                  Exportar a Excel
+              </Button>
+            </Grid>
+          </Grid>
+          <Grid xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
+            <Grid item xs={12}>
+              <Box >                  
+                <Box
+                  sx={{
+                    height: 800,
+                    width: '100%',
+                    '.css-196n7va-MuiSvgIcon-root': {
+                      fill: 'white',
+                    },
                   }}
-                />
-              </Grid>
-              <Grid item xs={12} md={3}>
-                <Button 
-                  variant="contained"                   
-                  style={{ width: '100%', height: '100%' }}
-                  onClick={() => {
-                    handleGetValidPayment();                    
-                  }}                  
-                  sx={{ bgcolor: 'secondary.main', '&:hover': { bgcolor: 'secondary.dark' } }}
-                  >
-                    <ManageSearchIcon fontSize="large"/>
-                    Buscar                  
-                </Button>
-              </Grid>
-            </Grid>
-
-            <Grid xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
-              <Grid item xs={12} md={3}>
-                <Card variant="outlined" sx={{ maxWidth: 360, backgroundColor: 'rgba(128, 128, 128, 0.1)', borderLeft: '5px solid #00ff00'  }}>
-                  <Box sx={{ p: 2, textAlign: 'center' }}>                    
-                    <Typography variant="h2" component="div">
-                    {countResult}
-                    </Typography>
-                    <Typography color="text.secondary" variant="h5">
-                      Registros encontrados
-                      <Tooltip title="Descargar" arrow>
-                        <IconButton onClick={() => {
-                          if (result.length > 0) {
-                              handleExportToExcel(1);                    
-                          } 
-                        }}
-                        >
-                          <CloudDownloadIcon  style={{ color: theme.palette.secondary.main }} />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Ver Registros" arrow>
-                        <IconButton
-                        onClick={() => handleOpenModal(1)}
-                        >
-                          <PreviewIcon  style={{ color: theme.palette.info.main }} />
-                        </IconButton>
-                      </Tooltip>
-                    </Typography>
-                  </Box>                  
-                </Card>
-              </Grid>
-              <Grid item xs={12} md={3}>
-                <Card variant="outlined" sx={{ maxWidth: 360, backgroundColor: 'rgba(128, 128, 128, 0.1)', borderLeft: '5px solid #00ff00'  }}>
-                  <Box sx={{ p: 3, textAlign: 'center' }}>                    
-                    <Typography variant="h2" component="div">
-                    {countUniqueAccount}
-                    </Typography>
-                    <Typography color="text.secondary" variant="h5">
-                      Cuentas unicas                      
-                    </Typography>
-                  </Box>                  
-                </Card>
-              </Grid>
-              <Grid item xs={12} md={3}>
-                <Card variant="outlined" sx={{ maxWidth: 360, backgroundColor: 'rgba(128, 128, 128, 0.1)', borderLeft: '5px solid #00ff00'  }}>
-                  <Box sx={{ p: 3, textAlign: 'center' }}>                    
-                    <Typography variant="h2" component="div">
-                    $ {totalAmount}
-                    </Typography>
-                    <Typography color="text.secondary" variant="h5">
-                      Monto ingresado                      
-                    </Typography>
-                  </Box>                  
-                </Card>
-              </Grid>
-              <Grid item xs={12} md={3}>
-                <Card variant="outlined" sx={{ maxWidth: 360, backgroundColor: 'rgba(128, 128, 128, 0.1)', borderLeft: '5px solid #00ff00'  }}>
-                  <Box sx={{ p: 4, textAlign: 'center' }}>                    
-                    <Typography variant="h4" component="div">
-                    {paymentDateRange}
-                    </Typography>
-                    <Typography color="text.secondary" variant="h5">
-                      Rango de fechas de pagos
-                    </Typography>
-                  </Box>                  
-                </Card>
-              </Grid>
-            </Grid>
-
-            <Grid xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
-              <Grid item xs={12} md={3}>
-                <Card variant="outlined" sx={{ maxWidth: 360, backgroundColor: 'rgba(128, 128, 128, 0.1)', borderLeft: '5px solid #00ff00'  }}>
-                  <Box sx={{ p: 2, textAlign: 'center' }}>                    
-                    <Typography variant="h3" component="div">
-                    {countValidProcedures}
-                    </Typography>
-                    <Typography color="text.secondary" variant="h6">
-                      Gestiones validas                      
-                    </Typography>                    
-                  </Box>                  
-                  <Box sx={{ display: 'flex', alignItems: 'center', p : 1 }}>
-                    <Box sx={{ width: '100%' }}>
-                      <LinearProgress color="secondary" variant="determinate" value={percentageValidProcedures} sx={{ height: 12}} />
-                    </Box>
-                    <Box sx={{ minWidth: 35, pl: 1, pr: 1 }}>
-                      <Typography variant="body2" color="text.secondary">{`${percentageValidProcedures}%`}</Typography>
-                    </Box>
-                  </Box>
-                  <Box sx={{ display: 'flex', textAlign: 'left' }}>                  
-                    <Tooltip title="Descargar" arrow>
-                      <IconButton onClick={() => {
-                        if (result.length > 0) {
-                            handleExportToExcel(2);                    
-                        }
-                      }}
-                      >
-                        <CloudDownloadIcon  style={{ color: theme.palette.secondary.main }} />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Ver Registros" arrow>
-                      <IconButton
-                       onClick={() => handleOpenModal(2)}
-                      >
-                        <PreviewIcon  style={{ color: theme.palette.info.main }} />
-                      </IconButton>
-                    </Tooltip>                  
-                  </Box>                  
-                </Card>
-              </Grid>
-              <Grid item xs={12} md={3}>
-                <Card variant="outlined" sx={{ maxWidth: 360, backgroundColor: 'rgba(128, 128, 128, 0.1)', borderLeft: '5px solid #00ff00'  }}>
-                  <Box sx={{ p: 2, textAlign: 'center' }}>                    
-                    <Typography variant="h3" component="div">
-                    {countInvalidProcedures}
-                    </Typography>
-                    <Typography color="text.secondary" variant="h6">
-                      Gestiones no validas                      
-                    </Typography>                    
-                  </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', p : 1 }}>
-                    <Box sx={{ width: '100%' }}>
-                      <LinearProgress color="warning" variant="determinate" value={percentageInvalidProcedures} sx={{ height: 12}} />
-                    </Box>
-                    <Box sx={{ minWidth: 35, pl: 1, pr: 1 }}>
-                      <Typography variant="body2" color="text.secondary">{`${percentageInvalidProcedures}%`}</Typography>
-                    </Box>
-                  </Box>
-                  <Box sx={{ textAlign: 'left' }}>
-                    <Tooltip title="Descargar" arrow>
-                      <IconButton onClick={() => {
-                        if (result.length > 0) {
-                            handleExportToExcel(3);                    
-                        } 
-                      }}
-                      >
-                        <CloudDownloadIcon  style={{ color: theme.palette.secondary.main }} />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Ver Registros" arrow>
-                      <IconButton
-                       onClick={() => handleOpenModal(3)}
-                      >
-                        <PreviewIcon  style={{ color: theme.palette.info.main }} />
-                      </IconButton>
-                    </Tooltip>
-                  </Box>
-                </Card>
-              </Grid>
-              <Grid item xs={12} md={3}>
-                <Card variant="outlined" sx={{ maxWidth: 360, backgroundColor: 'rgba(128, 128, 128, 0.1)', borderLeft: '5px solid #00ff00'  }}>
-                  <Box sx={{ p: 3, textAlign: 'center' }}>                    
-                    <Typography variant="h3" component="div">
-                    {amountValidProcedures}
-                    </Typography>
-                    <Typography color="text.secondary" variant="h6">
-                      Monto de gestiones validas                      
-                    </Typography>
-                  </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', p : 1 }}>
-                    <Box sx={{ width: '100%' }}>
-                      <LinearProgress color="secondary" variant="determinate" value={percentageAmountValidProcedures} sx={{ height: 12}} />
-                    </Box>
-                    <Box sx={{ minWidth: 35, pl: 1, pr: 1 }}>
-                      <Typography variant="body2" color="text.secondary">{`${percentageAmountValidProcedures}%`}</Typography>
-                    </Box>
-                  </Box>                  
-                </Card>
-              </Grid>
-              <Grid item xs={12} md={3}>
-                <Card variant="outlined" sx={{ maxWidth: 360, backgroundColor: 'rgba(128, 128, 128, 0.1)', borderLeft: '5px solid #00ff00'  }}>
-                  <Box sx={{ p: 3, textAlign: 'center' }}>                    
-                    <Typography variant="h3" component="div">
-                    {amountInvalidProcedures}
-                    </Typography>
-                    <Typography color="text.secondary" variant="h6">
-                      Monto de gestiones no validas                      
-                    </Typography>
-                  </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', p : 1 }}>
-                    <Box sx={{ width: '100%' }}>
-                      <LinearProgress color="warning" variant="determinate" value={percentageAmountInvalidProcedures} sx={{ height: 12}} />
-                    </Box>
-                    <Box sx={{ minWidth: 35, pl: 1, pr: 1 }}>
-                      <Typography variant="body2" color="text.secondary">{`${percentageAmountInvalidProcedures}%`}</Typography>
-                    </Box>
-                  </Box>                  
-                </Card>
-              </Grid>
-            </Grid>
-
-            <Grid xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
-              <Grid item xs={12} md={3}>
-                <Card variant="outlined" sx={{ maxWidth: 360, backgroundColor: 'rgba(128, 128, 128, 0.1)', borderLeft: '5px solid #00ff00'  }}>
-                  <Box sx={{ p: 2, textAlign: 'center' }}>                    
-                    <Typography variant="h3" component="div">
-                    {countNoPosition}
-                    </Typography>
-                    <Typography color="text.secondary" variant="h6">
-                      Registros sin posicion                      
-                    </Typography>                    
-                  </Box>                  
-                  <Box sx={{ display: 'flex', alignItems: 'center', p : 1 }}>
-                    <Box sx={{ width: '100%' }}>
-                      <LinearProgress color="error" variant="determinate" value={percentageCountNoPosition} sx={{ height: 12}} />
-                    </Box>
-                    <Box sx={{ minWidth: 35, pl: 1, pr: 1 }}>
-                      <Typography variant="body2" color="text.secondary">{`${percentageCountNoPosition}%`}</Typography>
-                    </Box>
-                  </Box>
-                  <Box sx={{ textAlign: 'left' }}>
-                    <Tooltip title="Descargar" arrow>
-                      <IconButton onClick={() => {
-                        if (result.length > 0) {
-                            handleExportToExcel(4);                    
-                        } 
-                      }}
-                      >
-                        <CloudDownloadIcon  style={{ color: theme.palette.secondary.main }} />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Ver Registros" arrow>
-                      <IconButton
-                       onClick={() => handleOpenModal(4)}
-                      >
-                        <PreviewIcon  style={{ color: theme.palette.info.main }} />
-                      </IconButton>
-                    </Tooltip>
-                  </Box>
-                </Card>
-              </Grid>
-              <Grid item xs={12} md={3}>
-                <Card variant="outlined" sx={{ maxWidth: 360, backgroundColor: 'rgba(128, 128, 128, 0.1)', borderLeft: '5px solid #00ff00'  }}>
-                  <Box sx={{ p: 2, textAlign: 'center' }}>                    
-                    <Typography variant="h3" component="div">
-                    {countWithoutPropertyPhoto}
-                    </Typography>
-                    <Typography color="text.secondary" variant="h6">
-                      Registros sin foto de fachada
-                    </Typography>                    
-                  </Box>                  
-                  <Box sx={{ display: 'flex', alignItems: 'center', p : 1 }}>
-                    <Box sx={{ width: '100%' }}>
-                      <LinearProgress color="error" variant="determinate" value={percentageCountWithoutPropertyPhoto} sx={{ height: 12}} />
-                    </Box>
-                    <Box sx={{ minWidth: 35, pl: 1, pr: 1 }}>
-                      <Typography variant="body2" color="text.secondary">{`${percentageCountWithoutPropertyPhoto}%`}</Typography>
-                    </Box>
-                  </Box>
-                  <Box sx={{ textAlign: 'left' }}>
-                    <Tooltip title="Descargar" arrow>
-                      <IconButton onClick={() => {
-                        if (result.length > 0) {
-                            handleExportToExcel(5);                    
-                        }
-                      }}
-                      >
-                        <CloudDownloadIcon  style={{ color: theme.palette.secondary.main }} />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Ver Registros" arrow>
-                      <IconButton
-                       onClick={() => handleOpenModal(5)}
-                      >
-                        <PreviewIcon  style={{ color: theme.palette.info.main }} />
-                      </IconButton>
-                    </Tooltip>
-                  </Box>
-                </Card>
-              </Grid>
-              <Grid item xs={12} md={3}>
-                <Card variant="outlined" sx={{ maxWidth: 360, backgroundColor: 'rgba(128, 128, 128, 0.1)', borderLeft: '5px solid #00ff00'  }}>
-                  <Box sx={{ p: 2, textAlign: 'center' }}>                    
-                    <Typography variant="h3" component="div">
-                    {countWithoutEvidencePhoto}
-                    </Typography>
-                    <Typography color="text.secondary" variant="h6">
-                      Registros sin foto de evidencia
-                    </Typography>                    
-                  </Box>                  
-                  <Box sx={{ display: 'flex', alignItems: 'center', p : 1 }}>
-                    <Box sx={{ width: '100%' }}>
-                      <LinearProgress color="error" variant="determinate" value={percentageCountWithoutEvidencePhoto} sx={{ height: 12}} />
-                    </Box>
-                    <Box sx={{ minWidth: 35, pl: 1, pr: 1 }}>
-                      <Typography variant="body2" color="text.secondary">{`${percentageCountWithoutEvidencePhoto}%`}</Typography>
-                    </Box>
-                  </Box>
-                  <Box sx={{ textAlign: 'left' }}>
-                    <Tooltip title="Descargar" arrow>
-                      <IconButton onClick={() => {
-                        if (result.length > 0) {
-                            handleExportToExcel(6);                    
-                        }
-                      }}
-                      >
-                        <CloudDownloadIcon  style={{ color: theme.palette.secondary.main }} />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Ver Registros" arrow>
-                      <IconButton
-                       onClick={() => handleOpenModal(6)}
-                      >
-                        <PreviewIcon  style={{ color: theme.palette.info.main }} />
-                      </IconButton>
-                    </Tooltip>
-                  </Box>
-                </Card>
-              </Grid>
-              <Grid item xs={12} md={3}>
-                <Card variant="outlined" sx={{ maxWidth: 360, backgroundColor: 'rgba(128, 128, 128, 0.1)', borderLeft: '5px solid #00ff00'  }}>
-                  <Box sx={{ p: 2, textAlign: 'center' }}>                    
-                    <Typography variant="h3" component="div">
-                    {countPropertyNotLocated}
-                    </Typography>
-                    <Typography color="text.secondary" variant="h6">
-                      Registros de predios no localizados
-                    </Typography>                    
-                  </Box>                  
-                  <Box sx={{ display: 'flex', alignItems: 'center', p : 1 }}>
-                    <Box sx={{ width: '100%' }}>
-                      <LinearProgress color="error" variant="determinate" value={percentageCountPropertyNotLocated} sx={{ height: 12}} />
-                    </Box>
-                    <Box sx={{ minWidth: 35, pl: 1, pr: 1 }}>
-                      <Typography variant="body2" color="text.secondary">{`${percentageCountPropertyNotLocated}%`}</Typography>
-                    </Box>
-                  </Box>
-                  <Box sx={{ textAlign: 'left' }}>
-                    <Tooltip title="Descargar" arrow>
-                      <IconButton onClick={() => {
-                        if (result.length > 0) {
-                            handleExportToExcel(7);                    
-                        } 
-                      }}
-                      >
-                        <CloudDownloadIcon  style={{ color: theme.palette.secondary.main }} />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Ver Registros" arrow>
-                      <IconButton
-                       onClick={() => handleOpenModal(7)}
-                      >
-                        <PreviewIcon  style={{ color: theme.palette.info.main }} />
-                      </IconButton>
-                    </Tooltip>
-                  </Box>
-                </Card>
-              </Grid>
-            </Grid>
-
-            <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
-              <Grid item xs={12}>
-                <Box m="20px">
-                  <Header title="Listado de pagos validos" />
-                  <Box
-                    sx={{
-                      height: 400,
-                      width: '100%',
-                      '.css-196n7va-MuiSvgIcon-root': {
-                        fill: 'white',
-                      },
-                    }}
-                  >
-                    {result.length === 0 ? (
+                >
+                  {result.length === 0 ? (
                       <div style={{ textAlign: 'center', padding: '20px' }}>No row</div>
                     ) : (
                       <DataGrid
-                        rows={result}
+                        rows={filteredResult.length > 0 ? filteredResult : result}
                         columns={columns}
                         getRowId={(row) => row.id}
                         editable={false}                         
                         slots={{ toolbar: CustomToolbar}}                        
                       />
                     )}
-                  </Box>
                 </Box>
-              </Grid>              
+              </Box>
             </Grid>
-            <ModalTable open={openModal} onClose={handleCloseModal} data={modalData} />
-          </Box>                 
-          
-        </Box>
+          </Grid>          
+        </Box>        
+      </Box>
 
     );
 };

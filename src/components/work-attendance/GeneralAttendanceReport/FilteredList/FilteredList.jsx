@@ -15,7 +15,7 @@ const FilteredList = ({ resultCountsEntry, resultCountsExit, handleDownloadExcel
   };
 
   return (    
-    <List sx={{ width: '100%', maxWidth: 360, bgcolor: colors.primary[400] }}>
+    <List sx={{ width: '100%', maxWidth: 500, bgcolor: colors.primary[400] }}>
       <ListItem>
         <ListItemAvatar>
           <Avatar>
