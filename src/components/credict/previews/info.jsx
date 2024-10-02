@@ -37,7 +37,7 @@ export default function PreviewsInfo ({ seleccionFormato }) {
 				<Box sx={{ display:'flex', justifyContent:'start', alingItems:'start', flexDirection:'column', gap:'5px' }}>
 					<Box sx={{ width:'100%', height:'auto', display:'flex', justifyContent:'start', gap:'10px', alingItems:'center' }}>
 						<Typography sx={{ fontSize:'20px', fontWeight:'600' }}>Expediente: </Typography>
-						<Typography sx={{ fontSize:'20px', color:'white' }}>{ seleccionFormato != null ? seleccionFormato.expediente : false }</Typography>
+						<Typography sx={{ fontSize:'20px', color:'white' }}>{ seleccionFormato != null ? seleccionFormato.folio : false }</Typography>
 					</Box>
 				</Box>
 
@@ -54,7 +54,7 @@ export default function PreviewsInfo ({ seleccionFormato }) {
 				<Box sx={{ display:'flex', justifyContent:'start', alingItems:'start', flexDirection:'column', gap:'5px' }}>
 					<Box sx={{ width:'100%', height:'auto', display:'flex', justifyContent:'start', gap:'10px', alingItems:'center' }}>
 						<Typography sx={{ fontSize:'20px', fontWeight:'600' }}>Dirección: </Typography>
-						<Typography sx={{ fontSize:'20px', color:'white' }}>{ seleccionFormato != null ? seleccionFormato.accountData.catastroCentral[0].direccion : false }</Typography>
+						<Typography sx={{ fontSize:'20px', color:'white' }}>{ seleccionFormato != null ? seleccionFormato.domicilio : false }</Typography>
 					</Box>
 				</Box>
 			</Box>

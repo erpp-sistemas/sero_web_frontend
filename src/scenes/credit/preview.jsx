@@ -11,6 +11,9 @@ export default function Preview ({ preview, setPreview, seleccionFormato }) {
 	const [openConstruccionData, setOpenConstruccionData] = useState(false)
 	const [openAdeudoData, setOpenAdeudoData] = useState(false)
 
+	console.log(preview)
+	console.log(seleccionFormato)
+
 	return(
 
 		<Box sx={{ position:'absolute', display: preview ? 'flex' : 'none', justifyContent:'center', alignItems:'center', width:'100%', height:'100vh', background:'rgba(0,0,0,0.5)', top:'0', right:'0', zIndex:'9999' }}>
@@ -71,8 +74,8 @@ export default function Preview ({ preview, setPreview, seleccionFormato }) {
 								</TableHead>
 
 								<TableBody>
-									{seleccionFormato && seleccionFormato.accountData.catastroTerreno ? (
-										seleccionFormato.accountData.catastroTerreno.map((terreno) => (
+									{seleccionFormato && seleccionFormato.terreno ? (
+										seleccionFormato.terreno.map((terreno) => (
 										<TableRow key={terreno.frente} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
 											<TableCell align="center">{terreno.frente}</TableCell>
 											<TableCell align="center">{terreno.fondo}</TableCell>
@@ -115,8 +118,8 @@ export default function Preview ({ preview, setPreview, seleccionFormato }) {
 								</TableHead>
 
 								<TableBody>
-									{seleccionFormato && seleccionFormato.accountData.catastroTerreno ? (
-										seleccionFormato.accountData.catastroTerreno.map((terreno) => (
+									{seleccionFormato && seleccionFormato.terreno ? (
+										seleccionFormato.terreno.map((terreno) => (
 										<TableRow key={terreno.frente} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
 											<TableCell align="center">{terreno.f_frente}</TableCell>
 											<TableCell align="center">{terreno.f_fondo}</TableCell>
@@ -194,8 +197,8 @@ export default function Preview ({ preview, setPreview, seleccionFormato }) {
 								</TableHead>
 
 								<TableBody>
-									{seleccionFormato && seleccionFormato.accountData.catastroConstruccion ? (
-										seleccionFormato.accountData.catastroConstruccion.map((constuccion, index) => (
+									{seleccionFormato && seleccionFormato.construccion ? (
+										seleccionFormato.construccion.map((constuccion, index) => (
 										<TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
 											<TableCell align="center">{constuccion.tipologia_construccion}</TableCell>
 											<TableCell align="center">{constuccion.construccion}</TableCell>
@@ -234,8 +237,8 @@ export default function Preview ({ preview, setPreview, seleccionFormato }) {
 								</TableHead>
 
 								<TableBody>
-									{seleccionFormato && seleccionFormato.accountData.catastroConstruccion ? (
-										seleccionFormato.accountData.catastroConstruccion.map((constuccion, index) => (
+									{seleccionFormato && seleccionFormato.construccion ? (
+										seleccionFormato.construccion.map((constuccion, index) => (
 										<TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
 											<TableCell align="center">{constuccion.f_edad}</TableCell>
 											<TableCell align="center">{constuccion.f_conservacion}</TableCell>
@@ -303,8 +306,8 @@ export default function Preview ({ preview, setPreview, seleccionFormato }) {
 								</TableHead>
 
 								<TableBody>
-									{seleccionFormato && seleccionFormato.accountData.catastroAdeudo ? (
-										seleccionFormato.accountData.catastroAdeudo.map((constuccion, index) => (
+									{seleccionFormato && seleccionFormato.adeudo ? (
+										seleccionFormato.adeudo.map((constuccion, index) => (
 										<TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
 											<TableCell align="center">{constuccion.año_adeudo}</TableCell>
 											<TableCell align="center">{constuccion.adeudo}</TableCell>
