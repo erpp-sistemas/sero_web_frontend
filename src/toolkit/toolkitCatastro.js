@@ -36,9 +36,20 @@ const getCuenta = async (cuenta) => {
 	}
 }
 
+const createPdf = async (data) => {
+	const url=`/catastro/pdf`
+	try {
+		const res = await instance.post( url, data )
+		return res
+	} catch(error) {
+		console.error(error)
+	}
+}
+
 export default {
 	checkCuenta,
 	addCuenta,
 	editCuenta,
-	getCuenta
+	getCuenta,
+	createPdf
 }

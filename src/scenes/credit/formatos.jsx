@@ -5,10 +5,8 @@ import PropTypes from "prop-types"
 import tool from '../../toolkit/toolkitCatastro'
 import ChargeMessage from '../../components/Records/chargeMessage.jsx'
 
-export default function Formatos({ setPreview, setSeleccionFormato }) {
-    const [validAccounts, setValidAccounts] = useState([])
-    const [invalidAccounts, setInvalidAccounts] = useState([]) 
-    const [fileName, setFileName] = useState("")
+export default function Formatos({ setPreview, setSeleccionFormato, setOpenConfirmation, validAccounts, setValidAccounts, invalidAccounts, setInvalidAccounts, fileName, setFileName }) {
+
     const fileInputRef = useRef(null)
     const [openFormatos, setOpenFormatos] = useState(false)
 
@@ -31,38 +29,55 @@ export default function Formatos({ setPreview, setSeleccionFormato }) {
 		const reader = new FileReader()
 		reader.onload = async (e) => {
 			try {
-				const data = new Uint8Array(e.target.result)
-				const workbook = XLSX.read(data, { type: "array" })
-				const worksheet = workbook.Sheets[workbook.SheetNames[0]]
-				const json = XLSX.utils.sheet_to_json(worksheet)
-				const accountChecks = json.map(async (row) => {
-					const account = row.cuentas || row.Account || 'Cuenta desconocida'
-					const isValid = await tool.checkCuenta(account)
-					return { ...row, isValid }
+			const data = new Uint8Array(e.target.result)
+			const workbook = XLSX.read(data, { type: "array" })
+			const worksheet = workbook.Sheets[workbook.SheetNames[0]]
+			const json = XLSX.utils.sheet_to_json(worksheet)
+			const accountChecks = json.map(async (row) => {
+				const account = row.cuentas || row.Account || 'Cuenta desconocida'
+				const isValid = await tool.checkCuenta(account)
+				return { ...row, isValid }
+			})
+			const results = await Promise.all(accountChecks)
+			const validRows = results.filter(row => row.isValid)
+			const invalidRows = results.filter(row => !row.isValid)
+			setValidAccounts(validRows)
+			setInvalidAccounts(invalidRows)
+			const updatedValidRows = await Promise.all(
+				validRows.map(async (item) => {
+				try {
+					const response = await tool.getCuenta(item.cuentas)
+					let accountData = response.data
+					accountData.catastroCentral = Array.isArray(accountData.catastroCentral) ? accountData.catastroCentral : [accountData.catastroCentral]
+					accountData.catastroConstruccion = Array.isArray(accountData.catastroConstruccion) ? accountData.catastroConstruccion : [accountData.catastroConstruccion]
+					accountData.catastroTerreno = Array.isArray(accountData.catastroTerreno) ? accountData.catastroTerreno : [accountData.catastroTerreno]
+					accountData.catastroAdeudo = Array.isArray(accountData.catastroAdeudo) ? accountData.catastroAdeudo : [accountData.catastroAdeudo]
+
+					const transformedData = {
+						cuentas: item.cuentas,
+						altura: '1',
+						año_final: item.año_final,
+						año_inicio: item.año_inicio,
+						bimestre_final: item.bimestre_final,
+						bimestre_inicio: item.bimestre_incio,
+						folio: item.expediente,
+						notificacion: item.notificacion,
+						clave_catastral: accountData.catastroCentral[0].clave_catastral,
+						domicilio: accountData.catastroCentral[0].direccion,
+						nombre: accountData.catastroCentral[0].propietario,
+						terreno: accountData.catastroTerreno,
+						construccion: accountData.catastroConstruccion,
+						adeudo: accountData.catastroAdeudo
+					}
+
+					return transformedData 
+				} catch (error) {
+					console.error(`Error al obtener datos de la cuenta ${item.cuentas}:`, error)
+					return item
+				}
 				})
-				const results = await Promise.all(accountChecks)
-				const validRows = results.filter(row => row.isValid)
-				const invalidRows = results.filter(row => !row.isValid)
-				setValidAccounts(validRows)
-				setInvalidAccounts(invalidRows)
-				const updatedValidRows = await Promise.all(
-					validRows.map(async (item) => {
-						try {
-							const response = await tool.getCuenta(item.cuentas)
-							let accountData = response.data
-							accountData.catastroCentral = Array.isArray(accountData.catastroCentral) ? accountData.catastroCentral : [accountData.catastroCentral]
-							accountData.catastroConstruccion = Array.isArray(accountData.catastroConstruccion) ? accountData.catastroConstruccion : [accountData.catastroConstruccion]
-							accountData.catastroTerreno = Array.isArray(accountData.catastroTerreno) ? accountData.catastroTerreno : [accountData.catastroTerreno]
-							accountData.catastroAdeudo = Array.isArray(accountData.catastroAdeudo) ? accountData.catastroAdeudo : [accountData.catastroAdeudo]
-	
-							return { ...item, accountData }
-						} catch (error) {
-							console.error(`Error al obtener datos de la cuenta ${item.cuentas}:`, error)
-							return item
-						}
-					})
-				)
-				setValidAccounts(updatedValidRows)
+			)
+			setValidAccounts(updatedValidRows)
 			} catch (error) {
 				console.error("Error al leer el archivo Excel:", error)
 			} finally {
@@ -70,10 +85,6 @@ export default function Formatos({ setPreview, setSeleccionFormato }) {
 			}
 		}
 		reader.readAsArrayBuffer(file)
-	}
-
-	const generarFormatos  = async () => {
-		console.log(validAccounts)
 	}
 
 	const openPreviewFinales = (cuenta, data) => {
@@ -140,7 +151,7 @@ export default function Formatos({ setPreview, setSeleccionFormato }) {
                                 bgcolor: 'secondary.main',
                                 '&:hover': { bgcolor: 'secondary.dark' }
                             }}
-							onClick={() => generarFormatos()}
+							onClick={() => setOpenConfirmation(true)}
                         >
                             Crear formatos
                         </Button>
@@ -221,4 +232,11 @@ export default function Formatos({ setPreview, setSeleccionFormato }) {
 Formatos.propTypes = {
     setPreview: PropTypes.func,
     setSeleccionFormato: PropTypes.func,
+	setOpenConfirmation: PropTypes.func,
+	validAccounts: PropTypes.object,
+	setValidAccounts: PropTypes.func,
+	invalidAccounts: PropTypes.object,
+	setInvalidAccounts: PropTypes.func,
+	fileName: PropTypes.object, 
+	setFileName: PropTypes.func
 }
