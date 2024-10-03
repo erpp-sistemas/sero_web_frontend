@@ -6,7 +6,7 @@ import ServiceSelect from '../../components/ServiceSelect'
 import ProcessSelect from '../../components/ProcessSelectMultipleChip'
 import { validPaymentRequest } from '../../api/payment.js'
 import { useSelector } from 'react-redux'
-import { Box, useTheme, Button, Avatar, InputAdornment, Divider, Typography } from "@mui/material";
+import { Box, useTheme, Button, Avatar, InputAdornment, Divider, Typography, Card, CardMedia } from "@mui/material";
 import Viewer from 'react-viewer';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
@@ -154,8 +154,7 @@ const Index = () => {
 
           setResultOriginal(response.data)
           setTypeFilter(1)
-          setTitleFilter('Registros Encontrados')
-          console.log(response.data)
+          setTitleFilter('Registros Encontrados')          
 
           const fechas = response.data.map(item => new Date(item["fecha de pago"]));
           
@@ -473,19 +472,19 @@ const Index = () => {
             return null;
           }
 
-          if (key === 'urlImagenFachada' || key === 'urlImagenEvidencia') {
-            return {
-              field: key,
-              headerName: key.toUpperCase(),
-              renderHeader: () => (
-                <strong style={{ color: "#5EBFFF" }}>{key.toUpperCase()}</strong>
-              ),
-              renderCell: (params) => <AvatarImage data={params.value} />,              
-              width: 150,
-              sortable: false,
-              filterable: false,
-            };
-          }
+          // if (key === 'urlImagenFachada' || key === 'urlImagenEvidencia') {
+          //   return {
+          //     field: key,
+          //     headerName: key.toUpperCase(),
+          //     renderHeader: () => (
+          //       <strong style={{ color: "#5EBFFF" }}>{key.toUpperCase()}</strong>
+          //     ),
+          //     renderCell: (params) => <AvatarImage data={params.value} />,              
+          //     width: 150,
+          //     sortable: false,
+          //     filterable: false,
+          //   };
+          // }
 
           if (key === 'foto fachada predio') {
             return {
@@ -543,6 +542,84 @@ const Index = () => {
                   color={params.value === 'valida' ? 'secondary' : 'error'}
                   variant="outlined"
                 />
+              ),
+              width: 150,
+              sortable: false,
+              filterable: false,
+            };
+          }
+
+          if (key === 'urlImagenFachada') {
+            return {
+              field: key,
+              headerName: key.toUpperCase(),
+              renderHeader: () => (
+                <strong style={{ color: "#5EBFFF" }}>{key.toUpperCase()}</strong>
+              ),
+              renderCell: (params) => (
+                params.row.urlImagenFachada ? (
+                  <Card
+                    sx={{ 
+                      maxWidth: 150,
+                      height: '100%', 
+                      display: 'flex',
+                      alignItems: 'center',
+                      border: '2px solid #5EBFFF',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <CardMedia
+                     component="img"
+                     height="100%"
+                     image={params.row.urlImagenFachada}
+                     alt="Foto fachada 1"
+                     sx={{ 
+                       objectFit: 'cover'
+                     }}                     
+                    />                
+                  </Card>
+                ) : (
+                  <Typography>No disponible</Typography>
+                )
+              ),
+              width: 150,
+              sortable: false,
+              filterable: false,
+            };
+          }
+
+          if (key === 'urlImagenEvidencia') {
+            return {
+              field: key,
+              headerName: key.toUpperCase(),
+              renderHeader: () => (
+                <strong style={{ color: "#5EBFFF" }}>{key.toUpperCase()}</strong>
+              ),
+              renderCell: (params) => (
+                params.row.urlImagenEvidencia ? (
+                  <Card
+                    sx={{ 
+                      maxWidth: 150,
+                      height: '100%', 
+                      display: 'flex',
+                      alignItems: 'center',
+                      border: '2px solid #5EBFFF',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <CardMedia
+                     component="img"
+                     height="100%"
+                     image={params.row.urlImagenEvidencia}
+                     alt="Foto evidencia 1"
+                     sx={{ 
+                       objectFit: 'cover'
+                     }}                     
+                    />                
+                  </Card>
+                ) : (
+                  <Typography>No disponible</Typography>
+                )
               ),
               width: 150,
               sortable: false,
