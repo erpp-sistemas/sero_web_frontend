@@ -472,20 +472,6 @@ const Index = () => {
             return null;
           }
 
-          // if (key === 'urlImagenFachada' || key === 'urlImagenEvidencia') {
-          //   return {
-          //     field: key,
-          //     headerName: key.toUpperCase(),
-          //     renderHeader: () => (
-          //       <strong style={{ color: "#5EBFFF" }}>{key.toUpperCase()}</strong>
-          //     ),
-          //     renderCell: (params) => <AvatarImage data={params.value} />,              
-          //     width: 150,
-          //     sortable: false,
-          //     filterable: false,
-          //   };
-          // }
-
           if (key === 'foto fachada predio') {
             return {
               field: key,
@@ -498,12 +484,10 @@ const Index = () => {
                   icon={params.value === 'si' ? <CheckCircleIcon style={{ color: 'green' }} /> : <ErrorIcon style={{ color: 'red' }} />}
                   label={params.value}
                   color={params.value === 'si' ? 'secondary' : 'error'}
-                  variant="outlined"
+                  variant="outlined"                  
                 />
               ),
-              width: 150,
-              sortable: false,
-              filterable: false,
+              width: 150,              
             };
           }
 
@@ -519,12 +503,10 @@ const Index = () => {
                   icon={params.value === 'si' ? <CheckCircleIcon style={{ color: 'green' }} /> : <ErrorIcon style={{ color: 'red' }} />}
                   label={params.value}
                   color={params.value === 'si' ? 'secondary' : 'error'}
-                  variant="outlined"
+                  variant="outlined"                  
                 />
               ),
-              width: 150,
-              sortable: false,
-              filterable: false,
+              width: 150,              
             };
           }
 
@@ -540,12 +522,10 @@ const Index = () => {
                   icon={params.value === 'valida' ? <CheckCircleIcon style={{ color: 'green' }} /> : <ErrorIcon style={{ color: 'red' }} />}
                   label={params.value}
                   color={params.value === 'valida' ? 'secondary' : 'error'}
-                  variant="outlined"
+                  variant="outlined"                  
                 />
               ),
-              width: 150,
-              sortable: false,
-              filterable: false,
+              width: 150,              
             };
           }
 
@@ -570,21 +550,19 @@ const Index = () => {
                   >
                     <CardMedia
                      component="img"
-                     height="100%"
+                      height="100%"
                      image={params.row.urlImagenFachada}
                      alt="Foto fachada 1"
-                     sx={{ 
+                     sx={{                       
                        objectFit: 'cover'
-                     }}                     
+                     }}
                     />                
                   </Card>
                 ) : (
                   <Typography>No disponible</Typography>
                 )
               ),
-              width: 150,
-              sortable: false,
-              filterable: false,
+              width: 150,              
             };
           }
 
@@ -608,22 +586,20 @@ const Index = () => {
                     }}
                   >
                     <CardMedia
-                     component="img"
-                     height="100%"
+                      component="img"
+                      height="100%"
                      image={params.row.urlImagenEvidencia}
                      alt="Foto evidencia 1"
-                     sx={{ 
+                     sx={{
                        objectFit: 'cover'
-                     }}                     
+                     }}
                     />                
                   </Card>
                 ) : (
                   <Typography>No disponible</Typography>
                 )
               ),
-              width: 150,
-              sortable: false,
-              filterable: false,
+              width: 150,              
             };
           }
   
@@ -962,6 +938,7 @@ const Index = () => {
                         rows={filteredResult.length > 0 ? filteredResult : result}
                         columns={columns}
                         getRowId={(row) => row.id}
+                        rowHeight={130}
                         editable={false}                         
                         slots={{ toolbar: CustomToolbar}}                        
                       />

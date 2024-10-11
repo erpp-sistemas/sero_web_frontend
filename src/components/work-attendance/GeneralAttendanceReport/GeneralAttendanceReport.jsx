@@ -8,6 +8,7 @@ import * as ExcelJS from "exceljs";
 import ModalTable from '../ModalTable.jsx'
 import FilteredList from "./FilteredList/FilteredList.jsx";
 import Viewer from "react-viewer";
+import IndividualAttendanceReportButton from "./IndividualAttendanceReportButton.jsx";
 
 function GeneralAttendanceReport({ data, reportWorkHoursData }) {
 
@@ -419,21 +420,20 @@ function GeneralAttendanceReport({ data, reportWorkHoursData }) {
               <Typography 
                 variant="h4" 
                 align="center" 
-                sx={{ fontWeight: 'bold', paddingTop: 1 }}
+                sx={{ fontWeight: 'bold', paddingTop: 1, paddingBottom: 2 }}
               >
                 Listado General de Asistencia
               </Typography>
             </Grid>
             
-            <Grid 
-              item 
-              xs={8} 
+            <Grid                
+              xs={12} 
               container
               alignItems="center"
               spacing={2} 
               sx={{ paddingBottom: 1 }}
             >
-              <Grid item xs={6}>
+              <Grid item xs={4}>
                 <FormControl fullWidth>
                   <TextField
                     fullWidth
@@ -472,6 +472,13 @@ function GeneralAttendanceReport({ data, reportWorkHoursData }) {
                 >
                   Exportar
                 </Button>
+              </Grid>
+              <Grid 
+                item 
+                xs={2}
+                sx={{ marginLeft: 1 }}
+              >
+                <IndividualAttendanceReportButton data ={ filteredUsers.length > 0 ? filteredUsers : data }/>
               </Grid>
             </Grid>
           </Grid>

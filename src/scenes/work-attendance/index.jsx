@@ -74,6 +74,9 @@ const Index = () => {
 			setUsers(JSON.parse(response.data[0].GeneralAttendanceReport));
 			setGeneralAttendanceReportData(JSON.parse(response.data[0].GeneralAttendanceReport))
 			setReportWorkHoursData(JSON.parse(response.data[0].ReportWorkHours))
+
+      console.log(JSON.parse(response.data[0].GeneralAttendanceReport))
+      console.log(JSON.parse(response.data[0].ReportWorkHours))
 			
 			setIsLoading(false)
 
