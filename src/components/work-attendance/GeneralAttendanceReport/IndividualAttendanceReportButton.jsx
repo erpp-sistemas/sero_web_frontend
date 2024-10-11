@@ -63,6 +63,7 @@ const IndividualAttendanceReportButton = ({ data }) => {
         'Hora Salida',
         'Retardos',
         'Faltas',
+        'Observaciones',
       ];
 
       sheet.addRow([]); // Fila vacía para separar el título
@@ -107,6 +108,7 @@ const IndividualAttendanceReportButton = ({ data }) => {
           horaSalida,
           retardo,
           falta,
+          '',
         ];
 
         const excelRow = sheet.addRow(row);
