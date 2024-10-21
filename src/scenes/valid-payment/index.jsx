@@ -158,12 +158,12 @@ const Index = () => {
 
           const fechas = response.data.map(item => new Date(item["fecha de pago"]));
           
-          const fechaMasGrande = new Date(Math.max(...fechas));
-          const fechaMasChica = new Date(Math.min(...fechas));          
+          const fechaMasGrande = new Date(Math.max(...fechas.map(fecha => fecha.getTime())));
+          const fechaMasChica = new Date(Math.min(...fechas.map(fecha => fecha.getTime())));
           
-          const opciones = { year: 'numeric', month: '2-digit', day: '2-digit' };
+          const opciones = { year: 'numeric', month: '2-digit', day: '2-digit', timeZone: 'UTC' };
           const fechaMayorFormateada = fechaMasGrande.toLocaleDateString('es-ES', opciones);
-          const fechaMenorFormateada = fechaMasChica.toLocaleDateString('es-ES', opciones);
+          const fechaMenorFormateada = fechaMasChica.toLocaleDateString('es-ES', opciones);          
           
           setPaymentDateRange(`${fechaMenorFormateada} - ${fechaMayorFormateada}`)
 
