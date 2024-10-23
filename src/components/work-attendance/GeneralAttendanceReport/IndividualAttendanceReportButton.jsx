@@ -94,7 +94,10 @@ const IndividualAttendanceReportButton = ({ data }) => {
         const isSunday = dayjs(date).day() === 0; // 0 indica que es domingo
 
         const retardo = recordForDate?.estatus_entrada === 'Retardo' ? 1 : 0;
-        const falta = recordForDate?.estatus_entrada === 'Falta' || recordForDate?.estatus_salida === 'Falta' ? 1 : 0;
+        const falta = recordForDate?.estatus_entrada === 'Falta' 
+              || recordForDate?.estatus_salida === 'Falta' 
+              || recordForDate?.estatus_salida === 'Registro incompleto'
+              || recordForDate?.estatus_salida === 'Dia incompleto' ? 1 : 0;
 
         totalRetardos += retardo;
         totalFaltas += falta;
@@ -154,6 +157,20 @@ const IndividualAttendanceReportButton = ({ data }) => {
             fgColor: { argb: 'FFFFE699' }, // Color naranja
           };
         }
+
+        // Resaltar en naranja cuando estatus_salida es 'Registro incompleto' o 'Dia incompleto'
+        if (recordForDate?.estatus_salida === 'Registro incompleto' || recordForDate?.estatus_salida === 'Dia incompleto') {
+          excelRow.getCell(2).fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFFFE699' }, // Color naranja
+          };
+          excelRow.getCell(3).fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFFFE699' }, // Color naranja
+          };
+        }
       });
 
       // Agregar el resumen de retardos, faltas y descuentos al final de la hoja
@@ -163,7 +180,7 @@ const IndividualAttendanceReportButton = ({ data }) => {
       resumenHeaderRow.alignment = { horizontal: 'center' };
       sheet.mergeCells(`A${resumenHeaderRow.number}:E${resumenHeaderRow.number}`);
 
-      const totalDescuentos = Math.floor(totalRetardos / 3); // Cada 3 retardos es 1 descuento
+      const totalDescuentos = Math.floor(totalRetardos / 3) + totalFaltas; // Cada 3 retardos es 1 descuento
 
       // Agregar las filas del resumen con totales
       sheet.addRow(['Total de Retardos', totalRetardos]);

@@ -153,6 +153,7 @@ const Index = () => {
           const response = await validPaymentRequest(selectedPlace, selectedService, selectedProcess,selectedValidDays, selectedStartDate, selectedFinishDate, type);
 
           setResultOriginal(response.data)
+          console.log(response.data)
           setTypeFilter(1)
           setTitleFilter('Registros Encontrados')          
 

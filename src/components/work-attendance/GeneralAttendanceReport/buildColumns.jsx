@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { AccessTime, AccessTimeRounded, Apartment, CalendarMonth, Dangerous, EditRoad, InsertEmoticon, Padding, PersonPinCircle, SentimentVeryDissatisfied, SentimentVeryDissatisfiedOutlined, WarningAmber } from "@mui/icons-material";
+import { AccessTime, AccessTimeRounded, Apartment, CalendarMonth, Dangerous, EditRoad, InsertEmoticon, Padding, PersonPinCircle, RunningWithErrors, SentimentVeryDissatisfied, SentimentVeryDissatisfiedOutlined, WarningAmber } from "@mui/icons-material";
 import Viewer from "react-viewer";
 import { useTheme, Box, Grid, Typography, Avatar, Chip } from "@mui/material";
 
@@ -250,6 +250,11 @@ function buildColumns() {
         icon = <SentimentVeryDissatisfiedOutlined/>;
         chipColor = 'error';
         chipLabel = 'Dia incompleto';
+        break;
+        case 'Registro incompleto':
+        icon = <RunningWithErrors/>;
+        chipColor = 'error';
+        chipLabel = 'Registro incompleto';
         break;
         default:
         icon = null;

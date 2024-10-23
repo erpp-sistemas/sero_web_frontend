@@ -12,6 +12,7 @@ import PersonPinCircleIcon from '@mui/icons-material/PersonPinCircle';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import SentimentVeryDissatisfiedIcon from '@mui/icons-material/SentimentVeryDissatisfied';
 import ImageViewerModal from '../../components/ImageViewerModal.jsx'
+import { RunningWithErrors } from '@mui/icons-material';
 
 const ModalTable = ({ open, onClose, data }) => {
     const columns = [
@@ -94,7 +95,7 @@ const ModalTable = ({ open, onClose, data }) => {
               icon = <SentimentVeryDissatisfiedIcon/>;
               chipColor = 'error';
               chipLabel = 'Día incompleto';
-              break;
+              break;            
             default:
               icon = null;
               chipColor = 'primary';
@@ -208,6 +209,11 @@ const ModalTable = ({ open, onClose, data }) => {
               icon = <SentimentVeryDissatisfiedIcon/>;
               chipColor = 'error';
               chipLabel = 'Dia incompleto';
+              break;
+            case 'Registro incompleto':
+              icon = <RunningWithErrors/>;
+              chipColor = 'error';
+              chipLabel = 'Registro incompleto';
               break;
             default:
               icon = null;

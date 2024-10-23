@@ -1,6 +1,6 @@
 import React from "react";
 import { List, ListItem, ListItemAvatar, Avatar, ListItemText, ListItemSecondaryAction, Tooltip, IconButton, Divider, ListItemIcon, Typography } from "@mui/material";
-import { DoneAll, CloudDownload, Preview, SubdirectoryArrowRight, SubdirectoryArrowLeft, Warning, Error } from "@mui/icons-material";
+import { DoneAll, CloudDownload, Preview, SubdirectoryArrowRight, SubdirectoryArrowLeft, Warning, Error, RunningWithErrors } from "@mui/icons-material";
 
 const FilteredList = ({ resultCountsEntry, resultCountsExit, handleDownloadExcel, handleOpenModal, totalRecords, colors, theme }) => { 
   if (!totalRecords) {
@@ -12,6 +12,7 @@ const FilteredList = ({ resultCountsEntry, resultCountsExit, handleDownloadExcel
     "Retardo": <Warning color="warning" />,
     "Falta": <Error color="error" />,
     "Dia incompleto": <Warning color="warning" />,
+    "Registro incompleto": <RunningWithErrors color="error" />,
   };
 
   return (    
