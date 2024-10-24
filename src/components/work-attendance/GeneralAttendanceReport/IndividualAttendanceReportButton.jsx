@@ -149,12 +149,12 @@ const IndividualAttendanceReportButton = ({ data }) => {
           excelRow.getCell(2).fill = {
             type: 'pattern',
             pattern: 'solid',
-            fgColor: { argb: 'FFFFE699' }, // Color naranja
+            fgColor: { argb: 'FFFFA500' }, // Color naranja
           };
           excelRow.getCell(3).fill = {
             type: 'pattern',
             pattern: 'solid',
-            fgColor: { argb: 'FFFFE699' }, // Color naranja
+            fgColor: { argb: 'FFFFA500' }, // Color naranja
           };
         }
 
@@ -163,12 +163,12 @@ const IndividualAttendanceReportButton = ({ data }) => {
           excelRow.getCell(2).fill = {
             type: 'pattern',
             pattern: 'solid',
-            fgColor: { argb: 'FFFFE699' }, // Color naranja
+            fgColor: { argb: 'FFDEE817' }, // Color amarillo
           };
           excelRow.getCell(3).fill = {
             type: 'pattern',
             pattern: 'solid',
-            fgColor: { argb: 'FFFFE699' }, // Color naranja
+            fgColor: { argb: 'FFDEE817' }, // Color amarillo
           };
         }
       });
