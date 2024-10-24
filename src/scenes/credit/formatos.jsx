@@ -62,6 +62,7 @@ export default function Formatos({ setPreview, setSeleccionFormato, setOpenConfi
 						bimestre_inicio: item.bimestre_incio,
 						folio: item.expediente,
 						notificacion: item.notificacion,
+						ejecucion: item.ejecucion,
 						clave_catastral: accountData.catastroCentral[0].clave_catastral,
 						domicilio: accountData.catastroCentral[0].direccion,
 						nombre: accountData.catastroCentral[0].propietario,
