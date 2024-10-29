@@ -1,9 +1,8 @@
-import { useState, useffect, forwardRef } from 'react';
+import { useState, forwardRef } from 'react';
 import { useSelector } from 'react-redux'
-import { Box, Typography, useTheme, FormControl, InputLabel, NativeSelect } from "@mui/material";
+import { useTheme } from "@mui/material";
 
 import IconButton from '@mui/material/IconButton'
-import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -11,11 +10,13 @@ import Slide from '@mui/material/Slide';
 import { tokens } from "../../theme";
 import Modal from '../MaterialUI/Modal'
 import PlumbingIcon from '@mui/icons-material/Plumbing';
-import { CSVLink } from 'react-csv';
+//import { CSVLink } from 'react-csv';
 
 import { getIcon } from '../../data/Icons';
 import ButtonUi from './Button';
 import SelectLayer from './SelectLayer';
+import TrackingGestor from './TrackingGestor';
+import RouteGestor from './RouteGestor';
 
 
 const Transition = forwardRef(function Transition(props, ref) {
@@ -23,17 +24,14 @@ const Transition = forwardRef(function Transition(props, ref) {
 });
 
 const colors_palette = [
-    '#0000ff', '#5f9ea0', '#d2691e', '#008b8b', '#006400', '#8b008b', '#8b0000', '#483d8b', '#2f4f4f', '#ffd600', '#ff69b4', '#f08080', '#add8e6', '#20b2aa', '#32cd32', '#ff00ff', '#800000', '#9370db', '#7b68ee', '#ffdead', '#ffa500', '#afeeee', '#800080', '#4169e1', '#fa8072', '#4682b4', '#40e0d0', '#f5f5f5', '#ffff00', '#9acd32', '#ff0000', '#00fffb', '#ff00d4', '#bf00ff', '#00ffa6'
-];
+    '#0000ff', '#5f9ea0', '#d2691e', '#008b8b', '#006400', '#8b008b', '#8b0000', '#483d8b', '#2f4f4f', '#ffd600', '#ff69b4', '#f08080', '#add8e6', '#20b2aa', '#32cd32', '#ff00ff', '#800000', '#9370db', '#7b68ee', '#ffdead', '#ffa500', '#afeeee', '#800080', '#4169e1', '#fa8072', '#4682b4', '#40e0d0', '#f5f5f5', '#ffff00', '#9acd32', '#ff0000', '#00fffb',];
 
 
 
 export default function AlertDialogSlide() {
 
-
     const mapa_activo = useSelector((state) => state.mapa)
     const features = useSelector((state) => state.features)
-
 
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
@@ -47,6 +45,17 @@ export default function AlertDialogSlide() {
     const [showModalCluster, setShowModalCluster] = useState(false)
     const [mapaCalorCreado, setMapaCalorCreado] = useState(false)
 
+    //* TRACKING
+    const [startTracking, setStartTracking] = useState(false);
+    const [positionsUser, setPositionsUser] = useState([]);
+    const [markers, setMarkers] = useState({});
+    const [showMarkers, setShowMarkers] = useState(true);
+
+    //* ROUTE
+    const [rutaDibujada, setRutaDibujada] = useState(false);
+    const [markersRoute, setMarkersRoute] = useState([]);
+    const [gestorSeleccionado, setGestorSeleccionado] = useState({});
+    const [fechaSeleccionada, setFechaSeleccionada] = useState('');
 
 
     const handleClickOpen = () => {
@@ -76,10 +85,10 @@ export default function AlertDialogSlide() {
         mapa_activo.mapa.setPaintProperty(idLayerSeleccionado, 'circle-color', color)
     }
 
-    const generateCSV = () => {
-        const data = features.puntos_in_poligono.map(f => f.properties)
-        return data
-    }
+    // const generateCSV = () => {
+    //     const data = features.puntos_in_poligono.map(f => f.properties)
+    //     return data
+    // }
 
     const handleActivaCluster = async () => {
         const layer = features.layers_activos.filter(l => l.layer_id == idLayerSeleccionado)[0];
@@ -159,8 +168,6 @@ export default function AlertDialogSlide() {
             paint: { 'circle-radius': ['/', 7.142857142857142, 2], 'circle-color': layer.color, 'circle-opacity': layer.opacidad, 'circle-stroke-width': 1, 'circle-stroke-color': '#232323' }
         });
 
-
-
     }
 
     const handleDesactivaCluster = () => {
@@ -188,6 +195,11 @@ export default function AlertDialogSlide() {
         return data;
     }
 
+    const handleBackTools = () => {
+        setShowButtonsHerramientas(true);
+        setNombreHerramientaSeleccionada('');
+    }
+
     return (
         <>
             {showModalCluster && (<Modal title={'Generando mapa de calor'.toUpperCase()} />)}
@@ -201,26 +213,66 @@ export default function AlertDialogSlide() {
                 onClose={handleClose}
                 aria-describedby="alert-dialog-slide-description"
                 sx={{ width: '100%' }}
+                fullWidth={true}
+                maxWidth={'sm'}
             >
-                <DialogTitle>{showButtonsHerramientas ? "HERRAMIENTAS DEL MAPA" : nombreHerramientaSeleccionada.toUpperCase()}</DialogTitle>
-                <DialogContent>
-
+                <DialogTitle sx={{ backgroundColor: '#F4F3F2', color: 'black', textAlign: 'center', borderTop: '1px solid black' }}>
+                    {showButtonsHerramientas && <div>HERRAMIENTAS DEL MAPA</div>}
+                    {!showButtonsHerramientas && (
+                        <>
+                            <div className="flex items-center gap-10">
+                                <button onClick={handleBackTools}>
+                                    {getIcon('ArrowBackIcon', {})}
+                                </button>
+                                <h1 className="font-semibold">{nombreHerramientaSeleccionada.toUpperCase()}</h1>
+                            </div>
+                            <div className="w-11/12 mx-auto bg-gray-900 h-1 rounded-md mt-4 opacity-50"></div>
+                        </>
+                    )}
+                </DialogTitle>
+                <DialogContent sx={{ backgroundColor: '#F4F3F2', borderBottom: '2px solid black', padding: '40px 0' }}>
                     {showButtonsHerramientas && (
-                        <div className="flex flex-col justify-center">
-                            <ButtonUi title='Cambio de color' bgColor={colors.blueAccent[400]} width='300px' padding='6px' fontWeight='' bgColorHover={colors.blueAccent[300]} handle={() => handleButtonHerramienta('Cambio de color')} mt='10px' icon={getIcon('ColorLensIcon', {})} />
+                        <>
+                            <div className="w-11/12 mx-auto bg-gray-900 h-1 rounded-md mb-4 opacity-50"></div>
 
-                            <ButtonUi title='Dibujar poligono' bgColor={colors.blueAccent[400]} width='300px' padding='6px' fontWeight='' bgColorHover={colors.blueAccent[300]} handle={() => handleButtonHerramienta('Dibujar poligono')} mt='10px' icon={getIcon('PolylineIcon', {})} />
+                            <div className="flex flex-wrap gap-6 justify-center font-mono">
+                                <button className="bg-neutral-50 text-gray-900 border-r-2 border-cyan-600 px-4 py-1 rounded-md flex gap-2 flex-col items-center justify-center w-1/4 shadow-lg "
+                                    onClick={() => handleButtonHerramienta('Cambio de color')}
+                                >
+                                    {getIcon('ColorLensIcon', { fontSize: '30px', color: 'black' })}
+                                    Cambio de color
+                                </button>
+                                <button className="bg-neutral-50 text-gray-900 border-r-2 border-cyan-600 px-4 py-1 rounded-md flex gap-2 flex-col items-center justify-center w-1/4 shadow-lg"
+                                    onClick={() => handleButtonHerramienta('Dibujar poligono')}
+                                >
+                                    {getIcon('PolylineIcon', { fontSize: '30px', color: 'black' })}
+                                    Dibujar Poligono
+                                </button>
+                                <button className="bg-neutral-50 text-gray-900 border-r-2 border-cyan-600 px-4 py-1 rounded-md flex gap-2 flex-col items-center justify-center w-1/4 shadow-lg"
+                                    onClick={() => handleButtonHerramienta('Mapa de calor')}
+                                >
+                                    {getIcon('FiberSmartRecordIcon', { fontSize: '30px', color: 'black' })}
+                                    Mapa de calor
+                                </button>
+                                <button className="bg-neutral-50 text-gray-900 border-r-2 border-cyan-600 px-4 py-1 rounded-md flex gap-2 flex-col items-center justify-center w-1/4 shadow-lg"
+                                    onClick={() => handleButtonHerramienta('Seguimiento gestores')}
+                                >
+                                    {getIcon('GpsFixedIcon', { fontSize: '30px', color: 'black' })}
+                                    Seguimiento
+                                </button>
+                                <button className="bg-neutral-50 text-gray-900 border-r-2  border-cyan-600 px-4 py-1 rounded-md flex gap-2 flex-col items-center justify-center w-1/4 shadow-lg"
+                                    onClick={() => handleButtonHerramienta('Ruta gestor')}
+                                >
+                                    {getIcon('PlaceIcon', { fontSize: '30px', color: 'black' })}
+                                    Ruta
+                                </button>
 
-                            <ButtonUi title='Mapa de calor' bgColor={colors.blueAccent[400]} width='300px' padding='6px' fontWeight='' bgColorHover={colors.blueAccent[300]} handle={() => handleButtonHerramienta('Mapa de calor')} mt='10px' icon={getIcon('FiberSmartRecordIcon', {})} />
-
-                            <ButtonUi title='Tracking a gestores' bgColor={colors.blueAccent[400]} width='300px' padding='6px' fontWeight='' bgColorHover={colors.blueAccent[300]} handle={() => handleButtonHerramienta('tracking')} mt='10px' icon={getIcon('GpsFixedIcon', {})} />
-                        </div>
+                            </div>
+                        </>
                     )}
 
-
-
                     {nombreHerramientaSeleccionada === 'Cambio de color' && (
-                        <div className='md:w-[400px] px-2'>
+                        <div className='px-2'>
                             <SelectLayer features={features} setIdLayerSeleccionado={setIdLayerSeleccionado} />
                             <div className="flex justify-evenly flex-wrap gap-3 mt-5">
                                 {colors_palette.map(color => (
@@ -231,7 +283,7 @@ export default function AlertDialogSlide() {
                     )}
 
                     {nombreHerramientaSeleccionada === 'Mapa de calor' && !showButtonsHerramientas && (
-                        <div className="md:w-[400px]">
+                        <div className="px-10">
                             {!mapaCalorCreado && <SelectLayer features={features} setIdLayerSeleccionado={setIdLayerSeleccionado} />}
 
                             {mapaCalorCreado && showButtonsHerramientas === false && (
@@ -256,10 +308,27 @@ export default function AlertDialogSlide() {
                         </div>
                     )}
 
-                
+                    {nombreHerramientaSeleccionada === 'Seguimiento gestores' && showButtonsHerramientas === false && (
+                        <TrackingGestor data={{
+                            startTracking, setStartTracking, positionsUser, setPositionsUser,
+                            markers, setMarkers, showMarkers, setShowMarkers,
+                            setShowTools: setOpen
+                        }} />
+                    )}
+
+                    {nombreHerramientaSeleccionada === 'Ruta gestor' && showButtonsHerramientas === false && (
+                        <RouteGestor data={{
+                            rutaDibujada, setRutaDibujada, markersRoute, setMarkersRoute,
+                            gestorSeleccionado, setGestorSeleccionado, fechaSeleccionada, setFechaSeleccionada,
+                            setShowTools: setOpen
+                        }} />
+                    )}
+
+
                 </DialogContent>
 
             </Dialog>
         </>
     );
 }
+

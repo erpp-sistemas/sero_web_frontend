@@ -60,10 +60,16 @@ import PieChartIcon from '@mui/icons-material/PieChart';
 import BrushIcon from '@mui/icons-material/Brush';
 import InfoIcon from '@mui/icons-material/Info';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import NotStartedIcon from '@mui/icons-material/NotStarted';
+import HelpIcon from '@mui/icons-material/Help';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 export const getIcon = (icon, style) => {
 
      let obj = {
+          "ArrowBackIcon": <ArrowBackIcon sx={style} />,
+          "HelpIcon": <HelpIcon sx={style} />,
+          "NotStartedIcon": <NotStartedIcon sx={style} />,
           "PictureAsPdfIcon": <PictureAsPdfIcon sx={style} />,
           "InfoIcon": <InfoIcon sx={style} />,
           "BrushIcon": <BrushIcon sx={style} />,
@@ -111,19 +117,19 @@ export const getIcon = (icon, style) => {
           "MenuOutlinedIcon": <MenuOutlinedIcon sx={style} />,
           "LogoutIcon": <LogoutIcon sx={style} />,
           "ArticleIcon": <ArticleIcon sx={style} />,
-          "AccessAlarmIcon": <AccessAlarmIcon sx={style} />,
-          "GroupsIcon": <GroupsIcon sx={style} />,
+          // "AccessAlarmIcon": <AccessAlarmIcon sx={style} />,
+          // "GroupsIcon": <GroupsIcon sx={style} />,
           "DiscountIcon": <DiscountIcon sx={style} />,
-          "BuildIcon": <BuildIcon sx={style} />,
-          "MemoryIcon": <MemoryIcon sx={style} />,
-          "WidgetsIcon": <WidgetsIcon sx={style} />,
-          "DesktopAccessDisabledIcon": <DesktopAccessDisabledIcon sx={style} />,
-          "AssignmentIcon": <AssignmentIcon sx={style} />,
-          "AppRegistrationIcon": <AppRegistrationIcon sx={style} />,
+          // "BuildIcon": <BuildIcon sx={style} />,
+          // "MemoryIcon": <MemoryIcon sx={style} />,
+          // "WidgetsIcon": <WidgetsIcon sx={style} />,
+          // "DesktopAccessDisabledIcon": <DesktopAccessDisabledIcon sx={style} />,
+          // "AssignmentIcon": <AssignmentIcon sx={style} />,
+          // "AppRegistrationIcon": <AppRegistrationIcon sx={style} />,
           "CalendarMonthIcon": <CalendarMonthIcon sx={style} />,
           "MapIcon": <MapIcon sx={style} />,
           "WhatsAppIcon": <WhatsAppIcon sx={style} />,
-          "ContactMailIcon": <ContactMailIcon sx={style} />,
+          // "ContactMailIcon": <ContactMailIcon sx={style} />,
           "HomeIcon": <HomeIcon sx={style} />,
           "Searchicon": <SearchIcon sx={style} />
      }

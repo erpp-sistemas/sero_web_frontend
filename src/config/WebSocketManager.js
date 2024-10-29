@@ -18,7 +18,7 @@ export const initializeWebSocket = (dispatch) => {
         socket = new WebSocket(url);
 
         socket.onopen = () => {
-            //console.log('WebSocket connected');
+            console.log('WebSocket connected');
             reconnectAttempts = 0;
             dispatch(setSocket(socket));
         };

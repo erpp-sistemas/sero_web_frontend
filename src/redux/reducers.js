@@ -4,7 +4,8 @@ import placeReducer from "../features/place/placeSlice"
 import plazaMapaReducer from "./plazaMapa.Slice"
 import featuresReducer from "./featuresSlice"
 import dialogReducer from "./dialogSlice"
-import mapaReducer from "./mapaSlice"
+import mapaReducer from "./mapaSlice";
+import socketReducer from './socketSlice';
 import accountData from "./accountDataSlice"
 import actions from "./actionsSlice"
 import alertInfo from "./alertInfoSlice"
@@ -35,7 +36,7 @@ import editarInformacionGeneralSlice from "./vehiculosSlices/editarInformacionGe
 import estadoAsignacionSlice from "./vehiculosSlices/estadoAsignacion.js"
 import editarVehiculoSlice from "./vehiculosSlices/editarVehiculoSlice.js"
 import comentariosSlice from "./vehiculosSlices/comentariosSlice.js"
-import creditSlice from "./creditSlice.js"
+import creditSlice from "./creditSlice.js";
 
 const rootReducer = combineReducers({
 	user: userReducer,
@@ -44,6 +45,7 @@ const rootReducer = combineReducers({
 	features: featuresReducer,
 	dialog: dialogReducer,
 	mapa: mapaReducer,
+	webSocket: socketReducer,
 	account: accountData,
 	actions: actions,
 	alertInfo: alertInfo,

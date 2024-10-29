@@ -14,6 +14,7 @@ const Index = () => {
     useEffect(() => {
         const getPlazasByUser = async () => {
             const res = await getPlacesByUserId(user.user_id);
+            console.log(res)
             setPlazas(res);
         }
         getPlazasByUser();

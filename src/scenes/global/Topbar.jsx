@@ -44,7 +44,7 @@ const Topbar = () => {
         {location.pathname === `/map/${mapa_seleccionado.place_id}` && (
           <>
             {getIcon('LayersIcon', { fontSize: '36px' })}
-            <p className="text-[22px]">
+            <p className="text-[18px] font-mono">
               Sistema de información geográfica
               <span style={{ color: theme.palette.mode === "dark" ? colors.greenAccent[400] : 'black', fontSize: '20px', fontWeight: 'bold' }}>
                 {` ${mapa_seleccionado.name}`}
