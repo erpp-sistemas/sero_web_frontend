@@ -4,7 +4,7 @@ import { tokens } from "../../theme"
 import PlaceSelect from '../../components/PlaceSelect'
 import {workAttendanceRequest} from '../../api/attendance.js'
 import { Box, useTheme, Button } from "@mui/material"
-
+import { useSelector } from 'react-redux'// material ui
 import TextField from '@mui/material/TextField'
 import LoadingModal from '../../components/LoadingModal.jsx'
 import CustomAlert from '../../components/CustomAlert.jsx'
@@ -16,8 +16,9 @@ const Index = () => {
     const theme = useTheme()
     const colors = tokens(theme.palette.mode)
     const [users, setUsers] = useState([])
-	const [generalAttendanceReportData, setGeneralAttendanceReportData] = useState([])	
-	const [reportWorkHoursData, setReportWorkHoursData] = useState([])	
+    const user = useSelector(state => state.user)    
+    const [generalAttendanceReportData, setGeneralAttendanceReportData] = useState([])	
+    const [reportWorkHoursData, setReportWorkHoursData] = useState([])	
     const [selectedPlace, setSelectedPlace] = useState('')
     const [selectedStartDate, setSelectedStartDate] = useState('')
     const [selectedEndDate, setSelectedEndDate] = useState('')
@@ -68,7 +69,9 @@ const Index = () => {
 
 			setIsLoading(true)
 
-			const response = await workAttendanceRequest(selectedPlace, selectedStartDate, selectedEndDate);
+      const user_id_session = user.user_id
+
+			const response = await workAttendanceRequest(selectedPlace, selectedStartDate, selectedEndDate, user_id_session);
 		
 			setNoData('')
 			setUsers(JSON.parse(response.data[0].GeneralAttendanceReport));
