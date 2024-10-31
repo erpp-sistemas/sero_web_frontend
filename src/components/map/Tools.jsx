@@ -11,12 +11,11 @@ import { tokens } from "../../theme";
 import Modal from '../MaterialUI/Modal'
 import PlumbingIcon from '@mui/icons-material/Plumbing';
 //import { CSVLink } from 'react-csv';
-
 import { getIcon } from '../../data/Icons';
-import ButtonUi from './Button';
 import SelectLayer from './SelectLayer';
 import TrackingGestor from './TrackingGestor';
 import RouteGestor from './RouteGestor';
+import Notification from './Notification';
 
 
 const Transition = forwardRef(function Transition(props, ref) {
@@ -267,6 +266,13 @@ export default function AlertDialogSlide() {
                                     Ruta
                                 </button>
 
+                                <button className="bg-neutral-50 text-gray-900 border-r-2  border-cyan-600 px-4 py-1 rounded-md flex gap-2 flex-col items-center justify-center w-1/4 shadow-lg"
+                                    onClick={() => handleButtonHerramienta('Notificación')}
+                                >
+                                    {getIcon('NotificationsOutlinedIcon', { fontSize: '30px', color: 'black' })}
+                                    Notificación
+                                </button>
+
                             </div>
                         </>
                     )}
@@ -320,6 +326,13 @@ export default function AlertDialogSlide() {
                         <RouteGestor data={{
                             rutaDibujada, setRutaDibujada, markersRoute, setMarkersRoute,
                             gestorSeleccionado, setGestorSeleccionado, fechaSeleccionada, setFechaSeleccionada,
+                            setShowTools: setOpen
+                        }} />
+                    )}
+
+                    {nombreHerramientaSeleccionada === 'Notificación' && showButtonsHerramientas === false && (
+                        <Notification data={{
+                            setShowModal: setShowButtonsHerramientas,
                             setShowTools: setOpen
                         }} />
                     )}

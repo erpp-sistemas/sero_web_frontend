@@ -124,3 +124,14 @@ export const getPositionsGestionesGestorByFecha = async (place_id, user_id, fech
 	}
 }
 
+export const getUsersForNotification = async () => {
+	try {
+		const response = await instance.get(`/usuarios`);
+		return response.data;
+	} catch (error) {
+		console.error("Error al obtener a los usuarios",
+			error.response?.data || error.message)
+		throw error.response?.data || error;
+	}
+}
+

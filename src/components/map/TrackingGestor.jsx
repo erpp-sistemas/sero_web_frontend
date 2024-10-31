@@ -27,7 +27,8 @@ const TrackingGestor = ({ data }) => {
     const messages = useSelector((state) => state.webSocket.messages);
     const dispatch = useDispatch()
 
-    const [showModalQuestion, setShowModalQuestion] = useState(false)
+    const [showModalQuestion, setShowModalQuestion] = useState(false);
+    
 
     useEffect(() => {
         if (!showMarkers || messages.length === 0) return;
@@ -92,14 +93,7 @@ const TrackingGestor = ({ data }) => {
 
         const divElement = document.createElement('div');
         const innerHtmlContent = `<div class="popup"><p>${gestor.nombre} ${gestor.apellido_paterno} ${gestor.apellido_materno}</p><p>${fecha}</p></div>`;
-        const assignBtn = document.createElement('div');
-        assignBtn.innerHTML = `<button id="button-notificacion" class="button-notificacion">Enviar notificación</button>`;
         divElement.innerHTML = innerHtmlContent;
-        divElement.appendChild(assignBtn);
-
-        assignBtn.addEventListener('click', () => {
-            handlerNotificacion(gestor);
-        });
 
         const popup = new mapboxgl.Popup({ offset: 25 }).setDOMContent(divElement);
 
@@ -145,7 +139,7 @@ const TrackingGestor = ({ data }) => {
         setShowMarkers(false);
     };
 
-
+    
     return (
         <div>
 
@@ -173,8 +167,7 @@ const TrackingGestor = ({ data }) => {
 
             </div>
 
-
-
+           
         </div>
     )
 
