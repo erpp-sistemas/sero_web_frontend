@@ -16,6 +16,7 @@ import SelectLayer from './SelectLayer';
 import TrackingGestor from './TrackingGestor';
 import RouteGestor from './RouteGestor';
 import Notification from './Notification';
+import Filtros from './Filtros';
 
 
 const Transition = forwardRef(function Transition(props, ref) {
@@ -270,7 +271,13 @@ export default function AlertDialogSlide() {
                                     onClick={() => handleButtonHerramienta('Notificación')}
                                 >
                                     {getIcon('NotificationsOutlinedIcon', { fontSize: '30px', color: 'black' })}
-                                    Notificación
+                                    Notificaciones
+                                </button>
+                                <button className="bg-neutral-50 text-gray-900 border-r-2  border-cyan-600 px-4 py-1 rounded-md flex gap-2 flex-col items-center justify-center w-1/4 shadow-lg"
+                                    onClick={() => handleButtonHerramienta('Filtros')}
+                                >
+                                    {getIcon('FilterAltIcon', { fontSize: '30px', color: 'black' })}
+                                    Filtros
                                 </button>
 
                             </div>
@@ -293,7 +300,7 @@ export default function AlertDialogSlide() {
                             {!mapaCalorCreado && <SelectLayer features={features} setIdLayerSeleccionado={setIdLayerSeleccionado} />}
 
                             {mapaCalorCreado && showButtonsHerramientas === false && (
-                                <p className='m-3 text-center inline-block'>
+                                <p className='m-3 text-center inline-block text-gray-900'>
                                     Capa creada <span className='inline-block mt-2 ml-1' style={{ color: colors.greenAccent[600] }}> {nombreLayerSeleccionado} </span>
                                 </p>
                             )}
@@ -335,6 +342,10 @@ export default function AlertDialogSlide() {
                             setShowModal: setShowButtonsHerramientas,
                             setShowTools: setOpen
                         }} />
+                    )}
+
+                    {nombreHerramientaSeleccionada === 'Filtros' && showButtonsHerramientas === false && (
+                       <Filtros />
                     )}
 
 

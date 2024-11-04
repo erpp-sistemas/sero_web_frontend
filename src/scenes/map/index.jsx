@@ -106,6 +106,8 @@ const Mapa = () => {
                         let coordenadas = features[0].geometry.coordinates;
                         dispatch(setCoordinates(coordenadas))
                     }
+                } else {
+                    dispatch(setCoordinates({}))
                 }
             }
         });
@@ -302,7 +304,7 @@ const Mapa = () => {
                 disabledPoints={disabledPoints} />}
 
             {showModalInfoPolygons && <ModalInfoPolygons setShowModal={setShowModalInfoPolygons} polygons={polygonsCreated} draw={drawMap} map={mapRef}
-                disablePoints={disabledPoints} enabledPoints={enabledPoints} setPolygonsCreated={setPolygonsCreated} setLastPolygonCreated={setLastPolygonCreated} 
+                disablePoints={disabledPoints} enabledPoints={enabledPoints} setPolygonsCreated={setPolygonsCreated} setLastPolygonCreated={setLastPolygonCreated}
                 setFunction={functionDelete} setShowModalPdf={setShowModalPdf} setDataPdf={setDataPdf}
             />}
 

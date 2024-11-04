@@ -1,19 +1,19 @@
-import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
-import LogoutIcon from '@mui/icons-material/Logout';
-import ArticleIcon from '@mui/icons-material/Article';
 import AccessAlarmIcon from '@mui/icons-material/AccessAlarm';
 import GroupsIcon from '@mui/icons-material/Groups';
-import DiscountIcon from '@mui/icons-material/Discount';
 import BuildIcon from '@mui/icons-material/Build';
 import MemoryIcon from '@mui/icons-material/Memory';
 import WidgetsIcon from '@mui/icons-material/Widgets';
 import DesktopAccessDisabledIcon from '@mui/icons-material/DesktopAccessDisabled';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import AppRegistrationIcon from '@mui/icons-material/AppRegistration';
+import ContactMailIcon from '@mui/icons-material/ContactMail';
+import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
+import LogoutIcon from '@mui/icons-material/Logout';
+import ArticleIcon from '@mui/icons-material/Article';
+import DiscountIcon from '@mui/icons-material/Discount';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import MapIcon from '@mui/icons-material/Map';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
-import ContactMailIcon from '@mui/icons-material/ContactMail';
 import HomeIcon from '@mui/icons-material/Home';
 import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettingsOutlined";
 import EditIcon from '@mui/icons-material/Edit';
@@ -63,10 +63,12 @@ import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import NotStartedIcon from '@mui/icons-material/NotStarted';
 import HelpIcon from '@mui/icons-material/Help';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import FilterAltIcon from '@mui/icons-material/FilterAlt';
 
 export const getIcon = (icon, style) => {
 
      let obj = {
+          "FilterAltIcon": <FilterAltIcon sx={style} />,
           "ArrowBackIcon": <ArrowBackIcon sx={style} />,
           "HelpIcon": <HelpIcon sx={style} />,
           "NotStartedIcon": <NotStartedIcon sx={style} />,
@@ -117,21 +119,21 @@ export const getIcon = (icon, style) => {
           "MenuOutlinedIcon": <MenuOutlinedIcon sx={style} />,
           "LogoutIcon": <LogoutIcon sx={style} />,
           "ArticleIcon": <ArticleIcon sx={style} />,
-          // "AccessAlarmIcon": <AccessAlarmIcon sx={style} />,
-          // "GroupsIcon": <GroupsIcon sx={style} />,
           "DiscountIcon": <DiscountIcon sx={style} />,
+          "CalendarMonthIcon": <CalendarMonthIcon sx={style} />,
+          "MapIcon": <MapIcon sx={style} />,
+          "WhatsAppIcon": <WhatsAppIcon sx={style} />,
+          "HomeIcon": <HomeIcon sx={style} />,
+          "Searchicon": <SearchIcon sx={style} />
+           // "AccessAlarmIcon": <AccessAlarmIcon sx={style} />,
+          // "GroupsIcon": <GroupsIcon sx={style} />,
           // "BuildIcon": <BuildIcon sx={style} />,
           // "MemoryIcon": <MemoryIcon sx={style} />,
           // "WidgetsIcon": <WidgetsIcon sx={style} />,
           // "DesktopAccessDisabledIcon": <DesktopAccessDisabledIcon sx={style} />,
           // "AssignmentIcon": <AssignmentIcon sx={style} />,
           // "AppRegistrationIcon": <AppRegistrationIcon sx={style} />,
-          "CalendarMonthIcon": <CalendarMonthIcon sx={style} />,
-          "MapIcon": <MapIcon sx={style} />,
-          "WhatsAppIcon": <WhatsAppIcon sx={style} />,
           // "ContactMailIcon": <ContactMailIcon sx={style} />,
-          "HomeIcon": <HomeIcon sx={style} />,
-          "Searchicon": <SearchIcon sx={style} />
      }
 
      return obj[icon]
