@@ -11,15 +11,20 @@ import ListItemText from '@mui/material/ListItemText';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
-import ShowChartIcon from '@mui/icons-material/ShowChart';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import GetAppIcon from '@mui/icons-material/GetApp';
 import * as ExcelJS from 'exceljs';
 import TopColoniasChart from './PaymentsByTypeOfService/TopColoniasChart.jsx';
 import { BarChart } from '@mui/icons-material';
+import { tokens } from "../../theme"
+import { useTheme } from "@mui/material"
 
 function PaymentsByTypeOfService({ data }) {
+
+  const theme = useTheme()
+  const colors = tokens(theme.palette.mode)
+
   const [uniqueTypes, setUniqueTypes] = useState([]);
   const [selectedTypes, setSelectedTypes] = useState([]);
   const [topColoniasByType, setTopColoniasByType] = useState({});
@@ -145,14 +150,14 @@ function PaymentsByTypeOfService({ data }) {
 
   return (
     <div>
-      <h2>Payments By Type Of Service</h2>
-      <Stack direction="row" spacing={1}>
+      <h2>Pagos por tipo de servicio</h2>
+      <Stack direction="row" spacing={2}>
         {uniqueTypes.map((type) => (
           <Chip
             key={type}
             label={type}
             clickable
-            color={selectedTypes.includes(type) ? 'primary' : 'default'}
+            color={selectedTypes.includes(type) ? 'secondary' : 'default'}
             onClick={() => handleChipClick(type)}
           />
         ))}
@@ -165,19 +170,41 @@ function PaymentsByTypeOfService({ data }) {
           onChange={(event, newView) => setView(newView)}
           aria-label="view selection"
         >
-          <ToggleButton value="list" aria-label="list view">
+          <ToggleButton 
+            value="list" 
+            aria-label="list view"
+            selected={view === 'list'}
+            sx={{
+              color: view === 'list' ? theme.palette.secondary.main : 'inherit',
+              '&.Mui-selected': {
+                backgroundColor: theme.palette.secondary.light,
+                color: theme.palette.grey[100],
+              },
+            }}  
+          >
             <FormatListBulletedIcon style={{ marginRight: '8px' }} />
             Ver en Listado
           </ToggleButton>
-          <ToggleButton value="chart" aria-label="chart view">
+          <ToggleButton 
+            value="chart" 
+            aria-label="chart view"
+            selected={view === 'chart'}
+            sx={{
+              color: view === 'chart' ? theme.palette.secondary.main : 'inherit',
+              '&.Mui-selected': {
+                backgroundColor: theme.palette.secondary.light,
+                color: theme.palette.grey[100],
+              },
+            }}
+          >
             <BarChart style={{ marginRight: '8px' }} />
             Ver en Gráfica
           </ToggleButton>
         </ToggleButtonGroup>
         
         <Button
-          variant="contained"
-          color="primary"
+          variant="outlined"
+          color="warning"
           onClick={exportToExcel}
           style={{ marginLeft: '16px' }}
           startIcon={<GetAppIcon />}
@@ -227,14 +254,30 @@ function PaymentsByTypeOfService({ data }) {
           ) : (
             <Grid container spacing={2}>
               {selectedTypes.map((type) => {
-                const seriesData = topColoniasByType[type]?.map(colonia => ({
+                 const totalData = topColoniasByType[type]?.map(colonia => ({
                   x: colonia.colonia || 'Sin nombre',
                   y: colonia.total,
                 })) || [];
 
+                const countData = topColoniasByType[type]?.map(colonia => ({
+                  x: colonia.colonia || 'Sin nombre',
+                  y: colonia.count,
+                })) || [];
+
                 return (
-                  <Grid item xs={12} sm={6} key={type}>
-                    <TopColoniasChart data={[{ id: type, data: seriesData }]} title={`Tipo de Servicio: ${type}`} />
+                  <Grid container spacing={2} key={type}>
+                    <Grid item xs={12} sm={6}>
+                      <TopColoniasChart
+                        data={[{ id: type, data: totalData }]}
+                        title={`Total Pagado por Tipo de Servicio: ${type}`}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <TopColoniasChart
+                        data={[{ id: type, data: countData }]}
+                        title={`Cuentas Pagadas por Tipo de Servicio: ${type}`}
+                      />
+                    </Grid>
                   </Grid>
                 );
               })}

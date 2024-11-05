@@ -1,7 +1,6 @@
 // TopColoniasChart.jsx
 import React from 'react';
 import { Box, Typography, useTheme } from '@mui/material';
-import { ResponsiveLine } from '@nivo/line';
 import { tokens } from '../../../theme.js';
 import ResponsiveLineChart from '../../../components/Charts/NivoCharts/ResponsiveLineChart.jsx'
 
@@ -13,12 +12,17 @@ function TopColoniasChart({ data, title }) {
     return null;
   }
 
+  const chartColor = title.includes('Total') ? colors.greenAccent[500] : colors.blueAccent[500];
+  const formatTooltip = title.includes('Total') ? "$,.2f" : "#,.0r";
+  const axisLeftLegendTitle = title.includes('Total') ? "Total" : "Cuentas"
+  const axisLeftFormat = title.includes('Total')
+    ? (value) => `$${value.toLocaleString()}`  // Formato con signo de pesos y comas
+    : (value) => value.toString();
+
   const formattedData = data.map((item) => ({
     ...item,
-    color: colors.greenAccent[500],
+    color: chartColor,
   }));
-
-  console.log(data)
 
   return (
     <Box
@@ -29,14 +33,14 @@ function TopColoniasChart({ data, title }) {
         alignItems: 'center',
         width: '100%',
         height: '400px',
-        p: 1,
+        p: 2,
         borderRadius: '10px',
       }}
     >
       <Typography
         variant="h6"
         sx={{
-          color: colors.greenAccent[500],
+          color: chartColor,
           fontWeight: 'bold',
           textAlign: 'center',
         }}
@@ -61,16 +65,17 @@ function TopColoniasChart({ data, title }) {
             data={ formattedData }
             lineColor={ colors.greenAccent[500] }
             showLegend={ false }
-            tooltipFormat="$,.2f"
+            tooltipFormat= {formatTooltip}
             margin = {{ top: 30, right: 120, bottom: 150, left: 100 }}
-            axisBottomLegend="colonia"
-            axisLeftLegend="total"
+            axisBottomLegend=""
+            axisLeftLegend= {axisLeftLegendTitle}
             axisLeftLegendOffset={ -85 }
             backgroundColor="paper"
             enableArea = { true }
             areaOpacity = { 0.3 }
             areaBaselineValue = { 0 }
             tickRotation = { 45 }
+            axisLeftFormat = {axisLeftFormat}
           />
         )}
       </Box>
