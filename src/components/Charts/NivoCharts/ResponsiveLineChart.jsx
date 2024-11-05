@@ -14,7 +14,8 @@ const ResponsiveLineChart = ({
   backgroundColor,
   enableArea,
   areaOpacity,
-  areaBaselineValue
+  areaBaselineValue,
+  tickRotation
 }) => {    
 
     const theme = useTheme()
@@ -47,7 +48,7 @@ const ResponsiveLineChart = ({
             axisBottom={{
                 tickSize: 5,
                 tickPadding: 5,
-                tickRotation: 0,
+                tickRotation: tickRotation,
                 legend: axisBottomLegend,
                 legendOffset: 36,
                 legendPosition: 'middle'

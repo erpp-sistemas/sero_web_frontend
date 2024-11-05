@@ -11,6 +11,7 @@ import TextField from '@mui/material/TextField'
 import { ManageSearch } from "@mui/icons-material"
 import {managerDashboardRequest} from '../../api/manager.js'
 import PaymentsPerColony from '../../components/ManagerDashboard/PaymentsPerColony.jsx'
+import PaymentsByTypeOfService from '../../components/ManagerDashboard/PaymentsByTypeOfService.jsx'
 
 function Index() {
     const theme = useTheme()
@@ -20,9 +21,8 @@ function Index() {
     const [selectedProcess, setSelectedProcess] = useState([]);
     const [selectedStartDate, setSelectedStartDate] = useState('')
     const [selectedFinishDate, setSelectedFinishDate] = useState('')
-    const [paymentsPerColonyData, setPaymentsPerColonyData] = useState([])
-    const [result, setResult] = useState([])
-    const [rowOneData, setRowOneData] = useState([]) 
+    const [paymentsPerColonyData, setPaymentsPerColonyData] = useState([])    
+    const [paymentsByTypeOfServiceData, setPaymentsByTypeOfServiceData] = useState([]) 
     const [isLoading, setIsLoading] = useState(false)
     const [alertOpen, setAlertOpen] = useState(false)
     const [alertType, setAlertType] = useState("info")
@@ -85,11 +85,12 @@ function Index() {
           return
         }
 
-        const response = await managerDashboardRequest(selectedPlace, selectedService, selectedProcess, selectedStartDate, selectedFinishDate)
-        setPaymentsPerColonyData(JSON.parse(response.data[0].paymentsPerColony))
-        console.log(JSON.parse(response.data[0].paymentsPerColony))
+		setIsLoading(true)
 
-        setIsLoading(true)
+        const response = await managerDashboardRequest(selectedPlace, selectedService, selectedProcess, selectedStartDate, selectedFinishDate)
+        setPaymentsByTypeOfServiceData(JSON.parse(response.data[0].paymentsByTypeOfService))
+        console.log(JSON.parse(response.data[0].paymentsByTypeOfService))
+        
         setIsLoading(false)
         setAlertOpen(true)
         setAlertType("success")
@@ -206,7 +207,8 @@ function Index() {
 
 				<Grid xs={12} container spacing={2}>
 					<Grid item xs={12}>
-            <PaymentsPerColony data= {paymentsPerColonyData} />
+						<PaymentsByTypeOfService data= {paymentsByTypeOfServiceData}/>
+            			{/* <PaymentsPerColony data= {paymentsPerColonyData} /> */}
 					</Grid>
 				</Grid>
 
