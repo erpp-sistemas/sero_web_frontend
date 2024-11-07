@@ -243,44 +243,44 @@ export default function AlertDialogSlide() {
                                 <button className="bg-neutral-50 text-gray-900 border-r-2 border-cyan-600 px-4 py-1 rounded-md flex gap-2 flex-col items-center justify-center w-1/4 shadow-lg hover:bg-slate-300 duration-300"
                                     onClick={() => handleButtonHerramienta('Cambio de color')}
                                 >
-                                    {getIcon('ColorLensIcon', { fontSize: '30px', color: 'black' })}
+                                    {getIcon('ColorLensIcon', { fontSize: '30px', color: 'blue' })}
                                     Cambio de color
                                 </button>
                                 <button className="bg-neutral-50 text-gray-900 border-r-2 border-cyan-600 px-4 py-1 rounded-md flex gap-2 flex-col items-center justify-center w-1/4 shadow-lg hover:bg-slate-300 duration-300"
                                     onClick={() => handleButtonHerramienta('Dibujar poligono')}
                                 >
-                                    {getIcon('PolylineIcon', { fontSize: '30px', color: 'black' })}
+                                    {getIcon('PolylineIcon', { fontSize: '30px', color: 'blue' })}
                                     Dibujar Poligono
                                 </button>
                                 <button className="bg-neutral-50 text-gray-900 border-r-2 border-cyan-600 px-4 py-1 rounded-md flex gap-2 flex-col items-center justify-center w-1/4 shadow-lg hover:bg-slate-300 duration-300"
                                     onClick={() => handleButtonHerramienta('Mapa de calor')}
                                 >
-                                    {getIcon('FiberSmartRecordIcon', { fontSize: '30px', color: 'black' })}
+                                    {getIcon('FiberSmartRecordIcon', { fontSize: '30px', color: 'blue' })}
                                     Mapa de calor
                                 </button>
                                 <button className="bg-neutral-50 text-gray-900 border-r-2 border-cyan-600 px-4 py-1 rounded-md flex gap-2 flex-col items-center justify-center w-1/4 shadow-lg hover:bg-slate-300 duration-300"
                                     onClick={() => handleButtonHerramienta('Seguimiento gestores')}
                                 >
-                                    {getIcon('GpsFixedIcon', { fontSize: '30px', color: 'black' })}
+                                    {getIcon('GpsFixedIcon', { fontSize: '30px', color: 'blue' })}
                                     Seguimiento
                                 </button>
                                 <button className="bg-neutral-50 text-gray-900 border-r-2  border-cyan-600 px-4 py-1 rounded-md flex gap-2 flex-col items-center justify-center w-1/4 shadow-lg hover:bg-slate-300 duration-300"
                                     onClick={() => handleButtonHerramienta('Ruta gestor')}
                                 >
-                                    {getIcon('PlaceIcon', { fontSize: '30px', color: 'black' })}
+                                    {getIcon('PlaceIcon', { fontSize: '30px', color: 'blue' })}
                                     Ruta
                                 </button>
 
                                 <button className="bg-neutral-50 text-gray-900 border-r-2  border-cyan-600 px-4 py-1 rounded-md flex gap-2 flex-col items-center justify-center w-1/4 shadow-lg hover:bg-slate-300 duration-300"
                                     onClick={() => handleButtonHerramienta('Notificación')}
                                 >
-                                    {getIcon('NotificationsOutlinedIcon', { fontSize: '30px', color: 'black' })}
+                                    {getIcon('NotificationsOutlinedIcon', { fontSize: '30px', color: 'blue' })}
                                     Notificaciones
                                 </button>
                                 <button className="bg-neutral-50 text-gray-900 border-r-2  border-cyan-600 px-4 py-1 rounded-md flex gap-2 flex-col items-center justify-center w-1/4 shadow-lg hover:bg-slate-300 duration-300"
                                     onClick={() => handleButtonHerramienta('Filtros')}
                                 >
-                                    {getIcon('FilterAltIcon', { fontSize: '30px', color: 'black' })}
+                                    {getIcon('FilterAltIcon', { fontSize: '30px', color: 'blue' })}
                                     Filtros
                                 </button>
 

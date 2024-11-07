@@ -15,7 +15,7 @@ import { useSelector } from 'react-redux';
 const Notification = ({ data }) => {
 
     const user_session = useSelector((state) => state.user);
-    
+
     const { setShowTools, setShowModal } = data;
 
     const [gestores, setGestores] = useState([]);
@@ -68,22 +68,23 @@ const Notification = ({ data }) => {
         if (file) {
             const formData = new FormData();
             formData.append('image', file);
-            image_url = await uploadImageNotificationService(formData)
+            const resp_upload_image = await uploadImageNotificationService(formData);
+            image_url = resp_upload_image.url_image;
         }
         const data = {
             category, contents, headings,
             type: typeMessage,
-            image_url: image_url.url_image,
+            image_url: image_url,
             users: typeMessage === "1" ? [] : gestoresSeleccionados,
         }
         sendNotificationService(data)
             .then(async message => {
                 const notification_id = message.data.response.id;
                 let arr = null;
-                if(typeMessage === "1") arr = gestores;
-                if(typeMessage === "2") arr = gestoresSeleccionados;
+                if (typeMessage === "1") arr = gestores;
+                if (typeMessage === "2") arr = gestoresSeleccionados;
                 for (let gestor of arr) {
-                    await saveInfoNotificationBd(notification_id, gestor, image_url.url_image);
+                    await saveInfoNotificationBd(notification_id, gestor, image_url);
                 }
                 //todo quitar el alert y poner otro tipo de mensaje
                 alert(message.data.message);
@@ -94,21 +95,23 @@ const Notification = ({ data }) => {
     }
 
     const saveInfoNotificationBd = async (notification_id, user, image_url) => {
-        const data = {
-            id_push_notification: notification_id,
-            id_usuario: user.id_usuario,
-            id_user_push: user.id_user_push,
-            mensaje: contents,
-            titulo: headings,
-            leido: 0,
-            url_img: image_url,
-            categoria: category,
-            tipo: typeMessage,
-            usuario_creo: user_session.user_id
+        if (notification_id) {
+            const data = {
+                id_push_notification: notification_id,
+                id_usuario: user.id_usuario,
+                id_user_push: user.id_user_push,
+                mensaje: contents,
+                titulo: headings,
+                leido: 0,
+                url_img: image_url,
+                categoria: category,
+                tipo: typeMessage,
+                usuario_creo: user_session.user_id
+            }
+            saveNotificationBdService(data)
+                .then(message => { })
+                .catch(error => console.error(error))
         }
-        saveNotificationBdService(data)
-            .then(message => {})
-            .catch(error => console.error(error))
     }
 
     const cleanData = () => {
