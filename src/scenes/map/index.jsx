@@ -107,6 +107,7 @@ const Mapa = () => {
                         dispatch(setCoordinates(coordenadas))
                     }
                 } else {
+                    dispatch(setFeatures([]))
                     dispatch(setCoordinates({}))
                 }
             }

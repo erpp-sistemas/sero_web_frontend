@@ -57,6 +57,10 @@ export default function AlertDialogSlide() {
     const [gestorSeleccionado, setGestorSeleccionado] = useState({});
     const [fechaSeleccionada, setFechaSeleccionada] = useState('');
 
+    //* FILTERS
+    const [dataFiltered, setDataFiltered] = useState([]);
+    const [filtersSelected, setFiltersSelected] = useState({});
+
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -236,44 +240,44 @@ export default function AlertDialogSlide() {
                             <div className="w-11/12 mx-auto bg-gray-900 h-1 rounded-md mb-4 opacity-50"></div>
 
                             <div className="flex flex-wrap gap-6 justify-center font-mono">
-                                <button className="bg-neutral-50 text-gray-900 border-r-2 border-cyan-600 px-4 py-1 rounded-md flex gap-2 flex-col items-center justify-center w-1/4 shadow-lg "
+                                <button className="bg-neutral-50 text-gray-900 border-r-2 border-cyan-600 px-4 py-1 rounded-md flex gap-2 flex-col items-center justify-center w-1/4 shadow-lg hover:bg-slate-300 duration-300"
                                     onClick={() => handleButtonHerramienta('Cambio de color')}
                                 >
                                     {getIcon('ColorLensIcon', { fontSize: '30px', color: 'black' })}
                                     Cambio de color
                                 </button>
-                                <button className="bg-neutral-50 text-gray-900 border-r-2 border-cyan-600 px-4 py-1 rounded-md flex gap-2 flex-col items-center justify-center w-1/4 shadow-lg"
+                                <button className="bg-neutral-50 text-gray-900 border-r-2 border-cyan-600 px-4 py-1 rounded-md flex gap-2 flex-col items-center justify-center w-1/4 shadow-lg hover:bg-slate-300 duration-300"
                                     onClick={() => handleButtonHerramienta('Dibujar poligono')}
                                 >
                                     {getIcon('PolylineIcon', { fontSize: '30px', color: 'black' })}
                                     Dibujar Poligono
                                 </button>
-                                <button className="bg-neutral-50 text-gray-900 border-r-2 border-cyan-600 px-4 py-1 rounded-md flex gap-2 flex-col items-center justify-center w-1/4 shadow-lg"
+                                <button className="bg-neutral-50 text-gray-900 border-r-2 border-cyan-600 px-4 py-1 rounded-md flex gap-2 flex-col items-center justify-center w-1/4 shadow-lg hover:bg-slate-300 duration-300"
                                     onClick={() => handleButtonHerramienta('Mapa de calor')}
                                 >
                                     {getIcon('FiberSmartRecordIcon', { fontSize: '30px', color: 'black' })}
                                     Mapa de calor
                                 </button>
-                                <button className="bg-neutral-50 text-gray-900 border-r-2 border-cyan-600 px-4 py-1 rounded-md flex gap-2 flex-col items-center justify-center w-1/4 shadow-lg"
+                                <button className="bg-neutral-50 text-gray-900 border-r-2 border-cyan-600 px-4 py-1 rounded-md flex gap-2 flex-col items-center justify-center w-1/4 shadow-lg hover:bg-slate-300 duration-300"
                                     onClick={() => handleButtonHerramienta('Seguimiento gestores')}
                                 >
                                     {getIcon('GpsFixedIcon', { fontSize: '30px', color: 'black' })}
                                     Seguimiento
                                 </button>
-                                <button className="bg-neutral-50 text-gray-900 border-r-2  border-cyan-600 px-4 py-1 rounded-md flex gap-2 flex-col items-center justify-center w-1/4 shadow-lg"
+                                <button className="bg-neutral-50 text-gray-900 border-r-2  border-cyan-600 px-4 py-1 rounded-md flex gap-2 flex-col items-center justify-center w-1/4 shadow-lg hover:bg-slate-300 duration-300"
                                     onClick={() => handleButtonHerramienta('Ruta gestor')}
                                 >
                                     {getIcon('PlaceIcon', { fontSize: '30px', color: 'black' })}
                                     Ruta
                                 </button>
 
-                                <button className="bg-neutral-50 text-gray-900 border-r-2  border-cyan-600 px-4 py-1 rounded-md flex gap-2 flex-col items-center justify-center w-1/4 shadow-lg"
+                                <button className="bg-neutral-50 text-gray-900 border-r-2  border-cyan-600 px-4 py-1 rounded-md flex gap-2 flex-col items-center justify-center w-1/4 shadow-lg hover:bg-slate-300 duration-300"
                                     onClick={() => handleButtonHerramienta('Notificación')}
                                 >
                                     {getIcon('NotificationsOutlinedIcon', { fontSize: '30px', color: 'black' })}
                                     Notificaciones
                                 </button>
-                                <button className="bg-neutral-50 text-gray-900 border-r-2  border-cyan-600 px-4 py-1 rounded-md flex gap-2 flex-col items-center justify-center w-1/4 shadow-lg"
+                                <button className="bg-neutral-50 text-gray-900 border-r-2  border-cyan-600 px-4 py-1 rounded-md flex gap-2 flex-col items-center justify-center w-1/4 shadow-lg hover:bg-slate-300 duration-300"
                                     onClick={() => handleButtonHerramienta('Filtros')}
                                 >
                                     {getIcon('FilterAltIcon', { fontSize: '30px', color: 'black' })}
@@ -345,9 +349,11 @@ export default function AlertDialogSlide() {
                     )}
 
                     {nombreHerramientaSeleccionada === 'Filtros' && showButtonsHerramientas === false && (
-                       <Filtros />
+                        <Filtros data={{
+                            dataFiltered, setDataFiltered, filtersSelected, setFiltersSelected,
+                            setShowTools: setOpen
+                        }} />
                     )}
-
 
                 </DialogContent>
 

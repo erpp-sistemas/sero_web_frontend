@@ -9,9 +9,11 @@ import { useDispatch } from 'react-redux'
 import { setDialog } from '../../redux/dialogSlice'
 import { setLayersActivos, setCargarLayer, setData } from '../../redux/featuresSlice'
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined"
-import SeroClaro from '../../assets/sero_claro.png'
-import SeroOscuro from '../../assets/sero-logo.png'
-import { Marker } from "mapbox-gl"
+import SeroClaro from '../../assets/ser0_space_fondooscuro.png'
+import SeroOscuro from '../../assets/ser0_space_fondoclaro.png'
+import { Marker } from "mapbox-gl";
+
+import ModalDate from '../../components/modals/ModalDate';
 
 const SidebarMap = () => {
 
@@ -28,14 +30,20 @@ const SidebarMap = () => {
     const [serviciosMapa, setServiciosMapa] = useState([]);
     const [layersMapa, setLayersMapa] = useState([]);
     const [nombreServicioActivo, setNombreServicioActivo] = useState('');
+    const [idServicioActivo, setIdServicioActivo] = useState(0);
     const [marker, setMarker] = useState(null);
 
+    const [showModalDate, setShowModalDate] = useState(false);
+    const [layerSelected, setLayerSelected] = useState({});
+    
 
     const fillCartografia = (servicio) => {
         const id = document.getElementById(servicio.service_id.toString());
-        id.style.color = colors.greenAccent[600]
-        setNombreServicioActivo(servicio.etiqueta)
-        setLayersByIdServicio(servicio.service_id)
+        if (id) {
+            id.style.color = colors.greenAccent[600]
+            setNombreServicioActivo(servicio.etiqueta)
+            putLayersByIdServicio(servicio.service_id)
+        }
     }
 
     useEffect(() => {
@@ -52,13 +60,12 @@ const SidebarMap = () => {
     }, [serviciosMapa]);
 
     useEffect(() => {
-        //console.log(features.coordinates)
         if (features.coordinates && features.coordinates.length > 0 && features.coordinates[0] !== undefined) {
 
             if (marker !== null) marker.remove()
 
             setMarker(new Marker({
-                color: colors.greenAccent[500],
+                color: colors.greenAccent[400],
             }).setLngLat(features.coordinates).addTo(mapa_activo.mapa));
         } else {
             if (marker !== null) marker.remove()
@@ -74,7 +81,7 @@ const SidebarMap = () => {
         setLayersMapa(promise[1])
     }
 
-    const setLayersByIdServicio = (id_servicio) => {
+    const putLayersByIdServicio = (id_servicio) => {
         const layers_a = layersMapa.filter(layer => id_servicio === layer.servicio_id)
         dispatch(setLayersActivos(layers_a))
         layers_a.forEach(layer => document.getElementById(layer.name_layer).style.display = 'block')
@@ -84,8 +91,9 @@ const SidebarMap = () => {
     }
 
     const handleServicioIcon = (servicio) => {
-        setLayersByIdServicio(servicio.service_id)
+        putLayersByIdServicio(servicio.service_id)
         setNombreServicioActivo(servicio.etiqueta)
+        setIdServicioActivo(servicio.service_id)
         changeColorServicioIcon(servicio.service_id)
     }
 
@@ -99,29 +107,78 @@ const SidebarMap = () => {
         })
     }
 
-    const handleLayer = (layer) => {
-        validateLayerInMap(layer)
-    }
+    const handleLayer = async (layer) => {
 
-    const cargarLayerMap = async (layer) => {
-        try {
-            if (layer.url_geoserver !== '') {
-                if (layer.tipo === 'punto') {
-                    await cargaPunto(layer)
-                } else if (layer.tipo === 'poligono') {
-                    await cargarPoligono(layer)
-                }
+        const existsLayerInMap = isLayerInMap(layer);
+        if (!existsLayerInMap) {
+            setLayerSelected(layer);
+            if (!layer.is_large) {
+                putDispatchDialog();
+                await processLoadLayerMap(layer);
+                return;
             }
-        } catch (error) {
-            console.error(error)
+            if (layer.is_large) return setShowModalDate(true);
         }
+        if (existsLayerInMap) {
+            if (mapa_activo.mapa.getLayoutProperty(layer.layer_id, 'visibility') === 'visible' || mapa_activo.mapa.getLayoutProperty(layer.layer_id, 'visibility') === undefined) {
+                mapa_activo.mapa.setLayoutProperty(layer.layer_id, 'visibility', 'none')
+                mapa_activo.mapa.setFilter(layer.layer_id, null)
+                changeColorLayer(layer.name_layer, colors.grey[100])
+            } else {
+                mapa_activo.mapa.setLayoutProperty(layer.layer_id, 'visibility', 'visible')
+                changeColorLayer(layer.name_layer, colors.greenAccent[600])
+            }
+        }
+
     }
 
-    const validateLayerInMap = (layer) => {
+    const handleRespModalQuestion = async (res) => {
+
+        if (!res) return setShowModalDate(false);
+        if (res) {
+            if ("periodoInicial" in res) {
+                const { periodoInicial, periodoFinal } = res;
+                const layer_id = `${layerSelected.layer_id}-${periodoInicial}_${periodoFinal}`;
+                const etiqueta = `${layerSelected.etiqueta} de ${periodoInicial} al ${periodoFinal}`;
+                const name_layer = `${layerSelected.name_layer}-${periodoInicial}_${periodoFinal}`;
+                const new_layer = {  ...layerSelected, layer_id, etiqueta, name_layer, is_large: 0 };
+                dispatch(setLayersActivos([...features.layers_activos, new_layer]));
+                setLayersMapa([...layersMapa, new_layer])
+                putDispatchDialog();
+                await processLoadLayerMap(new_layer, { periodoInicial, periodoFinal });
+                setShowModalDate(false);
+                return;
+            }
+            if ("withoutFilter" in res) {
+                setShowModalDate(false);
+                putDispatchDialog();
+                await processLoadLayerMap(layerSelected);
+                return;
+            }
+        }
+
+    }
+
+    const putDispatchDialog = () => {
+        dispatch(setDialog({ title: 'Cargando capa...', status: true }))
+        dispatch(setCargarLayer(cargarLayerMap));
+    }
+
+    const processLoadLayerMap = async (layer, dates_filter = null) => {
+        await cargarLayerMap(layer, dates_filter);
+        dispatch(setDialog({ title: '', status: false }));
+        changeColorLayer(layer.name_layer, colors.greenAccent[600]);
+    }
+
+    const isLayerInMap = (layer) => {
+        return !!mapa_activo.mapa.getLayer(layer.layer_id);
+    }
+
+    const validateLayerInMap = (layer, dates_filter = null) => {
         if (!mapa_activo.mapa.getLayer(layer.layer_id)) {
             dispatch(setDialog({ title: 'Cargando capa...', status: true }))
             dispatch(setCargarLayer(cargarLayerMap))
-            cargarLayerMap(layer).then(() => {
+            cargarLayerMap(layer, dates_filter).then(() => {
                 dispatch(setDialog({
                     title: '',
                     status: false
@@ -144,6 +201,20 @@ const SidebarMap = () => {
 
     }
 
+    const cargarLayerMap = async (layer, dates_filter = null) => {
+        try {
+            if (layer.url_geoserver !== '') {
+                if (layer.tipo === 'punto') {
+                    await cargaPunto(layer, dates_filter)
+                } else if (layer.tipo === 'poligono') {
+                    await cargarPoligono(layer, dates_filter)
+                }
+            }
+        } catch (error) {
+            console.error(error)
+        }
+    }
+
 
     const changeColorLayer = (nombre_layer, color) => {
         const id = document.getElementById(nombre_layer)
@@ -151,8 +222,8 @@ const SidebarMap = () => {
     }
 
 
-    const cargaPunto = async (layer) => {
-        const data = await cargarFeaturesLayer(layer.url_geoserver)
+    const cargaPunto = async (layer, dates_filter = null) => {
+        const data = await cargarFeaturesLayer(layer.url_geoserver, dates_filter)
         mapa_activo.mapa.addSource(layer.name_layer, { type: 'geojson', data: data })
         mapa_activo.mapa.addLayer({
             "id": layer.layer_id.toString(),
@@ -166,8 +237,8 @@ const SidebarMap = () => {
         mapa_activo.mapa.setLayoutProperty(layer.layer_id.toString(), 'visibility', 'visible')
     }
 
-    const cargarPoligono = async (layer) => {
-        const data = await cargarFeaturesLayer(layer.url_geoserver)
+    const cargarPoligono = async (layer, dates_filter = null) => {
+        const data = await cargarFeaturesLayer(layer.url_geoserver, dates_filter)
         mapa_activo.mapa.addSource(layer.name_layer, { type: 'geojson', data: data })
         mapa_activo.mapa.addLayer({
             id: layer.layer_id.toString(),
@@ -186,12 +257,29 @@ const SidebarMap = () => {
     }
 
 
-    const cargarFeaturesLayer = async (url) => {
-        let response = await fetch(url)
-        let data = await response.json()
-        return data
+    const cargarFeaturesLayer = async (url, dates_filter = null) => {
+        let cqlFilter = null;
+        let url_request = null;
+        let response = null;
+        if (dates_filter) {
+            const { periodoInicial, periodoFinal } = dates_filter;
+            cqlFilter = `fecha_filter BETWEEN '${periodoInicial}' AND '${periodoFinal}'`;
+            url_request = `${url}&cql_filter=${encodeURIComponent(cqlFilter)}`;
+            response = await fetch(url_request);
+        }
+        if (!dates_filter) response = await fetch(url);
+
+        const data = await response.json();
+        return data;
     }
 
+    const handleToggleMenu = () => {
+        const service_carto = serviciosMapa.filter(servicio => servicio.service_id === idServicioActivo)[0];
+        setIsCollapsed(!isCollapsed);
+        setTimeout(() => {
+            fillCartografia(service_carto);
+        }, 200)
+    }
 
 
     return (
@@ -215,16 +303,17 @@ const SidebarMap = () => {
                 "height": "100%"
             }}
         >
+            {showModalDate && (<ModalDate handleRespuesta={handleRespModalQuestion} title={'El layer que desea mostrar contiene mucha información, se recomienda que utilice un rango de fechas para filtrar los datos'} />)}
             <ProSidebar collapsed={isCollapsed} >
                 <Menu iconShape="square">
                     {/* LOGO AND MENU ICON */}
                     <MenuItem
-                        onClick={() => setIsCollapsed(!isCollapsed)} icon={isCollapsed ? <MenuOutlinedIcon /> : undefined}
+                        onClick={handleToggleMenu} icon={isCollapsed ? <MenuOutlinedIcon /> : undefined}
                         style={{ margin: "10px 0 20px 0", color: colors.grey[100], }} >
                         {!isCollapsed && (
-                            <div className="flex justify-between items-center ml-[15px]">
-                                <img src={theme.palette.mode === "dark" ? SeroClaro : SeroOscuro} style={{ width: '150px' }} alt="" />
-                                <IconButton onClick={() => setIsCollapsed(!isCollapsed)}>
+                            <div className="flex justify-between items-center">
+                                <img src={theme.palette.mode === "dark" ? SeroClaro : SeroOscuro} style={{ width: '169px' }} alt="" />
+                                <IconButton onClick={handleToggleMenu}>
                                     <MenuOutlinedIcon />
                                 </IconButton>
                             </div>
@@ -234,23 +323,23 @@ const SidebarMap = () => {
                     <Box paddingLeft={isCollapsed ? undefined : "10%"}>
 
                         {!isCollapsed && (
-                            <div>
+                            <div className="font-mono">
                                 {/* SERVICIOS */}
                                 <div className="w-[90%] mb-4" >
                                     <div className="h-8 flex items-center px-3" style={{ backgroundColor: theme.palette.mode === "dark" ? colors.primary[600] : colors.grey[700], color: theme.palette.mode === "dark" ? colors.grey[100] : 'white' }} >
                                         <h1 className="text-base">Servicios</h1>
                                     </div>
-                                    <div style={{ backgroundColor: theme.palette.mode === 'dark' ? colors.primary[500] : colors.primary[400] }} >
-                                        <div className="flex justify-evenly w-full rounded-md flex-wrap" >
+                                    <div style={{ backgroundColor: theme.palette.mode === 'dark' ? colors.primary[500] : colors.primary[400], padding: '10px 0' }} >
+                                        <div className="flex justify-evenly w-full rounded-md flex-wrap p-2" >
                                             {serviciosMapa.length > 0 && serviciosMapa.map((servicio) => (
-                                                <IconButton sx={{ width: '30%' }} key={servicio.service_id} aria-label="delete" size="large" onClick={() => handleServicioIcon(servicio)}>
+                                                <IconButton sx={{ width: '25%' }} key={servicio.service_id} aria-label="delete" size="large" onClick={() => handleServicioIcon(servicio)}>
                                                     <i id={servicio.service_id.toString()} style={{ color: colors.grey[100] }} className={servicio.icono}></i>
                                                 </IconButton>
                                             ))}
                                         </div>
                                         <Alert severity="success" variant="outline" sx={{
-                                            height: '36px', marginTop: '5px', borderRadius: '7px', display: 'flex', justifyContent: 'flex-start', alignItems: 'center',
-                                            backgroundColor: colors.greenAccent[600], color: '#000000', fontWeight: 'bold'
+                                            height: '30px', borderRadius: '7px', display: 'flex', justifyContent: 'flex-start', alignItems: 'center', width: '90%', margin: '5px auto',
+                                            backgroundColor: colors.greenAccent[400], color: '#000000', fontWeight: 'bold'
                                         }}>
                                             {nombreServicioActivo}
                                         </Alert>
@@ -260,7 +349,7 @@ const SidebarMap = () => {
                                     </div>
                                 </div>
                                 {/* LAYERS */}
-                                <div className="scroll w-[90%] max-h-[200px] mb-4 overflow-scroll" >
+                                <div className="w-[90%] max-h-[200px] overflow-y-scroll mb-4 :-webkit-scrollbar" >
                                     <div className="h-8 flex items-center px-3" style={{ backgroundColor: theme.palette.mode === "dark" ? colors.primary[600] : colors.grey[700], color: theme.palette.mode === "dark" ? colors.grey[100] : 'white' }} >
                                         <h1 className="text-base">Layers</h1>
                                     </div>
@@ -280,9 +369,13 @@ const SidebarMap = () => {
                                     </div>
                                     <div style={{ backgroundColor: theme.palette.mode === 'dark' ? colors.primary[500] : colors.primary[400] }} >
                                         {Object.keys(features.features_layer).length > 0 && (features.features_layer.cuenta || features.features_layer.municipio || features.features_layer.ide) ? Object.keys(features.features_layer).map((f, index) => ( // Añadir paréntesis aquí
-                                            <Button key={index} sx={{ width: '100%', backgroundColor: theme.palette.mode === 'dark' ? colors.primary[500] : colors.primary[400], color: colors.grey[100] }}>
-                                                {`${f.replaceAll('_', ' ')} : ${features.features_layer[f]}`}
-                                            </Button>
+                                            <>
+                                                {f !== 'fecha_filter' && (
+                                                    <Button key={index} sx={{ width: '100%', backgroundColor: theme.palette.mode === 'dark' ? colors.primary[500] : colors.primary[400], color: colors.grey[100] }}>
+                                                        {`${f.replaceAll('_', ' ')} : ${features.features_layer[f]}`}
+                                                    </Button>
+                                                )}
+                                            </>
                                         )) : null}
                                     </div>
                                 </div>
