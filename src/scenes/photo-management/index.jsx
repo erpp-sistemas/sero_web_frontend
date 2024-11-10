@@ -181,7 +181,9 @@ const Index = () => {
 
           const response = await photoManagementRequest(selectedPlace, selectedService, selectedProcess, selectedStartDate, selectedFinishDate);
 
-          setResult(response.data)          
+          setResult(response.data)     
+          
+          console.log(response.data)
 
           const groupedGestores = response.data.reduce((acc, item) => {
             if (!acc[item.nombre_gestor]) {
@@ -269,19 +271,19 @@ const Index = () => {
 
     useEffect(() => {      
       const countValidFotoFachadaUno = (rows) => {
-        return rows.filter(row => row.foto_fachada_1 && row.foto_fachada_1 !== 'https://ser0.mx/ser0/image/sin_foto.jpg').length;
+        return rows.filter(row => row.foto_fachada_1 && row.foto_fachada_1 !== 'https://fotos-usuarios-sero.s3.amazonaws.com/user-images/PhotoNotAvailable.jpeg').length;
       };
 
       const countValidFotoFachadaDos = (rows) => {
-        return rows.filter(row => row.foto_fachada_2 && row.foto_fachada_2 !== 'https://ser0.mx/ser0/image/sin_foto.jpg').length;
+        return rows.filter(row => row.foto_fachada_2 && row.foto_fachada_2 !== 'https://fotos-usuarios-sero.s3.amazonaws.com/user-images/PhotoNotAvailable.jpeg').length;
       };
       
       const countValidFotoEvidenciaUno = (rows) => {
-        return rows.filter(row => row.foto_evidencia_1 && row.foto_evidencia_1 !== 'https://ser0.mx/ser0/image/sin_foto.jpg').length;
+        return rows.filter(row => row.foto_evidencia_1 && row.foto_evidencia_1 !== 'https://fotos-usuarios-sero.s3.amazonaws.com/user-images/PhotoNotAvailable.jpeg').length;
       };
 
       const countValidFotoEvidenciaDos = (rows) => {
-        return rows.filter(row => row.foto_evidencia_2 && row.foto_evidencia_2 !== 'https://ser0.mx/ser0/image/sin_foto.jpg').length;
+        return rows.filter(row => row.foto_evidencia_2 && row.foto_evidencia_2 !== 'https://fotos-usuarios-sero.s3.amazonaws.com/user-images/PhotoNotAvailable.jpeg').length;
       };
       
       const rows = filteredResult.length > 0 ? filteredResult : result;
@@ -484,7 +486,7 @@ const Index = () => {
           url: fotoUrl,
           cuenta: row.cuenta,
           fecha_gestion: row.fecha_gestion,
-          isSinFoto: fotoUrl === 'https://ser0.mx/ser0/image/sin_foto.jpg'
+          isSinFoto: fotoUrl === 'https://fotos-usuarios-sero.s3.amazonaws.com/user-images/PhotoNotAvailable.jpeg'
         });
       });
     
