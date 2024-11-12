@@ -45,8 +45,8 @@ const ModalInfoPolygons = ({ setShowModal, polygons, draw, map, disablePoints, e
 
     const getUsers = async () => {
         const response = await instance.get('/usuarios');
-        const data = response.data;
-        const users_active = data.filter(user => user.activo === true);
+        const users_active = response.data;
+        //const users_active = data.filter(user => user.activo === true);
         const users_in_polygo = polygons.map(poly => poly.user)
         validateUsers(users_active, users_in_polygo)
     }
@@ -117,7 +117,7 @@ const ModalInfoPolygons = ({ setShowModal, polygons, draw, map, disablePoints, e
         const coordinates = centroid.geometry.coordinates;
 
         const marker = new Marker({
-            element: createElementImage(`https://www.ser0.mx/ser0/image/usuario/${image_url}`),
+            element: createElementImage(image_url),
         });
 
         marker
