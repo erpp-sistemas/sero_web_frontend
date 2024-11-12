@@ -13,7 +13,7 @@ function TopColoniasChart({ data, title }) {
   }
 
   const chartColor = title.includes('Total') ? colors.greenAccent[500] : colors.blueAccent[500];
-  const formatTooltip = title.includes('Total') ? "$,.2f" : "#,.0r";
+  const formatTooltip = title.includes('Total') ? "$,.2f" : "#,.0f";
   const axisLeftLegendTitle = title.includes('Total') ? "Total" : "Cuentas"
   const axisLeftFormat = title.includes('Total')
     ? (value) => `$${value.toLocaleString()}`  // Formato con signo de pesos y comas

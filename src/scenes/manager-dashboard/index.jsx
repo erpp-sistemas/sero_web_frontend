@@ -1,3 +1,4 @@
+import * as React from 'react';
 import { useState } from "react"
 import { tokens } from "../../theme"
 import PlaceSelect from '../../components/PlaceSelect'
@@ -8,10 +9,15 @@ import LoadingModal from '../../components/LoadingModal.jsx'
 import CustomAlert from '../../components/CustomAlert.jsx'
 import Grid from '@mui/material/Grid'
 import TextField from '@mui/material/TextField'
-import { ManageSearch } from "@mui/icons-material"
+import { CurrencyExchange, ManageSearch } from "@mui/icons-material"
 import {managerDashboardRequest} from '../../api/manager.js'
 import PaymentsPerColony from '../../components/ManagerDashboard/PaymentsPerColony.jsx'
 import PaymentsByTypeOfService from '../../components/ManagerDashboard/PaymentsByTypeOfService.jsx'
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import PhoneIcon from '@mui/icons-material/Phone';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import PersonPinIcon from '@mui/icons-material/PersonPin';
 
 function Index() {
     const theme = useTheme()
@@ -23,10 +29,16 @@ function Index() {
     const [selectedFinishDate, setSelectedFinishDate] = useState('')
     const [paymentsPerColonyData, setPaymentsPerColonyData] = useState([])    
     const [paymentsByTypeOfServiceData, setPaymentsByTypeOfServiceData] = useState([]) 
+    const [managerEfficiencyData, setManagerEfficiencyData] = useState([]) 
     const [isLoading, setIsLoading] = useState(false)
     const [alertOpen, setAlertOpen] = useState(false)
     const [alertType, setAlertType] = useState("info")
     const [alertMessage, setAlertMessage] = useState("")
+	const [value, setValue] = React.useState(0);
+
+	const handleChange = (event, newValue) => {
+		setValue(newValue);
+	};
 
     const handlePlaceChange = (event) => {
 		setSelectedPlace(event.target.value)
@@ -51,6 +63,9 @@ function Index() {
     }
 
     const handleGetCoordinationDashboard = async () => {
+
+		setPaymentsByTypeOfServiceData([]);
+		setManagerEfficiencyData([]);
       
       try {
 
@@ -89,7 +104,7 @@ function Index() {
 
         const response = await managerDashboardRequest(selectedPlace, selectedService, selectedProcess, selectedStartDate, selectedFinishDate)
         setPaymentsByTypeOfServiceData(JSON.parse(response.data[0].paymentsByTypeOfService))
-        console.log(JSON.parse(response.data[0].paymentsByTypeOfService))
+        console.log(JSON.parse(response.data[0].managerEfficiency))
         
         setIsLoading(false)
         setAlertOpen(true)
@@ -205,13 +220,29 @@ function Index() {
 				
 				</Grid>
 
-				<Grid xs={12} container spacing={2}>
-					<Grid item xs={12}>
-						<PaymentsByTypeOfService data= {paymentsByTypeOfServiceData}/>
-            			{/* <PaymentsPerColony data= {paymentsPerColonyData} /> */}
-					</Grid>
-				</Grid>
+				<Grid container spacing={2}>
+          <Grid item xs={12}>
+            <Tabs
+              value={value}
+              onChange={handleChange}
+              aria-label="icon label tabs example"
+              indicatorColor="secondary"
+              textColor="secondary"
+              variant="fullWidth"
+            >
+              <Tab icon={<CurrencyExchange />} label="PAGOS POR TIPO DE SERVICIO" />
+              <Tab icon={<FavoriteIcon />} label="FAVORITES" />
+              <Tab icon={<PersonPinIcon />} label="NEARBY" />
+            </Tabs>
+          </Grid>
 
+          <Grid item xs={12}>
+            {value === 0 && (
+              <PaymentsByTypeOfService data={paymentsByTypeOfServiceData} />
+            )}
+            {/* Aquí puedes condicionalmente renderizar otros componentes si es necesario */}
+          </Grid>
+        </Grid>
 			</Box>
 
 		</Box>
