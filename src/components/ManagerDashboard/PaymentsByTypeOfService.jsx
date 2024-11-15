@@ -2,31 +2,14 @@ import React, { useState, useEffect } from "react";
 import Chip from "@mui/material/Chip";
 import Stack from "@mui/material/Stack";
 import Grid from "@mui/material/Grid";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
-import Typography from "@mui/material/Typography";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemText from "@mui/material/ListItemText";
-import ToggleButton from "@mui/material/ToggleButton";
-import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
-import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import GetAppIcon from "@mui/icons-material/GetApp";
 import * as ExcelJS from "exceljs";
 import TopColoniasChart from "./PaymentsByTypeOfService/TopColoniasChart.jsx";
 import TopColoniasTable from "./PaymentsByTypeOfService/TopColoniasTable.jsx";
-import { BarChart } from "@mui/icons-material";
 import { tokens } from "../../theme";
-import {
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
+import {  
   useTheme,
 } from "@mui/material";
 
@@ -226,7 +209,7 @@ function PaymentsByTypeOfService({ data }) {
                     y: colonia.count,
                   })) || [];
 
-              console.log(countData)
+                console.log(countData)
 
               return (
                 <Grid container key={type}>

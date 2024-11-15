@@ -9,13 +9,13 @@ import LoadingModal from '../../components/LoadingModal.jsx'
 import CustomAlert from '../../components/CustomAlert.jsx'
 import Grid from '@mui/material/Grid'
 import TextField from '@mui/material/TextField'
-import { CurrencyExchange, ManageSearch } from "@mui/icons-material"
+import { AlarmOn, CurrencyExchange, ManageSearch } from "@mui/icons-material"
 import {managerDashboardRequest} from '../../api/manager.js'
-import PaymentsPerColony from '../../components/ManagerDashboard/PaymentsPerColony.jsx'
 import PaymentsByTypeOfService from '../../components/ManagerDashboard/PaymentsByTypeOfService.jsx'
+import ManagerEfficiency from '../../components/ManagerDashboard/ManagerEfficiency.jsx'
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import PhoneIcon from '@mui/icons-material/Phone';
+
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import PersonPinIcon from '@mui/icons-material/PersonPin';
 
@@ -104,6 +104,7 @@ function Index() {
 
         const response = await managerDashboardRequest(selectedPlace, selectedService, selectedProcess, selectedStartDate, selectedFinishDate)
         setPaymentsByTypeOfServiceData(JSON.parse(response.data[0].paymentsByTypeOfService))
+		setManagerEfficiencyData(JSON.parse(response.data[0].managerEfficiency))
         console.log(JSON.parse(response.data[0].managerEfficiency))
         
         setIsLoading(false)
@@ -221,28 +222,32 @@ function Index() {
 				</Grid>
 
 				<Grid container spacing={2}>
-          <Grid item xs={12}>
-            <Tabs
-              value={value}
-              onChange={handleChange}
-              aria-label="icon label tabs example"
-              indicatorColor="secondary"
-              textColor="secondary"
-              variant="fullWidth"
-            >
-              <Tab icon={<CurrencyExchange />} label="PAGOS POR TIPO DE SERVICIO" />
-              <Tab icon={<FavoriteIcon />} label="FAVORITES" />
-              <Tab icon={<PersonPinIcon />} label="NEARBY" />
-            </Tabs>
-          </Grid>
+					<Grid item xs={12}>
+						<Tabs
+						value={value}
+						onChange={handleChange}
+						aria-label="icon label tabs example"
+						indicatorColor="secondary"
+						textColor="secondary"
+						variant="fullWidth"
+						>
+						<Tab icon={<CurrencyExchange />} label="PAGOS POR TIPO DE SERVICIO" />
+						<Tab icon={<AlarmOn />} label="EFICIENCIA DE GESTION" />
+						<Tab icon={<PersonPinIcon />} label="NEARBY" />
+						</Tabs>
+					</Grid>
 
-          <Grid item xs={12}>
-            {value === 0 && (
-              <PaymentsByTypeOfService data={paymentsByTypeOfServiceData} />
-            )}
-            {/* Aquí puedes condicionalmente renderizar otros componentes si es necesario */}
-          </Grid>
-        </Grid>
+					<Grid item xs={12}>
+						{value === 0 && (
+						<PaymentsByTypeOfService data={paymentsByTypeOfServiceData} />
+						)}
+						{value === 1 && (
+						<ManagerEfficiency data={ managerEfficiencyData } />						
+						)}
+						{/* Aquí puedes condicionalmente renderizar otros componentes si es necesario */}
+
+					</Grid>
+				</Grid>
 			</Box>
 
 		</Box>
