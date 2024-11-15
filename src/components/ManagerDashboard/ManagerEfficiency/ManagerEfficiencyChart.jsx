@@ -194,7 +194,7 @@ function ManagerEfficiency({ data }) {
         justifyContent: "center",
         alignItems: "center",
         width: "100%",
-        height: "400px",
+        height: "500px",
         p: 2,
         borderRadius: "10px",
       }}
