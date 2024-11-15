@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, useTheme } from "@mui/material";
 import { tokens } from "../../theme.js";
-import { ManagerEfficiencyChart} from '../ManagerDashboard/ManagerEfficiency/ManagerEfficiencyChart.jsx'
+import ManagerEfficiencyChart from '../ManagerDashboard/ManagerEfficiency/ManagerEfficiencyChart.jsx'
 
 function ManagerEfficiency({ data }) {
   const theme = useTheme();
