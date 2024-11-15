@@ -1,9 +1,12 @@
 import React from "react";
-import { Box, useTheme } from "@mui/material";
+import { Box, Grid, useTheme } from "@mui/material";
 import { tokens } from "../../theme.js";
 import ManagerEfficiencyChart from '../ManagerDashboard/ManagerEfficiency/ManagerEfficiencyChart.jsx'
+import ManagerEfficiencyTable from '../ManagerDashboard/ManagerEfficiency/ManagerEfficiencyTable.jsx'
 
 function ManagerEfficiency({ data }) {
+
+  console.log(data)
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
@@ -19,7 +22,7 @@ function ManagerEfficiency({ data }) {
         justifyContent: "center",
         alignItems: "center",
         width: "100%",
-        height: "400px",
+        height: "980px",
         p: 2,
         borderRadius: "10px",
       }}
@@ -38,7 +41,15 @@ function ManagerEfficiency({ data }) {
         }}
       >
         {data.length > 0 && (
-          <ManagerEfficiencyChart data={data} />
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <ManagerEfficiencyChart data={data} />
+            </Grid>
+            <Grid item xs={12}>
+              <ManagerEfficiencyTable data={data} />
+            </Grid>
+          </Grid>
+          
         )}
       </Box>
     </Box>
