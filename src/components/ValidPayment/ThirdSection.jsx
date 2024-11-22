@@ -32,7 +32,7 @@ function ThirdSection({ countNoPosition, percentageCountNoPosition, countWithout
               </Typography>
             }
             secondary={
-              <Typography variant="h3" component="div" sx={{ fontWeight: 'bold', color: theme.palette.secondary.main, mt: 1 }}>
+              <Typography variant="h3" component="div" sx={{ fontWeight: 'bold', color: colors.accentGreen[100], mt: 1 }}>
                 {countNoPosition}
               </Typography>
             }
@@ -40,12 +40,12 @@ function ThirdSection({ countNoPosition, percentageCountNoPosition, countWithout
           <ListItemSecondaryAction>
             <Tooltip title="Descargar" arrow>
               <IconButton onClick={() => handleExportToExcel(4)}>
-                <CloudDownload />
+                <CloudDownload sx={{color: colors.accentGreen[100]}} />
               </IconButton>
             </Tooltip>
             <Tooltip title="Ver Registros" arrow>
               <IconButton onClick={() => handleFilteredRows(4)}>
-                <Preview />
+                <Preview sx={{color: colors.accentGreen[100]}} />
               </IconButton>
             </Tooltip>
           </ListItemSecondaryAction>
@@ -82,7 +82,7 @@ function ThirdSection({ countNoPosition, percentageCountNoPosition, countWithout
               </Typography>                        
             }
             secondary={
-              <Typography variant="h3" component="div" sx={{ fontWeight: 'bold', color: theme.palette.secondary.main, mt: 1 }}>
+              <Typography variant="h3" component="div" sx={{ fontWeight: 'bold', color: colors.accentGreen[100], mt: 1 }}>
                 {countWithoutPropertyPhoto}
               </Typography>
             }
@@ -90,12 +90,12 @@ function ThirdSection({ countNoPosition, percentageCountNoPosition, countWithout
           <ListItemSecondaryAction>
             <Tooltip title="Descargar" arrow>
               <IconButton onClick={() => handleExportToExcel(5)}>
-                <CloudDownload />
+                <CloudDownload sx={{color: colors.accentGreen[100]}} />
               </IconButton>
             </Tooltip>
             <Tooltip title="Ver Registros" arrow>
               <IconButton onClick={() => handleFilteredRows(5)}>
-                <Preview />
+                <Preview sx={{color: colors.accentGreen[100]}} />
               </IconButton>
             </Tooltip>
           </ListItemSecondaryAction>
@@ -132,7 +132,7 @@ function ThirdSection({ countNoPosition, percentageCountNoPosition, countWithout
               </Typography>
             }
             secondary={
-              <Typography variant="h3" component="div" sx={{ fontWeight: 'bold', color: theme.palette.secondary.main, mt: 1.5 }}>
+              <Typography variant="h3" component="div" sx={{ fontWeight: 'bold', color: colors.accentGreen[100], mt: 1.5 }}>
                 {countWithoutEvidencePhoto}
               </Typography>
             }
@@ -140,12 +140,12 @@ function ThirdSection({ countNoPosition, percentageCountNoPosition, countWithout
           <ListItemSecondaryAction>
             <Tooltip title="Descargar" arrow>
               <IconButton onClick={() => handleExportToExcel(6)}>
-                <CloudDownload />
+                <CloudDownload sx={{color: colors.accentGreen[100]}} />
               </IconButton>
             </Tooltip>
             <Tooltip title="Ver Registros" arrow>
               <IconButton onClick={() => handleFilteredRows(6)}>
-                <Preview />
+                <Preview sx={{color: colors.accentGreen[100]}} />
               </IconButton>
             </Tooltip>
           </ListItemSecondaryAction>
@@ -183,7 +183,7 @@ function ThirdSection({ countNoPosition, percentageCountNoPosition, countWithout
               </Typography>                        
             }
             secondary={
-              <Typography variant="h3" component="div" sx={{ fontWeight: 'bold', color: theme.palette.secondary.main, mt: 2 }}>
+              <Typography variant="h3" component="div" sx={{ fontWeight: 'bold', color: colors.accentGreen[100], mt: 2 }}>
                 {countPropertyNotLocated}
               </Typography>
             }
@@ -191,12 +191,12 @@ function ThirdSection({ countNoPosition, percentageCountNoPosition, countWithout
           <ListItemSecondaryAction>
             <Tooltip title="Descargar" arrow>
               <IconButton onClick={() => handleExportToExcel(7)}>
-                <CloudDownload />
+                <CloudDownload sx={{color: colors.accentGreen[100]}} />
               </IconButton>
             </Tooltip>
             <Tooltip title="Ver Registros" arrow>
               <IconButton onClick={() => handleFilteredRows(7)}>
-                <Preview />
+                <Preview sx={{color: colors.accentGreen[100]}} />
               </IconButton>
             </Tooltip>
           </ListItemSecondaryAction>

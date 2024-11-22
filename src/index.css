@@ -620,3 +620,43 @@ body,
 	}
 
 }
+
+@layer utilities {
+	@keyframes neonGlow {
+	  0% {
+		border-color: #00FF00; /* Verde neón */
+	  }
+	  25% {
+		border-color: #00FFFF; /* Azul brillante */
+	  }
+	  50% {
+		border-color: #00FF00; /* Regresa al verde */
+	  }
+	  75% {
+		border-color: #0099FF; /* Azul más oscuro */
+	  }
+	  100% {
+		border-color: #00FF00; /* Vuelve al verde */
+	  }
+	}
+  
+	@keyframes scaleAnimation {
+	  0% {
+		transform: scale(1); /* Tamaño normal */
+	  }
+	  50% {
+		transform: scale(1.1); /* Aumenta el tamaño */
+	  }
+	  100% {
+		transform: scale(1); /* Vuelve al tamaño normal */
+	  }
+	}
+  
+	.animate-neon {
+	  animation: neonGlow 2s infinite;
+	}
+  
+	.animate-scale {
+	  animation: scaleAnimation 4s infinite;
+	}
+  }

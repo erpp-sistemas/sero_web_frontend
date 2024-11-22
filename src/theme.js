@@ -16,6 +16,39 @@ export const tokens = (mode) => ({
 			900: "#141414",
 			1000: "#FBFCFC"
 		},
+		tealAccent: {
+			100: "#001010", 
+			200: "#042020", 
+			300: "#094142", 
+			400: "#1dd5d8",  // Color claro equivalente
+			500: "#74dddf", 
+			600: "#a2e9ea", 
+			700: "#d0f4f5", 
+			800: "#e8f9fa",  // Tonos muy claros
+			900: "#f6fcfc", 
+		  },
+		  green: {
+			100: "#ccffcc",  // Verde muy claro, casi pastel
+			200: "#99ff99",  // Verde claro
+			300: "#66ff66",  // Verde vivo, pero no saturado
+			400: "#33ff33",  // Verde brillante
+			500: "#00ff00",  // Color principal (verde puro del logotipo)
+			600: "#00cc00",  // Verde más oscuro
+			700: "#009900",  // Verde bosque oscuro
+			800: "#006600",  // Verde muy oscuro
+			900: "#003300",  // Verde casi negro
+		  },
+		searchButton:{
+			100: "#99ff99",
+			200: "#33ff33",
+		},
+		contentSearchButton:{
+			100: "#254061"			
+		},
+		accentGreen:{
+			100: "#99ff99",
+			200: "#33ff33",
+		},
 		primary: {
 			100: "#d0d1d5",
 			200: "#a1a4ab",
@@ -87,6 +120,39 @@ export const tokens = (mode) => ({
 			800: "#c2c2c2",
 			900: "#e0e0e0",
 			1000: "#FBFCFC"
+		},
+		tealAccent: {
+			100: "#d0f4f5",  // Muy claro
+			200: "#a2e9ea", 
+			300: "#74dddf", 
+			400: "#19b7ba",  // Color principal
+			500: "#138e91", 
+			600: "#0e6669", 
+			700: "#094142", 
+			800: "#042020", 
+			900: "#001010",  // Muy oscuro
+		  },
+		  green: {
+			100: "#003300",  // Verde oscuro profundo
+			200: "#99ff99",  // Verde muy oscuro
+			300: "#009900",  // Verde bosque oscuro
+			400: "#00cc00",  // Verde más oscuro
+			500: "#00ff00",  // Color principal (verde puro del logotipo)
+			600: "#33ff33",  // Verde brillante
+			700: "#99ff99",  // Verde vivo, pero no saturado
+			800: "#99ff99",  // Verde claro
+			900: "#ccffcc",  // Verde muy claro, casi pastel
+		  },
+		  searchButton:{
+			100: "#00a884",
+			200: "#33c4a9",
+		},
+		contentSearchButton:{
+			100: "#fff"			
+		},
+		accentGreen:{
+			100: "#00a884",
+			200: "#33ff33",
 		},
 		primary: {
 			100: "#040509",

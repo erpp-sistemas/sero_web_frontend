@@ -44,7 +44,7 @@ function SecondSection({ countValidProcedures, countInvalidProcedures, percentag
               </Typography>
             }
             secondary={
-              <Typography variant="h3" component="div" sx={{ fontWeight: 'bold', color: theme.palette.secondary.main, mt: 1 }}>
+              <Typography variant="h3" component="div" sx={{ fontWeight: 'bold', color: colors.accentGreen[100], mt: 1 }}>
                 {countValidProcedures}
               </Typography>
             }
@@ -52,12 +52,12 @@ function SecondSection({ countValidProcedures, countInvalidProcedures, percentag
           <ListItemSecondaryAction>
             <Tooltip title="Descargar" arrow>
               <IconButton onClick={() => handleExportToExcel(2)}>
-                <CloudDownload />
+                <CloudDownload sx={{color: colors.accentGreen[100]}} />
               </IconButton>
             </Tooltip>
             <Tooltip title="Ver Registros" arrow>
               <IconButton onClick={() => handleFilteredRows(2)}>
-                <Preview />
+                <Preview sx={{color: colors.accentGreen[100]}}/>
               </IconButton>
             </Tooltip>
           </ListItemSecondaryAction>
@@ -93,7 +93,7 @@ function SecondSection({ countValidProcedures, countInvalidProcedures, percentag
               </Typography>                        
             }
             secondary={
-              <Typography variant="h3" component="div" sx={{ fontWeight: 'bold', color: theme.palette.secondary.main, mt: 1 }}>
+              <Typography variant="h3" component="div" sx={{ fontWeight: 'bold', color: colors.accentGreen[100], mt: 1 }}>
                 {countInvalidProcedures}
               </Typography>
             }
@@ -101,12 +101,12 @@ function SecondSection({ countValidProcedures, countInvalidProcedures, percentag
           <ListItemSecondaryAction>
             <Tooltip title="Descargar" arrow>
               <IconButton onClick={() => handleExportToExcel(3)}>
-                <CloudDownload />
+                <CloudDownload sx={{color: colors.accentGreen[100]}}/>
               </IconButton>
             </Tooltip>
             <Tooltip title="Ver Registros" arrow>
               <IconButton onClick={() => handleFilteredRows(3)}>
-                <Preview />
+                <Preview sx={{color: colors.accentGreen[100]}} />
               </IconButton>
             </Tooltip>
           </ListItemSecondaryAction>
@@ -130,7 +130,7 @@ function SecondSection({ countValidProcedures, countInvalidProcedures, percentag
               </Typography>
             }
             secondary={
-              <Typography variant="h3" component="div" sx={{ fontWeight: 'bold', color: theme.palette.secondary.main, mt: 1 }}>
+              <Typography variant="h3" component="div" sx={{ fontWeight: 'bold', color: colors.accentGreen[100], mt: 1 }}>
                 {amountValidProcedures}
               </Typography>
             }
@@ -140,7 +140,7 @@ function SecondSection({ countValidProcedures, countInvalidProcedures, percentag
               <IconButton 
                 onClick={() => handleOpenModal()}
               >
-                <PieChart />
+                <PieChart sx={{color: colors.accentGreen[100]}} />
               </IconButton>
             </Tooltip>            
           </ListItemSecondaryAction>
@@ -163,7 +163,7 @@ function SecondSection({ countValidProcedures, countInvalidProcedures, percentag
               </Typography>                        
             }
             secondary={
-              <Typography variant="h3" component="div" sx={{ fontWeight: 'bold', color: theme.palette.secondary.main, mt: 1 }}>
+              <Typography variant="h3" component="div" sx={{ fontWeight: 'bold', color: colors.accentGreen[100], mt: 1 }}>
                 {amountInvalidProcedures}
               </Typography>
             }
