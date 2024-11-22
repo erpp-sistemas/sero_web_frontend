@@ -101,9 +101,9 @@ function ClasificacionesSection({
             padding: "2px 0px",
             borderRadius: "12px",
             border:
-              typeFilter === 2 ? "3px solid #F4D03F" : "3px solid transparent",
+              typeFilter === 8 ? "3px solid #F4D03F" : "3px solid transparent",
             animation:
-              typeFilter === 2 ? "borderAnimation 2s infinite" : "none",
+              typeFilter === 8 ? "borderAnimation 2s infinite" : "none",
             "@keyframes borderAnimation": {
               "0%": { borderColor: "transparent" },
               "50%": { borderColor: "#00ff00" },
@@ -177,9 +177,9 @@ function ClasificacionesSection({
             padding: "2px 0px",
             borderRadius: "12px",
             border:
-              typeFilter === 2 ? "3px solid #F4D03F" : "3px solid transparent",
+              typeFilter === 9 ? "3px solid #F4D03F" : "3px solid transparent",
             animation:
-              typeFilter === 2 ? "borderAnimation 2s infinite" : "none",
+              typeFilter === 9 ? "borderAnimation 2s infinite" : "none",
             "@keyframes borderAnimation": {
               "0%": { borderColor: "transparent" },
               "50%": { borderColor: "#00ff00" },
@@ -253,9 +253,9 @@ function ClasificacionesSection({
             padding: "2px 0px",
             borderRadius: "12px",
             border:
-              typeFilter === 2 ? "3px solid #F4D03F" : "3px solid transparent",
+              typeFilter === 10 ? "3px solid #F4D03F" : "3px solid transparent",
             animation:
-              typeFilter === 2 ? "borderAnimation 2s infinite" : "none",
+              typeFilter === 10 ? "borderAnimation 2s infinite" : "none",
             "@keyframes borderAnimation": {
               "0%": { borderColor: "transparent" },
               "50%": { borderColor: "#00ff00" },
@@ -330,9 +330,9 @@ function ClasificacionesSection({
             padding: "2px 0px",
             borderRadius: "12px",
             border:
-              typeFilter === 2 ? "3px solid #F4D03F" : "3px solid transparent",
+              typeFilter === 11 ? "3px solid #F4D03F" : "3px solid transparent",
             animation:
-              typeFilter === 2 ? "borderAnimation 2s infinite" : "none",
+              typeFilter === 11 ? "borderAnimation 2s infinite" : "none",
             "@keyframes borderAnimation": {
               "0%": { borderColor: "transparent" },
               "50%": { borderColor: "#00ff00" },
@@ -407,9 +407,9 @@ function ClasificacionesSection({
             padding: "2px 0px",
             borderRadius: "12px",
             border:
-              typeFilter === 2 ? "3px solid #F4D03F" : "3px solid transparent",
+              typeFilter === 12 ? "3px solid #F4D03F" : "3px solid transparent",
             animation:
-              typeFilter === 2 ? "borderAnimation 2s infinite" : "none",
+              typeFilter === 12 ? "borderAnimation 2s infinite" : "none",
             "@keyframes borderAnimation": {
               "0%": { borderColor: "transparent" },
               "50%": { borderColor: "#00ff00" },
@@ -484,9 +484,9 @@ function ClasificacionesSection({
             borderBottom: "1px solid #ddd",
             borderRadius: "12px",
             border:
-              typeFilter === 2 ? "3px solid #F4D03F" : "3px solid transparent",
+              typeFilter === 13 ? "3px solid #F4D03F" : "3px solid transparent",
             animation:
-              typeFilter === 2 ? "borderAnimation 2s infinite" : "none",
+              typeFilter === 13 ? "borderAnimation 2s infinite" : "none",
             "@keyframes borderAnimation": {
               "0%": { borderColor: "transparent" },
               "50%": { borderColor: "#00ff00" },
@@ -561,9 +561,9 @@ function ClasificacionesSection({
             borderBottom: "1px solid #ddd",
             borderRadius: "12px",
             border:
-              typeFilter === 2 ? "3px solid #F4D03F" : "3px solid transparent",
+              typeFilter === 14 ? "3px solid #F4D03F" : "3px solid transparent",
             animation:
-              typeFilter === 2 ? "borderAnimation 2s infinite" : "none",
+              typeFilter === 14 ? "borderAnimation 2s infinite" : "none",
             "@keyframes borderAnimation": {
               "0%": { borderColor: "transparent" },
               "50%": { borderColor: "#00ff00" },
@@ -638,9 +638,9 @@ function ClasificacionesSection({
             borderBottom: "1px solid #ddd",
             borderRadius: "12px",
             border:
-              typeFilter === 2 ? "3px solid #F4D03F" : "3px solid transparent",
+              typeFilter === 15 ? "3px solid #F4D03F" : "3px solid transparent",
             animation:
-              typeFilter === 2 ? "borderAnimation 2s infinite" : "none",
+              typeFilter === 15 ? "borderAnimation 2s infinite" : "none",
             "@keyframes borderAnimation": {
               "0%": { borderColor: "transparent" },
               "50%": { borderColor: "#00ff00" },
