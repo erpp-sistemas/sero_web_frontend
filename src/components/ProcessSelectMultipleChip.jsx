@@ -39,7 +39,7 @@ function ProcessSelectMultipleChip({ selectedPlace, selectedService, selectedPro
 
   return (
     <>
-      <FormControl variant='filled' sx={{ width: '100%' }}>
+      <FormControl variant='outlined' sx={{ width: '100%' }}>
         <InputLabel id="demo-multiple-chip-label">Procesos</InputLabel>
         <Select
           labelId="demo-multiple-chip-label"
@@ -47,7 +47,7 @@ function ProcessSelectMultipleChip({ selectedPlace, selectedService, selectedPro
           multiple
           value={selectedProcess}
           onChange={handleProcessChange}
-          input={<FilledInput id="select-multiple-chip" label="Chip" />}
+          input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
           renderValue={() => (
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
               {selectedProcessNames.map((name) => (

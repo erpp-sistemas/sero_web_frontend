@@ -195,6 +195,7 @@ const Index = () => {
       );
 
       setResultOriginal(response.data);
+      console.log(response.data)
       setTypeFilter(1);
       setTitleFilter("Registros Encontrados");
 
@@ -1049,7 +1050,7 @@ const Index = () => {
           spacing={2}
         >
           <Grid item xs={12} md={3}>
-            <FormControl variant="filled" sx={{ width: "100%" }}>
+            <FormControl variant="outlined" sx={{ width: "100%" }}>
               <InputLabel id="demo-simple-select-standard-label">
                 Numero de dias antes del pago:
               </InputLabel>
@@ -1061,7 +1062,7 @@ const Index = () => {
                 label="Days"
               >
                 <MenuItem value="">
-                  <em>None</em>
+                  <em>Ninguno</em>
                 </MenuItem>
                 <MenuItem value={30}>30 dias</MenuItem>
                 <MenuItem value={60}>60 dias</MenuItem>
@@ -1075,11 +1076,24 @@ const Index = () => {
               id="start-date"
               label="Fecha de inicio"
               type="date"
-              sx={{ width: "100%" }}
+              // sx={{ width: "100%" }}
               value={selectedStartDate}
               onChange={handleStartDateChange}
               InputLabelProps={{
                 shrink: true,
+              }}
+              sx={{
+                width: '100%',
+                "& input[type='date']::-webkit-calendar-picker-indicator": {
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='${encodeURIComponent(
+                    colors.accentGreen[100]
+                  )}'%3E%3Cpath d='M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zM5 20V9h14v11H5zm3-9h2v2H8v-2zm0 4h2v2H8v-2zm4-4h2v2h-2v-2zm0 4h2v2h-2v-2zm4-4h2v2h-2v-2zm0 4h2v2h-2v-2z'/%3E%3C/svg%3E")`,
+                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: "center",
+                  cursor: "pointer",
+                  width: "20px",
+                  height: "20px",
+                },
               }}
             />
           </Grid>
@@ -1087,12 +1101,24 @@ const Index = () => {
             <TextField
               id="finish-date"
               label="Fecha final"
-              type="date"
-              sx={{ width: "100%" }}
+              type="date"              
               value={selectedFinishDate}
               onChange={handleFinishDateChange}
               InputLabelProps={{
                 shrink: true,
+              }}
+              sx={{
+                width: '100%',
+                "& input[type='date']::-webkit-calendar-picker-indicator": {
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='${encodeURIComponent(
+                    colors.accentGreen[100]
+                  )}'%3E%3Cpath d='M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zM5 20V9h14v11H5zm3-9h2v2H8v-2zm0 4h2v2H8v-2zm4-4h2v2h-2v-2zm0 4h2v2h-2v-2zm4-4h2v2h-2v-2zm0 4h2v2h-2v-2z'/%3E%3C/svg%3E")`,
+                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: "center",
+                  cursor: "pointer",
+                  width: "20px",
+                  height: "20px",
+                },
               }}
             />
           </Grid>

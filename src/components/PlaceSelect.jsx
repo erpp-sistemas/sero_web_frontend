@@ -23,7 +23,7 @@ function PlaceSelect({ selectedPlace, handlePlaceChange }) {
       id="filled-select-places"
       select
       label="Plazas"
-      variant="filled"
+      variant="outlined"
       sx={{ width: '100%' }}
       value={selectedPlace}
       onChange={handlePlaceChange}
