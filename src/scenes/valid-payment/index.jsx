@@ -31,6 +31,7 @@ import {
   GridToolbarContainer,
   GridToolbarDensitySelector,
   GridToolbarFilterButton,
+  GridColumnMenu
 } from "@mui/x-data-grid";
 import Chip from "@mui/material/Chip";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -111,7 +112,9 @@ const Index = () => {
     { rango: "Mayor a 500 mil", total_pagado: 0, cuentas_pagadas: 0 },
   ];
 
-  const [clasificaciones, setClasificaciones] = useState(initialClasificaciones);
+  const [clasificaciones, setClasificaciones] = useState(
+    initialClasificaciones
+  );
 
   const handlePlaceChange = (event) => {
     setSelectedPlace(event.target.value);
@@ -238,7 +241,7 @@ const Index = () => {
 
       let countFotoFachadaNoAndValid = 0;
       let countFotoEvidenciaNoAndValid = 0;
-      let countEstatusPredioNoLocalizadoAndValid = 0;     
+      let countEstatusPredioNoLocalizadoAndValid = 0;
 
       setClasificaciones([...initialClasificaciones]);
       // Definir la clasificación como estado
@@ -389,7 +392,7 @@ const Index = () => {
   const handleExportToExcel = async (filter) => {
     try {
       setIsLoading(true);
-      console.log(filter)
+      console.log(filter);
       const workbook = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet("Registros Encontrados");
 
@@ -615,17 +618,19 @@ const Index = () => {
   function CustomToolbar() {
     return (
       <GridToolbarContainer>
-        <GridToolbarColumnsButton color="secondary">
+        <GridToolbarColumnsButton
+          color="info" 
+          variant="contained"
+          sx={{
+            borderRadius: "35px",
+            color: "white",
+            margin: '5px'
+          }}
+          
+        >
           Columnas
-        </GridToolbarColumnsButton>
-
-        <GridToolbarFilterButton color="secondary" />
-        <GridToolbarDensitySelector color="secondary" />
-
-        <Button color="secondary" onClick={handleExportToExcelFull}>
-          Exportar a Excel
-        </Button>
-      </GridToolbarContainer>
+        </GridToolbarColumnsButton>        
+      </GridToolbarContainer>      
     );
   }
 
@@ -642,11 +647,6 @@ const Index = () => {
             return {
               field: key,
               headerName: key.toUpperCase(),
-              renderHeader: () => (
-                <strong style={{ color: "#5EBFFF" }}>
-                  {key.toUpperCase()}
-                </strong>
-              ),
               renderCell: (params) => (
                 <Chip
                   icon={
@@ -661,7 +661,7 @@ const Index = () => {
                   variant="outlined"
                 />
               ),
-              width: 150,
+              width: 170,
             };
           }
 
@@ -669,11 +669,6 @@ const Index = () => {
             return {
               field: key,
               headerName: key.toUpperCase(),
-              renderHeader: () => (
-                <strong style={{ color: "#5EBFFF" }}>
-                  {key.toUpperCase()}
-                </strong>
-              ),
               renderCell: (params) => (
                 <Chip
                   icon={
@@ -688,7 +683,7 @@ const Index = () => {
                   variant="outlined"
                 />
               ),
-              width: 150,
+              width: 170,
             };
           }
 
@@ -696,11 +691,6 @@ const Index = () => {
             return {
               field: key,
               headerName: key.toUpperCase(),
-              renderHeader: () => (
-                <strong style={{ color: "#5EBFFF" }}>
-                  {key.toUpperCase()}
-                </strong>
-              ),
               renderCell: (params) => (
                 <Chip
                   icon={
@@ -723,11 +713,6 @@ const Index = () => {
             return {
               field: key,
               headerName: key.toUpperCase(),
-              renderHeader: () => (
-                <strong style={{ color: "#5EBFFF" }}>
-                  {key.toUpperCase()}
-                </strong>
-              ),
               renderCell: (params) =>
                 params.row.urlImagenFachada ? (
                   <Card
@@ -761,11 +746,6 @@ const Index = () => {
             return {
               field: key,
               headerName: key.toUpperCase(),
-              renderHeader: () => (
-                <strong style={{ color: "#5EBFFF" }}>
-                  {key.toUpperCase()}
-                </strong>
-              ),
               renderCell: (params) =>
                 params.row.urlImagenEvidencia ? (
                   <Card
@@ -798,9 +778,6 @@ const Index = () => {
           return {
             field: key,
             headerName: key.toUpperCase(),
-            renderHeader: () => (
-              <strong style={{ color: "#5EBFFF" }}>{key.toUpperCase()}</strong>
-            ),
             width: 210,
             editable: false,
           };
@@ -1235,26 +1212,28 @@ const Index = () => {
           </Grid>
         </Grid>
 
-        <Box
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          sx={{ marginBottom: "0px" }}
-        >
-          <Typography
-            variant="h4"
-            component="h1"
-            align="center"
-            sx={{
-              fontWeight: "bold",
-              color: colors.grey[100],
-            }}
-          >
-            {titleFilter}
-          </Typography>
-        </Box>
+        {/* Nueva sección con título centrado */}
+        <Grid container justifyContent="center" sx={{ marginTop: "10px" }}>
+          <Grid item xs={12}>
+            <Typography
+              variant="h3"
+              align="center"
+              sx={{ fontWeight: "bold", color: colors.accentGreen[100] }}
+            >
+              {titleFilter}
+            </Typography>
+          </Grid>
+        </Grid>
 
-        <Grid container alignItems="stretch" spacing={2}>
+        <Grid
+          container
+          spacing={2}
+          sx={{
+            marginTop: "10px",
+            maxWidth: "100%", // Asegura que no se salga del Box
+            boxSizing: "border-box", // Asegura que el padding esté dentro del ancho
+          }}
+        >
           <Grid item xs={12} sm={4}>
             <TextField
               label="Ingresa tu busqueda"
@@ -1278,9 +1257,13 @@ const Index = () => {
           </Grid>
           <Grid item xs={12} sm={4}>
             <Button
-              variant="outlined"
-              color="secondary"
-              startIcon={<Download />}
+              variant="contained"
+              color="info"
+              sx={{
+                borderRadius: "35px",
+                color: "white",
+              }}
+              endIcon={<Download />}
               onClick={handleExportToExcelDataGrid}
             >
               Exportar a Excel
@@ -1312,11 +1295,48 @@ const Index = () => {
                 ) : (
                   <DataGrid
                     rows={filteredResult.length > 0 ? filteredResult : result}
-                    columns={columns}
+                    columns={columns.map((column) => ({
+                      ...column,
+                      renderHeader: () => (
+                        <Typography
+                          sx={{
+                            color: colors.contentSearchButton[100],
+                            fontWeight: "bold",
+                          }}
+                        >
+                          {column.headerName}
+                        </Typography>
+                      ),
+                    }))}
+                    sx={{
+                      borderRadius: "8px",
+                      boxShadow: 3,
+                      padding: 0,
+                      background: "rgba(128, 128, 128, 0.1)",
+                      "& .MuiDataGrid-columnHeaders": {
+                        backgroundColor: colors.accentGreen[100], // Color de fondo deseado
+
+                        borderTopLeftRadius: "8px",
+                        borderTopRightRadius: "8px",
+                      },
+                      "& .MuiDataGrid-footerContainer": {
+                        borderBottomLeftRadius: "8px",
+                        borderBottomRightRadius: "8px",
+                        backgroundColor: colors.accentGreen[100], // Fondo del footer (paginador)
+                        color: colors.contentSearchButton[100], // Color de texto dentro del footer
+                      },
+                      "& .MuiTablePagination-root": {
+                        color: colors.contentSearchButton[100], // Color del texto del paginador
+                      },
+                      "& .MuiSvgIcon-root": {
+                        color: colors.contentSearchButton[100], // Color de los íconos (flechas)
+                      },
+                    }}
                     getRowId={(row) => row.id}
                     rowHeight={130}
                     editable={false}
                     slots={{ toolbar: CustomToolbar }}
+                    
                   />
                 )}
               </Box>
