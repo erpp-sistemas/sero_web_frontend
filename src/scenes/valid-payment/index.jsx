@@ -31,7 +31,7 @@ import {
   GridToolbarContainer,
   GridToolbarDensitySelector,
   GridToolbarFilterButton,
-  GridColumnMenu
+  GridColumnMenu,
 } from "@mui/x-data-grid";
 import Chip from "@mui/material/Chip";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -41,6 +41,8 @@ import SecondSection from "../../components/ValidPayment/SecondSection.jsx";
 import ThirdSection from "../../components/ValidPayment/ThirdSection.jsx";
 import ClasificacionesSection from "../../components/ValidPayment/ClasificacionesSection.jsx";
 import StatCards from "../../components/ValidPayment/StatCards.jsx";
+import PaymentsDay from "../../components/ValidPayment/PaymentsDay.jsx";
+import Legend from "../../components/LightweightCharts/Legend.jsx";
 import { Download, FindInPage, Search } from "@mui/icons-material";
 
 const Index = () => {
@@ -115,6 +117,8 @@ const Index = () => {
   const [clasificaciones, setClasificaciones] = useState(
     initialClasificaciones
   );
+
+  const [paymentsChartData, setPaymentsChartData] = useState([]);
 
   const handlePlaceChange = (event) => {
     setSelectedPlace(event.target.value);
@@ -195,7 +199,7 @@ const Index = () => {
       );
 
       setResultOriginal(response.data);
-      console.log(response.data)
+      console.log(response.data);
       setTypeFilter(1);
       setTitleFilter("Registros Encontrados");
 
@@ -248,6 +252,9 @@ const Index = () => {
       // Definir la clasificación como estado
       const updatedClasificaciones = [...initialClasificaciones];
 
+      // Inicializar un objeto temporal para agrupar fechas y sumar total_pagado
+      const groupedData = {};
+
       response.data.forEach((item) => {
         totalSum +=
           selectedPlace === 2 && selectedService === 2
@@ -292,6 +299,19 @@ const Index = () => {
             updatedClasificaciones[7].cuentas_pagadas += 1;
           }
 
+          // Obtener la fecha sin hora
+          const paymentDate = new Date(item["fecha de pago"])
+            .toISOString()
+            .split("T")[0];
+
+          // Si la fecha ya existe en el objeto, sumar el total_pagado
+          if (groupedData[paymentDate]) {
+            groupedData[paymentDate] += item.total_pagado;
+          } else {
+            // Si la fecha no existe, inicializar con el valor de total_pagado
+            groupedData[paymentDate] = item.total_pagado;
+          }
+
           if (item.latitud === 0) {
             countLatitudCeroAndValid++;
           }
@@ -315,6 +335,16 @@ const Index = () => {
               : item.total_pagado;
         }
       });
+
+      // Convertir el objeto agrupado en un array y ordenarlo por fecha
+      const chartData = Object.keys(groupedData)
+        .map((date) => ({
+          time: date, // Formato requerido por lightweight-charts
+          value: groupedData[date], // El total pagado en esa fecha
+        }))
+        .sort((a, b) => new Date(a.time) - new Date(b.time)); // Ordenar por fecha
+
+      console.log(chartData); // Ver el formato generado
 
       countPayments = response.data.length;
       totalSum = Number(totalSum.toFixed(2));
@@ -369,6 +399,8 @@ const Index = () => {
 
       // Actualiza el estado de clasificaciones
       setClasificaciones(updatedClasificaciones);
+
+      setPaymentsChartData(chartData);
       // Aquí puedes mostrar el objeto clasificaciones si lo necesitas
       console.log(updatedClasificaciones);
 
@@ -620,18 +652,17 @@ const Index = () => {
     return (
       <GridToolbarContainer>
         <GridToolbarColumnsButton
-          color="info" 
+          color="info"
           variant="contained"
           sx={{
             borderRadius: "35px",
             color: "white",
-            margin: '5px'
+            margin: "5px",
           }}
-          
         >
           Columnas
-        </GridToolbarColumnsButton>        
-      </GridToolbarContainer>      
+        </GridToolbarColumnsButton>
+      </GridToolbarContainer>
     );
   }
 
@@ -1083,7 +1114,7 @@ const Index = () => {
                 shrink: true,
               }}
               sx={{
-                width: '100%',
+                width: "100%",
                 "& input[type='date']::-webkit-calendar-picker-indicator": {
                   backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='${encodeURIComponent(
                     colors.accentGreen[100]
@@ -1101,14 +1132,14 @@ const Index = () => {
             <TextField
               id="finish-date"
               label="Fecha final"
-              type="date"              
+              type="date"
               value={selectedFinishDate}
               onChange={handleFinishDateChange}
               InputLabelProps={{
                 shrink: true,
               }}
               sx={{
-                width: '100%',
+                width: "100%",
                 "& input[type='date']::-webkit-calendar-picker-indicator": {
                   backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='${encodeURIComponent(
                     colors.accentGreen[100]
@@ -1182,6 +1213,19 @@ const Index = () => {
             />
           </Grid>
         </Grid>
+
+        <Grid
+          xs={12}
+          container
+          justifyContent="space-between"
+          alignItems="stretch"
+          spacing={2}          
+        >
+          <Grid item xs={12} md={12}>
+            <PaymentsDay data={paymentsChartData} />
+          </Grid>
+        </Grid>       
+
         <Grid
           xs={12}
           container
@@ -1362,7 +1406,6 @@ const Index = () => {
                     rowHeight={130}
                     editable={false}
                     slots={{ toolbar: CustomToolbar }}
-                    
                   />
                 )}
               </Box>
