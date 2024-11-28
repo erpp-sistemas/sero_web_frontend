@@ -60,6 +60,7 @@ import DirectionDashboard from './scenes/direction-dashboard'
 import Manuals from './scenes/manuals'
 import Individual from './scenes/inventory/individual'
 import Credict from './scenes/credit'
+import TestRh from './scenes/rh-test'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -82,18 +83,18 @@ function App() {
   }, [location.pathname])
 
   const SubmenuAccessLog = async (menu) => {
-		try {
-      const submenu_access_data = {      
+    try {
+      const submenu_access_data = {
         username: user.username,
         menu_name: menu
-      }; 
-  
-      await submenuAccessLogRequest( submenu_access_data );
-		
-		} catch (error) {
-			console.error('Error fetching data:', error)    
-		}
-	}
+      };
+
+      await submenuAccessLogRequest(submenu_access_data);
+
+    } catch (error) {
+      console.error('Error fetching data:', error)
+    }
+  }
 
   useEffect(() => {
     initializeWebSocket(dispatch);
@@ -153,7 +154,7 @@ function App() {
               <Route
                 path="*"
                 element={
-                  <Box sx={{ overflowY:'scroll', overflowX:'hidden' }} className="app">
+                  <Box sx={{ overflowY: 'scroll', overflowX: 'hidden' }} className="app">
                     {location.pathname !== `/map/${mapa_seleccionado.place_id}` ? (
                       <Sidebar isSidebar={isSidebar} />
                     ) : (
@@ -201,12 +202,13 @@ function App() {
                         <Route path="/backup" element={<RecordsBackup />} />
                         <Route path="/impresion" element={<RecordsImpression />} />
                         <Route path="/vehiculos" element={<Inventory />} />
-                        <Route path="/manager-dashboard" element={<ManagerDashboard />} />                        
+                        <Route path="/manager-dashboard" element={<ManagerDashboard />} />
                         <Route path="/photo-management" element={<PhotoManagement />} />
                         <Route path="/direction-dashboard" element={<DirectionDashboard />} />
                         <Route path="/manuals" element={<Manuals />} />
-						<Route path="/vehiculos/:vehicleNumber" element={<Individual />} />
-						<Route path="/credit" element={<Credict />} />
+                        <Route path="/vehiculos/:vehicleNumber" element={<Individual />} />
+                        <Route path="/credit" element={<Credict />} />
+                        <Route path="/test-rh" element={<TestRh />} />
                       </Routes>
                     </main>
                   </Box>
