@@ -35,7 +35,7 @@ const SidebarMap = () => {
 
     const [showModalDate, setShowModalDate] = useState(false);
     const [layerSelected, setLayerSelected] = useState({});
-    
+
 
     const fillCartografia = (servicio) => {
         const id = document.getElementById(servicio.service_id.toString());
@@ -125,11 +125,21 @@ const SidebarMap = () => {
                 mapa_activo.mapa.setFilter(layer.layer_id, null)
                 changeColorLayer(layer.name_layer, colors.grey[100])
             } else {
+                const find_cluster = handleCheckClusterInMap(layer);
+                if(find_cluster) return alert("Desactiva el mapa de calor para apagar este layer");
+
                 mapa_activo.mapa.setLayoutProperty(layer.layer_id, 'visibility', 'visible')
                 changeColorLayer(layer.name_layer, colors.greenAccent[600])
             }
         }
 
+    }
+
+    const handleCheckClusterInMap = (layer) => {
+        const sources = mapa_activo.mapa.getStyle().sources;
+        const name_cluster = `cluster-${layer.name_layer}`;
+        const find_cluster = Object.keys(sources).find(sourceID => sourceID === name_cluster);
+        return find_cluster;
     }
 
     const handleRespModalQuestion = async (res) => {
@@ -141,7 +151,7 @@ const SidebarMap = () => {
                 const layer_id = `${layerSelected.layer_id}-${periodoInicial}_${periodoFinal}`;
                 const etiqueta = `${layerSelected.etiqueta} de ${periodoInicial} al ${periodoFinal}`;
                 const name_layer = `${layerSelected.name_layer}-${periodoInicial}_${periodoFinal}`;
-                const new_layer = {  ...layerSelected, layer_id, etiqueta, name_layer, is_large: 0 };
+                const new_layer = { ...layerSelected, layer_id, etiqueta, name_layer, is_large: 0 };
                 dispatch(setLayersActivos([...features.layers_activos, new_layer]));
                 setLayersMapa([...layersMapa, new_layer])
                 putDispatchDialog();
@@ -174,33 +184,6 @@ const SidebarMap = () => {
         return !!mapa_activo.mapa.getLayer(layer.layer_id);
     }
 
-    const validateLayerInMap = (layer, dates_filter = null) => {
-        if (!mapa_activo.mapa.getLayer(layer.layer_id)) {
-            dispatch(setDialog({ title: 'Cargando capa...', status: true }))
-            dispatch(setCargarLayer(cargarLayerMap))
-            cargarLayerMap(layer, dates_filter).then(() => {
-                dispatch(setDialog({
-                    title: '',
-                    status: false
-                }))
-                changeColorLayer(layer.name_layer, colors.greenAccent[600])
-            }).catch(error => {
-                console.error(error)
-            })
-            return
-        }
-
-        if (mapa_activo.mapa.getLayoutProperty(layer.layer_id, 'visibility') === 'visible' || mapa_activo.mapa.getLayoutProperty(layer.layer_id, 'visibility') === undefined) {
-            mapa_activo.mapa.setLayoutProperty(layer.layer_id, 'visibility', 'none')
-            mapa_activo.mapa.setFilter(layer.layer_id, null)
-            changeColorLayer(layer.name_layer, colors.grey[100])
-        } else {
-            mapa_activo.mapa.setLayoutProperty(layer.layer_id, 'visibility', 'visible')
-            changeColorLayer(layer.name_layer, colors.greenAccent[600])
-        }
-
-    }
-
     const cargarLayerMap = async (layer, dates_filter = null) => {
         try {
             if (layer.url_geoserver !== '') {
@@ -223,7 +206,7 @@ const SidebarMap = () => {
 
 
     const cargaPunto = async (layer, dates_filter = null) => {
-        const data = await cargarFeaturesLayer(layer.url_geoserver, dates_filter)
+        const data = await cargarFeaturesLayer(layer.url_geoserver, dates_filter);
         mapa_activo.mapa.addSource(layer.name_layer, { type: 'geojson', data: data })
         mapa_activo.mapa.addLayer({
             "id": layer.layer_id.toString(),

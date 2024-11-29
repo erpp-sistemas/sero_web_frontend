@@ -96,13 +96,12 @@ export default function AlertDialogSlide() {
 
     const handleActivaCluster = async () => {
         const layer = features.layers_activos.filter(l => l.layer_id == idLayerSeleccionado)[0];
-        console.log(layer)
         setNombreLayerSeleccionado(layer.etiqueta)
         if (mapa_activo.mapa.getLayer(layer.layer_id.toString())) {
             if (mapa_activo.mapa.getLayoutProperty(layer.layer_id.toString(), 'visibility') === 'visible') {
                 setOpen(false)
                 setShowModalCluster(true)
-                await addCluster(layer)
+                await generateClusterMap(layer)
                 setShowButtonsHerramientas(true)
                 setShowModalCluster(false)
                 setMapaCalorCreado(true)
@@ -114,90 +113,75 @@ export default function AlertDialogSlide() {
         }
     }
 
-    const addCluster = async (layer) => {
+    const generateClusterMap = async (layer) => {
+
+        const { mapa: active_map } = mapa_activo;
+
+        if (active_map.getLayer(layer.layer_id.toString())) {
+
+            turnOffLayer(layer.layer_id);
+
+            const data = mapa_activo.mapa.getSource(layer.name_layer)._data;
+
+            active_map.addSource(`cluster-${layer.name_layer}`, {
+                type: 'geojson',
+                data: data,
+                cluster: true,
+                clusterMaxZoom: 16,
+                clusterRadius: 30,
+                clusterProperties: { "sum": ["+", ["get", "total"]] }
+            });
+
+            active_map.addLayer({
+                id: `clusters_${layer.layer_id.toString()}`,
+                type: 'circle',
+                source: `cluster-${layer.name_layer}`,
+                filter: ['has', 'point_count'],
+                paint: {
+                    'circle-color': ['step', ['get', 'point_count'], '#51bbd6', 200, '#75f183', 750, '#dde25c'],
+                    'circle-radius': ['step', ['get', 'point_count'], 20, 200, 30, 750, 40]
+                }
+            });
+
+            active_map.addLayer({
+                id: `cluster-total_${layer.layer_id.toString()}`,
+                type: 'symbol',
+                source: `cluster-${layer.name_layer}`,
+                filter: ['has', 'point_count'],
+                'layout': {
+                    'text-field': [
+                        'concat',
+                        ['format', ['get', 'point_count_abbreviated'], { 'font-scale': 0.3 }, '\n', {}],
+                        ['number-format', ['get', 'sum'], { 'locale': 'en', 'style': 'currency', 'max-fraction-digits': 2 }],
+                    ],
+                    'text-size': 12,
+                }
+            });
+
+        }
+    }
+
+    const turnOffLayer = (layer_id) =>  mapa_activo.mapa.setLayoutProperty(layer_id.toString(), 'visibility', 'none');
+
+    const turnOnLayer = (layer_id) =>  mapa_activo.mapa.setLayoutProperty(layer_id.toString(), 'visibility', 'visible');
+
+    const handleDisableCluster = () => {
+        
+        const layer = features.layers_activos.filter(l => l.layer_id == idLayerSeleccionado)[0];
         if (mapa_activo.mapa.getLayer(layer.layer_id.toString())) {
-            mapa_activo.mapa.removeLayer(layer.layer_id.toString())
-            mapa_activo.mapa.removeSource(layer.name_layer)
+            mapa_activo.mapa.removeLayer(`clusters_${layer.layer_id.toString()}`);
+            mapa_activo.mapa.removeLayer(`cluster-total_${layer.layer_id.toString()}`);
         }
-
-        const data = await cargarFeaturesLayer(layer.url_geoserver)
-        mapa_activo.mapa.addSource(layer.name_layer, {
-            type: 'geojson',
-            data: data,
-            cluster: true,
-            clusterMaxZoom: 16,
-            clusterRadius: 30,
-            // clusterProperties: {
-            //     "sum": ["+", ["get", nombre_adeudo]]
-            // }
-        })
-
-        configuraCluster(layer);
-    }
-
-    const configuraCluster = (layer) => {
-        mapa_activo.mapa.addLayer({
-            id: `clusters_${layer.layer_id.toString()}`,
-            type: 'circle',
-            source: layer.name_layer,
-            filter: ['has', 'point_count'],
-            paint: {
-                'circle-color': ['step', ['get', 'point_count'], '#51bbd6', 200, '#75f183', 750, '#dde25c'],
-                'circle-radius': ['step', ['get', 'point_count'], 20, 200, 30, 750, 40]
-            }
-        })
-
-        mapa_activo.mapa.addLayer({
-            id: `cluster-total_${layer.layer_id.toString()}`,
-            type: 'symbol',
-            source: layer.name_layer,
-            filter: ['has', 'point_count'],
-            'layout': {
-                'text-field': [
-                    'concat',
-                    ['format', ['get', 'point_count_abbreviated'], { 'font-scale': 0.4 }, '\n', {}],
-                ],
-                'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold']
-            }
-        })
-
-        mapa_activo.mapa.addLayer({
-            id: layer.layer_id.toString(),
-            type: "circle",
-            source: layer.name_layer,
-            layout: {},
-            filter: ['!', ['has', 'point_count']],
-            minzoom: 10,
-            maxzoom: 24,
-            paint: { 'circle-radius': ['/', 7.142857142857142, 2], 'circle-color': layer.color, 'circle-opacity': layer.opacidad, 'circle-stroke-width': 1, 'circle-stroke-color': '#232323' }
-        });
-
-    }
-
-    const handleDesactivaCluster = () => {
-        const layerArr = features.layers_activos.filter(l => l.layer_id == idLayerSeleccionado)
-        const layer = layerArr[0]
-        if (mapa_activo.mapa.getSource(layer.name_layer)) {
-            if (mapa_activo.mapa.getLayer(layer.layer_id.toString())) {
-                setOpen(false)
-                mapa_activo.mapa.removeLayer(`clusters_${layer.layer_id.toString()}`);
-                mapa_activo.mapa.removeLayer(`cluster-total_${layer.layer_id.toString()}`);
-                mapa_activo.mapa.removeLayer(layer.layer_id.toString());
-                setNombreLayerSeleccionado('')
-                setIdLayerSeleccionado(0)
-                setMapaCalorCreado(false)
-            }
-            mapa_activo.mapa.removeSource(layer.name_layer)
-            features.cargar_layer(layer)
-            setShowButtonsHerramientas(true)
+        if (mapa_activo.mapa.getSource(`cluster-${layer.name_layer}`)) {
+            mapa_activo.mapa.removeSource(`cluster-${layer.name_layer}`)
+            setNombreLayerSeleccionado('');
+            setIdLayerSeleccionado(0);
+            setMapaCalorCreado(false);
         }
+        turnOnLayer(layer.layer_id);
+        
     }
 
-    const cargarFeaturesLayer = async (url) => {
-        let response = await fetch(url);
-        let data = await response.json();
-        return data;
-    }
 
     const handleBackTools = () => {
         setShowButtonsHerramientas(true);
@@ -304,8 +288,8 @@ export default function AlertDialogSlide() {
                             {!mapaCalorCreado && <SelectLayer features={features} setIdLayerSeleccionado={setIdLayerSeleccionado} />}
 
                             {mapaCalorCreado && showButtonsHerramientas === false && (
-                                <p className='m-3 text-center inline-block text-gray-900'>
-                                    Capa creada <span className='inline-block mt-2 ml-1' style={{ color: colors.greenAccent[600] }}> {nombreLayerSeleccionado} </span>
+                                <p className='m-3 text-center inline-block text-gray-900 text-base font-semibold'>
+                                    Capa creada - <span className='inline-block mt-2 ml-1 font-normal'> {nombreLayerSeleccionado} </span>
                                 </p>
                             )}
 
@@ -317,7 +301,7 @@ export default function AlertDialogSlide() {
                             )}
 
                             {mapaCalorCreado === true && showButtonsHerramientas === false && (
-                                <button className="bg-red-700 mt-3 py-1 px-3 rounded-md w-2/6 flex items-center gap-1 " onClick={handleDesactivaCluster} >
+                                <button className="bg-red-700 mt-3 py-2 text-base px-6 rounded-md flex items-center gap-1 hover:bg-red-600" onClick={handleDisableCluster} >
                                     {getIcon('DeleteIcon', {})}
                                     Quitar
                                 </button>
