@@ -812,12 +812,13 @@ const Index = () => {
                     }}
                   >
                     <CardMedia
-                      component="img"
-                      height="100%"
+                      component="img"                      
                       image={params.row.foto_fachada_1}
                       alt="Foto fachada 1"
                       sx={{
-                        objectFit: "cover",
+                        width: 120,
+                        height: 120,
+                        objectFit: "scale-down",
                       }}
                       onClick={() =>
                         handleOpenModal({
@@ -860,12 +861,14 @@ const Index = () => {
                     }}
                   >
                     <CardMedia
-                      component="img"
-                      height="100%"
+                      component="img"                      
                       image={params.row.foto_evidencia_1}
                       alt="Foto evidencia 1"
                       sx={{
-                        objectFit: "cover",
+                        width: 120,
+                        height: 120,
+                        objectFit: "scale-down",
+                        backgroundColor: 'transparent'
                       }}
                       onClick={() =>
                         handleOpenModal({

@@ -202,7 +202,7 @@ const PhotoViewModal = ({
               sx={{
                 width: 500,
                 height: 500,
-                objectFit: "cover",
+                objectFit: "contain",
               }}
               image={data.foto}
               alt="Foto"
