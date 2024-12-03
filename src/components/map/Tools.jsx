@@ -1,22 +1,28 @@
 import { useState, forwardRef } from 'react';
-import { useSelector } from 'react-redux'
-import { useTheme } from "@mui/material";
 
+// LIBRERIES
+import { useSelector } from 'react-redux'
 import IconButton from '@mui/material/IconButton'
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import Slide from '@mui/material/Slide';
-import { tokens } from "../../theme";
 import Modal from '../MaterialUI/Modal'
+
+// ICONS
 import PlumbingIcon from '@mui/icons-material/Plumbing';
-//import { CSVLink } from 'react-csv';
+
+// COMPONENTS
 import { getIcon } from '../../data/Icons';
 import SelectLayer from './SelectLayer';
 import TrackingGestor from './TrackingGestor';
 import RouteGestor from './RouteGestor';
 import Notification from './Notification';
 import Filtros from './Filtros';
+import ListTools from './ListTools';
+import Asignacion from './Asignacion';
+
+//import { CSVLink } from 'react-csv';
 
 
 const Transition = forwardRef(function Transition(props, ref) {
@@ -32,10 +38,6 @@ export default function AlertDialogSlide() {
 
     const mapa_activo = useSelector((state) => state.mapa)
     const features = useSelector((state) => state.features)
-
-    const theme = useTheme();
-    const colors = tokens(theme.palette.mode);
-
 
     const [open, setOpen] = useState(false);
     const [showButtonsHerramientas, setShowButtonsHerramientas] = useState(true)
@@ -218,59 +220,10 @@ export default function AlertDialogSlide() {
                         </>
                     )}
                 </DialogTitle>
+
+
                 <DialogContent sx={{ backgroundColor: '#F4F3F2', borderBottom: '2px solid black', padding: '40px 0' }}>
-                    {showButtonsHerramientas && (
-                        <>
-                            <div className="w-11/12 mx-auto bg-gray-900 h-1 rounded-md mb-4 opacity-50"></div>
-
-                            <div className="flex flex-wrap gap-6 justify-center font-mono">
-                                <button className="bg-neutral-50 text-gray-900 border-r-2 border-cyan-600 px-4 py-1 rounded-md flex gap-2 flex-col items-center justify-center w-1/4 shadow-lg hover:bg-slate-300 duration-300"
-                                    onClick={() => handleButtonHerramienta('Cambio de color')}
-                                >
-                                    {getIcon('ColorLensIcon', { fontSize: '30px', color: 'blue' })}
-                                    Cambio de color
-                                </button>
-                                <button className="bg-neutral-50 text-gray-900 border-r-2 border-cyan-600 px-4 py-1 rounded-md flex gap-2 flex-col items-center justify-center w-1/4 shadow-lg hover:bg-slate-300 duration-300"
-                                    onClick={() => handleButtonHerramienta('Dibujar poligono')}
-                                >
-                                    {getIcon('PolylineIcon', { fontSize: '30px', color: 'blue' })}
-                                    Dibujar Poligono
-                                </button>
-                                <button className="bg-neutral-50 text-gray-900 border-r-2 border-cyan-600 px-4 py-1 rounded-md flex gap-2 flex-col items-center justify-center w-1/4 shadow-lg hover:bg-slate-300 duration-300"
-                                    onClick={() => handleButtonHerramienta('Mapa de calor')}
-                                >
-                                    {getIcon('FiberSmartRecordIcon', { fontSize: '30px', color: 'blue' })}
-                                    Mapa de calor
-                                </button>
-                                <button className="bg-neutral-50 text-gray-900 border-r-2 border-cyan-600 px-4 py-1 rounded-md flex gap-2 flex-col items-center justify-center w-1/4 shadow-lg hover:bg-slate-300 duration-300"
-                                    onClick={() => handleButtonHerramienta('Seguimiento gestores')}
-                                >
-                                    {getIcon('GpsFixedIcon', { fontSize: '30px', color: 'blue' })}
-                                    Seguimiento
-                                </button>
-                                <button className="bg-neutral-50 text-gray-900 border-r-2  border-cyan-600 px-4 py-1 rounded-md flex gap-2 flex-col items-center justify-center w-1/4 shadow-lg hover:bg-slate-300 duration-300"
-                                    onClick={() => handleButtonHerramienta('Ruta gestor')}
-                                >
-                                    {getIcon('PlaceIcon', { fontSize: '30px', color: 'blue' })}
-                                    Ruta
-                                </button>
-
-                                <button className="bg-neutral-50 text-gray-900 border-r-2  border-cyan-600 px-4 py-1 rounded-md flex gap-2 flex-col items-center justify-center w-1/4 shadow-lg hover:bg-slate-300 duration-300"
-                                    onClick={() => handleButtonHerramienta('Notificación')}
-                                >
-                                    {getIcon('NotificationsOutlinedIcon', { fontSize: '30px', color: 'blue' })}
-                                    Notificaciones
-                                </button>
-                                <button className="bg-neutral-50 text-gray-900 border-r-2  border-cyan-600 px-4 py-1 rounded-md flex gap-2 flex-col items-center justify-center w-1/4 shadow-lg hover:bg-slate-300 duration-300"
-                                    onClick={() => handleButtonHerramienta('Filtros')}
-                                >
-                                    {getIcon('FilterAltIcon', { fontSize: '30px', color: 'blue' })}
-                                    Filtros
-                                </button>
-
-                            </div>
-                        </>
-                    )}
+                    {showButtonsHerramientas && <ListTools handleCheckTool={handleButtonHerramienta} /> }
 
                     {nombreHerramientaSeleccionada === 'Cambio de color' && (
                         <div className='px-2'>
@@ -294,7 +247,7 @@ export default function AlertDialogSlide() {
                             )}
 
                             {mapaCalorCreado === false && showButtonsHerramientas === false && (
-                                <button className="bg-green-700 mt-3 py-1 px-3 rounded-md w-2/6 flex items-center gap-1 " onClick={handleActivaCluster} >
+                                <button className="bg-emerald-600 mt-3 py-2 px-6 rounded-md flex items-center gap-1 hover:bg-emerald-500" onClick={handleActivaCluster} >
                                     {getIcon('BlurLinearIcon', {})}
                                     Generar
                                 </button>
@@ -337,6 +290,10 @@ export default function AlertDialogSlide() {
                             dataFiltered, setDataFiltered, filtersSelected, setFiltersSelected,
                             setShowTools: setOpen
                         }} />
+                    )}
+
+                    {nombreHerramientaSeleccionada === 'Asignación' && showButtonsHerramientas === false && (
+                        <Asignacion data={{}} />
                     )}
 
                 </DialogContent>

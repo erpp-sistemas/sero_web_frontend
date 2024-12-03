@@ -57,7 +57,7 @@ const RouteGestor = ({ data }) => {
 
         const promise = await Promise.all([pos, pos_ges])
 
-        if(promise[0].length === 0 || promise[1].length === 0) {
+        if (promise[0].length === 0 || promise[1].length === 0) {
             alert("Este gestor no tiene posiciones en la fecha seleccionada");
             setIsLoading(false);
             return;
@@ -178,9 +178,12 @@ const RouteGestor = ({ data }) => {
         <div className="p-2 flex flex-col items-center">
             {!rutaDibujada && (
                 <>
-                    <div className='w-1/2 mb-4'>
-                        <p className="text-gray-900 text-base text-center font-semibold">Seleccione un gestor:</p>
-                        <select className='w-full rounded-md py-1 text-gray-900 px-4' onChange={handleChangeGestor}>
+                    <div className='w-2/3 mb-4'>
+                        <div className='flex w-full items-center mb-2'>
+                            {getIcon('FaceIcon', { fontSize: '30px', color: 'green' })}
+                            <h1 className="text-base text-gray-900 font-semibold px-2"> Seleccione un gestor </h1>
+                        </div>
+                        <select className='w-full rounded-md py-2 text-gray-900 px-4' onChange={handleChangeGestor}>
                             <option value="0">------------------</option>
                             {gestores.length > 0 && gestores.map(gestor => (
                                 <option key={gestor.id_usuario} value={gestor.id_usuario}>
@@ -189,16 +192,19 @@ const RouteGestor = ({ data }) => {
                             ))}
                         </select>
                     </div>
-                    <div className='w-1/2'>
-                        <p className="text-gray-900 text-base text-center font-semibold">Seleccione la fecha:</p>
-                        <input className="w-full rounded-md text-gray-950 px-4" type="date" onChange={e => setFechaSeleccionada(e.target.value)} placeholder='Ingrese una fecha' />
+                    <div className='w-2/3'>
+                        <div className='flex w-full items-center mb-2'>
+                            {getIcon('CalendarMonthIcon', { fontSize: '30px', color: 'green' })}
+                            <h1 className="text-base text-gray-900 font-semibold px-2"> Seleccione la fecha </h1>
+                        </div>
+                        <input className="w-full py-2 rounded-md text-gray-950 px-4" type="date" onChange={e => setFechaSeleccionada(e.target.value)} placeholder='Ingrese una fecha' />
                     </div>
 
                 </>
             )}
 
             {!rutaDibujada ? (
-                <button className="font-serif bg-green-700 py-1 rounded-md px-6 mt-4 flex items-center hover:bg-green-500" onClick={handleSearchRoute}>
+                <button className="font-serif bg-emerald-600 py-2 rounded-md px-6 mt-4 flex items-center hover:bg-green-500" onClick={handleSearchRoute}>
                     {getIcon('LineWeightIcon', {})}
                     BUSCAR RUTA
                 </button>
