@@ -10,13 +10,11 @@ import {
   Box,
   useTheme,
   Button,
-  Avatar,
   InputAdornment,
   Typography,
   Card,
   CardMedia,
 } from "@mui/material";
-import Viewer from "react-viewer";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
@@ -29,21 +27,17 @@ import {
   DataGrid,
   GridToolbarColumnsButton,
   GridToolbarContainer,
-  GridToolbarDensitySelector,
-  GridToolbarFilterButton,
-  GridColumnMenu,
 } from "@mui/x-data-grid";
 import Chip from "@mui/material/Chip";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorIcon from "@mui/icons-material/Error";
-import FirstSection from "../../components/ValidPayment/FirstSection.jsx";
 import SecondSection from "../../components/ValidPayment/SecondSection.jsx";
 import ThirdSection from "../../components/ValidPayment/ThirdSection.jsx";
 import ClasificacionesSection from "../../components/ValidPayment/ClasificacionesSection.jsx";
 import StatCards from "../../components/ValidPayment/StatCards.jsx";
 import PaymentsDay from "../../components/ValidPayment/PaymentsDay.jsx";
-import Legend from "../../components/LightweightCharts/Legend.jsx";
-import { Download, FindInPage, Search } from "@mui/icons-material";
+import { Download, Search } from "@mui/icons-material";
+import PhotoViewModal from "../../components/PhotoManagement/PhotoViewModal.jsx";
 
 const Index = () => {
   const theme = useTheme();
@@ -119,6 +113,68 @@ const Index = () => {
   );
 
   const [paymentsChartData, setPaymentsChartData] = useState([]);
+
+  const [openModal, setOpenModal] = useState(false);
+  const [selectedRow, setSelectedRow] = useState(null);
+  const [newImageUrl, setNewImageUrl] = useState([]);
+
+  const handleOpenModal = (rowData) => {
+    setSelectedRow(rowData);
+    setOpenModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedRow(null);
+    setOpenModal(false);
+  };
+
+  const handleImageUrlUpdate = (response_photo) => {
+    setNewImageUrl(response_photo);
+    const photo_field = response_photo.celda;
+    const photo_field_exists =
+      photo_field.replace(/_\d$/, "").replace(/_/g, " ") + " predio";
+
+    setResultOriginal((prev) =>
+      prev.map((row) =>
+        row.id_registro === selectedRow.id_registro
+          ? {
+              ...row,
+              [photo_field]: response_photo.image_url,
+              [`id_${photo_field}`]: response_photo.photo_record_id,
+              [photo_field_exists]: "si",
+            }
+          : row
+      )
+    );
+
+    setFilteredResult((prev) =>
+      prev.map((row) =>
+        row.id_registro === selectedRow.id_registro
+          ? {
+              ...row,
+              [photo_field]: response_photo.image_url,
+              [`id_${photo_field}`]: response_photo.photo_record_id,
+              [photo_field_exists]: "si",
+            }
+          : row
+      )
+    );
+
+    setResult((prev) =>
+      prev.map((row) =>
+        row.id_registro === selectedRow.id_registro
+          ? {
+              ...row,
+              [photo_field]: response_photo.image_url,
+              [`id_${photo_field}`]: response_photo.photo_record_id,
+              [photo_field_exists]: "si",
+            }
+          : row
+      )
+    );
+
+    handleFilteredRows(typeFilter);
+  };
 
   const handlePlaceChange = (event) => {
     setSelectedPlace(event.target.value);
@@ -199,210 +255,8 @@ const Index = () => {
       );
 
       setResultOriginal(response.data);
-      console.log(response.data);
       setTypeFilter(1);
       setTitleFilter("Registros Encontrados");
-
-      const fechas = response.data.map(
-        (item) => new Date(item["fecha de pago"])
-      );
-
-      const fechaMasGrande = new Date(
-        Math.max(...fechas.map((fecha) => fecha.getTime()))
-      );
-      const fechaMasChica = new Date(
-        Math.min(...fechas.map((fecha) => fecha.getTime()))
-      );
-
-      const opciones = {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        timeZone: "UTC",
-      };
-      const fechaMayorFormateada = fechaMasGrande.toLocaleDateString(
-        "es-ES",
-        opciones
-      );
-      const fechaMenorFormateada = fechaMasChica.toLocaleDateString(
-        "es-ES",
-        opciones
-      );
-
-      setPaymentDateRange(`${fechaMenorFormateada} - ${fechaMayorFormateada}`);
-
-      let countPayments = 0;
-
-      let totalSum = 0;
-      const uniqueAccounts = new Set();
-
-      let validaCount = 0;
-      let noValidaCount = 0;
-
-      let validaTotal = 0;
-      let noValidaTotal = 0;
-
-      let countLatitudCeroAndValid = 0;
-
-      let countFotoFachadaNoAndValid = 0;
-      let countFotoEvidenciaNoAndValid = 0;
-      let countEstatusPredioNoLocalizadoAndValid = 0;
-
-      setClasificaciones([...initialClasificaciones]);
-      // Definir la clasificación como estado
-      const updatedClasificaciones = [...initialClasificaciones];
-
-      // Inicializar un objeto temporal para agrupar fechas y sumar total_pagado
-      const groupedData = {};
-
-      response.data.forEach((item) => {
-        totalSum +=
-          selectedPlace === 2 && selectedService === 2
-            ? item.total_pagado
-            : item.total_pagado;
-        uniqueAccounts.add(item.cuenta);
-
-        if (item["estatus de gestion valida"] === "valida") {
-          validaCount++;
-          validaTotal +=
-            selectedPlace === 2 && selectedService === 2
-              ? item.total_pagado
-              : item.total_pagado;
-
-          // Clasificación por rango de total_pagado
-          if (item.total_pagado > 0 && item.total_pagado <= 1000) {
-            updatedClasificaciones[0].total_pagado += item.total_pagado;
-            updatedClasificaciones[0].cuentas_pagadas += 1;
-          } else if (item.total_pagado > 1000 && item.total_pagado <= 5000) {
-            updatedClasificaciones[1].total_pagado += item.total_pagado;
-            updatedClasificaciones[1].cuentas_pagadas += 1;
-          } else if (item.total_pagado > 5000 && item.total_pagado <= 10000) {
-            updatedClasificaciones[2].total_pagado += item.total_pagado;
-            updatedClasificaciones[2].cuentas_pagadas += 1;
-          } else if (item.total_pagado > 10000 && item.total_pagado <= 25000) {
-            updatedClasificaciones[3].total_pagado += item.total_pagado;
-            updatedClasificaciones[3].cuentas_pagadas += 1;
-          } else if (item.total_pagado > 25000 && item.total_pagado <= 50000) {
-            updatedClasificaciones[4].total_pagado += item.total_pagado;
-            updatedClasificaciones[4].cuentas_pagadas += 1;
-          } else if (item.total_pagado > 50000 && item.total_pagado <= 100000) {
-            updatedClasificaciones[5].total_pagado += item.total_pagado;
-            updatedClasificaciones[5].cuentas_pagadas += 1;
-          } else if (
-            item.total_pagado > 100000 &&
-            item.total_pagado <= 500000
-          ) {
-            updatedClasificaciones[6].total_pagado += item.total_pagado;
-            updatedClasificaciones[6].cuentas_pagadas += 1;
-          } else if (item.total_pagado > 500000) {
-            updatedClasificaciones[7].total_pagado += item.total_pagado;
-            updatedClasificaciones[7].cuentas_pagadas += 1;
-          }
-
-          // Obtener la fecha sin hora
-          const paymentDate = new Date(item["fecha de pago"])
-            .toISOString()
-            .split("T")[0];
-
-          // Si la fecha ya existe en el objeto, sumar el total_pagado
-          if (groupedData[paymentDate]) {
-            groupedData[paymentDate] += item.total_pagado;
-          } else {
-            // Si la fecha no existe, inicializar con el valor de total_pagado
-            groupedData[paymentDate] = item.total_pagado;
-          }
-
-          if (item.latitud === 0) {
-            countLatitudCeroAndValid++;
-          }
-
-          if (item["foto fachada predio"] === "no") {
-            countFotoFachadaNoAndValid++;
-          }
-
-          if (item["foto evidencia predio"] === "no") {
-            countFotoEvidenciaNoAndValid++;
-          }
-
-          if (item["estatus_predio"] !== "Predio localizado") {
-            countEstatusPredioNoLocalizadoAndValid++;
-          }
-        } else {
-          noValidaCount++;
-          noValidaTotal +=
-            selectedPlace === 2 && selectedService === 2
-              ? item.total_pagado
-              : item.total_pagado;
-        }
-      });
-
-      // Convertir el objeto agrupado en un array y ordenarlo por fecha
-      const chartData = Object.keys(groupedData)
-        .map((date) => ({
-          time: date, // Formato requerido por lightweight-charts
-          value: groupedData[date], // El total pagado en esa fecha
-        }))
-        .sort((a, b) => new Date(a.time) - new Date(b.time)); // Ordenar por fecha
-
-      console.log(chartData); // Ver el formato generado
-
-      countPayments = response.data.length;
-      totalSum = Number(totalSum.toFixed(2));
-
-      const uniqueCount = uniqueAccounts.size;
-
-      const validaPercentage = (validaCount / countPayments) * 100;
-      const noValidaPercentage = (noValidaCount / countPayments) * 100;
-
-      const totalValidaPercentage = (validaTotal / totalSum) * 100;
-      const totalNoValidaPercentage = (noValidaTotal / totalSum) * 100;
-
-      const noPositionPercentage =
-        (countLatitudCeroAndValid / countPayments) * 100;
-
-      const fotoFachadaNoAndValidPercentage =
-        (countFotoFachadaNoAndValid / countPayments) * 100;
-      const fotoEvidenciaNoAndValidPercentage =
-        (countFotoEvidenciaNoAndValid / countPayments) * 100;
-      const estatusPredioNoLocalizadoAndValidPercentage =
-        (countEstatusPredioNoLocalizadoAndValid / countPayments) * 100;
-
-      setCountResult(countPayments.toLocaleString());
-      setTotalAmount(totalSum.toLocaleString());
-      setCountUniqueAccount(uniqueCount.toLocaleString());
-      setCountValidProcedures(validaCount.toLocaleString());
-      setCountInvalidProcedures(noValidaCount.toLocaleString());
-      setPercentageValidProcedures(validaPercentage.toFixed(2));
-      setPercentageInvalidProcedures(noValidaPercentage.toFixed(2));
-      setAmountValidProcedures(validaTotal.toLocaleString());
-      setAmountInvalidProcedures(noValidaTotal.toLocaleString());
-      setPercentageAmountValidProcedures(totalValidaPercentage.toFixed(2));
-      setPercentageAmountInvalidProcedures(totalNoValidaPercentage.toFixed(2));
-      setCountNoPosition(countLatitudCeroAndValid.toLocaleString());
-      setPercentageCountNoPosition(noPositionPercentage.toFixed(2));
-      setCountWithoutPropertyPhoto(countFotoFachadaNoAndValid.toLocaleString());
-      setCountWithoutEvidencePhoto(
-        countFotoEvidenciaNoAndValid.toLocaleString()
-      );
-      setCountPropertyNotLocated(
-        countEstatusPredioNoLocalizadoAndValid.toLocaleString()
-      );
-      setPercentageCountWithoutPropertyPhoto(
-        fotoFachadaNoAndValidPercentage.toFixed(2)
-      );
-      setPercentageCountWithoutEvidencePhoto(
-        fotoEvidenciaNoAndValidPercentage.toFixed(2)
-      );
-      setPercentageCountPropertyNotLocated(
-        estatusPredioNoLocalizadoAndValidPercentage.toFixed(2)
-      );
-
-      // Actualiza el estado de clasificaciones
-      setClasificaciones(updatedClasificaciones);
-
-      setPaymentsChartData(chartData);
-      // Aquí puedes mostrar el objeto clasificaciones si lo necesitas
-      console.log(updatedClasificaciones);
 
       setIsLoading(false);
 
@@ -421,6 +275,205 @@ const Index = () => {
       setResult([]);
     }
   };
+
+  useEffect(() => {
+    if (!resultOriginal || resultOriginal.length === 0) return;
+
+    const fechas = resultOriginal.map(
+      (item) => new Date(item["fecha de pago"])
+    );
+
+    const fechaMasGrande = new Date(
+      Math.max(...fechas.map((fecha) => fecha.getTime()))
+    );
+    const fechaMasChica = new Date(
+      Math.min(...fechas.map((fecha) => fecha.getTime()))
+    );
+
+    const opciones = {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      timeZone: "UTC",
+    };
+    const fechaMayorFormateada = fechaMasGrande.toLocaleDateString(
+      "es-ES",
+      opciones
+    );
+    const fechaMenorFormateada = fechaMasChica.toLocaleDateString(
+      "es-ES",
+      opciones
+    );
+
+    setPaymentDateRange(`${fechaMenorFormateada} - ${fechaMayorFormateada}`);
+
+    let countPayments = 0;
+
+    let totalSum = 0;
+    const uniqueAccounts = new Set();
+
+    let validaCount = 0;
+    let noValidaCount = 0;
+
+    let validaTotal = 0;
+    let noValidaTotal = 0;
+
+    let countLatitudCeroAndValid = 0;
+
+    let countFotoFachadaNoAndValid = 0;
+    let countFotoEvidenciaNoAndValid = 0;
+    let countEstatusPredioNoLocalizadoAndValid = 0;
+
+    setClasificaciones([...initialClasificaciones]);
+    // Definir la clasificación como estado
+    const updatedClasificaciones = [...initialClasificaciones];
+
+    // Inicializar un objeto temporal para agrupar fechas y sumar total_pagado
+    const groupedData = {};
+
+    resultOriginal.forEach((item) => {
+      totalSum +=
+        selectedPlace === 2 && selectedService === 2
+          ? item.total_pagado
+          : item.total_pagado;
+      uniqueAccounts.add(item.cuenta);
+
+      if (item["estatus de gestion valida"] === "valida") {
+        validaCount++;
+        validaTotal +=
+          selectedPlace === 2 && selectedService === 2
+            ? item.total_pagado
+            : item.total_pagado;
+
+        // Clasificación por rango de total_pagado
+        if (item.total_pagado > 0 && item.total_pagado <= 1000) {
+          updatedClasificaciones[0].total_pagado += item.total_pagado;
+          updatedClasificaciones[0].cuentas_pagadas += 1;
+        } else if (item.total_pagado > 1000 && item.total_pagado <= 5000) {
+          updatedClasificaciones[1].total_pagado += item.total_pagado;
+          updatedClasificaciones[1].cuentas_pagadas += 1;
+        } else if (item.total_pagado > 5000 && item.total_pagado <= 10000) {
+          updatedClasificaciones[2].total_pagado += item.total_pagado;
+          updatedClasificaciones[2].cuentas_pagadas += 1;
+        } else if (item.total_pagado > 10000 && item.total_pagado <= 25000) {
+          updatedClasificaciones[3].total_pagado += item.total_pagado;
+          updatedClasificaciones[3].cuentas_pagadas += 1;
+        } else if (item.total_pagado > 25000 && item.total_pagado <= 50000) {
+          updatedClasificaciones[4].total_pagado += item.total_pagado;
+          updatedClasificaciones[4].cuentas_pagadas += 1;
+        } else if (item.total_pagado > 50000 && item.total_pagado <= 100000) {
+          updatedClasificaciones[5].total_pagado += item.total_pagado;
+          updatedClasificaciones[5].cuentas_pagadas += 1;
+        } else if (item.total_pagado > 100000 && item.total_pagado <= 500000) {
+          updatedClasificaciones[6].total_pagado += item.total_pagado;
+          updatedClasificaciones[6].cuentas_pagadas += 1;
+        } else if (item.total_pagado > 500000) {
+          updatedClasificaciones[7].total_pagado += item.total_pagado;
+          updatedClasificaciones[7].cuentas_pagadas += 1;
+        }
+
+        // Obtener la fecha sin hora
+        const paymentDate = new Date(item["fecha de pago"])
+          .toISOString()
+          .split("T")[0];
+
+        // Si la fecha ya existe en el objeto, sumar el total_pagado
+        if (groupedData[paymentDate]) {
+          groupedData[paymentDate] += item.total_pagado;
+        } else {
+          // Si la fecha no existe, inicializar con el valor de total_pagado
+          groupedData[paymentDate] = item.total_pagado;
+        }
+
+        if (item.latitud === 0) {
+          countLatitudCeroAndValid++;
+        }
+
+        if (item["foto fachada predio"] === "no") {
+          countFotoFachadaNoAndValid++;
+        }
+
+        if (item["foto evidencia predio"] === "no") {
+          countFotoEvidenciaNoAndValid++;
+        }
+
+        if (item["estatus_predio"] !== "Predio localizado") {
+          countEstatusPredioNoLocalizadoAndValid++;
+        }
+      } else {
+        noValidaCount++;
+        noValidaTotal +=
+          selectedPlace === 2 && selectedService === 2
+            ? item.total_pagado
+            : item.total_pagado;
+      }
+    });
+
+    // Convertir el objeto agrupado en un array y ordenarlo por fecha
+    const chartData = Object.keys(groupedData)
+      .map((date) => ({
+        time: date, // Formato requerido por lightweight-charts
+        value: groupedData[date], // El total pagado en esa fecha
+      }))
+      .sort((a, b) => new Date(a.time) - new Date(b.time)); // Ordenar por fecha
+
+    countPayments = resultOriginal.length;
+    totalSum = Number(totalSum.toFixed(2));
+
+    const uniqueCount = uniqueAccounts.size;
+
+    const validaPercentage = (validaCount / countPayments) * 100;
+    const noValidaPercentage = (noValidaCount / countPayments) * 100;
+
+    const totalValidaPercentage = (validaTotal / totalSum) * 100;
+    const totalNoValidaPercentage = (noValidaTotal / totalSum) * 100;
+
+    const noPositionPercentage =
+      (countLatitudCeroAndValid / countPayments) * 100;
+
+    const fotoFachadaNoAndValidPercentage =
+      (countFotoFachadaNoAndValid / countPayments) * 100;
+    const fotoEvidenciaNoAndValidPercentage =
+      (countFotoEvidenciaNoAndValid / countPayments) * 100;
+    const estatusPredioNoLocalizadoAndValidPercentage =
+      (countEstatusPredioNoLocalizadoAndValid / countPayments) * 100;
+
+    setCountResult(countPayments.toLocaleString());
+    setTotalAmount(totalSum.toLocaleString());
+    setCountUniqueAccount(uniqueCount.toLocaleString());
+    setCountValidProcedures(validaCount.toLocaleString());
+    setCountInvalidProcedures(noValidaCount.toLocaleString());
+    setPercentageValidProcedures(validaPercentage.toFixed(2));
+    setPercentageInvalidProcedures(noValidaPercentage.toFixed(2));
+    setAmountValidProcedures(validaTotal.toLocaleString());
+    setAmountInvalidProcedures(noValidaTotal.toLocaleString());
+    setPercentageAmountValidProcedures(totalValidaPercentage.toFixed(2));
+    setPercentageAmountInvalidProcedures(totalNoValidaPercentage.toFixed(2));
+    setCountNoPosition(countLatitudCeroAndValid.toLocaleString());
+    setPercentageCountNoPosition(noPositionPercentage.toFixed(2));
+    setCountWithoutPropertyPhoto(countFotoFachadaNoAndValid.toLocaleString());
+    setCountWithoutEvidencePhoto(countFotoEvidenciaNoAndValid.toLocaleString());
+    setCountPropertyNotLocated(
+      countEstatusPredioNoLocalizadoAndValid.toLocaleString()
+    );
+    setPercentageCountWithoutPropertyPhoto(
+      fotoFachadaNoAndValidPercentage.toFixed(2)
+    );
+    setPercentageCountWithoutEvidencePhoto(
+      fotoEvidenciaNoAndValidPercentage.toFixed(2)
+    );
+    setPercentageCountPropertyNotLocated(
+      estatusPredioNoLocalizadoAndValidPercentage.toFixed(2)
+    );
+
+    // Actualiza el estado de clasificaciones
+    setClasificaciones(updatedClasificaciones);
+
+    setPaymentsChartData(chartData);
+
+    handleFilteredRows(typeFilter);
+    console.log(typeFilter);
+  }, [resultOriginal]);
 
   const handleExportToExcel = async (filter) => {
     try {
@@ -741,12 +794,13 @@ const Index = () => {
             };
           }
 
-          if (key === "urlImagenFachada") {
+          if (key === "foto_fachada_1") {
             return {
               field: key,
               headerName: key.toUpperCase(),
+              width: 150,
               renderCell: (params) =>
-                params.row.urlImagenFachada ? (
+                params.row.foto_fachada_1 ? (
                   <Card
                     sx={{
                       maxWidth: 150,
@@ -758,28 +812,44 @@ const Index = () => {
                     }}
                   >
                     <CardMedia
-                      component="img"
-                      height="100%"
-                      image={params.row.urlImagenFachada}
+                      component="img"                      
+                      image={params.row.foto_fachada_1}
                       alt="Foto fachada 1"
                       sx={{
-                        objectFit: "cover",
+                        width: 120,
+                        height: 120,
+                        objectFit: "scale-down",
                       }}
+                      onClick={() =>
+                        handleOpenModal({
+                          cuenta: params.row.cuenta,
+                          id_registro: params.row.id_registro,
+                          id_registro_foto: params.row.id_foto_fachada_1,
+                          foto: params.row.foto_fachada_1,
+                          tarea_gestionada: params.row.tarea_gestionada,
+                          nombre_gestor: params.row.gestor,
+                          fecha_gestion: params.row.fecha_de_gestion,
+                          proceso: params.row.proceso,
+                          tipo: params.row.tipo_foto_fachada_1,
+                          num_foto: 1,
+                          celda: "foto_fachada_1",
+                        })
+                      }
                     />
                   </Card>
                 ) : (
                   <Typography>No disponible</Typography>
                 ),
-              width: 150,
             };
           }
 
-          if (key === "urlImagenEvidencia") {
+          if (key === "foto_evidencia_1") {
             return {
               field: key,
               headerName: key.toUpperCase(),
+              width: 150,
               renderCell: (params) =>
-                params.row.urlImagenEvidencia ? (
+                params.row.foto_evidencia_1 ? (
                   <Card
                     sx={{
                       maxWidth: 150,
@@ -791,19 +861,35 @@ const Index = () => {
                     }}
                   >
                     <CardMedia
-                      component="img"
-                      height="100%"
-                      image={params.row.urlImagenEvidencia}
+                      component="img"                      
+                      image={params.row.foto_evidencia_1}
                       alt="Foto evidencia 1"
                       sx={{
-                        objectFit: "cover",
+                        width: 120,
+                        height: 120,
+                        objectFit: "scale-down",
+                        backgroundColor: 'transparent'
                       }}
+                      onClick={() =>
+                        handleOpenModal({
+                          cuenta: params.row.cuenta,
+                          id_registro: params.row.id_registro,
+                          id_registro_foto: params.row.id_foto_evidencia_1,
+                          foto: params.row.foto_evidencia_1,
+                          tarea_gestionada: params.row.tarea_gestionada,
+                          nombre_gestor: params.row.gestor,
+                          fecha_gestion: params.row.fecha_de_gestion,
+                          proceso: params.row.proceso,
+                          tipo: params.row.tipo_foto_evidencia_1,
+                          num_foto: 1,
+                          celda: "foto_evidencia_1",
+                        })
+                      }
                     />
                   </Card>
                 ) : (
                   <Typography>No disponible</Typography>
                 ),
-              width: 150,
             };
           }
 
@@ -823,33 +909,6 @@ const Index = () => {
   useEffect(() => {
     buildColumns();
   }, [result]);
-
-  const AvatarImage = ({ data }) => {
-    const [visibleAvatar, setVisibleAvatar] = React.useState(false);
-    return (
-      <>
-        <Avatar
-          onClick={() => {
-            setVisibleAvatar(true);
-          }}
-          alt="Remy Sharp"
-          src={data}
-        />
-
-        <Viewer
-          visible={visibleAvatar}
-          onClose={() => {
-            setVisibleAvatar(false);
-          }}
-          images={[{ src: data, alt: "avatar" }]}
-        />
-      </>
-    );
-  };
-
-  const handleCloseModal = () => {
-    setOpenModal(false);
-  };
 
   const handleFilteredRows = (type) => {
     if (type === 1) {
@@ -1004,10 +1063,6 @@ const Index = () => {
   const handleFilterChange = (event) => {
     setFilterText(event.target.value);
   };
-
-  useEffect(() => {
-    setResult(resultOriginal);
-  }, [resultOriginal]);
 
   useEffect(() => {
     let filtered = result;
@@ -1219,12 +1274,12 @@ const Index = () => {
           container
           justifyContent="space-between"
           alignItems="stretch"
-          spacing={2}          
+          spacing={2}
         >
           <Grid item xs={12} md={12}>
             <PaymentsDay data={paymentsChartData} />
           </Grid>
-        </Grid>       
+        </Grid>
 
         <Grid
           xs={12}
@@ -1412,6 +1467,14 @@ const Index = () => {
             </Box>
           </Grid>
         </Grid>
+        <PhotoViewModal
+          open={openModal}
+          onClose={handleCloseModal}
+          selectedPlace={selectedPlace}
+          selectedService={selectedService}
+          data={selectedRow}
+          onImageUrlUpdate={handleImageUrlUpdate}
+        />
       </Box>
     </Box>
   );
