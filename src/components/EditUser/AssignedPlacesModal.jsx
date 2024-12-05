@@ -1,23 +1,33 @@
-import React, { useState, useEffect } from 'react';
-import { placeByUserIdRequest } from '../../api/place.js';
-import { placeServiceByUserIdRequest } from '../../api/service.js';
-import { placeServiceProcessByUserIdRequest } from '../../api/process.js';
-import { Card, CardContent, Avatar, Typography, Chip, Box, Divider, Stack, useTheme } from '@mui/material';
-import { CardActionArea } from '@mui/material';
-import { useSelector } from 'react-redux';
-import Button from '@mui/material/Button';
-import KeyboardTabIcon from '@mui/icons-material/KeyboardTab';
+import React, { useState, useEffect } from "react";
+import { placeByUserIdRequest } from "../../api/place.js";
+import { placeServiceByUserIdRequest } from "../../api/service.js";
+import { placeServiceProcessByUserIdRequest } from "../../api/process.js";
+import {
+  Card,
+  CardContent,
+  Avatar,
+  Typography,
+  Chip,
+  Box,
+  Divider,
+  Stack,
+  useTheme,
+} from "@mui/material";
+import { CardActionArea } from "@mui/material";
+import { useSelector } from "react-redux";
+import Button from "@mui/material/Button";
+import KeyboardTabIcon from "@mui/icons-material/KeyboardTab";
 import { tokens } from "../../theme";
-import LoadingModal from '../../components/LoadingModal.jsx';
-import CustomAlert from '../../components/CustomAlert.jsx';
-import { Dialog, DialogContent } from '@mui/material';
-import { Save } from '@mui/icons-material';
-import { updateAssignedPlacesRequest } from '../../api/auth';
+import LoadingModal from "../../components/LoadingModal.jsx";
+import CustomAlert from "../../components/CustomAlert.jsx";
+import { Dialog, DialogContent } from "@mui/material";
+import { Save } from "@mui/icons-material";
+import { updateAssignedPlacesRequest } from "../../api/auth";
 
 const AssignedPlacesModal = ({ open, onClose, data }) => {
   if (!data) return null;
 
-  console.log('data inicial: ', data);
+  console.log("data inicial: ", data);
 
   const [places, setPlaces] = useState([]);
   const [selectedPlace, setSelectedPlace] = useState(null);
@@ -25,7 +35,7 @@ const AssignedPlacesModal = ({ open, onClose, data }) => {
   const [selectedService, setSelectedService] = useState(null);
   const [processes, setProcesses] = useState([]);
   const [selectedProcesses, setSelectedProcesses] = useState({});
-  const user = useSelector(state => state.user);
+  const user = useSelector((state) => state.user);
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [isLoading, setIsLoading] = useState(false);
@@ -55,14 +65,16 @@ const AssignedPlacesModal = ({ open, onClose, data }) => {
       const parsedData = JSON.parse(data.assigned_place_service_process);
       const initialSelectedProcesses = {};
 
-      parsedData.forEach(item => {
+      parsedData.forEach((item) => {
         if (!initialSelectedProcesses[item.placeId]) {
           initialSelectedProcesses[item.placeId] = {};
         }
         if (!initialSelectedProcesses[item.placeId][item.serviceId]) {
           initialSelectedProcesses[item.placeId][item.serviceId] = [];
         }
-        initialSelectedProcesses[item.placeId][item.serviceId].push(item.processId);
+        initialSelectedProcesses[item.placeId][item.serviceId].push(
+          item.processId
+        );
       });
 
       setSelectedProcesses(initialSelectedProcesses);
@@ -85,16 +97,18 @@ const AssignedPlacesModal = ({ open, onClose, data }) => {
     setSelectedService(null);
 
     placeServiceByUserIdRequest(user.user_id, place_id)
-      .then(response => {
+      .then((response) => {
         console.log(response.data);
-        const servicesWithSelection = response.data.map(service => ({
+        const servicesWithSelection = response.data.map((service) => ({
           ...service,
-          active: selectedProcesses[place_id]?.[service.service_id]?.length > 0 || false
+          active:
+            selectedProcesses[place_id]?.[service.service_id]?.length > 0 ||
+            false,
         }));
         setServices(servicesWithSelection);
         setProcesses([]); // Clear processes when selecting a new place
       })
-      .catch(error => {
+      .catch((error) => {
         console.error("Error fetching services:", error);
       });
   };
@@ -102,11 +116,18 @@ const AssignedPlacesModal = ({ open, onClose, data }) => {
   const handleServiceChipClick = async (service_id) => {
     setSelectedService(service_id);
     try {
-      const response = await placeServiceProcessByUserIdRequest(user.user_id, selectedPlace, service_id);
+      const response = await placeServiceProcessByUserIdRequest(
+        user.user_id,
+        selectedPlace,
+        service_id
+      );
       console.log(response.data);
-      const processesWithSelection = response.data.map(process => ({
+      const processesWithSelection = response.data.map((process) => ({
         ...process,
-        active: selectedProcesses[selectedPlace]?.[service_id]?.includes(process.process_id) || false
+        active:
+          selectedProcesses[selectedPlace]?.[service_id]?.includes(
+            process.process_id
+          ) || false,
       }));
       setProcesses(processesWithSelection);
     } catch (error) {
@@ -123,13 +144,23 @@ const AssignedPlacesModal = ({ open, onClose, data }) => {
       if (!updatedSelectedProcesses[selectedPlace][selectedService]) {
         updatedSelectedProcesses[selectedPlace][selectedService] = [];
       }
-      if (updatedSelectedProcesses[selectedPlace][selectedService].includes(process_id)) {
-        updatedSelectedProcesses[selectedPlace][selectedService] = updatedSelectedProcesses[selectedPlace][selectedService].filter(id => id !== process_id);
+      if (
+        updatedSelectedProcesses[selectedPlace][selectedService].includes(
+          process_id
+        )
+      ) {
+        updatedSelectedProcesses[selectedPlace][selectedService] =
+          updatedSelectedProcesses[selectedPlace][selectedService].filter(
+            (id) => id !== process_id
+          );
       } else {
-        updatedSelectedProcesses[selectedPlace][selectedService].push(process_id);
+        updatedSelectedProcesses[selectedPlace][selectedService].push(
+          process_id
+        );
       }
 
-      const processesSelected = updatedSelectedProcesses[selectedPlace][selectedService].length > 0;
+      const processesSelected =
+        updatedSelectedProcesses[selectedPlace][selectedService].length > 0;
 
       if (!processesSelected) {
         delete updatedSelectedProcesses[selectedPlace][selectedService];
@@ -140,7 +171,7 @@ const AssignedPlacesModal = ({ open, onClose, data }) => {
 
       setSelectedProcesses(updatedSelectedProcesses);
 
-      const updatedProcesses = processes.map(process =>
+      const updatedProcesses = processes.map((process) =>
         process.process_id === process_id
           ? { ...process, active: !process.active }
           : process
@@ -149,15 +180,19 @@ const AssignedPlacesModal = ({ open, onClose, data }) => {
 
       console.log(JSON.stringify(updatedSelectedProcesses, null, 2));
     }
-  };  
+  };
 
   const transformData = (selectedProcesses) => {
     const transformedData = [];
 
-    Object.keys(selectedProcesses).forEach(placeId => {
-      Object.keys(selectedProcesses[placeId]).forEach(serviceId => {
-        selectedProcesses[placeId][serviceId].forEach(processId => {
-          transformedData.push({ placeId: parseInt(placeId), serviceId: parseInt(serviceId), processId: parseInt(processId) });
+    Object.keys(selectedProcesses).forEach((placeId) => {
+      Object.keys(selectedProcesses[placeId]).forEach((serviceId) => {
+        selectedProcesses[placeId][serviceId].forEach((processId) => {
+          transformedData.push({
+            placeId: parseInt(placeId),
+            serviceId: parseInt(serviceId),
+            processId: parseInt(processId),
+          });
         });
       });
     });
@@ -177,15 +212,16 @@ const AssignedPlacesModal = ({ open, onClose, data }) => {
       return;
     }
 
-    
-    console.log(transformedData) 
-    const userId = data.user_id;   
+    console.log(transformedData);
+    const userId = data.user_id;
 
     try {
       await updateAssignedPlaces(userId, transformedData);
       setAlertOpen(true);
       setAlertType("success");
-      setAlertMessage("El proceso se ha completado. Como gestor, no es necesario tener permisos de la plataforma web.");
+      setAlertMessage(
+        "El proceso se ha completado. Como gestor, no es necesario tener permisos de la plataforma web."
+      );
     } catch (error) {
       setAlertOpen(true);
       setAlertType("error");
@@ -195,46 +231,60 @@ const AssignedPlacesModal = ({ open, onClose, data }) => {
 
   const updateAssignedPlaces = async (user_id, dataAssignedPlaces) => {
     try {
-        const res = await updateAssignedPlacesRequest(user_id, dataAssignedPlaces);
-        
-        if (res.status === 200) {
-          console.log('Success:', res.data.message);
-          // Aquí puedes manejar el éxito, por ejemplo, mostrar una notificación al usuario
-        } else {
-          console.log(`Unexpected status code: ${res.status}`);
-          // Manejar otros códigos de estado inesperados
-        }
-  
+      const res = await updateAssignedPlacesRequest(
+        user_id,
+        dataAssignedPlaces
+      );
+
+      if (res.status === 200) {
+        console.log("Success:", res.data.message);
+        // Aquí puedes manejar el éxito, por ejemplo, mostrar una notificación al usuario
+      } else {
+        console.log(`Unexpected status code: ${res.status}`);
+        // Manejar otros códigos de estado inesperados
+      }
     } catch (error) {
-       if (error.response) {
+      if (error.response) {
         const status = error.response.status;
-        
+
         if (status === 400) {
-          console.log('Bad Request:', error.response.data.message);
+          console.log("Bad Request:", error.response.data.message);
           // Aquí puedes manejar los errores de solicitud incorrecta (400)
         } else if (status === 500) {
-          console.log('Server Error:', error.response.data.message);
+          console.log("Server Error:", error.response.data.message);
           // Aquí puedes manejar los errores del servidor (500)
         } else {
           console.log(`Error (${status}):`, error.response.data.message);
           // Manejar otros códigos de estado de error
         }
       } else {
-        console.log('Error:', error.message);
+        console.log("Error:", error.message);
         // Manejar otros tipos de errores, como problemas de red
       }
     }
-  }
+  };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
-      <DialogContent sx={{
-        '& .MuiDialog-paper': {
-          boxShadow: '0px 5px 15px rgba(0,0,0,0.5)',
-          borderRadius: '8px', 
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="lg"
+      fullWidth
+      sx={{
+        "& .MuiPaper-root": {
+          border: `2px solid ${colors.accentGreen[100]}`,
         },
-        bgcolor: 'background.paper'
-      }}>
+      }}
+    >
+      <DialogContent
+        sx={{
+          "& .MuiDialog-paper": {
+            boxShadow: "0px 5px 15px rgba(0,0,0,0.5)",
+            borderRadius: "8px",
+          },
+          bgcolor: "background.paper",
+        }}
+      >
         <form onSubmit={handleSubmit}>
           <div>
             <LoadingModal open={isLoading} />
@@ -244,42 +294,80 @@ const AssignedPlacesModal = ({ open, onClose, data }) => {
               message={alertMessage}
               onClose={setAlertOpen}
             />
-            <Typography variant="h5" gutterBottom>
+            <Typography
+              variant="h5"
+              gutterBottom
+              sx={{
+                color: colors.accentGreen[100],
+                fontWeight: "bold",
+              }}
+            >
               Selecciona la plaza
             </Typography>
-            <Divider sx={{ backgroundColor: '#5EBFFF' }} />
+            <Divider sx={{ backgroundColor: colors.accentGreen[100] }} />
             <Box mb={2} mt={1}>
-              <Card variant="outlined" sx={{ backgroundColor: 'transparent', boxShadow: 'none', border: 'none' }}>
+              <Card
+                variant="outlined"
+                sx={{
+                  backgroundColor: "transparent",
+                  boxShadow: "none",
+                  border: "none",
+                }}
+              >
                 <Box sx={{ p: 1 }}>
                   <Stack direction="row" spacing={1}>
-                    <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap' }}>
-                      {places.map(place => (
-                        <div key={place.place_id} style={{ margin: '5px' }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        flexWrap: "wrap",
+                      }}
+                    >
+                      {places.map((place) => (
+                        <div key={place.place_id} style={{ margin: "5px" }}>
                           <Card
                             style={{
                               width: 100,
                               height: 150,
-                              display: 'flex',
-                              flexDirection: 'column',
-                              justifyContent: 'space-between',
-                              backgroundColor: selectedPlace === place.place_id ? theme.palette.secondary.main : 'rgba(255, 255, 255, 0.1)',
+                              display: "flex",
+                              flexDirection: "column",
+                              justifyContent: "space-between",
+                              backgroundColor:
+                                selectedPlace === place.place_id
+                                  ? colors.accentGreen[100]
+                                  : "rgba(255, 255, 255, 0.1)",
                             }}
                             onClick={() => handleCardClick(place.place_id)}
                           >
                             <CardActionArea style={{ flexGrow: 1 }}>
-                              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                              <div
+                                style={{
+                                  display: "flex",
+                                  flexDirection: "column",
+                                  alignItems: "center",
+                                }}
+                              >
                                 <Avatar
                                   alt={place.name}
                                   src={place.image}
                                   sx={{
                                     width: 50,
                                     height: 50,
-                                    margin: 'auto',
-                                    marginBottom: '10px'
+                                    margin: "auto",
+                                    marginBottom: "10px",
                                   }}
                                 />
-                                <CardContent style={{ textAlign: 'center' }}>
-                                  <Typography variant="body2" color="text.secondary">
+                                <CardContent style={{ textAlign: "center" }}>
+                                  <Typography
+                                    variant="body2"
+                                    sx={{
+                                      color:
+                                        selectedPlace === place.place_id
+                                          ? colors.contentAccentGreen[100]
+                                          : "default",
+                                      fontWeight: "bold",
+                                    }}
+                                  >
                                     {place.name}
                                   </Typography>
                                 </CardContent>
@@ -293,22 +381,62 @@ const AssignedPlacesModal = ({ open, onClose, data }) => {
                 </Box>
               </Card>
             </Box>
-            <Typography variant="h5" gutterBottom>
+            <Typography
+              variant="h5"
+              gutterBottom
+              sx={{
+                color: colors.accentGreen[100],
+                fontWeight: "bold",
+              }}
+            >
               Selecciona un servicio
             </Typography>
-            <Divider sx={{ backgroundColor: '#5EBFFF' }} />
+            <Divider sx={{ backgroundColor: colors.accentGreen[100] }} />
             <Box mb={2} mt={1}>
-              <Card variant="outlined" sx={{ backgroundColor: 'transparent', boxShadow: 'none', border: 'none' }}>
+              <Card
+                variant="outlined"
+                sx={{
+                  backgroundColor: "transparent",
+                  boxShadow: "none",
+                  border: "none",
+                }}
+              >
                 <Box sx={{ p: 1 }}>
                   <Stack direction="row" spacing={1}>
-                    <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap' }}>
-                      {services.map(service => (
-                        <div key={service.service_id} style={{ margin: '10px' }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        flexWrap: "wrap",
+                      }}
+                    >
+                      {services.map((service) => (
+                        <div
+                          key={service.service_id}
+                          style={{ margin: "10px" }}
+                        >
                           <Chip
                             label={service.name}
                             clickable
-                            color={selectedService === service.service_id ? "secondary" : (service.active ? "secondary" : "default")}
-                            onClick={() => handleServiceChipClick(service.service_id)}
+                            // color={selectedService === service.service_id ? "secondary" : (service.active ? "secondary" : "default")}
+                            onClick={() =>
+                              handleServiceChipClick(service.service_id)
+                            }
+                            sx={{
+                              backgroundColor:
+                                selectedService === service.service_id
+                                  ? colors.accentGreen[100]
+                                  : service.active
+                                  ? colors.accentGreen[100]
+                                  : "default",
+                              color:
+                                selectedService === service.service_id
+                                  ? colors.contentAccentGreen[100]
+                                  : service.active
+                                  ? colors.contentAccentGreen[100]
+                                  : "default",
+                              fontWeight: "bold",
+                            }}
                           />
                         </div>
                       ))}
@@ -317,22 +445,51 @@ const AssignedPlacesModal = ({ open, onClose, data }) => {
                 </Box>
               </Card>
             </Box>
-            <Typography variant="h5" gutterBottom>
-              selecciona los procesos
+            <Typography
+              variant="h5"
+              gutterBottom
+              sx={{
+                color: colors.accentGreen[100],
+                fontWeight: "bold",
+              }}
+            >
+              Selecciona los procesos
             </Typography>
-            <Divider sx={{ backgroundColor: '#5EBFFF' }} />
-            <Box mt={1}>
-              <Card variant="outlined" sx={{ backgroundColor: 'transparent', boxShadow: 'none', border: 'none' }}>
+            <Divider sx={{ backgroundColor: colors.accentGreen[100] }} />
+            <Box mt={1} >
+              <Card
+                variant="outlined"
+                sx={{
+                  backgroundColor: "transparent",
+                  boxShadow: "none",
+                  border: "none",
+                }}
+              >
                 <Box sx={{ p: 1 }}>
                   <Stack direction="row" spacing={1}>
-                    <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap' }}>
-                      {processes.map(process => (
-                        <div key={process.process_id} style={{ margin: '10px' }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        flexWrap: "wrap",
+                      }}
+                    >
+                      {processes.map((process) => (
+                        <div
+                          key={process.process_id}
+                          style={{ margin: "10px" }}
+                        >
                           <Chip
                             label={process.name}
-                            clickable
-                            color={process.active ? "secondary" : "default"}
-                            onClick={() => handleProcessChipClick(process.process_id)}
+                            clickable                            
+                            sx={{
+                              backgroundColor: process.active ? colors.accentGreen[100] : "default",
+                              color: process.active ? colors.contentAccentGreen[100] : "default",
+                              fontWeight: "bold"
+                            }}
+                            onClick={() =>
+                              handleProcessChipClick(process.process_id)
+                            }
                           />
                         </div>
                       ))}
@@ -342,7 +499,16 @@ const AssignedPlacesModal = ({ open, onClose, data }) => {
               </Card>
             </Box>
             <Box mt={2}>
-              <Button type="submit" sx={{ bgcolor: 'secondary.main', '&:hover': { bgcolor: 'secondary.dark' } }} variant="contained" color="secondary" endIcon={<Save />}>
+              <Button
+                type="submit"
+                sx={{
+                  borderRadius: "35px",
+                  color: "white"
+                }}
+                variant="contained"
+                color="info"
+                endIcon={<Save />}
+              >
                 Guardar cambios
               </Button>
             </Box>

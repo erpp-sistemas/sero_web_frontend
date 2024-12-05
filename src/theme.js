@@ -49,6 +49,9 @@ export const tokens = (mode) => ({
 			100: "#99ff99",
 			200: "#33ff33",
 		},
+		contentAccentGreen:{
+			100: "#254061"
+		},
 		primary: {
 			100: "#d0d1d5",
 			200: "#a1a4ab",
@@ -153,6 +156,9 @@ export const tokens = (mode) => ({
 		accentGreen:{
 			100: "#00a884",
 			200: "#33ff33",
+		},
+		contentAccentGreen:{
+			100: "#fff"
 		},
 		primary: {
 			100: "#040509",
