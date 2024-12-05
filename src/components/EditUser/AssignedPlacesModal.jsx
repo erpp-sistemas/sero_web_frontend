@@ -58,7 +58,7 @@ const AssignedPlacesModal = ({ open, onClose, data }) => {
 
   useEffect(() => {
     getPlaces(user.user_id);
-  }, [user.user_id]);
+  }, [user.user_id]);  
 
   useEffect(() => {
     if (data.assigned_place_service_process) {
@@ -81,9 +81,9 @@ const AssignedPlacesModal = ({ open, onClose, data }) => {
 
       // Set initial selected place and service
       const firstPlaceId = parsedData[0]?.placeId;
-      const firstServiceId = parsedData[0]?.serviceId;
+      const firstServiceId = parsedData[0]?.serviceId;      
 
-      if (firstPlaceId) {
+      if (firstPlaceId) {        
         handleCardClick(firstPlaceId);
       }
       if (firstServiceId) {
@@ -116,6 +116,7 @@ const AssignedPlacesModal = ({ open, onClose, data }) => {
   const handleServiceChipClick = async (service_id) => {
     setSelectedService(service_id);
     try {
+      console.log(selectedPlace)
       const response = await placeServiceProcessByUserIdRequest(
         user.user_id,
         selectedPlace,
@@ -129,6 +130,8 @@ const AssignedPlacesModal = ({ open, onClose, data }) => {
             process.process_id
           ) || false,
       }));
+
+      console.log(processesWithSelection)
       setProcesses(processesWithSelection);
     } catch (error) {
       console.error("Error fetching processes:", error);

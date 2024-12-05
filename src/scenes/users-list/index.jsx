@@ -57,6 +57,7 @@ import {
   People,
   PeopleAlt,
   Person,
+  PersonAddAlt1,
   PersonOutline,
   Place,
   Search,
@@ -614,10 +615,11 @@ function Index() {
     return (
       <GridToolbarContainer>
         <Link to="/user-new" style={{ textDecoration: "none" }}>
-          <Button
-            color="info"
-            startIcon={<AddOutlined />}
+        <Button
+            endIcon={<PersonAddAlt1 />}
             size="small"
+            color="info"
+            variant="contained"
             sx={{
               borderRadius: "35px",
               color: "white",
