@@ -16,7 +16,10 @@ const ResponsiveBarChart = ({
   axisLeftLegend,
   axisLeftLegendOffset, 
   showBarValues,
-  groupMode 
+  groupMode,
+  valueScale,
+  tickRotation,
+  axisBottomtLegendOffset
 }) => {    
 
     const theme = useTheme()
@@ -48,7 +51,7 @@ const ResponsiveBarChart = ({
             indexBy={indexBy}
             margin={ margin }
             padding={0.3}
-            valueScale={{ type: 'linear' }}
+            valueScale={{ type: valueScale || 'linear' }}
             indexScale={{ type: 'band', round: true }}
             colors={ getBarColor }
             borderColor={{
@@ -62,10 +65,10 @@ const ResponsiveBarChart = ({
             axisBottom={{
                 tickSize: 5,
                 tickPadding: 5,
-                tickRotation: 0,
+                tickRotation: tickRotation || 0,
                 legend: axisBottomLegend,
                 legendPosition: 'middle',
-                legendOffset: 32
+                legendOffset: axisBottomtLegendOffset || 70
             }}
             axisLeft={{
                 tickSize: 5,

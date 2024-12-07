@@ -5,6 +5,8 @@ import Avatar from '@mui/material/Avatar';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
+import { useTheme} from '@mui/material';
+import { tokens } from "../../theme";
 
 const mapContainerStyle = {
   width: '100%',
@@ -14,8 +16,8 @@ const mapContainerStyle = {
 const TooltipCard = ({ account, latitude, longitude, property_status, date_capture, task }) => (
   <Card variant="outlined" sx={{ maxWidth: 200, backgroundColor: 'rgba(128, 128, 128, 0.1)', borderLeft: '5px solid #00ff00'  }}>
     <CardContent>
-      <Typography sx={{ fontSize: 12 }}>
-        <strong>Cuenta:</strong> {account}
+      <Typography sx={{ fontSize: 12, }}>
+        <strong >Cuenta:</strong> {account}
       </Typography>
       <Typography sx={{ fontSize: 12 }}>
         <strong>Tarea realizada:</strong> {task}
@@ -37,6 +39,10 @@ const TooltipCard = ({ account, latitude, longitude, property_status, date_captu
 );
 
 const MapboxMap = ({ positions, onClickMarker, setIsLoading }) => {
+
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
+
   const mapContainerRef = useRef(null);
   const map = useRef(null);  
 

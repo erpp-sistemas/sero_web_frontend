@@ -1,40 +1,57 @@
-import React, { useState, useEffect } from "react";
-import { Box, useTheme, Button, Avatar, Typography, Chip, InputAdornment, FormControl, FormHelperText } from "@mui/material";
-import Grid from '@mui/material/Grid';
-import TextField from '@mui/material/TextField';
+import React, { useState, useEffect, useMemo } from "react";
+import {
+  Box,
+  useTheme,
+  Button,
+  Avatar,
+  Typography,
+  Chip,
+  InputAdornment,
+  FormControl,
+  FormHelperText,
+} from "@mui/material";
+import Grid from "@mui/material/Grid";
+import TextField from "@mui/material/TextField";
 import { tokens } from "../../theme";
-import { DataGrid,
-  GridToolbarColumnsButton,
-  GridToolbarContainer,  
-  GridToolbarDensitySelector,
-  GridToolbarExport,  
-  GridToolbarFilterButton, } from '@mui/x-data-grid';
-import Viewer from 'react-viewer';
-import { AccessTime, CalendarToday, Download, Flag, NotListedLocation, Photo, Search, TaskAlt, ViewAgenda } from "@mui/icons-material";
-import { LinearProgress } from '@mui/material';
-import PopupViewPositionDailyWorkSummary from '../../components/CoordinationDashboard/PopupViewDailyWorkSummary.jsx'
-import LoadingModal from '../../components/LoadingModal.jsx'
+import { DataGrid } from "@mui/x-data-grid";
+import Viewer from "react-viewer";
+import {
+  AccessTime,
+  CalendarToday,
+  Download,
+  Flag,
+  NotListedLocation,
+  Photo,
+  Preview,
+  Search,
+  TaskAlt,
+  ViewAgenda,
+} from "@mui/icons-material";
+import { LinearProgress } from "@mui/material";
+import PopupViewPositionDailyWorkSummary from "../../components/CoordinationDashboard/PopupViewDailyWorkSummary.jsx";
+import LoadingModal from "../../components/LoadingModal.jsx";
 import * as ExcelJS from "exceljs";
 
-
-function DataGridManagementByManager({data, placeId, serviceId, proccessId}) {
-
+function DataGridManagementByManager({ data, placeId, serviceId, proccessId }) {
   if (!data) {
     return null;
-}
+  }
 
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
   const [popupOpen, setPopupOpen] = useState(false);
-  const [popupData, setPopupData] = useState({ userId: null, dateCapture: null });
+  const [popupData, setPopupData] = useState({
+    userId: null,
+    dateCapture: null,
+  });
   const [searchTerm, setSearchTerm] = useState(null);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [matching, setMatching] = useState(-1);
 
   const [noResults, setNoResults] = useState(false);
   const [searchPerformed, setSearchPerformed] = useState(false);
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleOpenPopup = (userId, dateCapture) => {
     setPopupData({ userId, dateCapture });
@@ -46,401 +63,574 @@ function DataGridManagementByManager({data, placeId, serviceId, proccessId}) {
     setPopupData({ userId: null, dateCapture: null });
   };
 
-  const buildColumns = () => {   
-    const columns = [
-      { 
-        field: 'name',
-        renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"NOMBRE"}</strong>
-        ),
-        width: 270,
+  const buildColumns = useMemo(() => {
+    return [
+      {
+        field: "name",
+        headerName: "NOMBRE",
+        width: 280,
         editable: false,
         renderCell: (params) => (
-          <Box sx={{ display: 'flex', alignItems: 'center', p: '12px' }}>
+          <Box sx={{ display: "flex", alignItems: "center", p: "12px" }}>
             <AvatarImage data={params.row.photo} />
-            <Typography variant="h6" sx={{ marginLeft: 1 }}>{params.value}</Typography>
+            <Typography variant="h6" sx={{ marginLeft: 1 }}>
+              {params.value}
+            </Typography>
           </Box>
-        )
-      }, 
-      { 
-        field: 'date_capture',
-        renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"FECHA"}</strong>
         ),
-        width: 130,
+      },
+      {
+        field: "date_capture",
+        headerName: "FECHA",
+        width: 150,
         editable: false,
         renderCell: (params) => (
           <Chip
             icon={<CalendarToday />}
             label={
-              <Typography variant="body1" sx={{ fontWeight: 'bold', fontSize: '1.2em' }}>
+              <Typography
+                variant="body1"
+                sx={{ fontWeight: "bold", fontSize: "1.2em" }}
+              >
                 {params.value}
               </Typography>
             }
-            variant="outlined"
+            variant="contained"
             sx={{
-              borderColor: theme.palette.info.main,
-              color: theme.palette.info.main,
-              '& .MuiChip-icon': {
-                color: theme.palette.info.main
-              }
+              background: colors.blueAccent[500],
+              "& .MuiChip-icon": {
+                color: theme.palette.info.main,
+              },
             }}
           />
-        )
-      }, 
-      { 
-        field: 'first_and_last_management',
-        renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"PRIMER Y ULTIMA GESTION"}</strong>
         ),
-        width: 200,
+      },
+      {
+        field: "first_and_last_management",
+        headerName: "PRIMER Y ULTIMA GESTION",
+        width: 230,
         editable: false,
         renderCell: (params) => {
           const hoursWorked = params.row.hours_worked;
           let color;
-  
+
           if (hoursWorked === 0) {
             color = theme.palette.error.main;
-          } else if (hoursWorked === 1 ) {
+          } else if (hoursWorked === 1) {
             color = theme.palette.warning.main;
           } else {
             color = theme.palette.secondary.main;
           }
-  
+
           return (
             <Chip
               icon={<AccessTime />}
               label={
-                <Typography variant="body1" sx={{ fontWeight: 'bold', fontSize: '1.2em' }}>
+                <Typography
+                  variant="body1"
+                  sx={{ fontWeight: "bold", fontSize: "1.2em" }}
+                >
                   {params.value}
                 </Typography>
               }
               variant="outlined"
               sx={{
-                borderColor: color,
-                color: color,
-                '& .MuiChip-icon': {
-                  color: color
-                }
+                background: colors.tealAccent[400],
+                color: colors.contentAccentGreen[100],
+                "& .MuiChip-icon": {
+                  color: color,
+                },
               }}
-            />
-          );
-        }
-      }, 
-      { 
-        field: 'hours_worked',
-        renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"HORAS TRABAJADAS"}</strong>
-        ),
-        width: 140,
-        editable: false,
-        renderCell: (params) => {
-          let color;
-          let iconColor;
-  
-          if (params.value === 0) {
-            color = 'error';
-            iconColor = 'error';
-          } else if (params.value === 1) {
-            color = 'warning';
-            iconColor = 'warning'
-          } else {
-            color = 'secondary';
-            iconColor = 'secondary';
-          }
-  
-          return (
-            <Chip
-              icon={<Flag sx={{ color: iconColor }} />}
-              label={
-                <Typography variant="body1" sx={{ fontWeight: 'bold', fontSize: '1.2em' }}>
-                  {params.value}
-                </Typography>
-              }
-              variant="outlined"
-              color={color}
             />
           );
         },
       },
-      { 
-        field: 'total_procedures',
-        renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"GESTIONES"}</strong>
-        ),
+      {
+        field: "hours_worked",
+        headerName: "HORAS TRABAJADAS",
+        width: 160,
+        editable: false,
+        renderCell: (params) => {
+          let backgroundColor;
+          let textColor;
+          let iconColor;
+
+          if (params.value === 0) {
+            backgroundColor = colors.redAccent[400];
+            textColor = colors.contentAccentGreen[100];
+            iconColor = colors.redAccent[400];
+          } else if (params.value === 1) {
+            backgroundColor = colors.yellowAccent[400];
+            textColor = colors.contentAccentGreen[100];
+            iconColor = colors.yellowAccent[400];
+          } else {
+            backgroundColor = colors.accentGreen[100];
+            textColor = colors.contentAccentGreen[100];
+            iconColor = colors.accentGreen[100];
+          }
+
+          return (
+            <Chip
+              icon={<Flag sx={{ color: iconColor }} />}
+              label={
+                <Typography
+                  variant="body1"
+                  sx={{ fontWeight: "bold", fontSize: "1.2em" }}
+                >
+                  {params.value}
+                </Typography>
+              }
+              sx={{
+                backgroundColor,
+                color: textColor,
+                borderColor: backgroundColor,
+                borderWidth: 2,
+              }}
+              variant="outlined"
+            />
+          );
+        },
+      },
+      {
+        field: "total_procedures",
+        headerName: "GESTIONES",
         width: 100,
         editable: false,
         renderCell: (params) => {
           const hoursWorked = params.row.hours_worked;
           let color;
-  
+
           if (hoursWorked === 0) {
             color = theme.palette.error.main;
-          } else if (hoursWorked === 1 ) {
+          } else if (hoursWorked === 1) {
             color = theme.palette.warning.main;
           } else {
-            color = theme.palette.secondary.main;
+            color = colors.accentGreen[100];
           }
-          
+
           return (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>            
-              <Typography variant="body1" sx={{ fontWeight: 'bold', fontSize: '1.2em' }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Typography
+                variant="body1"
+                sx={{ fontWeight: "bold", fontSize: "1.2em" }}
+              >
                 {params.value}
               </Typography>
               <TaskAlt sx={{ color: color }} />
             </div>
-          )          
-        }
-      },
-      { 
-        field: 'located',
-        renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"LOCALIZADAS"}</strong>
-        ),
-        width: 100,
-        editable: false,
-        renderCell: (params) => {
-          
-          const percentage = (params.row.located / params.row.total_procedures) * 100 || 0;
-          
-          let progressColor;
-          if (percentage <= 33) {
-            progressColor = 'error';
-          } else if (percentage <= 66) {
-            progressColor = 'warning';
-          } else {
-            progressColor = 'secondary';
-          }
-          return (
-           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '90px' }}>
-             <Typography variant="body1" sx={{ fontWeight: 'bold', fontSize: '1.2em' }}>
-                {params.value}
-              </Typography>
-            <LinearProgress
-              variant="determinate"
-              value={percentage}
-              sx={{ width: '60%', height: '8px' }}
-              style={{ marginTop: '5px' }}
-              color={progressColor}
-            />
-             <Typography variant="body1" sx={{ fontSize: '0.8em' }}>
-             {`${Math.round(percentage)}%`}
-            </Typography>
-          </div>
           );
-        }
+        },
       },
-      { 
-        field: 'vacant_lot',
-        renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"PREDIO BALDIO"}</strong>
-        ),
+      {
+        field: "located",
+        headerName: "LOCALIZADAS",
         width: 120,
         editable: false,
         renderCell: (params) => {
-          
-          const percentage = (params.row.vacant_lot / params.row.total_procedures) * 100 || 0;
-          
+          const percentage =
+            (params.row.located / params.row.total_procedures) * 100 || 0;
+
           let progressColor;
           if (percentage <= 33) {
-            progressColor = 'error';
+            progressColor = "error";
           } else if (percentage <= 66) {
-            progressColor = 'warning';
+            progressColor = "warning";
           } else {
-            progressColor = 'secondary';
+            progressColor = "secondary";
           }
+
           return (
-           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '90px' }}>
-             <Typography variant="body1" sx={{ fontWeight: 'bold', fontSize: '1.2em' }}>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "100%",
+              }}
+            >
+              {/* Valor principal */}
+              <Typography
+                variant="body1"
+                sx={{
+                  fontWeight: "bold",
+                  fontSize: "1em",
+                }}
+              >
                 {params.value}
               </Typography>
-            <LinearProgress
-              variant="determinate"
-              value={percentage}
-              sx={{ width: '60%', height: '8px' }}
-              style={{ marginTop: '5px' }}
-              color={progressColor}
-            />
-             <Typography variant="body1" sx={{ fontSize: '0.8em' }}>
-             {`${Math.round(percentage)}%`}
-            </Typography>
-          </div>
+
+              {/* Barra de progreso */}
+              <LinearProgress
+                variant="determinate"
+                value={percentage}
+                sx={{
+                  width: "100%",
+                  height: 8,
+                  borderRadius: 5,
+                  backgroundColor: "rgba(0, 0, 0, 0.5)",
+                }}
+                color={
+                  progressColor === "error"
+                    ? "red"
+                    : progressColor === "warning"
+                    ? "orange"
+                    : "secondary"
+                }
+              />
+
+              {/* Porcentaje */}
+              <Typography
+                variant="body2"
+                sx={{
+                  fontSize: "0.75em",
+                }}
+              >
+                {`${Math.round(percentage)}%`}
+              </Typography>
+            </Box>
           );
-        }
+        },
       },
-      { 
-        field: 'abandoned_property',
-        renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"PREDIO ABANDONADO"}</strong>
-        ),
+      {
+        field: "vacant_lot",
+        headerName: "PREDIO BALDIO",
+        width: 120,
+        editable: false,
+        renderCell: (params) => {
+          const percentage = Math.min(
+            Math.max(
+              (params.row.vacant_lot / params.row.total_procedures) * 100,
+              0
+            ),
+            100
+          );
+
+          let progressColor;
+          if (percentage <= 33) {
+            progressColor = "error";
+          } else if (percentage <= 66) {
+            progressColor = "warning";
+          } else {
+            progressColor = "success";
+          }
+
+          return (
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "100%",
+              }}
+            >
+              {/* Valor principal */}
+              <Typography
+                variant="body1"
+                sx={{
+                  fontWeight: "bold",
+                  fontSize: "1em",
+                }}
+              >
+                {params.value}
+              </Typography>
+
+              {/* Barra de progreso */}
+              <LinearProgress
+                variant="determinate"
+                value={percentage}
+                sx={{
+                  width: "100%",
+                  height: 8,
+                  borderRadius: 5,
+                  backgroundColor: "rgba(0, 0, 0, 0.5)",
+                }}
+                color={progressColor}
+              />
+
+              {/* Porcentaje */}
+              <Typography
+                variant="body2"
+                sx={{
+                  fontSize: "0.75em",
+                }}
+              >
+                {`${Math.round(percentage)}%`}
+              </Typography>
+            </Box>
+          );
+        },
+      },
+      {
+        field: "abandoned_property",
+        headerName: "PREDIO ABANDONADO",
+        width: 180,
+        editable: false,
+        renderCell: (params) => {
+          const percentage = Math.min(
+            Math.max(
+              (params.row.abandoned_property / params.row.total_procedures) *
+                100,
+              0
+            ),
+            100
+          );
+
+          let progressColor;
+          if (percentage <= 33) {
+            progressColor = "error";
+          } else if (percentage <= 66) {
+            progressColor = "warning";
+          } else {
+            progressColor = "success";
+          }
+
+          return (
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "100%",
+              }}
+            >
+              {/* Valor principal */}
+              <Typography
+                variant="body1"
+                sx={{
+                  fontWeight: "bold",
+                  fontSize: "1em",
+                }}
+              >
+                {params.value}
+              </Typography>
+
+              {/* Barra de progreso */}
+              <LinearProgress
+                variant="determinate"
+                value={percentage}
+                sx={{
+                  width: "100%",
+                  height: 8,
+                  borderRadius: 5,
+                  backgroundColor: "rgba(0, 0, 0, 0.5)",
+                }}
+                color={progressColor}
+              />
+
+              {/* Porcentaje */}
+              <Typography
+                variant="body2"
+                sx={{
+                  fontSize: "0.75em",
+                }}
+              >
+                {`${Math.round(percentage)}%`}
+              </Typography>
+            </Box>
+          );
+        },
+      },
+      {
+        field: "not_located",
+        headerName: "NO LOCALIZADAS",
         width: 150,
         editable: false,
         renderCell: (params) => {
-          
-          const percentage = (params.row.abandoned_property / params.row.total_procedures) * 100 || 0;
-          
+          const percentage = Math.min(
+            Math.max(
+              (params.row.not_located / params.row.total_procedures) * 100,
+              0
+            ),
+            100
+          );
+
           let progressColor;
           if (percentage <= 33) {
-            progressColor = 'error';
+            progressColor = "error";
           } else if (percentage <= 66) {
-            progressColor = 'warning';
+            progressColor = "warning";
           } else {
-            progressColor = 'secondary';
+            progressColor = "success";
           }
+
           return (
-           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '90px' }}>
-             <Typography variant="body1" sx={{ fontWeight: 'bold', fontSize: '1.2em' }}>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "100%",
+              }}
+            >
+              {/* Valor principal */}
+              <Typography
+                variant="body1"
+                sx={{
+                  fontWeight: "bold",
+                  fontSize: "1em",
+                }}
+              >
                 {params.value}
               </Typography>
-            <LinearProgress
-              variant="determinate"
-              value={percentage}
-              sx={{ width: '60%', height: '8px' }}
-              style={{ marginTop: '5px' }}
-              color={progressColor}
-            />
-             <Typography variant="body1" sx={{ fontSize: '0.8em' }}>
-             {`${Math.round(percentage)}%`}
-            </Typography>
-          </div>
-          );
-        }
-      },
-      { 
-        field: 'not_located',
-        renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"NO LOCALIZADAS"}</strong>
-        ),
-        width: 120,
-        editable: false,
-        renderCell: (params) => {
-          
-          const percentage = (params.row.not_located / params.row.total_procedures) * 100 || 0;
-          
-          let progressColor;
-          if (percentage <= 33) {
-            progressColor = 'error';
-          } else if (percentage <= 66) {
-            progressColor = 'warning';
-          } else {
-            progressColor = 'secondary';
-          }
-          return (
-           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '90px' }}>
-             <Typography variant="body1" sx={{ fontWeight: 'bold', fontSize: '1.2em' }}>
-                {params.value}
+
+              {/* Barra de progreso */}
+              <LinearProgress
+                variant="determinate"
+                value={percentage}
+                sx={{
+                  width: "100%",
+                  height: 8,
+                  borderRadius: 5,
+                  backgroundColor: "rgba(0, 0, 0, 0.5)",
+                }}
+                color={progressColor}
+              />
+
+              {/* Porcentaje */}
+              <Typography
+                variant="body2"
+                sx={{
+                  fontSize: "0.75em",
+                }}
+              >
+                {`${Math.round(percentage)}%`}
               </Typography>
-            <LinearProgress
-              variant="determinate"
-              value={percentage}
-              sx={{ width: '60%', height: '8px' }}
-              style={{ marginTop: '5px' }}
-              color={progressColor}
-            />
-             <Typography variant="body1" sx={{ fontSize: '0.8em' }}>
-             {`${Math.round(percentage)}%`}
-            </Typography>
-          </div>
+            </Box>
           );
-        }
+        },
       },
-      { 
-        field: 'not_position',
-        renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"CUENTAS SIN POSICION"}</strong>
-        ),
-        width: 160,
+      {
+        field: "not_position",
+        headerName: "CUENTAS SIN POSICION",
+        width: 180,
         editable: false,
         renderCell: (params) => {
           let color;
-  
+
           if (params.value > 0) {
             color = theme.palette.error.main;
           } else {
             color = theme.palette.secondary.main;
           }
-          
+
           return (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>            
-              <Typography variant="body1" sx={{ fontWeight: 'bold', fontSize: '1.2em' }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Typography
+                variant="body1"
+                sx={{ fontWeight: "bold", fontSize: "1.2em" }}
+              >
                 {params.value}
               </Typography>
               <NotListedLocation sx={{ color: color }} />
             </div>
-          )          
-        }        
+          );
+        },
       },
-      { 
-        field: 'total_photos',
-        renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"FOTOS TOMADAS"}</strong>
-        ),
-        width: 120,
+      {
+        field: "total_photos",
+        headerName: "FOTOS TOMADAS",
+        width: 150,
         editable: false,
         renderCell: (params) => {
           let color;
-  
+
           if (params.value === 0) {
             color = theme.palette.error.main;
           } else {
             color = theme.palette.secondary.main;
           }
-          
+
           return (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>            
-              <Typography variant="body1" sx={{ fontWeight: 'bold', fontSize: '1.2em' }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Typography
+                variant="body1"
+                sx={{ fontWeight: "bold", fontSize: "1.2em" }}
+              >
                 {params.value}
               </Typography>
               <Photo sx={{ color: color }} />
             </div>
-          )          
-        }        
+          );
+        },
       },
-      { 
-        field: 'total_not_photos',
-        renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"CUENTAS SIN FOTOS"}</strong>
-        ),
-        width: 140,
+      {
+        field: "total_not_photos",
+        headerName: "CUENTAS SIN FOTOS",
+        width: 170,
         editable: false,
         renderCell: (params) => {
           let color;
-  
+
           if (params.value > 0) {
             color = theme.palette.error.main;
           } else {
             color = theme.palette.secondary.main;
           }
-          
+
           return (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>            
-              <Typography variant="body1" sx={{ fontWeight: 'bold', fontSize: '1.2em' }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Typography
+                variant="body1"
+                sx={{ fontWeight: "bold", fontSize: "1.2em" }}
+              >
                 {params.value}
               </Typography>
               <Photo sx={{ color: color }} />
             </div>
-          )          
-        }        
+          );
+        },
       },
-      { 
-        field: 'actions',
-        headerName: 'Acción',
+      {
+        field: "actions",
+        headerName: "ACCION",
         width: 150,
         renderCell: (params) => (
           <Button
             variant="contained"
-            color="primary"
-            startIcon={<ViewAgenda />}
-            onClick={() => handleOpenPopup(params.row.user_id, params.row.date_capture)}
+            color="info"
+            endIcon={<Preview />}
+            onClick={() =>
+              handleOpenPopup(params.row.user_id, params.row.date_capture)
+            }
+            sx={{
+              color: "white",
+              borderRadius: "35px",
+            }}
           >
             Ver
           </Button>
-        )
-      }
+        ),
+      },
     ];
-  
-    return columns;
-  };
+  }, []);
 
   const AvatarImage = ({ data }) => {
     const [visibleAvatar, setVisibleAvatar] = React.useState(false);
@@ -453,35 +643,36 @@ function DataGridManagementByManager({data, placeId, serviceId, proccessId}) {
           alt="Remy Sharp"
           src={data}
         />
-  
+
         <Viewer
           visible={visibleAvatar}
           onClose={() => {
             setVisibleAvatar(false);
           }}
-          images={[{ src: data, alt: 'avatar' }]}          
+          images={[{ src: data, alt: "avatar" }]}
         />
       </>
     );
   };
 
   useEffect(() => {
-    
-    setSearchPerformed(true);  
-    
+    setSearchPerformed(true);
+
     if (!searchTerm) {
       setFilteredUsers([]);
       setNoResults(false);
       setMatching(-1);
       return;
-    } 
-    
-    const matchingUsers = data.filter(user => {
-      return Object.values(user).some(value =>
-        value && value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+    }
+
+    const matchingUsers = data.filter((user) => {
+      return Object.values(user).some(
+        (value) =>
+          value &&
+          value.toString().toLowerCase().includes(searchTerm.toLowerCase())
       );
-    });  
-    
+    });
+
     if (matchingUsers.length === 0) {
       setFilteredUsers([]);
       setNoResults(true);
@@ -491,9 +682,7 @@ function DataGridManagementByManager({data, placeId, serviceId, proccessId}) {
       setNoResults(false);
       setMatching(matchingUsers.length);
     }
-  
   }, [searchTerm]);
-  
 
   useEffect(() => {
     setNoResults(false);
@@ -506,10 +695,10 @@ function DataGridManagementByManager({data, placeId, serviceId, proccessId}) {
   const handleDownloadExcelDataGrid = async () => {
     try {
       setIsLoading(true);
-  
+
       const workbook = new ExcelJS.Workbook();
-      const worksheet = workbook.addWorksheet("Registros Encontrados");  
-  
+      const worksheet = workbook.addWorksheet("Registros Encontrados");
+
       const columnHeaders = {
         name: "NOMBRE",
         date_capture: "FECHA",
@@ -522,26 +711,26 @@ function DataGridManagementByManager({data, placeId, serviceId, proccessId}) {
         not_located: "PREDIO NO LOCALIZADO",
         not_position: "GESTIONES SIN POSICION",
         total_not_photos: "GESTIONES SIN FOTO",
-        total_photos: "FOTOS TOMADAS",        
+        total_photos: "FOTOS TOMADAS",
       };
-  
+
       const addRowsToWorksheet = (data) => {
         const headers = Object.keys(columnHeaders);
-        const headerRow = headers.map(header => columnHeaders[header]);
+        const headerRow = headers.map((header) => columnHeaders[header]);
         worksheet.addRow(headerRow);
-  
+
         data.forEach((row) => {
           const values = headers.map((header) => row[header]);
           worksheet.addRow(values);
         });
       };
-  
+
       if (filteredUsers.length > 0) {
         addRowsToWorksheet(filteredUsers);
       } else {
         addRowsToWorksheet(data);
       }
-  
+
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -564,103 +753,179 @@ function DataGridManagementByManager({data, placeId, serviceId, proccessId}) {
       id="grid-1"
       display="grid"
       gridTemplateColumns="repeat(12, 1fr)"
-      gridAutoRows="480px"
+      gridAutoRows="500px"
       gap="15px"
     >
-      <LoadingModal open={isLoading}/>
+      <LoadingModal open={isLoading} />
       <Box
-            sx={{ 
-				cursor: 'pointer',
-				gridColumn:'span 12',
-				backgroundColor:'rgba(128, 128, 128, 0.1)',
-				borderRadius:"10px",
-				overflowY:'hidden',
-				overflowX:'scroll'
-			}}
+        sx={{
+          cursor: "pointer",
+          gridColumn: "span 12",
+          backgroundColor: "rgba(128, 128, 128, 0.1)",
+          borderRadius: "10px",
+          overflowY: "hidden",
+          overflowX: "scroll",
+        }}
       >
         {data.length > 0 && (
           <>
-           <Grid item xs={12} container alignItems="stretch" spacing={2}
+            <Grid
+              container
+              alignItems="center"
+              spacing={2}
               sx={{
-                justifyContent:{
-                  xs:'start',
-                  md:'space-betweeen'
-                }
+                justifyContent: {
+                  xs: "flex-start",
+                  md: "space-between",
+                },
               }}
             >
-            <Grid item xs={12}>
-              <Typography 
-                variant="h4" 
-                align="center" 
-                sx={{ fontWeight: 'bold', paddingTop: 1 }}
-              >
-                RESUMEN DE ACTIVIDADES
-              </Typography>
+              <Grid item xs={12}>
+                <Typography
+                  variant="h4"
+                  align="center"
+                  sx={{
+                    fontWeight: "bold",
+                    paddingTop: 1,
+                    color: colors.accentGreen[100],
+                  }}
+                >
+                  RESUMEN DE ACTIVIDADES
+                </Typography>
+              </Grid>
+
+              <Grid container item xs={12} spacing={2} alignItems="center" paddingBottom= "10px">
+                {/* Campo de búsqueda */}
+                <Grid item xs={12} sm={4}>
+                  <FormControl fullWidth>
+                    <TextField
+                    label="Busqueda"
+                      value={searchTerm}
+                      onChange={handleChange}
+                      color="secondary"
+                      size="small"
+                      placeholder="Ingresa tu búsqueda"
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <Search sx={{ color: colors.accentGreen[100] }} />
+                          </InputAdornment>
+                        ),
+                      }}
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "20px", // Bordes redondeados
+                          "& .MuiOutlinedInput-notchedOutline": {
+                            borderColor: colors.accentGreen[100], // Color predeterminado del borde
+                          },
+                          "&:hover .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "accent.light", // Color al pasar el mouse
+                          },
+                          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "accent.dark", // Color al enfocar
+                          },
+                        },                        
+                      }}
+                    />
+                    {noResults && (
+                      <FormHelperText style={{ color: "red" }}>
+                        No se encontraron resultados
+                      </FormHelperText>
+                    )}
+                  </FormControl>
+                </Grid>
+
+                {/* Botón de exportar */}
+                <Grid item xs={12} sm={2}>
+                  <Button
+                    variant="contained"
+                    color="info"
+                    onClick={handleDownloadExcelDataGrid}                    
+                    endIcon={<Download />}
+                    fullWidth
+                    sx={{
+                      borderRadius: "35px",
+                      color: "white",
+                    }}
+                  >
+                    Exportar
+                  </Button>
+                </Grid>
+              </Grid>
             </Grid>
-            <Grid item xs={6} sx={{ paddingBottom: 1 }}>
-              <FormControl>
-                <TextField                              
-                  fullWidth                            
-                  value={searchTerm}              
-                  onChange={handleChange}              
-                  color='secondary'
-                  size="small"
-                  placeholder="Ingresa tu búsqueda"
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <Search color="secondary"/>
-                      </InputAdornment>
+
+            <Grid
+              item
+              xs={12}
+              container
+              justifyContent="space-between"
+              alignItems="center"
+              spacing={2}
+            >
+              <Grid item xs={12} style={{ height: 400, width: "100%" }}>
+                <DataGrid
+                  rows={filteredUsers.length > 0 ? filteredUsers : data}
+                  columns={buildColumns.map((column) => ({
+                    ...column,
+                    renderHeader: () => (
+                      <Typography
+                        sx={{
+                          color: colors.contentSearchButton[100],
+                          fontWeight: "bold",
+                        }}
+                      >
+                        {column.headerName}
+                      </Typography>
                     ),
+                  }))}
+                  getRowId={(row) => row.id}
+                  editable={false}
+                  autoPageSize
+                  sx={{
+                    borderRadius: "8px",
+                    boxShadow: 3,
+                    padding: 0,
+                    background: "rgba(128, 128, 128, 0.1)",
+                    "& .MuiDataGrid-columnHeaders": {
+                      backgroundColor: colors.accentGreen[100], // Color de fondo deseado
+                      borderTopLeftRadius: "8px",
+                      borderTopRightRadius: "8px",
+                    },
+                    "& .MuiDataGrid-footerContainer": {
+                      borderBottomLeftRadius: "8px",
+                      borderBottomRightRadius: "8px",
+                      backgroundColor: colors.accentGreen[100], // Fondo del footer (paginador)
+                      color: colors.contentSearchButton[100], // Color de texto dentro del footer
+                    },
+                    "& .MuiTablePagination-root": {
+                      color: colors.contentSearchButton[100], // Color del texto del paginador
+                    },
+                    // Estilos específicos para los íconos en el encabezado y pie de página
+                    "& .MuiDataGrid-columnHeaders .MuiSvgIcon-root, .MuiDataGrid-footerContainer .MuiSvgIcon-root":
+                      {
+                        color: colors.contentSearchButton[100], // Color de los íconos (flechas)
+                      },
+                    // Evitar que los íconos en las celdas se vean afectados
+                    "& .MuiDataGrid-cell .MuiSvgIcon-root": {
+                      color: "inherit", // No afectar el color de los íconos en las celdas
+                    },
                   }}
                 />
-                
-                {( noResults ) && (
-                  <FormHelperText  style={{ color: 'red' }}>
-                    No se encontraron resultados
-                  </FormHelperText>
-                )}
-                
-              </FormControl>
+              </Grid>
             </Grid>
-            <Grid item xs={2}>
-              <Button 
-                variant="outlined"                             
-                color="secondary"                            
-                onClick={() => {
-                  handleDownloadExcelDataGrid();                    
-                }}
-                size="small"
-                startIcon={<Download/>}
-                >                                                        
-                Exportar
-              </Button>
-            </Grid>
-           </Grid>
-          <Grid item xs={12} container justifyContent="space-between" alignItems="center" spacing={2}>              
-            <Grid item xs={12} style={{ height: 400, width: '100%' }}>         
-              <DataGrid
-                  rows={filteredUsers.length > 0 ? filteredUsers : data}
-                  columns={buildColumns()}
-                  getRowId={(row) => row.id}
-                  editable={false}                 
-                  autoPageSize
-              />
-            </Grid>
-          </Grid>
           </>
-        )}  
+        )}
       </Box>
-      <PopupViewPositionDailyWorkSummary 
-        open={popupOpen} 
-        onClose={handleClosePopup} 
-        userId={popupData.userId} 
+      <PopupViewPositionDailyWorkSummary
+        open={popupOpen}
+        onClose={handleClosePopup}
+        userId={popupData.userId}
         dateCapture={popupData.dateCapture}
-        placeId={placeId} 
-        serviceId={serviceId} 
-        proccessId={proccessId} 
+        placeId={placeId}
+        serviceId={serviceId}
+        proccessId={proccessId}
       />
-  </Box>   
-  )
+    </Box>
+  );
 }
-export default DataGridManagementByManager
+export default DataGridManagementByManager;
