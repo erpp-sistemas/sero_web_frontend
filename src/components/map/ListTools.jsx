@@ -33,10 +33,14 @@ const listTools = [
         title: 'Filtros',
         icon: 'FilterAltIcon'
     },
-    {
-        title: 'Asignación',
-        icon: 'DiscountIcon'
-    }
+    // {
+    //     title: 'Actualización',
+    //     icon: 'RepeatIcon'
+    // },
+    // {
+    //     title: 'Asignación',
+    //     icon: 'DiscountIcon'
+    // }
 ]
 
 

@@ -20,6 +20,7 @@ import RouteGestor from './RouteGestor';
 import Notification from './Notification';
 import Filtros from './Filtros';
 import ListTools from './ListTools';
+import UpdateData from './UpdateData';
 import Asignacion from './Asignacion';
 
 //import { CSVLink } from 'react-csv';
@@ -290,6 +291,10 @@ export default function AlertDialogSlide() {
                             dataFiltered, setDataFiltered, filtersSelected, setFiltersSelected,
                             setShowTools: setOpen
                         }} />
+                    )}
+
+                    {nombreHerramientaSeleccionada === 'Actualización' && showButtonsHerramientas === false && (
+                        <UpdateData />
                     )}
 
                     {nombreHerramientaSeleccionada === 'Asignación' && showButtonsHerramientas === false && (
