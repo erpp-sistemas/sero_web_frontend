@@ -255,6 +255,7 @@ const Index = () => {
       );
 
       setResultOriginal(response.data);
+      console.log(response.data)
       setTypeFilter(1);
       setTitleFilter("Registros Encontrados");
 
@@ -1374,9 +1375,23 @@ const Index = () => {
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
-                    <Search color="secondary" />
+                    <Search sx={{ color: colors.accentGreen[100]}} />
                   </InputAdornment>
                 ),
+              }}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "20px", // Bordes redondeados
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: colors.accentGreen[100], // Color predeterminado del borde
+                  },
+                  "&:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "accent.light", // Color al pasar el mouse
+                  },
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "accent.dark", // Color al enfocar
+                  },
+                },
               }}
             />
           </Grid>

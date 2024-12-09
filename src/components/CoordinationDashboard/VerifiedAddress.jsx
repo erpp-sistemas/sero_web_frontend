@@ -1,19 +1,39 @@
-import React, { useState, useEffect } from "react";
-import { Box, useTheme, Avatar, Typography, LinearProgress, InputAdornment, FormControl, FormHelperText, Chip, Button} from "@mui/material";
-import TextField from '@mui/material/TextField';
-import Grid from '@mui/material/Grid';
+import React, { useState, useEffect, useMemo } from "react";
+import {
+  Box,
+  useTheme,
+  Avatar,
+  Typography,
+  LinearProgress,
+  InputAdornment,
+  FormControl,
+  FormHelperText,
+  Chip,
+  Button,
+} from "@mui/material";
+import TextField from "@mui/material/TextField";
+import Grid from "@mui/material/Grid";
 import { tokens } from "../../theme";
-import { DataGrid } from '@mui/x-data-grid';
-import Viewer from 'react-viewer';
-import { Search, CalendarToday, AccessTime, Download, PersonPinCircle, TaskAlt, AddBusiness, ViewAgenda } from "@mui/icons-material";
-import LoadingModal from '../../components/LoadingModal.jsx'
+import { DataGrid } from "@mui/x-data-grid";
+import Viewer from "react-viewer";
+import {
+  Search,
+  CalendarToday,
+  AccessTime,
+  Download,
+  PersonPinCircle,
+  TaskAlt,
+  AddBusiness,
+  ViewAgenda,
+  Preview,
+} from "@mui/icons-material";
+import LoadingModal from "../../components/LoadingModal.jsx";
 import * as ExcelJS from "exceljs";
-import PopupViewPositionVerifiedAddress from '../../components/CoordinationDashboard/PopupViewPositionVerifiedAddress.jsx'
+import PopupViewPositionVerifiedAddress from "../../components/CoordinationDashboard/PopupViewPositionVerifiedAddress.jsx";
 
 function VerifiedAddress({ data, placeId, serviceId, proccessId }) {
-
   if (!data) {
-      return null;
+    return null;
   }
 
   const theme = useTheme();
@@ -25,10 +45,13 @@ function VerifiedAddress({ data, placeId, serviceId, proccessId }) {
   const [noResults, setNoResults] = useState(false);
   const [searchPerformed, setSearchPerformed] = useState(false);
 
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false);
 
   const [popupOpen, setPopupOpen] = useState(false);
-  const [popupData, setPopupData] = useState({ userId: null, dateCapture: null });
+  const [popupData, setPopupData] = useState({
+    userId: null,
+    dateCapture: null,
+  });
 
   const handleOpenPopup = (userId, dateCapture) => {
     setPopupData({ userId, dateCapture });
@@ -39,117 +62,132 @@ function VerifiedAddress({ data, placeId, serviceId, proccessId }) {
     setPopupOpen(false);
     setPopupData({ userId: null, dateCapture: null });
   };
- 
 
-  const buildColumns = () => {   
-    const columns = [       
-		{ 
-			field: 'user',
-			renderHeader: () => (
-				<strong style={{ color: "#5EBFFF" }}>{"GESTOR"}</strong>
-			),
-			width: 270,
-			editable: false,
-			renderCell: (params) => (
-				<Box sx={{ display: 'flex', alignItems: 'center', p: '12px' }}>
-					<AvatarImage data={params.row.image_user} />
-					<Typography variant="h6" sx={{ marginLeft: 1 }}>{params.value}</Typography>
-				</Box>
-			)
-		}, 
-		{ 
-			field: 'date_capture',
-			renderHeader: () => (
-				<strong style={{ color: "#5EBFFF" }}>{"FECHA"}</strong>
-			),
-			width: 150,
-			editable: false,
-			renderCell: (params) => (
-				<Chip
-				  icon={<CalendarToday />}
-				  label={
-					<Typography variant="body1" sx={{ fontWeight: 'bold', fontSize: '1.2em' }}>
-					  {params.value}
-					</Typography>
-				  }
-				  variant="outlined"
-				  sx={{
-					borderColor: theme.palette.info.main,
-					color: theme.palette.info.main,
-					'& .MuiChip-icon': {
-					  color: theme.palette.info.main
-					}
-				  }}
-				/>
-			  )
-		},    
-    { 
-      field: 'count',
-      renderHeader: () => (
-        <strong style={{ color: "#5EBFFF" }}>{"GESTIONES"}</strong>
-      ),
-      width: 100,
-      editable: false,
-      renderCell: (params) => {          
-        let color = theme.palette.secondary.main
-        return (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>            
-            <Typography variant="body1" sx={{ fontWeight: 'bold', fontSize: '1.2em' }}>
+  const buildColumns = useMemo(() => {
+    return [
+      {
+        field: "user",
+        headerName:"NOMBRE",
+        width: 270,
+        editable: false,
+        renderCell: (params) => (
+          <Box sx={{ display: "flex", alignItems: "center", p: "12px" }}>
+            <AvatarImage data={params.row.image_user} />
+            <Typography variant="h6" sx={{ marginLeft: 1 }}>
               {params.value}
             </Typography>
-            <TaskAlt sx={{ color: color }} />
-          </div>
-        )          
-      }
-    },
-    { 
-      field: 'verified_address',
-      renderHeader: () => (
-        <strong style={{ color: "#5EBFFF" }}>{"DOMICILIOS VERIFICADOS"}</strong>
-      ),
-      width: 170,
-      editable: false,
-      renderCell: (params) => {          
-        let color = theme.palette.secondary.main
-        if(params.value == '0'){
-          color = theme.palette.error.main
-        }
-        else{
-          color = theme.palette.secondary.main
-        }
+          </Box>
+        ),
+      },
+      {
+        field: "date_capture",
+        headerName:"FECHA",
+        width: 150,
+        editable: false,
+        renderCell: (params) => (
+          <Chip
+            icon={<CalendarToday />}
+            label={
+              <Typography
+                variant="body1"
+                sx={{ fontWeight: "bold", fontSize: "1.2em" }}
+              >
+                {params.value}
+              </Typography>
+            }
+            variant="outlined"
+            sx={{
+              background: colors.blueAccent[500],
+              "& .MuiChip-icon": {
+                color: theme.palette.info.main,
+              },
+            }}
+          />
+        ),
+      },
+      {
+        field: "count",
+        headerName:"GESTIONES",
+        width: 100,
+        editable: false,
+        renderCell: (params) => {
+          let color = theme.palette.secondary.main;
+          return (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Typography
+                variant="body1"
+                sx={{ fontWeight: "bold", fontSize: "1.2em" }}
+              >
+                {params.value}
+              </Typography>
+              <TaskAlt sx={{ color: color }} />
+            </div>
+          );
+        },
+      },
+      {
+        field: "verified_address",
+        headerName:"DOMICILIOS VERIFICADOS",
+        width: 190,
+        editable: false,
+        renderCell: (params) => {
+          let color = theme.palette.secondary.main;
+          if (params.value == "0") {
+            color = theme.palette.error.main;
+          } else {
+            color = theme.palette.secondary.main;
+          }
 
-        return (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>            
-            <Typography variant="body1" sx={{ fontWeight: 'bold', fontSize: '1.2em', padding: 1 }}>
-              {params.value}
-            </Typography>
-            <AddBusiness sx={{ color: color }} />
-          </div>
-        )          
-      }
-    },
-    { 
-      field: 'actions',      
-      renderHeader: () => (
-        <strong style={{ color: "#5EBFFF" }}>{"ACCION"}</strong>
-      ),
-      width: 150,
-      renderCell: (params) => (
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<ViewAgenda />}
-          onClick={() => handleOpenPopup(params.row.user_id, params.row.date_capture)}
-          disabled={params.row.verified_address == 0}
-        >
-          Ver
-        </Button>
-      )
-    } 
+          return (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Typography
+                variant="body1"
+                sx={{ fontWeight: "bold", fontSize: "1.2em", padding: 1 }}
+              >
+                {params.value}
+              </Typography>
+              <AddBusiness sx={{ color: color }} />
+            </div>
+          );
+        },
+      },
+      {
+        field: "actions",
+        headerName:"ACCION",
+        width: 150,
+        renderCell: (params) => (
+          <Button
+            variant="contained"
+            color="info"
+            endIcon={<Preview />}
+            onClick={() =>
+              handleOpenPopup(params.row.user_id, params.row.date_capture)
+            }
+            sx={{
+              color: "white",
+              borderRadius: "35px",
+              fontWeight: "bold"
+            }}
+            disabled={params.row.verified_address == 0}
+          >
+            Ver
+          </Button>
+        ),
+      },
     ];
-  
-    return columns;
-  };
+  }, []);
 
   const AvatarImage = ({ data }) => {
     const [visibleAvatar, setVisibleAvatar] = React.useState(false);
@@ -162,34 +200,35 @@ function VerifiedAddress({ data, placeId, serviceId, proccessId }) {
           alt="Remy Sharp"
           src={data}
         />
-  
+
         <Viewer
           visible={visibleAvatar}
           onClose={() => {
             setVisibleAvatar(false);
           }}
-          images={[{ src: data, alt: 'avatar' }]}          
+          images={[{ src: data, alt: "avatar" }]}
         />
       </>
     );
   };
   useEffect(() => {
-    
-    setSearchPerformed(true);  
-    
+    setSearchPerformed(true);
+
     if (!searchTerm) {
       setFilteredUsers([]);
       setNoResults(false);
       setMatching(-1);
       return;
-    } 
-    
-    const matchingUsers = data.filter(user => {
-      return Object.values(user).some(value =>
-        value && value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+    }
+
+    const matchingUsers = data.filter((user) => {
+      return Object.values(user).some(
+        (value) =>
+          value &&
+          value.toString().toLowerCase().includes(searchTerm.toLowerCase())
       );
-    });  
-    
+    });
+
     if (matchingUsers.length === 0) {
       setFilteredUsers([]);
       setNoResults(true);
@@ -199,9 +238,7 @@ function VerifiedAddress({ data, placeId, serviceId, proccessId }) {
       setNoResults(false);
       setMatching(matchingUsers.length);
     }
-  
   }, [searchTerm]);
-  
 
   useEffect(() => {
     setNoResults(false);
@@ -214,10 +251,10 @@ function VerifiedAddress({ data, placeId, serviceId, proccessId }) {
   const handleDownloadExcelDataGrid = async () => {
     try {
       setIsLoading(true);
-  
+
       const workbook = new ExcelJS.Workbook();
-      const worksheet = workbook.addWorksheet("Registros Encontrados");  
-  
+      const worksheet = workbook.addWorksheet("Registros Encontrados");
+
       const columnHeaders = {
         account: "Cuenta",
         street: "Direccion",
@@ -225,26 +262,26 @@ function VerifiedAddress({ data, placeId, serviceId, proccessId }) {
         longitude: "Longitud",
         position: "Posicion",
         manager: "Gestor que Gestiono",
-        date_capture: "Fecha de Captura"
+        date_capture: "Fecha de Captura",
       };
-  
+
       const addRowsToWorksheet = (data) => {
         const headers = Object.keys(columnHeaders);
-        const headerRow = headers.map(header => columnHeaders[header]);
+        const headerRow = headers.map((header) => columnHeaders[header]);
         worksheet.addRow(headerRow);
-  
+
         data.forEach((row) => {
           const values = headers.map((header) => row[header]);
           worksheet.addRow(values);
         });
       };
-  
+
       if (filteredUsers.length > 0) {
         addRowsToWorksheet(filteredUsers);
       } else {
         addRowsToWorksheet(data);
       }
-  
+
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -269,87 +306,178 @@ function VerifiedAddress({ data, placeId, serviceId, proccessId }) {
       gridTemplateColumns="repeat(12, 1fr)"
       gridAutoRows="480px"
       gap="15px"
-    >   
+    >
       <Box
-        gridColumn='span 12'
-        backgroundColor='rgba(128, 128, 128, 0.1)'
+        gridColumn="span 12"
+        backgroundColor="rgba(128, 128, 128, 0.1)"
         borderRadius="10px"
-        sx={{ cursor: 'pointer' }}
+        sx={{ cursor: "pointer" }}
       >
         {data.length > 0 && (
           <>
-          <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2} >
-            <Grid item xs={12}>
-              <Typography variant="h4" align="center" sx={{ fontWeight: 'bold', paddingTop: 1 }}>
-                Domicilios Verificados
-              </Typography>
-            </Grid>
-            <Grid item xs={6} sx={{ paddingBottom: 1 }}>
-              <FormControl>
-                <TextField                              
-                  fullWidth                            
-                  value={searchTerm}              
-                  onChange={handleChange}              
-                  color='secondary'
-                  size="small"
-                  placeholder="Ingresa tu búsqueda"
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <Search color="secondary"/>
-                      </InputAdornment>
-                    ),
+            <Grid
+              item
+              xs={12}
+              container
+              justifyContent="space-between"
+              alignItems="stretch"
+              spacing={2}
+            >
+              <Grid item xs={12}>
+                <Typography
+                  variant="h4"
+                  align="center"
+                  sx={{
+                    fontWeight: "bold",
+                    paddingTop: 1,
+                    color: colors.accentGreen[100],
                   }}
-                />
-                
-                {( noResults ) && (
-                  <FormHelperText  style={{ color: 'red' }}>
-                    No se encontraron resultados
-                  </FormHelperText>
-                )}
-                
-              </FormControl>
+                >
+                  DOMICILIOS VERIFICADOS
+                </Typography>
+              </Grid>
+              <Grid
+                container
+                item
+                xs={12}
+                spacing={2}
+                alignItems="center"
+                paddingBottom="10px"
+              >
+                {/* Campo de búsqueda */}
+                <Grid item xs={12} sm={4}>
+                  <FormControl fullWidth>
+                    <TextField
+                      label="Busqueda"
+                      fullWidth
+                      value={searchTerm}
+                      onChange={handleChange}
+                      color="secondary"
+                      size="small"
+                      placeholder="Ingresa tu búsqueda"
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <Search sx={{ color:colors.accentGreen[100]}} />
+                          </InputAdornment>
+                        ),
+                      }}
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "20px", // Bordes redondeados
+                          "& .MuiOutlinedInput-notchedOutline": {
+                            borderColor: colors.accentGreen[100], // Color predeterminado del borde
+                          },
+                          "&:hover .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "accent.light", // Color al pasar el mouse
+                          },
+                          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "accent.dark", // Color al enfocar
+                          },
+                        },
+                      }}
+                    />
+
+                    {noResults && (
+                      <FormHelperText style={{ color: "red" }}>
+                        No se encontraron resultados
+                      </FormHelperText>
+                    )}
+                  </FormControl>
+                </Grid>
+                {/* Botón de exportar */}
+                <Grid item xs={12} sm={2}>
+                  <Button
+                    variant="contained"
+                    color="info"
+                    onClick={() => {
+                      handleDownloadExcelDataGrid();
+                    }}                    
+                    endIcon={<Download />}
+                    sx={{
+                      borderRadius: "35px",
+                      color: "white",
+                      fontWeight: "bold"
+                    }}
+                  >
+                    Exportar
+                  </Button>
+                </Grid>
+              </Grid>
             </Grid>
-            <Grid item xs={6} md={2}>
-              <Button 
-                variant="outlined"                             
-                color="secondary"                            
-                onClick={() => {
-                  handleDownloadExcelDataGrid();                    
-                }}
-                size="small"
-                startIcon={<Download/>}
-                >                                                        
-                Exportar
-              </Button>
-            </Grid>
-           </Grid>
-            <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>              
-              <Grid item xs={12} style={{ height: 400, width: '100%' }}>         
+            <Grid
+              item
+              xs={12}
+              container
+              justifyContent="space-between"
+              alignItems="stretch"
+              spacing={2}
+            >
+              <Grid item xs={12} style={{ height: 400, width: "100%" }}>
                 <DataGrid
-                    rows={filteredUsers.length > 0 ? filteredUsers : data}
-                    columns={buildColumns()}
-                    getRowId={(row) => row.id}
-                    editable={false}                 
-                    autoPageSize
+                  rows={filteredUsers.length > 0 ? filteredUsers : data}
+                  columns={buildColumns.map((column) => ({
+                    ...column,
+                    renderHeader: () => (
+                      <Typography
+                        sx={{
+                          color: colors.contentSearchButton[100],
+                          fontWeight: "bold",
+                        }}
+                      >
+                        {column.headerName}
+                      </Typography>
+                    ),
+                  }))}
+                  getRowId={(row) => row.id}
+                  editable={false}
+                  autoPageSize
+                  sx={{
+                    borderRadius: "8px",
+                    boxShadow: 3,
+                    padding: 0,
+                    background: "rgba(128, 128, 128, 0.1)",
+                    "& .MuiDataGrid-columnHeaders": {
+                      backgroundColor: colors.accentGreen[100], // Color de fondo deseado
+                      borderTopLeftRadius: "8px",
+                      borderTopRightRadius: "8px",
+                    },
+                    "& .MuiDataGrid-footerContainer": {
+                      borderBottomLeftRadius: "8px",
+                      borderBottomRightRadius: "8px",
+                      backgroundColor: colors.accentGreen[100], // Fondo del footer (paginador)
+                      color: colors.contentSearchButton[100], // Color de texto dentro del footer
+                    },
+                    "& .MuiTablePagination-root": {
+                      color: colors.contentSearchButton[100], // Color del texto del paginador
+                    },
+                    // Estilos específicos para los íconos en el encabezado y pie de página
+                    "& .MuiDataGrid-columnHeaders .MuiSvgIcon-root, .MuiDataGrid-footerContainer .MuiSvgIcon-root":
+                      {
+                        color: colors.contentSearchButton[100], // Color de los íconos (flechas)
+                      },
+                    // Evitar que los íconos en las celdas se vean afectados
+                    "& .MuiDataGrid-cell .MuiSvgIcon-root": {
+                      color: "inherit", // No afectar el color de los íconos en las celdas
+                    },
+                  }}
                 />
               </Grid>
             </Grid>
           </>
-        )}  
+        )}
       </Box>
-      <LoadingModal open={isLoading}/>
+      <LoadingModal open={isLoading} />
       <PopupViewPositionVerifiedAddress
-        open={popupOpen} 
-        onClose={handleClosePopup} 
-        userId={popupData.userId} 
+        open={popupOpen}
+        onClose={handleClosePopup}
+        userId={popupData.userId}
         dateCapture={popupData.dateCapture}
-        placeId={placeId} 
-        serviceId={serviceId} 
-        proccessId={proccessId} 
+        placeId={placeId}
+        serviceId={serviceId}
+        proccessId={proccessId}
       />
-  </Box>
-     
-  )
+    </Box>
+  );
 }
-export default VerifiedAddress
+export default VerifiedAddress;

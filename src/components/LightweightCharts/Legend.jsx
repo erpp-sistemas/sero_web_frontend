@@ -3,7 +3,7 @@ import { createChart } from "lightweight-charts";
 import { useTheme, Typography, Box } from "@mui/material";
 import { tokens } from "../../theme";
 
-const Legend = ({ data, height = 290, customColors }) => {
+const Legend = ({ data, height = 290, customColors, title, title_label, format }) => {
   const theme = useTheme();
   const color = tokens(theme.palette.mode);
   const chartContainerRef = useRef();
@@ -42,7 +42,7 @@ const Legend = ({ data, height = 290, customColors }) => {
         horzAlign: "center",
         vertAlign: "top",
         color: color.accentGreen[100],
-        text: "Pagos por dia",
+        text: title,
       },
       grid: {
         vertLines: { color: "#334158" },
@@ -82,13 +82,23 @@ const Legend = ({ data, height = 290, customColors }) => {
     };
   }, [data, colors, height]);
 
-  const formatValue = (value) =>
-    new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(value);
+  const formatValue = (value, type_format) => {
+    const options =
+      type_format === "currency"
+        ? {
+            style: "currency",
+            currency: "USD",
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          }
+        : {
+            useGrouping: true, // Habilita separadores de miles
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0,
+          };
+  
+    return new Intl.NumberFormat("en-US", options).format(value);
+  };
 
   return (
     <Box sx={{ borderRadius: "10px", backgroundColor: colors.backgroundColor }}>
@@ -108,7 +118,7 @@ const Legend = ({ data, height = 290, customColors }) => {
             color: colors.textColor,
           }}
         >
-          {`Total pagado: ${formatValue(total)}`}
+          {`${title_label}: ${formatValue(total, format)}`}
         </Typography>
         <Typography
           sx={{
@@ -116,7 +126,7 @@ const Legend = ({ data, height = 290, customColors }) => {
             color: colors.textColor,
           }}
         >
-          {`Valor máximo: ${formatValue(maxValue)}`}
+          {`Valor máximo: ${formatValue(maxValue, format)}`}
         </Typography>
         <Typography
           sx={{
@@ -124,7 +134,7 @@ const Legend = ({ data, height = 290, customColors }) => {
             color: colors.textColor,
           }}
         >
-          {`Valor mínimo: ${formatValue(minValue)}`}
+          {`Valor mínimo: ${formatValue(minValue, format)}`}
         </Typography>
       </Box>
 

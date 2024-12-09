@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { List, ListItemButton, ListItemText, ListItem, ListSubheader, CircularProgress, Typography, Box, Button, Chip, Divider } from '@mui/material';
+import { List, ListItemButton, ListItemText, ListItem, useTheme, CircularProgress, Typography, Box, Button, Chip, Divider } from '@mui/material';
 import { menusProfileRequest } from '../../api/menu.js';
 import KeyboardTabIcon from '@mui/icons-material/KeyboardTab';
 import * as MUIIcons from "@mui/icons-material";
@@ -7,9 +7,13 @@ import LoadingModal from '../LoadingModal.jsx';
 import CustomAlert from '../CustomAlert.jsx';
 import { Dialog, DialogContent } from '@mui/material';
 import { updateMenuAndSubMenuRequest } from '../../api/auth';
+import { tokens } from "../../theme";
 
 function AssignedMenuAndSubMenu({ open, onClose, data }) {
   if (!data) return null;
+
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
 
   const { assigned_permissions, profile_id } = data;
 
@@ -164,7 +168,15 @@ function AssignedMenuAndSubMenu({ open, onClose, data }) {
   });
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
+    <Dialog 
+      open={open} 
+      onClose={onClose} 
+      sx={{
+        "& .MuiPaper-root": {
+          border: `2px solid ${colors.accentGreen[100]}`,
+        },
+      }}  
+    >
       <DialogContent>
         <form onSubmit={handleSubmit}>
           <LoadingModal open={isLoading} />
@@ -177,21 +189,28 @@ function AssignedMenuAndSubMenu({ open, onClose, data }) {
           <List
             sx={{
               width: '100%',
-              maxWidth: 360,
-              bgcolor: 'transparent',
+              maxWidth: 360,              
               margin: 'auto',
               borderRadius: '8px',
               boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
               padding: '16px',
+              bgcolor: "background.paper"
             }}
             component="nav"
             aria-labelledby="nested-list-subheader"
             subheader={
               <>
-                <Typography variant="h5" gutterBottom>
+                <Typography 
+                  variant="h5" 
+                  gutterBottom
+                  sx={{
+                    color: colors.accentGreen[100],
+                    fontWeight: "bold"
+                  }}
+                >
                   Menús a los que tendrá acceso
                 </Typography>
-                <Divider sx={{ backgroundColor: '#5EBFFF' }} />
+                <Divider sx={{ backgroundColor: colors.accentGreen[100] }} />
               </>
             }
           >
@@ -208,9 +227,14 @@ function AssignedMenuAndSubMenu({ open, onClose, data }) {
                       <ListItem key={child.id} sx={{ pl: 6 }}>
                         <Chip
                           label={child.name}
-                          color={selectedItems.some(item => item.parentId === menu.id && item.children.includes(child.id)) ? 'secondary' : 'default'}
+                          // color={selectedItems.some(item => item.parentId === menu.id && item.children.includes(child.id)) ? 'secondary' : 'default'}
                           onClick={() => handleToggle(child.id, menu.id)}
                           icon={IconComponent ? <IconComponent /> : null}
+                          sx={{
+                            backgroundColor: selectedItems.some(item => item.parentId === menu.id && item.children.includes(child.id)) ? colors.accentGreen[100] : 'default',
+                            color: selectedItems.some(item => item.parentId === menu.id && item.children.includes(child.id)) ? colors.contentAccentGreen[100] : 'default',
+                            fontWeight: "bold"
+                          }}
                         />
                       </ListItem>
                     );
@@ -219,8 +243,17 @@ function AssignedMenuAndSubMenu({ open, onClose, data }) {
               ))}
           </List>
           <Box mt={2}>
-            <Button type="submit" sx={{ bgcolor: 'secondary.main', '&:hover': { bgcolor: 'secondary.dark' } }} variant="contained" color="secondary" endIcon={<KeyboardTabIcon />}>
-              Finalizar
+            <Button 
+              type="submit" 
+              sx={{
+                borderRadius: "35px",
+                color: "white"
+              }}
+              variant="contained" 
+              color="info" 
+              endIcon={<MUIIcons.Save />}
+              >
+              Guardar
             </Button>
           </Box>
         </form>

@@ -38,7 +38,7 @@ function ProcessSelect({ selectedPlace, selectedService, selectedProcess, handle
       id="filled-select-service"
       select
       label="Proceso"
-      variant="filled"
+      variant="outlined"      
       sx={{ width: '100%' }}
       value={selectedProcess}
       onChange={handleProcessChange}
