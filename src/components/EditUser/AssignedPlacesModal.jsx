@@ -58,7 +58,7 @@ const AssignedPlacesModal = ({ open, onClose, data }) => {
 
   useEffect(() => {
     getPlaces(user.user_id);
-  }, [user.user_id]);  
+  }, [user.user_id]);
 
   useEffect(() => {
     if (data.assigned_place_service_process) {
@@ -81,13 +81,10 @@ const AssignedPlacesModal = ({ open, onClose, data }) => {
 
       // Set initial selected place and service
       const firstPlaceId = parsedData[0]?.placeId;
-      const firstServiceId = parsedData[0]?.serviceId;      
+      const firstServiceId = parsedData[0]?.serviceId;
 
-      if (firstPlaceId) {        
+      if (firstPlaceId) {
         handleCardClick(firstPlaceId);
-      }
-      if (firstServiceId) {
-        handleServiceChipClick(firstServiceId);
       }
     }
   }, [data]);
@@ -116,7 +113,7 @@ const AssignedPlacesModal = ({ open, onClose, data }) => {
   const handleServiceChipClick = async (service_id) => {
     setSelectedService(service_id);
     try {
-      console.log(selectedPlace)
+      console.log(selectedPlace);
       const response = await placeServiceProcessByUserIdRequest(
         user.user_id,
         selectedPlace,
@@ -131,7 +128,7 @@ const AssignedPlacesModal = ({ open, onClose, data }) => {
           ) || false,
       }));
 
-      console.log(processesWithSelection)
+      console.log(processesWithSelection);
       setProcesses(processesWithSelection);
     } catch (error) {
       console.error("Error fetching processes:", error);
@@ -459,7 +456,7 @@ const AssignedPlacesModal = ({ open, onClose, data }) => {
               Selecciona los procesos
             </Typography>
             <Divider sx={{ backgroundColor: colors.accentGreen[100] }} />
-            <Box mt={1} >
+            <Box mt={1}>
               <Card
                 variant="outlined"
                 sx={{
@@ -484,11 +481,15 @@ const AssignedPlacesModal = ({ open, onClose, data }) => {
                         >
                           <Chip
                             label={process.name}
-                            clickable                            
+                            clickable
                             sx={{
-                              backgroundColor: process.active ? colors.accentGreen[100] : "default",
-                              color: process.active ? colors.contentAccentGreen[100] : "default",
-                              fontWeight: "bold"
+                              backgroundColor: process.active
+                                ? colors.accentGreen[100]
+                                : "default",
+                              color: process.active
+                                ? colors.contentAccentGreen[100]
+                                : "default",
+                              fontWeight: "bold",
                             }}
                             onClick={() =>
                               handleProcessChipClick(process.process_id)
@@ -506,7 +507,7 @@ const AssignedPlacesModal = ({ open, onClose, data }) => {
                 type="submit"
                 sx={{
                   borderRadius: "35px",
-                  color: "white"
+                  color: "white",
                 }}
                 variant="contained"
                 color="info"
