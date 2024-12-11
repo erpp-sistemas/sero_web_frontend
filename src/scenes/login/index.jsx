@@ -1,168 +1,206 @@
-import { useState, useEffect } from "react"
-import { useNavigate } from "react-router-dom"
-import { useForm } from "react-hook-form"
-import { loginRequest } from "../../api/auth"
-import Cookies from "js-cookie"
-import { useDispatch } from "react-redux"
-import { setUser } from "../../features/user/userSlice"
-import LoadingModal from "../../components/LoadingModal"
-import PropTypes from "prop-types"
-import { Box } from "@mui/material"
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { loginRequest } from "../../api/auth";
+import Cookies from "js-cookie";
+import { useDispatch } from "react-redux";
+import { setUser } from "../../features/user/userSlice";
+import LoadingModal from "../../components/LoadingModal";
+import PropTypes from "prop-types";
+import { Box } from "@mui/material";
+import LoginImage from "../../../public/login-image.svg";
+import LogoImage from "../../../public/sero_claro.png";
+import {
+  Person,
+  Public,
+  Visibility,
+  VisibilityOff,
+  YouTube,
+} from "@mui/icons-material";
 
 const Login = ({ setLogin }) => {
-	const navigate = useNavigate()
-	const dispatch = useDispatch()
-	const [signinErrors, setSigninErrors] = useState([])
-	const [isLoading, setIsLoading] = useState(false)
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const [signinErrors, setSigninErrors] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-	const {
-		register,
-		handleSubmit,
-		formState: { errors },
-	} = useForm()
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
 
-	const onSubmit = handleSubmit((data) => {
-		signin(data)
-	})
+  const onSubmit = handleSubmit((data) => {
+    signin(data);
+  });
 
-	const signin = async (user) => {
+  const signin = async (user) => {
+    try {
+      setIsLoading(true);
 
-		try {
+      const res = await loginRequest(user);
+      console.log(res);
 
-			setIsLoading(true)
+      if (res && res.data && res.data.token) {
+        setTimeout(() => {
+          setIsLoading(false);
+          dispatch(setUser(res.data));
+          setLogin(true);
+          localStorage.setItem("token", res.data.token);
+          Cookies.set("token", res.data.token, { expires: 7 });
+          navigate("/home");
+        }, 3000);
+      } else {
+        console.error("Token not found in response:", res);
+        setIsLoading(false);
+      }
+    } catch (error) {
+      if (error.response && error.response.data) {
+        if (Array.isArray(error.response.data)) {
+          setSigninErrors(error.response.data);
+        } else {
+          setSigninErrors([error.response.data.message]);
+        }
+      } else {
+        console.error("Error response:", error);
+        setSigninErrors(["Error during login"]);
+      }
 
-			const res = await loginRequest(user)
-			console.log(res)
+      setIsLoading(false);
+    }
+  };
 
-			if (res && res.data && res.data.token) {
-
-			setTimeout(() => {
-				setIsLoading(false)
-				dispatch(setUser(res.data))
-				setLogin(true)
-				localStorage.setItem("token", res.data.token)
-				Cookies.set("token", res.data.token, { expires: 7 })
-				navigate("/home")
-			}, 3000)
-
-			} else {
-			
-				console.error("Token not found in response:", res)
-				setIsLoading(false)
-
-			}
-
-		} catch (error) {
-
-			if (error.response && error.response.data) {
-				if (Array.isArray(error.response.data)) {
-					setSigninErrors(error.response.data)
-				} else {
-					setSigninErrors([error.response.data.message])
-				}
-			} else {
-				console.error("Error response:", error)
-				setSigninErrors(["Error during login"])
-			}
-			
-			setIsLoading(false)
-
-		}
-
-	}
-  
-
-	useEffect(() => {
-		if (signinErrors.length > 0) {
-		const timer = setTimeout(() => {
-			setSigninErrors([])
-		}, 5000)
-		return () => clearTimeout(timer)
-		}
-	}, [signinErrors])
+  useEffect(() => {
+    if (signinErrors.length > 0) {
+      const timer = setTimeout(() => {
+        setSigninErrors([]);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [signinErrors]);
 
   return (
-
-    <Box className="bg-no-repeat bg-cover bg-center relative" style={{ backgroundImage: "url(fondo-login.jpeg)" }}>
-
+    <div className="font-[sans-serif] bg-gradient-to-b from-gray-800 to-gray-900 text-gray-100">
       <LoadingModal open={isLoading} />
-
-      <Box className="absolute bg-gradient-to-b from-blue-900 to-blue-800 opacity-25 inset-0 z-0" sx={{ display:{
-		xs:'none',
-		md:'flex'} }} ></Box>
-
-      <div className="min-h-screen sm:flex sm:flex-row mx-0 justify-center">
-
-        <div className="flex-col flex self-center p-10 sm:max-w-5xl xl:max-w-2xl z-10">
-          <div className="self-start hidden lg:flex flex-col text-gray-200 text-center">
-            <img src="erpp-logo.png" width={200} className="mb-3 mx-auto" />
-            <h1 className="mb-3 font-bold text-5xl">Bienvenido a SER0 </h1>
-            <p className="pr-3 text-xl font-semibold">
-              Aplicación de uso gerencial y administrativo para uso exclusivo del personal de
-              <span className="text-green-400 ml-1 font-black font-serif">ERPP&copy; Corporativo</span>
-            </p>
-          </div>
-        </div>
-		
-        <div className="flex justify-center self-center z-10 ml-0 p-4">
-          <div className="p-12 bg-gray-50 mx-auto rounded-2xl w-100 border-2 border-green-500">
-            <div className="mb-4">
-              <img src="sero-logo.png" width={200} className="mb-3 mx-auto" />
-              <h3 className="font-semibold text-2xl text-gray-800">LOGIN </h3>
-              <p className="text-gray-500">Favor de ingresar tus credenciales</p>
+      <div className="min-h-screen flex items-center justify-center py-6 px-4">
+        <div className="grid md:grid-cols-2 items-center gap-4 max-w-6xl w-full">
+          <div className="relative border border-gray-600 rounded-lg p-6 max-w-md shadow-[0_2px_22px_-4px_rgba(93,96,127,0.3)] max-md:mx-auto bg-gray-800">
+            <div className="flex justify-center mb-0">
+              <img
+                src={LogoImage}
+                alt="Nombre del Software"
+                className="w-32 h-auto"
+              />
             </div>
             {signinErrors.map((error, i) => (
-              <div className="bg-red-500 p-2 text-white text-center my-2" key={i}>
+              <div
+                className="bg-red-500 p-2 text-white text-center my-2"
+                key={i}
+              >
                 {error}
               </div>
             ))}
-            <form className="space-y-5" onSubmit={onSubmit}>
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700 tracking-wide">Usuario</label>
+            <form className="space-y-4 mt-5" onSubmit={onSubmit}>
+              <div className="mb-8">
+                <h3 className="text-gray-100 text-center text-3xl font-extrabold">
+                  Iniciar sesión
+                </h3>
+                <p className="text-gray-400 text-sm mt-4 leading-relaxed">
+                  Inicie sesión en su cuenta y explore un mundo de
+                  posibilidades. Tu viaje comienza aquí
+                </p>
+              </div>
+
+              <div>
+                <label className="text-gray-100 text-sm mb-2 block">
+                  User name
+                </label>
                 <input
-                  className="w-full text-base px-4 py-2 border text-black border-gray-300 rounded-lg focus:outline-none focus:border-blue-400"
-                  type="email"
-                  placeholder="mail@ser0.mx"
+                  name="username"
+                  type="text"
+                  required
+                  className="w-full text-sm text-gray-100 bg-gray-700 border border-gray-600 px-4 py-3 rounded-lg outline-blue-600 placeholder-gray-400"
+                  placeholder="Enter user name"
                   {...register("username", { required: true })}
                 />
-                {errors.username && <p className="text-red-500">El usuario es requerido</p>}
+                {errors.username && (
+                  <p className="text-red-500">El usuario es requerido</p>
+                )}
               </div>
-              <div className="space-y-2">
-                <label className="mb-5 text-sm font-medium text-gray-700 tracking-wide">Password</label>
-                <input
-                  className="w-full content-center text-base px-4 py-2 border text-black border-gray-300 rounded-lg focus:outline-none focus:border-blue-400"
-                  type="password"
-                  placeholder="Password"
-                  {...register("password", { required: true })}
-                />
-                {errors.password && <p className="text-red-500">La contraseña es requerida</p>}
-              </div>
+
               <div>
-                <button
-                  type="submit"
-                  className="w-full flex justify-center bg-blue-400 hover:bg-blue-500 text-gray-100 p-3 rounded-full tracking-wide font-semibold shadow-lg cursor-pointer transition ease-in duration-500"
-                >
-                  Sign in
-                </button>
+                <label className="text-gray-100 text-sm mb-2 block">
+                  Password
+                </label>
+                <div className="relative flex items-center">
+                  <input
+                    name="password"
+                    type={showPassword ? "text" : "password"} // Cambia el tipo basado en el estado
+                    required
+                    className="w-full text-sm text-gray-100 bg-gray-700 border border-gray-600 px-4 py-3 rounded-lg outline-blue-600 placeholder-gray-400"
+                    placeholder="Enter password"
+                    {...register("password", { required: true })}
+                  />
+                  {errors.password && (
+                    <p className="text-red-500">La contraseña es requerida</p>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)} // Alterna el estado
+                    className="absolute right-4 text-gray-400 hover:text-gray-300"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full shadow-xl py-3 px-4 text-sm tracking-wide rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none"
+              >
+                Acceder
+              </button>
+              <div className="mt-6 flex justify-center items-center space-x-4">
+                <ul className="flex items-center space-x-4">
+                  <li className="bg-transparent text-blue-500 hover:text-blue-500 transition flex items-center justify-center shrink-0">
+                    <a
+                      href="https://www.erpp.mx"
+                      target="_blank"
+                      className="text-2xl"
+                    >
+                      <Public sx={{ fontSize: "36px" }} />
+                    </a>
+                  </li>
+                  <li className="bg-transparent text-red-500 hover:text-red-600 transition flex items-center justify-center shrink-0">
+                    <a
+                      href="https://www.youtube.com/watch?v=jNVWbJrOvvQ"
+                      target="_blank"
+                    >
+                      <YouTube sx={{ fontSize: "36px" }} />
+                    </a>
+                  </li>
+                </ul>
               </div>
             </form>
-            <div className="pt-5 text-center text-gray-400 text-xs">
-              <span>
-                Copyright © 2022-2023{" "}
-                <a href="https://erpp.mx" rel="noreferrer" target="_blank" title="Ser0" className="text-blue hover:text-blue-500">
-                  SER0
-                </a>
-              </span>
-            </div>
+          </div>
+
+          <div className="lg:h-[600px] md:h-[400px] sm:h-[400px] max-md:mt-8">
+            <img
+              src={LoginImage}
+              className="w-full h-full max-md:w-4/5 mx-auto block object-contain"
+              alt="Dining Experience"
+            />
           </div>
         </div>
       </div>
-    </Box>
-  )
-}
+    </div>
+  );
+};
 
 Login.propTypes = {
   setLogin: PropTypes.func.isRequired,
-}
+};
 
-export default Login
+export default Login;
