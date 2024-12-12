@@ -1,368 +1,441 @@
-import { Typography, useTheme, InputAdornment, Divider } from '@mui/material'
-import Box from '@mui/material/Box'
-import { tokens } from '../../theme'
-import Grid from '@mui/material/Grid'
-import TextField from '@mui/material/TextField'
-import PersonIcon from '@mui/icons-material/Person'
-import MapboxMap from '../../components/account-history/google-map.jsx'
-import MapsHomeWorkIcon from '@mui/icons-material/MapsHomeWork'
-import RoomPreferencesIcon from '@mui/icons-material/RoomPreferences'
+import {
+  Typography,
+  useTheme,
+  InputAdornment,
+  Divider,
+  TableContainer,
+  Table,
+  TableBody,
+  TableRow,
+  TableCell,
+  Paper,
+  TableHead,
+  List,
+  ListItem,
+  ListItemText,
+} from "@mui/material";
+import Box from "@mui/material/Box";
+import { tokens } from "../../theme";
+import Grid from "@mui/material/Grid";
+import TextField from "@mui/material/TextField";
+import MapboxMap from "../../components/account-history/google-map.jsx";
+import MapsHomeWorkIcon from "@mui/icons-material/MapsHomeWork";
+import RoomPreferencesIcon from "@mui/icons-material/RoomPreferences";
+import { BorderColor, Person } from "@mui/icons-material";
 
 const AccountDetails = ({ accountDetails }) => {
-  
-	const theme = useTheme()
-	const colors = tokens(theme.palette.mode)
+  console.log(accountDetails);
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
 
-	if (accountDetails.length === 0) {
-
-		return (
-
-			<Grid item container xs={12}>
-				<Grid item xs={12}>
-				<Typography variant="h4" component="h4" sx={{ fontWeight: 'bold', color: 'secondary'}}>
-					<Divider>No se encontraron detalle de la cuenta</Divider>
-				</Typography>
-				</Grid>            
-			</Grid>
-
-		)
-
-	}
+  if (accountDetails.length === 0) {
+    return (
+      <Grid item container xs={12}>
+        <Grid item xs={12}>
+          <Typography
+            variant="h4"
+            component="h4"
+            sx={{ fontWeight: "bold", color: "secondary" }}
+          >
+            <Divider>No se encontraron detalle de la cuenta</Divider>
+          </Typography>
+        </Grid>
+      </Grid>
+    );
+  }
 
   return (
-    <div>       
-       <Box
-            m='20px 0'
-            display='flex'
-            justifyContent='space-evenly'
-            flexWrap='wrap'
-            gap='20px'
-            sx={{ backgroundColor: colors.primary[400], width: '100%' }}
-            padding='5px 10px'
-            borderRadius='10px'
-        >
-          <Grid xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
-            <Grid item xs={12} md={4}>
-              <TextField
-                fullWidth
-                disabled
-                label="Cuenta"              
-                value={accountDetails.account}              
-                color='info'
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <PersonIcon  sx={{ color: 'info.main' }}/>
-                    </InputAdornment>
-                  ),                  
-                }}         
-              />
-            </Grid>
-            <Grid item xs={12} md={8}>
-              <TextField
-                fullWidth
-                disabled
-                label="Propietario"
-                value={accountDetails.owner_name}              
-                color='info'
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <PersonIcon  sx={{ color: 'info.main' }}/>
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            </Grid>                       
+    <Box
+      id="grid-1"
+      display="grid"
+      gridTemplateColumns="repeat(12, 1fr)"
+      gridAutoRows="auto"
+      gap="15px"
+    >
+      <Box
+        gridColumn="span 12"        
+        borderRadius="10px"
+        sx={{ cursor: "pointer" }}
+      >
+        <Grid container spacing={2}>
+          {/* Sección de Información General */}
+          <Grid item xs={12}>
+            <Typography
+              variant="h4"
+              align="center"
+              sx={{
+                fontWeight: "bold",
+                paddingTop: 1,
+                paddingBottom: 2,
+                color: colors.accentGreen[100],
+              }}
+            >
+              INFORMACION PERSONAL
+            </Typography>
+            <List
+              sx={{
+                width: "100%",
+                bgcolor: "rgba(128, 128, 128, 0.1)",
+                borderRadius: "8px",
+                boxShadow: 3,
+                padding: 0,
+                display: "flex",
+                flexDirection: "row", // Para que los items se muestren en una fila
+                justifyContent: "space-between", // Para distribuirlos uniformemente
+                flexWrap: "wrap", // Para que se acomoden si no caben
+              }}
+            >
+              <ListItem sx={{ paddingBottom: 0, flex: 1 }}>
+                <ListItemText
+                  primary={
+                    <span
+                      style={{
+                        textTransform: "uppercase",
+                        color: colors.accentGreen[100],
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Cuenta
+                    </span>
+                  }
+                  secondary={accountDetails.account || "No disponible"}
+                />
+              </ListItem>
+              <ListItem sx={{ paddingBottom: 0, flex: 1 }}>
+                <ListItemText
+                  primary={
+                    <span
+                      style={{
+                        textTransform: "uppercase",
+                        color: colors.accentGreen[100],
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Propietario
+                    </span>
+                  }
+                  secondary={accountDetails.owner_name || "No disponible"}
+                />
+              </ListItem>
+              <ListItem sx={{ paddingBottom: 0, flex: 1 }}>
+                <ListItemText
+                  primary={
+                    <span
+                      style={{
+                        textTransform: "uppercase",
+                        color: colors.accentGreen[100],
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Tipo de Servicio
+                    </span>
+                  }
+                  secondary={accountDetails.type_service || "No disponible"}
+                />
+              </ListItem>
+              <ListItem sx={{ paddingBottom: 0, flex: 1 }}>
+                <ListItemText
+                  primary={
+                    <span
+                      style={{
+                        textTransform: "uppercase",
+                        color: colors.accentGreen[100],
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Tipo de Tarifa
+                    </span>
+                  }
+                  secondary={accountDetails.rate_type || "No disponible"}
+                />
+              </ListItem>
+              <ListItem sx={{ paddingBottom: 0, flex: 1 }}>
+                <ListItemText
+                  primary={
+                    <span
+                      style={{
+                        textTransform: "uppercase",
+                        color: colors.accentGreen[100],
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Turno
+                    </span>
+                  }
+                  secondary={accountDetails.turn || "No disponible"}
+                />
+              </ListItem>
+              <ListItem sx={{ paddingBottom: 0, flex: 1 }}>
+                <ListItemText
+                  primary={
+                    <span
+                      style={{
+                        textTransform: "uppercase",
+                        color: colors.accentGreen[100],
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Serie del Medidor
+                    </span>
+                  }
+                  secondary={accountDetails.meter_series || "No disponible"}
+                />
+              </ListItem>
+            </List>
+          </Grid>
+        </Grid>
+
+        <Grid container spacing={2}>
+          {/* Sección de Información General */}
+          <Grid item xs={12}>
+            <Typography
+              variant="h4"
+              align="center"
+              sx={{
+                fontWeight: "bold",
+                paddingTop: 4,
+                color: colors.accentGreen[100],
+              }}
+            >
+              DIRECCION
+            </Typography>
           </Grid>
 
-          <Grid item xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
-            <Grid item xs={12} md={3}>
-              <TextField
-                fullWidth
-                disabled
-                label="Tipo de servicio"
-                value={accountDetails.type_service ? accountDetails.type_service : "- - - - - - - - - -"}              
-                color='info'
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <RoomPreferencesIcon  sx={{ color: 'secondary.main' }}/>
-                    </InputAdornment>
-                  ),
+          <Grid item xs={8}>
+            <List
+              sx={{
+                width: "100%",
+                bgcolor: "rgba(128, 128, 128, 0.1)",
+                borderRadius: "8px",
+                boxShadow: 3,
+                padding: 0,
+              }}
+            >
+              <ListItem
+                alignItems="flex-start"
+                sx={{
+                  paddingBottom: 0,
+                  borderRadius: "12px",
                 }}
-              />
-            </Grid> 
-            <Grid item xs={12} md={3}>
-            <TextField
-                fullWidth
-                disabled
-                label="Tipo de tarifa"              
-                value={accountDetails.rate_type ? accountDetails.rate_type : "- - - - - - - - - -"}
-                color='info'
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <RoomPreferencesIcon  sx={{ color: 'secondary.main' }}/>
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            </Grid>
-            <Grid item xs={12} md={3}>
-            <TextField
-                fullWidth
-                disabled
-                label="Giro"              
-                value={accountDetails.turn ? accountDetails.turn : "- - - - - - - - - -"}
-                color='info'
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <RoomPreferencesIcon  sx={{ color: 'secondary.main' }}/>
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            </Grid>
-            <Grid item xs={12} md={3}>
-              <TextField
-                fullWidth
-                disabled
-                label="Seria del medidor"
-                value={accountDetails.meter_series ? accountDetails.meter_series : "- - - - - - - - - -"}                
-                color='info'
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <RoomPreferencesIcon  sx={{ color: 'secondary.main' }}/>
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            </Grid>
+              >
+                <ListItemText
+                  primary={
+                    <span
+                      style={{
+                        textTransform: "uppercase",
+                        color: colors.accentGreen[100],
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Calle
+                    </span>
+                  }
+                  secondary={accountDetails.street || "No disponible"}
+                />
+              </ListItem>
+              <Divider />
+              <ListItem>
+                <ListItemText
+                  primary={
+                    <span
+                      style={{
+                        textTransform: "uppercase",
+                        color: colors.accentGreen[100],
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Número Exterior
+                    </span>
+                  }
+                  secondary={accountDetails.outdoor_number || "No disponible"}
+                />
+                <ListItemText
+                  primary={
+                    <span
+                      style={{
+                        textTransform: "uppercase",
+                        color: colors.accentGreen[100],
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Número Interior
+                    </span>
+                  }
+                  secondary={accountDetails.interior_number || "No disponible"}
+                />
+                <ListItemText
+                  primary={
+                    <span
+                      style={{
+                        textTransform: "uppercase",
+                        color: colors.accentGreen[100],
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Colonia
+                    </span>
+                  }
+                  secondary={accountDetails.cologne || "No disponible"}
+                />
+              </ListItem>
+              <Divider />
+              <ListItem>
+                <ListItemText
+                  primary={
+                    <span
+                      style={{
+                        textTransform: "uppercase",
+                        color: colors.accentGreen[100],
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Manzana
+                    </span>
+                  }
+                  secondary={accountDetails.square || "No disponible"}
+                />
+                <ListItemText
+                  primary={
+                    <span
+                      style={{
+                        textTransform: "uppercase",
+                        color: colors.accentGreen[100],
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Lote
+                    </span>
+                  }
+                  secondary={accountDetails.allotment || "No disponible"}
+                />
+                <ListItemText
+                  primary={
+                    <span
+                      style={{
+                        textTransform: "uppercase",
+                        color: colors.accentGreen[100],
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Entre calle 1
+                    </span>
+                  }
+                  secondary={accountDetails.between_street_1 || "No disponible"}
+                />
+              </ListItem>
+              <Divider />
+              <ListItem>
+                <ListItemText
+                  primary={
+                    <span
+                      style={{
+                        textTransform: "uppercase",
+                        color: colors.accentGreen[100],
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Entre calle 2
+                    </span>
+                  }
+                  secondary={accountDetails.between_street_2 || "No disponible"}
+                />
+                <ListItemText
+                  primary={
+                    <span
+                      style={{
+                        textTransform: "uppercase",
+                        color: colors.accentGreen[100],
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Referencia
+                    </span>
+                  }
+                  secondary={accountDetails.reference || "No disponible"}
+                />
+                <ListItemText
+                  primary={
+                    <span
+                      style={{
+                        textTransform: "uppercase",
+                        color: colors.accentGreen[100],
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Población
+                    </span>
+                  }
+                  secondary={accountDetails.town || "No disponible"}
+                />
+              </ListItem>
+              <Divider />
+              <ListItem>
+                <ListItemText
+                  primary={
+                    <span
+                      style={{
+                        textTransform: "uppercase",
+                        color: colors.accentGreen[100],
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Código Postal
+                    </span>
+                  }
+                  secondary={accountDetails.postal_code || "No disponible"}
+                />
+                <ListItemText
+                  primary={
+                    <span
+                      style={{
+                        textTransform: "uppercase",
+                        color: colors.accentGreen[100],
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Latitud
+                    </span>
+                  }
+                  secondary={accountDetails.latitude || "No disponible"}
+                />
+                <ListItemText
+                  primary={
+                    <span
+                      style={{
+                        textTransform: "uppercase",
+                        color: colors.accentGreen[100],
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Longitud
+                    </span>
+                  }
+                  secondary={accountDetails.longitude || "No disponible"}
+                />
+              </ListItem>
+              <Divider />
+              {/* Nuevos campos de latitud y longitud */}
+              <ListItem></ListItem>
+            </List>
           </Grid>
 
-          <Grid item container xs={12}>
-            <Grid item xs={12}>
-              <Typography variant="h3" component="h3" sx={{ fontWeight: 'bold', fontSize: '2rem'}}>
-                <Divider>Direccion</Divider>
-              </Typography>
-            </Grid>
+          <Grid item xs={12} sm={4}>            
+            <Box
+              sx={{
+                borderRadius: "16px", // Ajusta este valor según el redondeo deseado
+                overflow: "hidden", // Asegúrate de que el contenido respete el borde redondeado
+              }}
+            >
+              <MapboxMap
+                latitude={accountDetails.latitude}
+                longitude={accountDetails.longitude}
+              />
+            </Box>
           </Grid>
+        </Grid>
+      </Box>
+    </Box>
+  );
+};
 
-          <Grid xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
-
-            <Grid item xs={12} md={8}>
-
-              <Grid item xs={12} container justifyContent="space-between" alignItems="stretch" spacing={2}>
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    disabled
-                    label="Direccion"
-                    value={accountDetails.street ? accountDetails.street : "- - - - - - - - - -"}              
-                    color='info'
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <MapsHomeWorkIcon sx={{ color: 'warning.main' }} />
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                </Grid>                 
-              </Grid>
-
-              <Grid xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2} paddingTop={2}>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    disabled
-                    label="Numero exterior"
-                    value={accountDetails.outdoor_number ? accountDetails.outdoor_number : "- - - - - - - - - -"}
-                    color='info'
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <MapsHomeWorkIcon sx={{ color: 'warning.main' }}/>
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                </Grid> 
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    disabled
-                    label="Numero interior"
-                    value={accountDetails.interior_number ? accountDetails.interior_number : "- - - - - - - - - -"}
-                    color='info'
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <MapsHomeWorkIcon sx={{ color: 'warning.main' }}/>
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                </Grid>
-              </Grid>
-
-              <Grid xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2} paddingTop={2}>
-                <Grid item xs={12} md={6}>
-                <TextField
-                    fullWidth
-                    disabled
-                    label="Colonia"
-                    value={accountDetails.cologne ? accountDetails.cologne : "- - - - - - - - - -"}
-                    color='info'
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <MapsHomeWorkIcon sx={{ color: 'warning.main' }}/>
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    disabled
-                    label="Manzana"
-                    value={accountDetails.square ? accountDetails.square : "- - - - - - - - - -"}
-                    color='info'
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <MapsHomeWorkIcon sx={{ color: 'warning.main' }}/>
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                </Grid>
-              </Grid>
-
-              <Grid xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2} paddingTop={2}>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    disabled
-                    label="Lote"
-                    value={accountDetails.allotment ? accountDetails.allotment : "- - - - - - - - - -"}
-                    color='info'
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <MapsHomeWorkIcon sx={{ color: 'warning.main' }}/>
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    disabled
-                    label="Entre calle 1"
-                    value={accountDetails.between_street_1 ? accountDetails.between_street_1 : "- - - - - - - - - -"}
-                    color='info'
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <MapsHomeWorkIcon sx={{ color: 'warning.main' }}/>
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                </Grid>
-              </Grid>
-
-              <Grid xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2} paddingTop={2}>                
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    disabled
-                    label="Entre calle 2"
-                    value={accountDetails.between_street_2 ? accountDetails.between_street_2 : "- - - - - - - - - -"}
-                    color='info'
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <MapsHomeWorkIcon sx={{ color: 'warning.main' }}/>
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    disabled
-                    label="Referencia"
-                    value={accountDetails.reference ? accountDetails.reference : "- - - - - - - - - -"}
-                    color='info'
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <MapsHomeWorkIcon sx={{ color: 'warning.main' }}/>
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                </Grid>
-              </Grid>
-
-              <Grid xs={12} md={12} container justifyContent="space-between" alignItems="stretch" spacing={2} paddingTop={2}>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    disabled
-                    label="poblacion"
-                    value={accountDetails.town ? accountDetails.town : "- - - - - - - - - -"}
-                    color='info'
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <MapsHomeWorkIcon sx={{ color: 'warning.main' }}/>
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    disabled
-                    label="Codigo postal"
-                    value={accountDetails.postal_code ? accountDetails.postal_code : "- - - - - - - - - -"}
-                    color='info'
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <MapsHomeWorkIcon sx={{ color: 'warning.main' }}/>
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                </Grid>                
-              </Grid>
-
-            </Grid>
-
-            <Grid item xs={12} md={4}>              
-                <MapboxMap latitude={accountDetails.latitude} longitude={accountDetails.longitude}/>                 
-            </Grid>
-
-          </Grid>   
-
-        </Box>   
-
-    </div>
-
-  )
-
-}
-
-export default AccountDetails
+export default AccountDetails;

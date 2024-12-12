@@ -1,13 +1,9 @@
 import React from 'react';
-import { Card, CardContent, CardHeader, Typography, useTheme, Avatar, CardMedia, Divider } from '@mui/material';
-import Box from '@mui/material/Box';
-import { tokens } from '../../theme';
-import Grid from '@mui/material/Grid'
+import { Avatar, Box, Grid, Typography, useTheme, Divider, Card, CardContent, CardMedia, CardHeader } from '@mui/material';
 import Viewer from 'react-viewer';
+import { tokens } from '../../theme';
 
-
-const Photos = ({ photo }) => {  
-
+const Photos = ({ photo }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const parsedPhotos = Array.isArray(photo) ? photo : JSON.parse(photo);
@@ -22,101 +18,93 @@ const Photos = ({ photo }) => {
           onClick={() => {
             setVisibleAvatar(true);
           }}
-          alt="Remy Sharp"
+          alt="Foto"
           src={data}
+          sx={{ width: 56, height: 56, cursor: 'pointer' }}
         />
-  
+
         <Viewer
           visible={visibleAvatar}
           onClose={() => {
             setVisibleAvatar(false);
           }}
-          images={[{ src: data, alt: 'avatar' }]}          
+          images={[{ src: data, alt: 'avatar' }]}
         />
       </>
     );
   };
 
-  if (parsedPhotos === null) {
+  if (!parsedPhotos) {
     return (
-      <Grid item container xs={12}>
-        <Grid item xs={12}>
-          <Typography variant="h4" component="h4" sx={{ fontWeight: 'bold', color: 'secondary'}}>
-            <Divider>No se encontraron fotografias</Divider>
+      <Grid container justifyContent="center" alignItems="center" sx={{ padding: '20px' }}>
+        <Grid item xs={12} textAlign="center">
+          <Typography variant="h5" sx={{ color: colors.grey[700] }}>
+            <Divider>No se encontraron fotografías</Divider>
           </Typography>
-        </Grid>            
+        </Grid>
       </Grid>
-      
     );
   }
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-  
     const datePart = date.toLocaleDateString();
     const timePart = date.toLocaleTimeString();
     return `${datePart} ${timePart}`;
   };
 
-  const handleImageClick = (image) => {
-    setVisibleImage(image); 
-  };
-
   return (
-    <div>
-      <Box          
-          display='flex'
-          justifyContent='space-evenly'
-          flexWrap='wrap'
-          gap='20px'          
-          padding='15px 10px'
-          borderRadius='10px'
-        >
-          <Grid container spacing={2} >            
-            {parsedPhotos.map((ph, index) => (
-              <Grid key={index} item xs={12} md={4}>
-              <Card variant='outlined' sx={{ backgroundColor: 'rgba(128, 128, 128, 0.1)'}}>
-                <CardHeader 
-                  avatar={<AvatarImage data={ph.photo_person_who_capture} />}
-                  title={ph.person_who_capture}
-                  subheader='Persona que capturo'
-                  sx={{ borderLeft: '5px solid #00ff00' }}
-                />
-                <CardMedia
-                  component='img'                  
-                  image={ph.image_url}
-                  alt={ph.image_url}
-                  sx={{ 
-                    height: '200px',                     
-                  }}
-                  onClick={() => handleImageClick({ src: ph.image_url, alt: 'image' })}
-                />
-                <CardContent>
-                  <Typography sx={{ fontSize: 14 }} color="text.secondary">
-                    Tipo de foto
-                  </Typography>
-                  <Typography variant="h4" component="div" gutterBottom>
-                    {ph.image_type}
-                  </Typography>                  
-                  <Typography sx={{ fontSize: 14 }} color="text.secondary">
-                    Tarea gestionada
-                  </Typography>
-                  <Typography variant="h4" component="div" gutterBottom>
-                    {ph.task_done}
-                  </Typography>                  
-                  <Typography sx={{ fontSize: 14 }} color="text.secondary">
-                    Fecha de captura
-                  </Typography>
-                  <Typography variant="h4" component="div" gutterBottom>
-                    {formatDate(ph.date_capture)}
-                  </Typography>
-                </CardContent>                 
-              </Card>
-            </Grid>
-            ))}
-          </Grid>           
-        </Box>
-        {visibleImage && (
+    <Box
+      display="flex"
+      justifyContent="space-evenly"
+      flexWrap="wrap"
+      gap="20px"
+      padding="15px 10px"
+      borderRadius="10px"
+    >
+      <Grid container spacing={2}>
+        {parsedPhotos.map((ph, index) => (
+          <Grid key={index} item xs={12} md={3}>
+            <Card
+              variant="outlined"
+              sx={{
+                backgroundColor: "rgba(128, 128, 128, 0.1)",
+                borderRadius: '8px',
+                boxShadow: 3,
+              }}
+            >
+              <CardHeader
+                avatar={<AvatarImage data={ph.photo_person_who_capture} />}
+                title={<Typography variant='body1'>{ph.person_who_capture || 'No disponible'}</Typography>}
+                subheader={<Typography sx={{ fontSize: 14, fontWeight: 'bold', color: colors.accentGreen[100], textTransform: 'uppercase' }}>Persona que capturó</Typography>}
+                
+              />
+              <CardMedia
+                component="img"
+                image={ph.image_url}
+                alt="Fotografía"
+                sx={{
+                  height: 200,
+                  cursor: 'pointer',
+                }}
+                onClick={() => setVisibleImage({ src: ph.image_url, alt: 'Fotografía' })}
+              />
+              <CardContent>
+                <Typography sx={{ fontSize: 14, fontWeight: 'bold', color: colors.accentGreen[100], textTransform: 'uppercase' }}>Tipo de foto</Typography>
+                <Typography variant="body1" gutterBottom>{ph.image_type || 'No disponible'}</Typography>
+
+                <Typography sx={{ fontSize: 14, fontWeight: 'bold', color: colors.accentGreen[100], textTransform: 'uppercase' }}>Tarea gestionada</Typography>
+                <Typography variant="body1" gutterBottom>{ph.task_done || 'No disponible'}</Typography>
+
+                <Typography sx={{ fontSize: 14, fontWeight: 'bold', color: colors.accentGreen[100], textTransform: 'uppercase' }}>Fecha de captura</Typography>
+                <Typography variant="body1" gutterBottom>{formatDate(ph.date_capture) || 'No disponible'}</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
+
+      {visibleImage && (
         <Viewer
           visible={true}
           onClose={() => setVisibleImage(null)}
@@ -125,7 +113,7 @@ const Photos = ({ photo }) => {
           rotatable={true}
         />
       )}
-    </div>
+    </Box>
   );
 };
 

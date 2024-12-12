@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import mapboxgl from 'mapbox-gl';
+import Pin from '../../../public/icons8-pin.png' 
 
 const mapContainerStyle = {
   width: '100%',
@@ -19,7 +20,7 @@ const MapboxMap = ({ latitude, longitude }) => {
     });
 
     const customMarkerElement = document.createElement('div');
-    customMarkerElement.innerHTML = '<img src="https://ser0.mx/ser0/image/icons8.png" style="width: 60px; height: 60px;">';
+    customMarkerElement.innerHTML = `<img src="${Pin}" style="width: 60px; height: 60px;">`;;
 
     new mapboxgl.Marker(customMarkerElement)
       .setLngLat([longitude, latitude])
@@ -32,3 +33,4 @@ const MapboxMap = ({ latitude, longitude }) => {
 };
 
 export default MapboxMap;
+
