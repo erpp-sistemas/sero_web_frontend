@@ -80,49 +80,79 @@ function DataGridManagementByManager({ data }) {
         flex: 1,
         editable: false,
         renderCell: (params) => {
-          const percentage = (params.row.located / params.row.count) * 100 || 0;
-          let progressColor;
-          if (percentage <= 33) {
-            progressColor = "error";
-          } else if (percentage <= 66) {
-            progressColor = "warning";
-          } else {
-            progressColor = "secondary";
-          }
-          return (
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                width: "100%", // Utilizamos todo el ancho disponible
-              }}
-            >
-              <Typography
-                variant="body1"
-                sx={{ fontWeight: "bold", fontSize: "1.2em" }}
-              >
-                {params.value}
-              </Typography>
-              <LinearProgress
-                variant="determinate"
-                value={percentage}
+          try {
+            // Validar valores nulos o no definidos
+            const located = params.row.located ?? 0;
+            const count = params.row.count ?? 0;
+      
+            // Manejar el caso donde count es 0 para evitar divisiones inválidas
+            const percentage =
+              count > 0
+                ? Math.min(Math.max((located / count) * 100, 0), 100)
+                : 0;
+      
+            // Determinar el color del progreso según el porcentaje
+            let progressColor;
+            if (percentage <= 33) {
+              progressColor = "error";
+            } else if (percentage <= 66) {
+              progressColor = "warning";
+            } else {
+              progressColor = "secondary";
+            }
+      
+            return (
+              <Box
                 sx={{
-                  width: "80%",
-                  height: "10px",
-                  borderRadius: "5px", // Borde redondeado
-                  backgroundColor: "rgba(0, 0, 0, 0.5)", // Fondo suave de la barra
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: "100%", // Utilizamos todo el ancho disponible
                 }}
-                color={progressColor}
-              />
-              <Typography variant="body1" sx={{ fontSize: "0.8em" }}>
-                {`${Math.round(percentage)}%`}
+              >
+                {/* Valor principal */}
+                <Typography
+                  variant="body1"
+                  sx={{ fontWeight: "bold", fontSize: "1.2em" }}
+                >
+                  {located}
+                </Typography>
+      
+                {/* Barra de progreso */}
+                <LinearProgress
+                  variant="determinate"
+                  value={percentage}
+                  sx={{
+                    width: "80%",
+                    height: 10,
+                    borderRadius: 5, // Borde redondeado
+                    backgroundColor: "rgba(0, 0, 0, 0.5)", // Fondo suave de la barra
+                  }}
+                  color={progressColor}
+                />
+      
+                {/* Porcentaje */}
+                <Typography
+                  variant="body1"
+                  sx={{ fontSize: "0.8em" }}
+                >
+                  {`${Math.round(percentage)}%`}
+                </Typography>
+              </Box>
+            );
+          } catch (error) {
+            console.error("Error en renderCell de LOCALIZADAS:", error);
+      
+            return (
+              <Typography color="error" variant="body2">
+                Error
               </Typography>
-            </div>
-          );
+            );
+          }
         },
       },
+      
 
       {
         field: "not_located",
@@ -130,50 +160,79 @@ function DataGridManagementByManager({ data }) {
         flex: 1,
         editable: false,
         renderCell: (params) => {
-          const percentage =
-            (params.row.not_located / params.row.count) * 100 || 0;
-          let progressColor;
-          if (percentage <= 33) {
-            progressColor = "error";
-          } else if (percentage <= 66) {
-            progressColor = "warning";
-          } else {
-            progressColor = "secondary";
-          }
-          return (
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                width: "100%", // Ajuste del ancho para que ocupe todo el espacio disponible
-              }}
-            >
-              <Typography
-                variant="body1"
-                sx={{ fontWeight: "bold", fontSize: "1.2em" }}
-              >
-                {params.value}
-              </Typography>
-              <LinearProgress
-                variant="determinate"
-                value={percentage}
+          try {
+            // Validar valores nulos o no definidos
+            const notLocated = params.row.not_located ?? 0;
+            const count = params.row.count ?? 0;
+      
+            // Manejar el caso donde count es 0 para evitar divisiones inválidas
+            const percentage =
+              count > 0
+                ? Math.min(Math.max((notLocated / count) * 100, 0), 100)
+                : 0;
+      
+            // Determinar el color del progreso según el porcentaje
+            let progressColor;
+            if (percentage <= 33) {
+              progressColor = "error";
+            } else if (percentage <= 66) {
+              progressColor = "warning";
+            } else {
+              progressColor = "secondary";
+            }
+      
+            return (
+              <Box
                 sx={{
-                  width: "80%",
-                  height: "10px",
-                  borderRadius: "5px", // Borde redondeado
-                  backgroundColor: "rgba(0, 0, 0, 0.5)", // Fondo suave de la barra
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: "100%", // Ajuste del ancho para que ocupe todo el espacio disponible
                 }}
-                color={progressColor}
-              />
-              <Typography variant="body1" sx={{ fontSize: "0.8em" }}>
-                {`${Math.round(percentage)}%`}
+              >
+                {/* Valor principal */}
+                <Typography
+                  variant="body1"
+                  sx={{ fontWeight: "bold", fontSize: "1.2em" }}
+                >
+                  {notLocated}
+                </Typography>
+      
+                {/* Barra de progreso */}
+                <LinearProgress
+                  variant="determinate"
+                  value={percentage}
+                  sx={{
+                    width: "80%",
+                    height: 10,
+                    borderRadius: 5, // Borde redondeado
+                    backgroundColor: "rgba(0, 0, 0, 0.5)", // Fondo suave de la barra
+                  }}
+                  color={progressColor}
+                />
+      
+                {/* Porcentaje */}
+                <Typography
+                  variant="body1"
+                  sx={{ fontSize: "0.8em" }}
+                >
+                  {`${Math.round(percentage)}%`}
+                </Typography>
+              </Box>
+            );
+          } catch (error) {
+            console.error("Error en renderCell de NO LOCALIZADAS:", error);
+      
+            return (
+              <Typography color="error" variant="body2">
+                Error
               </Typography>
-            </div>
-          );
+            );
+          }
         },
       },
+      
     ];
   }, []);
 

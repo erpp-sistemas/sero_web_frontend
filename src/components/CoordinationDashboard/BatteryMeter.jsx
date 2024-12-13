@@ -119,47 +119,64 @@ function BatteryMeter({ data }) {
       },
       {
         field: "first_percentage",
-        headerName: "PRIMER PORCENTAGE",
+        headerName: "PRIMER PORCENTAJE",
         width: 180,
         editable: false,
         renderCell: (params) => {
-          const percentage = params.value;
-          let progressColor;
-          if (percentage <= 33) {
-            progressColor = "error";
-          } else if (percentage <= 66) {
-            progressColor = "warning";
-          } else {
-            progressColor = "secondary";
-          }
-          return (
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                width: "100%",
-              }}
-            >
-              <LinearProgress
-                variant="determinate"
-                value={params.value}
+          try {
+            // Validar si params.value es un número válido
+            const percentage = isNaN(params.value) ? 0 : params.value;
+      
+            // Determinar el color del progreso según el porcentaje
+            let progressColor;
+            if (percentage <= 33) {
+              progressColor = "error";
+            } else if (percentage <= 66) {
+              progressColor = "warning";
+            } else {
+              progressColor = "secondary";
+            }
+      
+            return (
+              <Box
                 sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
                   width: "100%",
-                  height: 8,
-                  borderRadius: 5,
-                  backgroundColor: "rgba(0, 0, 0, 0.5)",
                 }}
-                color={progressColor}
-              />
-              <Typography variant="body1" sx={{ fontSize: "1.2em" }}>
-                {`${Math.round(params.value)}%`}
+              >
+                {/* Barra de progreso */}
+                <LinearProgress
+                  variant="determinate"
+                  value={percentage}
+                  sx={{
+                    width: "100%",
+                    height: 8,
+                    borderRadius: 5,
+                    backgroundColor: "rgba(0, 0, 0, 0.5)",
+                  }}
+                  color={progressColor}
+                />
+                {/* Porcentaje */}
+                <Typography variant="body1" sx={{ fontSize: "1.2em" }}>
+                  {`${Math.round(percentage)}%`}
+                </Typography>
+              </Box>
+            );
+          } catch (error) {
+            console.error("Error en renderCell de PRIMER PORCENTAJE:", error);
+      
+            return (
+              <Typography color="error" variant="body2">
+                Error
               </Typography>
-            </Box>
-          );
+            );
+          }
         },
       },
+      
       {
         field: "last_hour_percentage",
         headerName: "ULTIMA HORA",
@@ -194,47 +211,64 @@ function BatteryMeter({ data }) {
       },
       {
         field: "last_percentage",
-        headerName: "ULTIMO PORCENTAGE",
+        headerName: "ULTIMO PORCENTAJE",
         width: 170,
         editable: false,
         renderCell: (params) => {
-          const percentage = params.value;
-          let progressColor;
-          if (percentage <= 33) {
-            progressColor = "error";
-          } else if (percentage <= 66) {
-            progressColor = "warning";
-          } else {
-            progressColor = "secondary";
-          }
-          return (
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                width: "100%",
-              }}
-            >
-              <LinearProgress
-                variant="determinate"
-                value={params.value}
+          try {
+            // Validar si params.value es un número válido
+            const percentage = isNaN(params.value) ? 0 : params.value;
+      
+            // Determinar el color del progreso según el porcentaje
+            let progressColor;
+            if (percentage <= 33) {
+              progressColor = "error";
+            } else if (percentage <= 66) {
+              progressColor = "warning";
+            } else {
+              progressColor = "secondary";
+            }
+      
+            return (
+              <Box
                 sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
                   width: "100%",
-                  height: 8,
-                  borderRadius: 5,
-                  backgroundColor: "rgba(0, 0, 0, 0.5)",
                 }}
-                color={progressColor}
-              />
-              <Typography variant="body1" sx={{ fontSize: "1.2em" }}>
-                {`${Math.round(params.value)}%`}
+              >
+                {/* Barra de progreso */}
+                <LinearProgress
+                  variant="determinate"
+                  value={percentage}
+                  sx={{
+                    width: "100%",
+                    height: 8,
+                    borderRadius: 5,
+                    backgroundColor: "rgba(0, 0, 0, 0.5)",
+                  }}
+                  color={progressColor}
+                />
+                {/* Porcentaje */}
+                <Typography variant="body1" sx={{ fontSize: "1.2em" }}>
+                  {`${Math.round(percentage)}%`}
+                </Typography>
+              </Box>
+            );
+          } catch (error) {
+            console.error("Error en renderCell de ULTIMO PORCENTAJE:", error);
+      
+            return (
+              <Typography color="error" variant="body2">
+                Error
               </Typography>
-            </Box>
-          );
+            );
+          }
         },
       },
+      
     ];
   }, []);
 
