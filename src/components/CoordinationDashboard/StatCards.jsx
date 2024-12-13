@@ -23,6 +23,8 @@ function StatCards({
   finishDate,
 }) {
 
+  console.log(data)
+
   if (!data) {
     return null;
   }

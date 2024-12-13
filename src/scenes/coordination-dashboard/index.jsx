@@ -423,7 +423,7 @@ function Index() {
               <Grid item xs={12} md={6}>
                 <TypeProperty data={typePropertyData} />
               </Grid>
-            </Grid>
+            </Grid> 
 
             <Grid
               item

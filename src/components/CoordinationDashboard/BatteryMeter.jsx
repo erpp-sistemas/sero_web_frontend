@@ -26,6 +26,8 @@ import LoadingModal from "../../components/LoadingModal.jsx";
 import * as ExcelJS from "exceljs";
 
 function BatteryMeter({ data }) {
+
+  console.log(data)
   if (!data) {
     return null;
   }

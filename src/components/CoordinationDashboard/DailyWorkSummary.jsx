@@ -33,6 +33,9 @@ import LoadingModal from "../../components/LoadingModal.jsx";
 import * as ExcelJS from "exceljs";
 
 function DataGridManagementByManager({ data, placeId, serviceId, proccessId }) {
+
+  console.log(data)
+
   if (!data) {
     return null;
   }
@@ -191,6 +194,7 @@ function DataGridManagementByManager({ data, placeId, serviceId, proccessId }) {
           );
         },
       },
+
       {
         field: "total_procedures",
         headerName: "GESTIONES",
@@ -227,288 +231,344 @@ function DataGridManagementByManager({ data, placeId, serviceId, proccessId }) {
           );
         },
       },
+
       {
         field: "located",
         headerName: "LOCALIZADAS",
         width: 120,
         editable: false,
         renderCell: (params) => {
-          const percentage =
-            (params.row.located / params.row.total_procedures) * 100 || 0;
-
-          let progressColor;
-          if (percentage <= 33) {
-            progressColor = "error";
-          } else if (percentage <= 66) {
-            progressColor = "warning";
-          } else {
-            progressColor = "secondary";
-          }
-
-          return (
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                width: "100%",
-              }}
-            >
-              {/* Valor principal */}
-              <Typography
-                variant="body1"
+          try {
+            // Validar valores nulos o no definidos
+            const located = params.row.located ?? 0;
+            const totalProcedures = params.row.total_procedures ?? 0;
+      
+            // Manejar el caso donde totalProcedures es 0 para evitar divisiones inválidas
+            const percentage =
+              totalProcedures > 0
+                ? Math.min(Math.max((located / totalProcedures) * 100, 0), 100)
+                : 0;
+      
+            let progressColor;
+            if (percentage <= 33) {
+              progressColor = "error";
+            } else if (percentage <= 66) {
+              progressColor = "warning";
+            } else {
+              progressColor = "secondary";
+            }
+      
+            return (
+              <Box
                 sx={{
-                  fontWeight: "bold",
-                  fontSize: "1em",
-                }}
-              >
-                {params.value}
-              </Typography>
-
-              {/* Barra de progreso */}
-              <LinearProgress
-                variant="determinate"
-                value={percentage}
-                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
                   width: "100%",
-                  height: 8,
-                  borderRadius: 5,
-                  backgroundColor: "rgba(0, 0, 0, 0.5)",
-                }}
-                color={
-                  progressColor === "error"
-                    ? "red"
-                    : progressColor === "warning"
-                    ? "orange"
-                    : "secondary"
-                }
-              />
-
-              {/* Porcentaje */}
-              <Typography
-                variant="body2"
-                sx={{
-                  fontSize: "0.75em",
                 }}
               >
-                {`${Math.round(percentage)}%`}
+                {/* Valor principal */}
+                <Typography
+                  variant="body1"
+                  sx={{
+                    fontWeight: "bold",
+                    fontSize: "1em",
+                  }}
+                >
+                  {located}
+                </Typography>
+      
+                {/* Barra de progreso */}
+                <LinearProgress
+                  variant="determinate"
+                  value={percentage}
+                  sx={{
+                    width: "100%",
+                    height: 8,
+                    borderRadius: 5,
+                    backgroundColor: "rgba(0, 0, 0, 0.5)",
+                  }}
+                  color={progressColor}
+                />
+      
+                {/* Porcentaje */}
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontSize: "0.75em",
+                  }}
+                >
+                  {`${Math.round(percentage)}%`}
+                </Typography>
+              </Box>
+            );
+          } catch (error) {
+            console.error("Error en renderCell de LOCALIZADAS:", error);
+      
+            return (
+              <Typography color="error" variant="body2">
+                Error
               </Typography>
-            </Box>
-          );
+            );
+          }
         },
       },
+      
+      
+
       {
         field: "vacant_lot",
         headerName: "PREDIO BALDIO",
         width: 120,
         editable: false,
         renderCell: (params) => {
-          const percentage = Math.min(
-            Math.max(
-              (params.row.vacant_lot / params.row.total_procedures) * 100,
-              0
-            ),
-            100
-          );
-
-          let progressColor;
-          if (percentage <= 33) {
-            progressColor = "error";
-          } else if (percentage <= 66) {
-            progressColor = "warning";
-          } else {
-            progressColor = "success";
-          }
-
-          return (
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                width: "100%",
-              }}
-            >
-              {/* Valor principal */}
-              <Typography
-                variant="body1"
+          try {
+            // Asegurarse de que los valores no sean null o undefined
+            const vacantLot = params.row.vacant_lot ?? 0;
+            const totalProcedures = params.row.total_procedures ?? 0;
+      
+            // Manejar el caso donde el totalProcedures es 0 para evitar divisiones inválidas
+            const percentage =
+              totalProcedures > 0
+                ? Math.min(Math.max((vacantLot / totalProcedures) * 100, 0), 100)
+                : 0;
+      
+            let progressColor;
+            if (percentage <= 33) {
+              progressColor = "error";
+            } else if (percentage <= 66) {
+              progressColor = "warning";
+            } else {
+              progressColor = "success";
+            }
+      
+            return (
+              <Box
                 sx={{
-                  fontWeight: "bold",
-                  fontSize: "1em",
-                }}
-              >
-                {params.value}
-              </Typography>
-
-              {/* Barra de progreso */}
-              <LinearProgress
-                variant="determinate"
-                value={percentage}
-                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
                   width: "100%",
-                  height: 8,
-                  borderRadius: 5,
-                  backgroundColor: "rgba(0, 0, 0, 0.5)",
-                }}
-                color={progressColor}
-              />
-
-              {/* Porcentaje */}
-              <Typography
-                variant="body2"
-                sx={{
-                  fontSize: "0.75em",
                 }}
               >
-                {`${Math.round(percentage)}%`}
+                {/* Valor principal */}
+                <Typography
+                  variant="body1"
+                  sx={{
+                    fontWeight: "bold",
+                    fontSize: "1em",
+                  }}
+                >
+                  {vacantLot}
+                </Typography>
+      
+                {/* Barra de progreso */}
+                <LinearProgress
+                  variant="determinate"
+                  value={percentage}
+                  sx={{
+                    width: "100%",
+                    height: 8,
+                    borderRadius: 5,
+                    backgroundColor: "rgba(0, 0, 0, 0.5)",
+                  }}
+                  color={progressColor}
+                />
+      
+                {/* Porcentaje */}
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontSize: "0.75em",
+                  }}
+                >
+                  {`${Math.round(percentage)}%`}
+                </Typography>
+              </Box>
+            );
+          } catch (error) {
+            console.error("Error en renderCell de PREDIO BALDIO:", error);
+      
+            return (
+              <Typography color="error" variant="body2">
+                Error
               </Typography>
-            </Box>
-          );
+            );
+          }
         },
       },
+      
+
       {
         field: "abandoned_property",
         headerName: "PREDIO ABANDONADO",
         width: 180,
         editable: false,
         renderCell: (params) => {
-          const percentage = Math.min(
-            Math.max(
-              (params.row.abandoned_property / params.row.total_procedures) *
-                100,
-              0
-            ),
-            100
-          );
-
-          let progressColor;
-          if (percentage <= 33) {
-            progressColor = "error";
-          } else if (percentage <= 66) {
-            progressColor = "warning";
-          } else {
-            progressColor = "success";
-          }
-
-          return (
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                width: "100%",
-              }}
-            >
-              {/* Valor principal */}
-              <Typography
-                variant="body1"
+          try {
+            // Validar valores nulos o no definidos
+            const abandonedProperty = params.row.abandoned_property ?? 0;
+            const totalProcedures = params.row.total_procedures ?? 0;
+      
+            // Manejar el caso donde totalProcedures es 0 para evitar divisiones inválidas
+            const percentage =
+              totalProcedures > 0
+                ? Math.min(Math.max((abandonedProperty / totalProcedures) * 100, 0), 100)
+                : 0;
+      
+            let progressColor;
+            if (percentage <= 33) {
+              progressColor = "error";
+            } else if (percentage <= 66) {
+              progressColor = "warning";
+            } else {
+              progressColor = "success";
+            }
+      
+            return (
+              <Box
                 sx={{
-                  fontWeight: "bold",
-                  fontSize: "1em",
-                }}
-              >
-                {params.value}
-              </Typography>
-
-              {/* Barra de progreso */}
-              <LinearProgress
-                variant="determinate"
-                value={percentage}
-                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
                   width: "100%",
-                  height: 8,
-                  borderRadius: 5,
-                  backgroundColor: "rgba(0, 0, 0, 0.5)",
-                }}
-                color={progressColor}
-              />
-
-              {/* Porcentaje */}
-              <Typography
-                variant="body2"
-                sx={{
-                  fontSize: "0.75em",
                 }}
               >
-                {`${Math.round(percentage)}%`}
+                {/* Valor principal */}
+                <Typography
+                  variant="body1"
+                  sx={{
+                    fontWeight: "bold",
+                    fontSize: "1em",
+                  }}
+                >
+                  {abandonedProperty}
+                </Typography>
+      
+                {/* Barra de progreso */}
+                <LinearProgress
+                  variant="determinate"
+                  value={percentage}
+                  sx={{
+                    width: "100%",
+                    height: 8,
+                    borderRadius: 5,
+                    backgroundColor: "rgba(0, 0, 0, 0.5)",
+                  }}
+                  color={progressColor}
+                />
+      
+                {/* Porcentaje */}
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontSize: "0.75em",
+                  }}
+                >
+                  {`${Math.round(percentage)}%`}
+                </Typography>
+              </Box>
+            );
+          } catch (error) {
+            console.error("Error en renderCell de PREDIO ABANDONADO:", error);
+      
+            return (
+              <Typography color="error" variant="body2">
+                Error
               </Typography>
-            </Box>
-          );
+            );
+          }
         },
       },
+      
+
       {
         field: "not_located",
         headerName: "NO LOCALIZADAS",
         width: 150,
         editable: false,
         renderCell: (params) => {
-          const percentage = Math.min(
-            Math.max(
-              (params.row.not_located / params.row.total_procedures) * 100,
-              0
-            ),
-            100
-          );
-
-          let progressColor;
-          if (percentage <= 33) {
-            progressColor = "error";
-          } else if (percentage <= 66) {
-            progressColor = "warning";
-          } else {
-            progressColor = "success";
-          }
-
-          return (
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                width: "100%",
-              }}
-            >
-              {/* Valor principal */}
-              <Typography
-                variant="body1"
+          try {
+            // Validar valores nulos o no definidos
+            const notLocated = params.row.not_located ?? 0;
+            const totalProcedures = params.row.total_procedures ?? 0;
+      
+            // Manejar el caso donde totalProcedures es 0 para evitar divisiones inválidas
+            const percentage =
+              totalProcedures > 0
+                ? Math.min(Math.max((notLocated / totalProcedures) * 100, 0), 100)
+                : 0;
+      
+            let progressColor;
+            if (percentage <= 33) {
+              progressColor = "error";
+            } else if (percentage <= 66) {
+              progressColor = "warning";
+            } else {
+              progressColor = "success";
+            }
+      
+            return (
+              <Box
                 sx={{
-                  fontWeight: "bold",
-                  fontSize: "1em",
-                }}
-              >
-                {params.value}
-              </Typography>
-
-              {/* Barra de progreso */}
-              <LinearProgress
-                variant="determinate"
-                value={percentage}
-                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
                   width: "100%",
-                  height: 8,
-                  borderRadius: 5,
-                  backgroundColor: "rgba(0, 0, 0, 0.5)",
-                }}
-                color={progressColor}
-              />
-
-              {/* Porcentaje */}
-              <Typography
-                variant="body2"
-                sx={{
-                  fontSize: "0.75em",
                 }}
               >
-                {`${Math.round(percentage)}%`}
+                {/* Valor principal */}
+                <Typography
+                  variant="body1"
+                  sx={{
+                    fontWeight: "bold",
+                    fontSize: "1em",
+                  }}
+                >
+                  {notLocated}
+                </Typography>
+      
+                {/* Barra de progreso */}
+                <LinearProgress
+                  variant="determinate"
+                  value={percentage}
+                  sx={{
+                    width: "100%",
+                    height: 8,
+                    borderRadius: 5,
+                    backgroundColor: "rgba(0, 0, 0, 0.5)",
+                  }}
+                  color={progressColor}
+                />
+      
+                {/* Porcentaje */}
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontSize: "0.75em",
+                  }}
+                >
+                  {`${Math.round(percentage)}%`}
+                </Typography>
+              </Box>
+            );
+          } catch (error) {
+            console.error("Error en renderCell de NO LOCALIZADAS:", error);
+      
+            return (
+              <Typography color="error" variant="body2">
+                Error
               </Typography>
-            </Box>
-          );
+            );
+          }
         },
       },
+      
+
       {
         field: "not_position",
         headerName: "CUENTAS SIN POSICION",
@@ -542,6 +602,7 @@ function DataGridManagementByManager({ data, placeId, serviceId, proccessId }) {
           );
         },
       },
+
       {
         field: "total_photos",
         headerName: "FOTOS TOMADAS",
@@ -575,6 +636,7 @@ function DataGridManagementByManager({ data, placeId, serviceId, proccessId }) {
           );
         },
       },
+
       {
         field: "total_not_photos",
         headerName: "CUENTAS SIN FOTOS",
@@ -608,6 +670,7 @@ function DataGridManagementByManager({ data, placeId, serviceId, proccessId }) {
           );
         },
       },
+      ,
       {
         field: "actions",
         headerName: "ACCION",
