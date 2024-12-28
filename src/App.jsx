@@ -61,6 +61,7 @@ import Manuals from './scenes/manuals'
 import Individual from './scenes/inventory/individual'
 import Credict from './scenes/credit'
 import TestRh from './scenes/rh-test'
+import ReportsTestRH from './scenes/rerports-test-rh'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -209,6 +210,7 @@ function App() {
                         <Route path="/vehiculos/:vehicleNumber" element={<Individual />} />
                         <Route path="/credit" element={<Credict />} />
                         <Route path="/test-rh" element={<TestRh />} />
+                        <Route path="/reports-test-rh" element={<ReportsTestRH />} />
                       </Routes>
                     </main>
                   </Box>
