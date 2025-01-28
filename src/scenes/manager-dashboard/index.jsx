@@ -10,7 +10,7 @@ import LoadingModal from "../../components/LoadingModal.jsx";
 import CustomAlert from "../../components/CustomAlert.jsx";
 import Grid from "@mui/material/Grid";
 import TextField from "@mui/material/TextField";
-import { AlarmOn, CurrencyExchange, ManageSearch, Search } from "@mui/icons-material";
+import { AlarmOn, CurrencyExchange, Search } from "@mui/icons-material";
 import { managerDashboardRequest } from "../../api/manager.js";
 import PaymentsByTypeOfService from "../../components/ManagerDashboard/PaymentsByTypeOfService.jsx";
 import ManagerEfficiency from "../../components/ManagerDashboard/ManagerEfficiency.jsx";
