@@ -7,7 +7,12 @@ import Typography from "@mui/material/Typography";
 import { useSelector } from "react-redux";
 import { getPlaceServiceProcessByUserId } from "../services/process.service";
 
-function ProcessSelect({ selectedPlace, selectedService, selectedProcess, handleProcessChange }) {
+function ProcessSelect({
+  selectedPlace,
+  selectedService,
+  selectedProcess,
+  handleProcessChange,
+}) {
   const user = useSelector((state) => state.user);
   const [process, setProcess] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -17,7 +22,11 @@ function ProcessSelect({ selectedPlace, selectedService, selectedProcess, handle
       if (selectedPlace && selectedService) {
         setLoading(true);
         try {
-          const res = await getPlaceServiceProcessByUserId(user.user_id, selectedPlace, selectedService);
+          const res = await getPlaceServiceProcessByUserId(
+            user.user_id,
+            selectedPlace,
+            selectedService
+          );
           setProcess(res);
 
           // Seleccionar automáticamente el primer proceso si hay datos y no hay un valor seleccionado
@@ -58,7 +67,19 @@ function ProcessSelect({ selectedPlace, selectedService, selectedProcess, handle
       </TextField>
 
       {loading && (
-        <Box sx={{ mt: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            right: 0,
+            display: "flex",
+            alignItems: "center",
+            transform: "translateY(-50%)",
+            zIndex: 1,
+            pointerEvents: "none",
+            pr: 2,
+          }}
+        >
           <CircularProgress size={20} sx={{ mr: 1 }} />
           <Typography variant="body2" sx={{ color: "gray" }}>
             Cargando procesos...

@@ -88,10 +88,15 @@ function ProcessSelectMultipleChip({
       {loading && (
         <Box
           sx={{
-            mt: 1,
+            position: "absolute",
+            top: "50%",
+            right: 0,
             display: "flex",
             alignItems: "center",
-            justifyContent: "center",
+            transform: "translateY(-50%)",
+            zIndex: 1,
+            pointerEvents: "none",
+            pr: 2,
           }}
         >
           <Typography
@@ -103,7 +108,10 @@ function ProcessSelectMultipleChip({
           >
             Cargando...
           </Typography>
-          <Lottie animationData={loadingAnimation} style={{ width: 60, height: 60 }} />
+          <Lottie
+            animationData={loadingAnimation}
+            style={{ width: 60, height: 60 }}
+          />
         </Box>
       )}
     </FormControl>

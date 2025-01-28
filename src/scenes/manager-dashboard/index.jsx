@@ -10,13 +10,12 @@ import LoadingModal from "../../components/LoadingModal.jsx";
 import CustomAlert from "../../components/CustomAlert.jsx";
 import Grid from "@mui/material/Grid";
 import TextField from "@mui/material/TextField";
-import { AlarmOn, CurrencyExchange, ManageSearch } from "@mui/icons-material";
+import { AlarmOn, CurrencyExchange, ManageSearch, Search } from "@mui/icons-material";
 import { managerDashboardRequest } from "../../api/manager.js";
 import PaymentsByTypeOfService from "../../components/ManagerDashboard/PaymentsByTypeOfService.jsx";
 import ManagerEfficiency from "../../components/ManagerDashboard/ManagerEfficiency.jsx";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
-
 
 function Index() {
   const theme = useTheme();
@@ -27,7 +26,8 @@ function Index() {
   const [selectedStartDate, setSelectedStartDate] = useState("");
   const [selectedFinishDate, setSelectedFinishDate] = useState("");
   const [paymentsPerColonyData, setPaymentsPerColonyData] = useState([]);
-  const [paymentsByTypeOfServiceData, setPaymentsByTypeOfServiceData] = useState([]);
+  const [paymentsByTypeOfServiceData, setPaymentsByTypeOfServiceData] =
+    useState([]);
   const [managerEfficiencyData, setManagerEfficiencyData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [alertOpen, setAlertOpen] = useState(false);
@@ -175,11 +175,23 @@ function Index() {
               id="start-date"
               label="Fecha de inicio"
               type="date"
-              sx={{ width: "100%" }}
               value={selectedStartDate}
               onChange={handleStartDateChange}
               InputLabelProps={{
                 shrink: true,
+              }}
+              sx={{
+                width: "100%",
+                "& input[type='date']::-webkit-calendar-picker-indicator": {
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='${encodeURIComponent(
+                    colors.accentGreen[100]
+                  )}'%3E%3Cpath d='M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zM5 20V9h14v11H5zm3-9h2v2H8v-2zm0 4h2v2H8v-2zm4-4h2v2h-2v-2zm0 4h2v2h-2v-2zm4-4h2v2h-2v-2zm0 4h2v2h-2v-2z'/%3E%3C/svg%3E")`,
+                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: "center",
+                  cursor: "pointer",
+                  width: "20px",
+                  height: "20px",
+                },
               }}
             />
           </Grid>
@@ -189,11 +201,23 @@ function Index() {
               id="finish-date"
               label="Fecha final"
               type="date"
-              sx={{ width: "100%" }}
               value={selectedFinishDate}
               onChange={handleFinishDateChange}
               InputLabelProps={{
                 shrink: true,
+              }}
+              sx={{
+                width: "100%",
+                "& input[type='date']::-webkit-calendar-picker-indicator": {
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='${encodeURIComponent(
+                    colors.accentGreen[100]
+                  )}'%3E%3Cpath d='M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zM5 20V9h14v11H5zm3-9h2v2H8v-2zm0 4h2v2H8v-2zm4-4h2v2h-2v-2zm0 4h2v2h-2v-2zm4-4h2v2h-2v-2zm0 4h2v2h-2v-2z'/%3E%3C/svg%3E")`,
+                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: "center",
+                  cursor: "pointer",
+                  width: "20px",
+                  height: "20px",
+                },
               }}
             />
           </Grid>
@@ -206,12 +230,37 @@ function Index() {
                 handleGetCoordinationDashboard();
               }}
               sx={{
-                bgcolor: "secondary.main",
-                "&:hover": { bgcolor: "secondary.dark" },
+                width: "100%",
+                minHeight: { xs: "50px", md: "100%" }, // Mantén un tamaño mínimo en pantallas pequeñas
+                borderRadius: "35px",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                padding: { xs: "0 8px", md: "0 16px" }, // Ajusta el padding en pantallas pequeñas y grandes
+                backgroundColor: colors.searchButton[100],
+                color: colors.contentSearchButton[100],
+                border: "1px solid #d5e3f5",
+                boxShadow: "0 4px 6px rgba(255, 255, 255, 0.1)", // Sombra sutil
+                ":hover": {
+                  backgroundColor: colors.searchButton[200],
+                  boxShadow: "0 8px 12px rgba(255, 255, 255, 0.2)",
+                },
               }}
             >
-              <ManageSearch fontSize="large" />
-              Buscar
+              {/* Texto centrado */}
+              <span
+                style={{
+                  flex: 1,
+                  textAlign: "center",
+                  fontSize: { xs: "0.875rem", sm: "1rem" }, // Ajuste de tamaño de texto en pantallas pequeñas
+                  fontWeight: "bold",
+                }}
+              >
+                Buscar
+              </span>
+
+              {/* Icono al final */}
+              <Search sx={{ fontSize: { xs: "1.25rem", sm: "1.5rem" } }} />
             </Button>
           </Grid>
         </Grid>
