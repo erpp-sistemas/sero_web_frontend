@@ -4,7 +4,7 @@ import { Box, Typography, useTheme } from '@mui/material';
 import { tokens } from '../../../theme.js';
 import ResponsiveLineChart from '../../../components/Charts/NivoCharts/ResponsiveLineChart.jsx'
 
-function TopColoniasChart({ data, title }) {
+function TopColoniasChart({ data, title }) {  
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
@@ -12,7 +12,7 @@ function TopColoniasChart({ data, title }) {
     return null;
   }
 
-  const chartColor = title.includes('Total') ? colors.greenAccent[500] : colors.blueAccent[500];
+  const chartColor = title.includes('Total') ? colors.accentGreen[100] : colors.blueAccent[500];
   const formatTooltip = title.includes('Total') ? "$,.2f" : "#,.0f";
   const axisLeftLegendTitle = title.includes('Total') ? "Total" : "Cuentas"
   const axisLeftFormat = title.includes('Total')
