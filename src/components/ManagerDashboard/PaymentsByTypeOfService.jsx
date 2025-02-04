@@ -9,11 +9,18 @@ import * as ExcelJS from "exceljs";
 import TopColoniasChart from "./PaymentsByTypeOfService/TopColoniasChart.jsx";
 import TopColoniasTable from "./PaymentsByTypeOfService/TopColoniasTable.jsx";
 import { tokens } from "../../theme";
-import {  
-  useTheme,
-} from "@mui/material";
+import { useTheme } from "@mui/material";
+import { Download } from "@mui/icons-material";
 
 function PaymentsByTypeOfService({ data }) {
+  if (!data || data.length === 0) {
+    return (
+      <div style={{ textAlign: "center", padding: "20px", color: "#888" }}>
+        No se encontraron datos
+      </div>
+    );
+  }
+
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
@@ -175,17 +182,23 @@ function PaymentsByTypeOfService({ data }) {
         ))}
       </Stack>
 
-      <Box mt={2} mb={2} display="flex" justifyContent="space-between">
-        <Button
-          variant="outlined"
-          color="warning"
-          onClick={exportToExcel}
-          style={{ marginLeft: "16px" }}
-          startIcon={<GetAppIcon />}
-        >
-          Exportar en Excel
-        </Button>
-      </Box>
+      <Grid container spacing={2} alignItems="center" paddingBottom="10px">
+        <Grid item xs={12} sm={2}>
+          <Button
+            variant="contained"
+            color="info"
+            onClick={exportToExcel}
+            endIcon={<Download />}
+            fullWidth
+            sx={{
+              borderRadius: "35px",
+              color: "white",
+            }}
+          >
+            Exportar en Excel
+          </Button>
+        </Grid>
+      </Grid>
 
       {selectedTypes.length > 0 && (
         <div>
@@ -209,7 +222,7 @@ function PaymentsByTypeOfService({ data }) {
                     y: colonia.count,
                   })) || [];
 
-                console.log(countData)
+              console.log(countData);
 
               return (
                 <Grid container key={type}>

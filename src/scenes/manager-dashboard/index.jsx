@@ -271,25 +271,43 @@ function Index() {
               value={value}
               onChange={handleChange}
               aria-label="icon label tabs example"
-              indicatorColor="secondary"
-              textColor="secondary"
               variant="fullWidth"
+              sx={{
+                "& .MuiTabs-indicator": {
+                  backgroundColor: colors.accentGreen[100], // Color del indicador
+                },
+                "& .MuiTab-root": {
+                  color: colors.accentGreen[100], // Color del texto en estado normal
+                },
+                "& .Mui-selected": {
+                  color: colors.accentGreen[100] + " !important", // Asegurar que el color se mantenga en el seleccionado
+                },
+              }}
             >
-              <Tab
-                icon={<CurrencyExchange />}
-                label="PAGOS POR TIPO DE SERVICIO"
-              />
-              <Tab icon={<AlarmOn />} label="EFICIENCIA DE GESTION" />
-              <Tab icon={<PersonPinIcon />} label="NEARBY" />
+              {Array.isArray(paymentsByTypeOfServiceData) &&
+                paymentsByTypeOfServiceData.length > 0 && (
+                  <Tab
+                    icon={<CurrencyExchange />}
+                    label="PAGOS POR TIPO DE SERVICIO"
+                  />
+                )}
+
+              {Array.isArray(managerEfficiencyData) &&
+                managerEfficiencyData.length > 0 && (
+                  <Tab icon={<AlarmOn />} label="EFICIENCIA DE GESTION" />
+                )}
             </Tabs>
           </Grid>
 
           <Grid item xs={12}>
-            {value === 0 && (
-              <PaymentsByTypeOfService data={paymentsByTypeOfServiceData} />
-            )}
-            {value === 1 && <ManagerEfficiency data={managerEfficiencyData} />}
-            {/* Aquí puedes condicionalmente renderizar otros componentes si es necesario */}
+            {Array.isArray(paymentsByTypeOfServiceData) &&
+              paymentsByTypeOfServiceData.length > 0 &&
+              value === 0 && (
+                <PaymentsByTypeOfService data={paymentsByTypeOfServiceData} />
+              )}
+            {Array.isArray(managerEfficiencyData) &&
+              managerEfficiencyData.length > 0 &&
+              value === 1 && <ManagerEfficiency data={managerEfficiencyData} />}
           </Grid>
         </Grid>
       </Box>

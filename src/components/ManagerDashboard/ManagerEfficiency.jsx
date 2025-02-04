@@ -11,7 +11,11 @@ function ManagerEfficiency({ data }) {
   const colors = tokens(theme.palette.mode);
 
   if (!data || data.length === 0) {
-    return null;
+    return (
+      <div style={{ textAlign: "center", padding: "20px", color: "#888" }}>
+        No se encontraron datos
+      </div>
+    );
   }
 
   return (
