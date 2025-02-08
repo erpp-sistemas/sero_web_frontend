@@ -3,6 +3,7 @@ import Button from '@mui/material/Button';
 import ExcelJS from 'exceljs';
 import dayjs from 'dayjs';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
+import { Download } from '@mui/icons-material';
 
 const IndividualAttendanceReportButton = ({ data }) => {
   dayjs.extend(isSameOrBefore);
@@ -212,7 +213,17 @@ const IndividualAttendanceReportButton = ({ data }) => {
   };
 
   return (
-    <Button variant="outlined" color="warning" onClick={generateAttendanceReport}>
+    <Button 
+      variant="contained" 
+      color="info" 
+      startIcon={<Download />}
+      onClick={generateAttendanceReport}
+      sx={{
+        borderRadius: "35px",
+        color: "black",
+        fontWeight: "bold"
+      }}
+      >
       Reporte Individual 
     </Button>
   );

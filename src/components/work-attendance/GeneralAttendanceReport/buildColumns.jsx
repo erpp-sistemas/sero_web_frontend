@@ -1,388 +1,827 @@
-import React, { useMemo } from 'react';
-import { AccessTime, AccessTimeRounded, Apartment, CalendarMonth, Dangerous, EditRoad, InsertEmoticon, Padding, PersonPinCircle, RunningWithErrors, SentimentVeryDissatisfied, SentimentVeryDissatisfiedOutlined, WarningAmber } from "@mui/icons-material";
+import React, { useMemo } from "react";
+import {
+  AccessTime,
+  AccessTimeRounded,
+  Apartment,
+  CalendarMonth,
+  Dangerous,
+  EditRoad,
+  InsertEmoticon,
+  PersonPinCircle,
+  Public,
+  RunningWithErrors,
+  SentimentVeryDissatisfied,
+  SentimentVeryDissatisfiedOutlined,
+  WarningAmber,
+} from "@mui/icons-material";
 import Viewer from "react-viewer";
-import { useTheme, Box, Grid, Typography, Avatar, Chip } from "@mui/material";
+import {
+  useTheme,
+  Box,
+  Typography,
+  Avatar,
+  Chip,
+  Button,
+  Tooltip,
+} from "@mui/material";
+import { tokens } from "../../../theme";
 
 function buildColumns() {
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
 
   const AvatarImage = ({ data }) => {
-    const [visibleAvatar, setVisibleAvatar] = React.useState(false)
+    const [visibleAvatar, setVisibleAvatar] = React.useState(false);
 
     return (
       <>
         <Avatar
           onClick={() => {
-          setVisibleAvatar(true)
+            setVisibleAvatar(true);
           }}
           alt="Remy Sharp"
           src={data}
         />
-      
+
         <Viewer
           visible={visibleAvatar}
           onClose={() => {
-          setVisibleAvatar(false)
+            setVisibleAvatar(false);
           }}
-          images={[{ src: data, alt: 'avatar' }]}          
+          images={[{ src: data, alt: "avatar" }]}
         />
       </>
-    )
+    );
+  };
 
-  }
-  
-  return useMemo(() => [   
-    { 
-      field: 'usuario',
-      renderHeader: () => (
-      <strong style={{ color: "#5EBFFF" }}>{"NOMBRE"}</strong>
-      ),
-      width: 210,
-      editable: false,
-    },
-    { 
-      field: 'imagen_url',
-      renderHeader: () => (
-      <strong style={{ color: "#5EBFFF" }}>{"FOTO"}</strong>
-      ),
-      width: 70,
-      renderCell: (params) => <AvatarImage data={params.row.imagen_url} />,
-    },
-    { 
-      field: 'plaza', 
-      renderHeader: () => (
-      <strong style={{ color: "#5EBFFF" }}>{"PLAZA"}</strong>
-      ),
-      width: 120,
-    },
-    { 
-      field: 'fecha_captura', 
-      renderHeader: () => (
-      <strong style={{ color: "#5EBFFF" }}>{"FECHA DE CAPTURA"}</strong>
-      ),
-      width: 140,
-      renderCell: (params) => (
-      <>
-        {params.value}
-        <CalendarMonth style={{ marginLeft: '5px' }} />
-      </>
-      ),
-    },
-    { 
-      field: 'hora_entrada_sistema',
-      renderHeader: () => (
-      <strong style={{ color: "#5EBFFF" }}>{"HORA DE ENTRADA SISTEMA"}</strong>
-      ),
-      width: 190,
-      renderCell: (params) => (
-      <>
-        {params.value}
-        <AccessTime style={{ marginLeft: '5px' }} />
-      </>
-      ),
-    },
-    { 
-      field: 'hora_entrada',
-      renderHeader: () => (
-      <strong style={{ color: "#5EBFFF" }}>{"HORA DE ENTRADA"}</strong>
-      ),
-      width: 140,
-      renderCell: (params) => (
-      <>
-        {params.value}
-        <AccessTime style={{ marginLeft: '5px' }} />
-      </>
-      ),
-    },
-    { 
-      field: 'estatus_entrada',
-      renderHeader: () => (
-      <strong style={{ color: "#5EBFFF" }}>{"ESTATUS DE ENTRADA"}</strong>
-      ),
-      width: 200,
-      renderCell: (params) => {
-      let icon = null;
-      let chipColor = 'primary';
-      let chipLabel = '';
-      switch (params.row.estatus_entrada) {
-        case 'Asistencia correcta':
-        icon = <InsertEmoticon/>;
-        chipColor = 'success';
-        chipLabel = 'Asistencia correcta';
-        break;
-        case 'Retardo':
-        icon = <WarningAmber/>;
-        chipColor = 'warning';
-        chipLabel = 'Retardo';
-        break;
-        case 'Falta':
-        icon = <Dangerous/>;
-        chipColor = 'error';
-        chipLabel = 'Falta';
-        break;
-        case 'Dia incompleto':
-        icon = <SentimentVeryDissatisfied/>;
-        chipColor = 'error';
-        chipLabel = 'Día incompleto';
-        break;
-        default:
-        icon = null;
-        chipColor = 'primary';
-      }
-      return (
-        <>                  
-        <Chip
-          icon={icon}
-          label={chipLabel}
-          color={chipColor}
-          variant="outlined"
-          style={{ marginLeft: '5px' }}
-        />
-        </>
-      );
+  return useMemo(
+    () => [
+      {
+        field: "usuario",
+        headerName: "NOMBRE",
+        width: 280,
+        editable: false,
+        renderCell: (params) => (
+          <Box sx={{ display: "flex", alignItems: "center", p: "12px" }}>
+            <AvatarImage data={params.row.imagen_url} />
+            <Typography variant="h6" sx={{ marginLeft: 1 }}>
+              {params.value}
+            </Typography>
+          </Box>
+        ),
       },
-    },
-    { 
-      field: 'estatus_punto_entrada',
-      renderHeader: () => (
-      <strong style={{ color: "#5EBFFF" }}>{"ESTATUS DE PUNTO DE ENTRADA"}</strong>
-      ),
-      width: 200,
-      renderCell: (params) => {
-      let icon = null;
-      let chipColor = 'primary';
-      let chipLabel = '';
-      switch (params.row.estatus_punto_entrada) {
-        case 'Campo':
-        icon = <EditRoad/>;
-        chipColor = 'warning';
-        chipLabel = 'Campo';
-        break;
-        case 'Corporativo':
-        icon = <Apartment/>;
-        chipColor = 'info';
-        chipLabel = 'Corporativo';
-        break;                
-        default:
-        icon = null;
-        chipColor = 'primary';
-      }
-      return (
-        <>                  
-        <Chip
-          icon={icon}
-          label={chipLabel}
-          color={chipColor}
-          variant="outlined"
-          style={{ marginLeft: '5px' }}
-        />
-        </>
-      );
+      {
+        field: "plaza",
+        headerName: "PLAZA",
+        renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>{"PLAZA"}</strong>
+        ),
+        renderCell: (params) => (
+          <Chip
+            icon={<Public />}
+            label={
+              <Typography
+                variant="body1"
+                sx={{ fontWeight: "bold", fontSize: "1.2em" }}
+              >
+                {params.value}
+              </Typography>
+            }
+            variant="contained"
+            sx={{
+              background: colors.tealAccent[400],
+              color: "black",
+              "& .MuiChip-icon": {
+                color: theme.palette.info.main,
+              },
+            }}
+          />
+        ),
+        width: 200,
       },
-    },
-    { 
-      field: 'lugar_entrada',
-      renderHeader: () => (
-      <strong style={{ color: "#5EBFFF" }}>{"LUGAR DE ENTRADA"}</strong>
-      ),
-      width: 120,
-      renderCell: (params) => (
-      <PersonPinCircle 
-        style={{ cursor: 'pointer', color: 'lightblue', fontSize: 40 }} 
-        onClick={() => {
-        window.open(params.value, '_blank');
-        }}
-      />
-      ),
-    },
-    { 
-      field: 'hora_salida_sistema',
-      renderHeader: () => (
-      <strong style={{ color: "#5EBFFF" }}>{"HORA DE SALIDA SISTEMA"}</strong>
-      ),
-      width: 190,
-      renderCell: (params) => (
-      <>
-        {params.value}
-        <AccessTimeRounded style={{ marginLeft: '5px' }} />
-      </>
-      ),
-    },
-    { 
-      field: 'hora_salida',
-      renderHeader: () => (
-      <strong style={{ color: "#5EBFFF" }}>{"HORA DE SALIDA"}</strong>
-      ),
-      width: 120,
-      renderCell: (params) => (
-      <>
-        {params.value}
-        <AccessTimeRounded style={{ marginLeft: '5px' }} />
-      </>
-      ),
-    },
-    { 
-      field: 'estatus_salida',
-      renderHeader: () => (
-      <strong style={{ color: "#5EBFFF" }}>{"ESTATUS DE SALIDA"}</strong>
-      ),
-      width: 160,
-      renderCell: (params) => {
-      let icon = null;
-      let chipColor = 'primary';
-      let chipLabel = '';
-      switch (params.row.estatus_salida) {
-        case 'Asistencia correcta':
-        icon = <InsertEmoticon/>;
-        chipColor = 'success';
-        chipLabel = 'Asistencia correcta';
-        break;
-        case 'Retardo':
-        icon = <WarningAmber/>;
-        chipColor = 'warning';
-        chipLabel = 'Retardo';
-        break;
-        case 'Falta':
-        icon = <Dangerous/>;
-        chipColor = 'error';
-        chipLabel = 'Falta';
-        break;
-        case 'Dia incompleto':
-        icon = <SentimentVeryDissatisfiedOutlined/>;
-        chipColor = 'error';
-        chipLabel = 'Dia incompleto';
-        break;
-        case 'Registro incompleto':
-        icon = <RunningWithErrors/>;
-        chipColor = 'error';
-        chipLabel = 'Registro incompleto';
-        break;
-        default:
-        icon = null;
-        chipColor = 'primary';
-      }
-      return (
-        <>                  
-        <Chip
-          icon={icon}
-          label={chipLabel}
-          color={chipColor}
-          variant="outlined"
-          style={{ marginLeft: '5px' }}
-        />
-        </>
-      );
-      },            
-    },
-    { 
-      field: 'estatus_punto_salida',
-      renderHeader: () => (
-      <strong style={{ color: "#5EBFFF" }}>{"ESTATUS DE PUNTO DE SALIDA"}</strong>
-      ),
-      width: 200,
-      renderCell: (params) => {
-      let icon = null;
-      let chipColor = 'primary';
-      let chipLabel = '';
-      switch (params.row.estatus_punto_salida) {
-        case 'Campo':
-        icon = <EditRoad/>;
-        chipColor = 'warning';
-        chipLabel = 'Campo';
-        break;
-        case 'Corporativo':
-        icon = <Apartment/>;
-        chipColor = 'info';
-        chipLabel = 'Corporativo';
-        break;                
-        default:
-        icon = null;
-        chipColor = 'primary';
-      }
-      return (
-        <>                  
-        <Chip
-          icon={icon}
-          label={chipLabel}
-          color={chipColor}
-          variant="outlined"
-          style={{ marginLeft: '5px' }}
-        />
-        </>
-      );
+      {
+        field: "fecha_captura",
+        headerName: "FECHA DE CAPTURA",
+        renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>{"FECHA DE CAPTURA"}</strong>
+        ),
+        width: 160,
+        renderCell: (params) => (
+          <Chip
+            icon={<CalendarMonth />}
+            label={
+              <Typography
+                variant="body1"
+                sx={{ fontWeight: "bold", fontSize: "1.2em" }}
+              >
+                {params.value}
+              </Typography>
+            }
+            variant="contained"
+            sx={{
+              background: colors.blueAccent[500],
+              "& .MuiChip-icon": {
+                color: theme.palette.info.main,
+              },
+            }}
+          />
+        ),
       },
-    },
-    { 
-      field: 'lugar_salida',
-      renderHeader: () => (
-      <strong style={{ color: "#5EBFFF" }}>{"LUGAR DE SALIDA"}</strong>
-      ),
-      width: 120,
-      renderCell: (params) => (
-      <PersonPinCircle 
-        style={{ cursor: 'pointer', color: 'lightblue', fontSize: 40 }} 
-        onClick={() => {
-        window.open(params.value, '_blank');
-        }}
-      />
-      ),
-    },
-    { 
-      field: 'hora_entrada_comida',
-      renderHeader: () => (
-      <strong style={{ color: "#5EBFFF" }}>{"HORA DE ENTRADA DE COMIDA"}</strong>
-      ),
-      width: 200,
-      renderCell: (params) => (
-      <>
-        {params.value}
-        <AccessTime style={{ marginLeft: '5px' }} />
-      </>
-      ),
-    },
-    { 
-      field: 'lugar_entrada_comida',
-      renderHeader: () => (
-      <strong style={{ color: "#5EBFFF" }}>{"LUGAR DE ENTRADA DE COMIDA"}</strong>
-      ),
-      width: 210,
-      renderCell: (params) => (
-      <PersonPinCircle 
-        style={{ cursor: 'pointer', color: 'lightblue', fontSize: 40 }} 
-        onClick={() => {
-        window.open(params.value, '_blank');
-        }}
-      />
-      ),
-    },
-    { 
-      field: 'hora_salida_comida',
-      renderHeader: () => (
-      <strong style={{ color: "#5EBFFF" }}>{"HORA DE SALIDA DE COMIDA"}</strong>
-      ),
-      width: 200,
-      renderCell: (params) => (
-      <>
-        {params.value}
-        <AccessTime style={{ marginLeft: '5px' }} />
-      </>
-      ),
-    },
-    { 
-      field: 'lugar_salida_comida',
-      renderHeader: () => (
-      <strong style={{ color: "#5EBFFF" }}>{"LUGAR DE SALIDA DE COMIDA"}</strong>
-      ),
-      width: 200,
-      renderCell: (params) => (
-      <PersonPinCircle 
-        style={{ cursor: 'pointer', color: 'lightblue', fontSize: 40 }} 
-        onClick={() => {
-        window.open(params.value, '_blank');
-        }}
-      />
-      ),
-    },
-  ], []);
+      {
+        field: "hora_entrada_sistema",
+        headerName: "HORA DE ENTRADA SISTEMA",
+        renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>
+            {"HORA DE ENTRADA SISTEMA"}
+          </strong>
+        ),
+        width: 210,
+        renderCell: (params) => {
+          // Determinar el color basado en el valor de la celda
+          const chipColor =
+            params.value === "09:00:00"
+              ? colors.blueAccent[400]
+              : params.value === "08:00:00"
+              ? colors.tealAccent[400]
+              : "default"; // Color por defecto
+
+          return (
+            <Chip
+              icon={<AccessTime />}
+              label={
+                <Typography
+                  variant="body1"
+                  sx={{ fontWeight: "bold", fontSize: "1.2em" }}
+                >
+                  {params.value}
+                </Typography>
+              }
+              variant="contained"
+              sx={{
+                background: chipColor,
+                color: "black",
+                "& .MuiChip-icon": {
+                  color: theme.palette.info.main,
+                },
+              }}
+            />
+          );
+        },
+      },
+
+      {
+        field: "hora_entrada",
+        headerName: "HORA DE ENTRADA",
+        renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>{"HORA DE ENTRADA"}</strong>
+        ),
+        width: 160,
+        renderCell: (params) => {
+          // Determinar el color basado en el valor de la celda
+          let icon = null;
+          let chipColor = colors.greenAccent[400];
+
+          switch (params.row.estatus_entrada) {
+            case "Asistencia correcta":
+              icon = <InsertEmoticon />;
+              chipColor = colors.accentGreen[100];
+              break;
+            case "Retardo":
+              icon = <WarningAmber />;
+              chipColor = colors.yellowAccent[300];
+              break;
+            case "Falta":
+              icon = <Dangerous />;
+              chipColor = colors.redAccent[400];
+              break;
+            case "Dia incompleto":
+              icon = <SentimentVeryDissatisfied />;
+              chipColor = colors.redAccent[400];
+              break;
+            default:
+              icon = null;
+              chipColor = colors.greenAccent[400];
+          }
+
+          return (
+            <Chip
+              icon={icon}
+              label={
+                <Typography
+                  variant="body1"
+                  sx={{ fontWeight: "bold", fontSize: "1.2em" }}
+                >
+                  {params.value}
+                </Typography>
+              }
+              variant="contained"
+              sx={{
+                background: chipColor,
+                color: "black",
+                "& .MuiChip-icon": {
+                  color: theme.palette.info.main,
+                },
+              }}
+            />
+          );
+        },
+      },
+      {
+        field: "estatus_entrada",
+        headerName: "ESTATUS DE ENTRADA",
+        renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>{"ESTATUS DE ENTRADA"}</strong>
+        ),
+        width: 200,
+        renderCell: (params) => {
+          let icon = null;
+          let chipColor = colors.greenAccent[400];
+          let chipLabel = "";
+          switch (params.row.estatus_entrada) {
+            case "Asistencia correcta":
+              icon = <InsertEmoticon />;
+              chipColor = colors.accentGreen[100];
+              chipLabel = "Asistencia correcta";
+              break;
+            case "Retardo":
+              icon = <WarningAmber />;
+              chipColor = colors.yellowAccent[300];
+              chipLabel = "Retardo";
+              break;
+            case "Falta":
+              icon = <Dangerous />;
+              chipColor = colors.redAccent[400];
+              chipLabel = "Falta";
+              break;
+            case "Dia incompleto":
+              icon = <SentimentVeryDissatisfied />;
+              chipColor = colors.redAccent[400];
+              chipLabel = "Día incompleto";
+              break;
+            default:
+              icon = null;
+              chipColor = colors.greenAccent[400];
+          }
+          return (
+            <>
+              <Chip
+                icon={icon}
+                label={chipLabel}
+                variant="contained"
+                sx={{
+                  background: chipColor,
+                  fontWeight: "bold",
+                  fontSize: "1.2em",
+                  color: "black",
+                  "& .MuiChip-icon": {
+                    color: theme.palette.info.main,
+                  },
+                }}
+              />
+            </>
+          );
+        },
+      },
+      {
+        field: "estatus_punto_entrada",
+        headerName: "ESTATUS DE PUNTO DE ENTRADA",
+        renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>
+            {"ESTATUS DE PUNTO DE ENTRADA"}
+          </strong>
+        ),
+        width: 250,
+        renderCell: (params) => {
+          let icon = null;
+          let chipColor = colors.greenAccent[400];
+          let chipLabel = "";
+          switch (params.row.estatus_punto_entrada) {
+            case "Campo":
+              icon = <EditRoad />;
+              chipColor = colors.tealAccent[400];
+              chipLabel = "Campo";
+              break;
+            case "Corporativo":
+              icon = <Apartment />;
+              chipColor = colors.blueAccent[400];
+              chipLabel = "Corporativo";
+              break;
+            default:
+              icon = <Dangerous />;
+              chipColor = colors.redAccent[400];
+              chipLabel = "Sin especificar";
+          }
+          return (
+            <>
+              <Chip
+                icon={icon}
+                label={chipLabel}
+                variant="outlined"
+                sx={{
+                  background: chipColor,
+                  fontWeight: "bold",
+                  fontSize: "1.2em",
+                  color: "black",
+                  "& .MuiChip-icon": {
+                    color: theme.palette.info.main,
+                  },
+                }}
+              />
+            </>
+          );
+        },
+      },
+      {
+        field: "lugar_entrada",
+        headerName: "LUGAR DE ENTRADA",
+        renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>{"LUGAR DE ENTRADA"}</strong>
+        ),
+        width: 200,
+        renderCell: (params) => {
+          const { lugar_entrada, estatus_punto_entrada } = params.row;
+          const isDisabled =
+            estatus_punto_entrada !== "Campo" &&
+            estatus_punto_entrada !== "Corporativo";
+
+          return (
+            <Tooltip title="Abrir en Google Maps">
+              <span>
+                {" "}
+                {/* Necesario para que el Tooltip funcione en botones deshabilitados */}
+                <Button
+                  variant="contained"
+                  color="info"
+                  startIcon={<PersonPinCircle />}
+                  onClick={() => window.open(lugar_entrada, "_blank")}
+                  disabled={isDisabled}
+                  sx={{
+                    textTransform: "none",
+                    fontWeight: "bold",
+                    fontSize: "1.2em",
+                    backgroundColor: isDisabled
+                      ? colors.grey
+                      : colors.tealAccent[400],
+                    color: isDisabled ? "white" : "black",
+                    "&:hover": {
+                      backgroundColor: isDisabled
+                        ? colors.grey
+                        : colors.tealAccent[600],
+                    },
+                  }}
+                >
+                  Ver ubicación
+                </Button>
+              </span>
+            </Tooltip>
+          );
+        },
+      },
+      {
+        field: "hora_salida_sistema",
+        headerName: "HORA DE SALIDA SISTEMA",
+        renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>
+            {"HORA DE SALIDA SISTEMA"}
+          </strong>
+        ),
+        width: 200,
+        renderCell: (params) => {
+          // Determinar el color basado en el valor de la celda
+          const chipColor =
+            params.value === "18:00:00"
+              ? colors.blueAccent[400]
+              : params.value === "17:00:00"
+              ? colors.tealAccent[400]
+              : params.value === "13:00:00"
+              ? colors.greenAccent[400]
+              : "default"; // Color por defecto
+
+          return (
+            <Chip
+              icon={<AccessTime />}
+              label={
+                <Typography
+                  variant="body1"
+                  sx={{ fontWeight: "bold", fontSize: "1.2em" }}
+                >
+                  {params.value}
+                </Typography>
+              }
+              variant="contained"
+              sx={{
+                background: chipColor,
+                color: "black",
+                "& .MuiChip-icon": {
+                  color: theme.palette.info.main,
+                },
+              }}
+            />
+          );
+        },
+      },
+      {
+        field: "hora_salida",
+        headerName: "HORA DE SALIDA",
+        renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>{"HORA DE SALIDA"}</strong>
+        ),
+        width: 140,
+        renderCell: (params) => {
+          // Asignar un valor por defecto si params.value está vacío
+          const horaSalida =
+            params.value && params.value.trim() !== ""
+              ? params.value
+              : "--:--:--";
+
+          // Determinar el color basado en el estatus de salida
+          let icon = <RunningWithErrors />;
+          let chipColor = colors.greenAccent[400];
+
+          switch (params.row.estatus_salida) {
+            case "Asistencia correcta":
+              icon = <InsertEmoticon />;
+              chipColor = colors.accentGreen[100];
+              break;
+            case "Retardo":
+              icon = <WarningAmber />;
+              chipColor = colors.yellowAccent[300];
+              break;
+            case "Falta":
+              icon = <Dangerous />;
+              chipColor = colors.redAccent[400];
+              break;
+            case "Dia incompleto":
+              icon = <SentimentVeryDissatisfied />;
+              chipColor = colors.redAccent[400];
+              break;
+            case "Registro incompleto":
+              icon = <RunningWithErrors />;
+              chipColor = colors.redAccent[400];
+              break;
+            default:
+              icon = <RunningWithErrors />;
+              chipColor = colors.greenAccent[400];
+          }
+
+          return (
+            <Chip
+              icon={icon}
+              label={
+                <Typography
+                  variant="body1"
+                  sx={{ fontWeight: "bold", fontSize: "1.2em" }}
+                >
+                  {horaSalida}
+                </Typography>
+              }
+              variant="contained"
+              sx={{
+                background: chipColor,
+                color: "black",
+                "& .MuiChip-icon": {
+                  color: theme.palette.info.main,
+                },
+              }}
+            />
+          );
+        },
+      },
+      {
+        field: "estatus_salida",
+        headerName: "ESTATUS DE SALIDA",
+        renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>{"ESTATUS DE SALIDA"}</strong>
+        ),
+        width: 220,
+        renderCell: (params) => {
+          let icon = null;
+          let chipColor = colors.accentGreen[100];
+          let chipLabel = "";
+          switch (params.row.estatus_salida) {
+            case "Asistencia correcta":
+              icon = <InsertEmoticon />;
+              chipColor = chipColor = colors.accentGreen[100];
+              chipLabel = "Asistencia correcta";
+              break;
+            case "Retardo":
+              icon = <WarningAmber />;
+              chipColor = colors.yellowAccent[300];
+              chipLabel = "Retardo";
+              break;
+            case "Falta":
+              icon = <Dangerous />;
+              chipColor = colors.redAccent[400];
+              chipLabel = "Falta";
+              break;
+            case "Dia incompleto":
+              icon = <SentimentVeryDissatisfiedOutlined />;
+              chipColor = colors.redAccent[400];
+              chipLabel = "Dia incompleto";
+              break;
+            case "Registro incompleto":
+              icon = <RunningWithErrors />;
+              chipColor = colors.redAccent[400];
+              chipLabel = "Registro incompleto";
+              break;
+            default:
+              icon = null;
+              chipColor = colors.greenAccent[400];
+          }
+          return (
+            <>
+              <Chip
+                icon={icon}
+                label={chipLabel}
+                variant="outlined"
+                style={{ marginLeft: "5px" }}
+                sx={{
+                  background: chipColor,
+                  fontWeight: "bold",
+                  fontSize: "1.2em",
+                  color: "black",
+                  "& .MuiChip-icon": {
+                    color: theme.palette.info.main,
+                  },
+                }}
+              />
+            </>
+          );
+        },
+      },
+      {
+        field: "estatus_punto_salida",
+        headerName: "ESTATUS DE PUNTO DE SALIDA",
+        renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>
+            {"ESTATUS DE PUNTO DE SALIDA"}
+          </strong>
+        ),
+        width: 230,
+        renderCell: (params) => {
+          let icon = null;
+          let chipColor = colors.greenAccent[400];
+          let chipLabel = "";
+          switch (params.row.estatus_punto_salida) {
+            case "Campo":
+              icon = <EditRoad />;
+              chipColor = colors.tealAccent[400];
+              chipLabel = "Campo";
+              break;
+            case "Corporativo":
+              icon = <Apartment />;
+              chipColor = colors.blueAccent[400];
+              chipLabel = "Corporativo";
+              break;
+            default:
+              icon = <Dangerous />;
+              chipColor = colors.redAccent[400];
+              chipLabel = "Sin especificar";
+          }
+          return (
+            <>
+              <Chip
+                icon={icon}
+                label={chipLabel}
+                variant="outlined"
+                style={{ marginLeft: "5px" }}
+                sx={{
+                  background: chipColor,
+                  fontWeight: "bold",
+                  fontSize: "1.2em",
+                  color: "black",
+                  "& .MuiChip-icon": {
+                    color: theme.palette.info.main,
+                  },
+                }}
+              />
+            </>
+          );
+        },
+      },
+      {
+        field: "lugar_salida",
+        headerName: "LUGAR DE SALIDA",
+        renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>{"LUGAR DE SALIDA"}</strong>
+        ),
+        width: 180,
+        renderCell: (params) => {
+          const { lugar_salida, estatus_punto_salida } = params.row;
+          const isDisabled =
+            estatus_punto_salida !== "Campo" &&
+            estatus_punto_salida !== "Corporativo";
+
+          return (
+            <Tooltip title="Abrir en Google Maps">
+              <span>
+                {" "}
+                {/* Necesario para que el Tooltip funcione en botones deshabilitados */}
+                <Button
+                  variant="contained"
+                  color="info"
+                  startIcon={<PersonPinCircle />}
+                  onClick={() => window.open(lugar_salida, "_blank")}
+                  disabled={isDisabled}
+                  sx={{
+                    textTransform: "none",
+                    fontWeight: "bold",
+                    fontSize: "1.2em",
+                    backgroundColor: isDisabled
+                      ? colors.grey
+                      : colors.tealAccent[400],
+                    color: isDisabled ? "white" : "black",
+                    "&:hover": {
+                      backgroundColor: isDisabled
+                        ? colors.grey
+                        : colors.tealAccent[600],
+                    },
+                  }}
+                >
+                  Ver ubicación
+                </Button>
+              </span>
+            </Tooltip>
+          );
+        },
+      },
+      {
+        field: "hora_entrada_comida",
+        headerName: "HORA DE SALIDA DE COMIDA",
+        renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>
+            {"HORA DE ENTRADA DE COMIDA"}
+          </strong>
+        ),
+        width: 220,
+        renderCell: (params) => {
+          const horaSalidaComida =
+            params.value && params.value.trim() !== ""
+              ? params.value
+              : "--:--:--";
+          // Determinar el color basado en el valor de la celda
+          const chipColor =
+            params.value && params.value.trim() !== ""
+              ? colors.blueAccent[400]
+              : colors.redAccent[400];
+
+          return (
+            <Chip
+              icon={<AccessTime />}
+              label={
+                <Typography
+                  variant="body1"
+                  sx={{ fontWeight: "bold", fontSize: "1.2em" }}
+                >
+                  {horaSalidaComida}
+                </Typography>
+              }
+              variant="contained"
+              sx={{
+                background: chipColor,
+                color: "black",
+                "& .MuiChip-icon": {
+                  color: theme.palette.info.main,
+                },
+              }}
+            />
+          );
+        },
+      },
+      {
+        field: "lugar_entrada_comida",
+        headerName: "LUGAR DE SALIDA DE COMIDA",
+        renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>
+            {"LUGAR DE ENTRADA DE COMIDA"}
+          </strong>
+        ),
+        width: 230,
+        renderCell: (params) => {
+          const { lugar_entrada, lugar_entrada_comida } = params.row;
+          const isDisabled = lugar_entrada_comida.trim() === "";
+      
+          return (
+            <Tooltip title="Abrir en Google Maps">
+              <span> {/* Necesario para que el Tooltip funcione en botones deshabilitados */}
+                <Button
+                  variant="contained"
+                  color="info"
+                  startIcon={<PersonPinCircle />}
+                  onClick={() => window.open(lugar_entrada, "_blank")}
+                  disabled={isDisabled}
+                  sx={{
+                    textTransform: "none",
+                    fontWeight: "bold",
+                    fontSize: "1.2em",
+                    backgroundColor: isDisabled
+                      ? colors.grey
+                      : colors.tealAccent[400],
+                    color: isDisabled ? "white" : "black",
+                    "&:hover": {
+                      backgroundColor: isDisabled
+                        ? colors.grey
+                        : colors.tealAccent[600],
+                    },
+                  }}
+                >
+                  Ver ubicación
+                </Button>
+              </span>
+            </Tooltip>
+          );
+        }
+      },
+      {
+        field: "hora_salida_comida",
+        headerName: "HORA DE ENTRADA DE COMIDA",
+        renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>
+            {"HORA DE SALIDA DE COMIDA"}
+          </strong>
+        ),
+        width: 240,
+        renderCell: (params) => {
+          const horaEntradaComida =
+            params.value && params.value.trim() !== ""
+              ? params.value
+              : "--:--:--";
+          // Determinar el color basado en el valor de la celda
+          const chipColor =
+            params.value && params.value.trim() !== ""
+              ? colors.blueAccent[400]
+              : colors.redAccent[400];
+
+          return (
+            <Chip
+              icon={<AccessTime />}
+              label={
+                <Typography
+                  variant="body1"
+                  sx={{ fontWeight: "bold", fontSize: "1.2em" }}
+                >
+                  {horaEntradaComida}
+                </Typography>
+              }
+              variant="contained"
+              sx={{
+                background: chipColor,
+                color: "black",
+                "& .MuiChip-icon": {
+                  color: theme.palette.info.main,
+                },
+              }}
+            />
+          );
+        },
+      },
+      {
+        field: "lugar_salida_comida",
+        headerName: "LUGAR DE ENTRADA DE COMIDA",
+        renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>
+            {"LUGAR DE SALIDA DE COMIDA"}
+          </strong>
+        ),
+        width: 240,
+        renderCell: (params) => {
+          const { lugar_salida, lugar_salida_comida } = params.row;
+          const isDisabled = lugar_salida_comida.trim() === "";
+      
+          return (
+            <Tooltip title="Abrir en Google Maps">
+              <span> {/* Necesario para que el Tooltip funcione en botones deshabilitados */}
+                <Button
+                  variant="contained"
+                  color="info"
+                  startIcon={<PersonPinCircle />}
+                  onClick={() => window.open(lugar_salida, "_blank")}
+                  disabled={isDisabled}
+                  sx={{
+                    textTransform: "none",
+                    fontWeight: "bold",
+                    fontSize: "1.2em",
+                    backgroundColor: isDisabled
+                      ? colors.grey
+                      : colors.tealAccent[400],
+                    color: isDisabled ? "white" : "black",
+                    "&:hover": {
+                      backgroundColor: isDisabled
+                        ? colors.grey
+                        : colors.tealAccent[600],
+                    },
+                  }}
+                >
+                  Ver ubicación
+                </Button>
+              </span>
+            </Tooltip>
+          );
+        }
+      },
+    ],
+    []
+  );
 }
 
 export default buildColumns;
