@@ -25,6 +25,10 @@ import {
   RunningWithErrors,
   Login,
   Logout,
+  BeachAccess,
+  AttachMoney,
+  MoneyOff,
+  LocalHospital,
 } from "@mui/icons-material";
 
 const FilteredList = ({
@@ -42,11 +46,24 @@ const FilteredList = ({
 
   const resultIcons = {
     "Asistencia correcta": <DoneAll color="secondary" />,
+    Vacaciones: <BeachAccess sx={{ color: colors.accentGreen[100] }} />,
+    "Permiso con goce de sueldo": (
+      <AttachMoney sx={{ color: colors.accentGreen[100] }} />
+    ),
+    "Permiso sin goce de sueldo": <MoneyOff color="warning" />,
+    Incapacidad: <LocalHospital sx={{ color: colors.accentGreen[100] }} />,
     Retardo: <Warning color="warning" />,
     Falta: <Error color="error" />,
     "Dia incompleto": <Warning color="warning" />,
     "Registro incompleto": <RunningWithErrors color="error" />,
   };
+
+  const sortedEntries = Object.entries(resultCountsEntry || {}).sort(
+    (a, b) => b[1] - a[1]
+  );
+  const sortedExits = Object.entries(resultCountsExit || {}).sort(
+    (a, b) => b[1] - a[1]
+  );
 
   return (
     <Card
@@ -99,8 +116,8 @@ const FilteredList = ({
             />
           </ListItem>
           <Divider />
-          {Object.entries(resultCountsEntry || {}).length > 0 ? (
-            Object.entries(resultCountsEntry).map(([result, count]) => (
+          {sortedEntries.length > 0 ? (
+            sortedEntries.map(([result, count]) => (
               <React.Fragment key={result}>
                 <ListItem>
                   <ListItemAvatar>
@@ -185,8 +202,8 @@ const FilteredList = ({
             />
           </ListItem>
           <Divider />
-          {Object.entries(resultCountsExit || {}).length > 0 ? (
-            Object.entries(resultCountsExit).map(([results, counts]) => (
+          {sortedExits.length > 0 ? (
+            sortedExits.map(([results, counts]) => (
               <React.Fragment key={results}>
                 <ListItem>
                   <ListItemAvatar>

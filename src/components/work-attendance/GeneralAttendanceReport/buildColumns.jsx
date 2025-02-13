@@ -3,10 +3,14 @@ import {
   AccessTime,
   AccessTimeRounded,
   Apartment,
+  AttachMoney,
+  BeachAccess,
   CalendarMonth,
   Dangerous,
   EditRoad,
   InsertEmoticon,
+  LocalHospital,
+  MoneyOff,
   PersonPinCircle,
   Public,
   RunningWithErrors,
@@ -186,6 +190,22 @@ function buildColumns() {
               icon = <InsertEmoticon />;
               chipColor = colors.accentGreen[100];
               break;
+            case "Vacaciones":
+              icon = <BeachAccess />;
+              chipColor = colors.greenAccent[400];
+              break;
+            case "Permiso con goce de sueldo":
+              icon = <AttachMoney />;
+              chipColor = colors.greenAccent[400];
+              break;
+            case "Permiso sin goce de sueldo":
+              icon = <MoneyOff />;
+              chipColor = colors.yellowAccent[300];
+              break;
+            case "Incapacidad":
+              icon = <LocalHospital />;
+              chipColor = colors.greenAccent[400];
+              break;
             case "Retardo":
               icon = <WarningAmber />;
               chipColor = colors.yellowAccent[300];
@@ -232,7 +252,7 @@ function buildColumns() {
         renderHeader: () => (
           <strong style={{ color: "#5EBFFF" }}>{"ESTATUS DE ENTRADA"}</strong>
         ),
-        width: 200,
+        width: 280,
         renderCell: (params) => {
           let icon = null;
           let chipColor = colors.greenAccent[400];
@@ -242,6 +262,26 @@ function buildColumns() {
               icon = <InsertEmoticon />;
               chipColor = colors.accentGreen[100];
               chipLabel = "Asistencia correcta";
+              break;
+            case "Vacaciones":
+              icon = <BeachAccess />;
+              chipColor = colors.greenAccent[400];
+              chipLabel = "Vacaciones";
+              break;
+            case "Permiso con goce de sueldo":
+              icon = <AttachMoney />;
+              chipColor = colors.greenAccent[400];
+              chipLabel = "Permiso con goce de sueldo";
+              break;
+            case "Permiso sin goce de sueldo":
+              icon = <MoneyOff />;
+              chipColor = colors.yellowAccent[300];
+              chipLabel = "Permiso sin goce de sueldo";
+              break;
+            case "Incapacidad":
+              icon = <LocalHospital />;
+              chipColor = colors.greenAccent[400];
+              chipLabel = "Incapacidad";
               break;
             case "Retardo":
               icon = <WarningAmber />;
@@ -443,6 +483,22 @@ function buildColumns() {
               icon = <InsertEmoticon />;
               chipColor = colors.accentGreen[100];
               break;
+            case "Vacaciones":
+              icon = <BeachAccess />;
+              chipColor = colors.greenAccent[400];
+              break;
+            case "Permiso con goce de sueldo":
+              icon = <AttachMoney />;
+              chipColor = colors.greenAccent[400];
+              break;
+            case "Permiso sin goce de sueldo":
+              icon = <MoneyOff />;
+              chipColor = colors.yellowAccent[300];
+              break;
+            case "Incapacidad":
+              icon = <LocalHospital />;
+              chipColor = colors.greenAccent[400];
+              break;
             case "Retardo":
               icon = <WarningAmber />;
               chipColor = colors.yellowAccent[300];
@@ -493,7 +549,7 @@ function buildColumns() {
         renderHeader: () => (
           <strong style={{ color: "#5EBFFF" }}>{"ESTATUS DE SALIDA"}</strong>
         ),
-        width: 220,
+        width: 280,
         renderCell: (params) => {
           let icon = null;
           let chipColor = colors.accentGreen[100];
@@ -503,6 +559,26 @@ function buildColumns() {
               icon = <InsertEmoticon />;
               chipColor = chipColor = colors.accentGreen[100];
               chipLabel = "Asistencia correcta";
+              break;
+            case "Vacaciones":
+              icon = <BeachAccess />;
+              chipColor = colors.greenAccent[400];
+              chipLabel = "Vacaciones";
+              break;
+            case "Permiso con goce de sueldo":
+              icon = <AttachMoney />;
+              chipColor = colors.greenAccent[400];
+              chipLabel = "Permiso con goce de sueldo";
+              break;
+            case "Permiso sin goce de sueldo":
+              icon = <MoneyOff />;
+              chipColor = colors.yellowAccent[300];
+              chipLabel = "Permiso sin goce de sueldo";
+              break;
+            case "Incapacidad":
+              icon = <LocalHospital />;
+              chipColor = colors.greenAccent[400];
+              chipLabel = "Incapacidad";
               break;
             case "Retardo":
               icon = <WarningAmber />;
@@ -700,10 +776,12 @@ function buildColumns() {
         renderCell: (params) => {
           const { lugar_entrada, lugar_entrada_comida } = params.row;
           const isDisabled = lugar_entrada_comida.trim() === "";
-      
+
           return (
             <Tooltip title="Abrir en Google Maps">
-              <span> {/* Necesario para que el Tooltip funcione en botones deshabilitados */}
+              <span>
+                {" "}
+                {/* Necesario para que el Tooltip funcione en botones deshabilitados */}
                 <Button
                   variant="contained"
                   color="info"
@@ -730,7 +808,7 @@ function buildColumns() {
               </span>
             </Tooltip>
           );
-        }
+        },
       },
       {
         field: "hora_salida_comida",
@@ -787,10 +865,12 @@ function buildColumns() {
         renderCell: (params) => {
           const { lugar_salida, lugar_salida_comida } = params.row;
           const isDisabled = lugar_salida_comida.trim() === "";
-      
+
           return (
             <Tooltip title="Abrir en Google Maps">
-              <span> {/* Necesario para que el Tooltip funcione en botones deshabilitados */}
+              <span>
+                {" "}
+                {/* Necesario para que el Tooltip funcione en botones deshabilitados */}
                 <Button
                   variant="contained"
                   color="info"
@@ -817,7 +897,7 @@ function buildColumns() {
               </span>
             </Tooltip>
           );
-        }
+        },
       },
     ],
     []
