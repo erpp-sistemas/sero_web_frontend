@@ -5,9 +5,9 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { useSelector } from "react-redux";
-import { getPlaceServiceProcessByUserId } from "../services/process.service";
+import { getPlaceServiceFormByUserId } from "../services/form.service";
 
-function ProcessSelect({
+function ProcessSelectLektor({
   selectedPlace,
   selectedService,
   selectedProcess,
@@ -22,7 +22,7 @@ function ProcessSelect({
       if (selectedPlace && selectedService) {
         setLoading(true);
         try {
-          const res = await getPlaceServiceProcessByUserId(
+          const res = await getPlaceServiceFormByUserId(
             user.user_id,
             selectedPlace,
             selectedService
@@ -31,7 +31,7 @@ function ProcessSelect({
 
           // Seleccionar automáticamente el primer proceso si hay datos y no hay un valor seleccionado
           if (res.length > 0 && !selectedProcess) {
-            handleProcessChange({ target: { value: res[0].process_id } });
+            handleProcessChange({ target: { value: res[0].form_id } });
           }
         } catch (error) {
           console.error("Error loading processes:", error);
@@ -60,7 +60,7 @@ function ProcessSelect({
         disabled={loading || !selectedPlace || !selectedService}
       >
         {process.map((proces) => (
-          <MenuItem key={proces.process_id} value={proces.process_id}>
+          <MenuItem key={proces.form_id} value={proces.form_id}>
             {proces.name}
           </MenuItem>
         ))}
@@ -90,4 +90,4 @@ function ProcessSelect({
   );
 }
 
-export default memo(ProcessSelect);
+export default memo(ProcessSelectLektor);

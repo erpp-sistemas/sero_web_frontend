@@ -8,7 +8,7 @@ import { getPlaceServiceByUserId } from '../services/service.service';
 import Lottie from 'lottie-react';
 import loadingAnimation from '../../public/loading-8.json';
 
-function ServiceSelect({ selectedPlace, selectedService, handleServiceChange }) {
+function ServiceSelectLektor({ selectedPlace, selectedService, handleServiceChange }) {
   const user = useSelector((state) => state.user);
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -87,4 +87,4 @@ function ServiceSelect({ selectedPlace, selectedService, handleServiceChange }) 
   );
 }
 
-export default memo(ServiceSelect);
+export default memo(ServiceSelectLektor);

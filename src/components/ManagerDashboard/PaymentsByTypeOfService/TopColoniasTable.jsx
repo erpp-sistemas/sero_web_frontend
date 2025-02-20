@@ -9,9 +9,15 @@ import {
   Paper,
   Typography,
   Box,
+  useTheme
 } from "@mui/material";
+import { tokens } from '../../../theme.js';
 
 function TopColoniasTable({ type, topColonias }) {
+
+   const theme = useTheme();
+    const colors = tokens(theme.palette.mode);
+    const themeBackgroundColor = theme.palette.background.paper;
 
   const formatCurrency = (value) =>
     new Intl.NumberFormat("es-MX", {
@@ -40,10 +46,10 @@ function TopColoniasTable({ type, topColonias }) {
           textAlign: "center",
         }}
       >
-        Promedio pagado por Tipo de Servicio: {type}
+        Promedio pagado: {type}
       </Typography>
-      <TableContainer component={Paper}>
-        <Table size="small">
+      <TableContainer sx={{ backgroundColor: theme.palette.background.paper }}>
+        <Table >
           <TableHead>
             <TableRow>
               <TableCell>Colonia</TableCell>

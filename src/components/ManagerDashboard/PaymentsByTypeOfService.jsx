@@ -3,23 +3,31 @@ import Chip from "@mui/material/Chip";
 import Stack from "@mui/material/Stack";
 import Grid from "@mui/material/Grid";
 import Button from "@mui/material/Button";
-import Box from "@mui/material/Box";
-import GetAppIcon from "@mui/icons-material/GetApp";
+import BarChartIcon from "@mui/icons-material/BarChart";
+import FormatListNumberedIcon from "@mui/icons-material/FormatListNumbered";
 import * as ExcelJS from "exceljs";
 import TopColoniasChart from "./PaymentsByTypeOfService/TopColoniasChart.jsx";
 import TopColoniasTable from "./PaymentsByTypeOfService/TopColoniasTable.jsx";
 import { tokens } from "../../theme";
-import {  
-  useTheme,
-} from "@mui/material";
+import { useTheme } from "@mui/material";
+import { Download } from "@mui/icons-material";
 
 function PaymentsByTypeOfService({ data }) {
+  if (!data || data.length === 0) {
+    return (
+      <div style={{ textAlign: "center", padding: "20px", color: "#888" }}>
+        No se encontraron datos
+      </div>
+    );
+  }
+
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
   const [uniqueTypes, setUniqueTypes] = useState([]);
   const [selectedTypes, setSelectedTypes] = useState([]);
   const [topColoniasByType, setTopColoniasByType] = useState({});
+  const [viewMode, setViewMode] = useState("total"); // "total" o "count"
 
   // useEffect para configurar los tipos únicos y reiniciar el estado cuando cambie `data`
   useEffect(() => {
@@ -169,63 +177,132 @@ function PaymentsByTypeOfService({ data }) {
             key={type}
             label={type}
             clickable
-            color={selectedTypes.includes(type) ? "secondary" : "default"}
             onClick={() => handleChipClick(type)}
+            sx={{
+              backgroundColor: selectedTypes.includes(type)
+                ? colors.accentGreen[100]
+                : "inherit",
+              color: selectedTypes.includes(type)
+                ? colors.contentSearchButton[100]
+                : "inherit",
+              border: selectedTypes.includes(type) ? "none" : "1px solid #ccc",
+              fontWeight: "bold",
+              "&:hover": {
+                backgroundColor: colors.searchButton[200],
+                boxShadow: "0 8px 12px rgba(255, 255, 255, 0.2)",
+              },
+            }}
           />
         ))}
       </Stack>
 
-      <Box mt={2} mb={2} display="flex" justifyContent="space-between">
-        <Button
-          variant="outlined"
-          color="warning"
-          onClick={exportToExcel}
-          style={{ marginLeft: "16px" }}
-          startIcon={<GetAppIcon />}
-        >
-          Exportar en Excel
-        </Button>
-      </Box>
+      <Grid
+        container
+        spacing={2}
+        alignItems="center"
+        paddingBottom="10px"
+        paddingTop="10px"
+      >
+        <Grid item xs={12} sm={2}>
+          <Button
+            variant={viewMode === "total" ? "contained" : "outlined"}
+            color="info"
+            onClick={() => setViewMode("total")}
+            startIcon={<BarChartIcon />}
+            fullWidth
+            sx={{
+              borderRadius: "35px",
+              backgroundColor:
+                viewMode === "total" ? colors.accentGreen[100] : "inherit",
+              borderColor:
+                viewMode === "total" ? "inherit" : colors.accentGreen[100],
+              fontWeight: "bold",
+              color:
+                viewMode === "total" ? colors.contentSearchButton[100] : colors.accentGreen[100],
+              "&:hover": {
+                backgroundColor: colors.accentGreen[200], // Cambia el color del fondo en hover
+                borderColor: colors.accentGreen[200], // Cambia el color del borde en hover
+                color: "white"
+              },
+            }}
+            size="small"
+          >
+            Total Pagado
+          </Button>
+        </Grid>
+        <Grid item xs={12} sm={2}>
+          <Button
+            variant={viewMode === "count" ? "contained" : "outlined"}
+            color="info"
+            onClick={() => setViewMode("count")}
+            startIcon={<FormatListNumberedIcon />}
+            fullWidth
+            sx={{
+              borderRadius: "35px",
+              backgroundColor:
+                viewMode === "count" ? colors.blueAccent[500] : "inherit",
+              borderColor:
+                viewMode === "count" ? "inherit" : colors.blueAccent[500],
+              fontWeight: "bold",
+              color:
+                viewMode === "count" ? "inherit" : colors.blueAccent[500],
+              "&:hover": {
+                backgroundColor: colors.blueAccent[600], // Cambia el color del fondo en hover
+                borderColor: colors.blueAccent[600], // Cambia el color del borde en hover
+                color: "white"
+              },
+            }}
+            size="small"
+          >
+            Cuentas Pagadas
+          </Button>
+        </Grid>
+        <Grid item xs={12} sm={2}>
+          <Button
+            variant="contained"
+            color="info"
+            onClick={exportToExcel}
+            endIcon={<Download />}
+            fullWidth
+            sx={{
+              borderRadius: "35px",
+              color: "white",
+            }}
+            size="small"
+          >
+            Exportar en Excel
+          </Button>
+        </Grid>
+      </Grid>
 
       {selectedTypes.length > 0 && (
         <div>
           <Grid container spacing={2}>
             {selectedTypes.map((type) => {
-              const totalData =
+              const chartData =
                 topColoniasByType[type]
                   ?.slice()
-                  .sort((a, b) => b.total - a.total)
+                  .sort((a, b) =>
+                    viewMode === "total" ? b.total - a.total : b.count - a.count
+                  )
                   .map((colonia) => ({
                     x: colonia.colonia || "Sin nombre",
-                    y: colonia.total,
+                    y: viewMode === "total" ? colonia.total : colonia.count,
                   })) || [];
-
-              const countData =
-                topColoniasByType[type]
-                  ?.slice()
-                  .sort((a, b) => b.count - a.count)
-                  .map((colonia) => ({
-                    x: colonia.colonia || "Sin nombre",
-                    y: colonia.count,
-                  })) || [];
-
-                console.log(countData)
 
               return (
                 <Grid container key={type}>
-                  <Grid item xs={12} sm={4}>
+                  <Grid item xs={12} sm={6}>
                     <TopColoniasChart
-                      data={[{ id: type, data: totalData }]}
-                      title={`Total Pagado por Tipo de Servicio: ${type}`}
+                      data={[{ id: type, data: chartData }]}
+                      title={
+                        viewMode === "total"
+                          ? `Total pagado: ${type}`
+                          : `Cuentas pagadas: ${type}`
+                      }
                     />
                   </Grid>
-                  <Grid item xs={12} sm={4}>
-                    <TopColoniasChart
-                      data={[{ id: type, data: countData }]}
-                      title={`Cuentas Pagadas por Tipo de Servicio: ${type}`}
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={4}>
+                  <Grid item xs={12} sm={6}>
                     <TopColoniasTable
                       type={type}
                       topColonias={topColoniasByType[type] || []}

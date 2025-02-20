@@ -82,7 +82,7 @@ const Profile = () => {
                     <p>Perfil</p>
                 </MenuItem>
 
-                <MenuItem key={1} onClick={handleCerrarSesion}>
+                <MenuItem key={2} onClick={handleCerrarSesion}>
                     {getIcon('LogoutIcon', { marginRight: '10px', color: '#ff0000' })}
                     <p>Cerrar sesión</p>
                 </MenuItem>

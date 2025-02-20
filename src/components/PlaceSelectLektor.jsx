@@ -4,55 +4,56 @@ import MenuItem from '@mui/material/MenuItem';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { useSelector } from 'react-redux';
-import { getPlaceServiceByUserId } from '../services/service.service';
+import { getPlacesByUserId } from '../services/place.service.js';
 import Lottie from 'lottie-react';
 import loadingAnimation from '../../public/loading-8.json';
 
-function ServiceSelect({ selectedPlace, selectedService, handleServiceChange }) {
+function PlaceSelectLektor({ selectedPlace, handlePlaceChange }) {
   const user = useSelector((state) => state.user);
-  const [services, setServices] = useState([]);
+  const [places, setPlaces] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const loadServices = async () => {
-      if (selectedPlace) {
-        setLoading(true);
-        try {
-          const res = await getPlaceServiceByUserId(user.user_id, selectedPlace);
-          setServices(res);
+    const loadPlaces = async () => {
+      setLoading(true);
+      try {
+        const res = await getPlacesByUserId(user.user_id);
+        
+        // Filtrar solo place_id = 5
+        const filteredPlaces = res.filter(place => place.place_id === 5);
+        setPlaces(filteredPlaces);
 
-          // Seleccionar automáticamente la primera opción si no hay valor seleccionado
-          if (!selectedService && res.length > 0) {
-            handleServiceChange({ target: { value: res[0].service_id } });
-          }
-        } catch (error) {
-          console.error('Error loading services:', error);
-        } finally {
-          setLoading(false);
+        // Seleccionar automáticamente place_id = 5 si no hay valor seleccionado
+        if (!selectedPlace && filteredPlaces.length > 0) {
+          handlePlaceChange({ target: { value: 5 } });
         }
-      } else {
-        setServices([]); // Limpiar servicios si no hay un lugar seleccionado
+      } catch (error) {
+        console.error('Error loading places:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
-    loadServices();
-  }, [user.user_id, selectedPlace, handleServiceChange]);
+    if (user?.user_id) {
+      loadPlaces();
+    }
+  }, [user?.user_id, handlePlaceChange]);
 
   return (
     <Box sx={{ position: 'relative', width: '100%' }}>
       <TextField
-        id="filled-select-service"
+        id="filled-select-places"
         select
-        label="Servicio"
+        label="Plazas"
         variant="outlined"
         sx={{ width: '100%' }}
-        value={selectedService || ''}
-        onChange={handleServiceChange}
-        disabled={loading || !selectedPlace}
+        value={selectedPlace || ''}
+        onChange={handlePlaceChange}
+        disabled={loading}
       >
-        {services.map((service) => (
-          <MenuItem key={service.service_id} value={service.service_id}>
-            {service.name}
+        {places.map((place) => (
+          <MenuItem key={place.place_id} value={place.place_id}>
+            {place.name}
           </MenuItem>
         ))}
       </TextField>
@@ -87,4 +88,4 @@ function ServiceSelect({ selectedPlace, selectedService, handleServiceChange }) 
   );
 }
 
-export default memo(ServiceSelect);
+export default memo(PlaceSelectLektor);

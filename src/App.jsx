@@ -62,6 +62,7 @@ import Individual from './scenes/inventory/individual'
 import Credict from './scenes/credit'
 import TestRh from './scenes/rh-test'
 import ReportsTestRH from './scenes/rerports-test-rh'
+import Lektor from './scenes/lektor'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -211,6 +212,7 @@ function App() {
                         <Route path="/credit" element={<Credict />} />
                         <Route path="/test-rh" element={<TestRh />} />
                         <Route path="/reports-test-rh" element={<ReportsTestRH />} />
+                        <Route path="/lektor" element={<Lektor />} />
                       </Routes>
                     </main>
                   </Box>

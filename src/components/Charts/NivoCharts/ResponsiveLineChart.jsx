@@ -94,16 +94,16 @@ const ResponsiveLineChart = ({
               },
           ]}
             theme={{
-                textColor: '#ffffff',
+                textColor: colors.grey[100],
                 axis: {
                     ticks: {
                         text: {
-                            fill: '#ffffff',
+                            fill: colors.grey[100],
                         }
                     },
                     legend: {
                         text: {
-                            fill: '#ffffff'
+                            fill: colors.grey[100]
                         }
                     }
                 },
@@ -116,8 +116,8 @@ const ResponsiveLineChart = ({
                 },
                 tooltip: {
                     container: {
-                        background: '#333333',
-                        color: '#ffffff'
+                        background: colors.grey[900],
+                        color: colors.grey[100]
                     }
                 },
                 crosshair: {
