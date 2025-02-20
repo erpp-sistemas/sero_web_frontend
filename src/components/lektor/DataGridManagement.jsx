@@ -52,7 +52,19 @@ const DataGridManagement = ({ data }) => {
     return context.measureText(text).width;
   };
 
-  const columns = Object.keys(data[0])
+  // Obtener todos los campos únicos de todos los objetos en `data`
+  const allKeys = Array.from(new Set(data.flatMap(Object.keys)));
+
+  // Normalizar los datos para asegurarse de que cada objeto tenga todos los campos
+  const normalizedData = data.map((item) => {
+    const newItem = {};
+    allKeys.forEach((key) => {
+      newItem[key] = item[key] !== undefined ? item[key] : ""; // Asignar vacío si no existe
+    });
+    return newItem;
+  });
+
+  const columns = allKeys
     .filter(
       (key) => key !== "fotos" && key !== "id_usuario" && key !== "image_user"
     )
@@ -61,20 +73,20 @@ const DataGridManagement = ({ data }) => {
       const headerWidth = getTextWidth(headerText, "bold 16px Arial");
 
       const maxCellWidth = Math.max(
-        ...data.map((row) =>
+        ...normalizedData.map((row) =>
           getTextWidth(row[key]?.toString() || "", "14px Arial")
         )
       );
 
-      const finalWidth = Math.max(headerWidth, maxCellWidth) + 20; // +20 para margen
+      const finalWidth = Math.max(headerWidth, maxCellWidth) + 20;
 
       return {
         field: key,
         headerName: headerText,
-        minWidth: Math.max(100, finalWidth), // Evita columnas demasiado pequeñas
-        width: finalWidth, // Usa el ancho más grande entre header y celdas
-        maxWidth: 600, // Evita que se agranden demasiado
-        flex: 1, // Distribuye el espacio restante de forma proporcional
+        minWidth: Math.max(100, finalWidth),
+        width: finalWidth,
+        maxWidth: 600,
+        flex: 1,
       };
     });
 
