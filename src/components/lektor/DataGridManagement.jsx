@@ -150,14 +150,15 @@ const DataGridManagement = ({ data }) => {
       const worksheet = workbook.addWorksheet("Registros Encontrados");
 
       // Generar encabezados dinámicos
-      const baseHeaders = Object.keys(data[0])
+      const baseHeaders = Object.keys(normalizedData[0])
         .filter((header) => header !== "fotos")
         .map((header) => header.toUpperCase());
       let dynamicHeaders = [...baseHeaders];
       const maxPhotosPerType = {};
 
       // Filtrar las filas a exportar
-      const rowsToExport = filteredUsers.length > 0 ? filteredUsers : data;
+      const rowsToExport =
+        filteredUsers.length > 0 ? filteredUsers : normalizedData;
 
       // Comprobar si hay fotos en alguna de las filas
       let hasPhotos = false;
@@ -326,12 +327,12 @@ const DataGridManagement = ({ data }) => {
     setSearchTerm(value);
 
     if (!value) {
-      setFilteredUsers(data);
+      setFilteredUsers(normalizedData);
       setNoResults(false);
       return;
     }
 
-    const matchingUsers = data.filter((data_grid) => {
+    const matchingUsers = normalizedData.filter((data_grid) => {
       return Object.values(data_grid).some(
         (fieldValue) =>
           fieldValue && fieldValue.toString().toLowerCase().includes(value)
@@ -423,7 +424,11 @@ const DataGridManagement = ({ data }) => {
         }}
       >
         <DataGrid
-          rows={filteredUsers.length > 0 || searchTerm ? filteredUsers : data}
+          rows={
+            filteredUsers.length > 0 || searchTerm
+              ? filteredUsers
+              : normalizedData
+          }
           columns={columns.map((column) => ({
             ...column,
             renderHeader: () => (
@@ -437,7 +442,7 @@ const DataGridManagement = ({ data }) => {
               </Typography>
             ),
           }))}
-          getRowId={(row) => row.id}
+          getRowId={(row) => row.id || Math.random()}
           disableSelectionOnClick
           sx={{
             borderRadius: "8px",
