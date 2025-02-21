@@ -4,7 +4,7 @@ import ExcelJS from "exceljs";
 import dayjs from "dayjs";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import { Download } from "@mui/icons-material";
-import ERPPImage from "../../../../public/ERPP.jpg";
+import ERPPImage from "../../../../public/ERPP-LOGO-2.png";
 
 const IndividualAttendanceReportButton = ({ data }) => {
   dayjs.extend(isSameOrBefore);
@@ -63,7 +63,7 @@ const IndividualAttendanceReportButton = ({ data }) => {
       // Asignar el texto y darle formato
       const cell = sheet.getCell("C1");
       cell.value = "Reporte de Asistencia";
-      cell.font = { bold: true, size: 18 };
+      cell.font = { bold: true, size: 20 };
       cell.alignment = { horizontal: "center", vertical: "middle" };
 
       // Definir el color azul marino (hex: #003366)
@@ -414,6 +414,42 @@ const IndividualAttendanceReportButton = ({ data }) => {
           };
         });
       });
+
+      // Agregar las filas de firmas debajo de la tabla de resumen
+      const row6 = sheet.addRow([]);
+      const row7 = sheet.addRow([
+        "",
+        "______________________",
+        "",
+        "",
+        "______________________",
+        "",
+      ]);
+      const row4 = sheet.addRow([
+        "Firma del colaborador",
+        "",
+        "",
+        "",
+        "",
+        "Firma de RRHH",
+      ]);
+
+      // Fusionar las celdas de la columna A, B y C para la firma del colaborador
+      sheet.mergeCells(`A${row4.number}:C${row4.number}`);
+      // Fusionar las celdas de la columna D, E y F para la firma de RRHH
+      sheet.mergeCells(`D${row4.number}:F${row4.number}`);
+
+      // Alineación centrada para las celdas de firma
+      [row4].forEach((row) => {
+        ["A", "B", "C", "D", "E", "F"].forEach((col) => {
+          const cell = sheet.getCell(`${col}${row.number}`);
+          cell.alignment = { horizontal: "center", vertical: "middle" };
+        });
+      });
+
+      // Asegurarse de que la leyenda "Firma de RRHH" se vea correctamente
+      const firmaRRHHCell = sheet.getCell(`D${row4.number}`);
+      firmaRRHHCell.value = "Firma de RRHH"; // Asignar texto a la celda fusionada
     });
 
     // Ajustar el ancho de las columnas
