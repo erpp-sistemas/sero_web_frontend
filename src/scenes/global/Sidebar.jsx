@@ -142,7 +142,6 @@ const Sidebar = () => {
     setCurrentSection(sectionName);
   };
 
-
   const handleLogoClick = () => {
     setSelectedMenu(null);
     localStorage.removeItem("selectedMenu");
@@ -400,96 +399,99 @@ const Sidebar = () => {
                 backgroundColor: colors.primary[400],
                 display: "flex",
                 justifyContent: "center",
-                paddingTop: "16px", // Agregar padding top para evitar que los primeros menús se oculten
               }}
             >
-              <Grid container spacing={2} justifyContent="center">
-                {currentSection
-                  ? menuTree[currentSection].items.map((menuItem) => (
-                      <Grid item xs={6} key={menuItem.id_menu}>
-                        <Box
-                          display="flex"
-                          flexDirection="column"
-                          alignItems="center"
-                        >
-                          <Tooltip title={menuItem.name} placement="top">
-                            <Fab
-                              onClick={() => {
-                                handleMenuItemClick(
-                                  { preventDefault: () => {} },
-                                  menuItem.route,
-                                  menuItem
-                                );
-                                handleCloseDialog();
-                              }}
+              <Box sx={{ paddingTop: "16px" }}>
+                <Grid container spacing={2} justifyContent="center">
+                  {currentSection
+                    ? menuTree[currentSection].items.map((menuItem) => (
+                        <Grid item xs={6} key={menuItem.id_menu}>
+                          <Box
+                            display="flex"
+                            flexDirection="column"
+                            alignItems="center"
+                          >
+                            <Tooltip title={menuItem.name} placement="top">
+                              <Fab
+                                onClick={() => {
+                                  handleMenuItemClick(
+                                    { preventDefault: () => {} },
+                                    menuItem.route,
+                                    menuItem
+                                  );
+                                  handleCloseDialog();
+                                }}
+                                sx={{
+                                  backgroundColor:
+                                    selectedMenu === menuItem.id_menu
+                                      ? colors.accentGreen[100]
+                                      : "transparent",
+                                  color:
+                                    selectedMenu === menuItem.id_menu
+                                      ? "black"
+                                      : colors.accentGreen[100],
+                                  "& .MuiListItemIcon-root": {
+                                    color: colors.accentGreen[100],
+                                  },
+                                  "&:hover": {
+                                    backgroundColor: colors.primary[500],
+                                  },
+                                }}
+                              >
+                                {renderIcon(menuItem.icon)}
+                              </Fab>
+                            </Tooltip>
+                            <Typography
+                              variant="caption"
+                              display="block"
+                              align="center"
                               sx={{
-                                backgroundColor:
-                                  selectedMenu === menuItem.id_menu
-                                    ? colors.accentGreen[100]
-                                    : "transparent",
-                                color:
-                                  selectedMenu === menuItem.id_menu
-                                    ? "black"
-                                    : colors.accentGreen[100],
-                                "& .MuiListItemIcon-root": {
-                                  color: colors.accentGreen[100],
-                                },
-                                "&:hover": {
-                                  backgroundColor: colors.primary[500],
-                                },
+                                color: colors.accentGreen[100],
+                                fontWeight: "bold",
                               }}
                             >
-                              {renderIcon(menuItem.icon)}
-                            </Fab>
-                          </Tooltip>
-                          <Typography
-                            variant="caption"
-                            display="block"
-                            align="center"
-                            sx={{
-                              color: colors.accentGreen[100],
-                              fontWeight: "bold",
-                            }}
+                              {menuItem.name}
+                            </Typography>
+                          </Box>
+                        </Grid>
+                      ))
+                    : Object.keys(menuTree).map((sectionName) => (
+                        <Grid item xs={6} key={sectionName}>
+                          <Box
+                            display="flex"
+                            flexDirection="column"
+                            alignItems="center"
                           >
-                            {menuItem.name}
-                          </Typography>
-                        </Box>
-                      </Grid>
-                    ))
-                  : Object.keys(menuTree).map((sectionName) => (
-                      <Grid item xs={6} key={sectionName}>
-                        <Box
-                          display="flex"
-                          flexDirection="column"
-                          alignItems="center"
-                        >
-                          <Tooltip title={sectionName} placement="top">
-                            <Fab
-                              color="primary"
-                              onClick={() => handleSectionMobileClick(sectionName)}
+                            <Tooltip title={sectionName} placement="top">
+                              <Fab
+                                color="primary"
+                                onClick={() =>
+                                  handleSectionMobileClick(sectionName)
+                                }
+                                sx={{
+                                  backgroundColor: colors.accentGreen[100],
+                                  color: "black", // Cambiar el color de los íconos a negro
+                                }}
+                              >
+                                {renderIcon(menuTree[sectionName].icon)}
+                              </Fab>
+                            </Tooltip>
+                            <Typography
+                              variant="caption"
+                              display="block"
+                              align="center"
                               sx={{
-                                backgroundColor: colors.accentGreen[100],
-                                color: "black", // Cambiar el color de los íconos a negro
+                                color: colors.accentGreen[100],
+                                fontWeight: "bold",
                               }}
                             >
-                              {renderIcon(menuTree[sectionName].icon)}
-                            </Fab>
-                          </Tooltip>
-                          <Typography
-                            variant="caption"
-                            display="block"
-                            align="center"
-                            sx={{
-                              color: colors.accentGreen[100],
-                              fontWeight: "bold",
-                            }}
-                          >
-                            {sectionName}
-                          </Typography>
-                        </Box>
-                      </Grid>
-                    ))}
-              </Grid>
+                              {sectionName}
+                            </Typography>
+                          </Box>
+                        </Grid>
+                      ))}
+                </Grid>
+              </Box>
             </DialogContent>
           </Dialog>
         </>
