@@ -11,10 +11,14 @@ import {
   useTheme,
   Typography,
   Tooltip,
-  SpeedDial,
   SpeedDialIcon,
-  SpeedDialAction,
-  useMediaQuery
+  useMediaQuery,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  Grid,
+  Fab,
+  Button,
 } from "@mui/material";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import ExpandLess from "@mui/icons-material/ExpandLess";
@@ -32,7 +36,8 @@ const Sidebar = () => {
   const [menus, setMenus] = useState([]);
   const [selectedMenu, setSelectedMenu] = useState(null);
   const [openSections, setOpenSections] = useState({});
-  const [openSpeedDial, setOpenSpeedDial] = useState(false);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [currentSection, setCurrentSection] = useState(null);
   const sidebarRef = useRef(null);
   const user = useSelector((state) => state.user);
   const navigate = useNavigate();
@@ -133,10 +138,24 @@ const Sidebar = () => {
     }));
   };
 
+  const handleSectionMobileClick = (sectionName) => {
+    setCurrentSection(sectionName);
+  };
+
+
   const handleLogoClick = () => {
     setSelectedMenu(null);
     localStorage.removeItem("selectedMenu");
     navigate("/home");
+  };
+
+  const handleOpenDialog = () => {
+    setOpenDialog(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setCurrentSection(null);
   };
 
   return (
@@ -155,7 +174,7 @@ const Sidebar = () => {
             backgroundColor: "transparent !important",
           },
           "& .pro-inner-item": {
-            padding: "2px 20px 2px 10px !important", // Reducir el padding entre los menús
+            padding: "5px 35px 5px 20px !important",
           },
           "& .pro-inner-item:hover": {
             color: "#a4a9fc !important",
@@ -167,7 +186,6 @@ const Sidebar = () => {
           display: { xs: "none", md: "inline" },
           position: "fixed",
           zIndex: "9998",
-          overflowY: "auto", // Agregar scroll cuando haya muchos menús
           "& .pro-submenu": {
             backgroundColor: "transparent !important",
             boxShadow: "none !important",
@@ -345,84 +363,136 @@ const Sidebar = () => {
         </ProSidebar>
       </Box>
 
-      {/* SpeedDial for mobile view */}
+      {/* Vista móvil: botón FAB que abre un diálogo con menú en cuadrícula */}
       {isMobile && (
-        <Box
-          sx={{
-            position: "fixed",
-            bottom: 16,
-            right: 16,
-            zIndex: "999999999",            
-          }}
-        >
-          {console.log("Rendering SpeedDial Box, isMobile:", isMobile)}
-          <SpeedDial
-            ariaLabel="SpeedDial menu"
-            icon={<SpeedDialIcon />}
-            onClose={() => setOpenSpeedDial(false)}
-            onOpen={() => setOpenSpeedDial(true)}
-            open={openSpeedDial}
+        <>
+          <Fab
+            onClick={handleOpenDialog}
             sx={{
-              zIndex: "999999999",
+              position: "fixed",
+              backgroundColor: colors.accentGreen[100],
+              bottom: 16,
+              right: 16,
+              zIndex: 9999999,
             }}
           >
-            {Object.keys(menuTree).reduce((actions, sectionName) => {
-              actions.push(
-                <SpeedDialAction
-                  key={`parent-${sectionName}`}
-                  icon={
-                    <Box sx={{ display: "flex", alignItems: "center" }}>
-                      {renderIcon(menuTree[sectionName].icon)}
-                      {menuTree[sectionName].items.length > 0 &&
-                        (openSections[sectionName] ? (
-                          <ExpandLess fontSize="small" />
-                        ) : (
-                          <ExpandMore fontSize="small" />
-                        ))}
-                    </Box>
-                  }
-                  tooltipTitle={sectionName}
-                  onClick={() => handleSectionClick(sectionName)}
-                />
-              );
-              if (openSections[sectionName]) {
-                menuTree[sectionName].items.forEach((menuItem) => {
-                  const childIconColor =
-                    selectedMenu === menuItem.id_menu
-                      ? "black"
-                      : colors.accentGreen[100];
-                  actions.push(
-                    <SpeedDialAction
-                      key={`child-${menuItem.id_menu}`}
-                      icon={
-                        <Box sx={{ color: childIconColor }}>
-                          {renderIcon(menuItem.icon)}
+            <SpeedDialIcon />
+          </Fab>
+          <Dialog open={openDialog} onClose={handleCloseDialog}>
+            <DialogTitle
+              sx={{
+                backgroundColor: colors.primary[600],
+                color: colors.accentGreen[100],
+                fontWeight: "bold",
+                textAlign: "center",
+              }}
+            >
+              {currentSection ? (
+                <IconButton onClick={() => setCurrentSection(null)}>
+                  <MUIIcons.ArrowBack sx={{ color: colors.accentGreen[100] }} />
+                </IconButton>
+              ) : (
+                "Menú"
+              )}
+            </DialogTitle>
+            <DialogContent
+              sx={{
+                backgroundColor: colors.primary[400],
+                display: "flex",
+                justifyContent: "center",
+                paddingTop: "16px", // Agregar padding top para evitar que los primeros menús se oculten
+              }}
+            >
+              <Grid container spacing={2} justifyContent="center">
+                {currentSection
+                  ? menuTree[currentSection].items.map((menuItem) => (
+                      <Grid item xs={6} key={menuItem.id_menu}>
+                        <Box
+                          display="flex"
+                          flexDirection="column"
+                          alignItems="center"
+                        >
+                          <Tooltip title={menuItem.name} placement="top">
+                            <Fab
+                              onClick={() => {
+                                handleMenuItemClick(
+                                  { preventDefault: () => {} },
+                                  menuItem.route,
+                                  menuItem
+                                );
+                                handleCloseDialog();
+                              }}
+                              sx={{
+                                backgroundColor:
+                                  selectedMenu === menuItem.id_menu
+                                    ? colors.accentGreen[100]
+                                    : "transparent",
+                                color:
+                                  selectedMenu === menuItem.id_menu
+                                    ? "black"
+                                    : colors.accentGreen[100],
+                                "& .MuiListItemIcon-root": {
+                                  color: colors.accentGreen[100],
+                                },
+                                "&:hover": {
+                                  backgroundColor: colors.primary[500],
+                                },
+                              }}
+                            >
+                              {renderIcon(menuItem.icon)}
+                            </Fab>
+                          </Tooltip>
+                          <Typography
+                            variant="caption"
+                            display="block"
+                            align="center"
+                            sx={{
+                              color: colors.accentGreen[100],
+                              fontWeight: "bold",
+                            }}
+                          >
+                            {menuItem.name}
+                          </Typography>
                         </Box>
-                      }
-                      FabProps={{
-                        sx: {
-                          bgcolor:
-                            selectedMenu === menuItem.id_menu
-                              ? colors.accentGreen[100]
-                              : "inherit",
-                        },
-                      }}
-                      tooltipTitle={menuItem.name}
-                      onClick={() =>
-                        handleMenuItemClick(
-                          { preventDefault: () => {} },
-                          menuItem.route,
-                          menuItem
-                        )
-                      }
-                    />
-                  );
-                });
-              }
-              return actions;
-            }, [])}
-          </SpeedDial>
-        </Box>
+                      </Grid>
+                    ))
+                  : Object.keys(menuTree).map((sectionName) => (
+                      <Grid item xs={6} key={sectionName}>
+                        <Box
+                          display="flex"
+                          flexDirection="column"
+                          alignItems="center"
+                        >
+                          <Tooltip title={sectionName} placement="top">
+                            <Fab
+                              color="primary"
+                              onClick={() => handleSectionMobileClick(sectionName)}
+                              sx={{
+                                backgroundColor: colors.accentGreen[100],
+                                color: "black", // Cambiar el color de los íconos a negro
+                              }}
+                            >
+                              {renderIcon(menuTree[sectionName].icon)}
+                            </Fab>
+                          </Tooltip>
+                          <Typography
+                            variant="caption"
+                            display="block"
+                            align="center"
+                            sx={{
+                              color: colors.accentGreen[100],
+                              fontWeight: "bold",
+                            }}
+                          >
+                            {sectionName}
+                          </Typography>
+                        </Box>
+                      </Grid>
+                    ))}
+              </Grid>
+            </DialogContent>
+          </Dialog>
+        </>
       )}
     </Box>
   );
