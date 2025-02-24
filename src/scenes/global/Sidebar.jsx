@@ -14,6 +14,7 @@ import {
   SpeedDial,
   SpeedDialIcon,
   SpeedDialAction,
+  useMediaQuery
 } from "@mui/material";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import ExpandLess from "@mui/icons-material/ExpandLess";
@@ -36,6 +37,9 @@ const Sidebar = () => {
   const user = useSelector((state) => state.user);
   const navigate = useNavigate();
   const location = useLocation();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md")); // Ajusta el breakpoint según sea necesario
+
+  console.log("isMobile:", isMobile);
 
   const handleClickOutside = (event) => {
     if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
@@ -68,11 +72,12 @@ const Sidebar = () => {
   const transformMenuData = (menus) => {
     const result = {};
     const sectionMap = new Map();
-  
+
     // Ordenar los menús padres por la propiedad 'orden'
-    const sortedMenus = menus.filter(menu => menu.parent_menu_id === 0)
-                             .sort((a, b) => a.orden - b.orden);
-  
+    const sortedMenus = menus
+      .filter((menu) => menu.parent_menu_id === 0)
+      .sort((a, b) => a.orden - b.orden);
+
     sortedMenus.forEach((menu) => {
       sectionMap.set(menu.menu_id, menu.name);
       result[menu.name] = {
@@ -81,7 +86,7 @@ const Sidebar = () => {
         items: [],
       };
     });
-  
+
     menus.forEach((menu) => {
       if (menu.parent_menu_id !== 0) {
         const sectionName = sectionMap.get(menu.parent_menu_id);
@@ -99,11 +104,11 @@ const Sidebar = () => {
         }
       }
     });
-  
+
     return result;
   };
 
-  const menuTree = transformMenuData(menus);  
+  const menuTree = transformMenuData(menus);
 
   const renderIcon = (iconName) => {
     const IconComponent = MUIIcons[iconName] || MUIIcons.LocationOn;
@@ -111,9 +116,7 @@ const Sidebar = () => {
   };
 
   const isActiveMenu = (route) => {
-    return location.pathname === route
-      ? "bg-gray-500 dark:bg-gray-600 "
-      : "";
+    return location.pathname === route ? "bg-gray-500 dark:bg-gray-600 " : "";
   };
 
   const handleMenuItemClick = (event, route, menuItem) => {
@@ -139,8 +142,7 @@ const Sidebar = () => {
   return (
     <Box
       sx={{
-        width: "100px",
-        display: { xs: "none", md: "flex" },
+        width: { xs: "0%", md: "100px" }, // Ajusta el ancho según el tamaño de la pantalla
       }}
     >
       <Box
@@ -153,7 +155,7 @@ const Sidebar = () => {
             backgroundColor: "transparent !important",
           },
           "& .pro-inner-item": {
-            padding: "5px 35px 5px 20px !important",
+            padding: "2px 20px 2px 10px !important", // Reducir el padding entre los menús
           },
           "& .pro-inner-item:hover": {
             color: "#a4a9fc !important",
@@ -165,6 +167,7 @@ const Sidebar = () => {
           display: { xs: "none", md: "inline" },
           position: "fixed",
           zIndex: "9998",
+          overflowY: "auto", // Agregar scroll cuando haya muchos menús
           "& .pro-submenu": {
             backgroundColor: "transparent !important",
             boxShadow: "none !important",
@@ -343,75 +346,84 @@ const Sidebar = () => {
       </Box>
 
       {/* SpeedDial for mobile view */}
-      <Box
-        sx={{
-          display: { xs: "flex", md: "none" }, // solo se muestra en celulares
-          position: "fixed",
-          bottom: 16,
-          right: 16,
-          zIndex: "9999",
-        }}
-      >
-        <SpeedDial
-          ariaLabel="SpeedDial menu"
-          icon={<SpeedDialIcon />}
-          onClose={() => setOpenSpeedDial(false)}
-          onOpen={() => setOpenSpeedDial(true)}
-          open={openSpeedDial}
-        >
-          {Object.keys(menuTree).reduce((actions, sectionName) => {
-  actions.push(
-    <SpeedDialAction
-      key={`parent-${sectionName}`}
-      icon={
-        <Box sx={{ display: "flex", alignItems: "center" }}>
-          {renderIcon(menuTree[sectionName].icon)}
-          {menuTree[sectionName].items.length > 0 && (
-            openSections[sectionName] ? (
-              <ExpandLess fontSize="small" />
-            ) : (
-              <ExpandMore fontSize="small" />
-            )
-          )}
-        </Box>
-      }
-      tooltipTitle={sectionName}
-      onClick={() => handleSectionClick(sectionName)}
-    />
-  );
-  if (openSections[sectionName]) {
-    menuTree[sectionName].items.forEach((menuItem) => {
-      const childIconColor =
-        selectedMenu === menuItem.id_menu ? "black" : colors.accentGreen[100];
-      actions.push(
-        <SpeedDialAction
-          key={`child-${menuItem.id_menu}`}
-          icon={
-            <Box sx={{ color: childIconColor }}>
-              {renderIcon(menuItem.icon)}
-            </Box>
-          }
-          FabProps={{
-            sx: {
-              bgcolor: selectedMenu === menuItem.id_menu ? colors.accentGreen[100] : "inherit",
-            },
+      {isMobile && (
+        <Box
+          sx={{
+            position: "fixed",
+            bottom: 16,
+            right: 16,
+            zIndex: "999999999",            
           }}
-          tooltipTitle={menuItem.name}
-          onClick={() =>
-            handleMenuItemClick(
-              { preventDefault: () => {} },
-              menuItem.route,
-              menuItem
-            )
-          }
-        />
-      );
-    });
-  }
-  return actions;
-}, [])}
-        </SpeedDial>
-      </Box>
+        >
+          {console.log("Rendering SpeedDial Box, isMobile:", isMobile)}
+          <SpeedDial
+            ariaLabel="SpeedDial menu"
+            icon={<SpeedDialIcon />}
+            onClose={() => setOpenSpeedDial(false)}
+            onOpen={() => setOpenSpeedDial(true)}
+            open={openSpeedDial}
+            sx={{
+              zIndex: "999999999",
+            }}
+          >
+            {Object.keys(menuTree).reduce((actions, sectionName) => {
+              actions.push(
+                <SpeedDialAction
+                  key={`parent-${sectionName}`}
+                  icon={
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      {renderIcon(menuTree[sectionName].icon)}
+                      {menuTree[sectionName].items.length > 0 &&
+                        (openSections[sectionName] ? (
+                          <ExpandLess fontSize="small" />
+                        ) : (
+                          <ExpandMore fontSize="small" />
+                        ))}
+                    </Box>
+                  }
+                  tooltipTitle={sectionName}
+                  onClick={() => handleSectionClick(sectionName)}
+                />
+              );
+              if (openSections[sectionName]) {
+                menuTree[sectionName].items.forEach((menuItem) => {
+                  const childIconColor =
+                    selectedMenu === menuItem.id_menu
+                      ? "black"
+                      : colors.accentGreen[100];
+                  actions.push(
+                    <SpeedDialAction
+                      key={`child-${menuItem.id_menu}`}
+                      icon={
+                        <Box sx={{ color: childIconColor }}>
+                          {renderIcon(menuItem.icon)}
+                        </Box>
+                      }
+                      FabProps={{
+                        sx: {
+                          bgcolor:
+                            selectedMenu === menuItem.id_menu
+                              ? colors.accentGreen[100]
+                              : "inherit",
+                        },
+                      }}
+                      tooltipTitle={menuItem.name}
+                      onClick={() =>
+                        handleMenuItemClick(
+                          { preventDefault: () => {} },
+                          menuItem.route,
+                          menuItem
+                        )
+                      }
+                    />
+                  );
+                });
+              }
+              return actions;
+            }, [])}
+          </SpeedDial>
+        </Box>
+      )}
     </Box>
   );
 };
