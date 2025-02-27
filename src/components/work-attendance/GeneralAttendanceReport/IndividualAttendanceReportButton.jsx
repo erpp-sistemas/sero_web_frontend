@@ -4,7 +4,7 @@ import ExcelJS from "exceljs";
 import dayjs from "dayjs";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import { Download } from "@mui/icons-material";
-import ERPPImage from "../../../../public/ERPP.jpg";
+import ERPPImage from "../../../../public/ERPP-LOGO-2.png";
 
 const IndividualAttendanceReportButton = ({ data }) => {
   dayjs.extend(isSameOrBefore);
@@ -63,7 +63,7 @@ const IndividualAttendanceReportButton = ({ data }) => {
       // Asignar el texto y darle formato
       const cell = sheet.getCell("C1");
       cell.value = "Reporte de Asistencia";
-      cell.font = { bold: true, size: 18 };
+      cell.font = { bold: true, size: 20 };
       cell.alignment = { horizontal: "center", vertical: "middle" };
 
       // Definir el color azul marino (hex: #003366)
@@ -204,7 +204,7 @@ const IndividualAttendanceReportButton = ({ data }) => {
         "Observaciones",
       ];
 
-      //sheet.addRow([]); // Fila vacía para separar el título
+      // Crear fila de encabezado
       const headerRow = sheet.addRow(headers);
 
       // Resaltar los títulos de las columnas
@@ -222,6 +222,14 @@ const IndividualAttendanceReportButton = ({ data }) => {
           fgColor: { argb: "A9D08E" },
         };
       });
+
+      // Definir bordes exteriores e interiores
+      const borderStyleT = {
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" },
+      };
 
       let totalRetardos = 0;
       let totalFaltas = 0;
@@ -252,36 +260,13 @@ const IndividualAttendanceReportButton = ({ data }) => {
           ? "DESCANSO"
           : recordForDate?.hora_salida || "";
 
-        // Campo de observaciones
-        let observaciones = "";
-
-        // Verificamos las condiciones para estatus_salida
-        if (
-          recordForDate?.estatus_salida === "Registro incompleto" ||
-          recordForDate?.estatus_salida === "Dia incompleto"
-        ) {
-          observaciones = recordForDate?.estatus_salida.toUpperCase(); // Añadimos el valor en mayúsculas
-        }
-
-        // Verificamos las condiciones para estatus_entrada
-        if (
-          recordForDate?.estatus_entrada === "Retardo" ||
-          recordForDate?.estatus_entrada === "Falta"
-        ) {
-          observaciones = recordForDate?.estatus_entrada.toUpperCase(); // Añadimos el valor en mayúsculas
-        }
-
-        
-
-        const row = [
-          date,
-          horaEntrada,
-          horaSalida,
-          retardo,
-          falta,
-          observaciones,
-        ];
+        const row = [date, horaEntrada, horaSalida, retardo, falta, ""];
         const excelRow = sheet.addRow(row);
+
+        // Aplicar bordes a cada celda de la fila
+        excelRow.eachCell((cell) => {
+          cell.border = borderStyleT;
+        });
 
         // Fusionar las celdas de hora_entrada y hora_salida si es domingo
         if (isSunday) {
@@ -326,7 +311,7 @@ const IndividualAttendanceReportButton = ({ data }) => {
           };
         }
 
-        // Resaltar en naranja cuando estatus_salida es 'Registro incompleto' o 'Dia incompleto'
+        // Resaltar en amarillo cuando estatus_salida es 'Registro incompleto' o 'Dia incompleto'
         if (
           recordForDate?.estatus_salida === "Registro incompleto" ||
           recordForDate?.estatus_salida === "Dia incompleto"
@@ -345,20 +330,126 @@ const IndividualAttendanceReportButton = ({ data }) => {
       });
 
       // Agregar el resumen de retardos, faltas y descuentos al final de la hoja
-      sheet.addRow([]); // Fila vacía antes del resumen
-      const resumenHeaderRow = sheet.addRow(["Resumen de Asistencia"]);
-      resumenHeaderRow.font = { bold: true, size: 14 };
-      resumenHeaderRow.alignment = { horizontal: "center" };
-      sheet.mergeCells(
-        `A${resumenHeaderRow.number}:E${resumenHeaderRow.number}`
-      );
 
       const totalDescuentos = Math.floor(totalRetardos / 3) + totalFaltas; // Cada 3 retardos es 1 descuento
 
       // Agregar las filas del resumen con totales
-      sheet.addRow(["Total de Retardos", totalRetardos]);
-      sheet.addRow(["Total de Faltas", totalFaltas]);
-      sheet.addRow(["Total de Descuentos", totalDescuentos]);
+      // Agregar las filas del resumen con totales
+      const row1 = sheet.addRow([
+        "Total de Retardos",
+        "",
+        "",
+        totalRetardos,
+        "",
+        "Detalle de descuentos",
+      ]);
+      const row2 = sheet.addRow([
+        "Total de Faltas",
+        "",
+        "",
+        totalFaltas,
+        "",
+        "",
+      ]);
+      const row3 = sheet.addRow([
+        "Total de Descuentos",
+        "",
+        "",
+        totalDescuentos,
+        "",
+        "",
+      ]);
+
+      // Fusionar celdas según el requerimiento
+      sheet.mergeCells(`A${row1.number}:C${row1.number}`);
+      sheet.mergeCells(`D${row1.number}:E${row1.number}`);
+
+      sheet.mergeCells(`A${row2.number}:C${row2.number}`);
+      sheet.mergeCells(`D${row2.number}:E${row2.number}`);
+
+      sheet.mergeCells(`A${row3.number}:C${row3.number}`);
+      sheet.mergeCells(`D${row3.number}:E${row3.number}`);
+
+      // Fusionar celdas en la columna F para las filas 2 y 3 (verticalmente) y agregar "N/A"
+      sheet.mergeCells(`F${row2.number}:F${row3.number}`);
+      sheet.getCell(`F${row2.number}`).value = "N/A"; // Se pone "N/A" en la celda superior fusionada
+
+      // Aplicar alineación centrada y negrita en las celdas fusionadas
+      [row1, row2, row3].forEach((row) => {
+        ["A", "D", "F"].forEach((col) => {
+          const cell = sheet.getCell(`${col}${row.number}`);
+          cell.alignment = { horizontal: "center", vertical: "middle" };
+          cell.font = { bold: true };
+        });
+      });
+
+      // Alineación centrada para las celdas en columna F (ahora fusionada)
+      const mergedCell = sheet.getCell(`F${row2.number}`);
+      mergedCell.alignment = { horizontal: "center", vertical: "middle" };
+
+      // Definir el estilo de bordes
+      const borderStyles = {
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" },
+      };
+
+      // Aplicar bordes a todas las celdas de la tabla
+      [row1, row2, row3].forEach((row) => {
+        ["A", "B", "C", "D", "E", "F"].forEach((col) => {
+          const cell = sheet.getCell(`${col}${row.number}`);
+          cell.border = borderStyles;
+        });
+      });
+
+      // Aplicar color gris claro a las celdas en la columna A, B y C
+      [row1, row2, row3].forEach((row) => {
+        ["A", "B", "C"].forEach((col) => {
+          const cell = sheet.getCell(`${col}${row.number}`);
+          cell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "D9D9D9" }, // Color gris claro
+          };
+        });
+      });
+
+      // Agregar las filas de firmas debajo de la tabla de resumen
+      const row6 = sheet.addRow([]);
+      const row7 = sheet.addRow([
+        "",
+        "______________________",
+        "",
+        "",
+        "______________________",
+        "",
+      ]);
+      const row4 = sheet.addRow([
+        "Firma del colaborador",
+        "",
+        "",
+        "",
+        "",
+        "Firma de RRHH",
+      ]);
+
+      // Fusionar las celdas de la columna A, B y C para la firma del colaborador
+      sheet.mergeCells(`A${row4.number}:C${row4.number}`);
+      // Fusionar las celdas de la columna D, E y F para la firma de RRHH
+      sheet.mergeCells(`D${row4.number}:F${row4.number}`);
+
+      // Alineación centrada para las celdas de firma
+      [row4].forEach((row) => {
+        ["A", "B", "C", "D", "E", "F"].forEach((col) => {
+          const cell = sheet.getCell(`${col}${row.number}`);
+          cell.alignment = { horizontal: "center", vertical: "middle" };
+        });
+      });
+
+      // Asegurarse de que la leyenda "Firma de RRHH" se vea correctamente
+      const firmaRRHHCell = sheet.getCell(`D${row4.number}`);
+      firmaRRHHCell.value = "Firma de RRHH"; // Asignar texto a la celda fusionada
     });
 
     // Ajustar el ancho de las columnas

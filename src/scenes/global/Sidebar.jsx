@@ -1,465 +1,503 @@
-import React, { useState, useRef, useEffect  } from "react"
-import { ProSidebar, Menu, MenuItem } from "react-pro-sidebar"
-import { Box, IconButton, Typography, useTheme, Tooltip } from "@mui/material"
-import { Link } from "react-router-dom"
-import "react-pro-sidebar/dist/css/styles.css"
-import { tokens } from "../../theme"
-import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined"
-import LogoutIcon from '@mui/icons-material/Logout'
-import { useSelector } from 'react-redux'
-import Cookies from 'js-cookie'
-import { getMenusUserId } from '../../services/menu.service'
-import SearchOffIcon from '@mui/icons-material/SearchOff'
-import { useDispatch } from 'react-redux'
-import { logoutUser } from '../../features/user/userSlice'
-import HomeIcon from '@mui/icons-material/Home'
-import * as MUIIcons from "@mui/icons-material"
-import PropTypes from 'prop-types'
-import MenuIcon from "@mui/icons-material/Menu"
-
-const Item = ({ title, to, icon, selected, setSelected, color, isCollapsed = false, setIsCollapsed }) => {
-
-	const isValidIcon = typeof icon === 'string' && MUIIcons[icon]
-	
-	return (
-
-		<>
-
-			{isCollapsed ? (
-				<Tooltip title={title} placement="right" arrow={true} >
-					<MenuItem
-						active={selected === title}
-						style={{
-						color: color
-						}}
-						onClick={() => setSelected(title)}
-						icon={title === 'Inicio' ?  < HomeIcon /> : isValidIcon ? React.createElement(MUIIcons[icon]) : null}
-					>
-						<Box onClick={()=> setIsCollapsed(true)}>
-							<Typography>{title}</Typography>
-							<Link to={to} />
-						</Box>
-					</MenuItem>
-				</Tooltip>
-			) : (
-				<MenuItem
-					active={selected === title}
-					style={{
-						color: color
-					}}
-					onClick={() => setSelected(title)}
-					icon={title === 'Inicio' ?  < HomeIcon /> : isValidIcon ? React.createElement(MUIIcons[icon]) : null}
-				>
-					<Box onClick={()=> setIsCollapsed(true)}>
-						<Typography>{title}</Typography>
-						<Link to={to} />
-					</Box>
-				</MenuItem>
-			)}
-
-		</>
-
-	)
-
-}
+import React, { useState, useRef, useEffect } from "react";
+import { ProSidebar, Menu, MenuItem, SubMenu } from "react-pro-sidebar";
+import {
+  Box,
+  IconButton,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Collapse,
+  useTheme,
+  Typography,
+  Tooltip,
+  SpeedDialIcon,
+  useMediaQuery,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  Grid,
+  Fab,
+  Button,
+} from "@mui/material";
+import ExpandMore from "@mui/icons-material/ExpandMore";
+import ExpandLess from "@mui/icons-material/ExpandLess";
+import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
+import { getMenusUserId } from "../../services/menu.service";
+import { useSelector } from "react-redux";
+import { tokens } from "../../theme";
+import { useNavigate, Link, useLocation } from "react-router-dom";
+import * as MUIIcons from "@mui/icons-material";
 
 const Sidebar = () => {
-	const theme = useTheme()
-	const colors = tokens(theme.palette.mode)
-	const [isCollapsed, setIsCollapsed] = React.useState(true)
-	const [selected, setSelected] = React.useState("Dashboard")
-	const user = useSelector(state => state.user)
-	const [menus, setMenus] = React.useState([])
-	const [menu, setMenu] = React.useState([])
-	const [subMenu, setSubMenu] = React.useState([])
-	const dispatch = useDispatch()
-    const isLightMode = theme.palette.mode === 'light'
-	const [open, setOpen] = useState(false)
-	const sidebarRef = useRef(null)
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
+  const [isCollapsed, setIsCollapsed] = useState(true);
+  const [menus, setMenus] = useState([]);
+  const [selectedMenu, setSelectedMenu] = useState(null);
+  const [openSections, setOpenSections] = useState({});
+  const [openDialog, setOpenDialog] = useState(false);
+  const [currentSection, setCurrentSection] = useState(null);
+  const sidebarRef = useRef(null);
+  const user = useSelector((state) => state.user);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md")); // Ajusta el breakpoint según sea necesario
 
-	const toggleMenu = () => {
-		setOpen(!open)
-	}
+  console.log("isMobile:", isMobile);
 
-	const handleClickOutside = (event) => {
-        if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
-            setIsCollapsed(true)
-        }
+  const handleClickOutside = (event) => {
+    if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+      setIsCollapsed(true);
     }
+  };
 
-	React.useEffect(() => {
-		async function loadMenus() {
-			const res = await getMenusUserId(user.user_id)
-			setMenus(res)
-		}
-		loadMenus()
-	}, [user.user_id])
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
-	React.useEffect(() => {
-		if (menus && menus.length > 0) {
-			const mainMenu = menus.filter((m) => m.parent_menu_id === 0)
-			const subMenus = menus.filter((sm) => sm.parent_menu_id > 0)
-			setMenu(mainMenu)
-			setSubMenu(subMenus)
-		}
-	}, [menus])
+  useEffect(() => {
+    async function loadMenus() {
+      const res = await getMenusUserId(user.user_id);
+      setMenus(res);
+    }
+    loadMenus();
+  }, [user.user_id]);
 
-	const handleCerrarSesion = () => {
-		localStorage.removeItem('token')
-		Cookies.remove('token')
-		dispatch(logoutUser())
-		window.location.reload()
-	}
+  useEffect(() => {
+    const savedSelectedMenu = localStorage.getItem("selectedMenu");
+    if (savedSelectedMenu) {
+      setSelectedMenu(JSON.parse(savedSelectedMenu));
+    }
+  }, []);
 
-	const menuWithSubmenus = menu.map((m) => {
-		const relatedSubmenus = subMenu.filter((sm) => sm.parent_menu_id === m.menu_id);
-		return {
-		...m,
-		subMenu: relatedSubmenus,
-		}
-	})
+  const transformMenuData = (menus) => {
+    const result = {};
+    const sectionMap = new Map();
 
-	useEffect(() => {
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, []);
+    // Ordenar los menús padres por la propiedad 'orden'
+    const sortedMenus = menus
+      .filter((menu) => menu.parent_menu_id === 0)
+      .sort((a, b) => a.orden - b.orden);
 
-	return (
+    sortedMenus.forEach((menu) => {
+      sectionMap.set(menu.menu_id, menu.name);
+      result[menu.name] = {
+        icon: menu.icon_mui || "DefaultIcon",
+        orden: menu.orden || 0,
+        items: [],
+      };
+    });
 
-		<>
+    menus.forEach((menu) => {
+      if (menu.parent_menu_id !== 0) {
+        const sectionName = sectionMap.get(menu.parent_menu_id);
+        if (sectionName) {
+          result[sectionName].items.push({
+            section: sectionName,
+            id_menu: menu.menu_id,
+            id_menu_parent: menu.parent_menu_id,
+            name: menu.name,
+            icon: menu.icon_mui || "DefaultIcon",
+            route: menu.route || "#",
+            is_active: true,
+            submenus: [],
+          });
+        }
+      }
+    });
 
-			<Box
-				sx={{
-					width:'100px',
-					display:{ xs:'none', md:'flex' }
-				}}
-			>
+    return result;
+  };
 
-			</Box>
+  const menuTree = transformMenuData(menus);
 
-			<Box
-				ref={sidebarRef}
-				sx={{
-					"& .pro-sidebar-inner": {
-						background: `${colors.primary[400]} !important`,
-					},
-					"& .pro-icon-wrapper": {
-						backgroundColor: "transparent !important",
-					},
-					"& .pro-inner-item": {
-						padding: "5px 35px 5px 20px !important",
-					},
-					"& .pro-inner-item:hover": {
-						color: "#a4a9fc !important",
-					},
-					"& .pro-menu-item.active": {
-						color: "#6EBE71 !important",
-					},
-					"height": "100%",
-					display:{
-						xs:'none',
-						md:'inline',
-					},
-					position:'fixed',
-					zIndex:'9998'
-				}}
-			>
+  const renderIcon = (iconName) => {
+    const IconComponent = MUIIcons[iconName] || MUIIcons.LocationOn;
+    return <IconComponent />;
+  };
 
-				<ProSidebar collapsed={isCollapsed} >
+  const isActiveMenu = (route) => {
+    return location.pathname === route ? "bg-gray-500 dark:bg-gray-600 " : "";
+  };
 
-					<Menu iconShape="square">
+  const handleMenuItemClick = (event, route, menuItem) => {
+    event.preventDefault(); // Prevent page reload
+    setSelectedMenu(menuItem.id_menu);
+    localStorage.setItem("selectedMenu", JSON.stringify(menuItem.id_menu));
+    navigate(route);
+  };
 
-						<MenuItem
-							onClick={() => setIsCollapsed(!isCollapsed)}
-								icon={isCollapsed ? <MenuOutlinedIcon /> : undefined}
-								style={{
-								margin: "10px 0 20px 0",
-								color: colors.grey[100],
-							}}
-						>
-							{!isCollapsed && (
-								<Box
-									display="flex"
-									justifyContent="space-between"
-									alignItems="center"
-									ml="15px"
-								>
-									<img src={theme.palette.mode === "dark" ? "sero_claro.png" : "sero-logo.png"} style={{ width: '150px' }} alt="" />
-									<IconButton onClick={() => setIsCollapsed(!isCollapsed)}>
-									<MenuOutlinedIcon />
-									</IconButton>
-								</Box>
-							)}
-						</MenuItem>
+  const handleSectionClick = (sectionName) => {
+    setOpenSections((prevState) => ({
+      ...prevState,
+      [sectionName]: !prevState[sectionName],
+    }));
+  };
 
-						<Box paddingLeft={isCollapsed ? undefined : "10%"}>
+  const handleSectionMobileClick = (sectionName) => {
+    setCurrentSection(sectionName);
+  };
 
-							<Item
-								title={'Inicio'}
-								to={'/'}
-								icon={<HomeIcon/>}
-								selected={selected}
-								setSelected={setSelected}
-								color={colors.grey[100]}
-								isCollapsed={isCollapsed}
-								setIsCollapsed={setIsCollapsed}
-							/>
+  const handleLogoClick = () => {
+    setSelectedMenu(null);
+    localStorage.removeItem("selectedMenu");
+    navigate("/home");
+  };
 
-							{ menuWithSubmenus.map((m) => (
+  const handleOpenDialog = () => {
+    setOpenDialog(true);
+  };
 
-									<div key={m.menu_id}>
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setCurrentSection(null);
+  };
 
-										{!isCollapsed && (
-											<Typography variant="h6" color={colors.grey[400]} sx={{ m: "15px 0 5px 20px" }} >
-												{m.name}
-											</Typography>
-										)}
+  return (
+    <Box
+      sx={{
+        width: { xs: "0%", md: "100px" }, // Ajusta el ancho según el tamaño de la pantalla
+      }}
+    >
+      <Box
+        ref={sidebarRef}
+        sx={{
+          "& .pro-sidebar-inner": {
+            background: `${colors.primary[400]} !important`,
+          },
+          "& .pro-icon-wrapper": {
+            backgroundColor: "transparent !important",
+          },
+          "& .pro-inner-item": {
+            padding: "5px 35px 5px 20px !important",
+          },
+          "& .pro-inner-item:hover": {
+            color: "#a4a9fc !important",
+          },
+          "& .pro-menu-item.active": {
+            color: "#6EBE71 !important",
+          },
+          height: "100%",
+          display: { xs: "none", md: "inline" },
+          position: "fixed",
+          zIndex: "9998",
+          "& .pro-submenu": {
+            backgroundColor: "transparent !important",
+            boxShadow: "none !important",
+            border: "none !important",
+          },
+          "& .pro-submenu:hover": {
+            backgroundColor: "transparent !important",
+          },
+          "& .pro-submenu .pro-inner-item": {
+            backgroundColor: "transparent !important",
+          },
+          "& .pro-submenu .pro-inner-item:hover": {
+            backgroundColor: "transparent !important",
+          },
+        }}
+      >
+        <ProSidebar collapsed={isCollapsed}>
+          <Menu iconShape="square">
+            <MenuItem
+              onClick={() => setIsCollapsed(!isCollapsed)}
+              icon={isCollapsed ? <MenuOutlinedIcon /> : undefined}
+              style={{
+                margin: "0px 0 20px 0",
+                color: colors.grey[100],
+              }}
+            >
+              {!isCollapsed && (
+                <Box
+                  display="flex"
+                  justifyContent="space-between"
+                  alignItems="center"
+                  ml="15px"
+                >
+                  <img
+                    src={
+                      theme.palette.mode === "dark"
+                        ? "sero_claro.png"
+                        : "sero-logo.png"
+                    }
+                    style={{ width: "150px" }}
+                    alt="Logo"
+                    onClick={handleLogoClick}
+                  />
+                  <IconButton onClick={() => setIsCollapsed(!isCollapsed)}>
+                    <MenuOutlinedIcon />
+                  </IconButton>
+                </Box>
+              )}
+            </MenuItem>
 
-										{
-											
-											m.subMenu.map((submenus) => ( 
-						
-												<Item
-													key={submenus.menu_id}
-													title={submenus.name}
-													to={submenus.route}
-													icon={submenus.icon_mui}
-													selected={selected}
-													setSelected={setSelected}
-													color={colors.grey[100]}
-													isCollapsed={isCollapsed}
-													setIsCollapsed={setIsCollapsed}
-												/>
+            <List>
+              {Object.keys(menuTree).map((sectionName) => (
+                <React.Fragment key={sectionName}>
+                  <ListItem
+                    button
+                    onClick={() => handleSectionClick(sectionName)}
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Tooltip
+                      title={isCollapsed ? sectionName : ""}
+                      placement="right"
+                    >
+                      <ListItemIcon sx={{ color: colors.accentGreen[100] }}>
+                        {renderIcon(menuTree[sectionName].icon)}
+                      </ListItemIcon>
+                    </Tooltip>
+                    {!isCollapsed && (
+                      <Typography
+                        sx={{
+                          fontWeight: "bold",
+                          color: colors.accentGreen[100],
+                          fontSize: "0.675rem", // Ajusta el tamaño de la fuente aquí
+                          flexGrow: 5,
+                          textAlign: "left",
+                        }}
+                      >
+                        {sectionName}
+                      </Typography>
+                    )}
+                    <Box
+                      sx={{
+                        marginLeft: isCollapsed ? "-20px" : "0",
+                      }}
+                    >
+                      {openSections[sectionName] ? (
+                        <ExpandLess />
+                      ) : (
+                        <ExpandMore />
+                      )}
+                    </Box>
+                  </ListItem>
+                  <Collapse
+                    in={openSections[sectionName]}
+                    timeout="auto"
+                    unmountOnExit
+                  >
+                    <List component="div" disablePadding>
+                      {menuTree[sectionName].items.map((menuItem, index) => (
+                        <React.Fragment key={menuItem.id_menu}>
+                          <ListItem
+                            button
+                            className={`${isActiveMenu(menuItem.route)} ${
+                              selectedMenu === menuItem.id_menu
+                                ? "selected"
+                                : ""
+                            }`}
+                            onClick={(e) =>
+                              handleMenuItemClick(e, menuItem.route, menuItem)
+                            }
+                            sx={{
+                              pl: 4,
+                              backgroundColor:
+                                selectedMenu === menuItem.id_menu
+                                  ? colors.accentGreen[100]
+                                  : "transparent",
+                              "&:hover": {
+                                borderRadius: "35px",
+                                backgroundColor: colors.primary[500],
+                              },
+                              "&.selected": {
+                                backgroundColor: colors.accentGreen[100],
+                                borderRadius: "35px",
+                                "& .MuiListItemIcon-root": {
+                                  color: "black",
+                                },
+                                "& .MuiListItemText-root": {
+                                  color: "black",
+                                },
+                              },
+                            }}
+                          >
+                            <Box
+                              sx={{ display: "flex", flexDirection: "column" }}
+                            >
+                              <Tooltip
+                                title={isCollapsed ? menuItem.name : ""}
+                                placement="right"
+                              >
+                                <ListItemIcon
+                                  sx={{
+                                    color:
+                                      selectedMenu === menuItem.id_menu
+                                        ? "black"
+                                        : colors.accentGreen[100],
+                                  }}
+                                >
+                                  {renderIcon(menuItem.icon)}
+                                </ListItemIcon>
+                              </Tooltip>
+                            </Box>
+                            {!isCollapsed && (
+                              <ListItemText
+                                primary={menuItem.name}
+                                sx={{
+                                  color:
+                                    selectedMenu === menuItem.id_menu
+                                      ? "black"
+                                      : "inherit",
+                                }}
+                              />
+                            )}
+                          </ListItem>
+                        </React.Fragment>
+                      ))}
+                    </List>
+                  </Collapse>
+                </React.Fragment>
+              ))}
+            </List>
+          </Menu>
+        </ProSidebar>
+      </Box>
 
-											))
+      {/* Vista móvil: botón FAB que abre un diálogo con menú en cuadrícula */}
+      {isMobile && (
+        <>
+          <Fab
+            onClick={handleOpenDialog}
+            sx={{
+              position: "fixed",
+              backgroundColor: colors.accentGreen[100],
+              bottom: 16,
+              right: 16,
+              zIndex: 9999999,
+            }}
+          >
+            <SpeedDialIcon />
+          </Fab>
+          <Dialog open={openDialog} onClose={handleCloseDialog}>
+            <DialogTitle
+              sx={{
+                backgroundColor: colors.primary[600],
+                color: colors.accentGreen[100],
+                fontWeight: "bold",
+                textAlign: "center",
+              }}
+            >
+              {currentSection ? (
+                <IconButton onClick={() => setCurrentSection(null)}>
+                  <MUIIcons.ArrowBack sx={{ color: colors.accentGreen[100] }} />
+                </IconButton>
+              ) : (
+                "Menú"
+              )}
+            </DialogTitle>
+            <DialogContent
+              sx={{
+                backgroundColor: colors.primary[400],
+                display: "flex",
+                justifyContent: "center",
+              }}
+            >
+              <Box sx={{ paddingTop: "16px" }}>
+                <Grid container spacing={2} justifyContent="center">
+                  {currentSection
+                    ? menuTree[currentSection].items.map((menuItem) => (
+                        <Grid item xs={6} key={menuItem.id_menu}>
+                          <Box
+                            display="flex"
+                            flexDirection="column"
+                            alignItems="center"
+                          >
+                            <Tooltip title={menuItem.name} placement="top">
+                              <Fab
+                                onClick={() => {
+                                  handleMenuItemClick(
+                                    { preventDefault: () => {} },
+                                    menuItem.route,
+                                    menuItem
+                                  );
+                                  handleCloseDialog();
+                                }}
+                                sx={{
+                                  backgroundColor:
+                                    selectedMenu === menuItem.id_menu
+                                      ? colors.accentGreen[100]
+                                      : "transparent",
+                                  color:
+                                    selectedMenu === menuItem.id_menu
+                                      ? "black"
+                                      : colors.accentGreen[100],
+                                  "& .MuiListItemIcon-root": {
+                                    color: colors.accentGreen[100],
+                                  },
+                                  "&:hover": {
+                                    backgroundColor: colors.primary[500],
+                                  },
+                                }}
+                              >
+                                {renderIcon(menuItem.icon)}
+                              </Fab>
+                            </Tooltip>
+                            <Typography
+                              variant="caption"
+                              display="block"
+                              align="center"
+                              sx={{
+                                color: colors.accentGreen[100],
+                                fontWeight: "bold",
+                              }}
+                            >
+                              {menuItem.name}
+                            </Typography>
+                          </Box>
+                        </Grid>
+                      ))
+                    : Object.keys(menuTree).map((sectionName) => (
+                        <Grid item xs={6} key={sectionName}>
+                          <Box
+                            display="flex"
+                            flexDirection="column"
+                            alignItems="center"
+                          >
+                            <Tooltip title={sectionName} placement="top">
+                              <Fab
+                                color="primary"
+                                onClick={() =>
+                                  handleSectionMobileClick(sectionName)
+                                }
+                                sx={{
+                                  backgroundColor: colors.accentGreen[100],
+                                  color: "black", // Cambiar el color de los íconos a negro
+                                }}
+                              >
+                                {renderIcon(menuTree[sectionName].icon)}
+                              </Fab>
+                            </Tooltip>
+                            <Typography
+                              variant="caption"
+                              display="block"
+                              align="center"
+                              sx={{
+                                color: colors.accentGreen[100],
+                                fontWeight: "bold",
+                              }}
+                            >
+                              {sectionName}
+                            </Typography>
+                          </Box>
+                        </Grid>
+                      ))}
+                </Grid>
+              </Box>
+            </DialogContent>
+          </Dialog>
+        </>
+      )}
+    </Box>
+  );
+};
 
-										}
-
-									</div>
-
-								))
-
-							}
-
-							<MenuItem
-								style={{
-									color: colors.redAccent[500],
-									marginTop: '20px'
-								}}
-								onClick={handleCerrarSesion}
-								icon={<LogoutIcon />}
-							>
-
-							<Typography>Cerrar sesión</Typography>
-							</MenuItem>
-
-						</Box>
-
-					</Menu>
-
-				</ProSidebar>
-
-			</Box>
-
-			<Box sx={{ 
-				position: 'fixed', 
-				top: '0%', 
-				left: '0%', 
-				zIndex: 99999, 
-				width: '80%', 
-				height: '100%',
-				transform:!open ? 'translate(-99%, 0%)' : 'translate(0%,0%)',
-				transition: 'transform 0.3s ease-in-out',
-				display: {
-					xs: 'flex',
-					md: 'none'
-				}
-			}}>
-
-				<Box sx={{ 
-					width: '100%', 
-					height: '100%', 
-					background:isLightMode ? 'white' : '#17212F', 
-					position: 'relative', 
-					border:isLightMode ? '2px solid #17212F' : '2px solid white',
-					display:'flex',
-					justifyContent:'center',
-					alignItems:'start',
-					scrollX:''
-				}}>
-
-					<Box
-						sx={{
-							height: '100%', 
-							overflowY: 'auto', 
-							overflowX: 'hidden',
-							display:'flex',
-							justifyContent:'start',
-							width:'100%',
-							alignItems:'center',
-							flexDirection:'column'
-						}}
-					>
-
-						{!menus && (
-
-							<Item
-								title="Menus not found"
-								to="/login"
-								icon={<SearchOffIcon />}
-								selected={selected}
-								setSelected={setSelected}
-								color={colors.grey[100]}
-								isCollapsed={isCollapsed}
-							/>
-
-						)}
-
-						{ menuWithSubmenus.map((m) => (
-
-								<Box 
-									key={m.menu_id} 
-									sx={{ 
-										display:'flex',
-										justifyContent:'start',
-										width:'100%',
-										alignItems:'center',
-										flexDirection:'column'
-									}}
-								>
-
-									<Typography variant="h6" color={colors.grey[400]} sx={{ m: "20px 0px", fontSize:'24px' }} >
-										{m.name}
-									</Typography>
-
-									{
-										
-										m.subMenu.map((submenus) => ( 
-
-											<Box 
-												key={submenus.menu_id}
-												sx={{
-													width:'100%',
-													display:'flex',
-													justifyContent:'center',
-													alignItems:'center',
-													gap:'10px' 
-												}}
-												onClick={() => setSelected(submenus.name)}
-											>
-												<Link to={submenus.route} onClick={toggleMenu} >
-												
-													<Box
-														sx={{	
-															width:'100%',
-															display:'flex',
-															justifyContent:'center',
-															alignItems:'center',
-															gap:'10px',
-															mb:'20px',
-														}}
-													>
-														{React.createElement(MUIIcons[submenus.icon_mui], {
-															sx: { fontSize: '24px' }
-														})}
-														<Typography
-															sx={{
-																fontSize:'20px'
-															}}
-														>
-															{submenus.name}
-														</Typography>
-													</Box>
-														
-												</Link>
-											
-											</Box>
-
-										))
-
-									}
-	
-								</Box>
-
-							))
-						
-						}
-
-						<Box
-							sx={{	
-								width:'100%',
-								display:'flex',
-								justifyContent:'center',
-								alignItems:'center',
-								gap:'10px',
-								margin:'40px 0px'
-							}}
-							onClick={handleCerrarSesion}
-						>
-							<LogoutIcon 
-								sx={{
-									fontSize:'24px',
-									color:'red'
-								}}
-							/>
-							<Typography
-								sx={{
-									fontSize:'20px',
-									color:'red'
-								}}
-							>
-								Cerrar Sesión
-							</Typography>
-						</Box>
-
-					</Box>
-
-					<Box
-						sx={{
-							position: 'absolute',
-							width: '50px',
-							height: '50px',
-							background: isLightMode ? 'white' : '#17212F',
-							borderRadius: '2px',
-							display: 'flex',
-							alignItems: 'center',
-							justifyContent: 'center',
-							top: '2%',
-							left: '100%',
-							border: isLightMode ? '2px solid #17212F' : '2px solid white',
-							transform: 'translate(-0%, -2%)',
-							cursor: 'pointer',
-							borderTopRightRadius: '10px',
-							borderBottomRightRadius: '10px'
-						}}
-						onClick={toggleMenu}
-					>
-						<IconButton sx={{ color: isLightMode ? '#17212F' : 'white' }}>
-							<MenuIcon sx={{ fontSize: '30px' }} />
-						</IconButton>
-					</Box>
-
-				</Box>
-
-			</Box>
-
-		</>
-
-	)
-
-}
-
-export default Sidebar
-
-Item.propTypes = {
-	title: PropTypes.string.isRequired,
-	to: PropTypes.string.isRequired,
-	icon: PropTypes.oneOfType([PropTypes.element, PropTypes.string]),
-	selected: PropTypes.string.isRequired,
-	setSelected: PropTypes.func.isRequired,
-	color: PropTypes.string.isRequired,
-	isCollapsed: PropTypes.bool,
-	setIsCollapsed: PropTypes.func
-}
+export default Sidebar;
