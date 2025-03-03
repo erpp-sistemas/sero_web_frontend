@@ -8,6 +8,8 @@ function TypeService({ data }) {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
+  console.log(data)
+
   if (!data) {
     return null;
   }

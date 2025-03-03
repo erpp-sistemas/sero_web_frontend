@@ -92,6 +92,8 @@ function App() {
 
       await submenuAccessLogRequest(submenu_access_data);
 
+      console.log(user.place_service_process)
+
     } catch (error) {
       console.error('Error fetching data:', error)
     }

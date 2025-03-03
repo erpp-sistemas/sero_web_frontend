@@ -142,6 +142,12 @@ const Sidebar = () => {
     setCurrentSection(sectionName);
   };
 
+  useEffect(() => {
+    // Limpiar el menú seleccionado al montar el componente
+    setSelectedMenu(null);
+    localStorage.removeItem("selectedMenu");
+  }, []);
+
   const handleLogoClick = () => {
     setSelectedMenu(null);
     localStorage.removeItem("selectedMenu");

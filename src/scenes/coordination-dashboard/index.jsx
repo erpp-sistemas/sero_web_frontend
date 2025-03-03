@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { tokens } from "../../theme";
-import PlaceSelect from "../../components/PlaceSelect";
-import ServiceSelect from "../../components/ServiceSelect";
-import ProcessSelect from "../../components/ProcessSelect";
+import PlaceSelect from "../../components/select/placeSelect.jsx";
+import ServiceSelect from "../../components/select/serviceSelect";
+import ProcessSelect from "../../components/select/processSelect";
 import { Box, useTheme, Button } from "@mui/material";
 import LoadingModal from "../../components/LoadingModal.jsx";
 import CustomAlert from "../../components/CustomAlert.jsx";
@@ -35,15 +35,8 @@ function Index() {
   const [selectedStartDate, setSelectedStartDate] = React.useState("");
   const [selectedFinishDate, setSelectedFinishDate] = React.useState("");
   const [result, setResult] = useState([]);
-  const [rowOneData, setRowOneData] = useState([]);
-  const [lineMonthData, setLineMonthData] = useState([]);
-  const [lineWeekData, setLineWeekData] = useState([]);
-  const [lineDayData, setLineDayData] = useState([]);
-  const [dataGridData, setDataGridData] = useState([]);
-  const [pieManagementByTypeData, setPieManagementByTypeData] = useState([]);
-  const [pieManagementByLocationData, setPieManagementByLocationData] =
-    useState([]);
-  const [barStackData, setBarStackData] = useState([]);
+  const [rowOneData, setRowOneData] = useState([]);  
+  const [dataGridData, setDataGridData] = useState([]);  
   const [managedTaskData, setManagedTaskData] = useState([]);
   const [locationStatusData, setLocationStatusData] = useState([]);
   const [typeServiceData, setTypeServiceData] = useState([]);
@@ -70,6 +63,7 @@ function Index() {
 
   const handlePlaceChange = (event) => {
     setSelectedPlace(event.target.value);
+    setSelectedProcess("");
     setSelectedService("");
   };
 
@@ -130,28 +124,10 @@ function Index() {
         selectedStartDate,
         selectedFinishDate
       );
-      setRowOneData(JSON.parse(response.data[0].row_one));
-      setLineMonthData(
-        JSON.parse(response.data[0].LineMonthNumberOFTotalProcedures)
-      );
-      setLineWeekData(
-        JSON.parse(response.data[0].LineWeekNumberOFTotalProcedures)
-      );
-      setLineDayData(
-        JSON.parse(response.data[0].LineDayNumberOFTotalProcedures)
-      );
-      setDataGridData(JSON.parse(response.data[0].DataGridManagementByManager));
-      setPieManagementByTypeData(
-        JSON.parse(response.data[0].PieManagementByTypeOfService)
-      );
-      setPieManagementByLocationData(
-        JSON.parse(response.data[0].PieManagementByLocationStatus)
-      );
-      setBarStackData(
-        JSON.parse(
-          response.data[0].BarStackManagementsByManagerAndLocationStatus
-        )
-      );
+
+      console.log(JSON.parse(response.data[0].row_one))
+      setRowOneData(JSON.parse(response.data[0].row_one));      
+      setDataGridData(JSON.parse(response.data[0].DataGridManagementByManager));      
       setManagedTaskData(JSON.parse(response.data[0].ManagedTask));
       setLocationStatusData(JSON.parse(response.data[0].LocationStatus));
       setTypeServiceData(JSON.parse(response.data[0].TypeService));
@@ -215,6 +191,7 @@ function Index() {
             <PlaceSelect
               selectedPlace={selectedPlace}
               handlePlaceChange={handlePlaceChange}
+              setSelectedPlace={setSelectedPlace}
             />
           </Grid>
 
@@ -223,6 +200,7 @@ function Index() {
               selectedPlace={selectedPlace}
               selectedService={selectedService}
               handleServiceChange={handleServiceChange}
+              setSelectedService={setSelectedService}
             />
           </Grid>
 
@@ -232,6 +210,7 @@ function Index() {
               selectedService={selectedService}
               selectedProcess={selectedProcess}
               handleProcessChange={handleProcessChange}
+              setSelectedProcess={setSelectedProcess}
             />
           </Grid>
         </Grid>
@@ -358,7 +337,7 @@ function Index() {
                 />
               </Grid>
             </Grid>
-                        
+
             <Grid
               item
               xs={12}
@@ -423,7 +402,7 @@ function Index() {
               <Grid item xs={12} md={6}>
                 <TypeProperty data={typePropertyData} />
               </Grid>
-            </Grid> 
+            </Grid>
 
             <Grid
               item
