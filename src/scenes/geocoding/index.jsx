@@ -2,10 +2,18 @@ import React, { useState, useRef } from "react";
 import { Box, Button, Grid, Input, Typography, useTheme } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
-import { CloudUpload, Download, Search, Pause, PlayArrow, Cancel } from "@mui/icons-material";
+import {
+  CloudUpload,
+  Download,
+  Search,
+  Pause,
+  PlayArrow,
+  Cancel,
+} from "@mui/icons-material";
 import * as ExcelJS from "exceljs";
 import CustomAlert from "../../components/CustomAlert.jsx";
 import { getCoordinates } from "../../services/geocoding.service";
+import LoadingModal from "../../components/LoadingModal.jsx";
 
 const Geocoding = () => {
   const theme = useTheme();
@@ -19,13 +27,14 @@ const Geocoding = () => {
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertType, setAlertType] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const [isPaused, setIsPaused] = useState(false);
-  const [isCancelled, setIsCancelled] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [processedCount, setProcessedCount] = useState(0);
   const [observations, setObservations] = useState({});
-  const processRef = useRef(null);
+  const isPausedRef = useRef(false);
+  const isCancelledRef = useRef(false);
+  const [, forceRender] = useState();
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -50,7 +59,9 @@ const Geocoding = () => {
         setColumns([]);
       }
     } else {
-      console.log("¡Error! Debes seleccionar un archivo Excel.");
+      setAlertOpen(true);
+      setAlertType("error");
+      setAlertMessage("¡Error! Debes seleccionar un archivo Excel.");
       // Limpiar DataGrid
       setRows([]);
       setColumns([]);
@@ -60,6 +71,7 @@ const Geocoding = () => {
   };
 
   const readExcel = async (file) => {
+    setIsLoading(true);
     const reader = new FileReader();
     reader.onload = async (e) => {
       const buffer = e.target.result;
@@ -80,8 +92,10 @@ const Geocoding = () => {
 
           // Validar que las columnas sean "identificador" y "direccion"
           const requiredColumns = ["identificador", "direccion"];
-          const fileColumns = cols.map(col => col.headerName.toLowerCase());
-          missingColumns = requiredColumns.filter(col => !fileColumns.includes(col));
+          const fileColumns = cols.map((col) => col.headerName.toLowerCase());
+          missingColumns = requiredColumns.filter(
+            (col) => !fileColumns.includes(col)
+          );
 
           if (missingColumns.length > 0 || cols.length !== 2) {
             setAlertOpen(true);
@@ -95,13 +109,19 @@ const Geocoding = () => {
             return;
           }
 
-          setColumns([...cols, { field: 'latitud', headerName: 'Latitud', width: 150 }, { field: 'longitud', headerName: 'Longitud', width: 150 }, { field: 'observacion', headerName: 'Observaciones', width: 250 }, { field: 'progreso', headerName: 'Progreso', width: 150 }]);
+          setColumns([
+            ...cols,
+            { field: "latitud", headerName: "Latitud", width: 150 },
+            { field: "longitud", headerName: "Longitud", width: 150 },
+            { field: "observacion", headerName: "Observaciones", width: 250 },
+            { field: "progreso", headerName: "Progreso", width: 150 },
+          ]);
         } else {
           const rowData = {};
           row.values.slice(1).forEach((cell, cellIndex) => {
             rowData[cellIndex.toString()] = cell;
           });
-          json.push({ id: rowNumber, ...rowData, progreso: 'Pendiente' });
+          json.push({ id: rowNumber, ...rowData, progreso: "Pendiente" });
         }
       });
 
@@ -110,103 +130,127 @@ const Geocoding = () => {
         setSelectedFile(file);
       }
     };
+    setIsLoading(false);
     reader.readAsArrayBuffer(file);
   };
 
   const processGeocoding = async () => {
+    if (!selectedFile) {
+      setAlertOpen(true);
+      setAlertType("error");
+      setAlertMessage("¡Error! Debes seleccionar un archivo Excel.");
+      return;
+    }
+
     setIsProcessing(true);
-    setIsPaused(false);
-    setIsCancelled(false);
     setProcessedCount(0);
     setObservations({});
+    isPausedRef.current = false;
+    isCancelledRef.current = false;
 
-    const totalRows = rows.length;
     let processedRows = 0;
 
-    const updatedRows = [];
     for (const row of rows) {
-      if (isCancelled) {
-        updatedRows.push(row);
-        continue;
+      if (isCancelledRef.current) {
+        console.log("Proceso cancelado.");
+        break; // Detener el proceso inmediatamente
       }
 
-      while (isPaused) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
+      while (isPausedRef.current) {
+        console.log("Proceso pausado...");
+        await new Promise((resolve) => setTimeout(resolve, 500)); // Espera hasta que se reanude
       }
 
-      const address = row['1']; // Asumiendo que la columna 'direccion' es la segunda columna
+      const address = row["1"]; // Suponiendo que la dirección está en la segunda columna
       try {
-        setRows(prevRows => prevRows.map(r => r.id === row.id ? { ...r, progreso: 'En Progreso' } : r));
-        const coordinates = await getCoordinates(address); // Usar la función real del servicio
+        setRows((prevRows) =>
+          prevRows.map((r) =>
+            r.id === row.id ? { ...r, progreso: "En Progreso" } : r
+          )
+        );
+        const coordinates = await getCoordinates(address);
         processedRows++;
         setProcessedCount(processedRows);
-        const updatedRow = { ...row, latitud: coordinates.latitude, longitud: coordinates.longitude, observacion: coordinates.observation, progreso: 'Completado' };
-        setRows(prevRows => prevRows.map(r => r.id === row.id ? updatedRow : r));
-        updatedRows.push(updatedRow);
 
-        // Actualizar observaciones
-        setObservations(prevObservations => {
-          const newObservations = { ...prevObservations };
-          if (newObservations[coordinates.observation]) {
-            newObservations[coordinates.observation]++;
-          } else {
-            newObservations[coordinates.observation] = 1;
-          }
-          return newObservations;
-        });
+        const updatedRow = {
+          ...row,
+          latitud: coordinates.latitude,
+          longitud: coordinates.longitude,
+          observacion: coordinates.observation,
+          progreso: "Completado",
+        };
+
+        setRows((prevRows) =>
+          prevRows.map((r) => (r.id === row.id ? updatedRow : r))
+        );
+
+        setObservations((prevObservations) => ({
+          ...prevObservations,
+          [coordinates.observation]:
+            (prevObservations[coordinates.observation] || 0) + 1,
+        }));
       } catch (error) {
-        console.error('Error al obtener coordenadas:', error);
+        console.error("Error al obtener coordenadas:", error);
         processedRows++;
         setProcessedCount(processedRows);
-        const updatedRow = { ...row, latitud: 'Error', longitud: 'Error', observacion: 'Error al obtener coordenadas', progreso: 'Error' };
-        setRows(prevRows => prevRows.map(r => r.id === row.id ? updatedRow : r));
-        updatedRows.push(updatedRow);
 
-        // Actualizar observaciones
-        setObservations(prevObservations => {
-          const newObservations = { ...prevObservations };
-          if (newObservations['Error al obtener coordenadas']) {
-            newObservations['Error al obtener coordenadas']++;
-          } else {
-            newObservations['Error al obtener coordenadas'] = 1;
-          }
-          return newObservations;
-        });
+        setRows((prevRows) =>
+          prevRows.map((r) =>
+            r.id === row.id
+              ? { ...r, latitud: "Error", longitud: "Error", progreso: "Error" }
+              : r
+          )
+        );
+
+        setObservations((prevObservations) => ({
+          ...prevObservations,
+          "Error al obtener coordenadas":
+            (prevObservations["Error al obtener coordenadas"] || 0) + 1,
+        }));
       }
     }
 
-    setRows(updatedRows);
     setIsProcessing(false);
+    forceRender({});
+    console.log("Proceso finalizado.");
   };
 
   const handlePause = () => {
-    setIsPaused(true);
+    isPausedRef.current = true;
+    forceRender({});
   };
 
   const handleContinue = () => {
-    setIsPaused(false);
+    isPausedRef.current = false;
+    forceRender({});
   };
 
   const handleCancel = () => {
-    setIsCancelled(true);
-    setIsPaused(false);
+    isCancelledRef.current = true;
+    isPausedRef.current = false;
     setIsProcessing(false);
+    forceRender({});
   };
 
   const handleDownload = () => {
     const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Geocoding');
+    const worksheet = workbook.addWorksheet("Geocoding");
 
-    worksheet.columns = columns.map(col => ({ header: col.headerName, key: col.field }));
-    rows.forEach(row => {
+    worksheet.columns = columns.map((col) => ({
+      header: col.headerName,
+      key: col.field,
+    }));
+    rows.forEach((row) => {
       worksheet.addRow(row);
     });
 
     workbook.xlsx.writeBuffer().then((buffer) => {
-      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-      const link = document.createElement('a');
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
-      link.download = 'geocoding_result.xlsx';
+      link.download = "geocoding_result.xlsx";
       link.click();
     });
   };
@@ -223,6 +267,7 @@ const Geocoding = () => {
       >
         Geocoding
       </Typography>
+      <LoadingModal open={isLoading} />
       <CustomAlert
         alertOpen={alertOpen}
         type={alertType}
@@ -245,8 +290,8 @@ const Geocoding = () => {
                   width: "100%",
                 }}
               >
-                <CloudUpload style={{ marginRight: "5px" }} />
                 Seleccionar archivo
+                <CloudUpload style={{ marginLeft: "5px" }} />
               </Button>
               <Input
                 key={fileKey}
@@ -323,7 +368,7 @@ const Geocoding = () => {
               fontWeight: "bold",
             }}
             onClick={handlePause}
-            disabled={!isProcessing || isPaused}
+            disabled={isPausedRef.current || !isProcessing}
           >
             Pausar
           </Button>
@@ -340,7 +385,7 @@ const Geocoding = () => {
               fontWeight: "bold",
             }}
             onClick={handleContinue}
-            disabled={!isProcessing || !isPaused}
+            disabled={!isPausedRef.current || !isProcessing}
           >
             Continuar
           </Button>
@@ -376,7 +421,52 @@ const Geocoding = () => {
         </Box>
       </Box>
       <Box sx={{ height: 400, width: "100%", marginTop: "20px" }}>
-        <DataGrid rows={rows} columns={columns} pageSize={5} />
+        <DataGrid
+          rows={rows}
+          columns={columns.map((column) => ({
+            ...column,
+            renderHeader: () => (
+              <Typography
+                sx={{
+                  color: colors.contentSearchButton[100],
+                  fontWeight: "bold",
+                }}
+              >
+                {column.headerName}
+              </Typography>
+            ),
+          }))}
+          pageSize={5}
+          sx={{
+            borderRadius: "8px",
+            boxShadow: 3,
+            padding: 0,
+            background: "rgba(128, 128, 128, 0.1)",
+            "& .MuiDataGrid-columnHeaders": {
+              backgroundColor: colors.accentGreen[100], // Color de fondo deseado
+              borderTopLeftRadius: "8px",
+              borderTopRightRadius: "8px",
+            },
+            "& .MuiDataGrid-footerContainer": {
+              borderBottomLeftRadius: "8px",
+              borderBottomRightRadius: "8px",
+              backgroundColor: colors.accentGreen[100], // Fondo del footer (paginador)
+              color: colors.contentSearchButton[100], // Color de texto dentro del footer
+            },
+            "& .MuiTablePagination-root": {
+              color: colors.contentSearchButton[100], // Color del texto del paginador
+            },
+            // Estilos específicos para los íconos en el encabezado y pie de página
+            "& .MuiDataGrid-columnHeaders .MuiSvgIcon-root, .MuiDataGrid-footerContainer .MuiSvgIcon-root":
+              {
+                color: colors.contentSearchButton[100], // Color de los íconos (flechas)
+              },
+            // Evitar que los íconos en las celdas se vean afectados
+            "& .MuiDataGrid-cell .MuiSvgIcon-root": {
+              color: "inherit", // No afectar el color de los íconos en las celdas
+            },
+          }}
+        />
       </Box>
     </Box>
   );
