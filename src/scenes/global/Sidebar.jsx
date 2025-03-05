@@ -311,7 +311,7 @@ const Sidebar = () => {
                                   ? colors.accentGreen[100]
                                   : "transparent",
                               "&:hover": {
-                                borderRadius: "35px",
+                                borderRadius: "35px",                                
                                 backgroundColor: colors.primary[500],
                               },
                               "&.selected": {

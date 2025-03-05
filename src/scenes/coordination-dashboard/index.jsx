@@ -3,7 +3,7 @@ import { tokens } from "../../theme";
 import PlaceSelect from "../../components/select/placeSelect.jsx";
 import ServiceSelect from "../../components/select/serviceSelect";
 import ProcessSelect from "../../components/select/processSelect";
-import { Box, useTheme, Button } from "@mui/material";
+import { Box, useTheme, Button, Typography } from "@mui/material";
 import LoadingModal from "../../components/LoadingModal.jsx";
 import CustomAlert from "../../components/CustomAlert.jsx";
 import Grid from "@mui/material/Grid";
@@ -35,8 +35,8 @@ function Index() {
   const [selectedStartDate, setSelectedStartDate] = React.useState("");
   const [selectedFinishDate, setSelectedFinishDate] = React.useState("");
   const [result, setResult] = useState([]);
-  const [rowOneData, setRowOneData] = useState([]);  
-  const [dataGridData, setDataGridData] = useState([]);  
+  const [rowOneData, setRowOneData] = useState([]);
+  const [dataGridData, setDataGridData] = useState([]);
   const [managedTaskData, setManagedTaskData] = useState([]);
   const [locationStatusData, setLocationStatusData] = useState([]);
   const [typeServiceData, setTypeServiceData] = useState([]);
@@ -125,9 +125,9 @@ function Index() {
         selectedFinishDate
       );
 
-      console.log(JSON.parse(response.data[0].row_one))
-      setRowOneData(JSON.parse(response.data[0].row_one));      
-      setDataGridData(JSON.parse(response.data[0].DataGridManagementByManager));      
+      console.log(JSON.parse(response.data[0].row_one));
+      setRowOneData(JSON.parse(response.data[0].row_one));
+      setDataGridData(JSON.parse(response.data[0].DataGridManagementByManager));
       setManagedTaskData(JSON.parse(response.data[0].ManagedTask));
       setLocationStatusData(JSON.parse(response.data[0].LocationStatus));
       setTypeServiceData(JSON.parse(response.data[0].TypeService));
@@ -167,6 +167,12 @@ function Index() {
 
   return (
     <Box sx={{ margin: "20px" }}>
+      <Typography
+        variant="h3"
+        sx={{ color: colors.accentGreen[100], marginBottom: "20px", fontWeight: "bold" }}
+      >
+        Dashboard de Coordinadores
+      </Typography>
       <Box
         m="20px 0"
         display="flex"
