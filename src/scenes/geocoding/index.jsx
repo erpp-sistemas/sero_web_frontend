@@ -38,7 +38,7 @@ const Geocoding = () => {
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-
+    setIsLoading(true);
     setSelectedFile(null);
 
     if (file) {
@@ -65,6 +65,7 @@ const Geocoding = () => {
       // Limpiar DataGrid
       setRows([]);
       setColumns([]);
+      setIsLoading(false);
     }
 
     setFileKey((prevKey) => prevKey + 1);

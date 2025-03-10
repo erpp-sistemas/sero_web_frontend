@@ -91,6 +91,7 @@
     "react-hook-form": "^7.48.2",
     "react-icons": "^4.12.0",
     "react-input-mask": "^2.0.4",
+    "react-map-gl": "^8.0.1",
     "react-parallax-tilt": "^1.7.120",
     "react-pdf": "^7.5.1",
     "react-player": "^2.13.0",
