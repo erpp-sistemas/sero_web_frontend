@@ -23,6 +23,8 @@ const getRandomColor = () => {
 };
 
 function PublicService({ data }) {
+
+  console.log(data)
   if (!data || data.length === 0) {
     return (
       <p className="text-center text-gray-500">No hay datos para mostrar</p>

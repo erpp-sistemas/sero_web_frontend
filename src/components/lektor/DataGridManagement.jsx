@@ -17,8 +17,7 @@ import {
 } from "@mui/material";
 
 const DataGridManagement = ({ data }) => {
-
-  console.log(data)
+  
   if (!data || data.length === 0) {
     return <p>No hay datos para mostrar</p>;
   }

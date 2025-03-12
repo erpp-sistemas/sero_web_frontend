@@ -42,7 +42,7 @@ const Sidebar = () => {
   const user = useSelector((state) => state.user);
   const navigate = useNavigate();
   const location = useLocation();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md")); // Ajusta el breakpoint según sea necesario
+  const isMobile = useMediaQuery(theme.breakpoints.down("md")); // Ajusta el breakpoint según sea necesario  
 
   console.log("isMobile:", isMobile);
 
@@ -124,6 +124,10 @@ const Sidebar = () => {
     return location.pathname === route ? "bg-gray-500 dark:bg-gray-600 " : "";
   };
 
+  const isActiveMenu2 = (id_menu) => {
+    return selectedMenu === id_menu ? "bg-gray-500 dark:bg-gray-600 " : "";
+  };
+
   const handleMenuItemClick = (event, route, menuItem) => {
     event.preventDefault(); // Prevent page reload
     setSelectedMenu(menuItem.id_menu);
@@ -142,6 +146,7 @@ const Sidebar = () => {
     setCurrentSection(sectionName);
   };
 
+  //Se comento porque no se mantenia el valor del menu seleccionado al recargar la pagina
   useEffect(() => {
     // Limpiar el menú seleccionado al montar el componente
     setSelectedMenu(null);
@@ -311,7 +316,7 @@ const Sidebar = () => {
                                   ? colors.accentGreen[100]
                                   : "transparent",
                               "&:hover": {
-                                borderRadius: "35px",                                
+                                borderRadius: "35px",
                                 backgroundColor: colors.primary[500],
                               },
                               "&.selected": {

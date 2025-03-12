@@ -35,6 +35,7 @@ const Profile = () => {
 
 	const handleCerrarSesion = () => {
 		localStorage.removeItem('token')
+        localStorage.removeItem("selectedMenu");
 		Cookies.remove('token')
 		dispatch(logoutUser())
 		window.location.reload()

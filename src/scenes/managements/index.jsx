@@ -8,6 +8,7 @@ import { Search } from "@mui/icons-material";
 import { registerFormDynamicManagementRequest } from "../../api/management.js";
 import DataGridManagement from "../../components/lektor/DataGridManagement.jsx";
 import PublicService from "../../components/managements/PublicService.jsx";
+import Supervision from "../../components/managements/Supervision.jsx";
 import LoadingModal from "../../components/LoadingModal.jsx";
 import CustomAlert from "../../components/CustomAlert.jsx";
 
@@ -26,27 +27,32 @@ function Index() {
   const [alertType, setAlertType] = useState("info");
   const [resultData, setResultData] = useState([]);
 
-  const handlePlaceChange = (event) => {
+  const handlePlaceChange = useCallback((event) => {
     setSelectedPlace(event.target.value);
     setSelectedProcess("");
     setSelectedService("");
-  };
+    setResultData([]);
+  }, []);
 
-  const handleServiceChange = (event) => {
+  const handleServiceChange = useCallback((event) => {
     setSelectedService(event.target.value);
     setSelectedProcess("");
-  };
+    setResultData([]);
+  }, []);
 
-  const handleProcessChange = (event) => {
+  const handleProcessChange = useCallback((event) => {
     setSelectedProcess(event.target.value);
-  };
+    setResultData([]);
+  }, []);
 
   const handleStartDateChange = useCallback((event) => {
     setSelectedStartDate(event.target.value);
+    setResultData([]);
   }, []);
 
   const handleFinishDateChange = useCallback((event) => {
     setSelectedFinishDate(event.target.value);
+    setResultData([]);
   }, []);
 
   const handleGetLektorManagement = () => {
@@ -87,7 +93,8 @@ function Index() {
             ...item,
             fotos: item.fotos ? JSON.parse(item.fotos) : [], // Convierte a array
           }));
-          setResultData(processedData);          
+          setResultData(processedData);
+          console.log(processedData);
         }
       })
       .catch((error) => {
@@ -262,14 +269,19 @@ function Index() {
           Datos encontrados
         </Typography>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
-      <PublicService data={resultData} />
+        {selectedService === 8 &&
+          selectedProcess === 13 &&
+          resultData?.length > 0 && <PublicService data={resultData} />}
+
+        {selectedService === 9 &&
+          selectedProcess === 14 &&
+          resultData?.length > 0 && <Supervision data={resultData} />}
       </div>
       <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
         <DataGridManagement data={resultData} />
       </div>
-        
     </div>
   );
 }
