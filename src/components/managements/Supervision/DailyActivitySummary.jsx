@@ -17,7 +17,8 @@ import { KeyboardArrowDown, KeyboardArrowUp } from "@mui/icons-material";
 import { tokens } from "../../../theme";
 
 const DailyActivitySummary = ({ data }) => {
-  console.log(data);
+  console.log(data)
+
   if (!data || data.length === 0) {
     return (
       <p className="text-center text-gray-500">No hay datos para mostrar</p>

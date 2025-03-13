@@ -1,23 +1,35 @@
-import React from "react";
+import React, { useState  } from "react";
 import StatsCards from '../../components/managements/Supervision/statsCards.jsx'
 import SupervisionsPerUser from './Supervision/SupervisionsPerUser.jsx'
+import SupervisionsPerManager from './Supervision/SupervisionsPerManager.jsx'
 import DailyActivitySummary from './Supervision/DailyActivitySummary.jsx'
+import FieldSelector from './Supervision/FieldSelector.jsx'
 
 function Supervision({data}) {
   console.log(data)
+
+  const [selectedFields, setSelectedFields] = useState([]);
+
+  const handleFieldSelectionChange = (fields) => {
+    setSelectedFields(fields);
+    console.log(fields)
+  };
   return (
     <div className="w-full text-white">
+       <div className="w-full p-4 rounded-lg shadow-md mb-4">
+        <FieldSelector data={data} onSelectionChange={handleFieldSelectionChange} />
+      </div>
       {/* Primera Fila: 3 Contenedores de Ancho Completo */}
       <div className="w-full pb-3 rounded-lg shadow-md">
-        <StatsCards data={data}/>
+        <StatsCards data={data} selectedFields={selectedFields}/>
       </div>
 
       <div className="w-full p-6 rounded-lg shadow-md">
-        <SupervisionsPerUser data={data}/>
+        <SupervisionsPerUser data={data}  selectedFields={selectedFields}/>
       </div>
 
       <div className="w-full p-6 rounded-lg shadow-md">
-        <DailyActivitySummary data={data}/>
+        <SupervisionsPerManager data={data}  selectedFields={selectedFields}/>
       </div>
     </div>
   );

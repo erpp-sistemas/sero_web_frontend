@@ -11,11 +11,12 @@ import {
   IconButton,
   Collapse,
   useTheme,
+  Badge,
 } from "@mui/material";
 import { KeyboardArrowUp, KeyboardArrowDown } from "@mui/icons-material";
 import { tokens } from "../../../theme";
 
-const SupervisionsPerUser = ({ data, selectedFields }) => {
+const SupervisionsPerManager = ({ data, selectedFields }) => {
   if (!data || data.length === 0) {
     return (
       <p className="text-center text-gray-500">No hay datos para mostrar</p>
@@ -28,30 +29,30 @@ const SupervisionsPerUser = ({ data, selectedFields }) => {
 
   // 🔹 Agrupar datos por usuario
   const userSummaries = data.reduce((acc, item) => {
-    if (!acc[item.usuario]) {
-      acc[item.usuario] = {
-        usuario: item.usuario,
+    if (!acc[item.gestor_visitado_nombre]) {
+      acc[item.gestor_visitado_nombre] = {
+        gestor_visitado_nombre: item.gestor_visitado_nombre,
         totalSupervisions: 0,
         fieldCounts: {},
         details: [],
       };
     }
 
-    acc[item.usuario].totalSupervisions += 1; // 🔹 Contador de supervisiones
+    acc[item.gestor_visitado_nombre].totalSupervisions += 1; // 🔹 Contador de supervisiones
 
     selectedFields.forEach((field) => {
-      if (!acc[item.usuario].fieldCounts[field]) {
-        acc[item.usuario].fieldCounts[field] = { yes: 0, no: 0 };
+      if (!acc[item.gestor_visitado_nombre].fieldCounts[field]) {
+        acc[item.gestor_visitado_nombre].fieldCounts[field] = { yes: 0, no: 0 };
       }
 
       if (item[field] === "Si") {
-        acc[item.usuario].fieldCounts[field].yes += 1;
+        acc[item.gestor_visitado_nombre].fieldCounts[field].yes += 1;
       } else if (item[field] === "No") {
-        acc[item.usuario].fieldCounts[field].no += 1;
+        acc[item.gestor_visitado_nombre].fieldCounts[field].no += 1;
       }
     });
 
-    acc[item.usuario].details.push(item);
+    acc[item.gestor_visitado_nombre].details.push(item);
     return acc;
   }, {});
 
@@ -59,31 +60,34 @@ const SupervisionsPerUser = ({ data, selectedFields }) => {
     (a, b) => b.totalSupervisions - a.totalSupervisions
   );
 
-  const totalUsuarios = sortedUserSummaries.length;
+  const totalGestoresVisitados = sortedUserSummaries.length;
 
-  const toggleRow = (usuario) => {
-    setOpenRows((prev) => ({ ...prev, [usuario]: !prev[usuario] }));
-  };
-
-  const setUserFilter = (usuario, key, value) => {
-    setFilters((prev) => ({
+  const toggleRow = (gestor_visitado_nombre) => {
+    setOpenRows((prev) => ({
       ...prev,
-      [usuario]: { key, value },
+      [gestor_visitado_nombre]: !prev[gestor_visitado_nombre],
     }));
   };
 
-  const filterDetails = (usuario, details) => {
-    const userFilter = filters[usuario];
+  const setUserFilter = (gestor_visitado_nombre, key, value) => {
+    setFilters((prev) => ({
+      ...prev,
+      [gestor_visitado_nombre]: { key, value },
+    }));
+  };
+
+  const filterDetails = (gestor_visitado_nombre, details) => {
+    const userFilter = filters[gestor_visitado_nombre];
     if (!userFilter) return details;
     return details.filter(
       (detail) => detail[userFilter.key] === userFilter.value
     );
   };
 
-  const clearUserFilter = (usuario) => {
+  const clearUserFilter = (gestor_visitado_nombre) => {
     setFilters((prev) => {
       const newFilters = { ...prev };
-      delete newFilters[usuario]; // Elimina el filtro para ese usuario
+      delete newFilters[gestor_visitado_nombre]; // Elimina el filtro para ese usuario
       return newFilters;
     });
   };
@@ -100,7 +104,7 @@ const SupervisionsPerUser = ({ data, selectedFields }) => {
             textTransform: "uppercase",
           }}
         >
-          Estadisticas por supervisor
+          Estadisticas por Gestor Visitado
         </Typography>
 
         {/* Contador de gestores visitados */}
@@ -113,7 +117,7 @@ const SupervisionsPerUser = ({ data, selectedFields }) => {
               textTransform: "uppercase",
             }}
           >
-            Supervisores:
+            Gestores visitados:
           </Typography>
           <Typography
             variant="h3"
@@ -123,11 +127,10 @@ const SupervisionsPerUser = ({ data, selectedFields }) => {
               textTransform: "uppercase",
             }}
           >
-            {totalUsuarios}
+            {totalGestoresVisitados}
           </Typography>
         </div>
-      </div>      
-
+      </div>
       <TableContainer
         component={Paper}
         sx={{
@@ -161,7 +164,7 @@ const SupervisionsPerUser = ({ data, selectedFields }) => {
                   textTransform: "uppercase",
                 }}
               >
-                Supervisor
+                Gestor Visitado
               </TableCell>
               <TableCell
                 sx={{
@@ -170,7 +173,7 @@ const SupervisionsPerUser = ({ data, selectedFields }) => {
                   textTransform: "uppercase",
                 }}
               >
-                Total Supervisiones
+                Total Supervisiones recibidas
               </TableCell>
               {selectedFields.map((field) => (
                 <TableCell
@@ -189,16 +192,21 @@ const SupervisionsPerUser = ({ data, selectedFields }) => {
 
           <TableBody>
             {sortedUserSummaries.map(
-              ({ usuario, totalSupervisions, fieldCounts, details }) => (
-                <React.Fragment key={usuario}>
+              ({
+                gestor_visitado_nombre,
+                totalSupervisions,
+                fieldCounts,
+                details,
+              }) => (
+                <React.Fragment key={gestor_visitado_nombre}>
                   <TableRow>
                     <TableCell>
                       <IconButton
                         size="small"
-                        onClick={() => toggleRow(usuario)}
+                        onClick={() => toggleRow(gestor_visitado_nombre)}
                         sx={{ color: colors.accentGreen[100] }}
                       >
-                        {openRows[usuario] ? (
+                        {openRows[gestor_visitado_nombre] ? (
                           <KeyboardArrowUp sx={{ fontWeight: "bold" }} />
                         ) : (
                           <KeyboardArrowDown sx={{ fontWeight: "bold" }} />
@@ -213,12 +221,12 @@ const SupervisionsPerUser = ({ data, selectedFields }) => {
                           fontWeight: "bold",
                         }}
                       >
-                        {usuario}
+                        {gestor_visitado_nombre}
                       </Typography>
                     </TableCell>
                     <TableCell>
                       <IconButton
-                        onClick={() => clearUserFilter(usuario)}
+                        onClick={() => clearUserFilter(gestor_visitado_nombre)}
                         sx={{
                           color: colors.accentGreen[100],
                           fontWeight: "bold",
@@ -235,7 +243,9 @@ const SupervisionsPerUser = ({ data, selectedFields }) => {
                             color: colors.accentGreen[100],
                             fontWeight: "bold",
                           }}
-                          onClick={() => setUserFilter(usuario, field, "Si")}
+                          onClick={() =>
+                            setUserFilter(gestor_visitado_nombre, field, "Si")
+                          }
                         >
                           {fieldCounts[field]?.yes || 0}
                         </IconButton>
@@ -248,7 +258,9 @@ const SupervisionsPerUser = ({ data, selectedFields }) => {
                             color: colors.accentGreen[100],
                             fontWeight: "bold",
                           }}
-                          onClick={() => setUserFilter(usuario, field, "No")}
+                          onClick={() =>
+                            setUserFilter(gestor_visitado_nombre, field, "No")
+                          }
                         >
                           {fieldCounts[field]?.no || 0}
                         </IconButton>
@@ -259,11 +271,11 @@ const SupervisionsPerUser = ({ data, selectedFields }) => {
                     ))}
                   </TableRow>
 
-                  {openRows[usuario] && (
+                  {openRows[gestor_visitado_nombre] && (
                     <TableRow>
                       <TableCell colSpan={selectedFields.length + 3}>
                         <Collapse
-                          in={openRows[usuario]}
+                          in={openRows[gestor_visitado_nombre]}
                           timeout="auto"
                           unmountOnExit
                         >
@@ -283,7 +295,7 @@ const SupervisionsPerUser = ({ data, selectedFields }) => {
                                     textTransform: "uppercase",
                                   }}
                                 >
-                                  GESTOR VISITADO
+                                  Supervisor
                                 </TableCell>
                                 <TableCell
                                   sx={{
@@ -309,25 +321,24 @@ const SupervisionsPerUser = ({ data, selectedFields }) => {
                               </TableRow>
                             </TableHead>
                             <TableBody>
-                              {filterDetails(usuario, details).map(
-                                (detail, index) => (
-                                  <TableRow key={index}>
-                                    <TableCell>
-                                      {detail.gestor_visitado_nombre}
+                              {filterDetails(
+                                gestor_visitado_nombre,
+                                details
+                              ).map((detail, index) => (
+                                <TableRow key={index}>
+                                  <TableCell>{detail.usuario}</TableCell>
+                                  <TableCell>
+                                    {new Date(
+                                      detail.fecha_captura
+                                    ).toLocaleString()}
+                                  </TableCell>
+                                  {selectedFields.map((field) => (
+                                    <TableCell key={field}>
+                                      {detail[field]}
                                     </TableCell>
-                                    <TableCell>
-                                      {new Date(
-                                        detail.fecha_captura
-                                      ).toLocaleString()}
-                                    </TableCell>
-                                    {selectedFields.map((field) => (
-                                      <TableCell key={field}>
-                                        {detail[field]}
-                                      </TableCell>
-                                    ))}
-                                  </TableRow>
-                                )
-                              )}
+                                  ))}
+                                </TableRow>
+                              ))}
                             </TableBody>
                           </Table>
                         </Collapse>
@@ -344,4 +355,4 @@ const SupervisionsPerUser = ({ data, selectedFields }) => {
   );
 };
 
-export default SupervisionsPerUser;
+export default SupervisionsPerManager;

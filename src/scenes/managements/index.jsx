@@ -25,7 +25,7 @@ function Index() {
   const [alertMessage, setAlertMessage] = useState("");
   const [alertTitle, setAlertTitle] = useState("");
   const [alertType, setAlertType] = useState("info");
-  const [resultData, setResultData] = useState([]);
+  const [resultData, setResultData] = useState([]);  
 
   const handlePlaceChange = useCallback((event) => {
     setSelectedPlace(event.target.value);
@@ -116,7 +116,7 @@ function Index() {
       .finally(() => {
         setShowModalLoading(false); // Aseguramos que el indicador de carga desaparezca al finalizar.
       });
-  };
+  };  
 
   return (
     <div className="p-4 font-[sans-serif]">
