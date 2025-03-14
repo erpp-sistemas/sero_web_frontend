@@ -6,7 +6,7 @@ import ProcessSelect from "../../components/select/processSelect";
 import { Button, TextField, Typography, useTheme } from "@mui/material";
 import { Search } from "@mui/icons-material";
 import { registerFormDynamicManagementRequest } from "../../api/management.js";
-import DataGridManagement from "../../components/lektor/DataGridManagement.jsx";
+import DataGridManagement from "../../components/managements/DataGridManagement.jsx";
 import PublicService from "../../components/managements/PublicService.jsx";
 import Supervision from "../../components/managements/Supervision.jsx";
 import LoadingModal from "../../components/LoadingModal.jsx";
