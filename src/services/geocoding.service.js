@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const HEREDESERVER_URL = 'https://geocode.search.hereapi.com/v1/geocode'; // URL del proveedor Heredeveloper
-const HEREDESERVER_API_KEY = 'pvpXYHLE9Bl8Ql5BiMwmzDWg9qVFAmaO1bs5B3i8Js0'; // Reemplaza con tu clave de API
+const HEREDESERVER_API_KEY = 'sRRMHvvqhOQ7NgaMOv1RZOxssenLUtDAF0xLzOcxO-I'; // Reemplaza con tu clave de API
 
 export const getCoordinates = async (address) => {
     try {
