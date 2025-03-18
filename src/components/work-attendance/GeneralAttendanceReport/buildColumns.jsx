@@ -336,10 +336,10 @@ function buildColumns() {
           let chipColor = colors.greenAccent[400];
           let chipLabel = "";
           switch (params.row.estatus_punto_entrada) {
-            case "Campo":
+            case "Aplicación":
               icon = <EditRoad />;
               chipColor = colors.tealAccent[400];
-              chipLabel = "Campo";
+              chipLabel = "Aplicación";
               break;
             case "Corporativo":
               icon = <Apartment />;
@@ -639,10 +639,10 @@ function buildColumns() {
           let chipColor = colors.greenAccent[400];
           let chipLabel = "";
           switch (params.row.estatus_punto_salida) {
-            case "Campo":
+            case "Aplicación":
               icon = <EditRoad />;
               chipColor = colors.tealAccent[400];
-              chipLabel = "Campo";
+              chipLabel = "Aplicación";
               break;
             case "Corporativo":
               icon = <Apartment />;
