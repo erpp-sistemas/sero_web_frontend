@@ -381,7 +381,7 @@ function buildColumns() {
         renderCell: (params) => {
           const { lugar_entrada, estatus_punto_entrada } = params.row;
           const isDisabled =
-            estatus_punto_entrada !== "Campo" &&
+            estatus_punto_entrada !== "Aplicación" &&
             estatus_punto_entrada !== "Corporativo";
 
           return (
@@ -685,7 +685,7 @@ function buildColumns() {
         renderCell: (params) => {
           const { lugar_salida, estatus_punto_salida } = params.row;
           const isDisabled =
-            estatus_punto_salida !== "Campo" &&
+            estatus_punto_salida !== "Aplicación" &&
             estatus_punto_salida !== "Corporativo";
 
           return (
