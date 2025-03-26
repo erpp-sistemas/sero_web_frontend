@@ -64,6 +64,7 @@ import TestRh from './scenes/rh-test'
 import Lektor from './scenes/lektor'
 import Managements from './scenes/managements'
 import AssignmentManager from './scenes/assignment-manager'
+import AccountDetails from './scenes/account-details'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -216,7 +217,9 @@ function App() {
                         <Route path="/test-rh" element={<TestRh />} />
                         <Route path="/lektor" element={<Lektor />} />
                         <Route path="/managements" element={<Managements />} />
-                        <Route path="/assignment-manager" element={<AssignmentManager />} />                        
+                        <Route path="/assignment-manager" element={<AssignmentManager />} />
+                        <Route path="/account-details" element={<AccountDetails />} />
+                        
                       </Routes>
                     </main>
                   </Box>

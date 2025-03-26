@@ -15,6 +15,15 @@ import Chip from "@mui/material/Chip";
 import { DirectionsRun, MarkEmailRead } from "@mui/icons-material";
 
 const Actions = ({ action }) => {
+
+  if (!action || action.length === 0) {
+      return (
+        <Typography align="center" color="textSecondary">
+          No hay datos para mostrar
+        </Typography>
+      );
+    }
+
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const parsedActions = Array.isArray(action) ? action : JSON.parse(action);
@@ -30,7 +39,6 @@ const Actions = ({ action }) => {
           alt="Remy Sharp"
           src={data}
         />
-
         <Viewer
           visible={visibleAvatar}
           onClose={() => {
@@ -41,22 +49,9 @@ const Actions = ({ action }) => {
       </>
     );
   };
-
-  if (parsedActions === null) {
-    return (
-      <Grid container>
-        <Grid item xs={12}>
-          <Typography variant="h4" component="h4" sx={{ fontWeight: "bold" }}>
-            No se encontraron acciones
-          </Typography>
-        </Grid>
-      </Grid>
-    );
-  }
-
+   
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-
     const datePart = date.toLocaleDateString();
     const timePart = date.toLocaleTimeString();
     return `${datePart} ${timePart}`;
@@ -67,18 +62,27 @@ const Actions = ({ action }) => {
   );
 
   return (
-    <div>
+    <div className="space-y-3 pt-3">
+      <Typography
+        variant="h3"
+        sx={{
+          color: colors.accentGreen[100],
+          marginTop: "10px",
+          fontWeight: "bold",
+        }}
+      >
+        Acciones realizadas a la cuenta
+      </Typography>
       <Box
         display="flex"
         justifyContent="space-evenly"
         flexWrap="wrap"
         gap="20px"
-        padding="15px 10px"
         borderRadius="10px"
       >
         <Grid container spacing={2}>
           {sortedActions.map((actions, index) => (
-            <Grid key={index} item xs={12} md={4}>
+            <Grid key={index} item xs={12} md={3}>
               <Box
                 sx={{
                   backgroundColor: "rgba(128, 128, 128, 0.1)",
