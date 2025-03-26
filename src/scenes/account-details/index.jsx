@@ -104,7 +104,6 @@ function Index() {
           variant="contained"
           sx={{
             width: "100%",
-
             borderRadius: "35px",
             display: "flex",
             justifyContent: "space-between",

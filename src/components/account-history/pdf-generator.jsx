@@ -1,8 +1,11 @@
 import React from "react";
 import { jsPDF } from "jspdf";
 import "jspdf-autotable";
-import ErppLogo from '../../../public/ERPP-LOGO-2.png';
-import Ser0Logo from '../../../public/sero-logo.png';
+import ErppLogo from "../../../public/ERPP-LOGO-2.png";
+import Ser0Logo from "../../../public/sero-logo.png";
+
+import { Button } from "@mui/material";
+import { Download } from "@mui/icons-material";
 
 const PDFGenerator = ({ data }) => {
   const generatePDF = async () => {
@@ -13,6 +16,7 @@ const PDFGenerator = ({ data }) => {
 
     const doc = new jsPDF();
     const pageHeight = doc.internal.pageSize.height; // Altura de la página
+    const pageWidth = doc.internal.pageSize.width; // Ancho de la página
     const marginBottom = 10; // Margen inferior
 
     const user = data[0]; // Tomamos el primer objeto del array
@@ -36,24 +40,6 @@ const PDFGenerator = ({ data }) => {
       return currentY;
     };
 
-    // Función para convertir una imagen a base64
-    const convertImageToBase64 = async (url) => {
-      return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.crossOrigin = "Anonymous";
-        img.onload = () => {
-          const canvas = document.createElement("canvas");
-          canvas.width = img.width;
-          canvas.height = img.height;
-          const ctx = canvas.getContext("2d");
-          ctx.drawImage(img, 0, 0);
-          resolve(canvas.toDataURL("image/png"));
-        };
-        img.onerror = (err) => reject(err);
-        img.src = url;
-      });
-    };
-
     // Agregar el encabezado inicial
     addHeader();
 
@@ -65,15 +51,81 @@ const PDFGenerator = ({ data }) => {
     // Información de la Cuenta (Subtítulo)
     doc.setFontSize(12);
     doc.setFont("helvetica", "bold");
-    doc.text("Información de la Cuenta", 10, 50);
+    doc.text("INFORMACION DE LA CUENTA", 10, 50);
 
     const accountInfo = [
-      [{ content: "Cuenta", styles: { fillColor: [0, 102, 204], textColor: 255, halign: "right", fontStyle: "bold" } }, user.account || "No disponible"],
-      [{ content: "Nombre", styles: { fillColor: [0, 102, 204], textColor: 255, halign: "right", fontStyle: "bold" } }, user.owner_name || "No disponible"],
-      [{ content: "Servicio", styles: { fillColor: [0, 102, 204], textColor: 255, halign: "right", fontStyle: "bold" } }, user.type_service || "No disponible"],
-      [{ content: "Tarifa", styles: { fillColor: [0, 102, 204], textColor: 255, halign: "right", fontStyle: "bold" } }, user.rate_type || "No disponible"],
-      [{ content: "Turno", styles: { fillColor: [0, 102, 204], textColor: 255, halign: "right", fontStyle: "bold" } }, user.turn || "No disponible"],
-      [{ content: "Serie del Medidor", styles: { fillColor: [0, 102, 204], textColor: 255, halign: "right", fontStyle: "bold" } }, user.meter_series || "No disponible"],
+      [
+        {
+          content: "Cuenta",
+          styles: {
+            fillColor: [0, 102, 204],
+            textColor: 255,
+            halign: "right",
+            fontStyle: "bold",
+          },
+        },
+        user.account || "No disponible",
+      ],
+      [
+        {
+          content: "Propietario",
+          styles: {
+            fillColor: [0, 102, 204],
+            textColor: 255,
+            halign: "right",
+            fontStyle: "bold",
+          },
+        },
+        user.owner_name || "No disponible",
+      ],
+      [
+        {
+          content: "Tipo de servicio",
+          styles: {
+            fillColor: [0, 102, 204],
+            textColor: 255,
+            halign: "right",
+            fontStyle: "bold",
+          },
+        },
+        user.type_service || "No disponible",
+      ],
+      [
+        {
+          content: "Tipo de tarifa",
+          styles: {
+            fillColor: [0, 102, 204],
+            textColor: 255,
+            halign: "right",
+            fontStyle: "bold",
+          },
+        },
+        user.rate_type || "No disponible",
+      ],
+      [
+        {
+          content: "Giro",
+          styles: {
+            fillColor: [0, 102, 204],
+            textColor: 255,
+            halign: "right",
+            fontStyle: "bold",
+          },
+        },
+        user.turn || "No disponible",
+      ],
+      [
+        {
+          content: "Serie del Medidor",
+          styles: {
+            fillColor: [0, 102, 204],
+            textColor: 255,
+            halign: "right",
+            fontStyle: "bold",
+          },
+        },
+        user.meter_series || "No disponible",
+      ],
     ];
 
     doc.autoTable({
@@ -91,22 +143,165 @@ const PDFGenerator = ({ data }) => {
     currentY = checkPageSpace(currentY, 50); // Verificar espacio antes de agregar la tabla
     doc.setFontSize(12);
     doc.setFont("helvetica", "bold");
-    doc.text("Dirección de la Cuenta", 10, currentY);
+    doc.text("DIRECCION DE LA CUENTA", 10, currentY);
 
     const addressInfo = [
-      [{ content: "Calle", styles: { fillColor: [0, 102, 204], textColor: 255, halign: "right", fontStyle: "bold" } }, user.street || "No disponible"],
-      [{ content: "Número Exterior", styles: { fillColor: [0, 102, 204], textColor: 255, halign: "right", fontStyle: "bold" } }, user.outdoor_number || "No disponible"],
-      [{ content: "Número Interior", styles: { fillColor: [0, 102, 204], textColor: 255, halign: "right", fontStyle: "bold" } }, user.interior_number || "No disponible"],
-      [{ content: "Colonia", styles: { fillColor: [0, 102, 204], textColor: 255, halign: "right", fontStyle: "bold" } }, user.cologne || "No disponible"],
-      [{ content: "Plaza", styles: { fillColor: [0, 102, 204], textColor: 255, halign: "right", fontStyle: "bold" } }, user.square || "No disponible"],
-      [{ content: "Lote", styles: { fillColor: [0, 102, 204], textColor: 255, halign: "right", fontStyle: "bold" } }, user.allotment || "No disponible"],
-      [{ content: "Entre Calle 1", styles: { fillColor: [0, 102, 204], textColor: 255, halign: "right", fontStyle: "bold" } }, user.between_street_1 || "No disponible"],
-      [{ content: "Entre Calle 2", styles: { fillColor: [0, 102, 204], textColor: 255, halign: "right", fontStyle: "bold" } }, user.between_street_2 || "No disponible"],
-      [{ content: "Referencia", styles: { fillColor: [0, 102, 204], textColor: 255, halign: "right", fontStyle: "bold" } }, user.reference || "No disponible"],
-      [{ content: "Municipio", styles: { fillColor: [0, 102, 204], textColor: 255, halign: "right", fontStyle: "bold" } }, user.town || "No disponible"],
-      [{ content: "Código Postal", styles: { fillColor: [0, 102, 204], textColor: 255, halign: "right", fontStyle: "bold" } }, user.postal_code || "No disponible"],
-      [{ content: "Latitud", styles: { fillColor: [0, 102, 204], textColor: 255, halign: "right", fontStyle: "bold" } }, user.latitude || "No disponible"],
-      [{ content: "Longitud", styles: { fillColor: [0, 102, 204], textColor: 255, halign: "right", fontStyle: "bold" } }, user.longitude || "No disponible"],
+      [
+        {
+          content: "Calle",
+          styles: {
+            fillColor: [0, 102, 204],
+            textColor: 255,
+            halign: "right",
+            fontStyle: "bold",
+          },
+        },
+        user.street || "No disponible",
+      ],
+      [
+        {
+          content: "Número Exterior",
+          styles: {
+            fillColor: [0, 102, 204],
+            textColor: 255,
+            halign: "right",
+            fontStyle: "bold",
+          },
+        },
+        user.outdoor_number || "No disponible",
+      ],
+      [
+        {
+          content: "Número Interior",
+          styles: {
+            fillColor: [0, 102, 204],
+            textColor: 255,
+            halign: "right",
+            fontStyle: "bold",
+          },
+        },
+        user.interior_number || "No disponible",
+      ],
+      [
+        {
+          content: "Colonia",
+          styles: {
+            fillColor: [0, 102, 204],
+            textColor: 255,
+            halign: "right",
+            fontStyle: "bold",
+          },
+        },
+        user.cologne || "No disponible",
+      ],
+      [
+        {
+          content: "Manzana",
+          styles: {
+            fillColor: [0, 102, 204],
+            textColor: 255,
+            halign: "right",
+            fontStyle: "bold",
+          },
+        },
+        user.square || "No disponible",
+      ],
+      [
+        {
+          content: "Lote",
+          styles: {
+            fillColor: [0, 102, 204],
+            textColor: 255,
+            halign: "right",
+            fontStyle: "bold",
+          },
+        },
+        user.allotment || "No disponible",
+      ],
+      [
+        {
+          content: "Entre Calle 1",
+          styles: {
+            fillColor: [0, 102, 204],
+            textColor: 255,
+            halign: "right",
+            fontStyle: "bold",
+          },
+        },
+        user.between_street_1 || "No disponible",
+      ],
+      [
+        {
+          content: "Entre Calle 2",
+          styles: {
+            fillColor: [0, 102, 204],
+            textColor: 255,
+            halign: "right",
+            fontStyle: "bold",
+          },
+        },
+        user.between_street_2 || "No disponible",
+      ],
+      [
+        {
+          content: "Referencia",
+          styles: {
+            fillColor: [0, 102, 204],
+            textColor: 255,
+            halign: "right",
+            fontStyle: "bold",
+          },
+        },
+        user.reference || "No disponible",
+      ],
+      [
+        {
+          content: "Poblacion",
+          styles: {
+            fillColor: [0, 102, 204],
+            textColor: 255,
+            halign: "right",
+            fontStyle: "bold",
+          },
+        },
+        user.town || "No disponible",
+      ],
+      [
+        {
+          content: "Código Postal",
+          styles: {
+            fillColor: [0, 102, 204],
+            textColor: 255,
+            halign: "right",
+            fontStyle: "bold",
+          },
+        },
+        user.postal_code || "No disponible",
+      ],
+      [
+        {
+          content: "Latitud",
+          styles: {
+            fillColor: [0, 102, 204],
+            textColor: 255,
+            halign: "right",
+            fontStyle: "bold",
+          },
+        },
+        user.latitude || "No disponible",
+      ],
+      [
+        {
+          content: "Longitud",
+          styles: {
+            fillColor: [0, 102, 204],
+            textColor: 255,
+            halign: "right",
+            fontStyle: "bold",
+          },
+        },
+        user.longitude || "No disponible",
+      ],
     ];
 
     doc.autoTable({
@@ -126,17 +321,27 @@ const PDFGenerator = ({ data }) => {
       currentY = checkPageSpace(currentY, 50);
       doc.setFontSize(14);
       doc.setFont("helvetica", "bold");
-      doc.text("HISTORIAL DE PAGOS", 10, currentY);
+      doc.text("PAGOS REALIZADOS POR LA CUENTA", 10, currentY);
       doc.autoTable({
         startY: currentY + 5,
-        head: [["Descripción", "Monto", "Fecha", "Período"]],
-        headStyles: { fillColor: [0, 102, 204], textColor: 255 }, // Color azul para encabezados
+        head: [
+          [
+            "Fecha de pago",
+            "Monto Pagado",
+            "Referencia",
+            "Descripción",
+            "Período",
+          ],
+        ],
+        headStyles: { fillColor: [0, 102, 204], textColor: 255, fontSize: 7 }, // Color azul para encabezados
         body: payments.map((p) => [
-          p.description,
-          `$${p.amount_paid.toFixed(2)}`,
           p.payment_date.split("T")[0],
+          `$${p.amount_paid.toFixed(2)}`,
+          p.reference,
+          p.description,
           p.payment_period,
         ]),
+        styles: { fontSize: 7 },
       });
     }
 
@@ -147,16 +352,19 @@ const PDFGenerator = ({ data }) => {
       currentY = checkPageSpace(currentY, 50);
       doc.setFontSize(14);
       doc.setFont("helvetica", "bold");
-      doc.text("HISTORIAL DE DEUDAS", 10, currentY);
+      doc.text("ADEUDOS REGISTRADOS DE LA CUENTA", 10, currentY);
       doc.autoTable({
         startY: currentY + 5,
-        head: [["Monto Deuda", "Último Pago", "Fecha Corte"]],
-        headStyles: { fillColor: [0, 102, 204], textColor: 255 }, // Color azul para encabezados
+        head: [
+          ["Fecha de actualizacion", "Fecha de corte", "Monto del adeudo"],
+        ],
+        headStyles: { fillColor: [0, 102, 204], textColor: 255, fontSize: 7 }, // Color azul para encabezados
         body: debts.map((d) => [
-          `$${d.debt_amount.toFixed(2)}`,
-          d.last_payment_date ? d.last_payment_date.split("T")[0] : "No disponible",
+          d.update_date ? d.update_date.split("T")[0] : "No disponible",
           d.cutoff_date ? d.cutoff_date.split("T")[0] : "No disponible",
+          `$${d.debt_amount.toFixed(2)}`,
         ]),
+        styles: { fontSize: 7 },
       });
     }
 
@@ -167,46 +375,148 @@ const PDFGenerator = ({ data }) => {
       currentY = checkPageSpace(currentY, 50);
       doc.setFontSize(14);
       doc.setFont("helvetica", "bold");
-      doc.text("HISTORIAL DE ACCIONES", 10, currentY);
+      doc.text("ACCIONES REALIZADAS A LA CUENTA", 10, currentY);
       doc.autoTable({
         startY: currentY + 5,
-        head: [["Acción", "Fecha", "Descripción"]],
+        head: [
+          ["Persona que gestiono", "Tarea gestionada", "Fecha de gestion"],
+        ],
         headStyles: { fillColor: [0, 102, 204], textColor: 255 }, // Color azul para encabezados
         body: actions.map((a) => [
+          a.person_who_capture || "No disponible",
           a.task_done,
           a.date_capture.split("T")[0],
-          a.person_who_capture || "No disponible",
         ]),
       });
     }
 
-    // Sección de Fotos
-    const photos = JSON.parse(user.photo || "[]");
+    const photos = Array.isArray(user.photo)
+      ? user.photo
+      : JSON.parse(user.photo || "[]");
     if (photos.length > 0) {
-      currentY = doc.autoTable.previous.finalY + 10;
+      currentY = doc.autoTable.previous.finalY + 15; // Aumentar el espacio antes del título
       currentY = checkPageSpace(currentY, 50);
+      if (currentY + 80 > pageHeight - marginBottom) {
+        doc.addPage(); // Agregar una nueva página si no hay espacio suficiente
+        addHeader();
+        currentY = 30; // Reiniciar la posición Y en la nueva página
+      }
       doc.setFontSize(14);
       doc.setFont("helvetica", "bold");
-      doc.text("FOTOS", 10, currentY);
+      doc.text("FOTOS CAPTURADAS DE LA CUENTA", 10, currentY);
+
+      currentY += 15; // Aumentar la distancia entre el título y la primera foto
 
       for (const photo of photos) {
-        currentY += 10;
-        currentY = checkPageSpace(currentY, 60); // Verificar espacio antes de agregar la imagen
+        currentY = checkPageSpace(currentY, 80); // Verificar espacio antes de agregar la tabla e imagen
 
-        // Convertir la imagen a base64
-        const base64Image = await convertImageToBase64(photo.image_url);
+        const base64Image = photo.imageBase64;
 
-        // Agregar la imagen al PDF
-        doc.addImage(base64Image, "PNG", 10, currentY, 50, 50);
+        if (base64Image) {
+          // Crear tabla con la foto y la información
+          const photoInfo = [
+            [
+              {
+                content: "", // Espacio reservado para la imagen
+                rowSpan: 4, // La imagen ocupará 4 filas
+                styles: { halign: "center", valign: "middle" }, // Sin fondo
+              },
+              {
+                content: "Persona que capturo",
+                styles: {
+                  fillColor: [0, 102, 204],
+                  textColor: 255,
+                  halign: "right",
+                  fontStyle: "bold",
+                },
+              },
+              {
+                content: photo.person_who_capture || "No disponible",
+                styles: { halign: "left" },
+              },
+            ],
+            [
+              {
+                content: "Tipo de foto",
+                styles: {
+                  fillColor: [0, 102, 204],
+                  textColor: 255,
+                  halign: "right",
+                  fontStyle: "bold",
+                },
+              },
+              {
+                content: photo.image_type || "No disponible",
+                styles: { halign: "left" },
+              },
+            ],
+            [
+              {
+                content: "Tarea gestionada",
+                styles: {
+                  fillColor: [0, 102, 204],
+                  textColor: 255,
+                  halign: "right",
+                  fontStyle: "bold",
+                },
+              },
+              {
+                content: photo.task_done || "No disponible",
+                styles: { halign: "left" },
+              },
+            ],
+            [
+              {
+                content: "Fecha de captura",
+                styles: {
+                  fillColor: [0, 102, 204],
+                  textColor: 255,
+                  halign: "right",
+                  fontStyle: "bold",
+                },
+              },
+              {
+                content: photo.date_capture || "No disponible",
+                styles: { halign: "left" },
+              },
+            ],
+          ];
 
-        // Agregar información de la foto
-        doc.setFontSize(10);
-        doc.text(`Tipo: ${photo.image_type || "No disponible"}`, 70, currentY + 10);
-        doc.text(`Fecha Captura: ${photo.date_capture || "No disponible"}`, 70, currentY + 20);
-        doc.text(`Tarea: ${photo.task_done || "No disponible"}`, 70, currentY + 30);
-        doc.text(`Capturado por: ${photo.person_who_capture || "No disponible"}`, 70, currentY + 40);
+          doc.autoTable({
+            startY: currentY,
+            body: photoInfo,
+            columnStyles: {
+              0: { cellWidth: 60, fillColor: [255, 255, 255] }, // Columna para la imagen
+              1: { cellWidth: 40 }, // Columna para los títulos
+              2: { cellWidth: 80 }, // Columna para los valores
+            },
+            styles: { cellPadding: 2, fontSize: 9 }, // Reducir el padding y el tamaño de fuente
+            didDrawCell: (data) => {
+              // Dibujar la imagen dentro de la celda de la primera columna
+              if (data.column.index === 0 && data.row.index === 0) {
+                const cell = data.cell;
+                const imgWidth = 50; // Ancho de la imagen
+                const imgHeight = 50; // Alto de la imagen
+                const xPos = cell.x + (cell.width - imgWidth) / 2; // Centrar horizontalmente
+                const yPos = cell.y + (cell.height - imgHeight) / 2; // Centrar verticalmente
+                doc.addImage(
+                  base64Image,
+                  "JPG",
+                  xPos,
+                  yPos,
+                  imgWidth,
+                  imgHeight
+                );
+              }
+            },
+          });
 
-        currentY += 50; // Espacio entre fotos
+          currentY = doc.autoTable.previous.finalY + 25; // Aumentar el espacio después de la tabla
+        } else {
+          doc.setFontSize(10);
+          doc.text("Imagen no disponible", 10, currentY);
+          currentY += 15; // Espacio si no hay imagen
+        }
       }
     }
 
@@ -214,7 +524,36 @@ const PDFGenerator = ({ data }) => {
     doc.save("Historial_de_cuenta.pdf");
   };
 
-  return <button onClick={generatePDF}>Generar PDF</button>;
+  return (
+    <Button
+      variant="contained"
+      color="info"
+      onClick={generatePDF}
+      sx={{
+        width: "100%",
+        borderRadius: "35px",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        border: "1px solid #d5e3f5",
+        boxShadow: "0 4px 6px rgba(255, 255, 255, 0.1)", // Sombra sutil
+      }}
+    >
+      {" "}
+      <span
+        style={{
+          flex: 1,
+          textAlign: "center",
+          fontSize: { xs: "0.875rem", sm: "1rem" }, // Ajuste de tamaño de texto en pantallas pequeñas
+          fontWeight: "bold",
+        }}
+      >
+        Descarga PDF
+      </span>
+      {/* Icono al final */}
+      <Download sx={{ fontSize: { xs: "1.25rem", sm: "1.5rem" } }} />
+    </Button>
+  );
 };
 
 export default PDFGenerator;
