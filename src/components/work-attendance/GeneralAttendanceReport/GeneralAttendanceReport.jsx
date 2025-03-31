@@ -27,6 +27,8 @@ function GeneralAttendanceReport({ data, reportWorkHoursData }) {
     return null;
   }
 
+  console.log(data)
+
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
@@ -446,7 +448,7 @@ function GeneralAttendanceReport({ data, reportWorkHoursData }) {
               <Grid item xs={12}>
                 <Typography
                   variant="h4"
-                  align="center"
+                  
                   sx={{
                     fontWeight: "bold",
                     paddingTop: 1,
@@ -507,9 +509,10 @@ function GeneralAttendanceReport({ data, reportWorkHoursData }) {
                 <Grid item xs={2} sx={{ marginLeft: 1 }}>
                   <Button
                     variant="contained"
+                    fullWidth
                     color="info"
                     onClick={handleDownloadExcelDataGrid}
-                    size="small"
+                    
                     startIcon={<Download />}
                     sx={{
                       borderRadius: "35px",
