@@ -21,13 +21,12 @@ import ModalTable from "../ModalTable.jsx";
 import FilteredList from "./FilteredList/FilteredList.jsx";
 import Viewer from "react-viewer";
 import IndividualAttendanceReportButton from "./IndividualAttendanceReportButton.jsx";
+import StatusPointFilter from "./StatusPointFilter.jsx";
 
 function GeneralAttendanceReport({ data, reportWorkHoursData }) {
   if (!data) {
     return null;
   }
-
-  console.log(data)
 
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -421,6 +420,45 @@ function GeneralAttendanceReport({ data, reportWorkHoursData }) {
     }
   };
 
+  const [statusCountsEntry, setStatusCountsEntry] = useState({});
+  const [statusCountsExit, setStatusCountsExit] = useState({});
+
+  useEffect(() => {
+    const sourceData = filteredUsers.length > 0 ? filteredUsers : data;
+
+    const countsEntry = sourceData.reduce((acc, user) => {
+      const status = user.estatus_punto_entrada || "Sin especificar";
+      acc[status] = (acc[status] || 0) + 1;
+      return acc;
+    }, {});
+
+    const countsExit = sourceData.reduce((acc, user) => {
+      const status = user.estatus_punto_salida || "Sin especificar";
+      acc[status] = (acc[status] || 0) + 1;
+      return acc;
+    }, {});
+
+    setStatusCountsEntry(countsEntry);
+    setStatusCountsExit(countsExit);
+  }, [data, filteredUsers]);
+
+  const handleFilter = (field, status) => {
+    // Si el status es "Sin especificar", cambiarlo a ''
+    const normalizedStatus = status === "Sin especificar" ? "" : status;
+
+    // Verificar si filteredUsers tiene datos
+    const sourceData = filteredUsers.length > 0 ? filteredUsers : data;
+
+    // Filtrar los datos según el campo y el estatus
+    const filtered = sourceData.filter(
+      (user) => user[field] === normalizedStatus
+    );
+
+    // Enviar los datos filtrados al modal
+    setModalData(filtered);
+    setOpenModal(true); // Abrir el modal
+  };
+
   return (
     <Box
       id="grid-1"
@@ -448,7 +486,6 @@ function GeneralAttendanceReport({ data, reportWorkHoursData }) {
               <Grid item xs={12}>
                 <Typography
                   variant="h4"
-                  
                   sx={{
                     fontWeight: "bold",
                     paddingTop: 1,
@@ -458,6 +495,23 @@ function GeneralAttendanceReport({ data, reportWorkHoursData }) {
                 >
                   LISTADO GENERAL DE ASISTENCIA
                 </Typography>
+              </Grid>
+
+              <Grid
+                item
+                xs={12}
+                container
+                justifyContent="space-between"
+                alignItems="stretch"
+                spacing={2}
+              >
+                <Grid item xs={12} md={8}>
+                  <StatusPointFilter
+                    statusCountsEntry={statusCountsEntry}
+                    statusCountsExit={statusCountsExit}
+                    onFilter={handleFilter} // Usar la función actualizada
+                  />
+                </Grid>
               </Grid>
 
               <Grid
@@ -512,7 +566,6 @@ function GeneralAttendanceReport({ data, reportWorkHoursData }) {
                     fullWidth
                     color="info"
                     onClick={handleDownloadExcelDataGrid}
-                    
                     startIcon={<Download />}
                     sx={{
                       borderRadius: "35px",
