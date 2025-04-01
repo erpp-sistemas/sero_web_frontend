@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from "react";
+import React, { useCallback, useState } from "react";
 import { tokens } from "../../theme";
 import PlaceSelect from "../../components/select/placeSelect.jsx";
 import ServiceSelect from "../../components/select/serviceSelect";

@@ -25,11 +25,10 @@ const StatusPointFilter = ({
             sx={{
               fontWeight: "bold",
               paddingBottom: 2,
-              color: colors.accentGreen[100],
-              textTransform: "uppercase",
+              color: colors.accentGreen[100],              
             }}
           >
-            Estatus Punto de Entrada
+            Estatus del punto de entrada
           </Typography>
           <div className="flex flex-wrap gap-2">
             {Object.entries(statusCountsEntry).map(([status, count]) => (
@@ -59,11 +58,10 @@ const StatusPointFilter = ({
             sx={{
               fontWeight: "bold",
               paddingBottom: 2,
-              color: colors.accentGreen[100],
-              textTransform: "uppercase",
+              color: colors.accentGreen[100],              
             }}
           >
-            Estatus Punto de Salida
+            Estatus del punto de salida
           </Typography>
           <div className="flex flex-wrap gap-2">
             {Object.entries(statusCountsExit).map(([status, count]) => (

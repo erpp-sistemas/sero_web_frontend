@@ -1,7 +1,6 @@
 import React, { useMemo } from "react";
 import {
   AccessTime,
-  AccessTimeRounded,
   Apartment,
   AttachMoney,
   BeachAccess,
@@ -10,7 +9,6 @@ import {
   Cancel,
   CheckCircle,
   Dangerous,
-  Done,
   EditRoad,
   InsertEmoticon,
   LocalHospital,
@@ -147,7 +145,7 @@ function buildColumns() {
           let icon = null;
           let chipColor = colors.greenAccent[400];
           let chipLabel = "";
-      
+
           switch (params.value) {
             case 1:
               icon = <Smartphone />;
@@ -164,7 +162,7 @@ function buildColumns() {
               chipColor = colors.redAccent[400];
               chipLabel = "Desconocido";
           }
-      
+
           return (
             <Chip
               icon={icon}
@@ -468,7 +466,7 @@ function buildColumns() {
             </Tooltip>
           );
         },
-      },      
+      },
       {
         field: "lugar_entrada_primer_gestion",
         headerName: "LUGAR DE ENTRADA PRIMERA GESTIÓN",
@@ -477,12 +475,16 @@ function buildColumns() {
             {"LUGAR DE ENTRADA PRIMERA GESTIÓN"}
           </strong>
         ),
-        width:300,
+        width: 300,
         renderCell: (params) => {
           const isDisabled = params.value === "Sin lugar";
-      
+
           return (
-            <Tooltip title={isDisabled ? "Sin ubicación disponible" : "Abrir en Google Maps"}>
+            <Tooltip
+              title={
+                isDisabled ? "Sin ubicación disponible" : "Abrir en Google Maps"
+              }
+            >
               <span>
                 {/* Necesario para que el Tooltip funcione en botones deshabilitados */}
                 <Button
@@ -495,10 +497,14 @@ function buildColumns() {
                     textTransform: "none",
                     fontWeight: "bold",
                     fontSize: "1.2em",
-                    backgroundColor: isDisabled ? colors.grey : colors.tealAccent[400],
+                    backgroundColor: isDisabled
+                      ? colors.grey
+                      : colors.tealAccent[400],
                     color: isDisabled ? "white" : "black",
                     "&:hover": {
-                      backgroundColor: isDisabled ? colors.grey : colors.tealAccent[600],
+                      backgroundColor: isDisabled
+                        ? colors.grey
+                        : colors.tealAccent[600],
                     },
                   }}
                 >
@@ -508,7 +514,7 @@ function buildColumns() {
             </Tooltip>
           );
         },
-      },      
+      },
       {
         field: "distancia_entrada",
         headerName: "DISTANCIA DE PUNTOS DE ENTRADA",
@@ -522,7 +528,7 @@ function buildColumns() {
           let icon = null;
           let chipColor = colors.greenAccent[400];
           let chipLabel = params.value;
-      
+
           if (params.value === 0) {
             icon = <WarningAmber />;
             chipColor = colors.yellowAccent[400];
@@ -536,7 +542,7 @@ function buildColumns() {
             chipColor = colors.redAccent[400];
             chipLabel = `${params.value} m`;
           }
-      
+
           return (
             <Chip
               icon={icon}

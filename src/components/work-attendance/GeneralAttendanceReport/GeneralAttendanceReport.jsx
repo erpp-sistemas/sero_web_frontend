@@ -493,7 +493,7 @@ function GeneralAttendanceReport({ data, reportWorkHoursData }) {
                     color: colors.accentGreen[100],
                   }}
                 >
-                  LISTADO GENERAL DE ASISTENCIA
+                  Listado general de asistencia
                 </Typography>
               </Grid>
 
@@ -668,7 +668,7 @@ function GeneralAttendanceReport({ data, reportWorkHoursData }) {
               <Grid
                 item
                 xs={12}
-                style={{ height: 560, width: "100%", marginTop: "20px" }}
+                style={{ height: 560, width: "100%" }}
               >
                 <Grid
                   item
@@ -681,15 +681,13 @@ function GeneralAttendanceReport({ data, reportWorkHoursData }) {
                   <Grid item xs={12}>
                     <Typography
                       variant="h4"
-                      align="center"
                       sx={{
-                        fontWeight: "bold",
-                        paddingTop: 1,
+                        fontWeight: "bold",                        
                         paddingBottom: 2,
                         color: colors.accentGreen[100],
                       }}
                     >
-                      HORAS TRABAJADAS
+                      Horas trabajadas
                     </Typography>
                   </Grid>
                   <Grid item xs={2} sx={{ p: 1 }}>
