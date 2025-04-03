@@ -78,9 +78,6 @@ const Index = () => {
       );
       setReportWorkHoursData(JSON.parse(response.data[0].ReportWorkHours));
 
-      console.log(JSON.parse(response.data[0].GeneralAttendanceReport));
-      console.log(JSON.parse(response.data[0].ReportWorkHours));
-
       setIsLoading(false);
 
       const responseData = response.data[0].GeneralAttendanceReport;

@@ -24,9 +24,14 @@ import IndividualAttendanceReportButton from "./IndividualAttendanceReportButton
 import StatusPointFilter from "./StatusPointFilter.jsx";
 
 function GeneralAttendanceReport({ data, reportWorkHoursData }) {
-  if (!data) {
+  if (!data) {    
     return null;
   }
+
+  useEffect(() => {
+    setSearchTerm("")    
+  }, [data]);
+    
 
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
