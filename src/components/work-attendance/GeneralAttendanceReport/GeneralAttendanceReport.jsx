@@ -24,14 +24,13 @@ import IndividualAttendanceReportButton from "./IndividualAttendanceReportButton
 import StatusPointFilter from "./StatusPointFilter.jsx";
 
 function GeneralAttendanceReport({ data, reportWorkHoursData }) {
-  if (!data) {    
+  if (!data) {
     return null;
   }
 
   useEffect(() => {
-    setSearchTerm("")    
+    setSearchTerm("");
   }, [data]);
-    
 
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -465,138 +464,92 @@ function GeneralAttendanceReport({ data, reportWorkHoursData }) {
   };
 
   return (
-    <Box
-      id="grid-1"
-      display="grid"
-      gridTemplateColumns="repeat(12, 1fr)"
-      gridAutoRows="1300px"
-      gap="15px"
-    >
-      <Box
-        gridColumn="span 12"
-        backgroundColor="paper"
-        borderRadius="10px"
-        sx={{ cursor: "pointer" }}
-      >
-        {data.length > 0 && (
-          <>
-            <Grid
-              item
-              xs={12}
-              container
-              justifyContent="space-between"
-              alignItems="center"
-              sx={{ paddingBottom: 1 }}
+    <div className="w-full font-[sans-serif]">
+      {data.length > 0 && (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+            <Typography
+              variant="h3"
+              sx={{
+                color: colors.accentGreen[100],
+                marginBottom: "20px",
+                fontWeight: "bold",
+              }}
             >
-              <Grid item xs={12}>
-                <Typography
-                  variant="h4"
-                  sx={{
-                    fontWeight: "bold",
-                    paddingTop: 1,
-                    paddingBottom: 2,
-                    color: colors.accentGreen[100],
+              Listado general de asistencia
+            </Typography>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mb-6">
+            <StatusPointFilter
+              statusCountsEntry={statusCountsEntry}
+              statusCountsExit={statusCountsExit}
+              onFilter={handleFilter} // Usar la función actualizada
+            />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 rounded-lg shadow-md pb-3">
+            <div className="col-span-12 md:col-span-4">
+              <FormControl fullWidth>
+                <TextField
+                  fullWidth
+                  value={searchTerm}
+                  onChange={handleChange}
+                  color="secondary"
+                  size="small"
+                  placeholder="Ingresa tu búsqueda"
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <Search sx={{ color: colors.accentGreen[100] }} />
+                      </InputAdornment>
+                    ),
                   }}
-                >
-                  Listado general de asistencia
-                </Typography>
-              </Grid>
-
-              <Grid
-                item
-                xs={12}
-                container
-                justifyContent="space-between"
-                alignItems="stretch"
-                spacing={2}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "20px", // Bordes redondeados
+                      "& .MuiOutlinedInput-notchedOutline": {
+                        borderColor: colors.accentGreen[100], // Color predeterminado del borde
+                      },
+                      "&:hover .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "accent.light", // Color al pasar el mouse
+                      },
+                      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "accent.dark", // Color al enfocar
+                      },
+                    },
+                  }}
+                />
+                {noResults && (
+                  <FormHelperText style={{ color: "red" }}>
+                    No se encontraron resultados
+                  </FormHelperText>
+                )}
+              </FormControl>
+            </div>
+            <div className="col-span-12 md:col-span-2 ">
+              <Button
+                variant="contained"
+                fullWidth
+                color="info"
+                onClick={handleDownloadExcelDataGrid}
+                startIcon={<Download />}
+                sx={{
+                  borderRadius: "35px",
+                  color: "black",
+                  fontWeight: "bold",
+                }}
               >
-                <Grid item xs={12} md={8}>
-                  <StatusPointFilter
-                    statusCountsEntry={statusCountsEntry}
-                    statusCountsExit={statusCountsExit}
-                    onFilter={handleFilter} // Usar la función actualizada
-                  />
-                </Grid>
-              </Grid>
-
-              <Grid
-                xs={12}
-                container
-                alignItems="center"
-                spacing={2}
-                sx={{ paddingBottom: 1 }}
-              >
-                <Grid item xs={4}>
-                  <FormControl fullWidth>
-                    <TextField
-                      fullWidth
-                      value={searchTerm}
-                      onChange={handleChange}
-                      color="secondary"
-                      size="small"
-                      placeholder="Ingresa tu búsqueda"
-                      InputProps={{
-                        endAdornment: (
-                          <InputAdornment position="end">
-                            <Search sx={{ color: colors.accentGreen[100] }} />
-                          </InputAdornment>
-                        ),
-                      }}
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          borderRadius: "20px", // Bordes redondeados
-                          "& .MuiOutlinedInput-notchedOutline": {
-                            borderColor: colors.accentGreen[100], // Color predeterminado del borde
-                          },
-                          "&:hover .MuiOutlinedInput-notchedOutline": {
-                            borderColor: "accent.light", // Color al pasar el mouse
-                          },
-                          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                            borderColor: "accent.dark", // Color al enfocar
-                          },
-                        },
-                      }}
-                    />
-                    {noResults && (
-                      <FormHelperText style={{ color: "red" }}>
-                        No se encontraron resultados
-                      </FormHelperText>
-                    )}
-                  </FormControl>
-                </Grid>
-
-                <Grid item xs={2} sx={{ marginLeft: 1 }}>
-                  <Button
-                    variant="contained"
-                    fullWidth
-                    color="info"
-                    onClick={handleDownloadExcelDataGrid}
-                    startIcon={<Download />}
-                    sx={{
-                      borderRadius: "35px",
-                      color: "black",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    Exportar
-                  </Button>
-                </Grid>
-                <Grid item xs={2} sx={{ marginLeft: 1 }}>
-                  <IndividualAttendanceReportButton
-                    data={filteredUsers.length > 0 ? filteredUsers : data}
-                  />
-                </Grid>
-              </Grid>
-            </Grid>
-            <Grid
-              item
-              xs={12}
-              container
-              justifyContent="space-between"
-              alignItems="stretch"
-              spacing={2}
-            >
-              <Grid item xs={12} md={8} style={{ height: 560, width: "100%" }}>
+                Exportar
+              </Button>
+            </div>
+            <div className="col-span-12 md:col-span-2">
+              <IndividualAttendanceReportButton
+                data={filteredUsers.length > 0 ? filteredUsers : data}
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 rounded-lg shadow-md pb-3">
+            <div className="col-span-12 md:col-span-8 ">
+              <div className="w-full pb-3 rounded-lg shadow-md flex flex-col max-h-[650px] overflow-auto">
                 <DataGrid
                   rows={filteredUsers.length > 0 ? filteredUsers : data}
                   columns={useBuildColumns.map((column) => ({
@@ -614,7 +567,6 @@ function GeneralAttendanceReport({ data, reportWorkHoursData }) {
                   }))}
                   getRowId={(row) => row.usuario_id}
                   editable={false}
-                  autoPageSize
                   sx={{
                     borderRadius: "8px",
                     boxShadow: 3,
@@ -645,74 +597,53 @@ function GeneralAttendanceReport({ data, reportWorkHoursData }) {
                     },
                   }}
                 />
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <Box
-                  display="flex"
-                  flexDirection="column"
-                  justifyContent="space-evenly"
-                  gap="10px"
-                  sx={{
-                    backgroundColor: colors.primary[400],
-                    padding: "5px 5px",
-                    borderRadius: "10px",
-                    width: "100%",
-                  }}
-                >
-                  <FilteredList
-                    resultCountsEntry={resultCountsEntry}
-                    resultCountsExit={resultCountsExit}
-                    handleDownloadExcel={handleDownloadExcel}
-                    handleOpenModal={handleOpenModal}
-                    totalRecords={totalRecords}
-                    colors={colors}
-                    theme={theme}
-                  />
-                </Box>
-              </Grid>
-              <Grid
-                item
-                xs={12}
-                style={{ height: 560, width: "100%" }}
+              </div>
+            </div>
+            <div className="col-span-12 md:col-span-4 ">
+              <FilteredList
+                resultCountsEntry={resultCountsEntry}
+                resultCountsExit={resultCountsExit}
+                handleDownloadExcel={handleDownloadExcel}
+                handleOpenModal={handleOpenModal}
+                totalRecords={totalRecords}
+                colors={colors}
+                theme={theme}
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+            <Typography
+              variant="h3"
+              sx={{
+                color: colors.accentGreen[100],
+                marginBottom: "20px",
+                fontWeight: "bold",
+              }}
+            >
+              Horas trabajadas
+            </Typography>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 rounded-lg shadow-md pb-3">
+            <div className="col-span-12 md:col-span-2">
+              <Button
+                fullWidth
+                variant="contained"
+                color="info"
+                onClick={handleDownloadExcelDataGridHours}
+                endIcon={<Download />}
+                sx={{
+                  borderRadius: "35px",
+                  color: "black",
+                  fontWeight: "bold",
+                }}
               >
-                <Grid
-                  item
-                  xs={12}
-                  container
-                  justifyContent="space-between"
-                  alignItems="center"
-                  sx={{ paddingBottom: 1 }}
-                >
-                  <Grid item xs={12}>
-                    <Typography
-                      variant="h4"
-                      sx={{
-                        fontWeight: "bold",                        
-                        paddingBottom: 2,
-                        color: colors.accentGreen[100],
-                      }}
-                    >
-                      Horas trabajadas
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={2} sx={{ p: 1 }}>
-                    <Button
-                      variant="contained"
-                      color="info"
-                      onClick={handleDownloadExcelDataGridHours}
-                      size="small"
-                      startIcon={<Download />}
-                      sx={{
-                        borderRadius: "35px",
-                        color: "black",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      Exportar
-                    </Button>
-                  </Grid>
-                </Grid>
-
+                Exportar
+              </Button>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 rounded-lg shadow-md pb-3">
+            <div className="col-span-12 md:col-span-12 ">
+              <div className="w-full pb-3 rounded-lg shadow-md flex flex-col max-h-[650px] overflow-auto">
                 <DataGrid
                   rows={filteredHours.length > 0 ? filteredHours : rows}
                   columns={columns.map((column) => ({
@@ -729,7 +660,7 @@ function GeneralAttendanceReport({ data, reportWorkHoursData }) {
                     ),
                   }))}
                   getRowId={(row) => row.id_usuario}
-                  autoPageSize
+                  editable={false}
                   sx={{
                     borderRadius: "8px",
                     boxShadow: 3,
@@ -760,18 +691,18 @@ function GeneralAttendanceReport({ data, reportWorkHoursData }) {
                     },
                   }}
                 />
-              </Grid>
-            </Grid>
-          </>
-        )}
+              </div>
+            </div>
+          </div>
+        </>
+      )}
 
-        <ModalTable
-          open={openModal}
-          onClose={handleCloseModal}
-          data={modalData}
-        />
-      </Box>
-    </Box>
+      <ModalTable
+        open={openModal}
+        onClose={handleCloseModal}
+        data={modalData}
+      />
+    </div>
   );
 }
 

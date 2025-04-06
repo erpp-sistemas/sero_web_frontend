@@ -14,7 +14,7 @@ const StatusPointFilter = ({
     <div className="rounded-lg shadow-md pb-3">
       <div className="grid grid-cols-12 ">
         <div className="col-span-12">
-          <Typography variant="h7"  >
+          <Typography variant="body2"  >
             Selecciona un estatus para vizualizar los registros
           </Typography>
         </div>
