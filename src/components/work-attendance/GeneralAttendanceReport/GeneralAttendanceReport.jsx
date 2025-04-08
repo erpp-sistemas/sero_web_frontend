@@ -426,41 +426,62 @@ function GeneralAttendanceReport({ data, reportWorkHoursData }) {
 
   const [statusCountsEntry, setStatusCountsEntry] = useState({});
   const [statusCountsExit, setStatusCountsExit] = useState({});
+  const [selectedProfile, setSelectedProfile] = useState("");
+  const [profileCounts, setProfileCounts] = useState({}); // 👈 nuevo estado para los conteos de perfiles
+
+  console.log(data)
+  // Siempre usamos la fuente correcta de datos
+  const baseData = filteredUsers.length > 0 ? filteredUsers : data;
+
+  // Obtener perfiles únicos y sus conteos
+  const uniqueProfiles = Array.from(
+    new Set(baseData.map((user) => user.perfil))
+  ).filter(Boolean);
 
   useEffect(() => {
-    const sourceData = filteredUsers.length > 0 ? filteredUsers : data;
+    const sourceData = selectedProfile
+      ? baseData.filter((user) => user.perfil === selectedProfile)
+      : baseData;
 
+    // Estatus entrada
     const countsEntry = sourceData.reduce((acc, user) => {
       const status = user.estatus_punto_entrada || "Sin especificar";
       acc[status] = (acc[status] || 0) + 1;
       return acc;
     }, {});
 
+    // Estatus salida
     const countsExit = sourceData.reduce((acc, user) => {
       const status = user.estatus_punto_salida || "Sin especificar";
       acc[status] = (acc[status] || 0) + 1;
       return acc;
     }, {});
 
+    // Conteo de perfiles
+    const countsProfile = baseData.reduce((acc, user) => {
+      const perfil = user.perfil || "Sin perfil";
+      acc[perfil] = (acc[perfil] || 0) + 1;
+      return acc;
+    }, {});
+
     setStatusCountsEntry(countsEntry);
     setStatusCountsExit(countsExit);
-  }, [data, filteredUsers]);
+    setProfileCounts(countsProfile); // 👈 guardar conteos de perfiles
+  }, [data, filteredUsers, selectedProfile]);
 
   const handleFilter = (field, status) => {
-    // Si el status es "Sin especificar", cambiarlo a ''
     const normalizedStatus = status === "Sin especificar" ? "" : status;
 
-    // Verificar si filteredUsers tiene datos
-    const sourceData = filteredUsers.length > 0 ? filteredUsers : data;
+    const sourceData = selectedProfile
+      ? baseData.filter((user) => user.perfil === selectedProfile)
+      : baseData;
 
-    // Filtrar los datos según el campo y el estatus
     const filtered = sourceData.filter(
       (user) => user[field] === normalizedStatus
     );
 
-    // Enviar los datos filtrados al modal
     setModalData(filtered);
-    setOpenModal(true); // Abrir el modal
+    setOpenModal(true);
   };
 
   return (
@@ -483,7 +504,11 @@ function GeneralAttendanceReport({ data, reportWorkHoursData }) {
             <StatusPointFilter
               statusCountsEntry={statusCountsEntry}
               statusCountsExit={statusCountsExit}
-              onFilter={handleFilter} // Usar la función actualizada
+              onFilter={handleFilter}
+              profiles={uniqueProfiles}
+              profileCounts={profileCounts} // 👈 nueva prop
+              selectedProfile={selectedProfile}
+              onProfileSelect={setSelectedProfile}
             />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4 rounded-lg shadow-md pb-3">
