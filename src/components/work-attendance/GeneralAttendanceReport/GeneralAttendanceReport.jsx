@@ -429,7 +429,7 @@ function GeneralAttendanceReport({ data, reportWorkHoursData }) {
   const [selectedProfile, setSelectedProfile] = useState("");
   const [profileCounts, setProfileCounts] = useState({}); // 👈 nuevo estado para los conteos de perfiles
 
-  console.log(data)
+  
   // Siempre usamos la fuente correcta de datos
   const baseData = filteredUsers.length > 0 ? filteredUsers : data;
 
