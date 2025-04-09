@@ -866,6 +866,100 @@ function buildColumns() {
         },
       },
       {
+        field: "lugar_salida_ultima_gestion",
+        headerName: "LUGAR DE SALIDA PRIMERA GESTIÓN",
+        renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>
+            {"LUGAR DE SALIDA PRIMERA GESTIÓN"}
+          </strong>
+        ),
+        width: 300,
+        renderCell: (params) => {
+          const isDisabled = params.value === "Sin lugar";
+
+          return (
+            <Tooltip
+              title={
+                isDisabled ? "Sin ubicación disponible" : "Abrir en Google Maps"
+              }
+            >
+              <span>
+                {/* Necesario para que el Tooltip funcione en botones deshabilitados */}
+                <Button
+                  variant="contained"
+                  color="info"
+                  startIcon={<PersonPinCircle />}
+                  onClick={() => window.open(params.value, "_blank")}
+                  disabled={isDisabled}
+                  sx={{
+                    textTransform: "none",
+                    fontWeight: "bold",
+                    fontSize: "1.2em",
+                    backgroundColor: isDisabled
+                      ? colors.grey
+                      : colors.tealAccent[400],
+                    color: isDisabled ? "white" : "black",
+                    "&:hover": {
+                      backgroundColor: isDisabled
+                        ? colors.grey
+                        : colors.tealAccent[600],
+                    },
+                  }}
+                >
+                  Ver ubicación
+                </Button>
+              </span>
+            </Tooltip>
+          );
+        },
+      },
+      {
+        field: "distancia_salida",
+        headerName: "DISTANCIA DE PUNTOS DE SALIDA",
+        renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>
+            {"DISTANCIA DE PUNTOS DE SALIDA"}
+          </strong>
+        ),
+        width: 280,
+        renderCell: (params) => {
+          let icon = null;
+          let chipColor = colors.greenAccent[400];
+          let chipLabel = params.value;
+
+          if (params.value === 0) {
+            icon = <WarningAmber />;
+            chipColor = colors.yellowAccent[400];
+            chipLabel = "Sin distancia";
+          } else if (params.value <= 500) {
+            icon = <CheckCircle />;
+            chipColor = colors.tealAccent[400];
+            chipLabel = `${params.value} m`;
+          } else {
+            icon = <Cancel />;
+            chipColor = colors.redAccent[400];
+            chipLabel = `${params.value} m`;
+          }
+
+          return (
+            <Chip
+              icon={icon}
+              label={chipLabel}
+              variant="outlined"
+              sx={{
+                background: chipColor,
+                fontWeight: "bold",
+                fontSize: "1.2em",
+                color: "black",
+                "& .MuiChip-icon": {
+                  color: theme.palette.info.main,
+                },
+              }}
+            />
+          );
+        },
+      },
+      {
         field: "hora_entrada_comida",
         headerName: "HORA DE SALIDA DE COMIDA",
         renderHeader: () => (
