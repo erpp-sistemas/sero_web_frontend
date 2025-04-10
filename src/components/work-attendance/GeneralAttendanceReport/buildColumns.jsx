@@ -12,6 +12,7 @@ import {
   EditRoad,
   InsertEmoticon,
   LocalHospital,
+  LockClock,
   MoneyOff,
   PersonPinCircle,
   Public,
@@ -867,10 +868,10 @@ function buildColumns() {
       },
       {
         field: "lugar_salida_ultima_gestion",
-        headerName: "LUGAR DE SALIDA PRIMERA GESTIÓN",
+        headerName: "LUGAR DE SALIDA ULTIMA GESTIÓN",
         renderHeader: () => (
           <strong style={{ color: "#5EBFFF" }}>
-            {"LUGAR DE SALIDA PRIMERA GESTIÓN"}
+            {"LUGAR DE SALIDA ULTIMA GESTIÓN"}
           </strong>
         ),
         width: 300,
@@ -958,7 +959,99 @@ function buildColumns() {
             />
           );
         },
+      },      
+      {
+        field: "evaluacion_salida_basada_en",
+        headerName: "EVALUACION DE SALIDA BASADA EN",
+        renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>
+            {"EVALUACION DE SALIDA BASADA EN"}
+          </strong>
+        ),
+        width: 280,
+        renderCell: (params) => {
+          let icon = null;
+          let chipColor = colors.greenAccent[400];
+          let chipLabel = params.value;
+
+          if (params.value === "ubicacion en campo") {
+            icon = <WarningAmber />;
+            chipColor = colors.yellowAccent[400];
+            chipLabel = "ubicacion en campo";
+          } else if (params.value === "ubicacion en oficina") {
+            icon = <CheckCircle />;
+            chipColor = colors.tealAccent[400];
+            chipLabel = "ubicacion en oficina";
+          } else {
+            icon = <Cancel />;
+            chipColor = colors.redAccent[400];
+            chipLabel = "Sin evaluar";
+          }
+
+          return (
+            <Chip
+              icon={icon}
+              label={chipLabel}
+              variant="outlined"
+              sx={{
+                background: chipColor,
+                fontWeight: "bold",
+                fontSize: "1.2em",
+                color: "black",
+                "& .MuiChip-icon": {
+                  color: theme.palette.info.main,
+                },
+              }}
+            />
+          );
+        },
       },
+      {
+        field: "hora_ultima_gestion",
+        headerName: "HORA DE ULTIMA GESTION",
+        renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>
+            {"HORA DE ULTIMA GESTION"}
+          </strong>
+        ),
+        width: 280,
+        renderCell: (params) => {
+          let icon = null;
+          let chipColor = colors.greenAccent[400];
+          let chipLabel = params.value;
+
+          if (params.value >= "17:15:00") {
+            icon = <WarningAmber />;
+            chipColor = colors.yellowAccent[400];
+            chipLabel = params.value;
+          } else if (params.value < "17:15:00") {
+            icon = <CheckCircle />;
+            chipColor = colors.tealAccent[400];
+            chipLabel = params.value;
+          } else {
+            icon = <Cancel />;
+            chipColor = colors.redAccent[400];
+            chipLabel = params.value;
+          }
+
+          return (
+            <Chip
+              icon={icon}
+              label={chipLabel}
+              variant="outlined"
+              sx={{
+                background: chipColor,
+                fontWeight: "bold",
+                fontSize: "1.2em",
+                color: "black",
+                "& .MuiChip-icon": {
+                  color: theme.palette.info.main,
+                },
+              }}
+            />
+          );
+        },
+      },      
       {
         field: "hora_entrada_comida",
         headerName: "HORA DE SALIDA DE COMIDA",
