@@ -431,20 +431,20 @@ function GeneralAttendanceReport({
 
   const [statusCountsEntry, setStatusCountsEntry] = useState({});
   const [statusCountsExit, setStatusCountsExit] = useState({});
-  const [selectedProfile, setSelectedProfile] = useState("");
-  const [profileCounts, setProfileCounts] = useState({}); // 👈 nuevo estado para los conteos de perfiles
+  const [selectedPosition, setSelectedPosition] = useState("");
+  const [positionCounts, setPositionCounts] = useState({}); // 👈 nuevo estado para los conteos de puestos
 
   // Siempre usamos la fuente correcta de datos
   const baseData = filteredUsers.length > 0 ? filteredUsers : data;
 
-  // Obtener perfiles únicos y sus conteos
-  const uniqueProfiles = Array.from(
-    new Set(baseData.map((user) => user.perfil))
+  // Obtener puestos únicos y sus conteos
+  const uniquePositions = Array.from(
+    new Set(baseData.map((user) => user.puesto))
   ).filter(Boolean);
 
   useEffect(() => {
-    const sourceData = selectedProfile
-      ? baseData.filter((user) => user.perfil === selectedProfile)
+    const sourceData = selectedPosition
+      ? baseData.filter((user) => user.puesto === selectedPosition)
       : baseData;
 
     // Estatus entrada
@@ -461,23 +461,23 @@ function GeneralAttendanceReport({
       return acc;
     }, {});
 
-    // Conteo de perfiles
-    const countsProfile = baseData.reduce((acc, user) => {
-      const perfil = user.perfil || "Sin perfil";
-      acc[perfil] = (acc[perfil] || 0) + 1;
+    // Conteo de puestos
+    const countsPosition = baseData.reduce((acc, user) => {
+      const puesto = user.puesto || "Sin puesto";
+      acc[puesto] = (acc[puesto] || 0) + 1;
       return acc;
     }, {});
 
     setStatusCountsEntry(countsEntry);
     setStatusCountsExit(countsExit);
-    setProfileCounts(countsProfile); // 👈 guardar conteos de perfiles
-  }, [data, filteredUsers, selectedProfile]);
+    setPositionCounts(countsPosition); // 👈 guardar conteos de puestos
+  }, [data, filteredUsers, selectedPosition]);
 
   const handleFilter = (field, status) => {
     const normalizedStatus = status === "Sin especificar" ? "" : status;
 
-    const sourceData = selectedProfile
-      ? baseData.filter((user) => user.perfil === selectedProfile)
+    const sourceData = selectedPosition
+      ? baseData.filter((user) => user.puesto === selectedPosition)
       : baseData;
 
     const filtered = sourceData.filter(
@@ -509,10 +509,10 @@ function GeneralAttendanceReport({
               statusCountsEntry={statusCountsEntry}
               statusCountsExit={statusCountsExit}
               onFilter={handleFilter}
-              profiles={uniqueProfiles}
-              profileCounts={profileCounts} // 👈 nueva prop
-              selectedProfile={selectedProfile}
-              onProfileSelect={setSelectedProfile}
+              profiles={uniquePositions} // 👈 sustituir perfiles por puestos
+              profileCounts={positionCounts} // 👈 sustituir conteos de perfiles por puestos
+              selectedProfile={selectedPosition} // 👈 sustituir perfil seleccionado por puesto seleccionado
+              onProfileSelect={setSelectedPosition} // 👈 sustituir selección de perfil por puesto
             />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4 rounded-lg shadow-md pb-3">
