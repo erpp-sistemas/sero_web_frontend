@@ -102,8 +102,8 @@ const Index = () => {
       if (error.response.status === 400) {
         setAlertOpen(true);
         setAlertType("warning");
-        setAlertMessage("¡Atencion! No se encontraron asistencias");        
-      }      
+        setAlertMessage("¡Atencion! No se encontraron asistencias");
+      }
     }
   };
 
@@ -161,6 +161,8 @@ const Index = () => {
         <GeneralAttendanceReport
           data={generalAttendanceReportData}
           reportWorkHoursData={reportWorkHoursData}
+          selectedStartDate={selectedStartDate}
+          selectedEndDate={selectedEndDate}
         />
       </div>
     </div>

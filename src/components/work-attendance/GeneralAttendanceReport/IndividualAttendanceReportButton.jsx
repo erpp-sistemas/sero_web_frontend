@@ -6,8 +6,12 @@ import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import { Download } from "@mui/icons-material";
 import ERPPImage from "../../../../public/ERPP-LOGO-2.png";
 
-const IndividualAttendanceReportButton = ({ data }) => {
-  console.log(data)
+const IndividualAttendanceReportButton = ({
+  data,
+  selectedStartDate,
+  selectedEndDate,
+}) => {
+  console.log(data);
   dayjs.extend(isSameOrBefore);
 
   const generateAttendanceReport = async () => {
@@ -92,31 +96,65 @@ const IndividualAttendanceReportButton = ({ data }) => {
       }; // Fuente azul + negrita
       const borderStyle = { style: "thin", color: { argb: "000000" } }; // Bordes delgados en negro
 
+      // Obtener los valores de id_buk, puesto, área y horario del primer registro del usuario
+      const { id_buk, puesto, area, horario } = userRecords[0] || {};
+
+      // Concatenar las fechas seleccionadas
+      const fechaPeriodo = `Del ${selectedStartDate} al ${selectedEndDate}`;
+
       // Asignar valores a las celdas de títulos
       sheet.getCell("A7").value = "No. de empleado";
-      sheet.getCell("A8").value = "Nombre";
-      sheet.getCell("A9").value = "Horario laboral";
-      sheet.getCell("D7").value = "Puesto";
-      sheet.getCell("D8").value = "Área";
-      sheet.getCell("D9").value = "Fecha del período";
-
-      // Fusionar celdas en blanco horizontalmente (expandir hasta la columna H)
+      sheet.getCell("B7").value = id_buk || ""; // Mostrar id_buk
       sheet.mergeCells("B7:C7"); // Espacio vacío junto a "No. de empleado"
-      sheet.mergeCells("B9:C9"); // Espacio vacío junto a "Horario laboral"
-      sheet.mergeCells("E7:F7"); // Espacio vacío junto a "Puesto"
-      sheet.mergeCells("E8:F8"); // Espacio vacío junto a "Área"
-      sheet.mergeCells("E9:F9"); // Espacio vacío junto a "Fecha del período"
-      sheet.mergeCells("G7:H7"); // Espacio vacío adicional
-      sheet.mergeCells("G8:H8"); // Espacio vacío adicional
-      sheet.mergeCells("G9:H9"); // Espacio vacío adicional
+      sheet.getCell("B7").alignment = {
+        horizontal: "center",
+        vertical: "middle",
+      }; // Centrar
 
-      // Fusionar B8 y C8 para mostrar userName centrado
+      sheet.getCell("A8").value = "Nombre";
       sheet.mergeCells("B8:C8");
-      sheet.getCell("B8").value = userName;
+      sheet.getCell("B8").value = userName; // Mostrar el nombre del usuario
       sheet.getCell("B8").alignment = {
         horizontal: "center",
         vertical: "middle",
-      };
+      }; // Centrar
+
+      sheet.getCell("A9").value = "Horario laboral";
+      sheet.getCell("B9").value = horario || ""; // Mostrar horario
+      sheet.mergeCells("B9:C9"); // Espacio vacío junto a "Horario laboral"
+      sheet.getCell("B9").alignment = {
+        horizontal: "center",
+        vertical: "middle",
+      }; // Centrar
+
+      sheet.getCell("D7").value = "Puesto";
+      sheet.getCell("E7").value = puesto || ""; // Mostrar puesto
+      sheet.mergeCells("E7:F7"); // Espacio vacío junto a "Puesto"
+      sheet.getCell("E7").alignment = {
+        horizontal: "center",
+        vertical: "middle",
+      }; // Centrar
+
+      sheet.getCell("D8").value = "Área";
+      sheet.getCell("E8").value = area || ""; // Mostrar área
+      sheet.mergeCells("E8:F8"); // Espacio vacío junto a "Área"
+      sheet.getCell("E8").alignment = {
+        horizontal: "center",
+        vertical: "middle",
+      }; // Centrar
+
+      sheet.getCell("D9").value = "Fecha del período";
+      sheet.getCell("E9").value = fechaPeriodo; // Mostrar el rango de fechas
+      sheet.mergeCells("E9:F9"); // Espacio vacío junto a "Fecha del período"
+      sheet.getCell("E9").alignment = {
+        horizontal: "center",
+        vertical: "middle",
+      }; // Centrar
+
+      // Fusionar celdas en blanco horizontalmente (expandir hasta la columna H)
+      sheet.mergeCells("G7:H7"); // Espacio vacío adicional
+      sheet.mergeCells("G8:H8"); // Espacio vacío adicional
+      sheet.mergeCells("G9:H9"); // Espacio vacío adicional
 
       // Aplicar fondo verde claro y fuente azul negrita a los títulos
       ["A7", "A8", "A9", "D7", "D8", "D9"].forEach((cell) => {
@@ -190,9 +228,11 @@ const IndividualAttendanceReportButton = ({ data }) => {
       };
 
       // Aplicar el color a las celdas A14:H14 (expandir hasta la columna H)
-      ["A14", "B14", "C14", "D14", "E14", "F14", "G14", "H14"].forEach((cell) => {
-        sheet.getCell(cell).fill = darkBlue;
-      });
+      ["A14", "B14", "C14", "D14", "E14", "F14", "G14", "H14"].forEach(
+        (cell) => {
+          sheet.getCell(cell).fill = darkBlue;
+        }
+      );
 
       // Ordenar los registros por fecha para asegurar una secuencia adecuada
       userRecords.sort(

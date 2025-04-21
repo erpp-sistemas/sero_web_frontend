@@ -20,7 +20,7 @@ const StatusPointFilter = ({
       <div className="grid grid-cols-12 gap-2">
         <div className="col-span-12">
           <Typography variant="h7">
-            Selecciona un perfil y un estatus para visualizar los registros
+            Selecciona un puesto y un estatus para visualizar los registros
           </Typography>
         </div>
 
@@ -34,7 +34,7 @@ const StatusPointFilter = ({
               color: colors.accentGreen[100],
             }}
           >
-            Perfiles
+            Puesto
           </Typography>
           <div className="flex flex-wrap gap-2">
             <Chip

@@ -23,7 +23,12 @@ import Viewer from "react-viewer";
 import IndividualAttendanceReportButton from "./IndividualAttendanceReportButton.jsx";
 import StatusPointFilter from "./StatusPointFilter.jsx";
 
-function GeneralAttendanceReport({ data, reportWorkHoursData }) {
+function GeneralAttendanceReport({
+  data,
+  reportWorkHoursData,
+  selectedStartDate,
+  selectedEndDate
+}) {
   if (!data) {
     return null;
   }
@@ -429,7 +434,6 @@ function GeneralAttendanceReport({ data, reportWorkHoursData }) {
   const [selectedProfile, setSelectedProfile] = useState("");
   const [profileCounts, setProfileCounts] = useState({}); // 👈 nuevo estado para los conteos de perfiles
 
-  
   // Siempre usamos la fuente correcta de datos
   const baseData = filteredUsers.length > 0 ? filteredUsers : data;
 
@@ -569,6 +573,8 @@ function GeneralAttendanceReport({ data, reportWorkHoursData }) {
             <div className="col-span-12 md:col-span-2">
               <IndividualAttendanceReportButton
                 data={filteredUsers.length > 0 ? filteredUsers : data}
+                selectedStartDate={selectedStartDate}
+                selectedEndDate={selectedEndDate}
               />
             </div>
           </div>
