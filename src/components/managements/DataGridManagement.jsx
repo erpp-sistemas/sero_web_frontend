@@ -2,25 +2,27 @@ import React, { useState, useEffect } from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import { Block, Download, Error, Search } from "@mui/icons-material";
 import * as ExcelJS from "exceljs";
-// import Loading from "../../components/modals/loading";
 import ImageViewer from "../viewer/imageViewer";
-import { useSelector } from "react-redux";
 import { tokens } from "../../theme";
 import {
   Button,
   FormControl,
-  FormHelperText,
   InputAdornment,
   TextField,
   Typography,
   useTheme,
   Box,
+  Tooltip,
+  Chip,
+  Link,
 } from "@mui/material";
 
 const DataGridManagement = ({ data }) => {
   if (!data || data.length === 0) {
     return <p>No hay datos para mostrar</p>;
   }
+
+  console.log(data);
 
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -33,6 +35,14 @@ const DataGridManagement = ({ data }) => {
   const [openImageViewer, setOpenImageViewer] = useState(false); // Estado para controlar la visibilidad del visor de imágenes
   const [themeColor, setThemeColor] = useState("");
 
+  const isJsonString = (str) => {
+    try {
+      const parsed = JSON.parse(str);
+      return Array.isArray(parsed) && typeof parsed[0] === "object";
+    } catch (e) {
+      return false;
+    }
+  };
   // Obtener los diferentes tipos de fotos y crear columnas dinámicamente
   const photoTypes = new Set();
   data.forEach((row) => {
@@ -73,6 +83,105 @@ const DataGridManagement = ({ data }) => {
     return newItem;
   });
 
+  const renderDynamicCell = (params) => {
+    const value = params.value;
+
+    // Si no es un string JSON válido de array de objetos, mostrar valor normal
+    if (typeof value !== "string" || !isJsonString(value)) {
+      return <Typography noWrap>{String(value)}</Typography>;
+    }
+
+    // Parsear el valor porque sí es un array válido
+    const values = JSON.parse(value);
+
+    const getMainField = (item) => {
+      if (typeof item === "object" && item !== null) {
+        return item.inquietud || item.area || "Dato";
+      }
+      return item;
+    };
+
+    const renderTooltipDetail = (item) => {
+      if (typeof item === "object" && item !== null) {
+        return Object.entries(item)
+          .filter(([key]) => !key.toLowerCase().includes("id"))
+          .map(([key, val], index) => {
+            const stringVal = String(val);
+
+            const isLink =
+              stringVal.startsWith("http://") ||
+              stringVal.startsWith("https://");
+
+            return (
+              <Typography
+                key={index}
+                variant="body2"
+                sx={{ color: colors.grey[100] }}
+              >
+                <strong
+                  style={{
+                    color: colors.blueAccent[900],
+                    textTransform: "uppercase",
+                  }}
+                >
+                  {key}:
+                </strong>{" "}
+                {isLink ? (
+                  <Link
+                    href={stringVal}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    underline="hover"
+                    sx={{ color: "info.main" }}
+                  >
+                    {stringVal}
+                  </Link>
+                ) : (
+                  stringVal
+                )}
+              </Typography>
+            );
+          });
+      }
+
+      return <Typography variant="body2">{String(item)}</Typography>;
+    };
+
+    return (
+      <Box
+        display="flex"
+        flexWrap="wrap"
+        gap={1}
+        sx={{
+          whiteSpace: "normal",
+          wordBreak: "break-word",
+          lineHeight: 1.2,
+          py: 1,
+        }}
+      >
+        {values.map((item, index) => (
+          <Tooltip
+            key={index}
+            title={<Box>{renderTooltipDetail(item)}</Box>}
+            arrow
+            placement="top"
+          >
+            <Chip
+              label={getMainField(item)}
+              size="small"
+              sx={{
+                cursor: "pointer",
+                backgroundColor: colors.tealAccent[400],
+                color: colors.contentAccentGreen[100],
+                fontWeight: "bold",
+              }}
+            />
+          </Tooltip>
+        ))}
+      </Box>
+    );
+  };
+
   const columns = allKeys
     .filter(
       (key) =>
@@ -91,7 +200,13 @@ const DataGridManagement = ({ data }) => {
         )
       );
 
-      const finalWidth = Math.max(headerWidth, maxCellWidth) + 20;
+      const isArrayField = normalizedData.some(
+        (row) => typeof row[key] === "string" && isJsonString(row[key])
+      );
+
+      const finalWidth = isArrayField
+        ? 200 // Ancho fijo razonable para chips, dejar espacio para el wrap
+        : Math.max(headerWidth, maxCellWidth) + 20;
 
       return {
         field: key,
@@ -100,6 +215,7 @@ const DataGridManagement = ({ data }) => {
         width: finalWidth,
         maxWidth: 600,
         flex: 1,
+        renderCell: renderDynamicCell,
       };
     });
 
@@ -139,7 +255,7 @@ const DataGridManagement = ({ data }) => {
               width: "100%",
             }}
           >
-            {fotos.slice(0, 3).map((photo, index) => (
+            {fotos.slice(0, 5).map((photo, index) => (
               <img
                 key={index}
                 src={photo.urlImage}
@@ -151,7 +267,7 @@ const DataGridManagement = ({ data }) => {
                 }}
               />
             ))}
-            {fotos.length > 3 && (
+            {fotos.length > 5 && (
               <span style={{ color: "#888", fontSize: "12px" }}>
                 +{fotos.length - 3} más
               </span>
@@ -497,6 +613,8 @@ const DataGridManagement = ({ data }) => {
                 color: "inherit", // No afectar el color de los íconos en las celdas
               },
             }}
+            autoHeight
+            getRowHeight={() => "auto"}
           />
           {/* Modal de visualización de imágenes */}
           {openImageViewer && (
