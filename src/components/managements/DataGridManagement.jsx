@@ -16,13 +16,13 @@ import {
   Chip,
   Link,
 } from "@mui/material";
+import LoadingModal from "../../components/LoadingModal.jsx";
+
 
 const DataGridManagement = ({ data }) => {
   if (!data || data.length === 0) {
     return <p>No hay datos para mostrar</p>;
   }
-
-  console.log(data);
 
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -66,7 +66,6 @@ const DataGridManagement = ({ data }) => {
   // Obtener todos los campos únicos de todos los objetos en `data`
   const allKeys = Array.from(new Set(data.flatMap(Object.keys)));
 
-  // Normalizar los datos para asegurarse de que cada objeto tenga todos los campos
   // Normalizar los datos para asegurarse de que cada objeto tenga todos los campos
   const normalizedData = data.map((item) => {
     const newItem = {};
@@ -285,21 +284,78 @@ const DataGridManagement = ({ data }) => {
       const workbook = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet("Registros Encontrados");
 
-      // Generar encabezados dinámicos
-      const baseHeaders = Object.keys(normalizedData[0])
-        .filter((header) => header !== "fotos")
-        .map((header) => header.toUpperCase());
-      let dynamicHeaders = [...baseHeaders];
-      const maxPhotosPerType = {};
-
-      // Filtrar las filas a exportar
-      const rowsToExport =
+      const rowsToExportRaw =
         filteredUsers.length > 0 ? filteredUsers : normalizedData;
 
-      // Comprobar si hay fotos en alguna de las filas
-      let hasPhotos = false;
+      // 🔁 Expandir arrays serializados y omitir campos con "id" dentro
+      const rowsToExport = rowsToExportRaw.map((entry) => {
+        const newEntry = { ...entry };
 
-      // Determinar cuántas fotos hay por tipo para cada fila
+        for (const key in entry) {
+          const value = entry[key];
+
+          if (
+            typeof value === "string" &&
+            value.trim().startsWith("[") &&
+            value.trim().endsWith("]")
+          ) {
+            try {
+              const parsed = JSON.parse(value);
+              if (Array.isArray(parsed)) {
+                delete newEntry[key];
+                parsed.forEach((item, index) => {
+                  const filteredItem = Object.fromEntries(
+                    Object.entries(item).filter(
+                      ([k]) =>
+                        !k.toLowerCase().includes("id") &&
+                        k.toLowerCase() !== "selected" // 👉 omitimos también "selected"
+                    )
+                  );
+                  const newKey = `${key} ${index + 1}`;
+                  newEntry[newKey] = filteredItem;
+                });
+              }
+            } catch (err) {
+              // No hacer nada si falla el parseo
+            }
+          }
+        }
+
+        return newEntry;
+      });
+
+      // 🧠 Encabezados dinámicos (sin fotos ni campos con "id")
+      const allHeadersSet = new Set();
+      rowsToExport.forEach((row) => {
+        Object.keys(row).forEach((key) => {
+          if (
+            key !== "fotos" &&
+            !key.toLowerCase().includes("id") &&
+            !key.toLowerCase().includes("image_user")
+          ) {
+            const value = row[key];
+            if (
+              typeof value === "object" &&
+              value !== null &&
+              !Array.isArray(value)
+            ) {
+              Object.keys(value).forEach((subKey) => {
+                if (!subKey.toLowerCase().includes("id")) {
+                  allHeadersSet.add(`${key} - ${subKey}`.toUpperCase());
+                }
+              });
+            } else {
+              allHeadersSet.add(key.toUpperCase());
+            }
+          }
+        });
+      });
+
+      let dynamicHeaders = Array.from(allHeadersSet);
+
+      // 📸 Revisar fotos
+      const maxPhotosPerType = {};
+      let hasPhotos = false;
       for (const row of rowsToExport) {
         if (row.fotos) {
           hasPhotos = true;
@@ -315,103 +371,107 @@ const DataGridManagement = ({ data }) => {
         }
       }
 
-      // Si hay fotos, agregamos los encabezados dinámicos para cada tipo de foto
       if (hasPhotos) {
         for (const photoType of photoTypes) {
           const photoCount = maxPhotosPerType[photoType] || 0;
-          if (photoCount > 0) {
-            for (let i = 1; i <= photoCount; i++) {
-              dynamicHeaders.push(`FOTO DE ${photoType.toUpperCase()} ${i}`);
-            }
+          for (let i = 1; i <= photoCount; i++) {
+            dynamicHeaders.push(`FOTO DE ${photoType.toUpperCase()} ${i}`);
           }
-        }
-
-        /// Aplicar estilo a los encabezados
-        const headerRow = worksheet.addRow(dynamicHeaders);
-        headerRow.eachCell((cell) => {
-          cell.fill = {
-            type: "pattern",
-            pattern: "solid",
-            fgColor: { argb: themeColor.replace("#", "") },
-          };
-          cell.font = {
-            color: { argb: "000000" }, // Letra blanca
-            bold: true,
-          };
-          cell.alignment = { horizontal: "center", vertical: "middle" }; // Centrado
-        });
-
-        // Procesar filas
-        for (const [rowIndex, row] of rowsToExport.entries()) {
-          const rowValues = dynamicHeaders.map((header) =>
-            baseHeaders.includes(header) ? row[header.toLowerCase()] : null
-          );
-          const excelRow = worksheet.addRow(rowValues);
-
-          // Ajustar altura de fila para imágenes
-          worksheet.getRow(rowIndex + 2).height = 75;
-
-          if (row.fotos) {
-            const photoColumns = {};
-
-            for (const photo of row.fotos) {
-              // Encontrar la siguiente columna disponible para este tipo de foto
-              const photoHeaderBase = dynamicHeaders.filter((header) =>
-                header.startsWith(`FOTO DE ${photo.type.toUpperCase()}`)
-              );
-              let colIndex = -1;
-
-              for (let i = 0; i < photoHeaderBase.length; i++) {
-                if (!photoColumns[photoHeaderBase[i]]) {
-                  photoColumns[photoHeaderBase[i]] = true;
-                  colIndex = dynamicHeaders.indexOf(photoHeaderBase[i]) + 1; // Índice de columna en Excel
-                  break;
-                }
-              }
-
-              if (colIndex !== -1) {
-                const base64 = await urlToBase64(photo.urlImage);
-
-                const imageId = workbook.addImage({
-                  base64: base64,
-                  extension: "jpeg",
-                });
-
-                worksheet.addImage(imageId, {
-                  tl: { col: colIndex - 1, row: rowIndex + 1 },
-                  ext: { width: 75, height: 75 },
-                });
-
-                // Ajustar ancho de columna
-                worksheet.getColumn(colIndex).width = 12;
-              }
-            }
-          }
-        }
-      } else {
-        // Si no hay fotos, solo agregamos las filas sin fotos
-        worksheet.addRow(baseHeaders); // Solo encabezados base sin fotos
-        // Procesar filas sin fotos
-        for (const row of rowsToExport) {
-          const rowValues = baseHeaders.map((header) => row[header]);
-          worksheet.addRow(rowValues);
         }
       }
 
-      // Ajustar ancho de columnas basado en el contenido o el encabezado
-      worksheet.columns = dynamicHeaders.map((header) => {
-        const maxLength = Math.max(
-          header.length,
-          ...rowsToExport.map((row) =>
-            row[header.toLowerCase()]
-              ? row[header.toLowerCase()].toString().length
-              : 0
-          )
-        );
-        return { width: maxLength + 2 }; // Añadir un margen
+      const headerRow = worksheet.addRow(
+        dynamicHeaders.map((header) => header.replace(/_/g, " "))
+      );
+      headerRow.eachCell((cell) => {
+        cell.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "4F81BD" },
+        };
+        cell.font = {
+          color: { argb: "FFFFFF" },
+          bold: true,
+        };
+        cell.alignment = {
+          horizontal: "center",
+          vertical: "middle",
+          wrapText: true,
+        };
       });
 
-      // Guardar archivo Excel
+      // 🧾 Agregar datos
+      for (const [rowIndex, row] of rowsToExport.entries()) {
+        const rowValues = dynamicHeaders.map((header) => {
+          const match = header.match(/^(.+?) - (.+)$/);
+          if (match) {
+            const [_, parentKey, subKey] = match;
+            const obj = row[parentKey.toLowerCase()];
+            if (obj && typeof obj === "object") {
+              return obj[subKey.toLowerCase()] ?? "";
+            }
+          } else {
+            const value = row[header.toLowerCase()];
+            if (Array.isArray(value)) {
+              return value.join(", ");
+            } else if (typeof value === "object" && value !== null) {
+              return Object.entries(value)
+                .filter(([k]) => !k.toLowerCase().includes("id"))
+                .map(([k, v]) => `${k}: ${v}`)
+                .join(", ");
+            } else {
+              return value ?? "";
+            }
+          }
+          return "";
+        });
+
+        const excelRow = worksheet.addRow(rowValues);
+        worksheet.getRow(rowIndex + 2).height = 75;
+
+        // 🖼️ Insertar imágenes si hay
+        if (row.fotos) {
+          const photoColumns = {};
+          for (const photo of row.fotos) {
+            const photoHeaderBase = dynamicHeaders.filter((header) =>
+              header.startsWith(`FOTO DE ${photo.type.toUpperCase()}`)
+            );
+            let colIndex = -1;
+            for (let i = 0; i < photoHeaderBase.length; i++) {
+              if (!photoColumns[photoHeaderBase[i]]) {
+                photoColumns[photoHeaderBase[i]] = true;
+                colIndex = dynamicHeaders.indexOf(photoHeaderBase[i]) + 1;
+                break;
+              }
+            }
+
+            if (colIndex !== -1 && photo.imageBase64) {
+              const imageId = workbook.addImage({
+                base64: photo.imageBase64,
+                extension: "jpeg",
+              });
+              worksheet.addImage(imageId, {
+                tl: { col: colIndex - 1, row: rowIndex + 1 },
+                ext: { width: 75, height: 75 },
+              });
+              worksheet.getColumn(colIndex).width = 12;
+            }
+          }
+        }
+      }
+
+      // 📐 Ajustar ancho dinámicamente
+      dynamicHeaders.forEach((header, i) => {
+        let maxLength = header.length;
+        worksheet.eachRow((row, rowNumber) => {
+          const cell = row.getCell(i + 1);
+          const val = cell.value ? cell.value.toString() : "";
+          if (val.length > maxLength) maxLength = val.length;
+        });
+        worksheet.getColumn(i + 1).width = Math.min(maxLength + 2, 100);
+      });
+
+      // 💾 Descargar
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -425,37 +485,8 @@ const DataGridManagement = ({ data }) => {
     } catch (error) {
       console.error("Error al generar el archivo Excel:", error);
     } finally {
-      //setShowModalLoading(false);
+      setShowModalLoading(false);
     }
-  };
-
-  // Función para convertir la imagen a Base64 utilizando html2canvas
-  const convertToBase64 = async (url) => {
-    try {
-      const response = await fetch(url);
-      const blob = await response.blob();
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result.split(",")[1]);
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-      });
-    } catch (error) {
-      console.error("Error al convertir la imagen a Base64:", error);
-      throw new Error("Error al convertir la imagen a Base64.");
-    }
-  };
-
-  // Función para convertir una URL de imagen a base64
-  const urlToBase64 = async (url) => {
-    const response = await fetch(url);
-    const blob = await response.blob();
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result.split(",")[1]);
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
   };
 
   const handleChange = (event) => {
@@ -486,6 +517,7 @@ const DataGridManagement = ({ data }) => {
 
   return (
     <div className="w-full text-white">
+    <LoadingModal open={showModalLoading} />
       <div className="w-full p-4 rounded-lg shadow-md mb-4">
         <Typography
           variant="h6"

@@ -89,12 +89,9 @@ function Index() {
           setAlertType("info");
           setAlertOpen(true);
         } else {
-          const processedData = register.data.map((item) => ({
-            ...item,
-            fotos: item.fotos ? JSON.parse(item.fotos) : [], // Convierte a array
-          }));
-          setResultData(processedData);
-          console.log(processedData);
+          
+          setResultData(register.data);
+          console.log(register.data);
         }
       })
       .catch((error) => {
