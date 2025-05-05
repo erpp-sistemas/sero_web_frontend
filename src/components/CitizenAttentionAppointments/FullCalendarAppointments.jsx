@@ -6,7 +6,7 @@ import {
   Tooltip,
   TextField,
   InputAdornment,
-  FormHelperText,
+  FormHelperText,  
 } from "@mui/material";
 import LoadingModal from "../../components/LoadingModal.jsx";
 
@@ -19,6 +19,7 @@ import esLocale from "@fullcalendar/core/locales/es";
 import RegularizationChips from "./RegularizationChips";
 import StatCards from "./StatCard.jsx";
 import DataGridAppointments from "./DataGridAppointments.jsx";
+import DayEventsDrawer from "./DayEventsDrawer";
 
 import * as ExcelJS from "exceljs";
 import { Button } from "@mui/material";
@@ -32,6 +33,34 @@ const FullCalendarAppointments = ({ data }) => {
   const [showModalLoading, setShowModalLoading] = useState(false);
   const [selectedFilters, setSelectedFilters] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [selectedDayEvents, setSelectedDayEvents] = useState([]);
+  const [selectedDrawerFilter, setSelectedDrawerFilter] = useState(null);
+  const [currentView, setCurrentView] = useState("dayGridMonth");
+
+  const diasSemana = [
+    "domingo",
+    "lunes",
+    "martes",
+    "miércoles",
+    "jueves",
+    "viernes",
+    "sábado",
+  ];
+  const meses = [
+    "enero",
+    "febrero",
+    "marzo",
+    "abril",
+    "mayo",
+    "junio",
+    "julio",
+    "agosto",
+    "septiembre",
+    "octubre",
+    "noviembre",
+    "diciembre",
+  ];
 
   const events = useMemo(() => {
     if (!data) return [];
@@ -47,7 +76,37 @@ const FullCalendarAppointments = ({ data }) => {
     }));
   }, [data]);
 
+  const groupedEvents = useMemo(() => {
+    if (!data) return [];
+    const grouped = data.reduce((acc, item) => {
+      const date = item.fecha_cita.split("T")[0]; // Agrupamos por fecha (YYYY-MM-DD)
+      if (!acc[date]) acc[date] = [];
+      acc[date].push(item);
+      return acc;
+    }, {});
+
+    return Object.entries(grouped).flatMap(([date, events]) => {
+      if (events.length === 1) {
+        const event = events[0];
+        return {
+          id: event.id,
+          title: event.folio,
+          start: event.fecha_cita,
+          extendedProps: event,
+        };
+      } else {
+        return {
+          id: date,
+          title: `${events.length} citas`,
+          start: date,
+          extendedProps: { events },
+        };
+      }
+    });
+  }, [data]);
+
   const getColorFromString = (str) => {
+    if (!str) return "hsl(0, 0%, 70%)"; // gris para opción vacía
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
       hash = str.charCodeAt(i) + ((hash << 5) - hash);
@@ -74,6 +133,18 @@ const FullCalendarAppointments = ({ data }) => {
   };
 
   const renderEventContent = (eventInfo) => {
+    const { events } = eventInfo.event.extendedProps;
+
+    if (events) {
+      // Renderiza el contador de citas
+      return (
+        <div className="text-center font-bold text-2xl text-gray-100">
+          {eventInfo.event.title}
+        </div>
+      );
+    }
+
+    // Renderiza el contenido del evento individual
     const extendedProps = eventInfo.event.extendedProps;
     const { opcion_regularizacion, fecha_cita } = extendedProps;
     const date = new Date(fecha_cita);
@@ -87,22 +158,16 @@ const FullCalendarAppointments = ({ data }) => {
 
     const bulletColor = getColorFromString(opcion_regularizacion || "");
 
-    const fieldsToExclude = ["id_plaza", "id_servicio", "fecha_cita"];
-
     return (
       <Tooltip
         title={
           <div className="flex flex-col text-sm">
-            {Object.entries(extendedProps)
-              .filter(([key]) => !fieldsToExclude.includes(key))
-              .map(([key, value]) => (
-                <div key={key} className="capitalize">
-                  <span className="font-semibold">
-                    {key.replace(/_/g, " ")}:
-                  </span>{" "}
-                  {value}
-                </div>
-              ))}
+            {Object.entries(extendedProps).map(([key, value]) => (
+              <div key={key} className="capitalize">
+                <span className="font-semibold">{key.replace(/_/g, " ")}:</span>{" "}
+                {value}
+              </div>
+            ))}
             <div>
               <span className="font-semibold">Hora:</span> {formattedTime}
             </div>
@@ -128,32 +193,8 @@ const FullCalendarAppointments = ({ data }) => {
     );
   };
 
-  const diasSemana = [
-    "domingo",
-    "lunes",
-    "martes",
-    "miércoles",
-    "jueves",
-    "viernes",
-    "sábado",
-  ];
-  const meses = [
-    "enero",
-    "febrero",
-    "marzo",
-    "abril",
-    "mayo",
-    "junio",
-    "julio",
-    "agosto",
-    "septiembre",
-    "octubre",
-    "noviembre",
-    "diciembre",
-  ];
-
   const filteredEvents = useMemo(() => {
-    return events.filter((e) => {
+    return data.filter((e) => {
       const term = searchTerm.toLowerCase();
       const matchChip =
         selectedFilters.length === 0 ||
@@ -173,10 +214,40 @@ const FullCalendarAppointments = ({ data }) => {
 
       return matchChip && matchSearch;
     });
-  }, [events, selectedFilters, searchTerm]);
+  }, [data, selectedFilters, searchTerm]);
 
-  const textColor = colors.contentAccentGreen[100];
-  const calendarBackgroundColor = colors.accentGreen[100];
+  const filteredGroupedEvents = useMemo(() => {
+    const grouped = filteredEvents.reduce((acc, item) => {
+      const dateTime = item.fecha_cita; // Agrupamos por fecha y hora exacta
+      if (!acc[dateTime]) acc[dateTime] = [];
+      acc[dateTime].push(item);
+      return acc;
+    }, {});
+
+    return Object.entries(grouped).flatMap(([dateTime, events]) => {
+      if (events.length === 1) {
+        const event = events[0];
+        return {
+          id: event.id,
+          title: event.folio,
+          start: event.fecha_cita,
+          extendedProps: event,
+        };
+      } else {
+        return {
+          id: dateTime,
+          title: `${events.length} citas`,
+          start: dateTime,
+          extendedProps: { events },
+        };
+      }
+    });
+  }, [filteredEvents]);
+
+  const getEventsForView = useMemo(() => {
+    // Usamos la misma lógica para todas las vistas
+    return filteredGroupedEvents;
+  }, [filteredGroupedEvents]);
 
   const handleExportToExcel = async () => {
     const workbook = new ExcelJS.Workbook();
@@ -242,7 +313,42 @@ const FullCalendarAppointments = ({ data }) => {
     URL.revokeObjectURL(url);
   };
 
-  // ✅ Esta validación solo afecta lo que se renderiza, no los hooks
+  const handleDatesSet = (dateInfo) => {
+    setCurrentView(dateInfo.view.type);
+  };
+
+  const handleDateClick = (info) => {
+    const clickedDate = info.dateStr;
+    const dayGroup = filteredGroupedEvents.find(
+      (group) => group.start.split("T")[0] === clickedDate
+    );
+
+    if (dayGroup) {
+      if (dayGroup.extendedProps.events) {
+        setSelectedDayEvents(dayGroup.extendedProps.events);
+      } else {
+        setSelectedDayEvents([dayGroup.extendedProps]);
+      }
+      setDrawerOpen(true);
+    }
+  };
+
+  const handleEventClick = (info) => {
+    const clickedDateTime = info.event.start.toISOString();
+    const eventGroup = filteredGroupedEvents.find((group) =>
+      group.start === clickedDateTime
+    );
+
+    if (eventGroup) {
+      if (eventGroup.extendedProps.events) {
+        setSelectedDayEvents(eventGroup.extendedProps.events);
+      } else {
+        setSelectedDayEvents([eventGroup.extendedProps]);
+      }
+      setDrawerOpen(true);
+    }
+  };
+
   if (!data || data.length === 0) {
     return (
       <p className="text-center text-gray-500">No hay datos para mostrar</p>
@@ -254,8 +360,6 @@ const FullCalendarAppointments = ({ data }) => {
       <LoadingModal open={showModalLoading} />
 
       <div className="w-full p-4 rounded-lg shadow-md mb-4">
-        
-
         <div className="grid grid-cols-12 items-center gap-4">
           {/* Columna vacía (6 columnas) */}
           <div className="col-span-6 hidden" />
@@ -333,8 +437,8 @@ const FullCalendarAppointments = ({ data }) => {
               <FullCalendar
                 plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
                 initialView="dayGridMonth"
-                events={filteredEvents}
-                eventContent={renderEventContent}
+                events={getEventsForView} // Usamos la misma lógica para todas las vistas
+                eventContent={renderEventContent} // Renderiza eventos individuales y contadores
                 locale={esLocale}
                 headerToolbar={{
                   left: "prev,next today",
@@ -342,12 +446,21 @@ const FullCalendarAppointments = ({ data }) => {
                   right: "dayGridMonth,timeGridWeek,timeGridDay",
                 }}
                 height="auto"
-                slotMinTime="00:00:00"
-                slotMaxTime="23:59:00"
                 nowIndicator={true}
                 selectable={true}
-                dayHeaderClassNames={() => ['text-black', 'font-semibold']}                
+                dayHeaderClassNames={() => ["text-black", "font-semibold"]}
                 contentHeight="auto"
+                dateClick={handleDateClick}
+                eventClick={handleEventClick}
+                datesSet={handleDatesSet}
+              />
+              <DayEventsDrawer
+                open={drawerOpen}
+                onClose={() => setDrawerOpen(false)}
+                events={selectedDayEvents}
+                selectedFilter={selectedDrawerFilter}
+                setSelectedFilter={setSelectedDrawerFilter}
+                getColorFromString={getColorFromString}
               />
             </div>
           </div>
@@ -358,8 +471,7 @@ const FullCalendarAppointments = ({ data }) => {
               <DataGridAppointments data={filteredEvents} />
             </div>
           </div>
-          </div>
-        
+        </div>
       </div>
     </div>
   );
