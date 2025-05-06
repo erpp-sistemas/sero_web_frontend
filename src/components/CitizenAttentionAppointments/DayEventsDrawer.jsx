@@ -1,5 +1,15 @@
 import React, { useState } from "react";
-import { Drawer, Box, Typography, IconButton, Chip, Card, CardContent, TextField, Button } from "@mui/material";
+import {
+  Drawer,
+  Box,
+  Typography,
+  IconButton,
+  Chip,
+  Card,
+  CardContent,
+  TextField,
+  Button,
+} from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import * as ExcelJS from "exceljs";
@@ -12,6 +22,7 @@ const DayEventsDrawer = ({
   setSelectedFilter,
   getColorFromString,
 }) => {
+  console.log(events);
   const [searchTerm, setSearchTerm] = useState("");
 
   const opcionCounts = events.reduce((acc, curr) => {
@@ -32,6 +43,24 @@ const DayEventsDrawer = ({
         .includes(searchTerm.toLowerCase());
     return matchesFilter && matchesSearch;
   });
+
+  function parseHourFromFecha(fechaCita) {
+    const dateParts = fechaCita.split("T");
+    if (dateParts.length < 2) return "";
+
+    const timePart = dateParts[1];
+    const [hourStr, minuteStr] = timePart.split(":");
+    let hours = parseInt(hourStr, 10);
+    const minutes = minuteStr;
+
+    const ampm = hours >= 12 ? "PM" : "AM";
+
+    // Convertir a formato 12 horas
+    hours = hours % 12;
+    hours = hours === 0 ? 12 : hours; // Si es 0, en 12 horas es 12
+
+    return `${hours}:${minutes} ${ampm}`;
+  }
 
   const handleExportToExcel = async () => {
     const workbook = new ExcelJS.Workbook();
@@ -95,14 +124,15 @@ const DayEventsDrawer = ({
   };
 
   // Obtener la fecha de los eventos (asumiendo que todos los eventos tienen la misma fecha)
-  const drawerDate = events.length > 0 
-    ? new Date(events[0].fecha_cita).toLocaleDateString("es-MX", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
-    : "Sin fecha";
+  const drawerDate =
+    events.length > 0
+      ? new Date(events[0].fecha_cita).toLocaleDateString("es-MX", {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        })
+      : "Sin fecha";
 
   return (
     <Drawer anchor="right" open={open} onClose={onClose}>
@@ -141,7 +171,7 @@ const DayEventsDrawer = ({
             endIcon={<FileDownloadIcon />}
             onClick={handleExportToExcel}
             disabled={filteredEvents.length === 0}
-            sx={{              
+            sx={{
               color: "white",
             }}
           >
@@ -151,7 +181,11 @@ const DayEventsDrawer = ({
 
         {/* Chips para filtrar dentro del Drawer */}
         <Box mt={2} display="flex" flexWrap="wrap" gap={1}>
-          {[...new Set(events.map((e) => e.opcion_regularizacion || "Sin opción"))].map((option) => {
+          {[
+            ...new Set(
+              events.map((e) => e.opcion_regularizacion || "Sin opción")
+            ),
+          ].map((option) => {
             const isSelected = selectedFilter === option;
             const bulletColor = getColorFromString(option);
             const count = opcionCounts[option] || 0;
@@ -170,7 +204,9 @@ const DayEventsDrawer = ({
                   color: isSelected ? "white" : bulletColor,
                   backgroundColor: isSelected ? bulletColor : "transparent",
                   "&:hover": {
-                    backgroundColor: isSelected ? bulletColor : bulletColor + "33",
+                    backgroundColor: isSelected
+                      ? bulletColor
+                      : bulletColor + "33",
                   },
                 }}
               />
@@ -181,7 +217,9 @@ const DayEventsDrawer = ({
         {/* Citas filtradas */}
         <Box mt={2} display="flex" flexDirection="column" gap={2}>
           {filteredEvents.map((event) => {
-            const bulletColor = getColorFromString(event.opcion_regularizacion || "Sin opción");
+            const bulletColor = getColorFromString(
+              event.opcion_regularizacion || "Sin opción"
+            );
 
             return (
               <Card
@@ -204,10 +242,7 @@ const DayEventsDrawer = ({
                     textAlign="center"
                     sx={{ mb: 2 }}
                   >
-                    {new Date(event.fecha_cita).toLocaleTimeString("es-MX", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
+                    {parseHourFromFecha(event.fecha_cita)}
                   </Typography>
                   <Typography fontWeight="bold">{event.folio}</Typography>
                   <Typography variant="body2">{event.propietario}</Typography>
@@ -220,7 +255,7 @@ const DayEventsDrawer = ({
                       fontWeight: "bold",
                     }}
                   >
-                      {event.opcion_regularizacion || "Sin opción"}
+                    {event.opcion_regularizacion || "Sin opción"}
                   </Typography>
                 </CardContent>
               </Card>

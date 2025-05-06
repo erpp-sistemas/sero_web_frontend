@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { tokens } from "../../theme";
-import {
-  Typography,
+import {  
   useTheme,
   Tooltip,
   TextField,
@@ -132,6 +131,24 @@ const FullCalendarAppointments = ({ data }) => {
     );
   };
 
+  function parseHourFromFecha(fechaCita) {
+    const dateParts = fechaCita.split("T"); 
+    if (dateParts.length < 2) return "";
+
+    const timePart = dateParts[1]; 
+    const [hourStr, minuteStr] = timePart.split(":"); 
+    let hours = parseInt(hourStr, 10);
+    const minutes = minuteStr;
+    
+    const ampm = hours >= 12 ? "PM" : "AM";
+    
+    // Convertir a formato 12 horas
+    hours = hours % 12;
+    hours = hours === 0 ? 12 : hours; // Si es 0, en 12 horas es 12
+    
+    return `${hours}:${minutes} ${ampm}`;
+  }
+
   const renderEventContent = (eventInfo) => {
     const { events } = eventInfo.event.extendedProps;
 
@@ -147,14 +164,8 @@ const FullCalendarAppointments = ({ data }) => {
     // Renderiza el contenido del evento individual
     const extendedProps = eventInfo.event.extendedProps;
     const { opcion_regularizacion, fecha_cita } = extendedProps;
-    const date = new Date(fecha_cita);
 
-    const formattedTime = date.toLocaleTimeString("es-MX", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-      timeZone: "America/Mexico_City",
-    });
+    const formattedTime = parseHourFromFecha(fecha_cita); // Usamos la función para formatear la hora
 
     const bulletColor = getColorFromString(opcion_regularizacion || "");
 
@@ -218,13 +229,13 @@ const FullCalendarAppointments = ({ data }) => {
 
   const filteredGroupedEvents = useMemo(() => {
     const grouped = filteredEvents.reduce((acc, item) => {
-      const dateTime = item.fecha_cita; // Agrupamos por fecha y hora exacta
-      if (!acc[dateTime]) acc[dateTime] = [];
-      acc[dateTime].push(item);
+      const dateTimeHour = item.fecha_cita.slice(0, 13); // Agrupamos por fecha y hora (YYYY-MM-DDTHH)
+      if (!acc[dateTimeHour]) acc[dateTimeHour] = [];
+      acc[dateTimeHour].push(item);
       return acc;
     }, {});
 
-    return Object.entries(grouped).flatMap(([dateTime, events]) => {
+    return Object.entries(grouped).flatMap(([dateTimeHour, events]) => {
       if (events.length === 1) {
         const event = events[0];
         return {
@@ -235,9 +246,9 @@ const FullCalendarAppointments = ({ data }) => {
         };
       } else {
         return {
-          id: dateTime,
+          id: dateTimeHour,
           title: `${events.length} citas`,
-          start: dateTime,
+          start: `${dateTimeHour}:00`, // Agregamos minutos para que sea una fecha válida
           extendedProps: { events },
         };
       }
@@ -334,19 +345,17 @@ const FullCalendarAppointments = ({ data }) => {
   };
 
   const handleEventClick = (info) => {
-    const clickedDateTime = info.event.start.toISOString();
-    const eventGroup = filteredGroupedEvents.find((group) =>
-      group.start === clickedDateTime
-    );
+    const { extendedProps } = info.event;
 
-    if (eventGroup) {
-      if (eventGroup.extendedProps.events) {
-        setSelectedDayEvents(eventGroup.extendedProps.events);
-      } else {
-        setSelectedDayEvents([eventGroup.extendedProps]);
-      }
-      setDrawerOpen(true);
+    if (extendedProps.events) {
+      // Si es un contador de citas, mostramos todas las citas agrupadas
+      setSelectedDayEvents(extendedProps.events);
+    } else {
+      // Si es una cita individual, mostramos solo esa cita
+      setSelectedDayEvents([extendedProps]);
     }
+
+    setDrawerOpen(true); // Abrimos el drawer
   };
 
   if (!data || data.length === 0) {
@@ -440,6 +449,7 @@ const FullCalendarAppointments = ({ data }) => {
                 events={getEventsForView} // Usamos la misma lógica para todas las vistas
                 eventContent={renderEventContent} // Renderiza eventos individuales y contadores
                 locale={esLocale}
+                timeZone="America/Mexico_City" // Configuramos la zona horaria explícitamente
                 headerToolbar={{
                   left: "prev,next today",
                   center: "title",
