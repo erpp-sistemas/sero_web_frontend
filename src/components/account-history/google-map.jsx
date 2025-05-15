@@ -4,10 +4,11 @@ import Pin from '../../../public/icons8-pin.png'
 
 const mapContainerStyle = {
   width: '100%',
-  height: '400px'
+  height: '420px'
 };
 
 const MapboxMap = ({ latitude, longitude }) => {
+  console.log(latitude, longitude)
   const mapContainerRef = useRef(null);
   const map = useRef(null);
 
@@ -20,7 +21,7 @@ const MapboxMap = ({ latitude, longitude }) => {
     });
 
     const customMarkerElement = document.createElement('div');
-    customMarkerElement.innerHTML = `<img src="${Pin}" style="width: 60px; height: 60px;">`;;
+    customMarkerElement.innerHTML = `<img src="${Pin}" style="width: 50px; height: 50px;">`;;
 
     new mapboxgl.Marker(customMarkerElement)
       .setLngLat([longitude, latitude])

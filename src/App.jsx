@@ -63,6 +63,10 @@ import Credict from './scenes/credit'
 import TestRh from './scenes/rh-test'
 import ReportsTestRH from './scenes/rerports-test-rh'
 import Lektor from './scenes/lektor'
+import Managements from './scenes/managements'
+import AssignmentManager from './scenes/assignment-manager'
+import AccountDetails from './scenes/account-details'
+import CitizenAttentionAppointments from './scenes/citizen-attention-appointments'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -92,6 +96,8 @@ function App() {
       };
 
       await submenuAccessLogRequest(submenu_access_data);
+
+      console.log(user.place_service_process)
 
     } catch (error) {
       console.error('Error fetching data:', error)
@@ -213,6 +219,10 @@ function App() {
                         <Route path="/test-rh" element={<TestRh />} />
                         <Route path="/reports-test-rh" element={<ReportsTestRH />} />
                         <Route path="/lektor" element={<Lektor />} />
+                        <Route path="/managements" element={<Managements />} />
+                        <Route path="/assignment-manager" element={<AssignmentManager />} />
+                        <Route path="/account-details" element={<AccountDetails />} />
+                        <Route path="/citizen-attention-appointments" element={<CitizenAttentionAppointments />} />
                       </Routes>
                     </main>
                   </Box>

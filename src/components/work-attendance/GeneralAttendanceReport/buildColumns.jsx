@@ -1,21 +1,25 @@
 import React, { useMemo } from "react";
 import {
   AccessTime,
-  AccessTimeRounded,
   Apartment,
   AttachMoney,
   BeachAccess,
+  Business,
   CalendarMonth,
+  Cancel,
+  CheckCircle,
   Dangerous,
   EditRoad,
   InsertEmoticon,
   LocalHospital,
+  LockClock,
   MoneyOff,
   PersonPinCircle,
   Public,
   RunningWithErrors,
   SentimentVeryDissatisfied,
   SentimentVeryDissatisfiedOutlined,
+  Smartphone,
   WarningAmber,
 } from "@mui/icons-material";
 import Viewer from "react-viewer";
@@ -130,6 +134,53 @@ function buildColumns() {
             }}
           />
         ),
+      },
+      {
+        field: "tipo_checada",
+        headerName: "MEDIO DE CHECADA",
+        renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>{"MEDIO DE CHECADA"}</strong>
+        ),
+        width: 200,
+        renderCell: (params) => {
+          let icon = null;
+          let chipColor = colors.greenAccent[400];
+          let chipLabel = "";
+
+          switch (params.value) {
+            case 1:
+              icon = <Smartphone />;
+              chipColor = colors.tealAccent[400];
+              chipLabel = "App Móvil";
+              break;
+            case 2:
+              icon = <Business />;
+              chipColor = colors.blueAccent[400];
+              chipLabel = "Oficina";
+              break;
+            default:
+              icon = <Dangerous />;
+              chipColor = colors.redAccent[400];
+              chipLabel = "Desconocido";
+          }
+
+          return (
+            <Chip
+              icon={icon}
+              label={chipLabel}
+              variant="outlined"
+              sx={{
+                background: chipColor,
+                fontWeight: "bold",
+                fontSize: "1.2em",
+                color: "black",
+                "& .MuiChip-icon": {
+                  color: theme.palette.info.main,
+                },
+              }}
+            />
+          );
+        },
       },
       {
         field: "hora_entrada_sistema",
@@ -336,15 +387,15 @@ function buildColumns() {
           let chipColor = colors.greenAccent[400];
           let chipLabel = "";
           switch (params.row.estatus_punto_entrada) {
-            case "Campo":
+            case "Fuera del rango":
               icon = <EditRoad />;
-              chipColor = colors.tealAccent[400];
-              chipLabel = "Campo";
+              chipColor = colors.redAccent[400];
+              chipLabel = "Fuera del rango";
               break;
-            case "Corporativo":
+            case "Dentro del rango":
               icon = <Apartment />;
-              chipColor = colors.blueAccent[400];
-              chipLabel = "Corporativo";
+              chipColor = colors.tealAccent[400];
+              chipLabel = "Dentro del rango";
               break;
             default:
               icon = <Dangerous />;
@@ -381,8 +432,8 @@ function buildColumns() {
         renderCell: (params) => {
           const { lugar_entrada, estatus_punto_entrada } = params.row;
           const isDisabled =
-            estatus_punto_entrada !== "Campo" &&
-            estatus_punto_entrada !== "Corporativo";
+            estatus_punto_entrada !== "Fuera del rango" &&
+            estatus_punto_entrada !== "Dentro del rango";
 
           return (
             <Tooltip title="Abrir en Google Maps">
@@ -414,6 +465,100 @@ function buildColumns() {
                 </Button>
               </span>
             </Tooltip>
+          );
+        },
+      },
+      {
+        field: "lugar_entrada_primer_gestion",
+        headerName: "LUGAR DE ENTRADA PRIMERA GESTIÓN",
+        renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>
+            {"LUGAR DE ENTRADA PRIMERA GESTIÓN"}
+          </strong>
+        ),
+        width: 300,
+        renderCell: (params) => {
+          const isDisabled = params.value === "Sin lugar";
+
+          return (
+            <Tooltip
+              title={
+                isDisabled ? "Sin ubicación disponible" : "Abrir en Google Maps"
+              }
+            >
+              <span>
+                {/* Necesario para que el Tooltip funcione en botones deshabilitados */}
+                <Button
+                  variant="contained"
+                  color="info"
+                  startIcon={<PersonPinCircle />}
+                  onClick={() => window.open(params.value, "_blank")}
+                  disabled={isDisabled}
+                  sx={{
+                    textTransform: "none",
+                    fontWeight: "bold",
+                    fontSize: "1.2em",
+                    backgroundColor: isDisabled
+                      ? colors.grey
+                      : colors.tealAccent[400],
+                    color: isDisabled ? "white" : "black",
+                    "&:hover": {
+                      backgroundColor: isDisabled
+                        ? colors.grey
+                        : colors.tealAccent[600],
+                    },
+                  }}
+                >
+                  Ver ubicación
+                </Button>
+              </span>
+            </Tooltip>
+          );
+        },
+      },
+      {
+        field: "distancia_entrada",
+        headerName: "DISTANCIA DE PUNTOS DE ENTRADA",
+        renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>
+            {"DISTANCIA DE PUNTOS DE ENTRADA"}
+          </strong>
+        ),
+        width: 280,
+        renderCell: (params) => {
+          let icon = null;
+          let chipColor = colors.greenAccent[400];
+          let chipLabel = params.value;
+
+          if (params.value === 0) {
+            icon = <WarningAmber />;
+            chipColor = colors.yellowAccent[400];
+            chipLabel = "Sin distancia";
+          } else if (params.value <= 500) {
+            icon = <CheckCircle />;
+            chipColor = colors.tealAccent[400];
+            chipLabel = `${params.value} m`;
+          } else {
+            icon = <Cancel />;
+            chipColor = colors.redAccent[400];
+            chipLabel = `${params.value} m`;
+          }
+
+          return (
+            <Chip
+              icon={icon}
+              label={chipLabel}
+              variant="outlined"
+              sx={{
+                background: chipColor,
+                fontWeight: "bold",
+                fontSize: "1.2em",
+                color: "black",
+                "& .MuiChip-icon": {
+                  color: theme.palette.info.main,
+                },
+              }}
+            />
           );
         },
       },
@@ -639,15 +784,15 @@ function buildColumns() {
           let chipColor = colors.greenAccent[400];
           let chipLabel = "";
           switch (params.row.estatus_punto_salida) {
-            case "Campo":
+            case "Fuera del rango":
               icon = <EditRoad />;
-              chipColor = colors.tealAccent[400];
-              chipLabel = "Campo";
+              chipColor = colors.redAccent[400];
+              chipLabel = "Fuera del rango";
               break;
-            case "Corporativo":
+            case "Dentro del rango":
               icon = <Apartment />;
-              chipColor = colors.blueAccent[400];
-              chipLabel = "Corporativo";
+              chipColor = colors.tealAccent[400];
+              chipLabel = "Dentro del rango";
               break;
             default:
               icon = <Dangerous />;
@@ -685,8 +830,8 @@ function buildColumns() {
         renderCell: (params) => {
           const { lugar_salida, estatus_punto_salida } = params.row;
           const isDisabled =
-            estatus_punto_salida !== "Campo" &&
-            estatus_punto_salida !== "Corporativo";
+            estatus_punto_salida !== "Fuera del rango" &&
+            estatus_punto_salida !== "Dentro del rango";
 
           return (
             <Tooltip title="Abrir en Google Maps">
@@ -721,6 +866,192 @@ function buildColumns() {
           );
         },
       },
+      {
+        field: "lugar_salida_ultima_gestion",
+        headerName: "LUGAR DE SALIDA ULTIMA GESTIÓN",
+        renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>
+            {"LUGAR DE SALIDA ULTIMA GESTIÓN"}
+          </strong>
+        ),
+        width: 300,
+        renderCell: (params) => {
+          const isDisabled = params.value === "Sin lugar";
+
+          return (
+            <Tooltip
+              title={
+                isDisabled ? "Sin ubicación disponible" : "Abrir en Google Maps"
+              }
+            >
+              <span>
+                {/* Necesario para que el Tooltip funcione en botones deshabilitados */}
+                <Button
+                  variant="contained"
+                  color="info"
+                  startIcon={<PersonPinCircle />}
+                  onClick={() => window.open(params.value, "_blank")}
+                  disabled={isDisabled}
+                  sx={{
+                    textTransform: "none",
+                    fontWeight: "bold",
+                    fontSize: "1.2em",
+                    backgroundColor: isDisabled
+                      ? colors.grey
+                      : colors.tealAccent[400],
+                    color: isDisabled ? "white" : "black",
+                    "&:hover": {
+                      backgroundColor: isDisabled
+                        ? colors.grey
+                        : colors.tealAccent[600],
+                    },
+                  }}
+                >
+                  Ver ubicación
+                </Button>
+              </span>
+            </Tooltip>
+          );
+        },
+      },
+      {
+        field: "distancia_salida",
+        headerName: "DISTANCIA DE PUNTOS DE SALIDA",
+        renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>
+            {"DISTANCIA DE PUNTOS DE SALIDA"}
+          </strong>
+        ),
+        width: 280,
+        renderCell: (params) => {
+          let icon = null;
+          let chipColor = colors.greenAccent[400];
+          let chipLabel = params.value;
+
+          if (params.value === 0) {
+            icon = <WarningAmber />;
+            chipColor = colors.yellowAccent[400];
+            chipLabel = "Sin distancia";
+          } else if (params.value <= 500) {
+            icon = <CheckCircle />;
+            chipColor = colors.tealAccent[400];
+            chipLabel = `${params.value} m`;
+          } else {
+            icon = <Cancel />;
+            chipColor = colors.redAccent[400];
+            chipLabel = `${params.value} m`;
+          }
+
+          return (
+            <Chip
+              icon={icon}
+              label={chipLabel}
+              variant="outlined"
+              sx={{
+                background: chipColor,
+                fontWeight: "bold",
+                fontSize: "1.2em",
+                color: "black",
+                "& .MuiChip-icon": {
+                  color: theme.palette.info.main,
+                },
+              }}
+            />
+          );
+        },
+      },      
+      {
+        field: "evaluacion_salida_basada_en",
+        headerName: "EVALUACION DE SALIDA BASADA EN",
+        renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>
+            {"EVALUACION DE SALIDA BASADA EN"}
+          </strong>
+        ),
+        width: 280,
+        renderCell: (params) => {
+          let icon = null;
+          let chipColor = colors.greenAccent[400];
+          let chipLabel = params.value;
+
+          if (params.value === "ubicacion en campo") {
+            icon = <WarningAmber />;
+            chipColor = colors.yellowAccent[400];
+            chipLabel = "ubicacion en campo";
+          } else if (params.value === "ubicacion en oficina") {
+            icon = <CheckCircle />;
+            chipColor = colors.tealAccent[400];
+            chipLabel = "ubicacion en oficina";
+          } else {
+            icon = <Cancel />;
+            chipColor = colors.redAccent[400];
+            chipLabel = "Sin evaluar";
+          }
+
+          return (
+            <Chip
+              icon={icon}
+              label={chipLabel}
+              variant="outlined"
+              sx={{
+                background: chipColor,
+                fontWeight: "bold",
+                fontSize: "1.2em",
+                color: "black",
+                "& .MuiChip-icon": {
+                  color: theme.palette.info.main,
+                },
+              }}
+            />
+          );
+        },
+      },
+      {
+        field: "hora_ultima_gestion",
+        headerName: "HORA DE ULTIMA GESTION",
+        renderHeader: () => (
+          <strong style={{ color: "#5EBFFF" }}>
+            {"HORA DE ULTIMA GESTION"}
+          </strong>
+        ),
+        width: 280,
+        renderCell: (params) => {
+          let icon = null;
+          let chipColor = colors.greenAccent[400];
+          let chipLabel = params.value;
+
+          if (params.value >= "17:15:00") {
+            icon = <WarningAmber />;
+            chipColor = colors.yellowAccent[400];
+            chipLabel = params.value;
+          } else if (params.value < "17:15:00") {
+            icon = <CheckCircle />;
+            chipColor = colors.tealAccent[400];
+            chipLabel = params.value;
+          } else {
+            icon = <Cancel />;
+            chipColor = colors.redAccent[400];
+            chipLabel = params.value;
+          }
+
+          return (
+            <Chip
+              icon={icon}
+              label={chipLabel}
+              variant="outlined"
+              sx={{
+                background: chipColor,
+                fontWeight: "bold",
+                fontSize: "1.2em",
+                color: "black",
+                "& .MuiChip-icon": {
+                  color: theme.palette.info.main,
+                },
+              }}
+            />
+          );
+        },
+      },      
       {
         field: "hora_entrada_comida",
         headerName: "HORA DE SALIDA DE COMIDA",

@@ -1,6 +1,6 @@
 import React, { useCallback, useState, useEffect } from "react";
 import { tokens } from "../../theme";
-import PlaceSelectLektor from "../../components/PlaceSelectLektor";
+import PlaceSelectLektor from "../../components/PlaceSelect";
 import ServiceSelectLektor from "../../components/ServiceSelectLektor";
 import ProcessSelectLektor from "../../components/ProcessSelectLektor";
 import { Button, TextField, useTheme } from "@mui/material";

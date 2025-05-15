@@ -12,6 +12,7 @@ const initialState = {
   profile: '',
   active: false,
   isAuthenticated: false,
+  place_service_process: []
 }
 
 export const userSlice = createSlice({
@@ -19,7 +20,7 @@ export const userSlice = createSlice({
     initialState,
     reducers: {
         setUser : (state, action) => {
-            const { user_id, name, birthdate, sex,  personal_phone, work_phone, username, profile_id, profile, active, photo } = action.payload
+            const { user_id, name, birthdate, sex,  personal_phone, work_phone, username, profile_id, profile, active, photo, place_service_process } = action.payload
             state.user_id = user_id
             state.name = name
             state.birthdate = birthdate
@@ -31,7 +32,8 @@ export const userSlice = createSlice({
             state.profile = profile
             state.active = active,
             state.photo = photo
-            state.isAuthenticated = true
+            state.isAuthenticated = true,
+            state.place_service_process = place_service_process
         }
     }
 })

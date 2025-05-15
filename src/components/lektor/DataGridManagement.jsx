@@ -17,6 +17,7 @@ import {
 } from "@mui/material";
 
 const DataGridManagement = ({ data }) => {
+  
   if (!data || data.length === 0) {
     return <p>No hay datos para mostrar</p>;
   }
@@ -56,18 +57,30 @@ const DataGridManagement = ({ data }) => {
   const allKeys = Array.from(new Set(data.flatMap(Object.keys)));
 
   // Normalizar los datos para asegurarse de que cada objeto tenga todos los campos
+  // Normalizar los datos para asegurarse de que cada objeto tenga todos los campos
   const normalizedData = data.map((item) => {
     const newItem = {};
     allKeys.forEach((key) => {
-      newItem[key] = item[key] !== undefined ? item[key] : ""; // Asignar vacío si no existe
+      let value = item[key] !== undefined ? item[key] : "";
+
+      // Si el campo es "fecha_captura", eliminar "T" y "Z"
+      if (key === "fecha_captura" && typeof value === "string") {
+        value = value.split(".")[0].replace("T", " ");
+      }
+
+      newItem[key] = value;
     });
     return newItem;
   });
 
   const columns = allKeys
-    .filter(
-      (key) => key !== "fotos" && key !== "id_usuario" && key !== "image_user"
-    )
+  .filter(
+    (key) => 
+      key !== "id" && // Omitir si es exactamente "id"
+      !key.startsWith("id_") && // Omitir si empieza con "id_"
+      key !== "fotos" &&
+      key !== "image_user"
+  )
     .map((key) => {
       const headerText = key.replace(/_/g, " ").toUpperCase();
       const headerWidth = getTextWidth(headerText, "bold 16px Arial");
@@ -89,6 +102,13 @@ const DataGridManagement = ({ data }) => {
         flex: 1,
       };
     });
+
+  // Ordenar las columnas para asegurarse de que latitud y longitud estén seguidas
+  columns.sort((a, b) => {
+    if (a.field === "latitud" && b.field === "longitud") return -1;
+    if (a.field === "longitud" && b.field === "latitud") return 1;
+    return 0;
+  });
 
   // Agregar columnas para cada tipo de foto
   Array.from(photoTypes).forEach((type) => {
@@ -199,7 +219,7 @@ const DataGridManagement = ({ data }) => {
             fgColor: { argb: themeColor.replace("#", "") },
           };
           cell.font = {
-            color: { argb: "FFFFFF" }, // Letra blanca
+            color: { argb: "000000" }, // Letra blanca
             bold: true,
           };
           cell.alignment = { horizontal: "center", vertical: "middle" }; // Centrado
