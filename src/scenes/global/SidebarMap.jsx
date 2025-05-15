@@ -352,9 +352,9 @@ const SidebarMap = () => {
                                         <h1 className="text-base">Información</h1>
                                     </div>
                                     <div style={{ backgroundColor: theme.palette.mode === 'dark' ? colors.primary[500] : colors.primary[400] }} >
-                                        {Object.keys(features.features_layer).length > 0 && (features.features_layer.cuenta || features.features_layer.municipio || features.features_layer.ide) ? Object.keys(features.features_layer).map((f, index) => ( // Añadir paréntesis aquí
+                                        {Object.keys(features.features_layer).length > 0 && (features.features_layer.cuenta || features.features_layer.municipio || features.features_layer.ide || features.features_layer.id) ? Object.keys(features.features_layer).map((f, index) => ( // Añadir paréntesis aquí
                                             <>
-                                                {f !== 'fecha_filter' && (
+                                                {f !== 'fecha_filter' && f !== 'latitud' && f !== 'longitud' && f !== 'ide' && (
                                                     <Button key={index} sx={{ width: '100%', backgroundColor: theme.palette.mode === 'dark' ? colors.primary[500] : colors.primary[400], color: colors.grey[100] }}>
                                                         {`${f.replaceAll('_', ' ')} : ${features.features_layer[f]}`}
                                                     </Button>

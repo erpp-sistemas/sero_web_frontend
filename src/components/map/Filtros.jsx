@@ -100,8 +100,9 @@ const Filtros = ({ data }) => {
         const arr = [];
         for (let field of fieldsSelected) {
             const list = getValueUniqueByFieldBySource(field);
-            arr.push({ [field]: list })
+            arr.push({ [field]: list.sort() })
         }
+        console.log(arr);
         setFilters(arr)
         setShowSpinner(false);
     }
