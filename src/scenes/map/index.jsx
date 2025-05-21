@@ -2,7 +2,7 @@ import { useRef, useEffect, useState } from 'react'
 import { Map } from "mapbox-gl"
 import { useParams } from 'react-router-dom'
 import { getPlaceById } from '../../services/place.service'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { setDraw } from '../../redux/featuresSlice'
 import { setPlazaMapa } from '../../redux/plazaMapa.Slice'
 import { setMapa } from '../../redux/mapaSlice'

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { ProSidebar, Menu, MenuItem } from "react-pro-sidebar"
-import { Box, IconButton, useTheme, Alert, Button } from "@mui/material"
+import { Box, IconButton, useTheme, Alert } from "@mui/material"
 import "react-pro-sidebar/dist/css/styles.css"
 import { getServicesMapByIdPlaza, getLayersMapByIdPlaza } from '../../services/map.service'
 import { tokens } from "../../theme"
@@ -15,12 +15,17 @@ import { Marker } from "mapbox-gl";
 
 import ModalDate from '../../components/modals/ModalDate';
 
+
+// COMPONENTS
+import InformacionSidebar from '../../components/map/InformacionSidebar';
+
 const SidebarMap = () => {
 
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
     const dispatch = useDispatch();
     const mapa_seleccionado = useSelector((state) => state.plaza_mapa);
+    const messages = useSelector((state) => state.webSocket.messages);
     const mapa_activo = useSelector((state) => state.mapa)
     const dialog_mapa = useSelector((state) => state.dialog);
     const features = useSelector((state) => state.features);
@@ -45,6 +50,23 @@ const SidebarMap = () => {
             putLayersByIdServicio(servicio.service_id)
         }
     }
+
+    let reloadTimeout = null;
+    useEffect(() => {
+        if (messages.length === 0) return;
+        if (reloadTimeout) clearTimeout(reloadTimeout);
+        reloadTimeout = setTimeout(async () => {
+            for (const layer of features.layers_activos) {
+                const nuevaData = await cargarFeaturesLayer(layer.url_geoserver);
+                if (mapa_activo.mapa.getSource(layer.name_layer)) {
+                    mapa_activo.mapa.getSource(layer.name_layer).setData(nuevaData);
+                }
+            }
+        }, 2000); // recarga máximo cada 2 segundos
+        // Limpieza
+        return () => clearTimeout(reloadTimeout);
+    }, [messages]);
+
 
     useEffect(() => {
         screen.width <= 450 ? setIsCollapsed(true) : setIsCollapsed(false)
@@ -127,7 +149,7 @@ const SidebarMap = () => {
                 changeColorLayer(layer.name_layer, colors.grey[100])
             } else {
                 const find_cluster = handleCheckClusterInMap(layer);
-                if(find_cluster) return alert("Desactiva el mapa de calor para apagar este layer");
+                if (find_cluster) return alert("Desactiva el mapa de calor para apagar este layer");
 
                 mapa_activo.mapa.setLayoutProperty(layer.layer_id, 'visibility', 'visible')
                 changeColorLayer(layer.name_layer, colors.greenAccent[600])
@@ -347,22 +369,7 @@ const SidebarMap = () => {
                                 </div>
 
                                 {/* INFORMACION */}
-                                <div className="w-[90%]">
-                                    <div className="h-8 flex items-center px-3" style={{ backgroundColor: theme.palette.mode === "dark" ? colors.primary[600] : colors.grey[700], color: theme.palette.mode === "dark" ? colors.grey[100] : 'white' }} >
-                                        <h1 className="text-base">Información</h1>
-                                    </div>
-                                    <div style={{ backgroundColor: theme.palette.mode === 'dark' ? colors.primary[500] : colors.primary[400] }} >
-                                        {Object.keys(features.features_layer).length > 0 && (features.features_layer.cuenta || features.features_layer.municipio || features.features_layer.ide || features.features_layer.id) ? Object.keys(features.features_layer).map((f, index) => ( // Añadir paréntesis aquí
-                                            <>
-                                                {f !== 'fecha_filter' && f !== 'latitud' && f !== 'longitud' && f !== 'ide' && (
-                                                    <Button key={index} sx={{ width: '100%', backgroundColor: theme.palette.mode === 'dark' ? colors.primary[500] : colors.primary[400], color: colors.grey[100] }}>
-                                                        {`${f.replaceAll('_', ' ')} : ${features.features_layer[f]}`}
-                                                    </Button>
-                                                )}
-                                            </>
-                                        )) : null}
-                                    </div>
-                                </div>
+                                <InformacionSidebar />
 
                             </div>
                         )}
