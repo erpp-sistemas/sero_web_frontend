@@ -33,7 +33,7 @@ const ModalinfoPolygonPdf = ({ setShowModal, polygon }) => {
     useEffect(() => {
         const properties = polygon.points.map(poly => poly.properties);
         const { resultado, serviciosUnicos, totales, totalGeneral } = transformarDatos(properties);
-        setData({resultado, serviciosUnicos, totales, totalGeneral})
+        setData({ resultado, serviciosUnicos, totales, totalGeneral })
     }, [])
 
 
@@ -96,46 +96,6 @@ const ModalinfoPolygonPdf = ({ setShowModal, polygon }) => {
     };
 
 
-    // useEffect(() => {
-    //     const properties = polygon.points.map(poly => poly.properties);
-    //     const result_process = processData(properties)
-
-    //     const serviceT = Object.keys(properties.reduce((acc, item) => {
-    //         acc[item.tipo_servicio] = true;
-    //         return acc;
-    //     }, {}));
-
-    //     console.log(result_process)
-    //     console.log(serviceT)
-    //     setResult(result_process)
-    //     setServiceTypes(serviceT)
-    // }, [])
-
-
-
-    // const processData = (data) => {
-    //     return data.reduce((acc, item) => {
-    //         const userType = item.tipo_usuario;
-    //         const serviceType = item.tipo_servicio;
-
-    //         if (!acc[serviceType]) {
-    //             acc[serviceType] = {};
-    //         }
-
-    //         if (!acc[serviceType][userType]) {
-    //             acc[serviceType][userType] = {
-    //                 count: 0,
-    //                 sum: 0
-    //             };
-    //         }
-
-    //         acc[serviceType][userType].count += 1;
-    //         acc[serviceType][userType].sum += item.adeudo_real;
-
-    //         return acc;
-    //     }, {});
-
-    // };
 
     const handleConvertDivImg = async () => {
         const canvas_img = await html2Canvas(document.getElementById('map'))
@@ -195,7 +155,11 @@ const ModalinfoPolygonPdf = ({ setShowModal, polygon }) => {
                     <div className="mt-4 w-full mx-auto">
                         {Object.keys(data).length > 0 && (
                             <>
-                                <TableInfoPdf data={data} />
+                                {data.totalGeneral && data.totalGeneral.totalSum ? (
+                                    <TableInfoPdf data={data} />
+                                ): (
+                                    <p className='text-red-700 font-bold text-center'>Este layer no cuenta con información de adeudos para poder mostrar la tabla de resumen.</p>
+                                )}
                                 <MapPolygon polygon={polygon} />
                             </>
                         )}

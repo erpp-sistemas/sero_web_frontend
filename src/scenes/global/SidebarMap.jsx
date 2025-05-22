@@ -117,7 +117,6 @@ const SidebarMap = () => {
         const servicios_mapa = getServicesMapByIdPlaza(mapa_seleccionado.place_id)
         const layers_mapa = getLayersMapByIdPlaza(mapa_seleccionado.place_id)
         const promise = await Promise.all([servicios_mapa, layers_mapa]);
-        //console.log(promise);
         setServiciosMapa(promise[0])
         setLayersMapa(promise[1])
     }

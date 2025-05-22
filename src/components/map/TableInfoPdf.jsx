@@ -2,6 +2,7 @@ import React from 'react'
 
 const TableInfoPdf = ({ data }) => {
 
+
     return (
         <>
             {data.serviciosUnicos.length > 0 && (

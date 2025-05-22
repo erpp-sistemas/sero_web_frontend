@@ -23,9 +23,6 @@ import ListTools from './ListTools';
 import UpdateData from './UpdateData';
 import Asignacion from './Asignacion';
 
-//import { CSVLink } from 'react-csv';
-
-
 const Transition = forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
 });
@@ -117,14 +114,13 @@ export default function AlertDialogSlide() {
     }
 
     const generateClusterMap = async (layer) => {
-
         const { mapa: active_map } = mapa_activo;
 
         if (active_map.getLayer(layer.layer_id.toString())) {
-
             turnOffLayer(layer.layer_id);
 
             const data = mapa_activo.mapa.getSource(layer.name_layer)._data;
+            const hasTotal = data.features && data.features.some(f => f.properties && f.properties.total !== undefined);
 
             active_map.addSource(`cluster-${layer.name_layer}`, {
                 type: 'geojson',
@@ -132,7 +128,7 @@ export default function AlertDialogSlide() {
                 cluster: true,
                 clusterMaxZoom: 16,
                 clusterRadius: 30,
-                clusterProperties: { "sum": ["+", ["get", "total"]] }
+                ...(hasTotal && { clusterProperties: { "sum": ["+", ["get", "total"]] } })
             });
 
             active_map.addLayer({
@@ -152,24 +148,25 @@ export default function AlertDialogSlide() {
                 source: `cluster-${layer.name_layer}`,
                 filter: ['has', 'point_count'],
                 'layout': {
-                    'text-field': [
-                        'concat',
-                        ['format', ['get', 'point_count_abbreviated'], { 'font-scale': 0.3 }, '\n', {}],
-                        ['number-format', ['get', 'sum'], { 'locale': 'en', 'style': 'currency', 'max-fraction-digits': 2 }],
-                    ],
+                    'text-field': hasTotal
+                        ? [
+                            'concat',
+                            ['format', ['get', 'point_count_abbreviated'], { 'font-scale': 0.3 }, '\n', {}],
+                            ['number-format', ['get', 'sum'], { 'locale': 'en', 'style': 'currency', 'max-fraction-digits': 2 }]
+                        ]
+                        : ['get', 'point_count_abbreviated'],
                     'text-size': 12,
                 }
             });
-
         }
     }
 
-    const turnOffLayer = (layer_id) =>  mapa_activo.mapa.setLayoutProperty(layer_id.toString(), 'visibility', 'none');
+    const turnOffLayer = (layer_id) => mapa_activo.mapa.setLayoutProperty(layer_id.toString(), 'visibility', 'none');
 
-    const turnOnLayer = (layer_id) =>  mapa_activo.mapa.setLayoutProperty(layer_id.toString(), 'visibility', 'visible');
+    const turnOnLayer = (layer_id) => mapa_activo.mapa.setLayoutProperty(layer_id.toString(), 'visibility', 'visible');
 
     const handleDisableCluster = () => {
-        
+
         const layer = features.layers_activos.filter(l => l.layer_id == idLayerSeleccionado)[0];
         if (mapa_activo.mapa.getLayer(layer.layer_id.toString())) {
             mapa_activo.mapa.removeLayer(`clusters_${layer.layer_id.toString()}`);
@@ -182,7 +179,7 @@ export default function AlertDialogSlide() {
             setMapaCalorCreado(false);
         }
         turnOnLayer(layer.layer_id);
-        
+
     }
 
 
@@ -224,7 +221,7 @@ export default function AlertDialogSlide() {
 
 
                 <DialogContent sx={{ backgroundColor: '#F4F3F2', borderBottom: '2px solid black', padding: '40px 0' }}>
-                    {showButtonsHerramientas && <ListTools handleCheckTool={handleButtonHerramienta} /> }
+                    {showButtonsHerramientas && <ListTools handleCheckTool={handleButtonHerramienta} />}
 
                     {nombreHerramientaSeleccionada === 'Cambio de color' && (
                         <div className='px-2'>
@@ -248,7 +245,10 @@ export default function AlertDialogSlide() {
                             )}
 
                             {mapaCalorCreado === false && showButtonsHerramientas === false && (
-                                <button className="bg-emerald-600 mt-3 py-2 px-6 rounded-md flex items-center gap-1 hover:bg-emerald-500" onClick={handleActivaCluster} >
+                                <button
+                                    className="bg-emerald-600 mt-3 py-2 px-6 rounded-md flex items-center gap-1 hover:bg-emerald-500"
+                                    onClick={handleActivaCluster}
+                                >
                                     {getIcon('BlurLinearIcon', {})}
                                     Generar
                                 </button>
