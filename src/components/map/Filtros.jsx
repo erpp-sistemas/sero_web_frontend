@@ -23,6 +23,7 @@ const Filtros = ({ data }) => {
     const [showFilters, setShowFilters] = useState(false);
     const [filters, setFilters] = useState([]);
     const [showSpinner, setShowSpinner] = useState(false);
+    const [originalFeatures, setOriginalFeatures] = useState({});
 
     const handleLayerSelected = (e) => {
         if (e.target.value !== '0') {
@@ -62,7 +63,14 @@ const Filtros = ({ data }) => {
         const response = await fetch(`${layer_url}&maxFeatures=1`);
         const data = await response.json();
         let properties = Object.keys(data.features[0].properties);
-        properties = properties.filter(prop => prop !== 'fecha_filter')
+        properties = properties.filter(prop => prop !== 'fecha_filter');
+
+        const data_json = properties.find(prop => prop === 'data_json');
+        if (data_json) {
+            const data_json_properties = Object.keys(JSON.parse(data.features[0].properties.data_json));
+            properties = properties.filter(prop => prop !== 'data_json');
+            properties = [...properties, ...data_json_properties];
+        }
         setFields(properties);
         setShowSpinner(false);
     }
@@ -102,7 +110,6 @@ const Filtros = ({ data }) => {
             const list = getValueUniqueByFieldBySource(field);
             arr.push({ [field]: list.sort() })
         }
-        console.log(arr);
         setFilters(arr)
         setShowSpinner(false);
     }
@@ -131,11 +138,27 @@ const Filtros = ({ data }) => {
         }
         const features = source._data.features;
         const valoresUnicos = Array.from(new Set(
-            features.map(feature => feature.properties[campo])
+            features.map(feature => {
+                // Primero intenta obtener el campo directo
+                if (feature.properties.hasOwnProperty(campo)) {
+                    return feature.properties[campo];
+                }
+                // Si no, intenta obtenerlo desde data_json
+                if (feature.properties.data_json) {
+                    try {
+                        const dataJson = typeof feature.properties.data_json === "string"
+                            ? JSON.parse(feature.properties.data_json)
+                            : feature.properties.data_json;
+                        return dataJson[campo];
+                    } catch (e) {
+                        return undefined;
+                    }
+                }
+                return undefined;
+            }).filter(v => v !== undefined)
         ));
         return valoresUnicos;
     }
-
 
     const handleChangeFilterValue = (e, value) => {
         setFiltersSelected({
@@ -144,16 +167,69 @@ const Filtros = ({ data }) => {
         })
     }
 
+
     const handleApplyFilters = () => {
-        const filterConditions = ["all"];
-        for (const [campo, valor] of Object.entries(filtersSelected)) {
-            filterConditions.push(["==", ["get", campo], valor]);
+        const source = mapa_activo.mapa.getSource(sourceId);
+        if (!source) {
+            console.error("Fuente no encontrada");
+            return;
         }
-        mapa_activo.mapa.setFilter(layerSelected.layer_id.toString(), filterConditions);
-        setDataFiltered([...dataFiltered, { layerSelected: layerSelected, data: filtersSelected }])
+        const currentData = source._data || source._options.data;
+        let features = currentData.features || [];
+
+        // Guarda los features originales si aún no están guardados para este layer
+        if (!originalFeatures[sourceId]) {
+            setOriginalFeatures(prev => ({
+                ...prev,
+                [sourceId]: features
+            }));
+        }
+
+        // Filtra los features según los filtros seleccionados
+        const filteredFeatures = features.filter(feature => {
+            return Object.entries(filtersSelected).every(([campo, valor]) => {
+                // Busca el valor en properties o en data_json
+                let propValue = feature.properties[campo];
+                if (propValue === undefined && feature.properties.data_json) {
+                    try {
+                        const dataJson = typeof feature.properties.data_json === "string"
+                            ? JSON.parse(feature.properties.data_json)
+                            : feature.properties.data_json;
+                        propValue = dataJson[campo];
+                    } catch (e) {
+                        propValue = undefined;
+                    }
+                }
+                return propValue == valor;
+            });
+        });
+
+        // Actualiza la fuente con los features filtrados
+        source.setData({
+            ...currentData,
+            features: filteredFeatures
+        });
+
+        setDataFiltered([...dataFiltered, { layerSelected: layerSelected, data: filtersSelected }]);
         clean();
         setShowTools(false);
-    }
+    };
+
+    const handleDeleteFilter = (layer) => {
+        const source = mapa_activo.mapa.getSource(layer.name_layer);
+        if (source && originalFeatures[layer.name_layer]) {
+            const currentData = source._data || source._options.data;
+            source.setData({
+                ...currentData,
+                features: originalFeatures[layer.name_layer]
+            });
+        }
+        mapa_activo.mapa.setFilter(layer.layer_id.toString(), null);
+        const new_data = dataFiltered.filter(data => data.layerSelected.layer_id !== layer.layer_id);
+        setDataFiltered(new_data);
+        clean();
+        setShowTools(false);
+    };
 
     const clean = () => {
         setIdLayerSelected('0');
@@ -167,13 +243,6 @@ const Filtros = ({ data }) => {
         setSourceId('');
     }
 
-    const handleDeleteFilter = (layer) => {
-        mapa_activo.mapa.setFilter(layer.layer_id.toString(), null);
-        const new_data = dataFiltered.filter(data => data.layerSelected.layer_id !== layer.layer_id);
-        setDataFiltered(new_data);
-        clean();
-        setShowTools(false);
-    }
 
     return (
         <div className='font-mono'>
@@ -203,8 +272,10 @@ const Filtros = ({ data }) => {
                     )}
 
                     <div className="flex flex-wrap justify-center items-center gap-2 w-full">
-                        {fields.length > 0 && fields.map(field => (
-                            <button disabled={showFilters} style={{ background: '#D1D5DB' }} id={field} onClick={() => handleField(field)} className='w-5/12 px-4 text-gray-900 py-1 mb-1 rounded-md'>{field.replaceAll('_', ' ')}
+                        {fields.length > 0 && fields.map((field, index) => (
+                            <button key={index} disabled={showFilters} style={{ background: '#D1D5DB' }} id={field}
+                                onClick={() => handleField(field)} className='w-5/12 px-4 text-gray-900 py-1 mb-1 rounded-md'>
+                                {field.replaceAll('_', ' ')}
                             </button>
                         ))}
                     </div>
@@ -228,8 +299,8 @@ const Filtros = ({ data }) => {
 
                 {showFilters && (
                     <div className='w-6/12'>
-                        {filters.length > 0 && filters.map(filter => (
-                            <div className="mb-2 w-full">
+                        {filters.length > 0 && filters.map((filter, index) => (
+                            <div key={index} className="mb-2 w-full">
                                 <p className="text-gray-900"> {Object.keys(filter)[0].replaceAll('_', ' ').toUpperCase()} </p>
                                 <select className="text-gray-900 w-full px-2 py-1 rounded-md" onChange={e => handleChangeFilterValue(e, Object.keys(filter)[0])}>
                                     <option value="0">-------</option>
@@ -241,7 +312,9 @@ const Filtros = ({ data }) => {
                         ))}
                         {filters.length > 0 && (
                             <div className='w-6/12 mt-4 flex justify-center items-center'>
-                                <button onClick={handleApplyFilters} className="py-1 px-4 bg-green-600"> Aplicar filtros </button>
+                                <button onClick={handleApplyFilters} className="py-1 px-4 bg-green-600">
+                                    Aplicar filtros
+                                </button>
                             </div>
                         )}
                     </div>
