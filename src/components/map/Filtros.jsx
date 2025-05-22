@@ -160,13 +160,13 @@ const Filtros = ({ data }) => {
         return valoresUnicos;
     }
 
-    const handleChangeFilterValue = (e, value) => {
+    const handleChangeFilterValue = (e, field) => {
+        const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
         setFiltersSelected({
             ...filtersSelected,
-            [value]: e.target.value
-        })
-    }
-
+            [field]: selectedOptions
+        });
+    };
 
     const handleApplyFilters = () => {
         const source = mapa_activo.mapa.getSource(sourceId);
@@ -187,8 +187,8 @@ const Filtros = ({ data }) => {
 
         // Filtra los features según los filtros seleccionados
         const filteredFeatures = features.filter(feature => {
-            return Object.entries(filtersSelected).every(([campo, valor]) => {
-                // Busca el valor en properties o en data_json
+            return Object.entries(filtersSelected).every(([campo, valores]) => {
+                // valores es un array de valores seleccionados
                 let propValue = feature.properties[campo];
                 if (propValue === undefined && feature.properties.data_json) {
                     try {
@@ -200,7 +200,9 @@ const Filtros = ({ data }) => {
                         propValue = undefined;
                     }
                 }
-                return propValue == valor;
+                // Si no hay valores seleccionados, no filtra por ese campo
+                if (!valores || valores.length === 0) return true;
+                return valores.includes(String(propValue));
             });
         });
 
@@ -272,7 +274,7 @@ const Filtros = ({ data }) => {
                     )}
 
                     <div className="flex flex-wrap justify-center items-center gap-2 w-full">
-                        {fields.length > 0 && fields.map((field, index) => (
+                        {fields.length > 0 && fields.sort().map((field, index) => (
                             <button key={index} disabled={showFilters} style={{ background: '#D1D5DB' }} id={field}
                                 onClick={() => handleField(field)} className='w-5/12 px-4 text-gray-900 py-1 mb-1 rounded-md'>
                                 {field.replaceAll('_', ' ')}
@@ -298,16 +300,27 @@ const Filtros = ({ data }) => {
                 {showFilters && filters.length === 0 && showSpinner && <Spinner />}
 
                 {showFilters && (
-                    <div className='w-6/12'>
+                    <div className='w-9/12'>
                         {filters.length > 0 && filters.map((filter, index) => (
                             <div key={index} className="mb-2 w-full">
-                                <p className="text-gray-900"> {Object.keys(filter)[0].replaceAll('_', ' ').toUpperCase()} </p>
-                                <select className="text-gray-900 w-full px-2 py-1 rounded-md" onChange={e => handleChangeFilterValue(e, Object.keys(filter)[0])}>
+                                <p className="text-gray-900 ml-2">
+                                    {Object.keys(filter)[0].replaceAll('_', ' ').toUpperCase()}
+                                    <span className='text-emerald-600 text-sm ml-2'>
+                                        ( Puedes seleccionar varios valores utilizando Ctrl + click )
+                                    </span>
+                                </p>
+                                <select
+                                    multiple
+                                    className="text-gray-900 w-full h-32 px-2 py-1 rounded-md"
+                                    value={filtersSelected[Object.keys(filter)[0]] || []}
+                                    onChange={e => handleChangeFilterValue(e, Object.keys(filter)[0])}
+                                >
                                     <option value="0">-------</option>
                                     {filter[Object.keys(filter)].length > 0 && filter[Object.keys(filter)].map(value => (
                                         <option key={value} value={value}>{value}</option>
                                     ))}
                                 </select>
+
                             </div>
                         ))}
                         {filters.length > 0 && (
@@ -327,7 +340,12 @@ const Filtros = ({ data }) => {
                         <h1 className="text-center mb-3 text-base font-semibold">Filtros aplicados</h1>
                         <h1 className="text-green-600 font-semibold"> LAYER: <span className='text-gray-900'> {data.layerSelected.etiqueta} </span></h1>
                         {Object.entries(data.data).map(value => (
-                            <h1 className="text-green-600 font-semibold">{value[0].replaceAll('_', ' ').toUpperCase()} : <span className="text-gray-900"> {value[1]} </span> </h1>
+                            <h1 className="text-green-600 font-semibold">{value[0].replaceAll('_', ' ').toUpperCase()} :
+                                {value[1].length > 0 && value[1].map((val, index) => (
+                                    <span key={index} className="text-gray-900"> {val} {index !== value[1].length - 1 ? ' - ' : ''} </span>
+                                ))}
+                                {value[1].length === 0 && <span className="text-gray-900"> {value[1]} </span>}
+                            </h1>
                         ))}
                         <div className="mt-3 w-full flex justify-center">
                             <button onClick={() => handleDeleteFilter(data.layerSelected)} className="text-gray-100 bg-red-600 hover:bg-red-500 px-4 py-1 rounded-md">
