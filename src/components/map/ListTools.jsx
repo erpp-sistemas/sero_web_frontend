@@ -53,8 +53,8 @@ const ListTools = ({ handleCheckTool }) => {
 
             <div className="flex flex-wrap gap-6 justify-center font-mono">
 
-                {listTools.length > 0 && listTools.map(tool => (
-                    <button className="bg-neutral-50 text-gray-900 border-r-2 border-cyan-600 px-4 py-1 rounded-md flex gap-2 flex-col items-center justify-center w-1/4 shadow-lg hover:bg-slate-300 duration-300"
+                {listTools.length > 0 && listTools.map((tool, index) => (
+                    <button key={index} className="bg-neutral-50 text-gray-900 border-r-2 border-cyan-600 px-4 py-1 rounded-md flex gap-2 flex-col items-center justify-center w-1/4 shadow-lg hover:bg-slate-300 duration-300"
                         onClick={() => handleCheckTool(tool.title)}
                     >
                         {getIcon(tool.icon, { fontSize: '30px', color: 'blue' })}

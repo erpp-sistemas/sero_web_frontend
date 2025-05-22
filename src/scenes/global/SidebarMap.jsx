@@ -55,15 +55,33 @@ const SidebarMap = () => {
     useEffect(() => {
         if (messages.length === 0) return;
         if (reloadTimeout) clearTimeout(reloadTimeout);
+
         reloadTimeout = setTimeout(async () => {
             for (const layer of features.layers_activos) {
-                const nuevaData = await cargarFeaturesLayer(layer.url_geoserver);
-                if (mapa_activo.mapa.getSource(layer.name_layer)) {
-                    mapa_activo.mapa.getSource(layer.name_layer).setData(nuevaData);
+                if (layer.is_large && layer.filtro_fecha) {
+                    // Suponiendo que guardas el filtro de fechas en el layer
+                    const hoy = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
+                    const { periodoInicial, periodoFinal } = layer.filtro_fecha;
+                    // Si el filtro incluye el día de hoy, recarga solo los datos de hoy
+                    if (hoy >= periodoInicial && hoy <= periodoFinal) {
+                        const nuevaData = await cargarFeaturesLayer(layer.url_geoserver, {
+                            periodoInicial: hoy,
+                            periodoFinal: hoy
+                        });
+                        if (mapa_activo.mapa.getSource(layer.name_layer)) {
+                            mapa_activo.mapa.getSource(layer.name_layer).setData(nuevaData);
+                        }
+                    }
+                } else if (!layer.is_large) {
+                    // Para layers pequeños, sigue con la recarga normal
+                    const nuevaData = await cargarFeaturesLayer(layer.url_geoserver);
+                    if (mapa_activo.mapa.getSource(layer.name_layer)) {
+                        mapa_activo.mapa.getSource(layer.name_layer).setData(nuevaData);
+                    }
                 }
             }
-        }, 2000); // recarga máximo cada 2 segundos
-        // Limpieza
+        }, 2000);
+
         return () => clearTimeout(reloadTimeout);
     }, [messages]);
 
@@ -131,7 +149,6 @@ const SidebarMap = () => {
     }
 
     const handleLayer = async (layer) => {
-
         const existsLayerInMap = isLayerInMap(layer);
         if (!existsLayerInMap) {
             setLayerSelected(layer);
@@ -155,7 +172,6 @@ const SidebarMap = () => {
                 changeColorLayer(layer.name_layer, colors.greenAccent[600])
             }
         }
-
     }
 
     const handleCheckClusterInMap = (layer) => {
@@ -171,10 +187,15 @@ const SidebarMap = () => {
         if (res) {
             if ("periodoInicial" in res) {
                 const { periodoInicial, periodoFinal } = res;
-                const layer_id = `${layerSelected.layer_id}-${periodoInicial}_${periodoFinal}`;
-                const etiqueta = `${layerSelected.etiqueta} de ${periodoInicial} al ${periodoFinal}`;
-                const name_layer = `${layerSelected.name_layer}-${periodoInicial}_${periodoFinal}`;
-                const new_layer = { ...layerSelected, layer_id, etiqueta, name_layer, is_large: 0 };
+                console.log(layerSelected);
+                const new_layer = {
+                    ...layerSelected,
+                    filtro_fecha: { periodoInicial, periodoFinal },
+                    layer_id: `${layerSelected.layer_id}-${periodoInicial}_${periodoFinal}`,
+                    etiqueta: `${layerSelected.etiqueta} de ${periodoInicial} al ${periodoFinal}`,
+                    name_layer: `${layerSelected.name_layer}-${periodoInicial}_${periodoFinal}`,
+                    is_large: 0
+                };
                 dispatch(setLayersActivos([...features.layers_activos, new_layer]));
                 setLayersMapa([...layersMapa, new_layer])
                 putDispatchDialog();
