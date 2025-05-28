@@ -22,6 +22,7 @@ import Filtros from './Filtros';
 import ListTools from './ListTools';
 import UpdateData from './UpdateData';
 import Asignacion from './Asignacion';
+import OpenProject from './OpenProject';
 
 const Transition = forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -60,6 +61,11 @@ export default function AlertDialogSlide() {
     //* FILTERS
     const [dataFiltered, setDataFiltered] = useState([]);
     const [filtersSelected, setFiltersSelected] = useState({});
+
+    //* OPEN PROJECT
+    const [projects, setProjects] = useState(null);
+    const [allProjects, setAllProjects] = useState(null);
+    const [projectsLoaded, setProjectsLoaded] = useState(null);
 
 
     const handleClickOpen = () => {
@@ -290,6 +296,15 @@ export default function AlertDialogSlide() {
                         <Filtros data={{
                             dataFiltered, setDataFiltered, filtersSelected, setFiltersSelected,
                             setShowTools: setOpen
+                        }} />
+                    )}
+
+                    {nombreHerramientaSeleccionada === 'Proyectos' && showButtonsHerramientas === false && (
+                        <OpenProject data={{
+                            setShowTools: setOpen,
+                            projects, setProjects,
+                            allProjects, setAllProjects,
+                            projectsLoaded, setProjectsLoaded
                         }} />
                     )}
 

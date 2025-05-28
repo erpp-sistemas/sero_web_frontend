@@ -31,7 +31,7 @@ const InformacionSidebar = () => {
             >
                 <h1 className="text-base">Información</h1>
             </div>
-            <div key={(Math.random() * 100).toFixed(2)}
+            <div key={1}
                 style={{ backgroundColor: theme.palette.mode === 'dark' ? colors.primary[500] : colors.primary[400] }}
             >
 

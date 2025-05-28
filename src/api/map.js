@@ -16,3 +16,7 @@ export const sendNotificationApi = async ( data ) => axios.post('/send-push-noti
 export const saveNotificationBdApi = async ( data ) => axios.post('/insert-info-notification', data);
 
 export const updateLayerData = (data) => axios.post('/update-layer-data', data);
+
+export const sendDataProjectWorkspace = (data) => axios.post('/save-workspace', data);
+
+export const getProjectsByUser = (userId) => axios.get(`/get-projects-by-user/${userId}`);

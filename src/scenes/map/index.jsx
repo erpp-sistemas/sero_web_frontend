@@ -1,19 +1,29 @@
 import { useRef, useEffect, useState } from 'react'
-import { Map } from "mapbox-gl"
 import { useParams } from 'react-router-dom'
 import { getPlaceById } from '../../services/place.service'
-import { useDispatch } from 'react-redux'
+
+// REDUX
+import { useDispatch, useSelector } from 'react-redux'
 import { setDraw } from '../../redux/featuresSlice'
 import { setPlazaMapa } from '../../redux/plazaMapa.Slice'
 import { setMapa } from '../../redux/mapaSlice'
 import { setFeatures, setCoordinates, setPuntosInPoligono } from '../../redux/featuresSlice'
-import MapboxDraw from "@mapbox/mapbox-gl-draw"
+
+// COMPONENTS
+import ModalinfoPolygonPdf from '../../components/map/ModalinfoPolygonPdf';
+import ModalQuestion from '../../components/modals/ModalQuestion';
 import ModalInfoPolygon from '../../components/map/ModalInfoPolygon'
 import ModalInfoPolygons from '../../components/map/ModalInfoPolygons'
-import * as turf from '@turf/turf'
+import ModalSaveProject from '../../components/map/ModalSaveProject';
 import { getIcon } from '../../data/Icons'
+
+// LIBRERIES MAP
+import { Map } from "mapbox-gl"
+import MapboxDraw from "@mapbox/mapbox-gl-draw"
+import * as turf from '@turf/turf'
+
+// MATERIAL UI
 import Tooltip from '@mui/material/Tooltip';
-import ModalinfoPolygonPdf from '../../components/map/ModalinfoPolygonPdf'
 
 
 const stylesMap = {
@@ -26,6 +36,7 @@ const stylesMap = {
 
 const Mapa = () => {
 
+    const user = useSelector(state => state.user);
     const dispatch = useDispatch();
     const mapDiv = useRef(null);
     const { place_id } = useParams();
@@ -38,7 +49,13 @@ const Mapa = () => {
     const [showModalInfoPolygon, setShowModalInfoPolygon] = useState(false);
     const [showModalInfoPolygons, setShowModalInfoPolygons] = useState(false);
     const [showModalPdf, setShowModalPdf] = useState(false);
-    const [dataPdf, setDataPdf] = useState([])
+    const [showModalQuestion, setShowModalQuestion] = useState(false);
+    const [dataPdf, setDataPdf] = useState([]);
+
+    const [showModalSaveProject, setShowModalSaveProject] = useState(false);
+    const [idProject, setIdProject] = useState(Math.random().toString(36).substring(2, 15));
+    const [dataProject, setDataProject] = useState(null);
+
 
     const polygonsStorage = useRef(null);
     const mapRef = useRef(null);
@@ -275,7 +292,6 @@ const Mapa = () => {
         ]);
     }
 
-
     const quitarDuplicados = (array) => {
         var hash = {}
         let arrayTemp = array.filter(function (current) {
@@ -293,12 +309,55 @@ const Mapa = () => {
         }
     }
 
+    const handleSaveWorkSpace = () => {
+        if (polygonsCreated.length === 0) {
+            alert("No hay poligonos creados")
+            return;
+        }
+        setShowModalQuestion(true);
+    }
+
+    const handleRespModalQuestion = (resp) => {
+        setShowModalQuestion(false);
+        if (resp) {
+            const fecha = new Date();
+            const { name, user_id, username, profile_id } = user;
+            const data = {
+                project_id: idProject,
+                polygons: polygonsCreated,
+                plaza: plaza,
+                user: { name, user_id, username, profile_id },
+                fecha: `${fecha.getDate()}-${fecha.getMonth() + 1}-${fecha.getFullYear()} ${fecha.getHours()}:${fecha.getMinutes()}`,
+            }
+            if (dataProject && dataProject.nombre) {
+                const { nombre, descripcion } = dataProject;
+                setDataProject({ ...data, nombre, descripcion });
+            } else setDataProject(data);
+
+            setShowModalSaveProject(true);
+        }
+    }
+
 
     return (
 
         <div ref={mapDiv} style={stylesMap}>
 
-            {showModalPdf && <ModalinfoPolygonPdf setShowModal={setShowModalPdf} polygon={dataPdf} />}
+            {showModalQuestion && <ModalQuestion
+                title="¿Deseas guardar el proyecto?"
+                handleRespuesta={handleRespModalQuestion}
+            />}
+
+            {showModalPdf && <ModalinfoPolygonPdf
+                setShowModal={setShowModalPdf}
+                polygon={dataPdf}
+            />}
+
+            {showModalSaveProject && <ModalSaveProject
+                setShowModal={setShowModalSaveProject}
+                dataProject={dataProject}
+                setDataProject={setDataProject}
+            />}
 
             {showModalInfoPolygon && <ModalInfoPolygon
                 setShowModal={setShowModalInfoPolygon} polygon={lastPolygonCreated}
@@ -316,12 +375,12 @@ const Mapa = () => {
                     <Tooltip placement="left-start" title="Mostrar poligonos">
                         <button className="py-2 px-2 rounded bg-cyan-600 hover:bg-cyan-500"
                             onClick={() => setShowModalInfoPolygons(true)} >
-                            {getIcon('PolylineIcon', {})}
+                            {getIcon('TimelineIcon', {})}
                         </button>
                     </Tooltip>
                     <Tooltip placement="left-start" title="Guardar proyecto">
                         <button className="py-2 px-2 rounded bg-cyan-600 hover:bg-cyan-500"
-                            onClick={() => { }} >
+                            onClick={handleSaveWorkSpace} >
                             {getIcon('SaveIcon', {})}
                         </button>
                     </Tooltip>

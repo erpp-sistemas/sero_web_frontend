@@ -11,7 +11,7 @@ const listTools = [
     },
     {
         title: 'Dibujar poligono',
-        icon: 'PolylineIcon'
+        icon: 'TimelineIcon'
     },
     {
         title: 'Mapa de calor',
@@ -32,6 +32,14 @@ const listTools = [
     {
         title: 'Filtros',
         icon: 'FilterAltIcon'
+    },
+        {
+        title: 'Buscar',
+        icon: 'Searchicon'
+    },
+    {
+        title: 'Proyectos',
+        icon: 'LaptopMacIcon'
     },
     // {
     //     title: 'Actualización',

@@ -11,7 +11,7 @@ const TablePolygons = ({ polygons, setidUserSeleccionado, users, functions, data
 
 
     return (
-        <table className='w-full px-2 text-gray-900 text-center mt-2'>
+        <table key={1} className='w-full px-2 text-gray-900 text-center mt-2'>
             <tr className='bg-gray-700 font-bold text-white'>
                 <th className="w-2/12">Nombre</th>
                 <th className="w-2/12">Número de puntos</th>

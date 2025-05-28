@@ -1,4 +1,6 @@
-import { serviceMapByIdPlaza, layerMapByIdPlaza, updateLayerData } from '../api/map'
+import { serviceMapByIdPlaza, layerMapByIdPlaza, updateLayerData,
+    sendDataProjectWorkspace, getProjectsByUser
+ } from '../api/map'
 
 export const getServicesMapByIdPlaza = async (place_id) => {
     try {
@@ -24,6 +26,32 @@ export const updateLayerDataByPlazaService = async (data) => {
         return res.data;
     } catch (error) {
         console.error(error)
+    }
+}
+
+export const sendDataProject = async ( data ) => {
+    try {
+        if (data.polygons) {
+            data.polygons = data.polygons.map(polygon => {
+                const { marker, ...rest } = polygon;
+                return rest;
+            });
+        }
+        const res = await sendDataProjectWorkspace(data);
+        return res.data;
+    } catch (error) {
+        console.error('Error al enviar los datos del proyecto:', error);
+        throw error;
+    }
+}
+
+export const getProjectsByUserId = async (userId) => {
+    try {
+        const res = await getProjectsByUser(userId);
+        return res.data;
+    } catch (error) {
+        console.error('Error al obtener los proyectos:', error);
+        throw error;
     }
 }
 

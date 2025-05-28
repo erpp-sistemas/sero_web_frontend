@@ -23,7 +23,7 @@ import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import PhonelinkSetupIcon from '@mui/icons-material/PhonelinkSetup';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import BlurLinearIcon from '@mui/icons-material/BlurLinear';
-import PolylineIcon from '@mui/icons-material/Polyline';
+//import PolylineIcon from '@mui/icons-material/Polyline';
 import SearchIcon from '@mui/icons-material/Search';
 import LineWeightIcon from '@mui/icons-material/LineWeight';
 import PhotoSizeSelectActualIcon from '@mui/icons-material/PhotoSizeSelectActual';
@@ -64,10 +64,14 @@ import NotStartedIcon from '@mui/icons-material/NotStarted';
 import HelpIcon from '@mui/icons-material/Help';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
+import ShareIcon from '@mui/icons-material/Share';
+import TimelineIcon from '@mui/icons-material/Timeline';
 
 export const getIcon = (icon, style) => {
 
      let obj = {
+          "TimelineIcon": <TimelineIcon sx={style} />,
+          "ShareIcon": <ShareIcon sx={style} />,
           "FilterAltIcon": <FilterAltIcon sx={style} />,
           "ArrowBackIcon": <ArrowBackIcon sx={style} />,
           "HelpIcon": <HelpIcon sx={style} />,
@@ -107,7 +111,7 @@ export const getIcon = (icon, style) => {
           "DeleteIcon": <DeleteIcon sx={style} />,
           "PhotoSizeSelectActualIcon": <PhotoSizeSelectActualIcon sx={style} />,
           "EditLocationAltIcon": <EditLocationAltIcon sx={style} />,
-          "PolylineIcon": <PolylineIcon sx={style} />,
+          //"PolylineIcon": <PolylineIcon sx={style} />,
           "AdminPanelSettingsOutlinedIcon": <AdminPanelSettingsOutlinedIcon sx={style} />,
           "EditIcon": <EditIcon sx={style} />,
           "FaceIcon": <FaceIcon sx={style} />,

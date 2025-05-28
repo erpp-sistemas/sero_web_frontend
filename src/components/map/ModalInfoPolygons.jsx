@@ -46,7 +46,6 @@ const ModalInfoPolygons = ({ setShowModal, polygons, draw, map, disablePoints, e
     const getUsers = async () => {
         const response = await instance.get('/usuarios');
         const users_active = response.data;
-        //const users_active = data.filter(user => user.activo === true);
         const users_in_polygo = polygons.map(poly => poly.user)
         validateUsers(users_active, users_in_polygo)
     }
@@ -105,8 +104,13 @@ const ModalInfoPolygons = ({ setShowModal, polygons, draw, map, disablePoints, e
     const assigmentUser = (polygon) => {
         if (!idUserSeleccionado) return alert("Elige un usuario de la lista")
         const user = users.filter(user => user.id_usuario === Number(idUserSeleccionado))[0]
+        const { nombre, apellido_paterno, apellido_materno, is_user_push, id_usuario, foto } = user;
         const marker = addImageInPolygon(polygon.id, user.foto)
-        polygonAddData(polygon, { user, marker, disabled_points: true });
+        polygonAddData(polygon, {
+            user: {
+                nombre, apellido_paterno, apellido_materno, is_user_push, id_usuario, foto
+            }, marker, disabled_points: true
+        });
         disablePoints(map_active.mapa, polygon.id);
         zoomToPolygon(polygon.id);
     }
