@@ -100,8 +100,8 @@ const ModalInfoPolygons = ({ setShowModal, draw, map, disablePoints, enabledPoin
     }
 
     const disabledPointsSelected = (polygon) => {
-        disablePoints(map_active.mapa, polygon.id);
-        zoomToPolygon(polygon.id);
+        disablePoints(map_active.mapa, polygon.draw_id ? polygon.draw_id : polygon.id);
+        zoomToPolygon(polygon.draw_id ? polygon.draw_id : polygon.id);
         polygonAddData(polygon, { disabled_points: true })
     }
 
@@ -109,14 +109,14 @@ const ModalInfoPolygons = ({ setShowModal, draw, map, disablePoints, enabledPoin
         if (!idUserSeleccionado) return alert("Elige un usuario de la lista")
         const user = users.filter(user => user.id_usuario === Number(idUserSeleccionado))[0]
         const { nombre, apellido_paterno, apellido_materno, is_user_push, id_usuario, foto } = user;
-        const marker = addImageInPolygon(polygon.id, user.foto)
+        const marker = addImageInPolygon( polygon.draw_id ? polygon.draw_id : polygon.id, user.foto)
         polygonAddData(polygon, {
             user: {
                 nombre, apellido_paterno, apellido_materno, is_user_push, id_usuario, foto
             }, marker, disabled_points: true
         });
-        disablePoints(map_active.mapa, polygon.id);
-        zoomToPolygon(polygon.id);
+        disablePoints(map_active.mapa, polygon.draw_id ? polygon.draw_id : polygon.id);
+        zoomToPolygon(polygon.draw_id ? polygon.draw_id : polygon.id);
     }
 
     const addImageInPolygon = (polygon_id, image_url) => {
@@ -260,7 +260,6 @@ const ModalInfoPolygons = ({ setShowModal, draw, map, disablePoints, enabledPoin
     }
 
     const getInfoPolygon = (polygon) => {
-        console.log(polygon)
         setDataPdf(polygon);
         setShowModalPdf(true);
         setShowModal(false);

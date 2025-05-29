@@ -22,13 +22,12 @@ const OpenProject = ({ data }) => {
     const map = mapa_active.mapa;
     const polygonsCreated = useSelector(state => state.features.polygonsCreated);
     const dispatch = useDispatch();
-   
+
     useEffect(() => {
         getProjectsByUserId(user.user_id)
             .then(fetchedProjects => {
                 setProjects(fetchedProjects);
                 setAllProjects(fetchedProjects); // Guarda la lista original
-                console.log('Proyectos obtenidos:', fetchedProjects);
             })
             .catch(error => {
                 console.error('Error al obtener los proyectos:', error);
@@ -71,7 +70,6 @@ const OpenProject = ({ data }) => {
     };
 
     const transformPolygon = (polygons, name_project) => {
-        console.log(polygons)
         return {
             type: 'FeatureCollection',
             features: polygons.map(p => {
@@ -91,9 +89,9 @@ const OpenProject = ({ data }) => {
                         id: p.id,
                         proyecto: name_project,
                         name: p.name,
-                        user: p.user ? p.user.nombre + ' ' + p.user.apellido_paterno + ' ' + p.user.apellido_materno : 'Sin usuario',
+                        user: p.user ? p.user.nombre + ' ' + p.user.apellido_paterno + ' ' + p.user.apellido_materno : '',
                         area: p.area,
-                        distancia: p.distancia ? p.distancia.toFixed(2) + ' km' : 'No trazada',
+                        distancia: p.distancia ? p.distancia.toFixed(2) + ' km' : '',
                         number_points: p.number_points,
                         latitud,
                         longitud,
@@ -117,18 +115,17 @@ const OpenProject = ({ data }) => {
     }
 
     const handleEditPolygonsInMap = (projectId) => {
-        
+
         const name_project = projects.find(project => project.project_id === projectId)?.name || 'Proyecto sin nombre';
         const polygons_find = projects.find(project => project.project_id === projectId)?.polygons || [];
         const polygons = JSON.parse(polygons_find);
         const geojson = transformPolygon(polygons, name_project);
-        console.log(geojson)
         if (draw && map) {
             geojson.features.forEach(feature => {
                 const drawId = draw.add(feature);
                 feature.properties.draw_id = drawId[0]; // Guarda el ID del polígono en las propiedades
+                feature.properties.points = getPointsFromPolygon(feature); // Obtiene los puntos dentro del polígono
             });
-            console.log([...polygonsCreated, ...geojson.features.map(f => f.properties)]);
             dispatch(setPolygonsCreated([...polygonsCreated, ...geojson.features.map(f => f.properties)])); // Agrega los polígonos al estado global
             polygonsStorage.current = [...polygonsCreated, ...geojson.features.map(f => f.properties)];
             draw.changeMode('simple_select');
@@ -137,7 +134,30 @@ const OpenProject = ({ data }) => {
         setShowTools(false);
     };
 
-    
+    const getPointsFromPolygon = (polygon) => {
+        const layers_in_map = getLayersVisiblesInMap(map);
+        if (layers_in_map.status === 0) {
+            alert("No hay ningun layer prendido")
+            return;
+        }
+        const features_layer = map.getSource(layers_in_map.layers_visibles[0].source)._data.features;
+        const pointsInPolygon = features_layer.filter(point => turf.booleanPointInPolygon(point, polygon));
+        return pointsInPolygon;
+    }
+
+    const getLayersVisiblesInMap = (map) => {
+        const loaded_layers_in_map = map.getStyle().layers.filter(layer => layer.type === 'circle' && !layer.id.includes('gl-draw'));
+        if (loaded_layers_in_map.length === 0) {
+            return { status: 0, message: 'No hay layers cargados en el mapa', layers_visibles: [] }
+        }
+        const layers_visibles = loaded_layers_in_map.filter(layer => layer.layout.visibility === 'visible');
+        if (layers_visibles.length > 1) {
+            return { status: 2, message: 'Hay mas de un layer visible en el mapa', layers_visibles: layers_visibles }
+        }
+        return {
+            status: 1, message: 'Un layer en el mapa', layers_visibles: layers_visibles
+        }
+    }
 
 
     return (

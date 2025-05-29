@@ -46,7 +46,7 @@ const InformacionSidebar = () => {
 
                 {Object.keys(feat).length > 0 && (feat.cuenta || feat.municipio || feat.ide || feat.id) && !feat.data_json ? Object.keys(feat).map((f, index) => (
                     <>
-                        {f !== 'fecha_filter' && f !== 'latitud' && f !== 'longitud' && f !== 'ide' && (
+                        {f !== 'fecha_filter' && f !== 'latitud' && f !== 'longitud' && f !== 'ide' && f !== 'coordenadas' && f !== 'id' && (
                             <Button key={index} sx={{ width: '100%', backgroundColor: theme.palette.mode === 'dark' ? colors.primary[500] : colors.primary[400], color: colors.grey[100] }}>
                                 {`${f.replaceAll('_', ' ')} : ${feat[f]}`}
                             </Button>

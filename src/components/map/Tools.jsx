@@ -199,8 +199,9 @@ export default function AlertDialogSlide( { data } ) {
     return (
         <>
             {showModalCluster && (<Modal title={'Generando mapa de calor'.toUpperCase()} />)}
-            <IconButton sx={{ width: '49px' }} onClick={handleClickOpen}>
-                <PlumbingIcon color="action" />
+            <IconButton  onClick={handleClickOpen}>
+                {/* <PlumbingIcon color="action" /> */}
+                {getIcon('AppsIcon', { color: '#FFFFFF', fontSize: '30px' })}
             </IconButton>
             <Dialog
                 open={open}

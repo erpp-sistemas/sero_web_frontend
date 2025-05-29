@@ -141,17 +141,6 @@ const Mapa = () => {
             if (features.length) {
                 const clickedPolygon = features[0];
                 const id_polygon_selected = clickedPolygon.properties.id;
-                console.log(polygonsStorage.current)
-
-                // esto hace que cuando se llama el createPolygon obtenga los puntos en el poligono ya que como los poligonos que cumplan esta condicion no traen los points
-                // polygonsStorage.current = polygonsStorage.current.map(poly => {
-                //     if (poly.draw_id && poly.proyecto) {
-                //         const { area, ...rest } = poly;
-                //         return rest;
-                //     }
-                //     return poly;
-                // });
-
                 const polygon_selected = polygonsStorage.current.filter(poly => {
                     if (poly.draw_id) return poly.draw_id === id_polygon_selected;
                     else return poly.id === id_polygon_selected;
@@ -186,7 +175,6 @@ const Mapa = () => {
 
     const beforeCreatePolygon = (e, map) => {
         const polygon = e.features[0]; //? obtengo el poligono dibujado
-        console.log(polygon)
         if (polygon) {
             const res_layers_in_map = getLayersVisiblesInMap(map);
             if (res_layers_in_map.status === 2) {
@@ -199,7 +187,6 @@ const Mapa = () => {
 
 
     const createPolygon = (map, polygon) => {
-        console.log(polygon)
         if (!polygon) return;
         setShowModalInfoPolygon(true);
         if (!polygon.area) {
@@ -224,19 +211,14 @@ const Mapa = () => {
 
 
     const addPolygonStorage = (polygon) => {
-        console.log("addpolygonStorage")
-        console.log(polygon)
         let have_draw_id = polygon.draw_id ? true : false;
-        console.log("have_draw_id", have_draw_id)
         if (polygonsCreated.length === 0) {
             dispatch(setPolygonsCreated([polygon]));
             polygonsStorage.current = [polygon];
         } else {
             let have_id_polygon = null;
-            console.log(polygonsCreated)
             if (have_draw_id) have_id_polygon = polygonsCreated.find(poly => poly.draw_id === polygon.draw_id);
             if (!have_draw_id) have_id_polygon = polygonsCreated.find(poly => poly.id === polygon.id);
-            console.log(have_id_polygon)
             if (!have_id_polygon) {
                 dispatch(setPolygonsCreated([...polygonsCreated, polygon]));
                 polygonsStorage.current = [...polygonsCreated, polygon];
@@ -246,7 +228,6 @@ const Mapa = () => {
             let polygons_not_selected;
             if (have_draw_id) polygons_not_selected = polygonsCreated.filter(poly => poly.draw_id !== polygon.draw_id);
             if (!have_draw_id) polygons_not_selected = polygonsCreated.filter(poly => poly.id !== polygon.id);
-            console.log(polygons_not_selected)
 
             // Crea un nuevo objeto, no modifiques el original
             const newPolygon = {
@@ -254,8 +235,6 @@ const Mapa = () => {
                 name: have_id_polygon.name || polygon.name,
                 user: have_id_polygon.user || polygon.user
             };
-
-            console.log([...polygons_not_selected, newPolygon])
             dispatch(setPolygonsCreated([...polygons_not_selected, newPolygon]));
             polygonsStorage.current = [...polygons_not_selected, newPolygon];
         }
@@ -275,17 +254,26 @@ const Mapa = () => {
         const color = layers_in_map.layers_visibles[0].paint['circle-color'];
 
         const points = mapRef.current.getSource(source)._data.features;
-        points.forEach((point) => {
+
+        // Crea un nuevo array de features con las propiedades modificadas
+        const newPoints = points.map(point => {
             if (turf.booleanPointInPolygon(point, polygon)) {
-                point.properties.disabled = true;  // Marcar el punto como deshabilitado
-                point.properties.pid = polygon.id // le damos al punto su poligono
+                return {
+                    ...point,
+                    properties: {
+                        ...point.properties,
+                        disabled: true,
+                        pid: polygon.id
+                    }
+                };
             }
+            return point;
         });
 
         // Actualizar la fuente de datos para reflejar los cambios
         mapRef.current.getSource(source).setData({
             type: 'FeatureCollection',
-            features: points,
+            features: newPoints,
         });
 
         // Cambiar el estilo de los puntos deshabilitados
@@ -295,9 +283,7 @@ const Mapa = () => {
             '#B0B0B0', // Color gris para puntos deshabilitados
             color  // Color original para puntos activos
         ]);
-
     }
-
     const enabledPoints = (map, polygon_id) => {
 
         const layers_in_map = getLayersVisiblesInMap(map);
@@ -425,7 +411,7 @@ const Mapa = () => {
                 </div>
             )}
 
-            <div className="z-[100] absolute left-[300px] bottom-4 bg-slate-600 rounded-md p-1">
+            <div className="z-[100] absolute left-[300px] bottom-4 bg-neutral-700 rounded-md">
                 <Tools data={{ polygonsStorage, setLastPolygonCreated }} />
             </div>
 

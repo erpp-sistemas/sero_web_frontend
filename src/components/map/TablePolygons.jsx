@@ -25,7 +25,7 @@ const TablePolygons = ({ polygons, setidUserSeleccionado, users, functions, data
                     <td className='py-2'> {poly.name ? poly.name : 'Sin nombre'} </td>
                     <td> {poly.number_points} </td>
                     <td> {poly.area} </td>
-                    <td> {poly.distancia ? poly.distancia.toFixed(2) + ' km' : <p className="text-red-700 font-bold">No trazada</p>} </td>
+                    <td> {(poly.distancia && poly.distancia !== '') ? poly.distancia.toFixed(2) + ' km' : <p className="text-red-700 font-bold">No trazada</p>} </td>
                     <td>
                         {poly.user ? (
                             <p className="text-center font-bold">{poly.user.nombre} {poly.user.apellido_paterno} {poly.user.apellido_materno} </p>
