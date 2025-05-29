@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { setDraw } from '../../redux/featuresSlice'
 import { setPlazaMapa } from '../../redux/plazaMapa.Slice'
 import { setMapa } from '../../redux/mapaSlice'
-import { setFeatures, setCoordinates, setPuntosInPoligono } from '../../redux/featuresSlice'
+import { setFeatures, setCoordinates, setPuntosInPoligono, setPolygonsCreated } from '../../redux/featuresSlice'
 
 // COMPONENTS
 import ModalinfoPolygonPdf from '../../components/map/ModalinfoPolygonPdf';
@@ -16,6 +16,7 @@ import ModalInfoPolygon from '../../components/map/ModalInfoPolygon'
 import ModalInfoPolygons from '../../components/map/ModalInfoPolygons'
 import ModalSaveProject from '../../components/map/ModalSaveProject';
 import { getIcon } from '../../data/Icons'
+import Tools from '../../components/map/Tools'
 
 // LIBRERIES MAP
 import { Map } from "mapbox-gl"
@@ -37,12 +38,13 @@ const stylesMap = {
 const Mapa = () => {
 
     const user = useSelector(state => state.user);
+    const polygonsCreated = useSelector(state => state.features.polygonsCreated);
     const dispatch = useDispatch();
     const mapDiv = useRef(null);
     const { place_id } = useParams();
 
     const [plaza, setPlaza] = useState(null);
-    const [polygonsCreated, setPolygonsCreated] = useState([]);
+    //const [polygonsCreated, setPolygonsCreated] = useState([]);
     const [lastPolygonCreated, setLastPolygonCreated] = useState(null);
     const [drawMap, setDrawMap] = useState(null);
 
@@ -55,6 +57,7 @@ const Mapa = () => {
     const [showModalSaveProject, setShowModalSaveProject] = useState(false);
     const [idProject, setIdProject] = useState(Math.random().toString(36).substring(2, 15));
     const [dataProject, setDataProject] = useState(null);
+    const [showTools, setShowTools] = useState(false);
 
 
     const polygonsStorage = useRef(null);
@@ -138,7 +141,22 @@ const Mapa = () => {
             if (features.length) {
                 const clickedPolygon = features[0];
                 const id_polygon_selected = clickedPolygon.properties.id;
-                const polygon_selected = polygonsStorage.current.filter(poly => poly.id === id_polygon_selected)[0];
+                console.log(polygonsStorage.current)
+
+                // esto hace que cuando se llama el createPolygon obtenga los puntos en el poligono ya que como los poligonos que cumplan esta condicion no traen los points
+                // polygonsStorage.current = polygonsStorage.current.map(poly => {
+                //     if (poly.draw_id && poly.proyecto) {
+                //         const { area, ...rest } = poly;
+                //         return rest;
+                //     }
+                //     return poly;
+                // });
+
+                const polygon_selected = polygonsStorage.current.filter(poly => {
+                    if (poly.draw_id) return poly.draw_id === id_polygon_selected;
+                    else return poly.id === id_polygon_selected;
+                })[0];
+
                 createPolygon(map, polygon_selected)
             }
         });
@@ -168,6 +186,7 @@ const Mapa = () => {
 
     const beforeCreatePolygon = (e, map) => {
         const polygon = e.features[0]; //? obtengo el poligono dibujado
+        console.log(polygon)
         if (polygon) {
             const res_layers_in_map = getLayersVisiblesInMap(map);
             if (res_layers_in_map.status === 2) {
@@ -180,6 +199,8 @@ const Mapa = () => {
 
 
     const createPolygon = (map, polygon) => {
+        console.log(polygon)
+        if (!polygon) return;
         setShowModalInfoPolygon(true);
         if (!polygon.area) {
             const layers_in_map = getLayersVisiblesInMap(map);
@@ -203,31 +224,47 @@ const Mapa = () => {
 
 
     const addPolygonStorage = (polygon) => {
+        console.log("addpolygonStorage")
+        console.log(polygon)
+        let have_draw_id = polygon.draw_id ? true : false;
+        console.log("have_draw_id", have_draw_id)
         if (polygonsCreated.length === 0) {
-            setPolygonsCreated([polygon])
+            dispatch(setPolygonsCreated([polygon]));
             polygonsStorage.current = [polygon];
         } else {
-            const have_id_polygon = polygonsCreated.find(poly => poly.id === polygon.id);
+            let have_id_polygon = null;
+            console.log(polygonsCreated)
+            if (have_draw_id) have_id_polygon = polygonsCreated.find(poly => poly.draw_id === polygon.draw_id);
+            if (!have_draw_id) have_id_polygon = polygonsCreated.find(poly => poly.id === polygon.id);
+            console.log(have_id_polygon)
             if (!have_id_polygon) {
-                setPolygonsCreated([...polygonsCreated, polygon]);
+                dispatch(setPolygonsCreated([...polygonsCreated, polygon]));
                 polygonsStorage.current = [...polygonsCreated, polygon];
                 return;
             }
 
-            const polygons_not_selected = polygonsCreated.filter(poly => poly.id !== polygon.id);
-            if (have_id_polygon.name) polygon.name = have_id_polygon.name;
-            if (have_id_polygon.user) polygon.user = have_id_polygon.user;
+            let polygons_not_selected;
+            if (have_draw_id) polygons_not_selected = polygonsCreated.filter(poly => poly.draw_id !== polygon.draw_id);
+            if (!have_draw_id) polygons_not_selected = polygonsCreated.filter(poly => poly.id !== polygon.id);
+            console.log(polygons_not_selected)
 
-            setPolygonsCreated([...polygons_not_selected, polygon]);
-            polygonsStorage.current = [...polygons_not_selected, polygon];
+            // Crea un nuevo objeto, no modifiques el original
+            const newPolygon = {
+                ...polygon,
+                name: have_id_polygon.name || polygon.name,
+                user: have_id_polygon.user || polygon.user
+            };
 
+            console.log([...polygons_not_selected, newPolygon])
+            dispatch(setPolygonsCreated([...polygons_not_selected, newPolygon]));
+            polygonsStorage.current = [...polygons_not_selected, newPolygon];
         }
     }
 
     const deletePolygonStorage = (polygon) => {
         const new_polygons = polygonsStorage.current.filter(poly => poly.id !== polygon.id);
         polygonsStorage.current = new_polygons;
-        setPolygonsCreated(new_polygons)
+        dispatch(setPolygonsCreated(new_polygons));
     }
 
     const disabledPoints = (map, polygon_id) => {
@@ -361,12 +398,12 @@ const Mapa = () => {
 
             {showModalInfoPolygon && <ModalInfoPolygon
                 setShowModal={setShowModalInfoPolygon} polygon={lastPolygonCreated}
-                setLastPolygonCreated={setLastPolygonCreated} setPolygonsCreated={setPolygonsCreated}
-                polygonsCreated={polygonsCreated} polygonsStorage={polygonsStorage}
+                setLastPolygonCreated={setLastPolygonCreated}
+                polygonsStorage={polygonsStorage}
                 disabledPoints={disabledPoints} />}
 
-            {showModalInfoPolygons && <ModalInfoPolygons setShowModal={setShowModalInfoPolygons} polygons={polygonsCreated} draw={drawMap} map={mapRef}
-                disablePoints={disabledPoints} enabledPoints={enabledPoints} setPolygonsCreated={setPolygonsCreated} setLastPolygonCreated={setLastPolygonCreated}
+            {showModalInfoPolygons && <ModalInfoPolygons setShowModal={setShowModalInfoPolygons} draw={drawMap} map={mapRef}
+                disablePoints={disabledPoints} enabledPoints={enabledPoints} setLastPolygonCreated={setLastPolygonCreated}
                 setFunction={functionDelete} setShowModalPdf={setShowModalPdf} setDataPdf={setDataPdf}
             />}
 
@@ -387,6 +424,11 @@ const Mapa = () => {
 
                 </div>
             )}
+
+            <div className="z-[100] absolute left-[300px] bottom-4 bg-slate-600 rounded-md p-1">
+                <Tools data={{ polygonsStorage, setLastPolygonCreated }} />
+            </div>
+
 
         </div>
 

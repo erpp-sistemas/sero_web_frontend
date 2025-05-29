@@ -9,7 +9,9 @@ import { Modal } from '@mui/material';
 import { Marker } from "mapbox-gl";
 
 // REDUX
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { setPolygonsCreated } from '../../redux/featuresSlice';
+
 import instance from '../../api/axios';
 
 
@@ -18,10 +20,12 @@ import TablePolygons from './TablePolygons';
 import GridRegisterPolygon from './GridRegisterPolygon';
 
 
-const ModalInfoPolygons = ({ setShowModal, polygons, draw, map, disablePoints, enabledPoints, setPolygonsCreated, setLastPolygonCreated, setFunction, setShowModalPdf, setDataPdf }) => {
+const ModalInfoPolygons = ({ setShowModal, draw, map, disablePoints, enabledPoints, setLastPolygonCreated, setFunction, setShowModalPdf, setDataPdf }) => {
 
-    //console.log(polygons);
+    const dispatch = useDispatch();
     const map_active = useSelector((state) => state.mapa);
+    const polygons = useSelector((state) => state.features.polygonsCreated);
+    //console.log(polygons);
 
     const [open, setOpen] = useState(true);
     const [data, setData] = useState([]);
@@ -147,7 +151,7 @@ const ModalInfoPolygons = ({ setShowModal, polygons, draw, map, disablePoints, e
             ...polygon,
             ...dataObj
         }
-        setPolygonsCreated([...polygons_not_selected, polygon_new])
+        dispatch(setPolygonsCreated([...polygons_not_selected, polygon_new]));
         setLastPolygonCreated(polygon_new)
     }
 

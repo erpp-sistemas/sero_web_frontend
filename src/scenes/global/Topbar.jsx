@@ -66,9 +66,9 @@ const Topbar = () => {
         </IconButton>
 
         {/* BOTON PARA VISUALIZAR LAS HERRAMIENTAS DEL MAPA */}
-        {location.pathname === `/map/${mapa_seleccionado.place_id}` && (
+        {/* {location.pathname === `/map/${mapa_seleccionado.place_id}` && (
             <Tools id_campana={mapa_seleccionado.place_id} />
-        )}
+        )} */}
 
         {/* BOTON  PARA LAS HERRAMIENTAS COMO MAPA O WHATSAPP  */}
         <Apps />

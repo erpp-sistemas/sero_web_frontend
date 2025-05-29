@@ -33,7 +33,9 @@ const colors_palette = [
 
 
 
-export default function AlertDialogSlide() {
+export default function AlertDialogSlide( { data } ) {
+
+    const { polygonsStorage, setLastPolygonCreated } = data; 
 
     const mapa_activo = useSelector((state) => state.mapa)
     const features = useSelector((state) => state.features)
@@ -304,7 +306,8 @@ export default function AlertDialogSlide() {
                             setShowTools: setOpen,
                             projects, setProjects,
                             allProjects, setAllProjects,
-                            projectsLoaded, setProjectsLoaded
+                            projectsLoaded, setProjectsLoaded,
+                            polygonsStorage, setLastPolygonCreated
                         }} />
                     )}
 

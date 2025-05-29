@@ -3,12 +3,16 @@ import { Modal } from '@mui/material';
 
 import { getIcon } from '../../data/Icons';
 import { CSVLink } from 'react-csv';
+import { useDispatch, useSelector } from 'react-redux'
+import { setPolygonsCreated } from '../../redux/featuresSlice';
 
 
 
-const ModalInfoPolygon = ({ setShowModal, polygon, setLastPolygonCreated, polygonsCreated, setPolygonsCreated, polygonsStorage }) => {
+const ModalInfoPolygon = ({ setShowModal, polygon, setLastPolygonCreated, polygonsStorage }) => {
 
     //console.log(polygon)
+    const dispatch = useDispatch();
+    const polygonsCreated = useSelector(state => state.features.polygonsCreated);
     const [open, setOpen] = useState(true);
 
     const [showFieldName, setShowFieldName] = useState(false);
@@ -24,6 +28,7 @@ const ModalInfoPolygon = ({ setShowModal, polygon, setLastPolygonCreated, polygo
 
     useEffect(() => {
         const points = polygon.points;
+        if (!points || points.length === 0) return;
         const properties = points.map(p => p.properties);
         // si properties tiene un campo llamado data_json entonces entonces quiero tenerlo como un objeto y anexarlo a properties
         const propertiesWithDataJson = properties.map(p => {
@@ -54,7 +59,7 @@ const ModalInfoPolygon = ({ setShowModal, polygon, setLastPolygonCreated, polygo
         }
         setLastPolygonCreated(polygon_new);
         polygonsStorage.current = [...polygons_not_selected, polygon_new]
-        setPolygonsCreated([...polygons_not_selected, polygon_new])
+        dispatch(setPolygonsCreated([...polygons_not_selected, polygon_new]));
         setShowFieldName(false);
         setNamePolygon('')
     }
@@ -79,7 +84,8 @@ const ModalInfoPolygon = ({ setShowModal, polygon, setLastPolygonCreated, polygo
                             <p className="text-gray-900 text-base mt-1">Usuario: <span className="text-emerald-700 font-bold">{polygon.user.nombre} {polygon.user.apellido_paterno}</span> </p>
                         )}
                         {polygon.distancia && (
-                            <p className="text-gray-900 text-base mt-1">Distancia: <span className="text-emerald-700 font-bold">{polygon.distancia.toFixed(2)} km</span> </p>
+                            //<p className="text-gray-900 text-base mt-1">Distancia: <span className="text-emerald-700 font-bold">{polygon.distancia.toFixed(2)} km</span> </p>
+                            <p className="text-gray-900 text-base mt-1">Distancia: <span className="text-emerald-700 font-bold">{polygon.distancia} km</span> </p>
                         )}
                         <div className='w-full mx-auto mt-3 py-2 flex flex-col justify-center items-center gap-3'>
                             {!showFieldName && (

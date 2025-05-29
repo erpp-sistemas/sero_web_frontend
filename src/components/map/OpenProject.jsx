@@ -1,7 +1,8 @@
 import { useEffect } from 'react'
 import { getIcon } from '../../data/Icons';
 import { getProjectsByUserId } from '../../services/map.service';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { setPolygonsCreated } from '../../redux/featuresSlice';
 import * as turf from '@turf/turf'
 
 const OpenProject = ({ data }) => {
@@ -10,15 +11,18 @@ const OpenProject = ({ data }) => {
         setShowTools,
         projects, setProjects,
         allProjects, setAllProjects,
-        projectsLoaded, setProjectsLoaded
+        projectsLoaded, setProjectsLoaded,
+        polygonsStorage, setLastPolygonCreated
     } = data;
+
 
     const user = useSelector(state => state.user);
     const draw = useSelector(state => state.features.draw);
     const mapa_active = useSelector(state => state.mapa);
     const map = mapa_active.mapa;
-
-
+    const polygonsCreated = useSelector(state => state.features.polygonsCreated);
+    const dispatch = useDispatch();
+   
     useEffect(() => {
         getProjectsByUserId(user.user_id)
             .then(fetchedProjects => {
@@ -67,6 +71,7 @@ const OpenProject = ({ data }) => {
     };
 
     const transformPolygon = (polygons, name_project) => {
+        console.log(polygons)
         return {
             type: 'FeatureCollection',
             features: polygons.map(p => {
@@ -83,15 +88,16 @@ const OpenProject = ({ data }) => {
                         coordinates: p.coordenadas,
                     },
                     properties: {
-                        id: p.id.substring(0, 5),
+                        id: p.id,
                         proyecto: name_project,
-                        nombre: p.name,
-                        usuario: p.user ? p.user.nombre + ' ' + p.user.apellido_paterno + ' ' + p.user.apellido_materno : 'Sin usuario',
+                        name: p.name,
+                        user: p.user ? p.user.nombre + ' ' + p.user.apellido_paterno + ' ' + p.user.apellido_materno : 'Sin usuario',
                         area: p.area,
                         distancia: p.distancia ? p.distancia.toFixed(2) + ' km' : 'No trazada',
-                        número_puntos: p.number_points,
+                        number_points: p.number_points,
                         latitud,
-                        longitud
+                        longitud,
+                        coordenadas: p.coordenadas,
                     }
                 }
             })
@@ -111,23 +117,27 @@ const OpenProject = ({ data }) => {
     }
 
     const handleEditPolygonsInMap = (projectId) => {
+        
         const name_project = projects.find(project => project.project_id === projectId)?.name || 'Proyecto sin nombre';
         const polygons_find = projects.find(project => project.project_id === projectId)?.polygons || [];
         const polygons = JSON.parse(polygons_find);
         const geojson = transformPolygon(polygons, name_project);
+        console.log(geojson)
         if (draw && map) {
-            console.log("draw y map están definidos, procediendo a editar el proyecto");
-            // Limpia los features existentes antes de agregar los del proyecto a editar
-            draw.deleteAll();
-            map.removeLayer(`${projectId}-outline`);
             geojson.features.forEach(feature => {
-                draw.add(feature);
+                const drawId = draw.add(feature);
+                feature.properties.draw_id = drawId[0]; // Guarda el ID del polígono en las propiedades
             });
+            console.log([...polygonsCreated, ...geojson.features.map(f => f.properties)]);
+            dispatch(setPolygonsCreated([...polygonsCreated, ...geojson.features.map(f => f.properties)])); // Agrega los polígonos al estado global
+            polygonsStorage.current = [...polygonsCreated, ...geojson.features.map(f => f.properties)];
             draw.changeMode('simple_select');
+            handleDeletePolygonsInMap(projectId);
         }
         setShowTools(false);
     };
 
+    
 
 
     return (
