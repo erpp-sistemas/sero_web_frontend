@@ -1,12 +1,3 @@
-import AccessAlarmIcon from '@mui/icons-material/AccessAlarm';
-import GroupsIcon from '@mui/icons-material/Groups';
-import BuildIcon from '@mui/icons-material/Build';
-import MemoryIcon from '@mui/icons-material/Memory';
-import WidgetsIcon from '@mui/icons-material/Widgets';
-import DesktopAccessDisabledIcon from '@mui/icons-material/DesktopAccessDisabled';
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import AppRegistrationIcon from '@mui/icons-material/AppRegistration';
-import ContactMailIcon from '@mui/icons-material/ContactMail';
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import LogoutIcon from '@mui/icons-material/Logout';
 import ArticleIcon from '@mui/icons-material/Article';
@@ -23,15 +14,10 @@ import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import PhonelinkSetupIcon from '@mui/icons-material/PhonelinkSetup';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import BlurLinearIcon from '@mui/icons-material/BlurLinear';
-//import PolylineIcon from '@mui/icons-material/Polyline';
 import SearchIcon from '@mui/icons-material/Search';
 import LineWeightIcon from '@mui/icons-material/LineWeight';
-import PhotoSizeSelectActualIcon from '@mui/icons-material/PhotoSizeSelectActual';
-import EditLocationAltIcon from '@mui/icons-material/EditLocationAlt';
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 import DeleteIcon from '@mui/icons-material/Delete';
-import VolumeUpIcon from '@mui/icons-material/VolumeUp';
-import AccessTimeFilledIcon from '@mui/icons-material/AccessTimeFilled';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ColorLensIcon from '@mui/icons-material/ColorLens';
 import PlaceIcon from '@mui/icons-material/Place';
@@ -41,7 +27,6 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import LaptopMacIcon from '@mui/icons-material/LaptopMac';
 import RepeatIcon from '@mui/icons-material/Repeat';
-import SkipNextIcon from '@mui/icons-material/SkipNext';
 import ContactsIcon from '@mui/icons-material/Contacts';
 import PersonIcon from '@mui/icons-material/Person';
 import LayersIcon from '@mui/icons-material/Layers';
@@ -66,10 +51,12 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import ShareIcon from '@mui/icons-material/Share';
 import TimelineIcon from '@mui/icons-material/Timeline';
+import GridViewIcon from '@mui/icons-material/GridView';
 
 export const getIcon = (icon, style) => {
 
      let obj = {
+          "GridViewIcon": <GridViewIcon sx={style} />,
           "TimelineIcon": <TimelineIcon sx={style} />,
           "ShareIcon": <ShareIcon sx={style} />,
           "FilterAltIcon": <FilterAltIcon sx={style} />,
@@ -94,7 +81,6 @@ export const getIcon = (icon, style) => {
           "LayersIcon": <LayersIcon sx={style} />,
           "PersonIcon": <PersonIcon sx={style} />,
           "ContactsIcon": <ContactsIcon sx={style} />,
-          "SkipNextIcon": <SkipNextIcon sx={style} />,
           "BookmarkAddedIcon": <BookmarkAddedIcon sx={style} />,
           "BackupTableIcon": <BackupTableIcon sx={style} />,
           "AccountCircleIcon": <AccountCircleIcon sx={style} />,
@@ -104,14 +90,9 @@ export const getIcon = (icon, style) => {
           "PlaceIcon": <PlaceIcon sx={style} />,
           "ColorLensIcon": <ColorLensIcon sx={style}/>,
           "CheckCircleIcon": <CheckCircleIcon sx={style} />,
-          "VolumeUpIcon": <VolumeUpIcon sx={style} />,
-          "AccessTimeFilledIcon": <AccessTimeFilledIcon sx={style} />,
           "CloudDownloadIcon": <CloudDownloadIcon sx={style} />,
           "LineWeightIcon": <LineWeightIcon sx={style} />,
           "DeleteIcon": <DeleteIcon sx={style} />,
-          "PhotoSizeSelectActualIcon": <PhotoSizeSelectActualIcon sx={style} />,
-          "EditLocationAltIcon": <EditLocationAltIcon sx={style} />,
-          //"PolylineIcon": <PolylineIcon sx={style} />,
           "AdminPanelSettingsOutlinedIcon": <AdminPanelSettingsOutlinedIcon sx={style} />,
           "EditIcon": <EditIcon sx={style} />,
           "FaceIcon": <FaceIcon sx={style} />,
@@ -129,15 +110,6 @@ export const getIcon = (icon, style) => {
           "WhatsAppIcon": <WhatsAppIcon sx={style} />,
           "HomeIcon": <HomeIcon sx={style} />,
           "Searchicon": <SearchIcon sx={style} />
-           // "AccessAlarmIcon": <AccessAlarmIcon sx={style} />,
-          // "GroupsIcon": <GroupsIcon sx={style} />,
-          // "BuildIcon": <BuildIcon sx={style} />,
-          // "MemoryIcon": <MemoryIcon sx={style} />,
-          // "WidgetsIcon": <WidgetsIcon sx={style} />,
-          // "DesktopAccessDisabledIcon": <DesktopAccessDisabledIcon sx={style} />,
-          // "AssignmentIcon": <AssignmentIcon sx={style} />,
-          // "AppRegistrationIcon": <AppRegistrationIcon sx={style} />,
-          // "ContactMailIcon": <ContactMailIcon sx={style} />,
      }
 
      return obj[icon]

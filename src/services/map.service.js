@@ -33,7 +33,7 @@ export const sendDataProject = async ( data ) => {
     try {
         if (data.polygons) {
             data.polygons = data.polygons.map(polygon => {
-                const { marker, ...rest } = polygon;
+                const { marker, points, ...rest } = polygon;
                 return rest;
             });
         }

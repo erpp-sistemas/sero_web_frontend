@@ -30,7 +30,6 @@ const ModalInfoPolygon = ({ setShowModal, polygon, setLastPolygonCreated, polygo
         const points = polygon.points;
         if (!points || points.length === 0) return;
         const properties = points.map(p => p.properties);
-        // si properties tiene un campo llamado data_json entonces entonces quiero tenerlo como un objeto y anexarlo a properties
         const propertiesWithDataJson = properties.map(p => {
             const data_json = p.data_json;
             if (data_json) {

@@ -9,8 +9,6 @@ import DialogTitle from '@mui/material/DialogTitle';
 import Slide from '@mui/material/Slide';
 import Modal from '../MaterialUI/Modal'
 
-// ICONS
-import PlumbingIcon from '@mui/icons-material/Plumbing';
 
 // COMPONENTS
 import { getIcon } from '../../data/Icons';
@@ -200,8 +198,7 @@ export default function AlertDialogSlide( { data } ) {
         <>
             {showModalCluster && (<Modal title={'Generando mapa de calor'.toUpperCase()} />)}
             <IconButton  onClick={handleClickOpen}>
-                {/* <PlumbingIcon color="action" /> */}
-                {getIcon('AppsIcon', { color: '#FFFFFF', fontSize: '30px' })}
+                {getIcon('GridViewIcon', { color: '#FFFFFF', fontSize: '30px' })}
             </IconButton>
             <Dialog
                 open={open}
@@ -209,7 +206,7 @@ export default function AlertDialogSlide( { data } ) {
                 keepMounted
                 onClose={handleClose}
                 aria-describedby="alert-dialog-slide-description"
-                sx={{ width: '100%' }}
+                sx={{ width: '100%', height: '100%' }}
                 fullWidth={true}
                 maxWidth={'sm'}
             >
@@ -229,7 +226,7 @@ export default function AlertDialogSlide( { data } ) {
                 </DialogTitle>
 
 
-                <DialogContent sx={{ backgroundColor: '#F4F3F2', borderBottom: '2px solid black', padding: '40px 0' }}>
+                <DialogContent sx={{ backgroundColor: '#F4F3F2', borderBottom: '2px solid black', padding: '40px 0', minHeight: '300px' }}>
                     {showButtonsHerramientas && <ListTools handleCheckTool={handleButtonHerramienta} />}
 
                     {nombreHerramientaSeleccionada === 'Cambio de color' && (
@@ -308,7 +305,7 @@ export default function AlertDialogSlide( { data } ) {
                             projects, setProjects,
                             allProjects, setAllProjects,
                             projectsLoaded, setProjectsLoaded,
-                            polygonsStorage, setLastPolygonCreated
+                            polygonsStorage
                         }} />
                     )}
 

@@ -57,7 +57,7 @@ const Mapa = () => {
     const [showModalSaveProject, setShowModalSaveProject] = useState(false);
     const [idProject, setIdProject] = useState(Math.random().toString(36).substring(2, 15));
     const [dataProject, setDataProject] = useState(null);
-    const [showTools, setShowTools] = useState(false);
+    const [showModalCleanPolygons, setShowModalCleanPolygons] = useState(false);
 
 
     const polygonsStorage = useRef(null);
@@ -332,22 +332,21 @@ const Mapa = () => {
         }
     }
 
-    const handleSaveWorkSpace = () => {
-        if (polygonsCreated.length === 0) {
-            alert("No hay poligonos creados")
-            return;
-        }
-        setShowModalQuestion(true);
-    }
-
-    const handleRespModalQuestion = (resp) => {
+    const handleSaveWorkSpace = (resp) => {
+        if (polygonsCreated.length === 0) return alert("No hay poligonos creados");    
         setShowModalQuestion(false);
+
         if (resp) {
             const fecha = new Date();
             const { name, user_id, username, profile_id } = user;
+            const layers_in_map = getLayersVisiblesInMap(mapRef.current);
+            if (layers_in_map.status === 0) return alert("No hay ningun layer activo en el mapa");
+            if (layers_in_map.status === 2) return alert("Hay mas de un layer activo en el mapa")
+            const layer = layers_in_map.layers_visibles[0].source;
             const data = {
                 project_id: idProject,
                 polygons: polygonsCreated,
+                layer: layer,
                 plaza: plaza,
                 user: { name, user_id, username, profile_id },
                 fecha: `${fecha.getDate()}-${fecha.getMonth() + 1}-${fecha.getFullYear()} ${fecha.getHours()}:${fecha.getMinutes()}`,
@@ -359,6 +358,23 @@ const Mapa = () => {
 
             setShowModalSaveProject(true);
         }
+
+    }
+
+    const handleCleanAllPolygons = (resp) => {
+        if (polygonsCreated.length === 0) {
+            alert("No hay poligonos creados")
+            return;
+        }
+        setShowModalCleanPolygons(false);
+        if (resp) {
+            dispatch(setPolygonsCreated([]));
+            polygonsStorage.current = [];
+            setLastPolygonCreated(null);
+            drawMap.deleteAll();
+            dispatch(setFeatures([]));
+            dispatch(setCoordinates({}));
+        }
     }
 
 
@@ -368,7 +384,12 @@ const Mapa = () => {
 
             {showModalQuestion && <ModalQuestion
                 title="¿Deseas guardar el proyecto?"
-                handleRespuesta={handleRespModalQuestion}
+                handleRespuesta={handleSaveWorkSpace}
+            />}
+
+            {showModalCleanPolygons && <ModalQuestion
+                title={"¿Estás seguro de que deseas eliminar todos los polígonos, esta acción no se puede deshacer?"}
+                handleRespuesta={handleCleanAllPolygons}
             />}
 
             {showModalPdf && <ModalinfoPolygonPdf
@@ -403,10 +424,17 @@ const Mapa = () => {
                     </Tooltip>
                     <Tooltip placement="left-start" title="Guardar proyecto">
                         <button className="py-2 px-2 rounded bg-cyan-600 hover:bg-cyan-500"
-                            onClick={handleSaveWorkSpace} >
+                            onClick={() => setShowModalQuestion(true)} >
                             {getIcon('SaveIcon', {})}
                         </button>
                     </Tooltip>
+                    <Tooltip placement="left-start" title="Borrar poligonos">
+                        <button className="py-2 px-2 rounded bg-cyan-600 hover:bg-cyan-500"
+                            onClick={() => setShowModalCleanPolygons(true)} >
+                            {getIcon('DeleteIcon', {})}
+                        </button>
+                    </Tooltip>
+
 
                 </div>
             )}

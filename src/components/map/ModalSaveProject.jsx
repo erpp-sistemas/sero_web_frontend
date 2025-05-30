@@ -17,11 +17,14 @@ const ModalSaveProject = ({ setShowModal, dataProject, setDataProject }) => {
     };
 
     const handleSaveProject = () => {
+
+        if(!nombreProyecto || nombreProyecto.trim() === '') return alert('Por favor, ingrese un nombre para el proyecto.');
         console.log({
             nombre: nombreProyecto,
             descripcion: descripcionProyecto,
             ...dataProject
         })
+
         setIsLoading(true);
         setDataProject({
             nombre: nombreProyecto,
@@ -76,7 +79,7 @@ const ModalSaveProject = ({ setShowModal, dataProject, setDataProject }) => {
                                 <input
                                     type="text"
                                     className="w-full p-2 border border-gray-300 rounded-md mb-4"
-                                    placeholder="Ingresa el nombre del proyecto"
+                                    placeholder="*Ingresa el nombre del proyecto"
                                     value={nombreProyecto}
                                     onChange={(e) => setNombreProyecto(e.target.value)}
                                 />

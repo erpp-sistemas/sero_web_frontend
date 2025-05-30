@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { getIcon } from '../../data/Icons';
 import { getProjectsByUserId } from '../../services/map.service';
 import { useSelector, useDispatch } from 'react-redux';
@@ -12,7 +12,7 @@ const OpenProject = ({ data }) => {
         projects, setProjects,
         allProjects, setAllProjects,
         projectsLoaded, setProjectsLoaded,
-        polygonsStorage, setLastPolygonCreated
+        polygonsStorage
     } = data;
 
 
@@ -23,11 +23,30 @@ const OpenProject = ({ data }) => {
     const polygonsCreated = useSelector(state => state.features.polygonsCreated);
     const dispatch = useDispatch();
 
+    const [currentPage, setCurrentPage] = useState(1);
+    const projectsPerPage = 2;
+
+    const indexOfLastProject = currentPage * projectsPerPage;
+    const indexOfFirstProject = indexOfLastProject - projectsPerPage;
+    const currentProjects = projects ? projects.slice(indexOfFirstProject, indexOfLastProject) : [];
+
+    const totalPages = projects ? Math.ceil(projects.length / projectsPerPage) : 1;
+
+    const [fade, setFade] = useState(true);
+    const handlePageChange = (newPage) => {
+        setFade(false);
+        setTimeout(() => {
+            setCurrentPage(newPage);
+            setFade(true);
+        }, 150); // Duración de la animación en ms
+    };
+
     useEffect(() => {
         getProjectsByUserId(user.user_id)
             .then(fetchedProjects => {
                 setProjects(fetchedProjects);
                 setAllProjects(fetchedProjects); // Guarda la lista original
+                //console.log('Proyectos obtenidos:', fetchedProjects);
             })
             .catch(error => {
                 console.error('Error al obtener los proyectos:', error);
@@ -36,9 +55,10 @@ const OpenProject = ({ data }) => {
 
     const handleLoadPolygonsInMap = (projectId) => {
         const name_project = projects.find(project => project.project_id === projectId)?.name || 'Proyecto sin nombre';
+        const layer_project = projects.find(project => project.project_id === projectId)?.layer || 'default_layer';
         const polygons_find = projects.find(project => project.project_id === projectId)?.polygons || [];
         const polygons = JSON.parse(polygons_find);
-        const geojson = transformPolygon(polygons, name_project);
+        const geojson = transformPolygon(polygons, name_project, layer_project);
 
         map.addSource(projectId, {
             type: 'geojson',
@@ -50,7 +70,7 @@ const OpenProject = ({ data }) => {
             'source': projectId,
             'layout': {},
             'paint': {
-                'fill-color': '#088',
+                'fill-color': '#FFA100',
                 'fill-opacity': 0.5
             }
         });
@@ -69,7 +89,7 @@ const OpenProject = ({ data }) => {
         setShowTools(false);
     };
 
-    const transformPolygon = (polygons, name_project) => {
+    const transformPolygon = (polygons, name_project, layer_project) => {
         return {
             type: 'FeatureCollection',
             features: polygons.map(p => {
@@ -88,6 +108,7 @@ const OpenProject = ({ data }) => {
                     properties: {
                         id: p.id,
                         proyecto: name_project,
+                        layer: layer_project,
                         name: p.name,
                         user: p.user ? p.user.nombre + ' ' + p.user.apellido_paterno + ' ' + p.user.apellido_materno : '',
                         area: p.area,
@@ -115,11 +136,18 @@ const OpenProject = ({ data }) => {
     }
 
     const handleEditPolygonsInMap = (projectId) => {
-
         const name_project = projects.find(project => project.project_id === projectId)?.name || 'Proyecto sin nombre';
+        const layer_project = projects.find(project => project.project_id === projectId)?.layer || 'default_layer';
+        const layer_in_map = validateLayerOnMap();
+
+        if(layer_in_map === 0) return alert('No hay ningun layer visible en el mapa. Por favor, activa un layer antes de editar.');
+        if(layer_in_map === 2) return alert('Hay mas de un layer visible en el mapa. Por favor, activa un solo layer antes de editar.');
+        if(layer_in_map === 3) return alert('No hay ningun layer visible en el mapa. Por favor, activa un layer antes de editar.');
+        if(layer_project !== layer_in_map) return alert(`El layer del proyecto ${name_project} no coincide con el layer activo en el mapa. Por favor, activa el layer correcto antes de editar.`);
+        
         const polygons_find = projects.find(project => project.project_id === projectId)?.polygons || [];
         const polygons = JSON.parse(polygons_find);
-        const geojson = transformPolygon(polygons, name_project);
+        const geojson = transformPolygon(polygons, name_project, layer_project);
         if (draw && map) {
             geojson.features.forEach(feature => {
                 const drawId = draw.add(feature);
@@ -133,6 +161,15 @@ const OpenProject = ({ data }) => {
         }
         setShowTools(false);
     };
+
+    const validateLayerOnMap = () => {
+        const layers_in_map = getLayersVisiblesInMap(map);
+        if (layers_in_map.status === 0) return 0;
+        if (layers_in_map.status === 2) return 2;
+        if (layers_in_map.status === 3) return 3;
+        const layer = layers_in_map.layers_visibles[0].source;
+        return layer;
+    }
 
     const getPointsFromPolygon = (polygon) => {
         const layers_in_map = getLayersVisiblesInMap(map);
@@ -151,6 +188,9 @@ const OpenProject = ({ data }) => {
             return { status: 0, message: 'No hay layers cargados en el mapa', layers_visibles: [] }
         }
         const layers_visibles = loaded_layers_in_map.filter(layer => layer.layout.visibility === 'visible');
+        if( layers_visibles.length === 0) {
+            return { status: 3, message: 'No hay layers visibles en el mapa', layers_visibles: [] }
+        }
         if (layers_visibles.length > 1) {
             return { status: 2, message: 'Hay mas de un layer visible en el mapa', layers_visibles: layers_visibles }
         }
@@ -193,10 +233,12 @@ const OpenProject = ({ data }) => {
 
             {projects && projects.length > 0 && (
                 <div className='w-full flex justify-center items-center flex-col'>
-                    {projects.map((project, index) => (
-                        <div key={index} className=' w-10/12 text-gray-900 bg-gray-200 px-4 py-1 rounded-md text-sm'>
-                            <p> Nombre: {project.name} </p>
-                            <p> Descripción: {project.description} </p>
+                    {currentProjects.map((project, index) => (
+                        <div key={index} className=' w-10/12 text-gray-900 bg-gray-200 px-4 py-2 rounded-md text-sm my-1'>
+                            <p> <span className='font-semibold'> Nombre: </span> {project.name} </p>
+                            <p> <span className='font-semibold'> Descripción: </span> {project.description} </p>
+                            <p> <span className='font-semibold'> Layer: </span> {project.layer.replaceAll('_', ' ')} </p>
+                            <p> <span className='font-semibold'> Fecha: </span> {project.created_at.split('T')[0]} - {project.created_at.split('T')[1].substring(0, 8)} </p>
                             <div className='flex items-center gap-2 my-2'>
 
                                 {!projectsLoaded || !projectsLoaded.includes(project.project_id) ? (
@@ -234,6 +276,24 @@ const OpenProject = ({ data }) => {
                             </div>
                         </div>
                     ))}
+                    {/* Controles de paginación */}
+                    <div className="flex gap-2 mt-2 text-gray-900">
+                        <button
+                            className="px-2 py-1 rounded bg-gray-300 hover:bg-gray-400"
+                            onClick={() => handlePageChange(Math.max(currentPage - 1, 1))}
+                            disabled={currentPage === 1}
+                        >
+                            Anterior
+                        </button>
+                        <span className="px-2 py-1">{currentPage} / {totalPages}</span>
+                        <button
+                            className="px-2 py-1 rounded bg-gray-300 hover:bg-gray-400"
+                            onClick={() => handlePageChange(Math.min(currentPage + 1, totalPages))}
+                            disabled={currentPage === totalPages}
+                        >
+                            Siguiente
+                        </button>
+                    </div>
                 </div>
             )}
 
