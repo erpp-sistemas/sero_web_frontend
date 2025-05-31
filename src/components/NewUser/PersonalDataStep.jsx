@@ -52,7 +52,7 @@ function sanitizeTextForEmail(text) {
 }
 
 export default function PersonalDataStep({
-  mode = "edit",
+  mode = "create",
   initialValues = {},
   onChange,
 }) {

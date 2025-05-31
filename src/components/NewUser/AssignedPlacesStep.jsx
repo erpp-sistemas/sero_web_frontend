@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import {
   Typography,
@@ -13,11 +13,21 @@ import { DataGrid } from "@mui/x-data-grid";
 import clsx from "clsx";
 import { tokens } from "../../theme";
 import AssignedPlacesSummaryModal from "./AssignedPlacesStep/AssignedPlacesSummaryModal";
+import useFormulario from "../../hooks/useFormulario";
 
-const AssignedPlacesStep = () => {
+const AssignedPlacesStep = ({
+  mode = "create",
+  initialValues = {},
+  onChange,
+}) => {
   const user = useSelector((state) => state.user);
   const placeServiceProcess = user.place_service_process;
   const [openSummaryModal, setOpenSummaryModal] = useState(false);
+
+  const [formData, setFormData] = useState({
+    plazas: [],
+    ...initialValues,
+  });
 
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -25,6 +35,14 @@ const AssignedPlacesStep = () => {
   const [selectedData, setSelectedData] = useState([]);
   const [selectedPlazaId, setSelectedPlazaId] = useState(null);
   const [selectedServicioId, setSelectedServicioId] = useState(null);
+
+  const { guardarSeccion } = useFormulario();
+
+  useEffect(() => {
+  if (mode === "edit" && initialValues?.plazas?.length > 0) {
+    setSelectedData(initialValues.plazas);
+  }
+}, [mode, initialValues]);
 
   const isPlazaSelected = (plazaId) =>
     selectedData.some((p) => p.id_plaza === plazaId);
@@ -70,9 +88,9 @@ const AssignedPlacesStep = () => {
               procesos: [proceso],
             });
           } else {
-            const procesoIdx = updated[plazaIdx].servicios[
-              servicioIdx
-            ].procesos.findIndex((p) => p.id_proceso === proceso.id_proceso);
+            const procesoIdx = updated[plazaIdx].servicios[servicioIdx].procesos.findIndex(
+              (p) => p.id_proceso === proceso.id_proceso
+            );
             if (procesoIdx === -1) {
               updated[plazaIdx].servicios[servicioIdx].procesos.push(proceso);
             }
@@ -85,15 +103,11 @@ const AssignedPlacesStep = () => {
           );
 
           if (servicioIdx !== -1) {
-            updated[plazaIdx].servicios[servicioIdx].procesos = updated[
-              plazaIdx
-            ].servicios[servicioIdx].procesos.filter(
+            updated[plazaIdx].servicios[servicioIdx].procesos = updated[plazaIdx].servicios[servicioIdx].procesos.filter(
               (p) => p.id_proceso !== proceso.id_proceso
             );
 
-            if (
-              updated[plazaIdx].servicios[servicioIdx].procesos.length === 0
-            ) {
+            if (updated[plazaIdx].servicios[servicioIdx].procesos.length === 0) {
               updated[plazaIdx].servicios.splice(servicioIdx, 1);
             }
 
@@ -335,7 +349,7 @@ const AssignedPlacesStep = () => {
               setOpenSummaryModal(true);
             }
           }}
-          disabled={selectedData.length === 0} // opcional
+          disabled={selectedData.length === 0}
         >
           Guardar
         </Button>
@@ -344,6 +358,11 @@ const AssignedPlacesStep = () => {
         open={openSummaryModal}
         onClose={() => setOpenSummaryModal(false)}
         data={selectedData}
+        onConfirm={() => {
+          guardarSeccion("plazas", selectedData);
+          console.log("Datos guardados:", selectedData);
+          setOpenSummaryModal(false);
+        }}
       />
     </div>
   );
