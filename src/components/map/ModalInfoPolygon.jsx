@@ -82,9 +82,14 @@ const ModalInfoPolygon = ({ setShowModal, polygon, setLastPolygonCreated, polygo
                         {polygon.user && (
                             <p className="text-gray-900 text-base mt-1">Usuario: <span className="text-emerald-700 font-bold">{polygon.user.nombre} {polygon.user.apellido_paterno}</span> </p>
                         )}
-                        {polygon.distancia && (
-                            //<p className="text-gray-900 text-base mt-1">Distancia: <span className="text-emerald-700 font-bold">{polygon.distancia.toFixed(2)} km</span> </p>
-                            <p className="text-gray-900 text-base mt-1">Distancia: <span className="text-emerald-700 font-bold">{polygon.distancia} km</span> </p>
+                        {polygon.distancia && polygon.disntancia !== '' && polygon.distancia !== undefined && (
+                            <>
+                                {typeof polygon.distancia === 'number' ? (
+                                    <p className="text-gray-900 text-base mt-1">Distancia: <span className="text-emerald-700 font-bold">{(polygon.distancia).toFixed(2)} km</span> </p>
+                                ): (
+                                    <p className="text-gray-900 text-base mt-1">Distancia: <span className="text-emerald-700 font-bold">{polygon.distancia}</span> </p>
+                                )}
+                            </>
                         )}
                         <div className='w-full mx-auto mt-3 py-2 flex flex-col justify-center items-center gap-3'>
                             {!showFieldName && (

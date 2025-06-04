@@ -285,7 +285,6 @@ const Mapa = () => {
         ]);
     }
     const enabledPoints = (map, polygon_id) => {
-
         const layers_in_map = getLayersVisiblesInMap(map);
         const source = layers_in_map.layers_visibles[0].source;
         const layer = layers_in_map.layers_visibles[0].id;
@@ -326,7 +325,11 @@ const Mapa = () => {
     }
 
     const deleteUserAndRoute = (polygon_id) => {
-        const polygon = polygonsStorage.current.filter(poly => poly.id === polygon_id)[0];
+        const polygon = polygonsStorage.current.filter(poly => {
+            if (poly.draw_id) return poly.draw_id === polygon_id;
+            return poly.id === polygon_id
+        })[0];
+        console.log(functionDelete.current)
         if (typeof functionDelete.current === 'function') {
             functionDelete.current(polygon);
         }
@@ -367,6 +370,9 @@ const Mapa = () => {
             return;
         }
         setShowModalCleanPolygons(false);
+        console.log(polygonsStorage.current)
+        console.log(polygonsCreated)
+        console.log(drawMap.getAll())
         if (resp) {
             dispatch(setPolygonsCreated([]));
             polygonsStorage.current = [];
@@ -440,7 +446,7 @@ const Mapa = () => {
             )}
 
             <div className="z-[100] absolute left-[300px] bottom-4 bg-neutral-700 rounded-md">
-                <Tools data={{ polygonsStorage, setLastPolygonCreated }} />
+                <Tools data={{ polygonsStorage}} />
             </div>
 
 

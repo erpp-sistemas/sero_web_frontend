@@ -9,7 +9,6 @@ import { getIcon } from '../../data/Icons';
 
 const TablePolygons = ({ polygons, setidUserSeleccionado, users, functions, data, nameFile, csvLinkRef }) => {
 
-
     return (
         <table key={1} className='w-full px-2 text-gray-900 text-center mt-2'>
             <tr className='bg-gray-700 font-bold text-white'>
@@ -25,11 +24,21 @@ const TablePolygons = ({ polygons, setidUserSeleccionado, users, functions, data
                     <td className='py-2'> {poly.name ? poly.name : 'Sin nombre'} </td>
                     <td> {poly.number_points} </td>
                     <td> {poly.area} </td>
-                    <td> {(poly.distancia && poly.distancia !== '') ? poly.distancia.toFixed(2) + ' km' : <p className="text-red-700 font-bold">No trazada</p>} </td>
+                    {poly.distancia && poly.disntancia !== '' && poly.distancia !== undefined ? (
+                        <td> {typeof poly.distancia === 'number' ? (poly.distancia).toFixed(2) + ' Km.' : poly.distancia} </td>
+                    ) : (
+                        <td className="text-red-700 font-bold">No trazada</td>
+                    )}
                     <td>
-                        {poly.user ? (
+                        {poly.user && (
                             <p className="text-center font-bold">{poly.user.nombre} {poly.user.apellido_paterno} {poly.user.apellido_materno} </p>
-                        ) : (
+                        )}
+
+                        {poly.user && typeof poly.user === 'string' && (
+                            <p className="text-center font-bold">{poly.user}</p>
+                        )}
+
+                        {!poly.user && (
                             <select name="usuario" id="usuario" className="w-2/3 text-gray-900 py-1 rounded px-1 mr-1"
                                 onChange={e => setidUserSeleccionado(e.target.value)}
                             >
@@ -41,10 +50,11 @@ const TablePolygons = ({ polygons, setidUserSeleccionado, users, functions, data
                                 ))}
                             </select>
                         )}
+
                     </td>
                     <td className="flex justify-center items-center gap-2 py-1">
                         <Tooltip placement="top" title="Zoom">
-                            <button className="bg-cyan-600" onClick={() => functions.zoomToPolygon(poly.id)}>
+                            <button className="bg-cyan-600" onClick={() => functions.zoomToPolygon(poly.draw_id ? poly.draw_id : poly.id)}>
                                 {getIcon('ZoomInMapIcon', { color: 'white', fontSize: '26px' })}
                             </button>
                         </Tooltip>

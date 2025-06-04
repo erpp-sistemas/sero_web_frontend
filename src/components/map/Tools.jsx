@@ -33,7 +33,9 @@ const colors_palette = [
 
 export default function AlertDialogSlide( { data } ) {
 
-    const { polygonsStorage, setLastPolygonCreated } = data; 
+    const { polygonsStorage } = data;
+
+
 
     const mapa_activo = useSelector((state) => state.mapa)
     const features = useSelector((state) => state.features)
@@ -95,10 +97,6 @@ export default function AlertDialogSlide( { data } ) {
         mapa_activo.mapa.setPaintProperty(idLayerSeleccionado, 'circle-color', color)
     }
 
-    // const generateCSV = () => {
-    //     const data = features.puntos_in_poligono.map(f => f.properties)
-    //     return data
-    // }
 
     const handleActivaCluster = async () => {
         const layer = features.layers_activos.filter(l => l.layer_id == idLayerSeleccionado)[0];

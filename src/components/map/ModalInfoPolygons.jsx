@@ -25,7 +25,6 @@ const ModalInfoPolygons = ({ setShowModal, draw, map, disablePoints, enabledPoin
     const dispatch = useDispatch();
     const map_active = useSelector((state) => state.mapa);
     const polygons = useSelector((state) => state.features.polygonsCreated);
-    //console.log(polygons);
 
     const [open, setOpen] = useState(true);
     const [data, setData] = useState([]);
@@ -36,7 +35,6 @@ const ModalInfoPolygons = ({ setShowModal, draw, map, disablePoints, enabledPoin
     const [dataGrid, setDataGrid] = useState([]);
     const [colDefs, setColDefs] = useState([]);
     const [titles, setTitles] = useState([]);
-
 
 
     const csvLinkRef = useRef();
@@ -109,18 +107,21 @@ const ModalInfoPolygons = ({ setShowModal, draw, map, disablePoints, enabledPoin
         if (!idUserSeleccionado) return alert("Elige un usuario de la lista")
         const user = users.filter(user => user.id_usuario === Number(idUserSeleccionado))[0]
         const { nombre, apellido_paterno, apellido_materno, is_user_push, id_usuario, foto } = user;
-        const marker = addImageInPolygon( polygon.draw_id ? polygon.draw_id : polygon.id, user.foto)
+        const marker = addImageInPolygon(polygon.draw_id ? polygon.draw_id : polygon.id, user.foto)
         polygonAddData(polygon, {
             user: {
                 nombre, apellido_paterno, apellido_materno, is_user_push, id_usuario, foto
-            }, marker, disabled_points: true
+            }, marker,
+            //disabled_points: true
         });
-        disablePoints(map_active.mapa, polygon.draw_id ? polygon.draw_id : polygon.id);
+        //disablePoints(map_active.mapa, polygon.draw_id ? polygon.draw_id : polygon.id);
         zoomToPolygon(polygon.draw_id ? polygon.draw_id : polygon.id);
     }
 
     const addImageInPolygon = (polygon_id, image_url) => {
+        console.log('addImageInPolygon', polygon_id, image_url)
         const poly = draw.get(polygon_id);
+        console.log(poly)
         const centroid = turf.centroid(poly);
         const coordinates = centroid.geometry.coordinates;
 
@@ -155,17 +156,10 @@ const ModalInfoPolygons = ({ setShowModal, draw, map, disablePoints, enabledPoin
         setLastPolygonCreated(polygon_new)
     }
 
-    const polygonDeleteData = (polygon, fieldName) => delete polygon[fieldName];
-
-    const deleteAssigmentUser = (poly) => {
-        if (poly.marker) {
-            poly.marker.remove();
-            zoomToPolygon(poly.id);
-            delete poly.user;
-            delete poly.marker;
-        }
-    }
-
+    const polygonDeleteData = (polygon, fieldName) => {
+        const { [fieldName]: omit, ...polygonWithoutField } = polygon;
+        polygonAddData(polygonWithoutField, {});
+    };
 
     const generateGrid = (polygon) => {
         const points_arr = polygon.points;
@@ -239,20 +233,32 @@ const ModalInfoPolygons = ({ setShowModal, draw, map, disablePoints, enabledPoin
         return visited;
     }
 
-    const deleteRoute = (polygon) => {
-        if (map_active.mapa.getLayer(`route-${polygon.id}`)) {
-            map_active.mapa.removeLayer(`route-${polygon.id}`);
-            map_active.mapa.removeSource(`route-${polygon.id}`);
-            zoomToPolygon(polygon.id);
-            polygonDeleteData(polygon, 'distancia');
-        }
-    }
 
     const enablePointsBefore = (polygon) => {
         enabledPoints(map_active.mapa, polygon.id);
         polygonDeleteData(polygon, 'disabled_points')
         zoomToPolygon(polygon.id)
     }
+
+    const deleteRoute = (polygon) => {
+        const id = polygon.draw_id ? polygon.draw_id : polygon.id;
+        if (map_active.mapa.getLayer(`route-${id}`)) {
+            map_active.mapa.removeLayer(`route-${id}`);
+            map_active.mapa.removeSource(`route-${id}`);
+            zoomToPolygon(polygon.id);
+            polygonDeleteData(polygon, 'distancia');
+        }
+    }
+
+    const deleteAssigmentUser = (poly) => {
+        if (poly.marker) {
+            poly.marker.remove();
+            const { user, marker, ...polyWithoutUser } = poly;
+            polygonAddData(polyWithoutUser, {}); // Actualiza el estado con la copia
+            zoomToPolygon(poly.draw_id ? poly.draw_id : poly.id);
+        }
+    }
+
 
     function childFunction(polygon) {
         deleteRoute(polygon);
