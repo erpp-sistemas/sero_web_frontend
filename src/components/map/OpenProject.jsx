@@ -2,10 +2,11 @@ import { useEffect, useState } from 'react'
 import { getIcon } from '../../data/Icons';
 import { getProjectsByUserId } from '../../services/map.service';
 import { useSelector, useDispatch } from 'react-redux';
-import { setPolygonsCreated } from '../../redux/featuresSlice';
+import { setPolygonsCreated, setEditingPolygons } from '../../redux/featuresSlice';
 import * as turf from '@turf/turf'
 import Message from './Message';
-import { Marker, Popup } from "mapbox-gl";
+import { Marker } from "mapbox-gl";
+import Spinner from './Spinner';
 
 const OpenProject = ({ data }) => {
 
@@ -14,7 +15,7 @@ const OpenProject = ({ data }) => {
         projects, setProjects,
         allProjects, setAllProjects,
         projectsLoaded, setProjectsLoaded,
-        polygonsStorage
+        polygonsStorage, setShowModalInfoPolygons
     } = data;
 
 
@@ -176,6 +177,12 @@ const OpenProject = ({ data }) => {
 
         }
         setShowTools(false);
+        dispatch(setEditingPolygons(true));
+        setShowModalInfoPolygons(true);
+        setTimeout(() => {
+            dispatch(setEditingPolygons(false));
+            setShowModalInfoPolygons(false);
+        }, 1000)
 
     };
 
@@ -428,7 +435,7 @@ const OpenProject = ({ data }) => {
 
             {loading && (
                 <div className='w-10/12 mx-auto text-gray-900 text-center'>
-                    Cargando proyectos...
+                    <Spinner />
                 </div>
             )}
 

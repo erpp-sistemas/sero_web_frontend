@@ -211,6 +211,9 @@ const Mapa = () => {
 
 
     const addPolygonStorage = (polygon) => {
+        console.log("Poligono creado", polygon);
+        console.log("PolygonsStorage", polygonsStorage.current);
+        console.log("PolygonsCreated", polygonsCreated);
         let have_draw_id = polygon.draw_id ? true : false;
         if (polygonsCreated.length === 0) {
             dispatch(setPolygonsCreated([polygon]));
@@ -219,6 +222,7 @@ const Mapa = () => {
             let have_id_polygon = null;
             if (have_draw_id) have_id_polygon = polygonsCreated.find(poly => poly.draw_id === polygon.draw_id);
             if (!have_draw_id) have_id_polygon = polygonsCreated.find(poly => poly.id === polygon.id);
+            console.log("Have ID Polygon", have_id_polygon);
             if (!have_id_polygon) {
                 dispatch(setPolygonsCreated([...polygonsCreated, polygon]));
                 polygonsStorage.current = [...polygonsCreated, polygon];
@@ -228,7 +232,7 @@ const Mapa = () => {
             let polygons_not_selected;
             if (have_draw_id) polygons_not_selected = polygonsCreated.filter(poly => poly.draw_id !== polygon.draw_id);
             if (!have_draw_id) polygons_not_selected = polygonsCreated.filter(poly => poly.id !== polygon.id);
-
+            console.log("Polygons not selected", polygons_not_selected);
             // Crea un nuevo objeto, no modifiques el original
             const newPolygon = {
                 ...polygon,
@@ -241,8 +245,18 @@ const Mapa = () => {
     }
 
     const deletePolygonStorage = (polygon) => {
-        const new_polygons = polygonsStorage.current.filter(poly => poly.id !== polygon.id);
+        const new_polygons = polygonsStorage.current.filter(poly => {
+            if (poly.draw_id) return poly.draw_id !== polygon.id;
+            return poly.id !== polygon.id;
+        });
+        // console.log("PolygonsStorage before", polygonsStorage.current)
+        // console.log("Polygon ID", polygon.id)
+        // console.log("New Polygons", new_polygons)
+
         polygonsStorage.current = new_polygons;
+
+        //console.log("PolygonsStorageAfter", polygonsStorage.current)
+
         dispatch(setPolygonsCreated(new_polygons));
     }
 
@@ -329,7 +343,6 @@ const Mapa = () => {
             if (poly.draw_id) return poly.draw_id === polygon_id;
             return poly.id === polygon_id
         })[0];
-        console.log(functionDelete.current)
         if (typeof functionDelete.current === 'function') {
             functionDelete.current(polygon);
         }
@@ -446,7 +459,7 @@ const Mapa = () => {
             )}
 
             <div className="z-[100] absolute left-[300px] bottom-4 bg-neutral-700 rounded-md">
-                <Tools data={{ polygonsStorage}} />
+                <Tools data={{ polygonsStorage, setShowModalInfoPolygons }} />
             </div>
 
 

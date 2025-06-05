@@ -9,6 +9,7 @@ const initialState = {
     puntos_in_poligono: [],
     cargar_layer: null,
     polygonsCreated: [],
+    editingPolygons: false,
 }
 
 export const featuresSlice = createSlice({
@@ -38,10 +39,13 @@ export const featuresSlice = createSlice({
         },
         setPolygonsCreated: (state, action) => {
             state.polygonsCreated = action.payload
-        }
+        },
+        setEditingPolygons: (state, action) => {
+            state.editingPolygons = action.payload
+        },
     }
 })
 
 
-export const { setData, setFeatures, setCoordinates, setLayersActivos, setDraw, setPuntosInPoligono, setCargarLayer, setPolygonsCreated } = featuresSlice.actions
+export const { setData, setFeatures, setCoordinates, setLayersActivos, setDraw, setPuntosInPoligono, setCargarLayer, setPolygonsCreated, setEditingPolygons } = featuresSlice.actions
 export default featuresSlice.reducer

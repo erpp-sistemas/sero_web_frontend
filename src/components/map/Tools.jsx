@@ -33,7 +33,7 @@ const colors_palette = [
 
 export default function AlertDialogSlide( { data } ) {
 
-    const { polygonsStorage } = data;
+    const { polygonsStorage, setShowModalInfoPolygons } = data;
 
 
 
@@ -303,7 +303,7 @@ export default function AlertDialogSlide( { data } ) {
                             projects, setProjects,
                             allProjects, setAllProjects,
                             projectsLoaded, setProjectsLoaded,
-                            polygonsStorage
+                            polygonsStorage, setShowModalInfoPolygons
                         }} />
                     )}
 

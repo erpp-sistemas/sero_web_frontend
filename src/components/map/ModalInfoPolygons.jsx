@@ -18,13 +18,17 @@ import instance from '../../api/axios';
 // COMPONENTS
 import TablePolygons from './TablePolygons';
 import GridRegisterPolygon from './GridRegisterPolygon';
-
+import Spinner from './Spinner'
 
 const ModalInfoPolygons = ({ setShowModal, draw, map, disablePoints, enabledPoints, setLastPolygonCreated, setFunction, setShowModalPdf, setDataPdf }) => {
+
 
     const dispatch = useDispatch();
     const map_active = useSelector((state) => state.mapa);
     const polygons = useSelector((state) => state.features.polygonsCreated);
+    const editingPolygons = useSelector((state) => state.features.editingPolygons);
+
+    console.log(polygons)
 
     const [open, setOpen] = useState(true);
     const [data, setData] = useState([]);
@@ -147,17 +151,24 @@ const ModalInfoPolygons = ({ setShowModal, draw, map, disablePoints, enabledPoin
 
 
     const polygonAddData = (polygon, dataObj) => {
-        const polygons_not_selected = polygons.filter(poly => poly.id !== polygon.id);
+        const polygons_not_selected = polygons.filter(poly => {
+            if (poly.draw_id) {
+                return poly.draw_id !== polygon.draw_id;
+            }
+            return poly.id !== polygon.id;
+        });
         const polygon_new = {
             ...polygon,
             ...dataObj
         }
+        console.log('polygon_new', polygon_new)
         dispatch(setPolygonsCreated([...polygons_not_selected, polygon_new]));
         setLastPolygonCreated(polygon_new)
     }
 
     const polygonDeleteData = (polygon, fieldName) => {
         const { [fieldName]: omit, ...polygonWithoutField } = polygon;
+        console.log('polygonWithoutField', polygonWithoutField)
         polygonAddData(polygonWithoutField, {});
     };
 
@@ -241,6 +252,7 @@ const ModalInfoPolygons = ({ setShowModal, draw, map, disablePoints, enabledPoin
     }
 
     const deleteRoute = (polygon) => {
+        console.log('deleteRoute', polygon)
         const id = polygon.draw_id ? polygon.draw_id : polygon.id;
         if (map_active.mapa.getLayer(`route-${id}`)) {
             map_active.mapa.removeLayer(`route-${id}`);
@@ -251,6 +263,7 @@ const ModalInfoPolygons = ({ setShowModal, draw, map, disablePoints, enabledPoin
     }
 
     const deleteAssigmentUser = (poly) => {
+        console.log('deleteAssigmentUser', poly)
         if (poly.marker) {
             poly.marker.remove();
             const { user, marker, ...polyWithoutUser } = poly;
@@ -261,6 +274,7 @@ const ModalInfoPolygons = ({ setShowModal, draw, map, disablePoints, enabledPoin
 
 
     function childFunction(polygon) {
+        console.log('childFunction', polygon)
         deleteRoute(polygon);
         deleteAssigmentUser(polygon);
     }
@@ -286,29 +300,45 @@ const ModalInfoPolygons = ({ setShowModal, draw, map, disablePoints, enabledPoin
                 aria-labelledby="parent-modal-title"
                 aria-describedby="parent-modal-description"
             >
-                {polygons && polygons.length > 0 && (
-                    <div className='w-[93%] h-[97%] p-4 bg-blue-50 absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] rounded-md shadow-lg shadow-slate-700'>
-                        <div className='flex justify-between px-3'>
-                            <h1 className='text-center text-base font-bold text-gray-900'>
-                                {dataGrid.length === 0 ? 'Lista de poligonos creados' : 'Información dentro del poligono'}
-                            </h1>
-                            <button onClick={() => handleClose(true)}>
-                                {getIcon('CloseIcon', { fontSize: '26px', color: 'red' })}
-                            </button>
+                <>
+                    {editingPolygons ? (
+                        <div className='w-[20%] h-[25%] text-gray-900 p-4 bg-blue-50 absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] rounded-md shadow-lg shadow-slate-700'>
+                            <div className='flex flex-col items-center justify-center h-full '>
+                                <h1 className='text-center text-base font-semibold text-gray-900'>
+                                    Haciendo editables los poligonos
+                                    <Spinner />
+                                </h1>
+                            </div>
                         </div>
-                        <hr className='mt-2 bg-gray-900' />
+                    ) : (
+                        <>
+                            {polygons && polygons.length > 0 && (
+                                <div className='w-[93%] h-[97%] p-4 bg-blue-50 absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] rounded-md shadow-lg shadow-slate-700'>
+                                    <div className='flex justify-between px-3'>
+                                        <h1 className='text-center text-base font-bold text-gray-900'>
+                                            {dataGrid.length === 0 ? 'Lista de poligonos creados' : 'Información dentro del poligono'}
+                                        </h1>
+                                        <button onClick={() => handleClose(true)}>
+                                            {getIcon('CloseIcon', { fontSize: '26px', color: 'red' })}
+                                        </button>
+                                    </div>
+                                    <hr className='mt-2 bg-gray-900' />
 
-                        {dataGrid.length === 0 && (
-                            <TablePolygons polygons={polygons} setidUserSeleccionado={setidUserSeleccionado} users={users} functions={functions}
-                                data={data} nameFile={nameFile} csvLinkRef={csvLinkRef}
-                            />
-                        )}
+                                    {dataGrid.length === 0 && (
+                                        <TablePolygons polygons={polygons} setidUserSeleccionado={setidUserSeleccionado} users={users} functions={functions}
+                                            data={data} nameFile={nameFile} csvLinkRef={csvLinkRef}
+                                        />
+                                    )}
 
-                        {dataGrid.length > 0 && colDefs.length > 0 && (
-                            <GridRegisterPolygon dataGrid={dataGrid} colDefs={colDefs} titles={titles} />
-                        )}
-                    </div>
-                )}
+                                    {dataGrid.length > 0 && colDefs.length > 0 && (
+                                        <GridRegisterPolygon dataGrid={dataGrid} colDefs={colDefs} titles={titles} />
+                                    )}
+                                </div>
+                            )}
+                        </>
+                    )}
+
+                </>
             </Modal >
         </div >
     )
