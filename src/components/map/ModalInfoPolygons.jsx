@@ -28,8 +28,6 @@ const ModalInfoPolygons = ({ setShowModal, draw, map, disablePoints, enabledPoin
     const polygons = useSelector((state) => state.features.polygonsCreated);
     const editingPolygons = useSelector((state) => state.features.editingPolygons);
 
-    console.log(polygons)
-
     const [open, setOpen] = useState(true);
     const [data, setData] = useState([]);
     const [nameFile, setNameFile] = useState('');
@@ -123,9 +121,7 @@ const ModalInfoPolygons = ({ setShowModal, draw, map, disablePoints, enabledPoin
     }
 
     const addImageInPolygon = (polygon_id, image_url) => {
-        console.log('addImageInPolygon', polygon_id, image_url)
         const poly = draw.get(polygon_id);
-        console.log(poly)
         const centroid = turf.centroid(poly);
         const coordinates = centroid.geometry.coordinates;
 
@@ -150,7 +146,7 @@ const ModalInfoPolygons = ({ setShowModal, draw, map, disablePoints, enabledPoin
     }
 
 
-    const polygonAddData = (polygon, dataObj) => {
+    const polygonAddData = (polygon, dataObj, activeLastPolygon = true) => {
         const polygons_not_selected = polygons.filter(poly => {
             if (poly.draw_id) {
                 return poly.draw_id !== polygon.draw_id;
@@ -161,15 +157,13 @@ const ModalInfoPolygons = ({ setShowModal, draw, map, disablePoints, enabledPoin
             ...polygon,
             ...dataObj
         }
-        console.log('polygon_new', polygon_new)
         dispatch(setPolygonsCreated([...polygons_not_selected, polygon_new]));
-        setLastPolygonCreated(polygon_new)
+        if(activeLastPolygon) setLastPolygonCreated(polygon_new);
     }
 
     const polygonDeleteData = (polygon, fieldName) => {
         const { [fieldName]: omit, ...polygonWithoutField } = polygon;
-        console.log('polygonWithoutField', polygonWithoutField)
-        polygonAddData(polygonWithoutField, {});
+        polygonAddData(polygonWithoutField, {}, false);
     };
 
     const generateGrid = (polygon) => {
@@ -247,12 +241,11 @@ const ModalInfoPolygons = ({ setShowModal, draw, map, disablePoints, enabledPoin
 
     const enablePointsBefore = (polygon) => {
         enabledPoints(map_active.mapa, polygon.id);
-        polygonDeleteData(polygon, 'disabled_points')
+        polygonDeleteData(polygon, 'disabled_points', false);
         zoomToPolygon(polygon.id)
     }
 
     const deleteRoute = (polygon) => {
-        console.log('deleteRoute', polygon)
         const id = polygon.draw_id ? polygon.draw_id : polygon.id;
         if (map_active.mapa.getLayer(`route-${id}`)) {
             map_active.mapa.removeLayer(`route-${id}`);
@@ -263,18 +256,16 @@ const ModalInfoPolygons = ({ setShowModal, draw, map, disablePoints, enabledPoin
     }
 
     const deleteAssigmentUser = (poly) => {
-        console.log('deleteAssigmentUser', poly)
         if (poly.marker) {
             poly.marker.remove();
             const { user, marker, ...polyWithoutUser } = poly;
-            polygonAddData(polyWithoutUser, {}); // Actualiza el estado con la copia
+            polygonAddData(polyWithoutUser, {}, false); // Actualiza el estado con la copia
             zoomToPolygon(poly.draw_id ? poly.draw_id : poly.id);
         }
     }
 
 
     function childFunction(polygon) {
-        console.log('childFunction', polygon)
         deleteRoute(polygon);
         deleteAssigmentUser(polygon);
     }

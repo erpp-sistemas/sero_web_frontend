@@ -370,7 +370,7 @@ const OpenProject = ({ data }) => {
             {projects && projects.length > 0 && (
                 <div className='w-full flex justify-center items-center flex-col'>
                     {currentProjects.map((project, index) => (
-                        <div key={index} className=' w-10/12 text-gray-900 bg-gray-200 px-4 py-2 rounded-md text-sm my-1'>
+                        <div key={index} className=' w-10/12 text-gray-900 bg-neutral-200 px-4 py-2 rounded-md text-sm my-1'>
                             <p> <span className='font-semibold'> Nombre: </span> {project.name} </p>
                             <p> <span className='font-semibold'> Descripción: </span> {project.description} </p>
                             <p> <span className='font-semibold'> Layer: </span> {project.layer.replaceAll('_', ' ')} </p>
@@ -378,7 +378,7 @@ const OpenProject = ({ data }) => {
                             <div className='flex items-center gap-2 my-2'>
 
                                 {!projectsLoaded || !projectsLoaded.includes(project.project_id) ? (
-                                    <button className='bg-blue-400 py-1 px-2 hover:bg-blue-500 rounded-md'
+                                    <button className='bg-blue-500 py-2 px-2 w-32 hover:bg-blue-600 rounded-md text-neutral-50 border border-slate-700 border-spacing-2'
                                         onClick={() => handleLoadPolygonsInMap(project.project_id)}
                                     >
                                         {getIcon('LayersIcon', { color: 'white', fontSize: '20px', marginRight: '5px' })}
@@ -387,20 +387,20 @@ const OpenProject = ({ data }) => {
                                 ) : null}
 
 
-                                <button className='bg-emerald-400 py-1 px-2 hover:bg-emerald-500 rounded-md' >
+                                <button className='bg-green-500 py-2 px-2 w-32 hover:bg-green-600 text-neutral-50 rounded-md border border-slate-700 border-spacing-2' >
                                     {getIcon('ShareIcon', { color: 'white', fontSize: '20px', marginRight: '5px' })}
                                     Compartir
                                 </button>
 
                                 {projectsLoaded && projectsLoaded.includes(project.project_id) && (
                                     <>
-                                        <button className='bg-red-400 py-1 px-2 hover:bg-red-500 rounded-md'
+                                        <button className='bg-red-500 py-2 px-2 w-32 hover:bg-red-600 rounded-md text-neutral-50 border border-slate-700 border-spacing-2 '
                                             onClick={() => handleDeletePolygonsInMap(project)}
                                         >
                                             {getIcon('DeleteIcon', { color: 'white', fontSize: '20px', marginRight: '5px' })}
                                             Quitar
                                         </button>
-                                        <button className='bg-yellow-400 py-1 px-2 hover:bg-yellow-500 rounded-md'
+                                        <button className='bg-yellow-500 py-2 px-2 border border-slate-700 border-spacing-2 hover:bg-yellow-600 rounded-md w-32 text-neutral-50'
                                             onClick={() => handleEditPolygonsInMap(project)}
                                         >
                                             {getIcon('EditIcon', { color: 'white', fontSize: '20px', marginRight: '5px' })}

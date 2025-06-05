@@ -211,9 +211,6 @@ const Mapa = () => {
 
 
     const addPolygonStorage = (polygon) => {
-        console.log("Poligono creado", polygon);
-        console.log("PolygonsStorage", polygonsStorage.current);
-        console.log("PolygonsCreated", polygonsCreated);
         let have_draw_id = polygon.draw_id ? true : false;
         if (polygonsCreated.length === 0) {
             dispatch(setPolygonsCreated([polygon]));
@@ -222,7 +219,6 @@ const Mapa = () => {
             let have_id_polygon = null;
             if (have_draw_id) have_id_polygon = polygonsCreated.find(poly => poly.draw_id === polygon.draw_id);
             if (!have_draw_id) have_id_polygon = polygonsCreated.find(poly => poly.id === polygon.id);
-            console.log("Have ID Polygon", have_id_polygon);
             if (!have_id_polygon) {
                 dispatch(setPolygonsCreated([...polygonsCreated, polygon]));
                 polygonsStorage.current = [...polygonsCreated, polygon];
@@ -232,8 +228,7 @@ const Mapa = () => {
             let polygons_not_selected;
             if (have_draw_id) polygons_not_selected = polygonsCreated.filter(poly => poly.draw_id !== polygon.draw_id);
             if (!have_draw_id) polygons_not_selected = polygonsCreated.filter(poly => poly.id !== polygon.id);
-            console.log("Polygons not selected", polygons_not_selected);
-            // Crea un nuevo objeto, no modifiques el original
+            // Crea un nuevo objeto, para no modificar el original
             const newPolygon = {
                 ...polygon,
                 name: have_id_polygon.name || polygon.name,
@@ -249,14 +244,7 @@ const Mapa = () => {
             if (poly.draw_id) return poly.draw_id !== polygon.id;
             return poly.id !== polygon.id;
         });
-        // console.log("PolygonsStorage before", polygonsStorage.current)
-        // console.log("Polygon ID", polygon.id)
-        // console.log("New Polygons", new_polygons)
-
         polygonsStorage.current = new_polygons;
-
-        //console.log("PolygonsStorageAfter", polygonsStorage.current)
-
         dispatch(setPolygonsCreated(new_polygons));
     }
 
@@ -349,7 +337,7 @@ const Mapa = () => {
     }
 
     const handleSaveWorkSpace = (resp) => {
-        if (polygonsCreated.length === 0) return alert("No hay poligonos creados");    
+        if (polygonsCreated.length === 0) return alert("No hay poligonos creados");
         setShowModalQuestion(false);
 
         if (resp) {
@@ -377,23 +365,30 @@ const Mapa = () => {
 
     }
 
+
+    const cleanAllPolygons = () => {
+        polygonsStorage.current.forEach(polygon => {
+            if (polygon.marker) polygon.marker.remove();
+            const id = polygon.draw_id ? polygon.draw_id : polygon.id;
+            if (polygon.distancia && polygon.distancia !== '' && polygon.distancia !== undefined) {
+                if (mapRef.current.getLayer(`route-${id}`)) {
+                    mapRef.current.removeLayer(`route-${id}`);
+                    mapRef.current.removeSource(`route-${id}`);
+                }
+            }
+        })
+        dispatch(setPolygonsCreated([]));
+        polygonsStorage.current = [];
+        setLastPolygonCreated(null);
+        drawMap.deleteAll();
+        dispatch(setFeatures([]));
+        dispatch(setCoordinates({}));
+    }
+
     const handleCleanAllPolygons = (resp) => {
-        if (polygonsCreated.length === 0) {
-            alert("No hay poligonos creados")
-            return;
-        }
+        if (polygonsCreated.length === 0) return alert("No hay poligonos creados");
         setShowModalCleanPolygons(false);
-        console.log(polygonsStorage.current)
-        console.log(polygonsCreated)
-        console.log(drawMap.getAll())
-        if (resp) {
-            dispatch(setPolygonsCreated([]));
-            polygonsStorage.current = [];
-            setLastPolygonCreated(null);
-            drawMap.deleteAll();
-            dispatch(setFeatures([]));
-            dispatch(setCoordinates({}));
-        }
+        if (resp) cleanAllPolygons();
     }
 
 
