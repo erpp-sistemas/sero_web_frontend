@@ -52,10 +52,12 @@ import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import ShareIcon from '@mui/icons-material/Share';
 import TimelineIcon from '@mui/icons-material/Timeline';
 import GridViewIcon from '@mui/icons-material/GridView';
+import BrowserUpdatedIcon from '@mui/icons-material/BrowserUpdated';
 
 export const getIcon = (icon, style) => {
 
      let obj = {
+          "BrowserUpdatedIcon": <BrowserUpdatedIcon sx={style} />,
           "GridViewIcon": <GridViewIcon sx={style} />,
           "TimelineIcon": <TimelineIcon sx={style} />,
           "ShareIcon": <ShareIcon sx={style} />,

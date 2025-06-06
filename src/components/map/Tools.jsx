@@ -196,7 +196,7 @@ export default function AlertDialogSlide( { data } ) {
         <>
             {showModalCluster && (<Modal title={'Generando mapa de calor'.toUpperCase()} />)}
             <IconButton  onClick={handleClickOpen}>
-                {getIcon('GridViewIcon', { color: '#FFFFFF', fontSize: '30px' })}
+                {getIcon('GridViewIcon', { color: '#FFFFFF', fontSize: '36px' })}
             </IconButton>
             <Dialog
                 open={open}

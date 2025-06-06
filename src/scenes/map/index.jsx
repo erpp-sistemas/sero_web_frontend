@@ -58,7 +58,7 @@ const Mapa = () => {
     const [idProject, setIdProject] = useState(Math.random().toString(36).substring(2, 15));
     const [dataProject, setDataProject] = useState(null);
     const [showModalCleanPolygons, setShowModalCleanPolygons] = useState(false);
-
+    const [statusProject, setStatusProject] = useState({});
 
     const polygonsStorage = useRef(null);
     const mapRef = useRef(null);
@@ -84,6 +84,39 @@ const Mapa = () => {
             addPolygonStorage(lastPolygonCreated);
         }
     }, [lastPolygonCreated])
+
+    useEffect(() => {
+        console.log(polygonsCreated)
+        if (polygonsCreated.length > 0) {
+
+            let projectsIds = [];
+
+            polygonsCreated.forEach(polygon => {
+                if (polygon.project_id && polygon.project_id !== undefined) {
+                    projectsIds.push(polygon.project_id);
+                }
+            })
+            projectsIds = getUniqueProjects(projectsIds);
+            console.log(projectsIds);
+            if (projectsIds.length > 1) setStatusProject({ status: 3, comment: 'Hay polígonos de diferentes proyectos, no se puede actualizar el proyecto' });
+            if (projectsIds.length === 1 && projectsIds[0] === idProject) setStatusProject({ status: 1, comment: 'Hay polígonos de un solo proyecto y es el mismo que el del proyecto actual' });
+            if (projectsIds.length === 1 && projectsIds[0] !== idProject) setStatusProject({ status: 2, comment: 'Hay polígonos de un solo proyecto y es diferente al del proyecto actual' });
+            if (projectsIds.length === 0) setStatusProject({ status: 4, comment: 'No hay polígonos de ningún proyecto' });
+        }
+    }, [polygonsCreated])
+
+    const getUniqueProjects = (projects) => {
+        const uniqueProjects = [];
+        const projectIds = new Set();
+        projects.forEach(project => {
+            if (!projectIds.has(project)) {
+                projectIds.add(project);
+                uniqueProjects.push(project);
+            }
+        });
+        return uniqueProjects;
+    }
+
 
     const generateMap = () => {
         const map = new Map({
@@ -367,13 +400,17 @@ const Mapa = () => {
 
 
     const cleanAllPolygons = () => {
+        console.log(polygonsStorage.current);
         polygonsStorage.current.forEach(polygon => {
             if (polygon.marker) polygon.marker.remove();
-            const id = polygon.draw_id ? polygon.draw_id : polygon.id;
             if (polygon.distancia && polygon.distancia !== '' && polygon.distancia !== undefined) {
-                if (mapRef.current.getLayer(`route-${id}`)) {
-                    mapRef.current.removeLayer(`route-${id}`);
-                    mapRef.current.removeSource(`route-${id}`);
+                if (mapRef.current.getLayer(`route-${polygon.id}`)) {
+                    mapRef.current.removeLayer(`route-${polygon.id}`);
+                    mapRef.current.removeSource(`route-${polygon.id}`);
+                }
+                if (mapRef.current.getLayer(`route-${polygon.draw_id}`)) {
+                    mapRef.current.removeLayer(`route-${polygon.draw_id}`);
+                    mapRef.current.removeSource(`route-${polygon.draw_id}`);
                 }
             }
         })
@@ -415,6 +452,7 @@ const Mapa = () => {
                 setShowModal={setShowModalSaveProject}
                 dataProject={dataProject}
                 setDataProject={setDataProject}
+                statusProject={statusProject}
             />}
 
             {showModalInfoPolygon && <ModalInfoPolygon
@@ -429,31 +467,35 @@ const Mapa = () => {
             />}
 
             {polygonsCreated && polygonsCreated.length > 0 && (
-                <div className="z-[100] absolute right-[20px] top-3 p-2 flex flex-col justify-center gap-2 bg-gray-600 shadow-xl shadow-slate-600 rounded-md">
-                    <Tooltip placement="left-start" title="Mostrar poligonos">
+                <div className="z-[100] absolute right-[20px] bottom-[75px] p-2 flex flex-col justify-center gap-3 bg-gray-600 shadow-xl shadow-slate-600 rounded-md">
+                    <Tooltip placement="left-start" title="Lista de polígonos">
                         <button className="py-2 px-2 rounded bg-cyan-600 hover:bg-cyan-500"
                             onClick={() => setShowModalInfoPolygons(true)} >
                             {getIcon('TimelineIcon', {})}
                         </button>
                     </Tooltip>
-                    <Tooltip placement="left-start" title="Guardar proyecto">
+                    <Tooltip placement="left-start" title="Guardar proyecto nuevo">
                         <button className="py-2 px-2 rounded bg-cyan-600 hover:bg-cyan-500"
                             onClick={() => setShowModalQuestion(true)} >
                             {getIcon('SaveIcon', {})}
                         </button>
                     </Tooltip>
-                    <Tooltip placement="left-start" title="Borrar poligonos">
+                    <Tooltip placement="left-start" title="Exportar proyecto">
                         <button className="py-2 px-2 rounded bg-cyan-600 hover:bg-cyan-500"
-                            onClick={() => setShowModalCleanPolygons(true)} >
-                            {getIcon('DeleteIcon', {})}
+                            onClick={() => setShowModalQuestion(true)} >
+                            {getIcon('BrowserUpdatedIcon', {})}
                         </button>
                     </Tooltip>
-
-
+                    <Tooltip placement="left-start" title="Borrar todos los poligonos">
+                        <button className="py-2 px-2 rounded bg-cyan-600 hover:bg-cyan-500"
+                            onClick={() => setShowModalCleanPolygons(true)} >
+                            {getIcon('DeleteIcon', { color: 'red' })}
+                        </button>
+                    </Tooltip>
                 </div>
             )}
 
-            <div className="z-[100] absolute left-[300px] bottom-4 bg-neutral-700 rounded-md">
+            <div className="z-[100] absolute right-[20px] bottom-4 bg-neutral-700 rounded-md">
                 <Tools data={{ polygonsStorage, setShowModalInfoPolygons }} />
             </div>
 

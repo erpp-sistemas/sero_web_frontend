@@ -31,8 +31,8 @@ export default function BasicModal({ title, handleRespuesta }) {
             >
                 <div style={style}>
                     <div className='h-full items-center flex justify-center'>
-                        <div className="w-5/12 bg-neutral-100 p-10 rounded-md shadow-2x">
-                            {getIcon('HelpIcon', {fontSize: '36px', color: 'green', marginBottom: '10px'})}
+                        <div className="w-5/12 bg-neutral-100 p-6 rounded-md shadow-2x">
+                            {getIcon('HelpIcon', {fontSize: '66px', color: 'green', marginBottom: '10px'})}
                             <h1 className="text-lg text-black-500 font-serif" > {title} </h1>
                             <div className='flex justify-center gap-3'>
                                 <button className='w-20 bg-green-600 p-2 rounded-md mt-3 ' onClick={() => handleRespuesta(true)}>Si</button>

@@ -47,13 +47,13 @@ const OpenProject = ({ data }) => {
         }, 150); // Duración de la animación en ms
     };
 
-    useEffect(() => {
+     useEffect(() => {
         loading && setLoading(true);
         getProjectsByUserId(user.user_id)
             .then(fetchedProjects => {
                 setProjects(fetchedProjects);
                 setAllProjects(fetchedProjects); // Guarda la lista original
-                //console.log('Proyectos obtenidos:', fetchedProjects);
+                console.log('Proyectos obtenidos:', fetchedProjects);
                 setLoading(false);
             })
             .catch(error => {
@@ -66,7 +66,7 @@ const OpenProject = ({ data }) => {
         const layer_project = projects.find(project => project.project_id === projectId)?.layer || 'default_layer';
         const polygons_find = projects.find(project => project.project_id === projectId)?.polygons || [];
         const polygons = JSON.parse(polygons_find);
-        const geojson = transformPolygon(polygons, name_project, layer_project);
+        const geojson = transformPolygon(polygons, name_project, layer_project, projectId);
         map.addSource(projectId, {
             type: 'geojson',
             data: geojson
@@ -96,7 +96,8 @@ const OpenProject = ({ data }) => {
     };
 
 
-    const transformPolygon = (polygons, name_project, layer_project) => {
+    const transformPolygon = (polygons, name_project, layer_project, projectId) => {
+        console.log(polygons)
         return {
             type: 'FeatureCollection',
             features: polygons.map(p => {
@@ -118,11 +119,12 @@ const OpenProject = ({ data }) => {
                         name: p.name,
                         user: p.user ? p.user.nombre + ' ' + p.user.apellido_paterno + ' ' + p.user.apellido_materno : '',
                         area: p.area,
-                        distancia: p.distancia ? p.distancia.toFixed(2) + ' km' : '',
+                        distancia: !p.distancia ? '' : typeof p.distancia === 'number' ? p.distancia.toFixed(2) + ' km' : p.distancia,
                         number_points: p.number_points,
                         latitud,
                         longitud,
                         coordenadas: p.coordenadas,
+                        project_id: projectId,
                     }
                 }
             })
@@ -151,7 +153,7 @@ const OpenProject = ({ data }) => {
         const polygons = getPolygonsFromProyect(projectId);
         const polygons_with_user = polygons.filter(p => p.user)
 
-        const geojson = transformPolygon(polygons, name_project, layer_project);
+        const geojson = transformPolygon(polygons, name_project, layer_project, projectId);
         if (draw && map) {
             geojson.features.forEach(feature => {
                 const drawId = draw.add(feature);
@@ -387,23 +389,23 @@ const OpenProject = ({ data }) => {
                                 ) : null}
 
 
-                                <button className='bg-green-500 py-2 px-2 w-32 hover:bg-green-600 text-neutral-50 rounded-md border border-slate-700 border-spacing-2' >
-                                    {getIcon('ShareIcon', { color: 'white', fontSize: '20px', marginRight: '5px' })}
+                                <button className='bg-blue-500 py-2 px-2 w-32 hover:bg-blue-600 text-neutral-50 rounded-md border border-slate-700 border-spacing-2' >
+                                    {getIcon('ShareIcon', { color: '#00FF00', fontSize: '20px', marginRight: '5px' })}
                                     Compartir
                                 </button>
 
                                 {projectsLoaded && projectsLoaded.includes(project.project_id) && (
                                     <>
-                                        <button className='bg-red-500 py-2 px-2 w-32 hover:bg-red-600 rounded-md text-neutral-50 border border-slate-700 border-spacing-2 '
+                                        <button className='bg-blue-500 py-2 px-2 w-32 hover:bg-blue-600 rounded-md text-neutral-50 border border-slate-700 border-spacing-2 '
                                             onClick={() => handleDeletePolygonsInMap(project)}
                                         >
-                                            {getIcon('DeleteIcon', { color: 'white', fontSize: '20px', marginRight: '5px' })}
+                                            {getIcon('DeleteIcon', { color: 'red', fontSize: '20px', marginRight: '5px' })}
                                             Quitar
                                         </button>
-                                        <button className='bg-yellow-500 py-2 px-2 border border-slate-700 border-spacing-2 hover:bg-yellow-600 rounded-md w-32 text-neutral-50'
+                                        <button className='bg-blue-500 py-2 px-2 border border-slate-700 border-spacing-2 hover:bg-blue-600 rounded-md w-32 text-neutral-50'
                                             onClick={() => handleEditPolygonsInMap(project)}
                                         >
-                                            {getIcon('EditIcon', { color: 'white', fontSize: '20px', marginRight: '5px' })}
+                                            {getIcon('EditIcon', { color: 'yellow', fontSize: '20px', marginRight: '5px' })}
                                             Editar
                                         </button>
                                     </>

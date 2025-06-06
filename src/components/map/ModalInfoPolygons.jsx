@@ -189,8 +189,10 @@ const ModalInfoPolygons = ({ setShowModal, draw, map, disablePoints, enabledPoin
         const route = turf.lineString(orderedPoints);
         const routeLength = turf.length(route, { units: 'kilometers' });
 
+        console.log(`route-${polygon.id ? polygon.id : polygon.draw_id}`)
+        
         map_active.mapa.addLayer({
-            id: `route-${polygon.id}`,
+            id: `route-${polygon.id ? polygon.id : polygon.draw_id}`,
             type: 'line',
             source: {
                 type: 'geojson',
@@ -304,7 +306,7 @@ const ModalInfoPolygons = ({ setShowModal, draw, map, disablePoints, enabledPoin
                     ) : (
                         <>
                             {polygons && polygons.length > 0 && (
-                                <div className='w-[93%] h-[97%] p-4 bg-blue-50 absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] rounded-md shadow-lg shadow-slate-700'>
+                                <div className='w-[70%] h-[75%] p-4 bg-blue-50 absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] rounded-md shadow-lg shadow-slate-700'>
                                     <div className='flex justify-between px-3'>
                                         <h1 className='text-center text-base font-bold text-gray-900'>
                                             {dataGrid.length === 0 ? 'Lista de poligonos creados' : 'Información dentro del poligono'}
