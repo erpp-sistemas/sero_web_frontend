@@ -59,6 +59,7 @@ const Mapa = () => {
     const [dataProject, setDataProject] = useState(null);
     const [showModalCleanPolygons, setShowModalCleanPolygons] = useState(false);
     const [statusProject, setStatusProject] = useState({});
+    const [showToolPolygons, setShowToolPolygons] = useState(false);
 
     const polygonsStorage = useRef(null);
     const mapRef = useRef(null);
@@ -86,7 +87,6 @@ const Mapa = () => {
     }, [lastPolygonCreated])
 
     useEffect(() => {
-        console.log(polygonsCreated)
         if (polygonsCreated.length > 0) {
 
             let projectsIds = [];
@@ -97,7 +97,6 @@ const Mapa = () => {
                 }
             })
             projectsIds = getUniqueProjects(projectsIds);
-            console.log(projectsIds);
             if (projectsIds.length > 1) setStatusProject({ status: 3, comment: 'Hay polígonos de diferentes proyectos, no se puede actualizar el proyecto' });
             if (projectsIds.length === 1 && projectsIds[0] === idProject) setStatusProject({ status: 1, comment: 'Hay polígonos de un solo proyecto y es el mismo que el del proyecto actual' });
             if (projectsIds.length === 1 && projectsIds[0] !== idProject) setStatusProject({ status: 2, comment: 'Hay polígonos de un solo proyecto y es diferente al del proyecto actual' });
@@ -468,28 +467,38 @@ const Mapa = () => {
 
             {polygonsCreated && polygonsCreated.length > 0 && (
                 <div className="z-[100] absolute right-[20px] bottom-[75px] p-2 flex flex-col justify-center gap-3 bg-gray-600 shadow-xl shadow-slate-600 rounded-md">
-                    <Tooltip placement="left-start" title="Lista de polígonos">
+                    {showToolPolygons && (
+                        <>
+                            <Tooltip placement="left-start" title="Lista de polígonos">
+                                <button className="py-2 px-2 rounded bg-cyan-600 hover:bg-cyan-500"
+                                    onClick={() => setShowModalInfoPolygons(true)} >
+                                    {getIcon('TimelineIcon', {})}
+                                </button>
+                            </Tooltip>
+                            <Tooltip placement="left-start" title="Guardar proyecto nuevo">
+                                <button className="py-2 px-2 rounded bg-cyan-600 hover:bg-cyan-500"
+                                    onClick={() => setShowModalQuestion(true)} >
+                                    {getIcon('SaveIcon', {})}
+                                </button>
+                            </Tooltip>
+                            <Tooltip placement="left-start" title="Exportar proyecto">
+                                <button className="py-2 px-2 rounded bg-cyan-600 hover:bg-cyan-500"
+                                    onClick={() => setShowModalQuestion(true)} >
+                                    {getIcon('BrowserUpdatedIcon', {})}
+                                </button>
+                            </Tooltip>
+                            <Tooltip placement="left-start" title="Borrar todos los poligonos">
+                                <button className="py-2 px-2 rounded bg-cyan-600 hover:bg-cyan-500"
+                                    onClick={() => setShowModalCleanPolygons(true)} >
+                                    {getIcon('DeleteIcon', { color: 'red' })}
+                                </button>
+                            </Tooltip>
+                        </>
+                    )}
+                    <Tooltip placement="left-start" title="Herramientas de polígonos">
                         <button className="py-2 px-2 rounded bg-cyan-600 hover:bg-cyan-500"
-                            onClick={() => setShowModalInfoPolygons(true)} >
-                            {getIcon('TimelineIcon', {})}
-                        </button>
-                    </Tooltip>
-                    <Tooltip placement="left-start" title="Guardar proyecto nuevo">
-                        <button className="py-2 px-2 rounded bg-cyan-600 hover:bg-cyan-500"
-                            onClick={() => setShowModalQuestion(true)} >
-                            {getIcon('SaveIcon', {})}
-                        </button>
-                    </Tooltip>
-                    <Tooltip placement="left-start" title="Exportar proyecto">
-                        <button className="py-2 px-2 rounded bg-cyan-600 hover:bg-cyan-500"
-                            onClick={() => setShowModalQuestion(true)} >
-                            {getIcon('BrowserUpdatedIcon', {})}
-                        </button>
-                    </Tooltip>
-                    <Tooltip placement="left-start" title="Borrar todos los poligonos">
-                        <button className="py-2 px-2 rounded bg-cyan-600 hover:bg-cyan-500"
-                            onClick={() => setShowModalCleanPolygons(true)} >
-                            {getIcon('DeleteIcon', { color: 'red' })}
+                            onClick={() => { setShowToolPolygons(!showToolPolygons) }} >
+                            {getIcon('DiscountIcon', {})}
                         </button>
                     </Tooltip>
                 </div>

@@ -19,4 +19,6 @@ export const updateLayerData = (data) => axios.post('/update-layer-data', data);
 
 export const sendDataProjectWorkspace = (data) => axios.post('/save-workspace', data);
 
+export const sendDataProjectShareWorkspace = (data) => axios.post('/save-project-share', data);
+
 export const getProjectsByUser = (userId) => axios.get(`/get-projects-by-user/${userId}`);

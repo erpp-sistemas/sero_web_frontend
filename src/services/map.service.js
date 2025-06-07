@@ -1,6 +1,7 @@
-import { serviceMapByIdPlaza, layerMapByIdPlaza, updateLayerData,
-    sendDataProjectWorkspace, getProjectsByUser
- } from '../api/map'
+import {
+    serviceMapByIdPlaza, layerMapByIdPlaza, updateLayerData,
+    sendDataProjectWorkspace, getProjectsByUser, sendDataProjectShareWorkspace
+} from '../api/map'
 
 export const getServicesMapByIdPlaza = async (place_id) => {
     try {
@@ -29,7 +30,7 @@ export const updateLayerDataByPlazaService = async (data) => {
     }
 }
 
-export const sendDataProject = async ( data ) => {
+export const sendDataProject = async (data) => {
     try {
         if (data.polygons) {
             data.polygons = data.polygons.map(polygon => {
@@ -41,6 +42,16 @@ export const sendDataProject = async ( data ) => {
         return res.data;
     } catch (error) {
         console.error('Error al enviar los datos del proyecto:', error);
+        throw error;
+    }
+}
+
+export const sendDataProjectShare = async (data) => {
+    try {
+        const res = await sendDataProjectShareWorkspace(data);
+        return res.data;
+    } catch (error) {
+        console.error('Error al enviar los datos del proyecto para compartir:', error);
         throw error;
     }
 }

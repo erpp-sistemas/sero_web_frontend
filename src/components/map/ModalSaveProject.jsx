@@ -17,21 +17,16 @@ const ModalSaveProject = ({ setShowModal, dataProject, setDataProject, statusPro
 
 
     useEffect(() => {
-        console.log('statusProject', statusProject);
-        console.log("dataProject", dataProject);
         if (dataProject.polygons && dataProject.polygons.length > 0) {
 
             const projects = dataProject.polygons.map(p => p.proyecto).filter(id => id)
-            console.log('projects', projects);
             setPolygonsProject(projects);
             setProjectNameCurrent(projects[0] || 'Se eliminaron todos los poligonos del proyecto (Se recomienda crear un nuevo proyecto)');
 
             const uniqueProjects = getUniqueProjects(projects);
-            console.log('uniqueProjects', uniqueProjects);
             setUniqueProjects(uniqueProjects);
 
             const polygonsNotProject = dataProject.polygons.filter(p => !p.proyecto);
-            console.log('polygonsNotProject', polygonsNotProject);
             setPolygonsNotProject(polygonsNotProject);
 
         }
@@ -58,11 +53,6 @@ const ModalSaveProject = ({ setShowModal, dataProject, setDataProject, statusPro
     const handleSaveProject = () => {
 
         if (!nombreProyecto || nombreProyecto.trim() === '') return alert('Por favor, ingrese un nombre para el proyecto.');
-        console.log({
-            nombre: nombreProyecto,
-            descripcion: descripcionProyecto,
-            ...dataProject
-        })
 
         setIsLoading(true);
         setDataProject({
@@ -80,18 +70,15 @@ const ModalSaveProject = ({ setShowModal, dataProject, setDataProject, statusPro
 
     const handleUpdateProjectV2 = () => {
         setIsLoading(true);
-        console.log(dataProject);
         const projectIdHistory = dataProject.polygons.map(p => {
             if (p.draw_id) return p.project_id
         }).filter(id => id)[0];
-        console.log(projectIdHistory);
         if (!projectIdHistory) return alert('No se ha encontrado un proyecto para actualizar.');
         const data = {
             nombre: nombreProyecto === '' ? projectNameCurrent : nombreProyecto,
             ...dataProject,
             project_id: projectIdHistory
         }
-        console.log('data', data);
         saveWorkspace(data);
     }
 
@@ -115,11 +102,7 @@ const ModalSaveProject = ({ setShowModal, dataProject, setDataProject, statusPro
             });
     }
 
-    const handleShareProject = () => {
-
-    }
-
-
+  
     return (
         <div className='z-[1000]'>
             <Modal
