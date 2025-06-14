@@ -128,6 +128,8 @@ function StepTwo({ onNextTwo, onFormDataTwo }) {
         return;
     }
 
+    console.log("transformedData", transformedData)
+
       onNextTwo(transformedData);
       onFormDataTwo(transformedData);
     };
