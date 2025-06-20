@@ -43,6 +43,7 @@ function NewUser() {
     setFormDataTwo({});
     setFormDataThree({});
     setProfileId(null);
+    setUserId(null);
     setCompletedSteps({
       stepOne: false,
       stepTwo: false,
@@ -64,6 +65,46 @@ function NewUser() {
     setSelectedChip(chipLabel);
   };
 
+  // Ajuste: signup retorna el userId
+  const signup = async (user) => {
+    try {
+      setIsLoading(true);
+      const res = await registerRequest(user);
+
+      setIsLoading(false);
+
+      if (res.status === 200) {
+        const userIdFromMessage = res.data.message.match(/\d+/)[0];
+        setUserId(userIdFromMessage);
+        console.log("userIdFromMessage:", userIdFromMessage);
+        setAlertOpen(true);
+        setAlertType("success");
+        setAlertMessage("¡Felicidades! " + res.data.message);
+        return { success: true, userId: userIdFromMessage };
+      } else {
+        setAlertOpen(true);
+        setAlertType("error");
+        setAlertMessage(`Error! Unexpected status code: ${res.status}`);
+        return { success: false };
+      }
+    } catch (error) {
+      setIsLoading(false);
+      if (error.response) {
+        const status = error.response.status;
+        const message = error.response.data.message;
+        setAlertOpen(true);
+        setAlertType("error");
+        setAlertMessage("¡Error! " + message);
+      } else {
+        setAlertOpen(true);
+        setAlertType("error");
+        setAlertMessage("¡Error! " + error.message);
+      }
+      return { success: false };
+    }
+  };
+
+  // Paso 1
   const handleStepOneNext = async (data) => {
     const updateData = { ...data, username_session: user.username };
 
@@ -73,7 +114,7 @@ function NewUser() {
     if (updateData.profile_id === 1) {
       const signupResponse = await signup(updateData);
 
-      if (signupResponse) {
+      if (signupResponse.success) {
         setCompletedSteps({ ...completedSteps, stepOne: true });
         setAlertOpen(true);
         setAlertType("success");
@@ -88,19 +129,19 @@ function NewUser() {
     }
   };
 
+  // Paso 2
   const handleStepTwoNext = async (data) => {
     setFormDataTwo(data);
 
-    console.log(data);
-
+    // Si es gestor, registrar usuario y plazas
     if (profileId === 5) {
       const updateData = { ...formData, username_session: user.username };
-
       const signupResponse = await signup(updateData);
-      console.log(data);
 
-      if (signupResponse) {
-        await registerAssignedPlaces(userId, data);
+      if (signupResponse.success) {
+        // Usar el userId retornado por signup
+        await registerAssignedPlaces(signupResponse.userId, data);
+        setUserId(signupResponse.userId); // Por si se necesita en el paso 3
         setAlertOpen(true);
         setAlertType("success");
         setAlertMessage(
@@ -114,75 +155,39 @@ function NewUser() {
     }
   };
 
+  // Paso 3
   const handleStepThreeNext = async (data) => {
     setFormDataThree(data);
 
-    console.log(data);
-
     const updateData = { ...formData, username_session: user.username };
 
-    const signupResponse = await signup(updateData);
-
-    if (signupResponse) {
-      await registerAssignedPlaces(userId, formDataTwo);
-
-      await registerMenuAndSubMenu(userId, profileId, data);
-
-      setAlertOpen(true);
-      setAlertType("success");
-      setAlertMessage("Todos los pasos se han completado correctamente.");
-      resetForm();
+    // Si el usuario aún no existe, regístralo y usa el userId retornado
+    let finalUserId = userId;
+    if (!finalUserId) {
+      const signupResponse = await signup(updateData);
+      if (signupResponse.success) {
+        finalUserId = signupResponse.userId;
+        setUserId(finalUserId);
+      } else {
+        // Si falla el registro, no continuar
+        return;
+      }
     }
 
-    // if (profileId !== 5) {
+    await registerAssignedPlaces(finalUserId, formDataTwo);
+    await registerMenuAndSubMenu(finalUserId, profileId, data);
 
-    // }
-    // const finalFormData = { ...formData, ...formDataTwo, ...data };
+    setAlertOpen(true);
+    setAlertType("success");
+    setAlertMessage("Todos los pasos se han completado correctamente.");
+    resetForm();
   };
 
-  const signup = async (user) => {
-    try {
-      setIsLoading(true);
-      const res = await registerRequest(user);
-
-      setIsLoading(false);
-
-      if (res.status === 200) {
-        const userIdFromMessage = res.data.message.match(/\d+/)[0];
-        setUserId(userIdFromMessage);
-        console.log("Success:", res.data.message);
-        setAlertOpen(true);
-        setAlertType("success");
-        setAlertMessage("¡Felicidades! " + res.data.message);
-        return true;
-      } else {
-        console.log(`Unexpected status code: ${res.status}`);
-        setAlertOpen(true);
-        setAlertType("error");
-        setAlertMessage(`Error! Unexpected status code: ${res.status}`);
-        return false;
-      }
-    } catch (error) {
-      setIsLoading(false);
-      if (error.response) {
-        const status = error.response.status;
-        const message = error.response.data.message;
-
-        console.log(`Error (${status}):`, message);
-        setAlertOpen(true);
-        setAlertType("error");
-        setAlertMessage("¡Error! " + message);
-      } else {
-        console.log("Error:", error.message);
-        setAlertOpen(true);
-        setAlertType("error");
-        setAlertMessage("¡Error! " + error.message);
-      }
-      return false;
-    }
-  };
-
+  // Función para registrar plazas asignadas
   const registerAssignedPlaces = async (user_id, dataAssignedPlaces) => {
+    console.log("user_id enviado a registerAssignedPlacesRequest:", user_id);
+    console.log("dataAssignedPlaces enviado a registerAssignedPlacesRequest:", dataAssignedPlaces);
+
     try {
       const res = await registerAssignedPlacesRequest(
         user_id,
@@ -191,10 +196,8 @@ function NewUser() {
 
       if (res.status === 200) {
         console.log("Success:", res.data.message);
-        // Aquí puedes manejar el éxito, por ejemplo, mostrar una notificación al usuario
       } else {
         console.log(`Unexpected status code: ${res.status}`);
-        // Manejar otros códigos de estado inesperados
       }
     } catch (error) {
       if (error.response) {
@@ -202,21 +205,18 @@ function NewUser() {
 
         if (status === 400) {
           console.log("Bad Request:", error.response.data.message);
-          // Aquí puedes manejar los errores de solicitud incorrecta (400)
         } else if (status === 500) {
           console.log("Server Error:", error.response.data.message);
-          // Aquí puedes manejar los errores del servidor (500)
         } else {
           console.log(`Error (${status}):`, error.response.data.message);
-          // Manejar otros códigos de estado de error
         }
       } else {
         console.log("Error:", error.message);
-        // Manejar otros tipos de errores, como problemas de red
       }
     }
   };
 
+  // Función para registrar menús y submenús
   const registerMenuAndSubMenu = async (
     user_id,
     role_id,
@@ -231,10 +231,8 @@ function NewUser() {
 
       if (res.status === 200) {
         console.log("Success:", res.data.message);
-        // Aquí puedes manejar el éxito, por ejemplo, mostrar una notificación al usuario
       } else {
         console.log(`Unexpected status code: ${res.status}`);
-        // Manejar otros códigos de estado inesperados
       }
     } catch (error) {
       if (error.response) {
@@ -242,35 +240,31 @@ function NewUser() {
 
         if (status === 400) {
           console.log("Bad Request:", error.response.data.message);
-          // Aquí puedes manejar los errores de solicitud incorrecta (400)
         } else if (status === 500) {
           console.log("Server Error:", error.response.data.message);
-          // Aquí puedes manejar los errores del servidor (500)
         } else {
           console.log(`Error (${status}):`, error.response.data.message);
-          // Manejar otros códigos de estado de error
         }
       } else {
         console.log("Error:", error.message);
-        // Manejar otros tipos de errores, como problemas de red
       }
     }
   };
 
   return (
     <Box m="20px">
-      <div class="max-w-full mx-auto pb-5 rounded font-[sans-serif]">
+      <div className="max-w-full mx-auto pb-5 rounded font-[sans-serif]">
         <div
-          class="flex items-center gap-4 border-b border-g ray-300 pb-2"
+          className="flex items-center gap-4 border-b border-g ray-300 pb-2"
           style={{ borderBottom: `2px solid ${colors.accentGreen[100]}` }}
         >
           <h3
-            class="text-2xl font-extrabold text-green-300"
+            className="text-2xl font-extrabold text-green-300"
             style={{ color: colors.accentGreen[100] }}
           >
             Nuevo usuario
           </h3>
-          <p class="text-gray-400 leading-relaxed text-base">
+          <p className="text-gray-400 leading-relaxed text-base">
             Crea nuevos usuarios con sus plazas asignadas y configura sus
             accesos al sistema de manera eficiente y organizada.
           </p>

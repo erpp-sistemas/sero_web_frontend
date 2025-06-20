@@ -67,6 +67,7 @@ import Managements from './scenes/managements'
 import AssignmentManager from './scenes/assignment-manager'
 import AccountDetails from './scenes/account-details'
 import CitizenAttentionAppointments from './scenes/citizen-attention-appointments'
+import InventoryList from './scenes/inventory-list'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -223,6 +224,7 @@ function App() {
                         <Route path="/assignment-manager" element={<AssignmentManager />} />
                         <Route path="/account-details" element={<AccountDetails />} />
                         <Route path="/citizen-attention-appointments" element={<CitizenAttentionAppointments />} />
+                        <Route path="/inventory-list" element={<InventoryList />} />
                       </Routes>
                     </main>
                   </Box>

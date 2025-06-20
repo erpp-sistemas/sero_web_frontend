@@ -645,7 +645,7 @@ const DataGridManagement = ({ data }) => {
                 color: "inherit", // No afectar el color de los íconos en las celdas
               },
             }}
-            autoHeight
+            
             getRowHeight={() => "auto"}
           />
           {/* Modal de visualización de imágenes */}
