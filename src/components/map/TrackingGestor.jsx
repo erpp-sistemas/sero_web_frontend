@@ -24,6 +24,7 @@ const TrackingGestor = ({ data }) => {
     } = data;
 
     const map_active = useSelector((state) => state.mapa);
+    const plaza = useSelector((state) => state.plaza_mapa);
     const messages = useSelector((state) => state.webSocket.messages);
     const dispatch = useDispatch()
 
@@ -56,7 +57,7 @@ const TrackingGestor = ({ data }) => {
                 if (startTracking) {
                     const newMarker = createDivFoto(newUserPosition, [longitud, latitud], fecha);
                     setMarkers((prev) => ({ ...prev, [id_usuario]: newMarker }));
-                    console.log(markers)
+                    //console.log(markers)
                 }
             }
         }
@@ -65,7 +66,7 @@ const TrackingGestor = ({ data }) => {
 
     // Función para obtener las posiciones iniciales y crear los marcadores
     const getLastPositionGestor = async () => {
-        let users_with_position = await getLastPositionUsers(2);
+        let users_with_position = await getLastPositionUsers(plaza.place_id);
         users_with_position = getUniqueUsers(users_with_position);
         setPositionsUser(users_with_position);
         const newMarkers = { ...markers }; // Copiamos los marcadores existentes
