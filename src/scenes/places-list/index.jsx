@@ -1,7 +1,9 @@
 import React from 'react'
 
-export const index = () => {
+const PlaceList = () => {
   return (
-    <div>index</div>
+    <div>PlaceList</div>
   )
 }
+
+export default PlaceList
