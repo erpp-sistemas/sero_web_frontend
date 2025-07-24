@@ -1,522 +1,520 @@
+// Adaptación del AssignedPlacesModal al diseño de StepTwo
 import React, { useState, useEffect } from "react";
-import { placeByUserIdRequest } from "../../api/place.js";
-import { placeServiceByUserIdRequest } from "../../api/service.js";
-import { placeServiceProcessByUserIdRequest } from "../../api/process.js";
 import {
-  Card,
-  CardContent,
-  Avatar,
+  Dialog,
+  DialogContent,
   Typography,
-  Chip,
-  Box,
   Divider,
-  Stack,
+  Box,
+  IconButton,
+  Tooltip,
+  Button,
+  Checkbox,
+  Paper,
+  TableContainer,
   useTheme,
 } from "@mui/material";
-import { CardActionArea } from "@mui/material";
+import {
+  CheckCircle as CheckCircleIcon,
+  Cancel as CancelIcon,
+  Block as BlockIcon,
+  SkipNext as SkipNextIcon,
+  Save as SaveIcon,
+  CheckBox as CheckBoxIcon,
+  CheckBoxOutlineBlank as CheckBoxOutlineBlankIcon,
+  CheckBoxOutlineBlank,
+  CheckBox,
+} from "@mui/icons-material";
 import { useSelector } from "react-redux";
-import Button from "@mui/material/Button";
-import KeyboardTabIcon from "@mui/icons-material/KeyboardTab";
-import { tokens } from "../../theme";
-import LoadingModal from "../../components/LoadingModal.jsx";
-import CustomAlert from "../../components/CustomAlert.jsx";
-import { Dialog, DialogContent } from "@mui/material";
-import { Save } from "@mui/icons-material";
+import { placeByUserIdRequest } from "../../api/place";
+import { placeServiceByUserIdRequest } from "../../api/service";
+import { placeServiceProcessByUserIdRequest } from "../../api/process";
 import { updateAssignedPlacesRequest } from "../../api/auth";
+import LoadingModal from "../../components/LoadingModal";
+import CustomAlert from "../../components/CustomAlert";
+import { tokens } from "../../theme";
 
 const AssignedPlacesModal = ({ open, onClose, data }) => {
-  if (!data) return null;
-
-  console.log("data inicial: ", data);
-
   const [places, setPlaces] = useState([]);
-  const [selectedPlace, setSelectedPlace] = useState(null);
   const [services, setServices] = useState([]);
-  const [selectedService, setSelectedService] = useState(null);
   const [processes, setProcesses] = useState([]);
+  const [selectedPlace, setSelectedPlace] = useState(null);
+  const [selectedService, setSelectedService] = useState(null);
   const [selectedProcesses, setSelectedProcesses] = useState({});
-  const user = useSelector((state) => state.user);
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
   const [isLoading, setIsLoading] = useState(false);
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertType, setAlertType] = useState("info");
   const [alertMessage, setAlertMessage] = useState("");
-
-  const getPlaces = async (user_id) => {
-    try {
-      setIsLoading(true);
-      const response = await placeByUserIdRequest(user_id);
-      setPlaces(response.data);
-      console.log(response.data);
-      setIsLoading(false);
-    } catch (error) {
-      console.error("Error fetching places:", error);
-      setIsLoading(false);
-    }
-  };
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
+  const user = useSelector((state) => state.user);
 
   useEffect(() => {
-    getPlaces(user.user_id);
-  }, [user.user_id]);
+    if (!data) return;
+    setIsLoading(true);
+    placeByUserIdRequest(user.user_id)
+      .then((res) => {
+        setPlaces(res.data);
+        setIsLoading(false);
+      })
+      .catch(() => setIsLoading(false));
 
-  useEffect(() => {
     if (data.assigned_place_service_process) {
-      const parsedData = JSON.parse(data.assigned_place_service_process);
-      const initialSelectedProcesses = {};
-
-      parsedData.forEach((item) => {
-        if (!initialSelectedProcesses[item.placeId]) {
-          initialSelectedProcesses[item.placeId] = {};
-        }
-        if (!initialSelectedProcesses[item.placeId][item.serviceId]) {
-          initialSelectedProcesses[item.placeId][item.serviceId] = [];
-        }
-        initialSelectedProcesses[item.placeId][item.serviceId].push(
-          item.processId
-        );
+      const parsed = JSON.parse(data.assigned_place_service_process);
+      const initial = {};
+      parsed.forEach(({ placeId, serviceId, processId }) => {
+        if (!initial[placeId]) initial[placeId] = {};
+        if (!initial[placeId][serviceId]) initial[placeId][serviceId] = [];
+        initial[placeId][serviceId].push(processId);
       });
-
-      setSelectedProcesses(initialSelectedProcesses);
-
-      // Set initial selected place and service
-      const firstPlaceId = parsedData[0]?.placeId;
-      const firstServiceId = parsedData[0]?.serviceId;
-
-      if (firstPlaceId) {
-        handleCardClick(firstPlaceId);
-      }
+      setSelectedProcesses(initial);
+      const firstPlace = parsed[0]?.placeId;
+      if (firstPlace) handleSelectPlace(firstPlace);
     }
   }, [data]);
 
-  const handleCardClick = (place_id) => {
+  const hasAssignedProcesses = (place_id) => {
+    return (
+      selectedProcesses[place_id] &&
+      Object.values(selectedProcesses[place_id]).some((arr) => arr.length > 0)
+    );
+  };
+
+  const hasAssignedProcessesService = (place_id, service_id) => {
+    return selectedProcesses[place_id]?.[service_id]?.length > 0;
+  };
+
+  const handleSelectPlace = (place_id) => {
     setSelectedPlace(place_id);
     setSelectedService(null);
-
+    setProcesses([]);
     placeServiceByUserIdRequest(user.user_id, place_id)
-      .then((response) => {
-        console.log(response.data);
-        const servicesWithSelection = response.data.map((service) => ({
-          ...service,
-          active:
-            selectedProcesses[place_id]?.[service.service_id]?.length > 0 ||
-            false,
-        }));
-        setServices(servicesWithSelection);
-        setProcesses([]); // Clear processes when selecting a new place
-      })
-      .catch((error) => {
-        console.error("Error fetching services:", error);
-      });
+      .then((res) => setServices(res.data))
+      .catch(() => setServices([]));
   };
 
-  const handleServiceChipClick = async (service_id) => {
+  const handleSelectService = (service_id) => {
     setSelectedService(service_id);
-    try {
-      console.log(selectedPlace);
-      const response = await placeServiceProcessByUserIdRequest(
-        user.user_id,
-        selectedPlace,
-        service_id
-      );
-      console.log(response.data);
-      const processesWithSelection = response.data.map((process) => ({
-        ...process,
-        active:
-          selectedProcesses[selectedPlace]?.[service_id]?.includes(
-            process.process_id
-          ) || false,
-      }));
-
-      console.log(processesWithSelection);
-      setProcesses(processesWithSelection);
-    } catch (error) {
-      console.error("Error fetching processes:", error);
-    }
+    placeServiceProcessByUserIdRequest(user.user_id, selectedPlace, service_id)
+      .then((res) => setProcesses(res.data))
+      .catch(() => setProcesses([]));
   };
 
-  const handleProcessChipClick = (process_id) => {
-    const updatedSelectedProcesses = { ...selectedProcesses };
-    if (selectedPlace && selectedService) {
-      if (!updatedSelectedProcesses[selectedPlace]) {
-        updatedSelectedProcesses[selectedPlace] = {};
-      }
-      if (!updatedSelectedProcesses[selectedPlace][selectedService]) {
-        updatedSelectedProcesses[selectedPlace][selectedService] = [];
-      }
-      if (
-        updatedSelectedProcesses[selectedPlace][selectedService].includes(
-          process_id
-        )
-      ) {
-        updatedSelectedProcesses[selectedPlace][selectedService] =
-          updatedSelectedProcesses[selectedPlace][selectedService].filter(
-            (id) => id !== process_id
-          );
-      } else {
-        updatedSelectedProcesses[selectedPlace][selectedService].push(
-          process_id
-        );
-      }
-
-      const processesSelected =
-        updatedSelectedProcesses[selectedPlace][selectedService].length > 0;
-
-      if (!processesSelected) {
-        delete updatedSelectedProcesses[selectedPlace][selectedService];
-        if (Object.keys(updatedSelectedProcesses[selectedPlace]).length === 0) {
-          delete updatedSelectedProcesses[selectedPlace];
-        }
-      }
-
-      setSelectedProcesses(updatedSelectedProcesses);
-
-      const updatedProcesses = processes.map((process) =>
-        process.process_id === process_id
-          ? { ...process, active: !process.active }
-          : process
+  const handleProcessCheckbox = (process_id) => {
+    const updated = { ...selectedProcesses };
+    if (!updated[selectedPlace]) updated[selectedPlace] = {};
+    if (!updated[selectedPlace][selectedService])
+      updated[selectedPlace][selectedService] = [];
+    const arr = updated[selectedPlace][selectedService];
+    if (arr.includes(process_id)) {
+      updated[selectedPlace][selectedService] = arr.filter(
+        (id) => id !== process_id
       );
-      setProcesses(updatedProcesses);
-
-      console.log(JSON.stringify(updatedSelectedProcesses, null, 2));
+    } else {
+      arr.push(process_id);
     }
+    if (updated[selectedPlace][selectedService].length === 0) {
+      delete updated[selectedPlace][selectedService];
+      if (Object.keys(updated[selectedPlace]).length === 0) {
+        delete updated[selectedPlace];
+      }
+    }
+    setSelectedProcesses(updated);
   };
 
-  const transformData = (selectedProcesses) => {
-    const transformedData = [];
+  const isProcessActive = (place_id, service_id, process_id) => {
+    return (
+      selectedProcesses[place_id]?.[service_id]?.includes(process_id) || false
+    );
+  };
 
-    Object.keys(selectedProcesses).forEach((placeId) => {
-      Object.keys(selectedProcesses[placeId]).forEach((serviceId) => {
-        selectedProcesses[placeId][serviceId].forEach((processId) => {
-          transformedData.push({
-            placeId: parseInt(placeId),
-            serviceId: parseInt(serviceId),
-            processId: parseInt(processId),
-          });
+  const transformData = (obj) => {
+    const result = [];
+    Object.keys(obj).forEach((p) => {
+      Object.keys(obj[p]).forEach((s) => {
+        obj[p][s].forEach((proc) => {
+          result.push({ placeId: +p, serviceId: +s, processId: +proc });
         });
       });
     });
-
-    return transformedData;
+    return result;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const transformedData = transformData(selectedProcesses);
-
-    if (transformedData.length === 0) {
+    const dataToSend = transformData(selectedProcesses);
+    if (dataToSend.length === 0) {
       setAlertOpen(true);
       setAlertType("error");
-      setAlertMessage("¡Error! Debes seleccionar al menos un proceso.");
+      setAlertMessage("Debes seleccionar al menos un proceso.");
       return;
     }
-
-    console.log(transformedData);
-    const userId = data.user_id;
-
     try {
-      await updateAssignedPlaces(userId, transformedData);
-      setAlertOpen(true);
+      await updateAssignedPlacesRequest(data.user_id, dataToSend);
       setAlertType("success");
-      setAlertMessage(
-        "El proceso se ha completado. Como gestor, no es necesario tener permisos de la plataforma web."
-      );
-    } catch (error) {
-      setAlertOpen(true);
+      setAlertMessage("Asignaciones actualizadas correctamente.");
+    } catch (err) {
       setAlertType("error");
-      setAlertMessage(`¡Error! ${error.message}`);
-    }
-  };
-
-  const updateAssignedPlaces = async (user_id, dataAssignedPlaces) => {
-    try {
-      const res = await updateAssignedPlacesRequest(
-        user_id,
-        dataAssignedPlaces
-      );
-
-      if (res.status === 200) {
-        console.log("Success:", res.data.message);
-        // Aquí puedes manejar el éxito, por ejemplo, mostrar una notificación al usuario
-      } else {
-        console.log(`Unexpected status code: ${res.status}`);
-        // Manejar otros códigos de estado inesperados
-      }
-    } catch (error) {
-      if (error.response) {
-        const status = error.response.status;
-
-        if (status === 400) {
-          console.log("Bad Request:", error.response.data.message);
-          // Aquí puedes manejar los errores de solicitud incorrecta (400)
-        } else if (status === 500) {
-          console.log("Server Error:", error.response.data.message);
-          // Aquí puedes manejar los errores del servidor (500)
-        } else {
-          console.log(`Error (${status}):`, error.response.data.message);
-          // Manejar otros códigos de estado de error
-        }
-      } else {
-        console.log("Error:", error.message);
-        // Manejar otros tipos de errores, como problemas de red
-      }
+      setAlertMessage("Hubo un error al guardar.");
+    } finally {
+      setAlertOpen(true);
     }
   };
 
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      maxWidth="lg"
-      fullWidth
-      sx={{
-        "& .MuiPaper-root": {
-          border: `2px solid ${colors.accentGreen[100]}`,
-        },
-      }}
-    >
-      <DialogContent
-        sx={{
-          "& .MuiDialog-paper": {
-            boxShadow: "0px 5px 15px rgba(0,0,0,0.5)",
-            borderRadius: "8px",
-          },
-          bgcolor: "background.paper",
-        }}
-      >
+    <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
+      <DialogContent>
         <form onSubmit={handleSubmit}>
-          <div>
-            <LoadingModal open={isLoading} />
-            <CustomAlert
-              alertOpen={alertOpen}
-              type={alertType}
-              message={alertMessage}
-              onClose={setAlertOpen}
-            />
-            <Typography
-              variant="h5"
-              gutterBottom
-              sx={{
-                color: colors.accentGreen[100],
-                fontWeight: "bold",
-              }}
-            >
-              Selecciona la plaza
-            </Typography>
-            <Divider sx={{ backgroundColor: colors.accentGreen[100] }} />
-            <Box mb={2} mt={1}>
-              <Card
-                variant="outlined"
-                sx={{
-                  backgroundColor: "transparent",
-                  boxShadow: "none",
-                  border: "none",
-                }}
-              >
-                <Box sx={{ p: 1 }}>
-                  <Stack direction="row" spacing={1}>
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        flexWrap: "wrap",
-                      }}
-                    >
-                      {places.map((place) => (
-                        <div key={place.place_id} style={{ margin: "5px" }}>
-                          <Card
-                            style={{
-                              width: 100,
-                              height: 150,
-                              display: "flex",
-                              flexDirection: "column",
-                              justifyContent: "space-between",
-                              backgroundColor:
-                                selectedPlace === place.place_id
-                                  ? colors.accentGreen[100]
-                                  : "rgba(255, 255, 255, 0.1)",
-                            }}
-                            onClick={() => handleCardClick(place.place_id)}
-                          >
-                            <CardActionArea style={{ flexGrow: 1 }}>
+          <LoadingModal open={isLoading} />
+          <CustomAlert
+            alertOpen={alertOpen}
+            type={alertType}
+            message={alertMessage}
+            onClose={setAlertOpen}
+          />
+          <Typography variant="h6" mb={2}>
+            Editar plazas, servicios y procesos asignados
+          </Typography>
+          <div className="flex flex-row gap-4 w-full">
+            {/* Plazas */}
+            <div className="flex-1">
+              <div className="overflow-x-auto">
+                <TableContainer
+                  component={Paper}
+                  sx={{
+                    borderRadius: 3,
+                    mb: 2,
+                    border: `1px solid ${theme.palette.divider}`,
+                    background: "rgba(128, 128, 128, 0.1)",
+                    boxShadow: 3,
+                  }}
+                >
+                  <table className="min-w-full">
+                    <thead>
+                      <tr>
+                        <th className="px-2 py-2 text-left">Plaza</th>
+                        <th className="px-2 py-2 text-right">Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {places.map((place) => {
+                        const active = selectedPlace === place.place_id;
+                        const assigned = hasAssignedProcesses(place.place_id);
+                        return (
+                          <tr key={place.place_id}>
+                            <td colSpan={3} style={{ padding: 0, border: 0 }}>
                               <div
-                                style={{
-                                  display: "flex",
-                                  flexDirection: "column",
-                                  alignItems: "center",
-                                }}
+                                style={
+                                  active
+                                    ? {
+                                        backgroundColor:
+                                          colors.accentGreen[100],
+                                        color: colors.contentAccentGreen[100],
+                                        borderRadius: 12,
+                                        fontWeight: "bold",
+                                        fontSize: "1.1rem",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        padding: "0.5rem 0.75rem",
+                                        transition: "all 0.2s",
+                                      }
+                                    : {
+                                        display: "flex",
+                                        alignItems: "center",
+                                        padding: "0.5rem 0.75rem",
+                                      }
+                                }
                               >
-                                <Avatar
-                                  alt={place.name}
-                                  src={place.image}
-                                  sx={{
-                                    width: 50,
-                                    height: 50,
-                                    margin: "auto",
-                                    marginBottom: "10px",
-                                  }}
-                                />
-                                <CardContent style={{ textAlign: "center" }}>
-                                  <Typography
-                                    variant="body2"
-                                    sx={{
-                                      color:
-                                        selectedPlace === place.place_id
-                                          ? colors.contentAccentGreen[100]
-                                          : "default",
-                                      fontWeight: "bold",
-                                    }}
-                                  >
-                                    {place.name}
-                                  </Typography>
-                                </CardContent>
+                                {/* Plaza + icono */}
+                                <div className="flex-1 flex items-center gap-2">
+                                  {place.name}
+                                  {assigned ? (
+                                    <CheckCircleIcon
+                                      sx={{
+                                        color: colors.green[700],
+                                        fontSize: 22,
+                                      }}
+                                    />
+                                  ) : (
+                                    <CancelIcon
+                                      sx={{
+                                        color: colors.redAccent[500],
+                                        fontSize: 22,
+                                      }}
+                                    />
+                                  )}
+                                </div>
+                                {/* Selección */}
+                                <div>
+                                  <Tooltip title="Ver servicios">
+                                    <span>
+                                      <IconButton
+                                        color={active ? "primary" : "default"}
+                                        onClick={() =>
+                                          handleSelectPlace(place.place_id)
+                                        }
+                                        sx={{
+                                          backgroundColor:
+                                            colors.tealAccent[400],
+                                          "&:hover": {
+                                            backgroundColor:
+                                              colors.tealAccent[500],
+                                          },
+                                          borderRadius: 15,
+                                        }}
+                                      >
+                                        <SkipNextIcon
+                                          sx={{
+                                            color:
+                                              colors.contentSearchButton[100],
+                                          }}
+                                        />
+                                      </IconButton>
+                                    </span>
+                                  </Tooltip>
+                                </div>
                               </div>
-                            </CardActionArea>
-                          </Card>
-                        </div>
-                      ))}
-                    </div>
-                  </Stack>
-                </Box>
-              </Card>
-            </Box>
-            <Typography
-              variant="h5"
-              gutterBottom
-              sx={{
-                color: colors.accentGreen[100],
-                fontWeight: "bold",
-              }}
-            >
-              Selecciona un servicio
-            </Typography>
-            <Divider sx={{ backgroundColor: colors.accentGreen[100] }} />
-            <Box mb={2} mt={1}>
-              <Card
-                variant="outlined"
-                sx={{
-                  backgroundColor: "transparent",
-                  boxShadow: "none",
-                  border: "none",
-                }}
-              >
-                <Box sx={{ p: 1 }}>
-                  <Stack direction="row" spacing={1}>
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        flexWrap: "wrap",
-                      }}
-                    >
-                      {services.map((service) => (
-                        <div
-                          key={service.service_id}
-                          style={{ margin: "10px" }}
-                        >
-                          <Chip
-                            label={service.name}
-                            clickable
-                            // color={selectedService === service.service_id ? "secondary" : (service.active ? "secondary" : "default")}
-                            onClick={() =>
-                              handleServiceChipClick(service.service_id)
-                            }
-                            sx={{
-                              backgroundColor:
-                                selectedService === service.service_id
-                                  ? colors.accentGreen[100]
-                                  : service.active
-                                  ? colors.accentGreen[100]
-                                  : "default",
-                              color:
-                                selectedService === service.service_id
-                                  ? colors.contentAccentGreen[100]
-                                  : service.active
-                                  ? colors.contentAccentGreen[100]
-                                  : "default",
-                              fontWeight: "bold",
-                            }}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </Stack>
-                </Box>
-              </Card>
-            </Box>
-            <Typography
-              variant="h5"
-              gutterBottom
-              sx={{
-                color: colors.accentGreen[100],
-                fontWeight: "bold",
-              }}
-            >
-              Selecciona los procesos
-            </Typography>
-            <Divider sx={{ backgroundColor: colors.accentGreen[100] }} />
-            <Box mt={1}>
-              <Card
-                variant="outlined"
-                sx={{
-                  backgroundColor: "transparent",
-                  boxShadow: "none",
-                  border: "none",
-                }}
-              >
-                <Box sx={{ p: 1 }}>
-                  <Stack direction="row" spacing={1}>
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        flexWrap: "wrap",
-                      }}
-                    >
-                      {processes.map((process) => (
-                        <div
-                          key={process.process_id}
-                          style={{ margin: "10px" }}
-                        >
-                          <Chip
-                            label={process.name}
-                            clickable
-                            sx={{
-                              backgroundColor: process.active
-                                ? colors.accentGreen[100]
-                                : "default",
-                              color: process.active
-                                ? colors.contentAccentGreen[100]
-                                : "default",
-                              fontWeight: "bold",
-                            }}
-                            onClick={() =>
-                              handleProcessChipClick(process.process_id)
-                            }
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </Stack>
-                </Box>
-              </Card>
-            </Box>
-            <Box mt={2}>
-              <Button
-                type="submit"
-                sx={{
-                  borderRadius: "35px",
-                  color: "white",
-                }}
-                variant="contained"
-                color="info"
-                endIcon={<Save />}
-              >
-                Guardar cambios
-              </Button>
-            </Box>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </TableContainer>
+              </div>
+            </div>
+
+            <div className="flex-1">
+              <div className="overflow-x-auto">
+                {/* Servicios */}
+                <TableContainer
+                  component={Paper}
+                  sx={{
+                    borderRadius: 3,
+                    mb: 2,
+                    border: `1px solid ${theme.palette.divider}`,
+                    background: "rgba(128, 128, 128, 0.1)",
+                    boxShadow: 3,
+                  }}
+                >
+                  <table className="min-w-full">
+                    <thead>
+                      <tr>
+                        <th className="px-2 py-2 text-left">Servicio</th>
+                        <th className="px-2 py-2 text-right">Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {services.map((service) => {
+                        const active = selectedService === service.service_id;
+                        const assigned = hasAssignedProcessesService(
+                          selectedPlace,
+                          service.service_id
+                        );
+                        return (
+                          <tr key={service.service_id}>
+                            <td colSpan={3} style={{ padding: 0, border: 0 }}>
+                              <div
+                                style={
+                                  active
+                                    ? {
+                                        backgroundColor:
+                                          colors.accentGreen[100],
+                                        color: colors.contentAccentGreen[100],
+                                        borderRadius: 12,
+                                        fontWeight: "bold",
+                                        fontSize: "1.1rem",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        padding: "0.5rem 0.75rem",
+                                        transition: "all 0.2s",
+                                      }
+                                    : {
+                                        display: "flex",
+                                        alignItems: "center",
+                                        padding: "0.5rem 0.75rem",
+                                      }
+                                }
+                              >
+                                {/* Servicio + icono */}
+                                <div className="flex-1 flex items-center gap-2">
+                                  {service.name}
+                                  {assigned ? (
+                                    <CheckCircleIcon
+                                      sx={{
+                                        color: colors.green[700],
+                                        fontSize: 22,
+                                      }}
+                                    />
+                                  ) : (
+                                    <CancelIcon
+                                      sx={{
+                                        color: colors.redAccent[500],
+                                        fontSize: 22,
+                                      }}
+                                    />
+                                  )}
+                                </div>
+                                {/* Selección */}
+                                <div>
+                                  <Tooltip title="Ver procesos">
+                                    <span>
+                                      <IconButton
+                                        color={active ? "primary" : "default"}
+                                        onClick={() =>
+                                          handleSelectService(
+                                            service.service_id
+                                          )
+                                        }
+                                        disabled={!selectedPlace}
+                                        sx={{
+                                          backgroundColor:
+                                            colors.tealAccent[400],
+                                          "&:hover": {
+                                            backgroundColor:
+                                              colors.tealAccent[500],
+                                          },
+                                          borderRadius: 15,
+                                        }}
+                                      >
+                                        <SkipNextIcon
+                                          sx={{
+                                            color:
+                                              colors.contentSearchButton[100],
+                                          }}
+                                        />
+                                      </IconButton>
+                                    </span>
+                                  </Tooltip>
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </TableContainer>
+              </div>
+            </div>
+
+            <div className="flex-1">
+              <div className="overflow-x-auto">
+                {/* Procesos */}
+                <TableContainer
+                  component={Paper}
+                  sx={{
+                    borderRadius: 3,
+                    mb: 2,
+                    border: `1px solid ${theme.palette.divider}`,
+                    background: "rgba(128, 128, 128, 0.1)",
+                    boxShadow: 3,
+                  }}
+                >
+                  <table className="min-w-full">
+                    <thead>
+                      <tr>
+                        <th className="px-2 py-2 text-left">Proceso</th>
+                        <th className="px-2 py-2 text-right">Selección</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {processes.map((process) => {
+                        const checked = isProcessActive(
+                          selectedPlace,
+                          selectedService,
+                          process.process_id
+                        );
+                        return (
+                          <tr key={process.process_id}>
+                            <td colSpan={2} style={{ padding: 0, border: 0 }}>
+                              <div
+                                style={
+                                  checked
+                                    ? {
+                                        backgroundColor:
+                                          colors.accentGreen[100],
+                                        color: colors.contentAccentGreen[100],
+                                        borderRadius: 12,
+                                        fontWeight: "bold",
+                                        fontSize: "1.1rem",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        padding: "0.5rem 0.75rem",
+                                        transition: "all 0.2s",
+                                      }
+                                    : {
+                                        display: "flex",
+                                        alignItems: "center",
+                                        padding: "0.5rem 0.75rem",
+                                      }
+                                }
+                              >
+                                {/* Proceso + icono */}
+                                <div className="flex-1 flex items-center gap-2">
+                                  {process.name}
+                                  {checked ? (
+                                    <CheckCircleIcon
+                                      sx={{
+                                        color: colors.green[700],
+                                        fontSize: 22,
+                                      }}
+                                    />
+                                  ) : (
+                                    <CancelIcon
+                                      sx={{
+                                        color: colors.redAccent[500],
+                                        fontSize: 22,
+                                      }}
+                                    />
+                                  )}
+                                </div>
+                                {/* Selección */}
+                                <div>
+                                  <Checkbox
+                                    checked={checked}
+                                    onChange={() =>
+                                      handleProcessCheckbox(process.process_id)
+                                    }
+                                    color="success"
+                                    disabled={!selectedService}
+                                    icon={
+                                      <CheckBoxOutlineBlank
+                                        sx={{ fontSize: 28 }}
+                                      />
+                                    }
+                                    checkedIcon={
+                                      <CheckBox
+                                        sx={{
+                                          fontSize: 28,
+                                          color: colors.green[700],
+                                        }}
+                                      />
+                                    }
+                                  />
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </TableContainer>
+              </div>
+            </div>
           </div>
+
+          <Box mt={2} textAlign="right">
+            <Button
+              type="submit"
+              variant="contained"
+              color="info"
+              endIcon={<SaveIcon />}
+            >
+              Guardar cambios
+            </Button>
+          </Box>
         </form>
       </DialogContent>
     </Dialog>

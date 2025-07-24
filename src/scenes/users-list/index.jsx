@@ -70,6 +70,7 @@ import { updateActiveUserRequest } from "../../api/auth.js";
 import LoadingModal from "../../components/LoadingModal.jsx";
 import CustomAlert from "../../components/CustomAlert.jsx";
 import { tokens } from "../../theme";
+import { color } from "echarts";
 
 function Index() {
   const theme = useTheme();
@@ -407,7 +408,7 @@ function Index() {
   };
 
   const getColor = (status) => {
-    return status === "activo" ? "success.main" : "error.main";
+    return status === "activo" ? colors.accentGreen[100] : colors.redAccent[500];
   };
 
   const StatusCell = ({
@@ -446,7 +447,7 @@ function Index() {
     };
 
     const iconStyles = (status) => ({
-      color: "white",
+      color: "green",
       backgroundColor: getColor(status),
       "&:hover": {
         color: getColor(status),
@@ -604,6 +605,10 @@ function Index() {
         sx={{
           backgroundColor: profileInfo.color || "default", // Fondo del chip
           fontWeight: "bold",
+          color: colors.contentAccentGreen[100],
+          "& .MuiChip-icon": {
+          color: colors.contentAccentGreen[100], // Color del icono
+        },
         }}
       />
     ) : (
@@ -649,18 +654,27 @@ function Index() {
         filtered = users.filter((user) => user.active === "activo");
         break;
       case "inactive":
-        filtered = users.filter((user) => user.active === "in activo");
+        filtered = users.filter((user) => user.active === "inactivo");
         break;
       case "all":
       default:
         break;
     }
     if (searchText) {
-      filtered = filtered.filter((user) =>
-        Object.values(user).some((value) =>
-          String(value).toLowerCase().includes(searchText.toLowerCase())
-        )
-      );
+      const search = searchText.toLowerCase();
+      filtered = filtered.filter((user) => {
+        // Solo busca en los campos relevantes y que sean string
+        return [
+          user.name,
+          user.first_last_name,
+          user.second_last_name,
+          user.user_name,
+          user.profile,
+          user.assigned_places,
+        ]
+          .filter((field) => typeof field === "string" && field.trim() !== "")
+          .some((field) => field.toLowerCase().includes(search));
+      });
     }
     return filtered;
   }, [users, filter, searchText]);
