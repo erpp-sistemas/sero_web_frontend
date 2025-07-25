@@ -57,6 +57,7 @@ function DataGridManagementByManager({ data, placeId, serviceId, proccessId }) {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleOpenPopup = (userId, dateCapture) => {
+    console.log(userId, dateCapture);
     setPopupData({ userId, dateCapture });
     setPopupOpen(true);
   };

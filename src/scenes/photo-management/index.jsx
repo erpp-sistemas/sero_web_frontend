@@ -337,11 +337,8 @@ const Index = () => {
           });
         };
     
-        if (filteredUsers.length > 0) {
-          addRowsToWorksheet(filteredUsers);
-        } else {
-          addRowsToWorksheet(data);
-        }
+        const dataToExport = filteredResult.length > 0 ? filteredResult : result;
+        addRowsToWorksheet(dataToExport);
     
         const buffer = await workbook.xlsx.writeBuffer();
         const blob = new Blob([buffer], {
@@ -350,7 +347,7 @@ const Index = () => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `Registros_Medidor_Pila.xlsx`;
+        a.download = `Registro_Fotos_Tomadas.xlsx`;
         a.click();
         window.URL.revokeObjectURL(url);
         setIsLoading(false);
