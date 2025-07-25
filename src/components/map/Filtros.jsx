@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { getIcon } from '../../data/Icons';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { setFiltrosActivos } from '../../redux/featuresSlice';
 import Spinner from './Spinner';
 
 const Filtros = ({ data }) => {
@@ -10,7 +11,9 @@ const Filtros = ({ data }) => {
         setShowTools
     } = data;
 
+    const dispatch = useDispatch();
     const features = useSelector((state) => state.features);
+    const filtrosActivos = useSelector(state => state.features.filtrosActivos);
     const mapa_activo = useSelector((state) => state.mapa)
     const { layers_activos } = features;
 
@@ -174,10 +177,17 @@ const Filtros = ({ data }) => {
             console.error("Fuente no encontrada");
             return;
         }
-        const currentData = source._data || source._options.data;
+
+        // Obtiene los datos actuales
+        const currentData = source._data || source._options?.data;
+        if (!currentData) {
+            console.error("No hay datos en la fuente");
+            return;
+        }
+
         let features = currentData.features || [];
 
-        // Guarda los features originales si aún no están guardados para este layer
+        // Guarda los features originales si aún no están guardados
         if (!originalFeatures[sourceId]) {
             setOriginalFeatures(prev => ({
                 ...prev,
@@ -185,50 +195,77 @@ const Filtros = ({ data }) => {
             }));
         }
 
-        // Filtra los features según los filtros seleccionados
+        // Aplica los filtros seleccionados
         const filteredFeatures = features.filter(feature => {
             return Object.entries(filtersSelected).every(([campo, valores]) => {
-                // valores es un array de valores seleccionados
                 let propValue = feature.properties[campo];
+
                 if (propValue === undefined && feature.properties.data_json) {
                     try {
                         const dataJson = typeof feature.properties.data_json === "string"
                             ? JSON.parse(feature.properties.data_json)
                             : feature.properties.data_json;
+
                         propValue = dataJson[campo];
                     } catch (e) {
                         propValue = undefined;
                     }
                 }
-                // Si no hay valores seleccionados, no filtra por ese campo
+
                 if (!valores || valores.length === 0) return true;
+
                 return valores.includes(String(propValue));
             });
         });
 
-        // Actualiza la fuente con los features filtrados
+        // Aplica los datos filtrados a la capa
         source.setData({
             ...currentData,
             features: filteredFeatures
         });
 
-        setDataFiltered([...dataFiltered, { layerSelected: layerSelected, data: filtersSelected }]);
+        // Guarda los filtros aplicados en Redux
+        dispatch(setFiltrosActivos({
+            layerId: sourceId,
+            featuresFiltrados: filteredFeatures,
+            filtros: filtersSelected,
+            totalOriginal: features.length
+        }));
+
+        // Guarda para el historial visual
+        setDataFiltered(prev => [...prev, {
+            layerSelected,
+            data: filtersSelected
+        }]);
+
+        // Limpieza visual
         clean();
         setShowTools(false);
     };
 
     const handleDeleteFilter = (layer) => {
-        const source = mapa_activo.mapa.getSource(layer.name_layer);
-        if (source && originalFeatures[layer.name_layer]) {
-            const currentData = source._data || source._options.data;
+        const layerId = layer.name_layer;
+        const source = mapa_activo.mapa.getSource(layerId);
+
+        if (source && originalFeatures[layerId]) {
+            const currentData = source._data || source._options?.data;
             source.setData({
                 ...currentData,
-                features: originalFeatures[layer.name_layer]
+                features: originalFeatures[layerId]
             });
         }
+
+        // Limpia cualquier filtro Mapbox (aunque ya no se use setFilter por propiedad)
         mapa_activo.mapa.setFilter(layer.layer_id.toString(), null);
+
+        // Limpia el estado local de filtros aplicados
+        // const nuevosFiltros = filtrosActivos.filter(f => f.layerId !== layerId);
+        // dispatch(setFiltrosActivos(nuevosFiltros));
+
+        // Limpia el historial visual
         const new_data = dataFiltered.filter(data => data.layerSelected.layer_id !== layer.layer_id);
         setDataFiltered(new_data);
+
         clean();
         setShowTools(false);
     };

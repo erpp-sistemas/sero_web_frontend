@@ -7,7 +7,7 @@ import { tokens } from "../../theme"
 import { useSelector } from 'react-redux'
 import { useDispatch } from 'react-redux'
 import { setDialog } from '../../redux/dialogSlice'
-import { setLayersActivos, setCargarLayer, setData } from '../../redux/featuresSlice'
+import { setLayersActivos, setCargarLayer } from '../../redux/featuresSlice'
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined"
 import SeroClaro from '../../assets/ser0_space_fondooscuro.png'
 import SeroOscuro from '../../assets/ser0_space_fondoclaro.png'
@@ -29,6 +29,7 @@ const SidebarMap = () => {
     const mapa_activo = useSelector((state) => state.mapa)
     const dialog_mapa = useSelector((state) => state.dialog);
     const features = useSelector((state) => state.features);
+    const filtrosActivos = useSelector(state => state.features.filtrosActivos);
 
 
     const [isCollapsed, setIsCollapsed] = useState(false);
@@ -58,25 +59,65 @@ const SidebarMap = () => {
 
         reloadTimeout = setTimeout(async () => {
             for (const layer of features.layers_activos) {
+                const source = mapa_activo.mapa.getSource(layer.name_layer);
+                if (!source) continue;
+
+                let nuevaData = null;
+
                 if (layer.is_large && layer.filtro_fecha) {
-                    // Suponiendo que guardas el filtro de fechas en el layer
                     const hoy = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
                     const { periodoInicial, periodoFinal } = layer.filtro_fecha;
-                    // Si el filtro incluye el día de hoy, recarga solo los datos de hoy
+
                     if (hoy >= periodoInicial && hoy <= periodoFinal) {
-                        const nuevaData = await cargarFeaturesLayer(layer.url_geoserver, {
+                        nuevaData = await cargarFeaturesLayer(layer.url_geoserver, {
                             periodoInicial: hoy,
                             periodoFinal: hoy
                         });
-                        if (mapa_activo.mapa.getSource(layer.name_layer)) {
-                            mapa_activo.mapa.getSource(layer.name_layer).setData(nuevaData);
-                        }
                     }
                 } else if (!layer.is_large) {
-                    // Para layers pequeños, sigue con la recarga normal
-                    const nuevaData = await cargarFeaturesLayer(layer.url_geoserver);
-                    if (mapa_activo.mapa.getSource(layer.name_layer)) {
-                        mapa_activo.mapa.getSource(layer.name_layer).setData(nuevaData);
+                    nuevaData = await cargarFeaturesLayer(layer.url_geoserver);
+                }
+
+                if (nuevaData) {
+                    // Guarda los datos originales si no están guardados aún
+                    if (!originalFeatures[layer.name_layer]) {
+                        originalFeatures[layer.name_layer] = nuevaData.features;
+                    }
+
+                    // Verifica si hay filtros activos para este layer
+                    const filtroLayer = filtrosActivos.find(f => f.layerId === layer.name_layer);
+
+                    if (filtroLayer) {
+                        // Filtra las features nuevamente
+                        const filtros = filtroLayer.filters;
+                        const filtradas = nuevaData.features.filter(feature => {
+                            return Object.entries(filtros).every(([campo, valores]) => {
+                                let propValue = feature.properties[campo];
+
+                                if (propValue === undefined && feature.properties.data_json) {
+                                    try {
+                                        const dataJson = typeof feature.properties.data_json === "string"
+                                            ? JSON.parse(feature.properties.data_json)
+                                            : feature.properties.data_json;
+                                        propValue = dataJson[campo];
+                                    } catch (e) {
+                                        propValue = undefined;
+                                    }
+                                }
+
+                                if (!valores || valores.length === 0) return true;
+                                return valores.includes(String(propValue));
+                            });
+                        });
+
+                        // Aplica el filtro al source
+                        source.setData({
+                            ...nuevaData,
+                            features: filtradas
+                        });
+                    } else {
+                        // No hay filtros, aplica la data completa
+                        source.setData(nuevaData);
                     }
                 }
             }
