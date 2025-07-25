@@ -173,6 +173,7 @@ const Filtros = ({ data }) => {
 
     const handleApplyFilters = () => {
         const source = mapa_activo.mapa.getSource(sourceId);
+        console.log(source)
         if (!source) {
             console.error("Fuente no encontrada");
             return;
@@ -218,6 +219,7 @@ const Filtros = ({ data }) => {
             });
         });
 
+
         // Aplica los datos filtrados a la capa
         source.setData({
             ...currentData,
@@ -258,9 +260,10 @@ const Filtros = ({ data }) => {
         // Limpia cualquier filtro Mapbox (aunque ya no se use setFilter por propiedad)
         mapa_activo.mapa.setFilter(layer.layer_id.toString(), null);
 
+        console.log(filtrosActivos) // es un objeto no un arreglo
         // Limpia el estado local de filtros aplicados
-        // const nuevosFiltros = filtrosActivos.filter(f => f.layerId !== layerId);
-        // dispatch(setFiltrosActivos(nuevosFiltros));
+        //const nuevosFiltros = filtrosActivos.filter(f => f.layerId !== layerId);
+        dispatch(setFiltrosActivos({}));
 
         // Limpia el historial visual
         const new_data = dataFiltered.filter(data => data.layerSelected.layer_id !== layer.layer_id);
