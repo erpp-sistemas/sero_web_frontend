@@ -73,6 +73,7 @@ const SidebarMap = () => {
                             periodoInicial: hoy,
                             periodoFinal: hoy
                         });
+                        
                     }
                 } else if (!layer.is_large) {
                     nuevaData = await cargarFeaturesLayer(layer.url_geoserver);
@@ -80,16 +81,16 @@ const SidebarMap = () => {
 
                 if (nuevaData) {
                     // Guarda los datos originales si no están guardados aún
-                    if (!originalFeatures[layer.name_layer]) {
-                        originalFeatures[layer.name_layer] = nuevaData.features;
-                    }
+                    // if (!originalFeatures[layer.name_layer]) {
+                    //     originalFeatures[layer.name_layer] = nuevaData.features;
+                    // }
 
                     // Verifica si hay filtros activos para este layer
-                    const filtroLayer = filtrosActivos.find(f => f.layerId === layer.name_layer);
+                    const filtroLayer = filtrosActivos
 
-                    if (filtroLayer) {
+                    if (Object.keys(filtroLayer).length > 0) {
                         // Filtra las features nuevamente
-                        const filtros = filtroLayer.filters;
+                        const filtros = filtroLayer.filtros;
                         const filtradas = nuevaData.features.filter(feature => {
                             return Object.entries(filtros).every(([campo, valores]) => {
                                 let propValue = feature.properties[campo];
@@ -227,7 +228,6 @@ const SidebarMap = () => {
         if (res) {
             if ("periodoInicial" in res) {
                 const { periodoInicial, periodoFinal } = res;
-                console.log(layerSelected);
                 const new_layer = {
                     ...layerSelected,
                     filtro_fecha: { periodoInicial, periodoFinal },

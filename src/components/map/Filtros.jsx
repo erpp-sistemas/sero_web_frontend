@@ -71,6 +71,7 @@ const Filtros = ({ data }) => {
         const data_json = properties.find(prop => prop === 'data_json');
         if (data_json) {
             const data_json_properties = Object.keys(JSON.parse(data.features[0].properties.data_json));
+            console.log(data_json_properties)
             properties = properties.filter(prop => prop !== 'data_json');
             properties = [...properties, ...data_json_properties];
         }
@@ -173,7 +174,6 @@ const Filtros = ({ data }) => {
 
     const handleApplyFilters = () => {
         const source = mapa_activo.mapa.getSource(sourceId);
-        console.log(source)
         if (!source) {
             console.error("Fuente no encontrada");
             return;
@@ -260,9 +260,6 @@ const Filtros = ({ data }) => {
         // Limpia cualquier filtro Mapbox (aunque ya no se use setFilter por propiedad)
         mapa_activo.mapa.setFilter(layer.layer_id.toString(), null);
 
-        console.log(filtrosActivos) // es un objeto no un arreglo
-        // Limpia el estado local de filtros aplicados
-        //const nuevosFiltros = filtrosActivos.filter(f => f.layerId !== layerId);
         dispatch(setFiltrosActivos({}));
 
         // Limpia el historial visual
