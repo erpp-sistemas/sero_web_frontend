@@ -135,3 +135,15 @@ export const getUsersForNotification = async () => {
 	}
 }
 
+export const getAllActiveUsers = async () => {
+
+    try {
+        const response = await instance.get('/AllActiveUsers')
+        return response.data
+    } catch (error) {
+        console.error("Error al obtener todos los usuarios activos:", error.response?.data || error.message)
+        throw error.response?.data || error
+    }
+
+}
+

@@ -32,6 +32,8 @@ function ProcessSelectMultipleChip({
             selectedPlace,
             selectedService
           );
+
+          console.log(user.user_id, selectedPlace, selectedService, res);
           setProcess(res);
 
           // Si no hay procesos seleccionados, puedes establecer automáticamente el primer proceso
