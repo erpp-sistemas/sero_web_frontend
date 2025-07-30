@@ -3,6 +3,7 @@ import { Grid, TextField, Typography, Box, Paper } from "@mui/material";
 import { useLocation } from "react-router-dom";
 import { jsPDF } from "jspdf";
 import "jspdf-autotable";
+import SignatureCanvas from "react-signature-canvas";
 
 const Index = () => {
   const { state } = useLocation();
@@ -12,6 +13,10 @@ const Index = () => {
   const [motivoCambio, setMotivoCambio] = useState("");
   const [logoBase64, setLogoBase64] = useState(null);
   const pdfRef = useRef(null);
+  const [firmaOtorgante, setFirmaOtorgante] = useState(null);
+  const [firmaReceptor, setFirmaReceptor] = useState(null);
+  const sigCanvasOtorgante = useRef(null);
+  const sigCanvasReceptor = useRef(null);
 
   // Función para convertir imagen pública a base64
   const getImageBase64FromUrl = (url) => {
@@ -397,6 +402,14 @@ const Index = () => {
     doc.line(20, 250, 80, 250);
     doc.line(pageWidth - 80, 250, pageWidth - 20, 250);
 
+    if (firmaOtorgante) {
+      doc.addImage(firmaOtorgante, "PNG", 25, 230, 50, 20); // encima de la línea
+    }
+
+    if (firmaReceptor) {
+      doc.addImage(firmaReceptor, "PNG", pageWidth - 75, 230, 50, 20);
+    }
+
     doc.setFont("times", "normal");
     doc.setFontSize(10);
 
@@ -435,7 +448,24 @@ const Index = () => {
     if (nuevoArticulo && logoBase64) {
       generarPDF();
     }
-  }, [nuevoArticulo, observaciones, motivoCambio, logoBase64]);
+  }, [
+    nuevoArticulo,
+    observaciones,
+    motivoCambio,
+    logoBase64,
+    firmaOtorgante,
+    firmaReceptor,
+  ]);
+
+  const guardarFirma = (ref, setFirma) => {
+    const dataURL = ref.current.getCanvas().toDataURL("image/png");
+    console.log("firma dataURL:", dataURL);
+    setFirma(dataURL);
+  };
+
+  const limpiarFirma = (ref) => {
+    ref.current.clear();
+  };
 
   return (
     <Box p={2}>
@@ -462,7 +492,7 @@ const Index = () => {
           </Paper>
 
           {/* Observaciones */}
-          <Paper elevation={3} sx={{ p: 2 }}>
+          <Paper elevation={3} sx={{ p: 2, mb: 2 }}>
             <Typography variant="subtitle1" gutterBottom>
               Observaciones
             </Typography>
@@ -475,6 +505,58 @@ const Index = () => {
               onChange={(e) => setObservaciones(e.target.value)}
               placeholder="Escribe observaciones sobre el artículo..."
             />
+          </Paper>
+
+          <Paper elevation={3} sx={{ p: 2, mb: 2 }}>
+            <Typography variant="subtitle1" gutterBottom>
+              Firma del Otorgante
+            </Typography>
+            <SignatureCanvas
+              ref={sigCanvasOtorgante}
+              penColor="black"
+              canvasProps={{ width: 300, height: 100, className: "sigCanvas" }}
+            />
+            <Box mt={1}>
+              <button onClick={() => limpiarFirma(sigCanvasOtorgante)}>
+                Limpiar
+              </button>
+            </Box>
+            <Box mt={1}>
+              <button
+                onClick={() =>
+                  guardarFirma(sigCanvasOtorgante, setFirmaOtorgante)
+                }
+              >
+                Guardar Firma
+              </button>
+            </Box>
+          </Paper>
+
+          <Paper elevation={3} sx={{ p: 2, mb: 2 }}>
+            <Typography variant="subtitle1" gutterBottom>
+              Firma del Receptor
+            </Typography>
+            <SignatureCanvas
+              ref={sigCanvasReceptor}
+              penColor="black"
+              canvasProps={{ width: 300, height: 100, className: "sigCanvas" }}
+            />
+            <Box mt={1}>
+              <button onClick={() => limpiarFirma(sigCanvasReceptor)}>
+                Limpiar
+              </button>
+            </Box>
+            <Box mt={1}>
+              <button
+                onClick={() =>
+                  guardarFirma(sigCanvasReceptor, setFirmaReceptor)
+                }
+                variant="contained"
+                color="warning"
+              >
+                Guardar Firma
+              </button>
+            </Box>
           </Paper>
         </Grid>
 
