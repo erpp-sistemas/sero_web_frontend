@@ -69,6 +69,7 @@ import AccountDetails from './scenes/account-details'
 import CitizenAttentionAppointments from './scenes/citizen-attention-appointments'
 import InventoryList from './scenes/inventory-list'
 import NewInventory from './scenes/new-inventory'
+import ResponsiveGenerator from './scenes/responsive-generator'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -227,6 +228,7 @@ function App() {
                         <Route path="/citizen-attention-appointments" element={<CitizenAttentionAppointments />} />
                         <Route path="/inventory-list" element={<InventoryList />} />
                         <Route path="/new-inventory" element={<NewInventory />} />
+                        <Route path="/responsive-generator" element={< ResponsiveGenerator />} />
 
                       </Routes>
                     </main>

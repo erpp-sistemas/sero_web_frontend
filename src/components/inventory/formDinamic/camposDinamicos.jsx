@@ -4,6 +4,7 @@ import {
   Checkbox,
   FormControlLabel,
   Typography,
+  Skeleton,
 } from "@mui/material";
 import { useTheme } from "@mui/material";
 import { tokens } from "../../../theme";
@@ -13,8 +14,8 @@ function CamposDinamicos({
   values = {},
   onChange,
   camposConError = [],
+  loading = false, // ← Nueva prop
 }) {
-  console.log(campos, "Campos Dinámicos");
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
@@ -37,7 +38,19 @@ function CamposDinamicos({
         Campos para llenar
       </Typography>
 
-      {campos.length === 0 ? (
+      {loading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+          {[...Array(3)].map((_, i) => (
+            <Skeleton
+              key={i}
+              variant="rectangular"
+              height={56}
+              className="w-full"
+              sx={{ borderRadius: 2, marginBottom: 2 }}
+            />
+          ))}
+        </div>
+      ) : campos.length === 0 ? (
         <div className="text-gray-400 italic py-4 text-center">
           No hay campos disponibles.
         </div>

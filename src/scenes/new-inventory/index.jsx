@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { useTheme } from "@mui/material";
+import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, useTheme } from "@mui/material";
 import { tokens } from "../../theme";
 import CategorySelect from "../../components/inventory/select/categorySelect";
 import SubcategorySelect from "../../components/inventory/select/subcategorySelect";
-import PlaceSelect from "../../components/select/placeSelect.jsx";
+import PlaceSelectArray from "../../components/select/placeSelectArray.jsx";
 import ActiveUsersSelect from "../../components/inventory/select/activeUsersSelect";
 import CamposDinamicos from "../../components/inventory/formDinamic/camposDinamicos";
 import {
@@ -13,15 +13,17 @@ import {
 import PhotosManager from "../../components/inventory/photoManager";
 import { Button, Snackbar, Alert } from "@mui/material";
 import { AddCircle } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
 
 function Index() {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const navigate = useNavigate(); // ← Agrega esto
 
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedSubcategory, setSelectedSubcategory] = useState("");
-  const [selectedPlace, setSelectedPlace] = useState("");
-  const [selectedUser, setSelectedUser] = useState("");
+  const [selectedPlace, setSelectedPlace] = useState(null);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   const [allSubcategories, setAllSubcategories] = useState([]);
   const [filteredSubcategories, setFilteredSubcategories] = useState([]);
@@ -35,6 +37,10 @@ function Index() {
   const [showAlert, setShowAlert] = useState(false);
 
   const [camposConError, setCamposConError] = useState([]);
+  const [loadingCampos, setLoadingCampos] = useState(true);
+
+  const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
+  const [nuevoArticuloTemp, setNuevoArticuloTemp] = useState(null);
 
   const handleCategoryChange = (event) => {
     const selected = event.target.value;
@@ -51,17 +57,17 @@ function Index() {
     setSelectedSubcategory(event.target.value);
   };
 
-  const handleUserChange = (event) => {
-    setSelectedUser(event.target.value);
+  const handleUserChange = (userData) => {
+    setSelectedUser(userData);
   };
 
   const handleFormChange = (campoId, valor) => {
     setFormValues((prev) => ({ ...prev, [campoId]: valor }));
   };
 
-  const handlePlaceChange = useCallback((event) => {
-    setSelectedPlace(event.target.value);
-  }, []);
+  const handlePlaceChange = useCallback((placeData) => {
+  setSelectedPlace(placeData);
+}, []);
 
   useEffect(() => {
     const fetchSubcategories = async () => {
@@ -88,10 +94,13 @@ function Index() {
   useEffect(() => {
     const fetchCampos = async () => {
       try {
+        setLoadingCampos(true);
         const data = await getAllInventoryFieldsCategorySubcategory();
         setAllCampos(data);
       } catch (error) {
         console.error("Error fetching campos:", error);
+      } finally {
+        setLoadingCampos(false);
       }
     };
 
@@ -162,6 +171,8 @@ function Index() {
     };
 
     console.log("Artículo a enviar:", nuevoArticulo);
+    setNuevoArticuloTemp(nuevoArticulo);
+    setOpenConfirmDialog(true); // ← abrimos el dialog
     // Aquí podrías hacer el POST a tu API
   };
 
@@ -195,7 +206,7 @@ function Index() {
             selectedSubcategory={selectedSubcategory}
             handleSubcategoryChange={handleSubcategoryChange}
           />
-          <PlaceSelect
+          <PlaceSelectArray
             selectedPlace={selectedPlace}
             handlePlaceChange={handlePlaceChange}
             setSelectedPlace={setSelectedPlace}
@@ -213,6 +224,7 @@ function Index() {
               values={formValues}
               onChange={handleFormChange}
               camposConError={camposConError}
+              loading={loadingCampos} // ← Nueva prop
             />
           </div>
           <div className="md:col-span-4">
@@ -264,6 +276,48 @@ function Index() {
             Por favor completa todos los campos obligatorios.
           </Alert>
         </Snackbar>
+
+        <Dialog
+          open={openConfirmDialog}
+          onClose={() => setOpenConfirmDialog(false)}
+          PaperProps={{
+            sx: {
+              backgroundColor: theme.palette.background.paper, // ← Color paper
+            },
+          }}
+        >
+          <DialogTitle>¿Deseas generar una responsiva?</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Esto generará un documento PDF con la información del artículo que
+              estás registrando.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={() => setOpenConfirmDialog(false)}
+              color="warning"
+              variant="contained"
+              sx={{ borderRadius: "20px", fontWeight: "bold" }}
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={() => {
+                setOpenConfirmDialog(false);
+                navigate("/responsive-generator", {
+                  state: { nuevoArticulo: nuevoArticuloTemp },
+                });
+              }}
+              color="info"
+              variant="contained"
+              autoFocus
+              sx={{ borderRadius: "20px", fontWeight: "bold" }}
+            >
+              Generar responsiva
+            </Button>
+          </DialogActions>
+        </Dialog>
       </div>
     </div>
   );

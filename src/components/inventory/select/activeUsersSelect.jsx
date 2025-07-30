@@ -20,9 +20,7 @@ function ActiveUsersSelect({ selectedUser, handleUserChange }) {
         setUsers(res);
 
         if (!selectedUser && res.length > 0) {
-          handleUserChange({
-            target: { value: res[0].id_usuario },
-          });
+          handleUserChange(res[0]); // envia el objeto completo
         }
       } catch (error) {
         console.error("Error loading users:", error);
@@ -34,6 +32,12 @@ function ActiveUsersSelect({ selectedUser, handleUserChange }) {
     loadUsers();
   }, []);
 
+  const handleChange = (event) => {
+    const selectedId = event.target.value;
+    const fullUser = users.find((u) => u.id_usuario === selectedId);
+    handleUserChange(fullUser); // también enviamos el objeto completo aquí
+  };
+
   return (
     <Box sx={{ position: "relative", width: "100%" }}>
       <TextField
@@ -42,8 +46,8 @@ function ActiveUsersSelect({ selectedUser, handleUserChange }) {
         label="Usuario"
         variant="outlined"
         sx={{ width: "100%" }}
-        value={selectedUser || ""}
-        onChange={handleUserChange}
+        value={selectedUser?.id_usuario || ""}
+        onChange={handleChange}
         disabled={loading}
       >
         {users.map((user) => (
