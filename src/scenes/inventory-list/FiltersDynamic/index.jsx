@@ -2,23 +2,25 @@ import React, { useEffect, useState } from "react";
 import {
   Select,
   MenuItem,
+  IconButton,
   Button,
   InputLabel,
   FormControl,
   useTheme,
-  Skeleton,
-  Grow,
 } from "@mui/material";
+import ClearIcon from "@mui/icons-material/Clear";
 import { tokens } from "../../theme";
 import { getAllInventory } from "../../api/inventory";
 import {
+  Add,
+  Clear,
+  ClearAll,
+  Close,
   DeleteSweep,
-  KeyboardArrowDown,
   NavigateNext,
   PlaylistAdd,
 } from "@mui/icons-material";
 import { Breadcrumbs, Chip } from "@mui/material";
-import InventoryCards from "../../components/InventoryList/InventoryCards";
 
 function Index() {
   const theme = useTheme();
@@ -30,7 +32,6 @@ function Index() {
   const [selectedFilters, setSelectedFilters] = useState({});
   const [availableFilters, setAvailableFilters] = useState([]);
   const [addingFilter, setAddingFilter] = useState("");
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -74,8 +75,6 @@ function Index() {
         setSelectedFilters(initialSelected);
       } catch (error) {
         console.error("Error al obtener inventario:", error);
-      } finally {
-        setLoading(false); // 👈 terminado
       }
     };
     fetchData();
@@ -170,90 +169,43 @@ function Index() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-          {loading
-            ? // Mostrar 3 Skeletons mientras carga
-              Array.from({ length: 3 }).map((_, idx) => (
-                <div key={idx} className="flex items-center">
-                  <Skeleton variant="rounded" height={40} width="100%" />
-                </div>
-              ))
-            : Object.keys(selectedFilters).map((filterKey) => (
-                <Grow key={filterKey} in={true} timeout={300}>
-                  <div key={filterKey} className="flex items-center">
-                    <FormControl fullWidth size="small" variant="outlined">
-                      <InputLabel>{filterKey}</InputLabel>
-                      <Select
-                        value={selectedFilters[filterKey]}
-                        label={filterKey}
-                        onChange={(e) => applyFilter(filterKey, e.target.value)}
-                        sx={{
-                          backgroundColor: "transparent",
-                          borderRadius: "8px",
-                          fontSize: "0.875rem",
-                          "& .MuiOutlinedInput-notchedOutline": {
-                            borderColor: colors.grey[300],
-                          },
-                          "&:hover .MuiOutlinedInput-notchedOutline": {
-                            borderColor: colors.primary[300],
-                          },
-                          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                            borderColor: colors.primary[500],
-                          },
-                        }}
-                        IconComponent={(props) => (
-                          <KeyboardArrowDown {...props} sx={{ fontSize: 18 }} />
-                        )}
-                      >
-                        <MenuItem value="">Todos</MenuItem>
-                        {getOptions(filterKey).map((option, idx) => (
-                          <MenuItem key={idx} value={String(option)}>
-                            {String(option)}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  </div>
-                </Grow>
-              ))}
+          {Object.keys(selectedFilters).map((filterKey) => (
+            <div key={filterKey} className="flex items-center">
+              <FormControl fullWidth size="small">
+                <InputLabel>{filterKey}</InputLabel>
+                <Select
+                  value={selectedFilters[filterKey]}
+                  label={filterKey}
+                  onChange={(e) => applyFilter(filterKey, e.target.value)}
+                >
+                  <MenuItem value="">Todos</MenuItem>
+                  {getOptions(filterKey).map((option, idx) => (
+                    <MenuItem key={idx} value={String(option)}>
+                      {String(option)}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </div>
+          ))}
         </div>
 
         <div className="grid grid-cols-12 items-center gap-2 mt-4">
           <FormControl size="small" className="col-span-4">
             <InputLabel>Agregar filtro</InputLabel>
-            {loading ? (
-              <Skeleton variant="rounded" height={40} width="100%" />
-            ) : (
-              <Select
-                value={addingFilter}
-                label="Agregar filtro"
-                onChange={(e) => setAddingFilter(e.target.value)}
-                sx={{
-                  backgroundColor: "transparent",
-                  borderRadius: "8px",
-                  fontSize: "0.875rem",
-                  "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: colors.grey[300],
-                  },
-                  "&:hover .MuiOutlinedInput-notchedOutline": {
-                    borderColor: colors.primary[300],
-                  },
-                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                    borderColor: colors.primary[500],
-                  },
-                }}
-                IconComponent={(props) => (
-                  <KeyboardArrowDown {...props} sx={{ fontSize: 18 }} />
-                )}
-              >
-                {availableFilters
-                  .filter((f) => !selectedFilters.hasOwnProperty(f))
-                  .map((field) => (
-                    <MenuItem key={field} value={field}>
-                      {field}
-                    </MenuItem>
-                  ))}
-              </Select>
-            )}
+            <Select
+              value={addingFilter}
+              label="Agregar filtro"
+              onChange={(e) => setAddingFilter(e.target.value)}
+            >
+              {availableFilters
+                .filter((f) => !selectedFilters.hasOwnProperty(f))
+                .map((field) => (
+                  <MenuItem key={field} value={field}>
+                    {field}
+                  </MenuItem>
+                ))}
+            </Select>
           </FormControl>
           <div className="col-span-2">
             <Button
@@ -261,20 +213,8 @@ function Index() {
               variant="contained"
               color="info"
               fullWidth
-              endIcon={<PlaylistAdd sx={{ fontSize: 18 }} />}
-              disabled={loading}
-              sx={{
-                textTransform: "none",
-                borderRadius: "10px",
-                borderColor: colors.grey[300],
-                color: colors.grey[800],
-                fontWeight: 500,
-                fontSize: "0.875rem",
-                "&:hover": {
-                  backgroundColor: colors.grey[100],
-                  borderColor: colors.primary[300],
-                },
-              }}
+              sx={{ borderRadius: "20px", fontWeight: "bold" }}
+              endIcon={<PlaylistAdd />}
             >
               Agregar filtro
             </Button>
@@ -298,20 +238,8 @@ function Index() {
               variant="contained"
               color="error"
               fullWidth
-              endIcon={<DeleteSweep sx={{ fontSize: 18 }} />}
-              disabled={loading}
-              sx={{
-                textTransform: "none",
-                borderRadius: "10px",
-                borderColor: colors.grey[300],
-                color: colors.grey[800],
-                fontWeight: 500,
-                fontSize: "0.875rem",
-                "&:hover": {
-                  backgroundColor: colors.redAccent[100],
-                  borderColor: colors.redAccent[200],
-                },
-              }}
+              endIcon={<DeleteSweep />}
+              sx={{ borderRadius: "16px", fontWeight: "bold", color: "black" }}
             >
               Limpiar filtros
             </Button>
@@ -319,57 +247,48 @@ function Index() {
           <div className="col-span-4"></div>
         </div>
 
-        <div className="pt-4">
+        <div className="mt-6">
+          <strong>Filtros aplicados:</strong> {appliedFilters.join(", ")}
+        </div>
+
+        <div>
           {appliedFilters.length > 0 && (
             <Breadcrumbs separator={<NavigateNext fontSize="large" />}>
               {appliedFilters.map((filterKey, index) => {
                 const filterLabel = `${filterKey}: ${selectedFilters[filterKey]}`;
                 return (
-                  <Grow key={filterKey} in={true} timeout={300}>
-                    <Chip
-                      key={filterKey}
-                      label={filterLabel}
-                      onDelete={() => {
-                        // Al eliminar, reinicia desde ese filtro
-                        const newSelectedFilters = { ...selectedFilters };
-                        const allFilterKeys = Object.keys(selectedFilters);
-                        const startIndex = allFilterKeys.indexOf(filterKey);
+                  <Chip
+                    key={filterKey}
+                    label={filterLabel}
+                    onDelete={() => {
+                      // Al eliminar, reinicia desde ese filtro
+                      const newSelectedFilters = { ...selectedFilters };
+                      const allFilterKeys = Object.keys(selectedFilters);
+                      const startIndex = allFilterKeys.indexOf(filterKey);
 
-                        for (
-                          let i = startIndex;
-                          i < allFilterKeys.length;
-                          i++
-                        ) {
-                          newSelectedFilters[allFilterKeys[i]] = "";
-                        }
+                      for (let i = startIndex; i < allFilterKeys.length; i++) {
+                        newSelectedFilters[allFilterKeys[i]] = "";
+                      }
 
-                        setSelectedFilters(newSelectedFilters);
-                        setAppliedFilters((prev) => prev.slice(0, index));
-                        setFilteredObjects((prev) => prev.slice(0, index + 1));
-                      }}
-                      color="info"
-                      variant="outlined"
-                      size="small"
-                    />
-                  </Grow>
+                      setSelectedFilters(newSelectedFilters);
+                      setAppliedFilters((prev) => prev.slice(0, index));
+                      setFilteredObjects((prev) => prev.slice(0, index + 1));
+                    }}
+                    color="info"
+                    variant="outlined"
+                    size="small"
+                  />
                 );
               })}
             </Breadcrumbs>
           )}
         </div>
-        <div className="pt-4">
-          {(loading ||
-            (filteredObjects.length > 0 &&
-              filteredObjects[filteredObjects.length - 1])) && (
-            <InventoryCards
-              inventory={
-                filteredObjects.length > 0
-                  ? filteredObjects[filteredObjects.length - 1]
-                  : []
-              }
-              loading={loading}
-            />
-          )}
+
+        <div className="mt-2">
+          <strong>Artículos filtrados:</strong>{" "}
+          {filteredObjects.length > 0
+            ? filteredObjects[filteredObjects.length - 1].length
+            : 0}
         </div>
 
         <div className="mt-8">
