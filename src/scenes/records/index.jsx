@@ -77,8 +77,7 @@ function Records() {
 		dispatch(setCargando(true))
 
 		try {
-
-            const excelURL = await tool.uploadS3(excel, user.name)
+      const excelURL = await tool.uploadS3(excel, user.name)
 
 			const fechaCorte = new Date();
 			const formattedFechaCorte = fechaCorte.toISOString().split('T')[0]
@@ -108,6 +107,7 @@ function Records() {
 			}
 
 			let total = 0
+			console.log(registros)
 			for (let ficha of registros) {
 				await tool.uploadFichas({ id_paquete, ...ficha })
 				total += 1
@@ -118,9 +118,9 @@ function Records() {
 			dispatch(setCargando(false))
 			dispatch(setModal(true))
 
-        } catch (error) {
-            console.error('Error al subir el archivo de Excel:', error)
-        }
+			} catch (error) {
+					console.error('Error al subir el archivo de Excel:', error)
+			}
 
 	}	
 
@@ -139,6 +139,7 @@ function Records() {
 			const options = { header: 1 }
 			const jsonData = XLSX.utils.sheet_to_json(sheet, options)
 			const filasFormateadas = await tool.formatearFila(jsonData, folio)
+			console.log(filasFormateadas)
 			dispatch(setRegistros(filasFormateadas))
 		}
 

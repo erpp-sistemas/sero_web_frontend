@@ -87,6 +87,7 @@ const Impression = () => {
 			id_local: registro.id_local,
 			nombre: paquete.nombre,
 			cuenta: registro.cuenta,
+			predio: registro.predio,
 			propietario: registro.propietario,
 			tipo_servicio: registro.tipo_servicio,
 			servicio: registro.servicio,
@@ -164,6 +165,7 @@ const Impression = () => {
 					registrosAgrupados[cuenta] = { 
 						id: registro.id, 
 						cuenta, 
+						predio: registro.predio,
 						calle: registro.calle, 
 						id_local: registro.id_local, 
 						giro: registro.giro, 
@@ -242,6 +244,7 @@ const Impression = () => {
 		const data = Object.values(registrosOriginales).map(registro => ({
 			id_local: registro.id_local,
 			cuenta: registro.cuenta,
+			predio: registro.predio,
 			folio: registro.folio,
 			calle: registro.calle,
 			colonia: registro.colonia,

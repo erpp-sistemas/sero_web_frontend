@@ -107,6 +107,7 @@ const formatearFila = async (data, folio) => {
         cuenta: 'cuenta',
         propietario: 'propietario',
         calle: 'calle',
+				predio: 'predio',
         colonia: 'colonia',
         latitud: 'latitud',
         longitud: 'longitud',
