@@ -372,7 +372,7 @@ function Index() {
           )}
         </div>
 
-        <div className="mt-8">
+        {/* <div className="mt-8">
           <h4 className="text-lg font-bold">Detalle de objetos filtrados:</h4>
           {filteredObjects.map((obj, index) => (
             <div
@@ -391,7 +391,7 @@ function Index() {
               </pre>
             </div>
           ))}
-        </div>
+        </div> */}
       </div>
     </div>
   );

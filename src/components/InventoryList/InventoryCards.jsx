@@ -242,7 +242,23 @@ function InventoryViewer({ inventory, loading }) {
   const [itemsToShow, setItemsToShow] = useState(20);
   const [loadingMore, setLoadingMore] = useState(false);
   const prevCount = useRef(0);
-  const [searchTerm, setSearchTerm] = useState(""); // Estado para búsqueda
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isSearching, setIsSearching] = useState(false); // Estado para búsqueda
+
+  // Efecto para simular delay al buscar
+  useEffect(() => {
+    if (!searchTerm) {
+      setIsSearching(false);
+      return;
+    }
+
+    setIsSearching(true);
+    const delay = setTimeout(() => {
+      setIsSearching(false);
+    }, 300); // Delay para mostrar spinner
+
+    return () => clearTimeout(delay);
+  }, [searchTerm]);
 
   // Filtrar inventario con base en searchTerm (insensible a mayúsculas)
   const filteredInventory = React.useMemo(() => {
@@ -250,17 +266,8 @@ function InventoryViewer({ inventory, loading }) {
     const lowerSearch = searchTerm.toLowerCase();
 
     return inventory.filter((item) => {
-      // Campos para buscar coincidencias
-      const fieldsToSearch = [
-        "nombre_articulo",
-        "categoria",
-        "subcategoria",
-        "usuario",
-        "plaza",
-      ];
-
-      return fieldsToSearch.some((field) => {
-        const value = item[field];
+      // Convertimos todos los valores del objeto a texto y buscamos coincidencias
+      return Object.values(item).some((value) => {
         if (!value) return false;
         return String(value).toLowerCase().includes(lowerSearch);
       });
@@ -357,7 +364,17 @@ function InventoryViewer({ inventory, loading }) {
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
-                    <Search sx={{ color: colors.grey[100], fontSize: 20 }} />
+                    {isSearching ? (
+                      <CircularProgress
+                        size={16}
+                        thickness={4}
+                        sx={{
+                          color: colors.grey[100],
+                        }}
+                      />
+                    ) : (
+                      <Search sx={{ color: colors.grey[100], fontSize: 20 }} />
+                    )}
                   </InputAdornment>
                 ),
               }}
