@@ -85,23 +85,36 @@ const InventoryDetailModal = ({ open, onClose, item }) => {
           </Typography>
 
           {fotos?.length > 0 ? (
-            <ImageList cols={3} gap={8} sx={{ mb: 2 }}>
-              {fotos.map((foto, idx) => (
-                <ImageListItem key={idx}>
-                  <img
-                    src={foto.url_imagen}
-                    alt={`Foto ${idx + 1}`}
-                    loading="lazy"
-                    style={{
-                      borderRadius: 6,
-                      objectFit: "cover",
-                      width: "100%",
-                      height: "100%",
-                    }}
-                  />
-                </ImageListItem>
-              ))}
-            </ImageList>
+            <Grid container spacing={2} sx={{ mb: 2 }}>
+    {fotos.map((foto, idx) => (
+      <Grid item xs={6} sm={4} md={3} key={idx}>
+        <Box
+          sx={{
+            width: "100%",
+            aspectRatio: "1", // Cuadrado
+            backgroundColor: "#f6f6f6",
+            borderRadius: 2,
+            overflow: "hidden",
+            border: "1px solid #eee",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <img
+            src={foto.url_imagen}
+            alt={`Foto ${idx + 1}`}
+            loading="lazy"
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+            }}
+          />
+        </Box>
+      </Grid>
+    ))}
+  </Grid>
           ) : (
             <Box
               display="flex"

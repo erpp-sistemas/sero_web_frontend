@@ -1,3 +1,4 @@
+// ExportPDFButton.js
 import React, { useState, useEffect } from "react";
 import { Button, useTheme } from "@mui/material";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
@@ -47,7 +48,6 @@ const ExportPDFButton = ({ data = [], loading }) => {
   const drawHeader = (doc, pageWidth) => {
     const marginLeft = 40;
     const marginRight = 40;
-
     const leftImgWidth = cmToPt(3);
     const leftImgHeight = cmToPt(2);
     const headerTop = 15;
@@ -61,9 +61,6 @@ const ExportPDFButton = ({ data = [], loading }) => {
         leftImgWidth,
         leftImgHeight
       );
-    } else {
-      doc.setFillColor("#CCCCCC");
-      doc.rect(marginLeft, headerTop, leftImgWidth, leftImgHeight, "F");
     }
 
     const rightImgWidth = cmToPt(9);
@@ -81,9 +78,6 @@ const ExportPDFButton = ({ data = [], loading }) => {
         undefined,
         "NONE"
       );
-    } else {
-      doc.setFillColor("#EEEEEE");
-      doc.rect(rightX, headerTop, rightImgWidth, rightImgHeight, "F");
     }
 
     const greenWidth = cmToPt(2);
@@ -100,19 +94,17 @@ const ExportPDFButton = ({ data = [], loading }) => {
     );
   };
 
-  const footerHeight = 50; // Espacio para footer (línea + texto)
+  const footerHeight = 50;
 
   const drawFooter = (doc, pageWidth, pageHeight, pageNum, totalPages) => {
     const marginLeft = 40;
     const marginRight = 40;
     const greenWidth = cmToPt(2);
-    const footerY = pageHeight - footerHeight + 10; // Línea un poco arriba
+    const footerY = pageHeight - footerHeight + 10;
 
-    // Línea verde
     doc.setFillColor("#4caf50");
     doc.rect(marginLeft, footerY, greenWidth, 3, "F");
 
-    // Línea gris
     doc.setFillColor("#999999");
     doc.rect(
       marginLeft + greenWidth,
@@ -122,7 +114,6 @@ const ExportPDFButton = ({ data = [], loading }) => {
       "F"
     );
 
-    // Número de página centrado
     const pageText = `Página ${pageNum} de ${totalPages}`;
     doc.setFontSize(10);
     doc.setTextColor("#444");
@@ -130,8 +121,7 @@ const ExportPDFButton = ({ data = [], loading }) => {
       align: "center",
     });
 
-    // --- IZQUIERDA: Imagen world-icon + texto www.erpp.mx ---
-    const iconSize = 12; // tamaño icono en pt
+    const iconSize = 12;
     const iconTextGap = 5;
     const leftX = marginLeft;
     const leftY = pageHeight - footerHeight / 2 - iconSize / 2 + 5;
@@ -148,69 +138,65 @@ const ExportPDFButton = ({ data = [], loading }) => {
       leftY + iconSize * 0.75
     );
 
-    // --- DERECHA: Imagen marker-icon + 3 líneas texto ---
     const rightIconSize = 12;
     const iconTextGapRight = 5;
-    const maxTextWidth = 150; // máximo ancho para texto y espacio de la imagen
-
-    // Para que no salga del margen derecho, el bloque completo debe estar dentro del margen
+    const maxTextWidth = 150;
     const rightBlockWidth = rightIconSize + iconTextGapRight + maxTextWidth;
     const rightX = pageWidth - marginRight - rightBlockWidth;
-
-    // Coordenada vertical para centrar imagen respecto al texto (3 líneas, cada línea 10 pts alto)
-    const totalTextHeight = 3 * 10; // 3 líneas de texto * 10 pts c/u
+    const totalTextHeight = 3 * 10;
     const rightY = pageHeight - footerHeight / 2 - totalTextHeight / 2;
 
-    // Dibuja imagen centrada verticalmente con el bloque de texto
     if (base64MarkerIcon) {
       doc.addImage(
         base64MarkerIcon,
         "PNG",
-        rightX,
-        rightY + (totalTextHeight - rightIconSize) / 2,
+        rightX - 12,
+        rightY + 2 + (totalTextHeight - rightIconSize) / 2,
         rightIconSize,
         rightIconSize
       );
     }
-
     doc.setFontSize(8);
     doc.setTextColor("#333");
-    const addressX = rightX + rightIconSize + iconTextGapRight;
+
+    const shiftLeft = 15; // mueve más a la izquierda
+    const addressX = rightX + rightIconSize + iconTextGapRight - shiftLeft;
+
     const addressLines = [
       "Jaime Balmes no.11 Torre A, Piso 1 int.B",
       "Polanco I Sección Miguel Hgo., CDMX.",
       "C.P. 11510",
     ];
 
-    addressLines.forEach((line, i) => {
-      doc.text(line, addressX, rightY + 12 + i * 10, {
-        maxWidth: maxTextWidth,
-      });
+    let currentY = rightY + 10;
+    const lineHeight = 10;
+
+    addressLines.forEach((line) => {
+      // Aquí forzamos que no se parta la línea, aunque sea más larga que maxTextWidth
+      doc.text(line, addressX, currentY);
+      currentY += lineHeight;
     });
   };
 
   const generatePDF = () => {
     try {
       const doc = new jsPDF("p", "pt", "a4");
-      const margin = { top: 100, left: 40, right: 40 };
       const pageHeight = doc.internal.pageSize.height;
       const pageWidth = doc.internal.pageSize.width;
+      const margin = { top: 100, left: 40, right: 40 };
       const contentWidth = pageWidth - margin.left - margin.right;
+      const lineHeight = 20;
+      const labelWidth = 130;
+      const boxPadding = 15;
+      const imagesPerRow = 4;
+      const imageMargin = 12;
+      const imageSize =
+        (contentWidth - (imagesPerRow - 1) * imageMargin - boxPadding * 2) /
+        imagesPerRow;
 
       let cursorY = margin.top;
 
       drawHeader(doc, pageWidth);
-
-      const boxPadding = 15;
-      const lineHeight = 20;
-      const labelWidth = 130;
-      const valueMaxWidth = contentWidth - labelWidth - boxPadding * 2 - 20;
-      const imagesPerRow = 4;
-      const imageMargin = 12;
-      const paddingHorizontal = boxPadding * 2;
-      const totalMargins = imageMargin * (imagesPerRow - 1);
-      const imageSize =
-        (contentWidth - totalMargins - paddingHorizontal) / imagesPerRow;
 
       const roundedRect = (x, y, w, h, r) => {
         doc.roundedRect(x, y, w, h, r, r);
@@ -229,28 +215,28 @@ const ExportPDFButton = ({ data = [], loading }) => {
           );
         });
 
-        const attrLines = entries.length;
+        const attrHeight = boxPadding * 2 + 30 + entries.length * lineHeight;
+
         const photos = Array.isArray(item.fotos) ? item.fotos : [];
+        const photoTitleHeight = photos.length > 0 ? 30 : 0;
         const photoRows = Math.ceil(photos.length / imagesPerRow);
+        const photosHeight = photoRows * (imageSize + imageMargin);
+        const totalHeight = attrHeight + photoTitleHeight + photosHeight;
 
-        const boxHeight =
-          boxPadding * 2 +
-          30 +
-          attrLines * lineHeight +
-          (photos.length > 0 ? 30 : 0) +
-          photoRows * (imageSize + imageMargin) -
-          15;
-
-        if (index > 0 || cursorY + boxHeight > pageHeight - footerHeight) {
-          doc.addPage();
-          drawHeader(doc, pageWidth);
-          cursorY = margin.top;
+        if (cursorY + totalHeight > pageHeight - footerHeight) {
+          const isFirstPage =
+            doc.internal.getNumberOfPages() === 1 && cursorY === margin.top;
+          if (!isFirstPage) {
+            doc.addPage();
+            drawHeader(doc, pageWidth);
+            cursorY = margin.top;
+          }
         }
 
         doc.setDrawColor("#BBBBBB");
         doc.setFillColor("#F9F9F9");
         doc.setLineWidth(0.7);
-        roundedRect(margin.left, cursorY, contentWidth, boxHeight, 6);
+        roundedRect(margin.left, cursorY, contentWidth, attrHeight, 6);
         doc.setFillColor(255);
 
         const titulo = `${item.folio || ""} - ${
@@ -291,8 +277,10 @@ const ExportPDFButton = ({ data = [], loading }) => {
             .replace(/\b\w/g, (c) => c.toUpperCase());
 
           const valStr = String(value);
-          const maxChars = Math.floor(valueMaxWidth / 6);
-          let displayVal =
+          const maxChars = Math.floor(
+            (contentWidth - labelWidth - boxPadding * 2 - 20) / 6
+          );
+          const displayVal =
             valStr.length > maxChars
               ? valStr.slice(0, maxChars - 3) + "..."
               : valStr;
@@ -317,24 +305,69 @@ const ExportPDFButton = ({ data = [], loading }) => {
           attrY += lineHeight;
         });
 
+        cursorY += attrHeight + 10;
+
+        // ExportPDFButton.js
+        // ...mantén todos los imports que ya tienes sin cambios...
+
+        // Dentro de generatePDF (reemplaza solo la parte de generación de fotos):
         if (photos.length > 0) {
-          const fotosTitleY = attrY;
-          doc.setFontSize(10);
-          doc.setFont(undefined, "bold");
-          doc.setTextColor("#333");
-          doc.text("Fotos:", margin.left + boxPadding, fotosTitleY);
+          const renderPhotoTitle = () => {
+            doc.setFontSize(10);
+            doc.setFont(undefined, "bold");
+            doc.setTextColor("#333");
+            doc.text("Fotos:", margin.left + boxPadding, cursorY + 10);
+            cursorY += 20;
+          };
 
           let photoX = margin.left + boxPadding;
-          let photoY = fotosTitleY + lineHeight / 2;
+          let photoY = cursorY;
+
+          const maxImageHeightFirstRow = imageSize + footerHeight + 20; // 20 por el título y padding
+
+          // Verificamos si la PRIMERA FILA de fotos cabe con el título
+          const needsPageBreak = photoY + maxImageHeightFirstRow > pageHeight;
+
+          if (needsPageBreak) {
+            if (doc.internal.getNumberOfPages() > 1 || cursorY > margin.top) {
+              doc.addPage();
+              drawHeader(doc, pageWidth);
+            }
+            photoY = margin.top;
+            cursorY = margin.top;
+          }
+
+          renderPhotoTitle(); // Se dibuja después del salto de página si fue necesario
+          photoY = cursorY;
 
           photos.forEach((photo, i) => {
             if (!photo.imagen64) return;
 
-            if (i > 0 && i % imagesPerRow === 0) {
+            // Si es nueva fila
+            const isNewRow = i % imagesPerRow === 0 && i !== 0;
+            if (isNewRow) {
               photoX = margin.left + boxPadding;
               photoY += imageSize + imageMargin;
+
+              if (photoY + imageSize + footerHeight > pageHeight) {
+                doc.addPage();
+                drawHeader(doc, pageWidth);
+                photoY = margin.top;
+                renderPhotoTitle();
+                photoX = margin.left + boxPadding;
+              }
             }
 
+            // Verificamos si la imagen actual cabe, si no, nueva página
+            if (photoY + imageSize + footerHeight > pageHeight) {
+              doc.addPage();
+              drawHeader(doc, pageWidth);
+              photoY = margin.top;
+              renderPhotoTitle();
+              photoX = margin.left + boxPadding;
+            }
+
+            // Render foto con borde
             const borderPadding = 3;
             doc.setDrawColor("#CCCCCC");
             doc.setLineWidth(0.4);
@@ -360,9 +393,11 @@ const ExportPDFButton = ({ data = [], loading }) => {
 
             photoX += imageSize + imageMargin;
           });
-        }
 
-        cursorY += boxHeight + 15;
+          cursorY = photoY + imageSize + 20;
+        } else {
+          cursorY += 20;
+        }
       });
 
       const totalPages = doc.internal.getNumberOfPages();
@@ -371,10 +406,9 @@ const ExportPDFButton = ({ data = [], loading }) => {
         drawFooter(doc, pageWidth, pageHeight, i, totalPages);
       }
 
-      // Guardar PDF
       const today = new Date();
       const dateString = today.toISOString().split("T")[0];
-      doc.save(`inventario_${dateString.trim()}.pdf`);
+      doc.save(`inventario_${dateString}.pdf`);
     } catch (error) {
       console.error("Error generando PDF:", error);
     } finally {
@@ -384,10 +418,7 @@ const ExportPDFButton = ({ data = [], loading }) => {
 
   const handleExportPDF = () => {
     if (!data.length) return;
-
     setLoadingGenerate(true);
-
-    // Espera un pequeño delay para que React actualice el DOM antes de generar el PDF
     setTimeout(() => {
       generatePDF();
     }, 50);
@@ -420,7 +451,6 @@ const ExportPDFButton = ({ data = [], loading }) => {
     >
       {loadingGenerate ? (
         <div className="flex items-center">
-          {/* 3 dots with Tailwind animate-ping and delay */}
           <span
             className="w-2 h-2 bg-current rounded-full animate-ping"
             style={{ animationDelay: "0s" }}

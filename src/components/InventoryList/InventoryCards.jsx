@@ -127,7 +127,13 @@ function InventoryCards({ inventory, loading }) {
                 >
                   <CardMedia
                     component="img"
-                    sx={{ width: 140, objectFit: "cover", borderRadius: 2 }}
+                    sx={{
+                      width: 140,
+                      objectFit: "cover",
+                      borderRadius: 2,
+                      height: 200,
+                      flexShrink: 0,
+                    }}
                     image={imageUrl}
                     alt={item.nombre || "Imagen del artículo"}
                   />
