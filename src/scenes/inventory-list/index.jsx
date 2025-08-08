@@ -150,6 +150,23 @@ function Index() {
     setAddingFilter("");
   };
 
+  const handleSaveItem = (updatedInventory) => {
+  setAllInventory(updatedInventory);
+
+  setFilteredObjects((prev) => {
+    // Actualizamos el último filtro con el inventario actualizado, 
+    // manteniendo la estructura de los filtros previos
+    const lastFiltered = prev.length > 0 ? prev[prev.length - 1] : [];
+    const newFiltered = lastFiltered.map((item) => {
+      return updatedInventory.find(
+        (inv) => inv.id_articulo === item.id_articulo
+      ) || item;
+    });
+
+    return [...prev.slice(0, -1), newFiltered];
+  });
+};
+
   return (
     <div className="p-4 space-y-6">
       <div className="max-w-full mx-auto font-[sans-serif]">
@@ -368,6 +385,7 @@ function Index() {
                   : []
               }
               loading={loading}
+               onSaveItem={handleSaveItem}
             />
           )}
         </div>

@@ -13,11 +13,11 @@ import {
   Box,
   Tooltip,
   TextField,
-  InputAdornment, // Importar TextField
+  InputAdornment,
 } from "@mui/material";
 import { tokens } from "../../theme";
 import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
-import { useSpring, animated } from "@react-spring/web"; // Nuevo import
+import { useSpring, animated } from "@react-spring/web";
 import {
   KeyboardArrowDown,
   OpenInNewOutlined,
@@ -28,11 +28,16 @@ import InventoryDetailModal from "./InventoryCards/InventoryDetailModal";
 import ExportToExcelButton from "./InventoryCards/ExportToExcelButton";
 import ExportPDFButton from "./InventoryCards/ExportPDFButton";
 
-function InventoryCards({ inventory, loading }) {
+function InventoryCards({ inventoryCopy, loading, onSaveItem }) {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const [localInventory, setLocalInventory] = useState(inventoryCopy || []);
   const [selectedItem, setSelectedItem] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
+
+  useEffect(() => {
+    setLocalInventory(inventoryCopy || []);
+  }, [inventoryCopy]);
 
   const handleViewDetails = (item) => {
     setSelectedItem(item);
@@ -42,6 +47,13 @@ function InventoryCards({ inventory, loading }) {
   const handleCloseModal = () => {
     setModalOpen(false);
     setSelectedItem(null);
+  };
+
+  const handleSaveItem = (id_articulo, changes) => {
+    console.log("Guardar cambios para artículo", id_articulo, changes);
+    if (onSaveItem) {
+      onSaveItem(id_articulo, changes);
+    }
   };
 
   if (loading) {
@@ -87,7 +99,7 @@ function InventoryCards({ inventory, loading }) {
     );
   }
 
-  if (!inventory || inventory.length === 0) {
+  if (!localInventory || localInventory.length === 0) {
     return (
       <Box className="text-center py-10" sx={{ color: colors.redAccent[300] }}>
         <SearchOff sx={{ fontSize: 40 }} />
@@ -99,7 +111,7 @@ function InventoryCards({ inventory, loading }) {
   return (
     <>
       <Grid container spacing={3}>
-        {inventory.map((item, index) => {
+        {localInventory.map((item, index) => {
           const imageUrl =
             item.fotos && item.fotos.length > 0
               ? item.fotos[0].url_imagen
@@ -237,21 +249,31 @@ function InventoryCards({ inventory, loading }) {
         open={modalOpen}
         onClose={handleCloseModal}
         item={selectedItem}
+        onSave={handleSaveItem}
       />
     </>
   );
 }
 
-function InventoryViewer({ inventory, loading }) {
+function InventoryViewer({ inventory, loading, onSaveItem  }) {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [itemsToShow, setItemsToShow] = useState(20);
   const [loadingMore, setLoadingMore] = useState(false);
   const prevCount = useRef(0);
   const [searchTerm, setSearchTerm] = useState("");
-  const [isSearching, setIsSearching] = useState(false); // Estado para búsqueda
+  const [isSearching, setIsSearching] = useState(false);
+  const [inventoryCopy, setInventoryCopy] = useState([]);
 
-  // Efecto para simular delay al buscar
+  // Copiar inventario cuando cambia inventory prop
+  useEffect(() => {
+    if (inventory && inventory.length > 0) {
+      setInventoryCopy([...inventory]);
+    } else {
+      setInventoryCopy([]);
+    }
+  }, [inventory]);
+
   useEffect(() => {
     if (!searchTerm) {
       setIsSearching(false);
@@ -261,24 +283,22 @@ function InventoryViewer({ inventory, loading }) {
     setIsSearching(true);
     const delay = setTimeout(() => {
       setIsSearching(false);
-    }, 300); // Delay para mostrar spinner
+    }, 300);
 
     return () => clearTimeout(delay);
   }, [searchTerm]);
 
-  // Filtrar inventario con base en searchTerm (insensible a mayúsculas)
   const filteredInventory = React.useMemo(() => {
-    if (!searchTerm) return inventory;
+    if (!searchTerm) return inventoryCopy;
     const lowerSearch = searchTerm.toLowerCase();
 
-    return inventory.filter((item) => {
-      // Convertimos todos los valores del objeto a texto y buscamos coincidencias
+    return inventoryCopy.filter((item) => {
       return Object.values(item).some((value) => {
         if (!value) return false;
         return String(value).toLowerCase().includes(lowerSearch);
       });
     });
-  }, [searchTerm, inventory]);
+  }, [searchTerm, inventoryCopy]);
 
   const totalItems = filteredInventory.length;
   const visibleItems = filteredInventory.slice(0, itemsToShow);
@@ -293,7 +313,7 @@ function InventoryViewer({ inventory, loading }) {
   });
 
   useEffect(() => {
-    setItemsToShow(20); // Reset al cambiar filtro o inventario
+    setItemsToShow(20);
   }, [filteredInventory]);
 
   const handleLoadMore = () => {
@@ -302,6 +322,68 @@ function InventoryViewer({ inventory, loading }) {
       setItemsToShow((prev) => Math.min(prev + 20, totalItems));
       setLoadingMore(false);
     }, 500);
+  };
+
+  // Función para actualizar inventoryCopy con cambios de fotos
+  // const handleSaveItem = (id_articulo, changes) => {
+  //   setInventoryCopy((currentInventory) => {
+  //     return currentInventory.map((item) => {
+  //       if (item.id_articulo !== id_articulo) return item;
+
+  //       let updatedPhotos = item.fotos ? [...item.fotos] : [];
+
+  //       if (changes.deletedPhotoIds && changes.deletedPhotoIds.length > 0) {
+  //         updatedPhotos = updatedPhotos.filter(
+  //           (photo) => !changes.deletedPhotoIds.includes(photo.id_foto_articulo)
+  //         );
+  //       }
+
+  //       if (changes.newPhotos && changes.newPhotos.length > 0) {
+  //         // Limpiamos properties para evitar objetos pesados
+  //         const newPhotosCleaned = changes.newPhotos.map(
+  //           ({ file, imagen64, ...rest }) => rest
+  //         );
+  //         updatedPhotos = [...updatedPhotos, ...newPhotosCleaned];
+  //       }
+
+  //       return {
+  //         ...item,
+  //         fotos: updatedPhotos,
+  //       };
+  //     });
+  //   });    
+  // };
+
+  const handleSaveItem = (id_articulo, changes) => {
+    setInventoryCopy((currentInventory) => {
+      const updatedInventory = currentInventory.map((item) => {
+        if (item.id_articulo !== id_articulo) return item;
+
+        let updatedPhotos = item.fotos ? [...item.fotos] : [];
+
+        if (changes.deletedPhotoIds && changes.deletedPhotoIds.length > 0) {
+          updatedPhotos = updatedPhotos.filter(
+            (photo) => !changes.deletedPhotoIds.includes(photo.id_foto_articulo)
+          );
+        }
+
+        if (changes.newPhotos && changes.newPhotos.length > 0) {
+          const newPhotosCleaned = changes.newPhotos.map(
+            ({ file, imagen64, ...rest }) => rest
+          );
+          updatedPhotos = [...updatedPhotos, ...newPhotosCleaned];
+        }
+
+        return { ...item, fotos: updatedPhotos };
+      });
+
+      // Propagar hacia el padre el inventario completo actualizado
+      if (onSaveItem) {
+        onSaveItem(updatedInventory);
+      }
+
+      return updatedInventory;
+    });
   };
 
   return (
@@ -410,17 +492,19 @@ function InventoryViewer({ inventory, loading }) {
         <Grid item xs={12} md={2}>
           <ExportToExcelButton data={filteredInventory} loading={loading} />
         </Grid>
-        {/* Exportar a PDF (2 col) */}
         <Grid item xs={12} md={2}>
           <ExportPDFButton data={filteredInventory} loading={loading} />
         </Grid>
 
-        {/* Espacio vacío (4 col) */}
         <Grid item xs={12} md={4} />
       </Grid>
 
       {/* Cards */}
-      <InventoryCards inventory={visibleItems} loading={loading} />
+      <InventoryCards
+        inventoryCopy={visibleItems}
+        loading={loading}
+         onSaveItem={handleSaveItem}
+      />
 
       {/* Indicador inferior */}
       <Typography
