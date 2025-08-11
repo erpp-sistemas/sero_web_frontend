@@ -24,6 +24,7 @@ import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
 import SaveIcon from "@mui/icons-material/Save";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
+import { updateArticlePhotos } from "../../../api/inventory";
 import { tokens } from "../../../theme";
 
 const InventoryDetailModal = ({ open, onClose, item, onSave }) => {
@@ -146,12 +147,11 @@ const InventoryDetailModal = ({ open, onClose, item, onSave }) => {
     setConfirmSaveDialog(true);
   };
 
-  const confirmAndSave = () => {
+  const confirmAndSave = async () => {
     setConfirmSaveDialog(false);
     setSaving(true);
 
-    // Simulación de llamada backend (200ms)
-    setTimeout(() => {
+    try {
       const deletedPhotoIds = photosToDelete.map(
         (photo) => photo.id_foto_articulo
       );
@@ -165,16 +165,28 @@ const InventoryDetailModal = ({ open, onClose, item, onSave }) => {
       }));
 
       // Log para enviar datos al backend
-      console.log("📸 Guardando cambios de fotos:", {
+      // console.log("📸 Guardando cambios de fotos:", {
+      //   id_articulo,
+      //   deletedPhotoIds,
+      //   newPhotosFormatted,
+      // });
+
+      const payload = {
         id_articulo,
         deletedPhotoIds,
-        newPhotosFormatted,
-      });
+        newPhotos: newPhotosFormatted,
+      };
+
+      console.log(payload);
+
+      const response = await updateArticlePhotos(payload);
+
+      console.log(response);
 
       if (onSave) {
         onSave(id_articulo, {
           deletedPhotoIds,
-          newPhotos: newPhotosFormatted,
+          newPhotos: response.newPhotos,
         });
       }
 
@@ -187,7 +199,7 @@ const InventoryDetailModal = ({ open, onClose, item, onSave }) => {
 
         const fotosConNuevas = [
           ...fotosActualizadas,
-          ...newPhotosFormatted.map(({ id_foto_articulo, url_imagen }) => ({
+          ...response.newPhotos.map(({ id_foto_articulo, url_imagen }) => ({
             id_foto_articulo,
             url_imagen,
           })),
@@ -202,9 +214,13 @@ const InventoryDetailModal = ({ open, onClose, item, onSave }) => {
       setPhotosToDelete([]);
       setNewPhotos([]);
       setIsEditing(false);
-      setSaving(false);
+      // setSaving(false);
       setSaveSuccess(true);
-    }, 1000);
+    } catch (error) {
+      console.error("Error al guardar fotos:", error);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleCancelEdit = () => {
