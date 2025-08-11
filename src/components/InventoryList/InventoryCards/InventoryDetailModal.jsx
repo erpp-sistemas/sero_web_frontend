@@ -16,6 +16,7 @@ import {
   DialogActions,
   Snackbar,
   Alert,
+  Tooltip,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -26,6 +27,11 @@ import SaveIcon from "@mui/icons-material/Save";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import { updateArticlePhotos } from "../../../api/inventory";
 import { tokens } from "../../../theme";
+import {
+  CheckCircleOutline,
+  DeleteOutline,
+  WarningAmberOutlined,
+} from "@mui/icons-material";
 
 const InventoryDetailModal = ({ open, onClose, item, onSave }) => {
   console.log(item);
@@ -280,11 +286,14 @@ const InventoryDetailModal = ({ open, onClose, item, onSave }) => {
               sx={{
                 textTransform: "none",
                 borderRadius: "10px",
+                borderColor: colors.grey[300],
                 color: colors.grey[800],
                 fontWeight: 500,
                 fontSize: "0.875rem",
-                display: "flex",
-                gap: "8px",
+                "&:hover": {
+                  backgroundColor: colors.grey[100],
+                  borderColor: colors.primary[300],
+                },
               }}
               startIcon={
                 isEditing ? <CancelOutlinedIcon /> : <EditOutlinedIcon />
@@ -302,7 +311,7 @@ const InventoryDetailModal = ({ open, onClose, item, onSave }) => {
             </Button>
 
             {/* Botón subir imagenes estilizado */}
-            {isEditing && (
+            {isEditing && (              
               <>
                 <input
                   accept="image/*"
@@ -323,10 +332,14 @@ const InventoryDetailModal = ({ open, onClose, item, onSave }) => {
                     sx={{
                       textTransform: "none",
                       borderRadius: "10px",
+                      borderColor: colors.grey[300],
+                      color: colors.grey[800],
                       fontWeight: 500,
                       fontSize: "0.875rem",
-                      color: colors.grey[100],
-                      minWidth: "150px",
+                      "&:hover": {
+                        backgroundColor: colors.grey[100],
+                        borderColor: colors.primary[300],
+                      },
                     }}
                     disabled={saving}
                   >
@@ -345,10 +358,14 @@ const InventoryDetailModal = ({ open, onClose, item, onSave }) => {
                   sx={{
                     textTransform: "none",
                     borderRadius: "10px",
+                    borderColor: colors.grey[300],
+                    color: colors.grey[800],
                     fontWeight: 500,
                     fontSize: "0.875rem",
-                    display: "flex",
-                    gap: "8px",
+                    "&:hover": {
+                      backgroundColor: colors.grey[100],
+                      borderColor: colors.primary[300],
+                    },
                   }}
                   startIcon={<SaveIcon />}
                   onClick={handleSaveChanges}
@@ -403,38 +420,63 @@ const InventoryDetailModal = ({ open, onClose, item, onSave }) => {
                       }}
                     />
                     {isEditing && !isMarkedForDeletion && (
-                      <IconButton
-                        size="small"
-                        onClick={() => openConfirmDeleteDialog(idx)}
-                        sx={{
-                          position: "absolute",
-                          top: 5,
-                          right: 5,
-                          backgroundColor: colors.grey[200],
-                          "&:hover": {
-                            backgroundColor: colors.redAccent[500],
-                          },
-                        }}
-                      >
-                        <DeleteIcon sx={{ fontSize: 18 }} />
-                      </IconButton>
+                      <Tooltip title="Eliminar imagen" arrow>
+                        <IconButton
+                          size="small"
+                          onClick={() => openConfirmDeleteDialog(idx)}
+                          sx={{
+                            position: "absolute",
+                            top: 5,
+                            right: 5,
+                            backgroundColor: "rgba(255,255,255,0.8)", // 🔹 Fondo muy sutil
+                            border: "1px solid",
+                            borderColor: colors.grey[300],
+                            borderRadius: "6px", // 🔹 Esquinas suaves
+                            padding: "4px",
+                            transition: "all 0.2s ease",
+                            "&:hover": {
+                              backgroundColor: colors.grey[100],
+                              borderColor: colors.primary[300],
+                            },
+                          }}
+                        >
+                          <DeleteIcon
+                            sx={{ fontSize: 18, color: colors.grey[700] }}
+                          />
+                        </IconButton>
+                      </Tooltip>
                     )}
                     {isEditing && isMarkedForDeletion && (
-                      <IconButton
-                        size="small"
-                        onClick={() => handleUndoDelete(foto.id_foto_articulo)}
-                        sx={{
-                          position: "absolute",
-                          top: 5,
-                          right: 5,
-                          backgroundColor: colors.grey[200],
-                          "&:hover": {
-                            backgroundColor: colors.greenAccent[400],
-                          },
-                        }}
-                      >
-                        <CancelOutlinedIcon sx={{ fontSize: 18 }} />
-                      </IconButton>
+                      <Tooltip title="Deshacer borrado" arrow>
+                        <IconButton
+                          size="small"
+                          onClick={() =>
+                            handleUndoDelete(foto.id_foto_articulo)
+                          }
+                          sx={{
+                            position: "absolute",
+                            top: 5,
+                            right: 5,
+                            backgroundColor: "rgba(255,255,255,0.85)",
+                            border: "1px solid",
+                            borderColor: colors.grey[300],
+                            borderRadius: "6px",
+                            padding: "4px",
+                            transition: "all 0.2s ease",
+                            "&:hover": {
+                              backgroundColor: colors.grey[100],
+                              borderColor: colors.greenAccent[300],
+                              "& .MuiSvgIcon-root": {
+                                color: colors.greenAccent[500],
+                              },
+                            },
+                          }}
+                        >
+                          <CancelOutlinedIcon
+                            sx={{ fontSize: 18, color: colors.grey[700] }}
+                          />
+                        </IconButton>
+                      </Tooltip>
                     )}
                   </Box>
                 </Grid>
@@ -509,6 +551,8 @@ const InventoryDetailModal = ({ open, onClose, item, onSave }) => {
             </Box>
           )}
 
+          <Divider sx={{ mb: 2, bgcolor: colors.grey[700] }} />
+
           {/* Usuario */}
           {usuario && (
             <Box display="flex" alignItems="center" mb={2}>
@@ -531,8 +575,6 @@ const InventoryDetailModal = ({ open, onClose, item, onSave }) => {
               </Box>
             </Box>
           )}
-
-          <Divider sx={{ mb: 2, bgcolor: colors.grey[700] }} />
 
           {/* Detalles */}
           <Grid container spacing={2}>
@@ -562,19 +604,74 @@ const InventoryDetailModal = ({ open, onClose, item, onSave }) => {
           <Dialog
             open={confirmDialog.open}
             onClose={() => setConfirmDialog({ open: false, index: null })}
+            PaperProps={{
+              sx: {
+                borderRadius: "12px",
+                padding: "8px",
+                boxShadow: "0px 4px 14px rgba(0,0,0,0.08)", // Sombra suave
+                minWidth: 320,
+              },
+            }}
           >
-            <DialogTitle>¿Deseas eliminar esta foto?</DialogTitle>
-            <DialogActions>
+            <DialogTitle
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+                fontSize: "1rem",
+                fontWeight: 500,
+                color: colors.grey[100],
+                pb: 1,
+              }}
+            >
+              <WarningAmberOutlined
+                sx={{ color: colors.yellowAccent[500], fontSize: 22 }}
+              />
+              ¿Deseas eliminar esta foto?
+            </DialogTitle>
+            <DialogActions sx={{ p: 2, pt: 0 }}>
               <Button
                 onClick={() => setConfirmDialog({ open: false, index: null })}
                 disabled={saving}
+                sx={{
+                  textTransform: "none",
+                  borderRadius: "6px",
+                  color: colors.grey[700],
+                  backgroundColor: "rgba(255,255,255,0.85)",
+                  border: "1px solid",
+                  borderColor: colors.grey[300],
+                  "&:hover": {
+                    backgroundColor: colors.grey[100],
+                    borderColor: colors.grey[400],
+                  },
+                }}
               >
                 Cancelar
               </Button>
               <Button
                 onClick={() => handleDeletePhoto(confirmDialog.index)}
-                color="error"
                 disabled={saving}
+                startIcon={
+                  <DeleteOutline
+                    sx={{ fontSize: 18, color: colors.grey[700] }}
+                  />
+                }
+                sx={{
+                  textTransform: "none",
+                  borderRadius: "6px",
+                  color: colors.grey[700],
+                  backgroundColor: "rgba(255,255,255,0.85)",
+                  border: "1px solid",
+                  borderColor: colors.grey[300],
+                  "&:hover": {
+                    backgroundColor: colors.redAccent[300],
+                    borderColor: colors.redAccent[500],
+                    color: colors.grey[100],
+                    "& .MuiSvgIcon-root": {
+                      color: colors.redAccent[500],
+                    },
+                  },
+                }}
               >
                 Eliminar
               </Button>
@@ -585,19 +682,74 @@ const InventoryDetailModal = ({ open, onClose, item, onSave }) => {
           <Dialog
             open={confirmSaveDialog}
             onClose={() => setConfirmSaveDialog(false)}
+            PaperProps={{
+              sx: {
+                borderRadius: "12px",
+                padding: "8px",
+                boxShadow: "0px 4px 14px rgba(0,0,0,0.08)",
+                minWidth: 320,
+              },
+            }}
           >
-            <DialogTitle>¿Deseas guardar los cambios?</DialogTitle>
+            <DialogTitle
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+                fontSize: "1rem",
+                fontWeight: 500,
+                color: colors.grey[100],
+                pb: 1,
+              }}
+            >
+              <CheckCircleOutline
+                sx={{ color: colors.greenAccent[500], fontSize: 22 }}
+              />
+              ¿Deseas guardar los cambios?
+            </DialogTitle>
             <DialogActions>
               <Button
                 onClick={() => setConfirmSaveDialog(false)}
                 disabled={saving}
+                sx={{
+                  textTransform: "none",
+                  borderRadius: "6px",
+                  color: colors.grey[700],
+                  backgroundColor: "rgba(255,255,255,0.85)",
+                  border: "1px solid",
+                  borderColor: colors.grey[300],
+                  "&:hover": {
+                    backgroundColor: colors.grey[100],
+                    borderColor: colors.grey[400],
+                  },
+                }}
               >
                 Cancelar
               </Button>
               <Button
                 onClick={confirmAndSave}
-                color="success"
                 disabled={saving}
+                startIcon={
+                  <CheckCircleOutline
+                    sx={{ fontSize: 18, color: colors.grey[700] }}
+                  />
+                }
+                sx={{
+                  textTransform: "none",
+                  borderRadius: "6px",
+                  color: colors.grey[700],
+                  backgroundColor: "rgba(255,255,255,0.85)",
+                  border: "1px solid",
+                  borderColor: colors.grey[300],
+                  "&:hover": {
+                    backgroundColor: colors.greenAccent[100],
+                    borderColor: colors.greenAccent[300],
+                    color: colors.grey[100],
+                    "& .MuiSvgIcon-root": {
+                      color: colors.greenAccent[500],
+                    },
+                  },
+                }}
               >
                 Confirmar
               </Button>
