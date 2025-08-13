@@ -222,7 +222,7 @@ function Index() {
           <SubcategorySelect
             subcategories={filteredSubcategories}
             selectedSubcategory={selectedSubcategory}
-            handleSubcategoryChange={handleSubcategoryChange}
+            handleSubcategoryChange={handleSubcategoryChange}            
           />
           <PlaceSelectArray
             selectedPlace={selectedPlace}

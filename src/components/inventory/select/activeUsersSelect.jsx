@@ -18,6 +18,8 @@ function ActiveUsersSelect({ selectedUser, handleUserChange }) {
       setLoading(true);
       try {
         const res = await getAllActiveUsers();
+
+         await new Promise((resolve) => setTimeout(resolve, 300));
         setUsers(res);
 
         if (!selectedUser && res.length > 0) {

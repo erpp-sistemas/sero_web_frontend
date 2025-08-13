@@ -88,7 +88,7 @@ function CategorySelect({ selectedCategory, handleCategoryChange }) {
         <Box
           sx={{
             position: "absolute",
-            top: "50%",
+            top: "25%",
             right: 0,
             display: "flex",
             alignItems: "center",
