@@ -7,6 +7,7 @@ import Avatar from "@mui/material/Avatar";
 import { getAllActiveUsers } from "../../../api/user";
 import Lottie from "lottie-react";
 import loadingAnimation from "../../../../public/loading-8.json";
+import KeyboardArrowDown from "@mui/icons-material/KeyboardArrowDown";
 
 function ActiveUsersSelect({ selectedUser, handleUserChange }) {
   const [users, setUsers] = useState([]);
@@ -45,15 +46,46 @@ function ActiveUsersSelect({ selectedUser, handleUserChange }) {
         select
         label="Usuario"
         variant="outlined"
-        sx={{ width: "100%" }}
+        size="small"
         value={selectedUser?.id_usuario || ""}
         onChange={handleChange}
         disabled={loading}
+        sx={{
+          width: "100%",
+          backgroundColor: "transparent",
+          borderRadius: "8px",
+          fontSize: "0.875rem",
+          "& .MuiOutlinedInput-notchedOutline": {
+            borderColor: "#D1D5DB",
+          },
+          "&:hover .MuiOutlinedInput-notchedOutline": {
+            borderColor: "#3B82F6",
+          },
+          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+            borderColor: "#2563EB",
+          },
+        }}
+        SelectProps={{
+          IconComponent: (props) => (
+            <KeyboardArrowDown {...props} sx={{ fontSize: 18 }} />
+          ),
+        }}
       >
         {users.map((user) => (
           <MenuItem key={user.id_usuario} value={user.id_usuario}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2, width: "100%" }}>
-              <Avatar src={user.url_image || ""} alt={user.nombre} sx={{ width: 40, height: 40 }} />
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 2,
+                width: "100%",
+              }}
+            >
+              <Avatar
+                src={user.url_image || ""}
+                alt={user.nombre}
+                sx={{ width: 40, height: 40 }}
+              />
               <Box sx={{ display: "flex", flexDirection: "column" }}>
                 <Typography variant="body1" fontWeight="bold">
                   {user.nombre}

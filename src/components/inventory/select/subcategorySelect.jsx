@@ -1,5 +1,12 @@
 import React, { useEffect } from "react";
-import { MenuItem, TextField, Typography } from "@mui/material";
+import {
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Typography,
+} from "@mui/material";
+import KeyboardArrowDown from "@mui/icons-material/KeyboardArrowDown";
 
 const SubcategorySelect = ({
   subcategories,
@@ -8,11 +15,7 @@ const SubcategorySelect = ({
   loading,
 }) => {
   useEffect(() => {
-    if (
-      !loading &&
-      subcategories.length > 0 &&
-      !selectedSubcategory
-    ) {
+    if (!loading && subcategories.length > 0 && !selectedSubcategory) {
       handleSubcategoryChange({
         target: {
           value: subcategories[0].id_subcategoria_inventario,
@@ -22,38 +25,52 @@ const SubcategorySelect = ({
   }, [loading, subcategories, selectedSubcategory]);
 
   return (
-    <TextField
-      fullWidth
-      select
-      label="Selecciona Subcategoría"
-      value={selectedSubcategory || ""}
-      onChange={handleSubcategoryChange}
-      variant="outlined"
-      disabled={loading}
-    >
-      {loading ? (
-        <MenuItem disabled>
-          <Typography variant="body2" color="textSecondary">
-            Cargando...
-          </Typography>
-        </MenuItem>
-      ) : subcategories.length === 0 ? (
-        <MenuItem disabled>
-          <Typography variant="body2" color="textSecondary">
-            Sin subcategorías disponibles
-          </Typography>
-        </MenuItem>
-      ) : (
-        subcategories.map((sub) => (
-          <MenuItem
-            key={sub.id_subcategoria_inventario}
-            value={sub.id_subcategoria_inventario}
-          >
-            {sub.nombre_subcategoria}
+    <FormControl fullWidth size="small" variant="outlined" disabled={loading}>
+      <InputLabel id="subcategory-select-label">Selecciona Subcategoría</InputLabel>
+      <Select
+        labelId="subcategory-select-label"
+        value={selectedSubcategory || ""}
+        label="Selecciona Subcategoría"
+        onChange={handleSubcategoryChange}
+        IconComponent={(props) => (
+          <KeyboardArrowDown {...props} sx={{ fontSize: 18 }} />
+        )}
+        sx={{
+          backgroundColor: "transparent",
+          borderRadius: "8px",
+          fontSize: "0.875rem",
+          "& .MuiOutlinedInput-notchedOutline": {
+            borderColor: "rgba(128,128,128,0.3)",
+          },
+          "&:hover .MuiOutlinedInput-notchedOutline": {
+            borderColor: "rgba(0,120,212,0.6)",
+          },
+          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+            borderColor: "rgba(0,120,212,1)",
+          },
+        }}
+      >
+        {loading ? (
+          <MenuItem disabled>
+            <Typography variant="body2" color="textSecondary">
+              Cargando...
+            </Typography>
           </MenuItem>
-        ))
-      )}
-    </TextField>
+        ) : subcategories.length === 0 ? (
+          <MenuItem disabled>
+            <Typography variant="body2" color="textSecondary">
+              Sin subcategorías disponibles
+            </Typography>
+          </MenuItem>
+        ) : (
+          subcategories.map((sub) => (
+            <MenuItem key={sub.id_subcategoria_inventario} value={sub.id_subcategoria_inventario}>
+              {sub.nombre_subcategoria}
+            </MenuItem>
+          ))
+        )}
+      </Select>
+    </FormControl>
   );
 };
 

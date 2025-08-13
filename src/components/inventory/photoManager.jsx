@@ -3,7 +3,7 @@ import { Button, IconButton, Snackbar, Alert, Typography } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useTheme } from "@mui/material";
 import { tokens } from "../../theme";
-import { AddPhotoAlternate, Margin } from "@mui/icons-material";
+import { NoPhotographyOutlined, UploadFile } from "@mui/icons-material";
 
 function PhotosManager({ photos, setPhotos }) {
   const inputFileRef = useRef(null);
@@ -34,15 +34,14 @@ function PhotosManager({ photos, setPhotos }) {
       setAlertOpen(true);
     }
 
-    // Leer cada archivo como base64 y actualizar el estado
     newFiles.forEach((file) => {
       const reader = new FileReader();
       reader.onloadend = () => {
         const newPhoto = {
           id: Date.now() + Math.random(),
-          url: reader.result, // base64 para mostrar la imagen
-          file,               // archivo original
-          base64: reader.result, // base64 para guardar/enviar
+          url: reader.result,
+          file,
+          base64: reader.result,
         };
         setPhotos((prev) => [...prev, newPhoto]);
       };
@@ -59,29 +58,41 @@ function PhotosManager({ photos, setPhotos }) {
   return (
     <div className="w-full">
       <Typography
-        variant="h6"
+        variant="subtitle1"
         sx={{
-          fontWeight: "bold",
-          paddingBottom: 1,
+          fontWeight: 600,
+          marginBottom: 1.5, // 12px aprox
           color: colors.accentGreen[100],
         }}
       >
-        Fotografias para subir
+        Fotografías para subir
       </Typography>
 
-      <Button
-        variant="contained"
-        color="info"
-        onClick={handleAddPhotoClick}
-        endIcon={<AddPhotoAlternate />}
-        sx={{
-          borderRadius: "35px",
-          marginBottom: "10px",
-          fontWeight: "bold",
-        }}
-      >
-        Agregar foto
-      </Button>
+      {/* Botón agregar foto */}
+      <div className="mb-5">
+        <Button
+          variant="contained"
+          color="info"
+          onClick={handleAddPhotoClick}
+          endIcon={<UploadFile />}
+          sx={{
+            textTransform: "none",
+            borderRadius: "10px",
+            borderColor: colors.grey[300],
+            color: colors.grey[800],
+            fontWeight: 500,
+            fontSize: "0.875rem",
+            boxShadow: "none",
+            "&:hover": {
+              backgroundColor: colors.grey[100],
+              borderColor: colors.primary[300],
+              boxShadow: "none",
+            },
+          }}
+        >
+          Agregar foto
+        </Button>
+      </div>
 
       <input
         type="file"
@@ -92,28 +103,52 @@ function PhotosManager({ photos, setPhotos }) {
         onChange={handleFileChange}
       />
 
+      {/* Cuadrícula de imágenes */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 gap-4">
         {photos.map((photo) => (
           <div
             key={photo.id}
-            className="relative rounded overflow-hidden shadow"
+            className="relative w-full aspect-square bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200"
           >
             <img
               src={photo.url}
               alt="Foto"
-              className="w-full h-32 object-cover"
+              className="w-full h-full object-cover"
             />
-            <div className="absolute top-1 right-1 bg-black bg-opacity-50 rounded p-1">
-              <IconButton
-                size="small"
-                color="error"
-                onClick={() => handleDeletePhoto(photo.id)}
-              >
-                <DeleteIcon fontSize="small" />
-              </IconButton>
-            </div>
+
+            <IconButton
+              size="small"
+              onClick={() => handleDeletePhoto(photo.id)}
+              sx={{
+                position: "absolute",
+                top: 6,
+                right: 6,
+                backgroundColor: "rgba(255,255,255,0.85)",
+                border: "1px solid",
+                borderColor: colors.grey[300],
+                borderRadius: "6px",
+                padding: "4px",
+                transition: "all 0.2s ease",
+                "&:hover": {
+                  backgroundColor: colors.grey[100],
+                  borderColor: colors.primary[300],
+                },
+              }}
+            >
+              <DeleteIcon sx={{ fontSize: 18, color: colors.grey[700] }} />
+            </IconButton>
           </div>
         ))}
+
+        {/* Mensaje si no hay fotos */}
+        {photos.length === 0 && (
+          <div className="col-span-full flex flex-col justify-center items-center py-8 text-gray-500 border border-dashed border-gray-700 rounded-lg">
+            <NoPhotographyOutlined
+              sx={{ fontSize: 40, color: colors.grey[500], mb: 1 }}
+            />
+            No hay fotos disponibles
+          </div>
+        )}
       </div>
 
       <Snackbar

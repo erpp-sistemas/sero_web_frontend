@@ -1,5 +1,12 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, useTheme } from "@mui/material";
+import {
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  useTheme,
+} from "@mui/material";
 import { tokens } from "../../theme";
 import CategorySelect from "../../components/inventory/select/categorySelect";
 import SubcategorySelect from "../../components/inventory/select/subcategorySelect";
@@ -12,7 +19,15 @@ import {
 } from "../../api/inventory";
 import PhotosManager from "../../components/inventory/photoManager";
 import { Button, Snackbar, Alert } from "@mui/material";
-import { AddCircle } from "@mui/icons-material";
+import {
+  AddBox,
+  AddBoxOutlined,
+  AddCircle,
+  Description,
+  SaveAltOutlined,
+  SaveOutlined,
+  WarningAmberOutlined,
+} from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 
 function Index() {
@@ -44,6 +59,7 @@ function Index() {
 
   const handleCategoryChange = (event) => {
     const selected = event.target.value;
+    console.log(event.target.value);
     setSelectedCategory(selected);
 
     const filtered = allSubcategories.filter(
@@ -55,10 +71,12 @@ function Index() {
 
   const handleSubcategoryChange = (event) => {
     setSelectedSubcategory(event.target.value);
+    console.log(event.target.value);
   };
 
   const handleUserChange = (userData) => {
     setSelectedUser(userData);
+    console.log(userData);
   };
 
   const handleFormChange = (campoId, valor) => {
@@ -66,8 +84,8 @@ function Index() {
   };
 
   const handlePlaceChange = useCallback((placeData) => {
-  setSelectedPlace(placeData);
-}, []);
+    setSelectedPlace(placeData);
+  }, []);
 
   useEffect(() => {
     const fetchSubcategories = async () => {
@@ -235,34 +253,25 @@ function Index() {
         <div className="flex justify-center">
           <Button
             variant="contained"
-            color="primary"
+            color="info"
             onClick={handleAgregarArticulo}
+            endIcon={<AddBoxOutlined/>}
             sx={{
-              borderRadius: "35px",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              backgroundColor: colors.searchButton[100],
-              color: colors.contentSearchButton[100],
-              border: "1px solid #d5e3f5",
-              boxShadow: "0 4px 6px rgba(255, 255, 255, 0.1)",
-              ":hover": {
-                backgroundColor: colors.searchButton[200],
-                boxShadow: "0 8px 12px rgba(255, 255, 255, 0.2)",
+              textTransform: "none",
+              borderRadius: "10px",
+              borderColor: colors.grey[300],
+              color: colors.grey[800],
+              fontWeight: 500,
+              fontSize: "0.875rem",
+              boxShadow: "none",
+              "&:hover": {
+                backgroundColor: colors.grey[100],
+                borderColor: colors.primary[300],
+                boxShadow: "none",
               },
             }}
           >
-            <span
-              style={{
-                flex: 1,
-                textAlign: "center",
-                fontSize: { xs: "0.875rem", sm: "1rem" },
-                fontWeight: "bold",
-              }}
-            >
-              Agregar nuevo artículo
-            </span>
-            <AddCircle sx={{ fontSize: { xs: "1.25rem", sm: "1.5rem" } }} />
+            Agregar nuevo artículo
           </Button>
         </div>
 
@@ -272,7 +281,28 @@ function Index() {
           onClose={() => setShowAlert(false)}
           anchorOrigin={{ vertical: "top", horizontal: "center" }}
         >
-          <Alert severity="warning" onClose={() => setShowAlert(false)}>
+          <Alert
+            severity="warning"
+            onClose={() => setShowAlert(false)}
+            icon={
+              <WarningAmberOutlined
+                sx={{ color: colors.yellowAccent[500], fontSize: 22 }}
+              />
+            }
+            sx={{
+              borderRadius: "12px",
+              padding: "8px 12px",
+              boxShadow: "0px 4px 14px rgba(0,0,0,0.08)",
+              minWidth: 320,
+              fontSize: "0.95rem",
+              fontWeight: 500,
+              color: colors.grey[100],
+              backgroundColor: colors.grey[900], // Fondo similar al diálogo
+              "& .MuiAlert-icon": {
+                alignItems: "center",
+              },
+            }}
+          >
             Por favor completa todos los campos obligatorios.
           </Alert>
         </Snackbar>
@@ -282,13 +312,41 @@ function Index() {
           onClose={() => setOpenConfirmDialog(false)}
           PaperProps={{
             sx: {
-              backgroundColor: theme.palette.background.paper, // ← Color paper
+              borderRadius: "12px",
+              padding: "8px",
+              boxShadow: "0px 4px 14px rgba(0,0,0,0.08)", // Sombra suave
+              minWidth: 320,
             },
           }}
         >
-          <DialogTitle>¿Deseas generar una responsiva?</DialogTitle>
+          <DialogTitle
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              fontSize: "1rem",
+              fontWeight: 500,
+              color: colors.grey[100],
+              pb: 1,
+            }}
+          >
+            <WarningAmberOutlined
+              sx={{ color: colors.yellowAccent[500], fontSize: 22 }}
+            />
+            ¿Deseas generar una responsiva?
+          </DialogTitle>
           <DialogContent>
-            <DialogContentText>
+            <DialogContentText
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+                fontSize: "0.8rem",
+                fontWeight: 500,
+                color: colors.grey[100],
+                pb: 1,
+              }}
+            >
               Esto generará un documento PDF con la información del artículo que
               estás registrando.
             </DialogContentText>
@@ -296,11 +354,28 @@ function Index() {
           <DialogActions>
             <Button
               onClick={() => setOpenConfirmDialog(false)}
-              color="warning"
               variant="contained"
-              sx={{ borderRadius: "20px", fontWeight: "bold" }}
+              startIcon={
+                <SaveOutlined sx={{ fontSize: 18, color: colors.grey[700] }} />
+              }
+              sx={{
+                textTransform: "none",
+                borderRadius: "6px",
+                color: colors.grey[700],
+                backgroundColor: "rgba(255,255,255,0.85)",
+                border: "1px solid",
+                borderColor: colors.grey[300],
+                "&:hover": {
+                  backgroundColor: colors.tealAccent[300],
+                  borderColor: colors.tealAccent[500],
+                  color: colors.grey[100],
+                  "& .MuiSvgIcon-root": {
+                    color: colors.tealAccent[800],
+                  },
+                },
+              }}
             >
-              Cancelar
+              Guardar articulo
             </Button>
             <Button
               onClick={() => {
@@ -312,7 +387,25 @@ function Index() {
               color="info"
               variant="contained"
               autoFocus
-              sx={{ borderRadius: "20px", fontWeight: "bold" }}
+              startIcon={
+                <Description sx={{ fontSize: 18, color: colors.grey[700] }} />
+              }
+              sx={{
+                textTransform: "none",
+                borderRadius: "6px",
+                color: colors.grey[700],
+                backgroundColor: "rgba(255,255,255,0.85)",
+                border: "1px solid",
+                borderColor: colors.grey[300],
+                "&:hover": {
+                  backgroundColor: colors.yellowAccent[300],
+                  borderColor: colors.yellowAccent[500],
+                  color: colors.grey[700],
+                  "& .MuiSvgIcon-root": {
+                    color: colors.yellowAccent[800],
+                  },
+                },
+              }}
             >
               Generar responsiva
             </Button>

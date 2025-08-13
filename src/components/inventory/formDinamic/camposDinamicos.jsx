@@ -5,6 +5,7 @@ import {
   FormControlLabel,
   Typography,
   Skeleton,
+  Grow,
 } from "@mui/material";
 import { useTheme } from "@mui/material";
 import { tokens } from "../../../theme";
@@ -14,7 +15,7 @@ function CamposDinamicos({
   values = {},
   onChange,
   camposConError = [],
-  loading = false, // ← Nueva prop
+  loading = false,
 }) {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -25,17 +26,38 @@ function CamposDinamicos({
       .toLowerCase()
       .replace(/\b\w/g, (l) => l.toUpperCase());
 
+  const baseMinimalSx = {
+    backgroundColor: "transparent",
+    borderRadius: "8px",
+    fontSize: "0.875rem",
+    "& .MuiOutlinedInput-notchedOutline": {
+      borderColor: "rgba(128,128,128,0.3)",
+    },
+    "&:hover .MuiOutlinedInput-notchedOutline": {
+      borderColor: "rgba(0,120,212,0.6)",
+    },
+    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+      borderColor: "rgba(0,120,212,1)",
+    },
+    "& input": {
+      padding: "10px 12px",
+    },
+    "& label": {
+      fontSize: "0.875rem",
+    },
+  };
+
   return (
     <div>
       <Typography
-        variant="h6"
+        variant="subtitle1"
         sx={{
-          fontWeight: "bold",
-          paddingBottom: 1,
+          fontWeight: 600,
+          marginBottom: 1.5, // 12px aprox
           color: colors.accentGreen[100],
         }}
       >
-        Campos para llenar
+        Completa la informacion
       </Typography>
 
       {loading ? (
@@ -44,9 +66,9 @@ function CamposDinamicos({
             <Skeleton
               key={i}
               variant="rectangular"
-              height={56}
+              height={44}
               className="w-full"
-              sx={{ borderRadius: 2, marginBottom: 2 }}
+              sx={{ borderRadius: "8px", mb: 2 }}
             />
           ))}
         </div>
@@ -56,10 +78,10 @@ function CamposDinamicos({
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-          {campos.map((campo) => {
+          {campos.map((campo, index) => {
             const baseLabel = formateaNombre(campo.nombre_campo);
             const isRequired = campo.obligatorio === "1";
-            const label = baseLabel; // Solo el texto, sin asterisco
+            const label = baseLabel;
             const placeholder = `Escribe ${baseLabel.toLowerCase()}`;
             const value =
               values[campo.id] ??
@@ -81,39 +103,27 @@ function CamposDinamicos({
               variant: "outlined",
               fullWidth: true,
               margin: "dense",
-              // size: "small",
-              className: "w-full",
               required: isRequired,
               value: value,
               onChange: handleChange,
               error: tieneError,
               helperText: tieneError ? "Este campo es obligatorio" : "",
-              sx: {
-                "& .MuiOutlinedInput-root": {
-                  "&.Mui-focused fieldset": {
-                    borderColor: colors.accentGreen[100],
-                  },
-                  "& input": {
-                    color: colors.grey[100],
-                  },
-                },
-                "& label.Mui-focused": {
-                  color: colors.accentGreen[100],
-                },
-              },
+              sx: baseMinimalSx,
             };
 
-            switch (campo.tipo_campo) {
-              case "texto":
-                return (
-                  <div key={campo.id}>
+            return (
+              <Grow
+                key={campo.id}
+                in={true}
+                style={{ transformOrigin: "0 0 0" }}
+                timeout={200 + index * 100} // efecto escalonado
+              >
+                <div>
+                  {campo.tipo_campo === "texto" && (
                     <TextField {...textFieldProps} />
-                  </div>
-                );
+                  )}
 
-              case "numero":
-                return (
-                  <div key={campo.id}>
+                  {campo.tipo_campo === "numero" && (
                     <TextField
                       {...textFieldProps}
                       type="number"
@@ -125,37 +135,39 @@ function CamposDinamicos({
                         },
                       }}
                     />
-                  </div>
-                );
+                  )}
 
-              case "checkbox":
-                return (
-                  <div key={campo.id} className="flex items-center h-full">
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          size="small"
-                          checked={!!value}
-                          onChange={handleChange}
-                        />
-                      }
-                      label={label}
-                      required={isRequired}
-                      sx={{ marginTop: 1, marginBottom: 1 }}
-                      className="w-full"
-                    />
-                  </div>
-                );
+                  {campo.tipo_campo === "checkbox" && (
+                    <div className="flex items-center h-full">
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            size="small"
+                            checked={!!value}
+                            onChange={handleChange}
+                            sx={{
+                              color: "rgba(0,0,0,0.54)",
+                              "&.Mui-checked": {
+                                color: "rgba(0,120,212,1)",
+                              },
+                            }}
+                          />
+                        }
+                        label={label}
+                        required={isRequired}
+                        sx={{ fontSize: "0.875rem" }}
+                        className="w-full"
+                      />
+                    </div>
+                  )}
 
-              case "fecha":
-                return (
-                  <div key={campo.id}>
+                  {campo.tipo_campo === "fecha" && (
                     <TextField
                       {...textFieldProps}
                       type="date"
                       InputLabelProps={{ shrink: true }}
                       sx={{
-                        ...textFieldProps.sx,
+                        ...baseMinimalSx,
                         "& input[type='date']::-webkit-calendar-picker-indicator":
                           {
                             backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='${encodeURIComponent(
@@ -169,16 +181,14 @@ function CamposDinamicos({
                           },
                       }}
                     />
-                  </div>
-                );
+                  )}
 
-              default:
-                return (
-                  <div key={campo.id}>
-                    <TextField {...textFieldProps} />
-                  </div>
-                );
-            }
+                  {!["texto", "numero", "checkbox", "fecha"].includes(
+                    campo.tipo_campo
+                  ) && <TextField {...textFieldProps} />}
+                </div>
+              </Grow>
+            );
           })}
         </div>
       )}
