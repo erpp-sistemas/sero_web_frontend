@@ -33,7 +33,7 @@ const SubcategorySelect = ({
   }, 300); // 300ms de “loading simulado”
 
   return () => clearTimeout(timer);
-}, [subcategories, selectedSubcategory, handleSubcategoryChange]);
+}, [subcategories, selectedSubcategory]);
 
 
   return (
