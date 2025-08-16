@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Grid, Typography, Box, Paper, CircularProgress } from "@mui/material";
+import { Grid, Typography, Box, Paper, CircularProgress, Button } from "@mui/material";
 import { useLocation } from "react-router-dom";
 import { jsPDF } from "jspdf";
 import InlineEditableText from "../../components/ResponsiveGenerator/InlineEditableText";
-import dayjs from "dayjs";
+import SignatureModal from "../../components/ResponsiveGenerator/SignatureModal"; 
+
 
 const Index = () => {
   const { state } = useLocation();
@@ -21,6 +22,29 @@ const Index = () => {
   const [pdfUrl, setPdfUrl] = useState("");
   const [pdfVersion, setPdfVersion] = useState(0);
   const pdfRef = useRef(null);
+
+  // Estado simplificado para firma
+  const [signatureStatus, setSignatureStatus] = useState({
+    isSigned: false,
+    showModal: false,
+  });
+
+  // Mock: Enviar OTP (conectar a tu API)
+  const handleOTPRequest = (callback) => {
+    console.log("Enviando OTP a:", nuevoArticulo.usuarioAsignado?.email);
+    setTimeout(() => callback(), 1500); // Simular delay de red
+  };
+
+  // Mock: Validar OTP (conectar a tu API)
+  const handleOTPValidate = (otp) => {
+    if (otp === "123456") { // Reemplazar con validación real
+      setSignatureStatus({ isSigned: true, showModal: false });
+      generarPDF(); // Ahora con QR
+      alert("✅ Firma validada. El PDF incluirá tu firma electrónica.");
+    } else {
+      alert("❌ Código incorrecto. Intenta nuevamente.");
+    }
+  };
 
   // Configuración de estilos actualizada (estilo Notion/Figma)
   const PDF_STYLES = {
@@ -666,7 +690,9 @@ const Index = () => {
           nuevoArticulo.campos?.nombre_articulo
         }, propiedad de la misma, a favor de ${
           nuevoArticulo.usuarioAsignado?.nombre || "el empleado"
-        } con CURP, con un valor comercial: $${
+        } con CURP ${
+          nuevoArticulo.usuarioAsignado?.curp
+        }, con un valor comercial: $${
           nuevoArticulo.campos?.precio_articulo
         }. Declaro que el equipo recibido se encuentra en buen estado y funcionando correctamente.`,
         "Asimismo, me comprometo a:",
@@ -806,7 +832,7 @@ const Index = () => {
               <InlineEditableText
                 value={motivoCambio}
                 onChange={handleMotivoCambioChange}
-                placeholder="Describa el motivo del cambio de equipo..."
+                placeholder="motivo del cambio de equipo..."
                 minRows={4}
                 sx={{ backgroundColor: "background.paper" }}
               />
@@ -819,12 +845,36 @@ const Index = () => {
               <InlineEditableText
                 value={observaciones}
                 onChange={handleObservacionesChange}
-                placeholder="Agregue cualquier observación relevante..."
+                placeholder="observación relevante..."
                 minRows={6}
                 sx={{ backgroundColor: "background.paper" }}
               />
             </Box>
           </Paper>
+
+          {/* Botón de firma */}
+      {!signatureStatus.isSigned && (
+        <Button
+          variant="outlined"
+          onClick={() => setSignatureStatus({ ...signatureStatus, showModal: true })}
+          sx={{
+            borderColor: "#4caf50",
+            color: "#4caf50",
+            mb: 3,
+            "&:hover": { bgcolor: "#f0f9f0" }
+          }}
+        >
+          Firmar Electrónicamente
+        </Button>
+      )}
+
+      <SignatureModal
+        open={signatureStatus.showModal}
+        onClose={() => setSignatureStatus({ ...signatureStatus, showModal: false })}
+        userEmail={nuevoArticulo.usuarioAsignado?.email}
+        onOTPRequest={handleOTPRequest}
+        onOTPValidate={handleOTPValidate}
+      />
         </Grid>
 
         <Grid item xs={12} md={8}>
