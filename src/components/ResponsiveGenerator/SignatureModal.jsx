@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -12,11 +12,18 @@ import {
   TextField,
   useTheme,
   DialogContentText,
+  Grow,
 } from "@mui/material";
 import { tokens } from "../../theme";
 import CloseIcon from "@mui/icons-material/Close";
 import WarningAmberOutlined from "@mui/icons-material/WarningAmberOutlined";
-import { EmailOutlined, SecurityOutlined } from "@mui/icons-material";
+import {
+  CheckCircleOutline,
+  EmailOutlined,
+  SecurityOutlined,
+} from "@mui/icons-material";
+import { QRCode } from "react-qr-code";
+import { toPng } from "html-to-image";
 
 const SignatureModal = ({
   open,
@@ -24,15 +31,20 @@ const SignatureModal = ({
   userEmail,
   onOTPRequest,
   onOTPValidate,
+  documentData,
 }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const qrContainerRef = useRef(null);
 
   const [step, setStep] = useState("confirm"); // "confirm" | "otp"
   const [otp, setOtp] = useState("");
   const [countdown, setCountdown] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [isCodeExpired, setIsCodeExpired] = useState(false);
+  const [qrData, setQrData] = useState(null);
+  const [showResendAlert, setShowResendAlert] = useState(false);
+  const [isAlertRendered, setIsAlertRendered] = useState(false);
 
   // Reset al cerrar
   const handleClose = () => {
@@ -41,6 +53,17 @@ const SignatureModal = ({
     setCountdown(0);
     setIsCodeExpired(false);
     onClose();
+  };
+
+  useEffect(() => {
+    if (showResendAlert) {
+      setIsAlertRendered(true); // Montar el componente
+    }
+  }, [showResendAlert]);
+
+  // Escuchar cuando la animación de salida termina
+  const handleExited = () => {
+    setIsAlertRendered(false); // Desmontar después de la animación
   };
 
   // Countdown
@@ -63,6 +86,7 @@ const SignatureModal = ({
   const handleSendOTP = () => {
     setIsLoading(true);
     setIsCodeExpired(false);
+    setOtp("");
     onOTPRequest(() => {
       setStep("otp");
       setCountdown(30);
@@ -74,10 +98,71 @@ const SignatureModal = ({
   const handleResendCode = () => {
     setIsLoading(true);
     setIsCodeExpired(false);
+    setOtp("");
     onOTPRequest(() => {
       setCountdown(30);
       setIsLoading(false);
+      setShowResendAlert(true); // ← Mostrar alerta
+      setTimeout(() => setShowResendAlert(false), 3000); // ← Ocultar después de 3s
     });
+  };
+
+  const generateVerificationHash = () => {
+    return `${userEmail}-${Date.now()}-${Math.random()
+      .toString(36)
+      .substring(2)}`;
+  };
+
+  const handleValidateOTP = async () => {
+    if (otp.length !== 6) return;
+
+    setIsLoading(true);
+
+    try {
+      const verificationData = {
+        documentId: documentData?.id || "RESP-" + Date.now(),
+        employee: documentData?.employeeId || "N/A",
+        email: userEmail,
+        date: new Date().toISOString(),
+        hash: generateVerificationHash(),
+      };
+
+      setQrData(verificationData);
+
+      // Solución: Esperar a que el estado se actualice completamente
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+
+      if (qrContainerRef.current) {
+        // Configuración segura para toPng
+        const qrImage = await toPng(qrContainerRef.current, {
+          quality: 1,
+          pixelRatio: 2,
+          backgroundColor: "white",
+          skipFonts: true, // ← Solución clave 1
+          cacheBust: true, // ← Solución clave 2
+          style: {
+            fontFamily: "Arial, sans-serif", // ← Fuente segura
+          },
+        });
+
+        onOTPValidate(otp, {
+          qrImage,
+          qrData: JSON.stringify(verificationData),
+        });
+      }
+    } catch (error) {
+      console.error("Error generating QR:", error);
+      // Solución mejorada para manejo de errores
+      if (error.message.includes("Cannot access rules")) {
+        alert(
+          "Error de seguridad al generar el QR. Por favor use fuentes locales."
+        );
+      } else {
+        alert("Error al generar la firma digital");
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -188,6 +273,7 @@ const SignatureModal = ({
               {userEmail}
             </Typography>
             <TextField
+            autoFocus
               fullWidth
               placeholder="Ej: 123456"
               value={otp}
@@ -214,6 +300,55 @@ const SignatureModal = ({
                 },
               }}
             />
+
+            {isAlertRendered && (
+              <Grow
+                in={showResendAlert}
+                timeout={{ enter: 300, exit: 450 }} // Transiciones más rápidas
+                onExited={handleExited}
+                style={{ transformOrigin: "left center" }}
+              >
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: colors.greenAccent[600], // Verde un poco más oscuro
+                    fontSize: "0.725rem", // Tamaño ligeramente menor
+                    display: "flex", // Para integrar icono si quieres
+                    alignItems: "center",
+                    gap: 0.5, // Espaciado entre icono y texto
+                    mt: 0.5, // Menos margen superior
+                    fontWeight: 500, // Peso medio (no bold)
+                    letterSpacing: 0.2, // Espaciado sutil entre letras
+                  }}
+                >
+                  <CheckCircleOutline sx={{ fontSize: "0.9rem" }} />{" "}
+                  {/* Icono opcional */}
+                  ¡Código reenviado! {/* Texto más corto */}
+                </Typography>
+              </Grow>
+            )}
+
+            <div style={{ position: "absolute", left: "-9999px" }}>
+              {qrData && (
+                <div
+                  ref={qrContainerRef}
+                  style={{
+                    padding: "12px",
+                    backgroundColor: "white",
+                    borderRadius: "8px",
+                  }}
+                >
+                  <QRCode
+                    value={JSON.stringify(qrData)}
+                    size={200}
+                    level="H"
+                    bgColor="white"
+                    fgColor="#000000"
+                  />
+                </div>
+              )}
+            </div>
+
             {countdown > 0 ? (
               <Typography
                 variant="caption"
@@ -380,7 +515,7 @@ const SignatureModal = ({
               Volver
             </Button>
             <Button
-              onClick={() => onOTPValidate(otp)}
+              onClick={handleValidateOTP}
               variant="contained"
               disabled={otp.length !== 6 || isCodeExpired}
               startIcon={

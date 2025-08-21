@@ -1,14 +1,35 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Grid, Typography, Box, Paper, CircularProgress, Button } from "@mui/material";
+import {
+  Grid,
+  Typography,
+  Box,
+  Paper,
+  CircularProgress,
+  Button,
+  IconButton,
+  useTheme,
+} from "@mui/material";
 import { useLocation } from "react-router-dom";
 import { jsPDF } from "jspdf";
 import InlineEditableText from "../../components/ResponsiveGenerator/InlineEditableText";
-import SignatureModal from "../../components/ResponsiveGenerator/SignatureModal"; 
-
+import SignatureModal from "../../components/ResponsiveGenerator/SignatureModal";
+import VerifiedIcon from "@mui/icons-material/Verified";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import DownloadIcon from "@mui/icons-material/Download";
+import { tokens } from "../../theme";
+import {
+  AssignmentOutlined,
+  DrawOutlined,
+  HowToRegOutlined,
+  LockPersonOutlined,
+  VerifiedOutlined,
+} from "@mui/icons-material";
 
 const Index = () => {
   const { state } = useLocation();
   const { nuevoArticulo } = state || {};
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
 
   const [observaciones, setObservaciones] = useState("");
   const [motivoCambio, setMotivoCambio] = useState("");
@@ -22,28 +43,175 @@ const Index = () => {
   const [pdfUrl, setPdfUrl] = useState("");
   const [pdfVersion, setPdfVersion] = useState(0);
   const pdfRef = useRef(null);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [verificationResult, setVerificationResult] = useState(null);
 
-  // Estado simplificado para firma
+  // Estado para firma electrónica
   const [signatureStatus, setSignatureStatus] = useState({
     isSigned: false,
     showModal: false,
+    qrImage: null,
+    qrData: null,
+    verificationHash: "",
+    signedAt: null,
+    hashMetadata: null,
   });
 
-  // Mock: Enviar OTP (conectar a tu API)
-  const handleOTPRequest = (callback) => {
-    console.log("Enviando OTP a:", nuevoArticulo.usuarioAsignado?.email);
-    setTimeout(() => callback(), 1500); // Simular delay de red
+  // Generación segura de hash con nonce
+  const generateSecureHash = async (data, options = {}) => {
+    const {
+      algorithm = "SHA-256",
+      includeTimestamp = true,
+      includeUniqueId = true,
+      documentId = null,
+    } = options;
+
+    try {
+      // Salts para el hash
+      const timestampSalt = includeTimestamp
+        ? new Date().toISOString() +
+          "|" +
+          Intl.DateTimeFormat().resolvedOptions().timeZone
+        : "";
+
+      const uniqueIdSalt = includeUniqueId ? crypto.randomUUID() : "";
+      const documentSalt = documentId ? `|DOC-${documentId}` : "";
+
+      // Combinar todos los componentes
+      const combinedData = `${data}|${timestampSalt}|${uniqueIdSalt}${documentSalt}`;
+
+      // Codificar y calcular hash
+      const encoder = new TextEncoder();
+      const dataBuffer = encoder.encode(combinedData);
+      const hashBuffer = await crypto.subtle.digest(algorithm, dataBuffer);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+
+      // Convertir a hexadecimal
+      const hashHex = hashArray
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
+
+      return {
+        hash: hashHex,
+        algorithm,
+        timestamp: includeTimestamp ? new Date().toISOString() : undefined,
+        timezone: includeTimestamp
+          ? Intl.DateTimeFormat().resolvedOptions().timeZone
+          : undefined,
+        uniqueId: includeUniqueId ? uniqueIdSalt : undefined,
+        documentId: documentId || undefined,
+      };
+    } catch (error) {
+      console.error("Error generando hash seguro:", error);
+
+      // Fallback seguro
+      const fallbackHash = await crypto.subtle.digest(
+        "SHA-256",
+        new TextEncoder().encode(
+          `${data}|${Date.now()}|${Math.random().toString(36).slice(2)}|${
+            nuevoArticulo?.id || "fallback"
+          }`
+        )
+      );
+      const fallbackArray = Array.from(new Uint8Array(fallbackHash));
+
+      return {
+        hash: fallbackArray
+          .map((b) => b.toString(16).padStart(2, "0"))
+          .join(""),
+        algorithm: "SHA-256",
+        isFallback: true,
+        error: error.message,
+      };
+    }
   };
 
-  // Mock: Validar OTP (conectar a tu API)
-  const handleOTPValidate = (otp) => {
-    if (otp === "123456") { // Reemplazar con validación real
-      setSignatureStatus({ isSigned: true, showModal: false });
-      generarPDF(); // Ahora con QR
-      alert("✅ Firma validada. El PDF incluirá tu firma electrónica.");
+  // Mock: Enviar OTP (conectar a tu API real)
+  const handleOTPRequest = (callback) => {
+    console.log("Enviando OTP a:", nuevoArticulo.usuarioAsignado?.email);
+    // Simular delay de red
+    setTimeout(() => callback(), 1500);
+  };
+
+  // Mock: Validar OTP (conectar a tu API real)
+  const handleOTPValidate = async (otp, qrResponse) => {
+    // En producción, verificar contra tu backend
+    if (otp === "123456") {
+      const hashResult = await generateSecureHash(qrResponse.qrData, {
+        includeTimestamp: true,
+        includeUniqueId: true,
+        documentId: nuevoArticulo?.id,
+      });
+
+      const newSignatureStatus = {
+        isSigned: true,
+        showModal: false,
+        qrImage: qrResponse.qrImage,
+        qrData: qrResponse.qrData,
+        verificationHash: hashResult.hash,
+        hashMetadata: {
+          algorithm: hashResult.algorithm,
+          timestamp: hashResult.timestamp,
+          timezone: hashResult.timezone,
+          uniqueId: hashResult.uniqueId,
+          documentId: hashResult.documentId,
+        },
+        signedAt: new Date(),
+      };
+
+      setSignatureStatus(newSignatureStatus);
+      setPdfVersion((prev) => prev + 1);
+
+      // Guardar firma en backend (simulado)
+      console.log("Guardando firma en backend:", newSignatureStatus);
+
+      alert("✅ Firma electrónica verificada y guardada");
+      return true;
     } else {
-      alert("❌ Código incorrecto. Intenta nuevamente.");
+      alert("❌ Código incorrecto");
+      return false;
     }
+  };
+
+  // Exportar certificado de firma
+  const exportSignatureCertificate = () => {
+    if (!signatureStatus.isSigned) return;
+
+    const certData = {
+      document: {
+        id: nuevoArticulo?.id,
+        type: "Responsiva de equipo",
+        name: nuevoArticulo?.campos?.nombre_articulo || "N/A",
+      },
+      signer: {
+        id: nuevoArticulo.usuarioAsignado?.id,
+        name: nuevoArticulo.usuarioAsignado?.nombre,
+        position: nuevoArticulo.usuarioAsignado?.puesto?.nombre,
+      },
+      signature: {
+        hash: signatureStatus.verificationHash,
+        algorithm: signatureStatus.hashMetadata?.algorithm,
+        timestamp: signatureStatus.hashMetadata?.timestamp,
+        timezone: signatureStatus.hashMetadata?.timezone,
+        uniqueId: signatureStatus.hashMetadata?.uniqueId,
+      },
+      signedAt: signatureStatus.signedAt.toISOString(),
+      verificationUrl: "https://erpp.mx/verify", // URL de verificación (ajustar)
+    };
+
+    const blob = new Blob([JSON.stringify(certData, null, 2)], {
+      type: "application/json",
+    });
+    saveAs(blob, `firma-responsiva-${nuevoArticulo?.id || "documento"}.json`);
+  };
+
+  // Copiar token al portapapeles
+  const copyTokenToClipboard = () => {
+    if (!signatureStatus.isSigned) return;
+    navigator.clipboard
+      .writeText(signatureStatus.verificationHash)
+      .then(() => alert("Token copiado al portapapeles"))
+      .catch((err) => console.error("Error copiando token:", err));
   };
 
   // Configuración de estilos actualizada (estilo Notion/Figma)
@@ -749,37 +917,98 @@ const Index = () => {
       });
 
       // Firmas
-      y = pageHeight - 120;
+      // Firmas - Área modificada para incluir el QR
+      y = pageHeight - 150; // Posición inicial para las firmas
       y = addStyledText(doc, "Atentamente", pageWidth / 2, y, maxWidth, {
         type: "section",
         align: "center",
       });
       y += PDF_STYLES.spacing.line;
 
+      // Posiciones fijas para las líneas de firma
+      const lineY = y + 40; // Espacio para QR si está firmado
       doc.setLineWidth(0.5);
       doc.setDrawColor(80, 80, 80);
-      doc.line(MARGINS.left, y, MARGINS.left + 160, y);
-      doc.line(pageWidth - MARGINS.left - 160, y, pageWidth - MARGINS.left, y);
-      y += 20;
 
+      // Línea del otorgante (siempre visible)
+      doc.line(MARGINS.left, lineY, MARGINS.left + 160, lineY);
+
+      // Línea del receptor (siempre visible)
+      doc.line(
+        pageWidth - MARGINS.left - 160,
+        lineY,
+        pageWidth - MARGINS.left,
+        lineY
+      );
+
+      // Texto de firmas (siempre visible)
+      const textY = lineY + 20;
       doc.setFontSize(10);
+      doc.setTextColor(PDF_STYLES.colors.text);
       const leftCenter = MARGINS.left + 80;
       const rightCenter = pageWidth - MARGINS.left - 80;
 
+      // Firma otorgante (sin cambios)
       doc.text(
         "Firma del otorgante\nERPP CORPORATIVO S.A DE C.V.",
         leftCenter,
-        y,
+        textY - 7,
         { align: "center" }
       );
+
+      // Firma receptor (sin cambios)
       doc.text(
         `Firma del receptor\n${
           nuevoArticulo.usuarioAsignado?.nombre || "Nombre del receptor"
         }`,
         rightCenter,
-        y,
+        textY - 7,
         { align: "center" }
       );
+
+      // QR solo si está firmado (encima de la línea del receptor)
+      if (signatureStatus.isSigned && signatureStatus.qrImage) {
+        const qrSize = 90; // Tamaño moderado para no saturar
+        const qrX = rightCenter - qrSize / 2; // Centrado sobre la línea
+        const qrY = lineY - qrSize - 30; // 10pt arriba de la línea
+
+        doc.addImage(signatureStatus.qrImage, "PNG", qrX, qrY, qrSize, qrSize);
+
+        // Mostrar el token/hash de verificación debajo del QR
+        const token = signatureStatus.verificationHash;
+        const formattedToken = token.match(/.{1,8}/g).join(" "); // Separar cada 8 caracteres
+
+        // Información de validación
+        doc.setFontSize(6);
+        doc.setTextColor(100, 100, 100);
+        doc.text(
+          `Verificado: ${signatureStatus.signedAt.toLocaleString()}`,
+          rightCenter,
+          qrY + qrSize + 2,
+          { align: "center" }
+        );
+
+        doc.setFontSize(6);
+        doc.setTextColor(100, 100, 100);
+        doc.text("Token de verificación:", rightCenter, qrY + qrSize + 8, {
+          align: "center",
+        });
+
+        doc.setFontSize(5);
+        doc.text(formattedToken, rightCenter, qrY + qrSize + 14, {
+          align: "center",
+          maxWidth: qrSize + 30,
+        });
+
+        doc.setFontSize(6);
+        doc.setTextColor(100, 100, 100);
+        doc.text(
+          "Firma electrónica avanzada - ERPP Corporativo",
+          rightCenter,
+          qrY + qrSize + 27,
+          { align: "center" }
+        );
+      }
 
       // Añadir pies de página a todas las páginas
       const totalPages = doc.internal.getNumberOfPages();
@@ -853,28 +1082,141 @@ const Index = () => {
           </Paper>
 
           {/* Botón de firma */}
-      {!signatureStatus.isSigned && (
-        <Button
-          variant="outlined"
-          onClick={() => setSignatureStatus({ ...signatureStatus, showModal: true })}
-          sx={{
-            borderColor: "#4caf50",
-            color: "#4caf50",
-            mb: 3,
-            "&:hover": { bgcolor: "#f0f9f0" }
-          }}
-        >
-          Firmar Electrónicamente
-        </Button>
-      )}
+          {!signatureStatus.isSigned ? (
+            <Button
+              variant="contained"
+              onClick={() =>
+                setSignatureStatus({ ...signatureStatus, showModal: true })
+              }
+              endIcon={
+                <LockPersonOutlined
+                  sx={{ fontSize: 18, color: colors.grey[700] }}
+                />
+              }
+              sx={{
+                textTransform: "none",
+                borderRadius: "6px",
+                color: colors.grey[700],
+                backgroundColor: "rgba(255,255,255,0.85)",
+                border: "1px solid",
+                borderColor: colors.grey[300],
+                "&:hover": {
+                  backgroundColor: colors.tealAccent[300],
+                  borderColor: colors.tealAccent[500],
+                  color: colors.grey[100],
+                  "& .MuiSvgIcon-root": {
+                    color: colors.tealAccent[800],
+                  },
+                },
+              }}
+            >
+              Firmar Electrónicamente
+            </Button>
+          ) : (
+            <Box
+              sx={{
+                p: 2,
+                mt: 2,
+                borderRadius: 1,
+              }}
+            >
+              <Box display="flex" alignItems="center" mb={2}>
+                <VerifiedIcon
+                  color={
+                    verificationResult
+                      ? "success"
+                      : verificationResult === false
+                      ? "error"
+                      : "disabled"
+                  }
+                />
+                <Typography variant="subtitle1" sx={{ ml: 1 }}>
+                  {verificationResult
+                    ? "Documento verificado"
+                    : verificationResult === false
+                    ? "¡Advertencia! Documento modificado"
+                    : "Documento firmado"}
+                </Typography>
+              </Box>
 
-      <SignatureModal
-        open={signatureStatus.showModal}
-        onClose={() => setSignatureStatus({ ...signatureStatus, showModal: false })}
-        userEmail={nuevoArticulo.usuarioAsignado?.email}
-        onOTPRequest={handleOTPRequest}
-        onOTPValidate={handleOTPValidate}
-      />
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="body2">
+                  <strong>Documento:</strong> Responsiva #{nuevoArticulo?.id}
+                </Typography>
+                <Typography variant="body2">
+                  <strong>Firmado por:</strong>{" "}
+                  {nuevoArticulo.usuarioAsignado?.nombre}
+                </Typography>
+                <Typography variant="body2">
+                  <strong>Fecha:</strong>{" "}
+                  {signatureStatus.signedAt.toLocaleString()}
+                </Typography>
+                <Typography variant="body2">
+                  <strong>Algoritmo:</strong>{" "}
+                  {signatureStatus.hashMetadata?.algorithm}
+                </Typography>
+              </Box>
+
+              <Box
+                sx={{
+                  p: 1.5,
+                  mb: 2,
+                  borderRadius: 1,
+                  position: "relative",
+                }}
+              >
+                <Typography
+                  variant="caption"
+                  component="div"
+                  color="text.secondary"
+                >
+                  Token de verificación:
+                </Typography>
+                <Box display="flex" alignItems="center">
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      wordBreak: "break-all",
+                      fontFamily: "monospace",
+                      fontSize: "0.7rem",
+                      flexGrow: 1,
+                    }}
+                  >
+                    {signatureStatus.verificationHash}
+                  </Typography>
+                  <IconButton
+                    size="small"
+                    onClick={copyTokenToClipboard}
+                    sx={{ ml: 1 }}
+                  >
+                    <ContentCopyIcon fontSize="small" />
+                  </IconButton>
+                </Box>
+              </Box>
+
+              <Box display="flex" justifyContent="space-between">
+                <Button
+                  variant="contained"
+                  color="info"
+                  size="small"
+                  endIcon={<DownloadIcon />}
+                  onClick={exportSignatureCertificate}
+                >
+                  Exportar certificado
+                </Button>
+              </Box>
+            </Box>
+          )}
+
+          <SignatureModal
+            open={signatureStatus.showModal}
+            onClose={() =>
+              setSignatureStatus({ ...signatureStatus, showModal: false })
+            }
+            userEmail={nuevoArticulo.usuarioAsignado?.email}
+            onOTPRequest={handleOTPRequest}
+            onOTPValidate={handleOTPValidate}
+          />
         </Grid>
 
         <Grid item xs={12} md={8}>
@@ -885,6 +1227,7 @@ const Index = () => {
 
             {pdfUrl ? (
               <iframe
+                key={pdfVersion}
                 ref={pdfRef}
                 src={pdfUrl}
                 title="Vista previa de la responsiva"
