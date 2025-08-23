@@ -773,7 +773,9 @@ const Index = () => {
           nuevoArticulo.usuarioAsignado?.area?.nombre || "N/A"
         }`,
         `- Fecha de entrega: ${nuevoArticulo.fecha_ingreso || "N/A"}`,
-        `- Correo institucional: N/A`,
+        `- Correo institucional: ${
+          nuevoArticulo.usuarioAsignado?.email || "N/A"
+        }`,
         `- Plaza: ${nuevoArticulo.plaza?.nombre_plaza || "N/A"}`,
       ];
 
