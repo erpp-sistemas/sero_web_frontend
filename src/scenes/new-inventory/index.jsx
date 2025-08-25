@@ -239,6 +239,8 @@ function Index() {
       // Llamar a la nueva función
       const resultado = await createArticle(payload);
 
+      console.log(resultado);
+
       if (resultado.success) {
         setSnackbar({
           open: true,
@@ -248,9 +250,17 @@ function Index() {
 
         if (generarResponsiva) {
           setTimeout(() => {
+            // ✅ CREAR un nuevo objeto con el ID actualizado
+            const nuevoArticuloCompleto = {
+              ...nuevoArticuloTemp,
+              id_articulo: resultado.article.id_articulo, // ← Agregar el ID generado
+              folio: resultado.article.folio,
+              nombre_articulo: resultado.article.nombre_articulo,
+            };
+
             navigate("/responsive-generator", {
               state: {
-                nuevoArticulo: nuevoArticuloTemp, // ← O usar resultado.article
+                nuevoArticulo: nuevoArticuloCompleto, // ← Usar el objeto actualizado
                 articuloId: resultado.article.id_articulo,
               },
             });

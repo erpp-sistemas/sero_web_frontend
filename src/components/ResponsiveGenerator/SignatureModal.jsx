@@ -32,6 +32,7 @@ const SignatureModal = ({
   onOTPRequest,
   onOTPValidate,
   documentData,
+  onSignatureComplete,
 }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -107,58 +108,170 @@ const SignatureModal = ({
     });
   };
 
-  const generateVerificationHash = () => {
-    return `${userEmail}-${Date.now()}-${Math.random()
-      .toString(36)
-      .substring(2)}`;
+  const generateVerificationHash = async () => {
+    try {
+      const data = `${userEmail}-${Date.now()}-${crypto.randomUUID()}`;
+      const encoder = new TextEncoder();
+      const dataBuffer = encoder.encode(data);
+      const hashBuffer = await crypto.subtle.digest("SHA-256", dataBuffer);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+    } catch (error) {
+      console.error("Error generating hash:", error);
+      return `fallback-${Date.now()}-${Math.random()
+        .toString(36)
+        .substring(2, 15)}`;
+    }
   };
 
+  // Agrega esta función en SignatureModal para generar hashes consistentes
+  const generateSecureHash = async (data, options = {}) => {
+    const {
+      algorithm = "SHA-256",
+      includeTimestamp = true,
+      includeUniqueId = true,
+      documentId = null,
+    } = options;
+
+    try {
+      // Salts para el hash
+      const timestampSalt = includeTimestamp
+        ? new Date().toISOString() +
+          "|" +
+          Intl.DateTimeFormat().resolvedOptions().timeZone
+        : "";
+
+      const uniqueIdSalt = includeUniqueId ? crypto.randomUUID() : "";
+      const documentSalt = documentId ? `|DOC-${documentId}` : "";
+
+      // Combinar todos los componentes
+      const combinedData = `${data}|${timestampSalt}|${uniqueIdSalt}${documentSalt}`;
+
+      // Codificar y calcular hash
+      const encoder = new TextEncoder();
+      const dataBuffer = encoder.encode(combinedData);
+      const hashBuffer = await crypto.subtle.digest(algorithm, dataBuffer);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+
+      // Convertir a hexadecimal
+      const hashHex = hashArray
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
+
+      return {
+        hash: hashHex,
+        algorithm,
+        timestamp: includeTimestamp ? new Date().toISOString() : undefined,
+        timezone: includeTimestamp
+          ? Intl.DateTimeFormat().resolvedOptions().timeZone
+          : undefined,
+        uniqueId: includeUniqueId ? uniqueIdSalt : undefined,
+        documentId: documentId || undefined,
+      };
+    } catch (error) {
+      console.error("Error generando hash seguro:", error);
+
+      // Fallback seguro
+      const fallbackHash = await crypto.subtle.digest(
+        "SHA-256",
+        new TextEncoder().encode(
+          `${data}|${Date.now()}|${Math.random().toString(36).slice(2)}|${
+            nuevoArticulo?.id || "fallback"
+          }`
+        )
+      );
+      const fallbackArray = Array.from(new Uint8Array(fallbackHash));
+
+      return {
+        hash: fallbackArray
+          .map((b) => b.toString(16).padStart(2, "0"))
+          .join(""),
+        algorithm: "SHA-256",
+        isFallback: true,
+        error: error.message,
+      };
+    }
+  };
+
+  // En tu SignatureModal.js
   const handleValidateOTP = async () => {
     if (otp.length !== 6) return;
 
     setIsLoading(true);
 
     try {
+      // Generar hash seguro
+      const verificationHash = await generateVerificationHash();
+
       const verificationData = {
         documentId: documentData?.id || "RESP-" + Date.now(),
-        employee: documentData?.employeeId || "N/A",
+        employee:
+          documentData?.employeeId || documentData?.employee?.id || "N/A",
+        employeeName: documentData?.employee?.name || "N/A",
         email: userEmail,
         date: new Date().toISOString(),
-        hash: generateVerificationHash(),
+        hash: verificationHash,
+        otp: otp, // Incluir el OTP en los datos
+        timestamp: new Date().toISOString(),
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       };
 
       setQrData(verificationData);
 
-      // Solución: Esperar a que el estado se actualice completamente
-      await new Promise((resolve) => requestAnimationFrame(resolve));
+      // Esperar un frame para asegurar que el QR se renderice
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       if (qrContainerRef.current) {
-        // Configuración segura para toPng
         const qrImage = await toPng(qrContainerRef.current, {
           quality: 1,
           pixelRatio: 2,
           backgroundColor: "white",
-          skipFonts: true, // ← Solución clave 1
-          cacheBust: true, // ← Solución clave 2
-          style: {
-            fontFamily: "Arial, sans-serif", // ← Fuente segura
-          },
+          skipFonts: true,
+          cacheBust: true,
         });
 
-        onOTPValidate(otp, {
-          qrImage,
+        const signatureCompleteData = {
+          success: true,
+          qrImage: qrImage,
           qrData: JSON.stringify(verificationData),
-        });
+          codigo_verificacion: otp,
+          timestamp: new Date().toISOString(),
+          verificationHash: verificationHash,
+          hashMetadata: {
+            algorithm: "SHA-256",
+            timestamp: new Date().toISOString(),
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            uniqueId: crypto.randomUUID?.(),
+            documentId: verificationData.documentId,
+          },
+        };
+
+        console.log("📤 SignatureModal enviando:", signatureCompleteData);
+
+        // Llamar a ambos callbacks
+        if (onSignatureComplete) {
+          onSignatureComplete(signatureCompleteData);
+        }
+
+        if (onOTPValidate) {
+          onOTPValidate(
+            otp,
+            {
+              qrImage,
+              qrData: JSON.stringify(verificationData),
+            },
+            signatureCompleteData
+          );
+        }
       }
     } catch (error) {
       console.error("Error generating QR:", error);
-      // Solución mejorada para manejo de errores
-      if (error.message.includes("Cannot access rules")) {
-        alert(
-          "Error de seguridad al generar el QR. Por favor use fuentes locales."
-        );
-      } else {
-        alert("Error al generar la firma digital");
+      if (onSignatureComplete) {
+        onSignatureComplete({
+          success: false,
+          error: error.message,
+          timestamp: new Date().toISOString(),
+        });
       }
     } finally {
       setIsLoading(false);
@@ -273,7 +386,7 @@ const SignatureModal = ({
               {userEmail}
             </Typography>
             <TextField
-            autoFocus
+              autoFocus
               fullWidth
               placeholder="Ej: 123456"
               value={otp}

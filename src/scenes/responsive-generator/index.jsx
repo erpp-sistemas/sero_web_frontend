@@ -8,6 +8,14 @@ import {
   Button,
   IconButton,
   useTheme,
+  Alert,
+  Snackbar,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Chip,
 } from "@mui/material";
 import { useLocation } from "react-router-dom";
 import { jsPDF } from "jspdf";
@@ -18,18 +26,37 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DownloadIcon from "@mui/icons-material/Download";
 import { tokens } from "../../theme";
 import {
-  AssignmentOutlined,
-  DrawOutlined,
-  HowToRegOutlined,
+  CheckCircle,
+  Close,
+  ErrorOutline,
+  Info,
   LockPersonOutlined,
-  VerifiedOutlined,
+  Refresh,
 } from "@mui/icons-material";
+import { createResponsiva } from "../../api/responsive";
 
 const Index = () => {
   const { state } = useLocation();
   const { nuevoArticulo } = state || {};
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+
+  // Estado para snackbar
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "info", // "success", "error", "warning", "info"
+  });
+
+  // Estado para controlar errores de guardado y reintentos
+  const [saveState, setSaveState] = useState({
+    isLoading: false,
+    error: null,
+    success: false,
+    retryCount: 0,
+    showRetryDialog: false,
+    lastSignatureData: null, // Almacenar datos de firma para reintentos
+  });
 
   const [observaciones, setObservaciones] = useState("");
   const [motivoCambio, setMotivoCambio] = useState("");
@@ -56,6 +83,51 @@ const Index = () => {
     signedAt: null,
     hashMetadata: null,
   });
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [saveError, setSaveError] = useState(null);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+
+  const signatureStatusRef = useRef(signatureStatus);
+
+  // 🔥 AGREGA ESTE useEffect para mantener la referencia actualizada
+  useEffect(() => {
+    signatureStatusRef.current = signatureStatus;
+  }, [signatureStatus]);
+
+  
+  // Función para manejar reintentos de guardado
+  const handleRetrySave = async () => {
+    if (!saveState.lastSignatureData) {
+      setSnackbar({
+        open: true,
+        message: "No hay datos de firma para reintentar el guardado",
+        severity: "error",
+      });
+      return;
+    }
+
+    setSaveState((prev) => ({
+      ...prev,
+      isLoading: true,
+      error: null,
+      showRetryDialog: false,
+    }));
+
+    try {
+      await enviarResponsivaAlBackend(saveState.lastSignatureData);
+    } catch (error) {
+      // El error ya se maneja en enviarResponsivaAlBackend
+    }
+  };
+
+  // Función para cerrar el diálogo de reintento
+  const handleCloseRetryDialog = () => {
+    setSaveState((prev) => ({
+      ...prev,
+      showRetryDialog: false,
+    }));
+  };
 
   // Generación segura de hash con nonce
   const generateSecureHash = async (data, options = {}) => {
@@ -134,42 +206,222 @@ const Index = () => {
   };
 
   // Mock: Validar OTP (conectar a tu API real)
-  const handleOTPValidate = async (otp, qrResponse) => {
-    // En producción, verificar contra tu backend
+  // Reemplaza tu handleOTPValidate actual con esta versión
+  const handleOTPValidate = async (
+    otp,
+    qrResponse,
+    signatureCompleteData = null
+  ) => {
     if (otp === "123456") {
-      const hashResult = await generateSecureHash(qrResponse.qrData, {
-        includeTimestamp: true,
-        includeUniqueId: true,
-        documentId: nuevoArticulo?.id,
+      try {
+        if (signatureCompleteData && signatureCompleteData.success) {
+          const newSignatureStatus = {
+            isSigned: true,
+            showModal: false,
+            qrImage: signatureCompleteData.qrImage,
+            qrData: signatureCompleteData.qrData,
+            verificationHash: signatureCompleteData.verificationHash,
+            hashMetadata: signatureCompleteData.hashMetadata,
+            signedAt: new Date(signatureCompleteData.timestamp),
+            codigo_verificacion: signatureCompleteData.codigo_verificacion,
+            timestamp_firma: signatureCompleteData.timestamp,
+          };
+
+          // ✅ Solo actualizar UI
+          signatureStatusRef.current = newSignatureStatus;
+          setSignatureStatus(newSignatureStatus);
+          setPdfVersion((prev) => prev + 1);
+
+          // ❌ ELIMINAR esta línea - Ya se envía desde handleSignatureComplete
+          // await enviarResponsivaAlBackend(newSignatureStatus);
+
+          return true;
+        }
+      } catch (error) {
+        return false;
+      }
+    } else {
+      setSnackbar({
+        open: true,
+        message: "❌ Código incorrecto",
+        severity: "error",
+      });
+      return false;
+    }
+  };
+
+  const handleSignatureComplete = async (signatureData) => {
+    if (signatureData.success) {
+      try {
+        const newSignatureStatus = {
+          isSigned: true,
+          showModal: false,
+          qrImage: signatureData.qrImage,
+          qrData: signatureData.qrData,
+          verificationHash: signatureData.verificationHash,
+          hashMetadata: signatureData.hashMetadata,
+          signedAt: new Date(signatureData.timestamp),
+          codigo_verificacion: signatureData.codigo_verificacion,
+          timestamp_firma: signatureData.timestamp,
+        };
+
+        // ✅ ACTUALIZAR LA REFERENCIA
+        signatureStatusRef.current = newSignatureStatus;
+
+        // ✅ ACTUALIZAR EL ESTADO DE REACT
+        setSignatureStatus(newSignatureStatus);
+        setPdfVersion((prev) => prev + 1);
+
+        // Guardar datos de firma para posibles reintentos
+        setSaveState((prev) => ({
+          ...prev,
+          lastSignatureData: newSignatureStatus,
+        }));
+
+        await enviarResponsivaAlBackend(newSignatureStatus);
+      } catch (error) {
+        setSnackbar({
+          open: true,
+          message: "❌ Error al completar el proceso de firma",
+          severity: "error",
+        });
+      }
+    } else {
+      setSnackbar({
+        open: true,
+        message: `Error en firma electrónica: ${signatureData.error}`,
+        severity: "error",
+      });
+    }
+  };
+
+  const prepareResponsivaData = async (currentSignatureStatus) => {
+    const idArticulo = nuevoArticulo?.id_articulo;
+
+    if (
+      !currentSignatureStatus.codigo_verificacion ||
+      !currentSignatureStatus.verificationHash ||
+      !currentSignatureStatus.qrImage ||
+      !nuevoArticulo?.usuarioAsignado?.id_usuario
+    ) {
+      throw new Error("Faltan datos requeridos para la responsiva");
+    }
+
+    const responsivaData = {
+      // ✅ DATOS BÁSICOS
+      id_articulo: nuevoArticulo.id_articulo,
+      id_usuario_asignado: nuevoArticulo.usuarioAsignado?.id_usuario,
+      id_usuario_autoriza: 1,
+      usuario_puesto: nuevoArticulo.usuarioAsignado.puesto?.nombre,
+      usuario_departamento: nuevoArticulo.usuarioAsignado.area?.nombre,
+      usuario_email: nuevoArticulo.usuarioAsignado?.email,
+      usuario_plaza: nuevoArticulo.plaza?.nombre_plaza,
+      // ✅ FIRMA ELECTRÓNICA (usar SOLO el parámetro)
+      codigo_verificacion: currentSignatureStatus.codigo_verificacion,
+      firma_electronica_hash: currentSignatureStatus.verificationHash,
+      algoritmo_hash:
+        currentSignatureStatus.hashMetadata?.algorithm || "SHA-256",
+      timestamp_firma:
+        currentSignatureStatus.timestamp_firma || new Date().toISOString(),
+      timezone_firma:
+        currentSignatureStatus.hashMetadata?.timezone ||
+        Intl.DateTimeFormat().resolvedOptions().timeZone,
+      unique_id_firma:
+        currentSignatureStatus.hashMetadata?.uniqueId || crypto.randomUUID(),
+
+      // ✅ QR CODE
+      qr_image_base64: currentSignatureStatus.qrImage,
+
+      // ✅ INFORMACIÓN DEL DOCUMENTO
+      motivo_cambio: motivoCambio || "Asignación inicial de equipo",
+      observaciones: observaciones || "",
+      tipo_responsiva: "asignacion_inicial",
+      estado: "pendiente_firma",
+      folio_responsiva: `RESP-${nuevoArticulo.id_articulo}-${Date.now()}`,
+
+      // ✅ UBICACIÓN Y CONTEXTO
+      ubicacion_actual: nuevoArticulo.ubicacion || "Oficina Central",
+      id_plaza: nuevoArticulo.plaza?.id_plaza || 1,
+      plaza_asignacion: nuevoArticulo.plaza?.nombre_plaza || "CDMX",
+
+      // ✅ FECHAS
+      fecha_asignacion: new Date().toISOString().split("T")[0],
+      fecha_limite_firma: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .split("T")[0],
+    };
+
+    // Limpiar datos undefined/null
+    Object.keys(responsivaData).forEach((key) => {
+      if (responsivaData[key] === null || responsivaData[key] === undefined) {
+        delete responsivaData[key];
+      }
+    });
+
+    return responsivaData;
+  };
+
+  const enviarResponsivaAlBackend = async (currentSignatureData) => {
+    try {
+      setIsLoading(true);
+      setSaveError(null);
+      setSaveSuccess(false);
+
+      setSaveState((prev) => ({
+        ...prev,
+        isLoading: true,
+        error: null,
+        success: false,
+      }));
+
+      // ✅ PASAR EXPLÍCITAMENTE los datos a prepareResponsivaData
+      const responsivaData = await prepareResponsivaData(currentSignatureData);
+
+      // ✅ LLAMAR DIRECTAMENTE a la función (ya no es fetch)
+      const result = await createResponsiva(responsivaData);
+
+      // ✅ VERIFICAR éxito basado en la respuesta del backend
+      if (!result.success) {
+        throw new Error(result.message || "Error al guardar la responsiva");
+      }
+
+      setSnackbar({
+        open: true,
+        message: "✅ Responsiva guardada exitosamente en el sistema",
+        severity: "success",
       });
 
-      const newSignatureStatus = {
-        isSigned: true,
-        showModal: false,
-        qrImage: qrResponse.qrImage,
-        qrData: qrResponse.qrData,
-        verificationHash: hashResult.hash,
-        hashMetadata: {
-          algorithm: hashResult.algorithm,
-          timestamp: hashResult.timestamp,
-          timezone: hashResult.timezone,
-          uniqueId: hashResult.uniqueId,
-          documentId: hashResult.documentId,
-        },
-        signedAt: new Date(),
-      };
+      setSaveSuccess(true);
 
-      setSignatureStatus(newSignatureStatus);
-      setPdfVersion((prev) => prev + 1);
+      setSaveState((prev) => ({
+        ...prev,
+        isLoading: false,
+        success: true,
+        error: null,
+        retryCount: 0,
+      }));
 
-      // Guardar firma en backend (simulado)
-      console.log("Guardando firma en backend:", newSignatureStatus);
+      return result;
+    } catch (error) {
+      console.error("Error al guardar responsiva:", error);
 
-      alert("✅ Firma electrónica verificada y guardada");
-      return true;
-    } else {
-      alert("❌ Código incorrecto");
-      return false;
+      setSnackbar({
+        open: true,
+        message: `❌ Error al guardar: ${error.message}`,
+        severity: "error",
+      });
+
+      setSaveState((prev) => ({
+        ...prev,
+        isLoading: false,
+        error: error.message,
+        success: false,
+        showRetryDialog: true, // Mostrar diálogo de reintento
+        retryCount: prev.retryCount + 1,
+      }));
+      throw error;
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -210,7 +462,13 @@ const Index = () => {
     if (!signatureStatus.isSigned) return;
     navigator.clipboard
       .writeText(signatureStatus.verificationHash)
-      .then(() => alert("Token copiado al portapapeles"))
+      .then(() => {
+        setSnackbar({
+          open: true,
+          message: "✅ Token copiado al portapapeles",
+          severity: "success",
+        });
+      })
       .catch((err) => console.error("Error copiando token:", err));
   };
 
@@ -1044,44 +1302,258 @@ const Index = () => {
       >
         Generar Responsiva de Equipo
       </Typography>
+      {/* Snackbar para notificaciones */}
+      {/* Snackbar para notificaciones - Estilo minimalista */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        sx={{
+          // Asegurar que esté por encima de otros elementos
+          zIndex: 1400,
+          // Para dispositivos móviles, asegurar que no esté demasiado abajo
+          bottom: { xs: 70, sm: 24 },
+        }}
+      >
+        <Box
+          sx={{
+            backgroundColor:
+              snackbar.severity === "error"
+                ? "#d32f2f" // Rojo más estándar para errores
+                : snackbar.severity === "success"
+                ? "#2e7d32" // Verde más profesional
+                : "#1976d2", // Azul principal para información
+            color: "white",
+            borderRadius: "4px", // Bordes ligeramente menos redondeados (estándar Material)
+            padding: "14px 16px", // Un poco más de padding
+            boxShadow: "0 3px 10px rgba(0,0,0,0.2), 0 3px 3px rgba(0,0,0,0.12)",
+            minWidth: "288px", // Ancho mínimo según especificación Material Design
+            maxWidth: "600px", // Ancho máximo para no sobrepasar en pantallas grandes
+            fontSize: "0.875rem",
+            fontWeight: 400, // Peso normal para mejor legibilidad
+            display: "flex",
+            alignItems: "center",
+            // Añadir transición suave
+            transition: "transform 0.2s ease-in-out, opacity 0.2s ease-in-out",
+            // Estilo para cuando está abierto
+            transform: snackbar.open ? "translateY(0)" : "translateY(100px)",
+            opacity: snackbar.open ? 1 : 0,
+          }}
+        >
+          {/* Icono según el tipo de mensaje (mejora la comprensión) */}
+          {snackbar.severity === "error" && (
+            <ErrorOutline sx={{ mr: 1, fontSize: "20px" }} />
+          )}
+          {snackbar.severity === "success" && (
+            <CheckCircle sx={{ mr: 1, fontSize: "20px" }} />
+          )}
+          {snackbar.severity === "info" && (
+            <Info sx={{ mr: 1, fontSize: "20px" }} />
+          )}
 
+          {/* Mensaje */}
+          <Box component="span" sx={{ flexGrow: 1 }}>
+            {snackbar.message}
+          </Box>
+
+          {/* Botón de cerrar opcional */}
+          <IconButton
+            size="small"
+            aria-label="close"
+            color="inherit"
+            onClick={() => setSnackbar({ ...snackbar, open: false })}
+            sx={{ ml: 2, padding: "4px" }}
+          >
+            <Close fontSize="small" />
+          </IconButton>
+        </Box>
+      </Snackbar>
+      {/* Diálogo para reintentar guardado - Estilo minimalista */}
+      <Dialog
+        open={saveState.showRetryDialog}
+        onClose={handleCloseRetryDialog}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+        PaperProps={{
+          sx: {
+            borderRadius: "12px",
+            boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
+            maxWidth: "500px",
+            width: "90%",
+          },
+        }}
+      >
+        <DialogTitle
+          id="alert-dialog-title"
+          sx={{
+            fontSize: "1.25rem",
+            fontWeight: 600,
+            pb: 1,
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+          }}
+        >
+          <ErrorOutline color="error" />
+          Error al guardar
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText
+            id="alert-dialog-description"
+            sx={{ color: "text.secondary", lineHeight: 1.6 }}
+          >
+            No se pudo guardar la responsiva en la base de datos. Por favor,
+            verifica tu conexión a internet e intenta nuevamente.
+            {saveState.error && (
+              <Box
+                component="span"
+                sx={{
+                  display: "block",
+                  mt: 1,
+                  fontStyle: "italic",
+                  fontSize: "0.9em",
+                }}
+              >
+                Error: {saveState.error}
+              </Box>
+            )}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button
+            onClick={handleCloseRetryDialog}
+            sx={{
+              color: "text.secondary",
+              fontWeight: 500,
+              borderRadius: "6px",
+              px: 2,
+              py: 1,
+            }}
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={handleRetrySave}
+            autoFocus
+            variant="contained"
+            startIcon={<Refresh />}
+            sx={{
+              borderRadius: "6px",
+              px: 2,
+              py: 1,
+              textTransform: "none",
+              fontWeight: 500,
+              boxShadow: "none",
+              "&:hover": {
+                boxShadow: "none",
+              },
+            }}
+          >
+            Reintentar ({saveState.retryCount})
+          </Button>
+        </DialogActions>
+      </Dialog>
       <Grid container spacing={3}>
         <Grid item xs={12} md={4}>
-          <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
+          <Paper
+            elevation={0}
+            sx={{
+              p: 3,
+              mb: 3,
+              borderRadius: "12px",
+              border: "1px solid",
+              borderColor: "divider",
+              backgroundColor: "background.paper",
+            }}
+          >
             <Typography
               variant="h6"
               gutterBottom
-              sx={{ color: "text.secondary" }}
+              sx={{
+                color: "text.primary",
+                fontWeight: 600,
+                mb: 3,
+                fontSize: "1.1rem",
+              }}
             >
               Configuración del Documento
             </Typography>
 
             <Box mb={3}>
-              <Typography variant="subtitle2" gutterBottom>
+              <Typography
+                variant="subtitle2"
+                gutterBottom
+                sx={{ fontWeight: 500, mb: 1, color: "text.primary" }}
+              >
                 Motivo de Cambio
               </Typography>
               <InlineEditableText
                 value={motivoCambio}
                 onChange={handleMotivoCambioChange}
-                placeholder="motivo del cambio de equipo..."
-                minRows={4}
-                sx={{ backgroundColor: "background.paper" }}
+                placeholder="Describe el motivo del cambio de equipo..."
+                minRows={3}
+                sx={{
+                  backgroundColor: "transparent",
+                  borderRadius: "8px",
+                  border: "1px solid",
+                  borderColor: "divider",
+                  p: 1.5,
+                  "&:focus": {
+                    borderColor: "primary.main",
+                  },
+                }}
               />
             </Box>
 
             <Box>
-              <Typography variant="subtitle2" gutterBottom>
+              <Typography
+                variant="subtitle2"
+                gutterBottom
+                sx={{ fontWeight: 500, mb: 1, color: "text.primary" }}
+              >
                 Observaciones
               </Typography>
               <InlineEditableText
                 value={observaciones}
                 onChange={handleObservacionesChange}
-                placeholder="observación relevante..."
-                minRows={6}
-                sx={{ backgroundColor: "background.paper" }}
+                placeholder="Añade cualquier observación relevante..."
+                minRows={4}
+                sx={{
+                  backgroundColor: "transparent",
+                  borderRadius: "8px",
+                  border: "1px solid",
+                  borderColor: "divider",
+                  p: 1.5,
+                  "&:focus": {
+                    borderColor: "primary.main",
+                  },
+                }}
               />
             </Box>
           </Paper>
+
+          <Box>
+            {/* Indicador de carga y estado de guardado - Estilo minimalista */}
+            {saveState.isLoading && (
+              <Alert
+                severity="info"
+                icon={<CircularProgress size={16} />}
+                sx={{
+                  mb: 2,
+                  mt: 2,
+                  borderRadius: "8px",
+                  backgroundColor: "info.light",
+                  color: "info.dark",
+                  "& .MuiAlert-message": {
+                    padding: "4px 0",
+                  },
+                }}
+              >
+                Guardando responsiva en el sistema...
+              </Alert>
+            )}
+          </Box>
 
           {/* Botón de firma */}
           {!signatureStatus.isSigned ? (
@@ -1115,62 +1587,68 @@ const Index = () => {
               Firmar Electrónicamente
             </Button>
           ) : (
-            <Box
+            <Paper
+              elevation={0}
               sx={{
-                p: 2,
+                p: 2.5,
                 mt: 2,
-                borderRadius: 1,
+                borderRadius: "12px",
+                border: "1px solid",
+                borderColor: "divider",
+                backgroundColor: "background.paper",
               }}
             >
               <Box display="flex" alignItems="center" mb={2}>
-                <VerifiedIcon
-                  color={
-                    verificationResult
-                      ? "success"
-                      : verificationResult === false
-                      ? "error"
-                      : "disabled"
-                  }
-                />
-                <Typography variant="subtitle1" sx={{ ml: 1 }}>
-                  {verificationResult
-                    ? "Documento verificado"
-                    : verificationResult === false
-                    ? "¡Advertencia! Documento modificado"
-                    : "Documento firmado"}
+                <VerifiedIcon color="success" />
+                <Typography
+                  variant="subtitle1"
+                  sx={{ ml: 1.5, fontWeight: 600 }}
+                >
+                  Documento firmado
                 </Typography>
               </Box>
 
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="body2">
-                  <strong>Documento:</strong> Responsiva #{nuevoArticulo?.id}
+              <Box sx={{ mb: 2.5 }}>
+                <Typography variant="body2" sx={{ mb: 1 }}>
+                  <Box component="span" sx={{ fontWeight: 500 }}>
+                    Documento:
+                  </Box>{" "}
+                  Responsiva #{nuevoArticulo?.id}
                 </Typography>
-                <Typography variant="body2">
-                  <strong>Firmado por:</strong>{" "}
+                <Typography variant="body2" sx={{ mb: 1 }}>
+                  <Box component="span" sx={{ fontWeight: 500 }}>
+                    Firmado por:
+                  </Box>{" "}
                   {nuevoArticulo.usuarioAsignado?.nombre}
                 </Typography>
-                <Typography variant="body2">
-                  <strong>Fecha:</strong>{" "}
+                <Typography variant="body2" sx={{ mb: 1 }}>
+                  <Box component="span" sx={{ fontWeight: 500 }}>
+                    Fecha:
+                  </Box>{" "}
                   {signatureStatus.signedAt.toLocaleString()}
                 </Typography>
-                <Typography variant="body2">
-                  <strong>Algoritmo:</strong>{" "}
-                  {signatureStatus.hashMetadata?.algorithm}
-                </Typography>
+                <Chip
+                  label={signatureStatus.hashMetadata?.algorithm || "SHA-256"}
+                  size="small"
+                  variant="outlined"
+                  sx={{ mt: 1, fontSize: "0.7rem" }}
+                />
               </Box>
-
               <Box
                 sx={{
                   p: 1.5,
                   mb: 2,
-                  borderRadius: 1,
-                  position: "relative",
+                  borderRadius: "8px",
+
+                  border: "1px solid",
+                  borderColor: "divider",
                 }}
               >
                 <Typography
                   variant="caption"
                   component="div"
                   color="text.secondary"
+                  sx={{ fontWeight: 500, mb: 0.5 }}
                 >
                   Token de verificación:
                 </Typography>
@@ -1182,6 +1660,7 @@ const Index = () => {
                       fontFamily: "monospace",
                       fontSize: "0.7rem",
                       flexGrow: 1,
+                      color: "text.primary",
                     }}
                   >
                     {signatureStatus.verificationHash}
@@ -1195,8 +1674,7 @@ const Index = () => {
                   </IconButton>
                 </Box>
               </Box>
-
-              <Box display="flex" justifyContent="space-between">
+              <Box display="flex" justifyContent="space-between" gap={1}>
                 <Button
                   variant="contained"
                   color="info"
@@ -1206,8 +1684,59 @@ const Index = () => {
                 >
                   Exportar certificado
                 </Button>
+
+                {/* Botón de reintento que aparece cuando hay error */}
+                {saveState.error && (
+                  <Button
+                    variant="contained"
+                    size="small"
+                    startIcon={<Refresh />}
+                    onClick={handleRetrySave}
+                    sx={{
+                      textTransform: "none",
+                      borderRadius: "6px",
+                      fontWeight: 500,
+                    }}
+                  >
+                    Reintentar
+                  </Button>
+                )}
               </Box>
-            </Box>
+              <Box display="flex" justifyContent="space-between" gap={1}>
+                {saveState.error && !saveState.isLoading && (
+                  <Alert
+                    severity="error"
+                    sx={{
+                      mb: 2,
+                      mt: 2,
+                      borderRadius: "8px",
+                      alignItems: "center",
+                      "& .MuiAlert-message": {
+                        padding: "4px 0",
+                        flexGrow: 1,
+                      },
+                    }}
+                    action={
+                      <Button
+                        color="inherit"
+                        size="small"
+                        onClick={handleRetrySave}
+                        startIcon={<Refresh />}
+                        sx={{
+                          textTransform: "none",
+                          fontWeight: 500,
+                        }}
+                      >
+                        Reintentar
+                      </Button>
+                    }
+                  >
+                    Error al guardar la responsiva. Por favor, intenta
+                    nuevamente.
+                  </Alert>
+                )}
+              </Box>
+            </Paper>
           )}
 
           <SignatureModal
@@ -1218,12 +1747,36 @@ const Index = () => {
             userEmail={nuevoArticulo.usuarioAsignado?.email}
             onOTPRequest={handleOTPRequest}
             onOTPValidate={handleOTPValidate}
+            onSignatureComplete={handleSignatureComplete} // ✅ NUEVO CALLBACK
+            documentData={{
+              id: nuevoArticulo?.id,
+              employeeId: nuevoArticulo.usuarioAsignado?.id,
+              // ... otros datos que necesites
+            }}
           />
         </Grid>
 
         <Grid item xs={12} md={8}>
-          <Paper elevation={3} sx={{ p: 2, height: "100%" }}>
-            <Typography variant="h6" gutterBottom sx={{ px: 2 }}>
+          <Paper
+            elevation={0}
+            sx={{
+              p: 2,
+              height: "100%",
+              borderRadius: "12px",
+              border: "1px solid",
+              borderColor: "divider",
+              backgroundColor: "background.paper",
+            }}
+          >
+            <Typography
+              variant="h6"
+              gutterBottom
+              sx={{
+                px: 2,
+                fontWeight: 600,
+                fontSize: "1.1rem",
+              }}
+            >
               Vista Previa del Documento
             </Typography>
 
@@ -1238,7 +1791,6 @@ const Index = () => {
                 style={{
                   border: "1px solid #e0e0e0",
                   borderRadius: "8px",
-                  boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
                 }}
               />
             ) : (
@@ -1250,7 +1802,7 @@ const Index = () => {
                 height="700px"
                 border="1px dashed #e0e0e0"
                 borderRadius={2}
-                sx={{ backgroundColor: "background.default" }}
+                sx={{ backgroundColor: "grey.50" }}
               >
                 <CircularProgress sx={{ mb: 2 }} />
                 <Typography variant="body1" color="text.secondary">
