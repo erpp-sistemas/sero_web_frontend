@@ -34,12 +34,15 @@ import {
   Refresh,
 } from "@mui/icons-material";
 import { createResponsiva } from "../../api/responsive";
+import { useSelector } from 'react-redux';
 
 const Index = () => {
   const { state } = useLocation();
   const { nuevoArticulo } = state || {};
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+
+  const user = useSelector((state) => state.user);  
 
   // Estado para snackbar
   const [snackbar, setSnackbar] = useState({
@@ -95,7 +98,6 @@ const Index = () => {
     signatureStatusRef.current = signatureStatus;
   }, [signatureStatus]);
 
-  
   // Función para manejar reintentos de guardado
   const handleRetrySave = async () => {
     if (!saveState.lastSignatureData) {
@@ -307,11 +309,13 @@ const Index = () => {
       throw new Error("Faltan datos requeridos para la responsiva");
     }
 
+    const pdfBase64 = await generarPDF(true); // true indica que queremos base64
+
     const responsivaData = {
       // ✅ DATOS BÁSICOS
       id_articulo: nuevoArticulo.id_articulo,
       id_usuario_asignado: nuevoArticulo.usuarioAsignado?.id_usuario,
-      id_usuario_autoriza: 1,
+      id_usuario_autoriza: user?.user_id,
       usuario_puesto: nuevoArticulo.usuarioAsignado.puesto?.nombre,
       usuario_departamento: nuevoArticulo.usuarioAsignado.area?.nombre,
       usuario_email: nuevoArticulo.usuarioAsignado?.email,
@@ -331,6 +335,9 @@ const Index = () => {
 
       // ✅ QR CODE
       qr_image_base64: currentSignatureStatus.qrImage,
+
+      pdf_base64: pdfBase64,
+      pdf_filename: `responsiva-${nuevoArticulo.id_articulo}-${Date.now()}.pdf`,
 
       // ✅ INFORMACIÓN DEL DOCUMENTO
       motivo_cambio: motivoCambio || "Asignación inicial de equipo",
@@ -356,6 +363,18 @@ const Index = () => {
       if (responsivaData[key] === null || responsivaData[key] === undefined) {
         delete responsivaData[key];
       }
+    });
+
+    console.log("📦 Datos preparados para la responsiva:", {
+      responsivaData: {
+        ...responsivaData,
+        pdf_base64: pdfBase64
+          ? `Base64 (${pdfBase64.length} caracteres)`
+          : null,
+        qr_image_base64: currentSignatureStatus.qrImage
+          ? `Base64 (${currentSignatureStatus.qrImage.length} caracteres)`
+          : null,
+      },
     });
 
     return responsivaData;
@@ -970,10 +989,10 @@ const Index = () => {
     return y + 6;
   };
 
-  const generarPDF = async () => {
+  const generarPDF = async (returnBase64 = false) => {
     if (!nuevoArticulo || !images.loaded) {
       console.log("Faltan datos necesarios para generar el PDF");
-      return;
+      return returnBase64 ? null : undefined;
     }
 
     try {
@@ -1277,11 +1296,30 @@ const Index = () => {
         drawFooter(doc, pageWidth, pageHeight, i, totalPages);
       }
 
-      const pdfBlob = doc.output("blob");
-      const newPdfUrl = URL.createObjectURL(pdfBlob);
-      setPdfUrl(newPdfUrl);
+      if (returnBase64) {
+        // Retornar base64 para enviar al backend
+        const pdfBlob = doc.output("blob");
+        return new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const base64 = reader.result.split(",")[1];
+            resolve(base64);
+          };
+          reader.readAsDataURL(pdfBlob);
+        });
+      } else {
+        // Generar para vista previa
+        const pdfBlob = doc.output("blob");
+        const newPdfUrl = URL.createObjectURL(pdfBlob);
+        setPdfUrl(newPdfUrl);
+      }
+
+      // const pdfBlob = doc.output("blob");
+      // const newPdfUrl = URL.createObjectURL(pdfBlob);
+      // setPdfUrl(newPdfUrl);
     } catch (error) {
       console.error("Error al generar el PDF:", error);
+      return returnBase64 ? null : undefined;
     }
   };
 
