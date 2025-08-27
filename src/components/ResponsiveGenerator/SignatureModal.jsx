@@ -44,6 +44,7 @@ const SignatureModal = ({
   const [otp, setOtp] = useState("");
   const [countdown, setCountdown] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [isResending, setIsResending] = useState(false);
   const [isCodeExpired, setIsCodeExpired] = useState(false);
   const [qrData, setQrData] = useState(null);
   const [showResendAlert, setShowResendAlert] = useState(false);
@@ -68,6 +69,19 @@ const SignatureModal = ({
     setCountdown(0);
     setIsCodeExpired(false);
     onClose();
+  };
+
+  // Manejar el cierre del modal - solo permitir cierre desde botones
+  const handleModalClose = (event, reason) => {
+    if (reason && reason === "backdropClick") {
+      // Prevenir cierre al hacer clic fuera del modal
+      return;
+    }
+    if (reason && reason === "escapeKeyDown") {
+      // Prevenir cierre con la tecla ESC
+      return;
+    }
+    handleClose();
   };
 
   useEffect(() => {
@@ -98,7 +112,6 @@ const SignatureModal = ({
   }, [countdown]);
 
   // Enviar OTP
-  // En tu SignatureModal.js - mejorar handleSendOTP
   const handleSendOTP = async () => {
     setIsLoading(true);
     setIsCodeExpired(false);
@@ -125,29 +138,31 @@ const SignatureModal = ({
       console.error("❌ Error sending OTP:", error);
 
       // Mostrar mensaje de error al usuario
-      // Puedes agregar un estado para mostrar errores en la UI
       alert(`Error: ${error.message}`);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Reenviar código
+  // Reenviar código - MODIFICADO para mantener la interfaz visible
   const handleResendCode = async () => {
-    setIsLoading(true);
-    setIsCodeExpired(false);
-    setOtp("");
+    setIsResending(true);
+    // NO cambiamos setIsCodeExpired(false) aquí para mantener visible la sección
 
     try {
       await requestOTP(userEmail, documentData);
 
       setCountdown(300);
-      setIsLoading(false);
       setShowResendAlert(true);
       setTimeout(() => setShowResendAlert(false), 3000);
+
+      // Solo marcamos como no expirado cuando el reenvío es exitoso
+      setIsCodeExpired(false);
     } catch (error) {
       console.error("Error resending OTP:", error);
-      setIsLoading(false);
+      // Mantenemos isCodeExpired como true si falla el reenvío
+    } finally {
+      setIsResending(false);
     }
   };
 
@@ -334,7 +349,7 @@ const SignatureModal = ({
   return (
     <Dialog
       open={open}
-      onClose={handleClose}
+      onClose={handleModalClose} // Usar la nueva función manejadora
       fullWidth
       maxWidth="xs"
       PaperProps={{
@@ -470,26 +485,25 @@ const SignatureModal = ({
             {isAlertRendered && (
               <Grow
                 in={showResendAlert}
-                timeout={{ enter: 300, exit: 450 }} // Transiciones más rápidas
+                timeout={{ enter: 300, exit: 450 }}
                 onExited={handleExited}
                 style={{ transformOrigin: "left center" }}
               >
                 <Typography
                   variant="caption"
                   sx={{
-                    color: colors.greenAccent[600], // Verde un poco más oscuro
-                    fontSize: "0.725rem", // Tamaño ligeramente menor
-                    display: "flex", // Para integrar icono si quieres
+                    color: colors.greenAccent[600],
+                    fontSize: "0.725rem",
+                    display: "flex",
                     alignItems: "center",
-                    gap: 0.5, // Espaciado entre icono y texto
-                    mt: 0.5, // Menos margen superior
-                    fontWeight: 500, // Peso medio (no bold)
-                    letterSpacing: 0.2, // Espaciado sutil entre letras
+                    gap: 0.5,
+                    mt: 0.5,
+                    fontWeight: 500,
+                    letterSpacing: 0.2,
                   }}
                 >
-                  <CheckCircleOutline sx={{ fontSize: "0.9rem" }} />{" "}
-                  {/* Icono opcional */}
-                  ¡Código reenviado! {/* Texto más corto */}
+                  <CheckCircleOutline sx={{ fontSize: "0.9rem" }} />
+                  ¡Código reenviado!
                 </Typography>
               </Grow>
             )}
@@ -540,7 +554,7 @@ const SignatureModal = ({
                 </Typography>
               </Box>
             ) : (
-              isCodeExpired && (
+              (isCodeExpired || isResending) && (
                 <Box
                   sx={{
                     mt: 2,
@@ -570,7 +584,9 @@ const SignatureModal = ({
                         lineHeight: 1.3,
                       }}
                     >
-                      El código ha expirado
+                      {isResending
+                        ? "Reenviando código..."
+                        : "El código ha expirado"}
                     </Typography>
                     <Typography
                       variant="caption"
@@ -580,12 +596,14 @@ const SignatureModal = ({
                         fontSize: "0.7rem",
                       }}
                     >
-                      Para continuar, solicita un nuevo código
+                      {isResending
+                        ? "Espere un momento..."
+                        : "Para continuar, solicita un nuevo código"}
                     </Typography>
                   </Box>
                   <Button
                     onClick={handleResendCode}
-                    disabled={isLoading}
+                    disabled={isResending}
                     sx={{
                       textTransform: "none",
                       borderRadius: "4px",
@@ -597,14 +615,20 @@ const SignatureModal = ({
                       py: 0.5,
                       minWidth: 0,
                       "&:hover": {
-                        backgroundColor: colors.redAccent[100],
+                        backgroundColor: isResending
+                          ? "transparent"
+                          : colors.redAccent[100],
+                      },
+                      "&.Mui-disabled": {
+                        color: colors.grey[500],
+                        borderColor: colors.grey[400],
                       },
                     }}
                   >
-                    {isLoading ? (
+                    {isResending ? (
                       <CircularProgress size={20} color="inherit" />
                     ) : (
-                      "Haz clic para reenviar codigo"
+                      "Haz clic para reenviar código"
                     )}
                   </Button>
                 </Box>
@@ -645,7 +669,13 @@ const SignatureModal = ({
               onClick={handleSendOTP}
               variant="contained"
               startIcon={
-                <EmailOutlined sx={{ fontSize: 18, color: colors.grey[700] }} />
+                isLoading ? (
+                  <CircularProgress size={18} color="inherit" />
+                ) : (
+                  <EmailOutlined
+                    sx={{ fontSize: 18, color: colors.grey[700] }}
+                  />
+                )
               }
               disabled={isLoading}
               sx={{
@@ -663,13 +693,13 @@ const SignatureModal = ({
                     color: colors.tealAccent[800],
                   },
                 },
+                "&.Mui-disabled": {
+                  backgroundColor: colors.grey[300],
+                  color: colors.grey[500],
+                },
               }}
             >
-              {isLoading ? (
-                <CircularProgress size={20} color="inherit" />
-              ) : (
-                "Enviar código"
-              )}
+              {isLoading ? "Enviando..." : "Enviar código"}
             </Button>
           </>
         ) : (
@@ -694,11 +724,15 @@ const SignatureModal = ({
             <Button
               onClick={handleValidateOTP}
               variant="contained"
-              disabled={otp.length !== 6 || isCodeExpired}
+              disabled={otp.length !== 6 || isCodeExpired || isLoading}
               startIcon={
-                <SecurityOutlined
-                  sx={{ fontSize: 18, color: colors.grey[700] }}
-                />
+                isLoading ? (
+                  <CircularProgress size={18} color="inherit" />
+                ) : (
+                  <SecurityOutlined
+                    sx={{ fontSize: 18, color: colors.grey[700] }}
+                  />
+                )
               }
               sx={{
                 textTransform: "none",
@@ -715,9 +749,13 @@ const SignatureModal = ({
                     color: colors.tealAccent[800],
                   },
                 },
+                "&.Mui-disabled": {
+                  backgroundColor: colors.grey[300],
+                  color: colors.grey[500],
+                },
               }}
             >
-              Validar
+              {isLoading ? "Validando..." : "Validar"}
             </Button>
           </>
         )}
