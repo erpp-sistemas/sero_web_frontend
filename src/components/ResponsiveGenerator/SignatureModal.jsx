@@ -18,12 +18,14 @@ import { tokens } from "../../theme";
 import CloseIcon from "@mui/icons-material/Close";
 import WarningAmberOutlined from "@mui/icons-material/WarningAmberOutlined";
 import {
+  AccessTime,
   CheckCircleOutline,
   EmailOutlined,
   SecurityOutlined,
 } from "@mui/icons-material";
 import { QRCode } from "react-qr-code";
 import { toPng } from "html-to-image";
+import { requestOTP, validateOTP } from "../../api/otp";
 
 const SignatureModal = ({
   open,
@@ -46,6 +48,18 @@ const SignatureModal = ({
   const [qrData, setQrData] = useState(null);
   const [showResendAlert, setShowResendAlert] = useState(false);
   const [isAlertRendered, setIsAlertRendered] = useState(false);
+
+  const formatTime = (seconds) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const remainingSeconds = seconds % 60;
+
+    return [
+      hours.toString().padStart(2, "0"),
+      minutes.toString().padStart(2, "0"),
+      remainingSeconds.toString().padStart(2, "0"),
+    ].join(":");
+  };
 
   // Reset al cerrar
   const handleClose = () => {
@@ -84,28 +98,57 @@ const SignatureModal = ({
   }, [countdown]);
 
   // Enviar OTP
-  const handleSendOTP = () => {
+  // En tu SignatureModal.js - mejorar handleSendOTP
+  const handleSendOTP = async () => {
     setIsLoading(true);
     setIsCodeExpired(false);
     setOtp("");
-    onOTPRequest(() => {
-      setStep("otp");
-      setCountdown(30);
+
+    try {
+      // Llamar a la API real
+      const response = await requestOTP(userEmail, documentData);
+
+      if (response.success) {
+        setStep("otp");
+        setCountdown(300); // 5 minutos en segundos
+
+        // También llamar al callback del padre si existe
+        if (onOTPRequest) {
+          onOTPRequest(() => {
+            console.log("✅ OTP request callback executed");
+          });
+        }
+      } else {
+        throw new Error(response.message || "Error al enviar el código");
+      }
+    } catch (error) {
+      console.error("❌ Error sending OTP:", error);
+
+      // Mostrar mensaje de error al usuario
+      // Puedes agregar un estado para mostrar errores en la UI
+      alert(`Error: ${error.message}`);
+    } finally {
       setIsLoading(false);
-    });
+    }
   };
 
   // Reenviar código
-  const handleResendCode = () => {
+  const handleResendCode = async () => {
     setIsLoading(true);
     setIsCodeExpired(false);
     setOtp("");
-    onOTPRequest(() => {
-      setCountdown(30);
+
+    try {
+      await requestOTP(userEmail, documentData);
+
+      setCountdown(300);
       setIsLoading(false);
-      setShowResendAlert(true); // ← Mostrar alerta
-      setTimeout(() => setShowResendAlert(false), 3000); // ← Ocultar después de 3s
-    });
+      setShowResendAlert(true);
+      setTimeout(() => setShowResendAlert(false), 3000);
+    } catch (error) {
+      console.error("Error resending OTP:", error);
+      setIsLoading(false);
+    }
   };
 
   const generateVerificationHash = async () => {
@@ -200,20 +243,27 @@ const SignatureModal = ({
     setIsLoading(true);
 
     try {
-      // Generar hash seguro
+      // 1. Primero validar el OTP con el backend
+      const validationResult = await validateOTP(userEmail, otp, documentData);
+
+      if (!validationResult.success) {
+        throw new Error(validationResult.message || "Código inválido");
+      }
+
+      // 2. Si el OTP es válido, generar el hash y QR
       const verificationHash = await generateVerificationHash();
 
       const verificationData = {
         documentId: documentData?.id || "RESP-" + Date.now(),
-        employee:
-          documentData?.employeeId || documentData?.employee?.id || "N/A",
+        employee: documentData?.employeeId || "N/A",
         employeeName: documentData?.employee?.name || "N/A",
         email: userEmail,
         date: new Date().toISOString(),
         hash: verificationHash,
-        otp: otp, // Incluir el OTP en los datos
+        otp: otp,
         timestamp: new Date().toISOString(),
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        validationId: validationResult.validationId, // ID de validación del backend
       };
 
       setQrData(verificationData);
@@ -243,12 +293,13 @@ const SignatureModal = ({
             timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
             uniqueId: crypto.randomUUID?.(),
             documentId: verificationData.documentId,
+            validationId: validationResult.validationId,
           },
         };
 
         console.log("📤 SignatureModal enviando:", signatureCompleteData);
 
-        // Llamar a ambos callbacks
+        // Llamar a los callbacks
         if (onSignatureComplete) {
           onSignatureComplete(signatureCompleteData);
         }
@@ -265,7 +316,9 @@ const SignatureModal = ({
         }
       }
     } catch (error) {
-      console.error("Error generating QR:", error);
+      console.error("Error validating OTP:", error);
+
+      // Mostrar error al usuario
       if (onSignatureComplete) {
         onSignatureComplete({
           success: false,
@@ -463,18 +516,29 @@ const SignatureModal = ({
             </div>
 
             {countdown > 0 ? (
-              <Typography
-                variant="caption"
-                sx={{
-                  display: "block",
-                  mt: 1,
-                  color:
-                    countdown < 10 ? colors.redAccent[400] : colors.grey[500],
-                  fontSize: "0.75rem",
-                }}
+              <Box
+                sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 1 }}
               >
-                El código expira en {countdown}s
-              </Typography>
+                <AccessTime
+                  sx={{
+                    fontSize: "16px",
+                    color:
+                      countdown < 60 ? colors.redAccent[400] : colors.grey[200],
+                  }}
+                />
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color:
+                      countdown < 60 ? colors.redAccent[400] : colors.grey[200],
+                    fontSize: "0.75rem",
+                    fontFamily: "monospace",
+                    fontWeight: countdown < 60 ? 600 : 400,
+                  }}
+                >
+                  El código expira en {formatTime(countdown)}
+                </Typography>
+              </Box>
             ) : (
               isCodeExpired && (
                 <Box

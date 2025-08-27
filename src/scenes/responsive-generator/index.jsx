@@ -34,7 +34,7 @@ import {
   Refresh,
 } from "@mui/icons-material";
 import { createResponsiva } from "../../api/responsive";
-import { useSelector } from 'react-redux';
+import { useSelector } from "react-redux";
 
 const Index = () => {
   const { state } = useLocation();
@@ -42,7 +42,7 @@ const Index = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
-  const user = useSelector((state) => state.user);  
+  const user = useSelector((state) => state.user);
 
   // Estado para snackbar
   const [snackbar, setSnackbar] = useState({
@@ -201,10 +201,14 @@ const Index = () => {
   };
 
   // Mock: Enviar OTP (conectar a tu API real)
-  const handleOTPRequest = (callback) => {
-    console.log("Enviando OTP a:", nuevoArticulo.usuarioAsignado?.email);
-    // Simular delay de red
-    setTimeout(() => callback(), 1500);
+  const handleOTPRequest = async (callback) => {
+    try {
+      // Esta función ahora será manejada por el SignatureModal directamente
+      // Solo llamamos al callback para mantener la compatibilidad
+      callback();
+    } catch (error) {
+      console.error("Error in OTP request:", error);
+    }
   };
 
   // Mock: Validar OTP (conectar a tu API real)
@@ -214,35 +218,31 @@ const Index = () => {
     qrResponse,
     signatureCompleteData = null
   ) => {
-    if (otp === "123456") {
-      try {
-        if (signatureCompleteData && signatureCompleteData.success) {
-          const newSignatureStatus = {
-            isSigned: true,
-            showModal: false,
-            qrImage: signatureCompleteData.qrImage,
-            qrData: signatureCompleteData.qrData,
-            verificationHash: signatureCompleteData.verificationHash,
-            hashMetadata: signatureCompleteData.hashMetadata,
-            signedAt: new Date(signatureCompleteData.timestamp),
-            codigo_verificacion: signatureCompleteData.codigo_verificacion,
-            timestamp_firma: signatureCompleteData.timestamp,
-          };
+    try {
+      if (signatureCompleteData && signatureCompleteData.success) {
+        const newSignatureStatus = {
+          isSigned: true,
+          showModal: false,
+          qrImage: signatureCompleteData.qrImage,
+          qrData: signatureCompleteData.qrData,
+          verificationHash: signatureCompleteData.verificationHash,
+          hashMetadata: signatureCompleteData.hashMetadata,
+          signedAt: new Date(signatureCompleteData.timestamp),
+          codigo_verificacion: signatureCompleteData.codigo_verificacion,
+          timestamp_firma: signatureCompleteData.timestamp,
+        };
 
-          // ✅ Solo actualizar UI
-          signatureStatusRef.current = newSignatureStatus;
-          setSignatureStatus(newSignatureStatus);
-          setPdfVersion((prev) => prev + 1);
+        // ✅ Solo actualizar UI
+        signatureStatusRef.current = newSignatureStatus;
+        setSignatureStatus(newSignatureStatus);
+        setPdfVersion((prev) => prev + 1);
 
-          // ❌ ELIMINAR esta línea - Ya se envía desde handleSignatureComplete
-          // await enviarResponsivaAlBackend(newSignatureStatus);
+        // ❌ ELIMINAR esta línea - Ya se envía desde handleSignatureComplete
+        // await enviarResponsivaAlBackend(newSignatureStatus);
 
-          return true;
-        }
-      } catch (error) {
-        return false;
+        return true;
       }
-    } else {
+    } catch (error) {
       setSnackbar({
         open: true,
         message: "❌ Código incorrecto",
@@ -1570,7 +1570,6 @@ const Index = () => {
               />
             </Box>
           </Paper>
-
           <Box>
             {/* Indicador de carga y estado de guardado - Estilo minimalista */}
             {saveState.isLoading && (
@@ -1592,7 +1591,6 @@ const Index = () => {
               </Alert>
             )}
           </Box>
-
           {/* Botón de firma */}
           {!signatureStatus.isSigned ? (
             <Button
@@ -1776,7 +1774,7 @@ const Index = () => {
               </Box>
             </Paper>
           )}
-
+          
           <SignatureModal
             open={signatureStatus.showModal}
             onClose={() =>
@@ -1785,11 +1783,18 @@ const Index = () => {
             userEmail={nuevoArticulo.usuarioAsignado?.email}
             onOTPRequest={handleOTPRequest}
             onOTPValidate={handleOTPValidate}
-            onSignatureComplete={handleSignatureComplete} // ✅ NUEVO CALLBACK
+            onSignatureComplete={handleSignatureComplete}
             documentData={{
-              id: nuevoArticulo?.id,
-              employeeId: nuevoArticulo.usuarioAsignado?.id,
-              // ... otros datos que necesites
+              id: nuevoArticulo?.id_articulo, // ← CORREGIDO: usar id_articulo en lugar de id
+              employeeId: nuevoArticulo.usuarioAsignado?.id_usuario, // ← CORREGIDO: usar id_usuario en lugar de id
+              employee: {
+                id: nuevoArticulo.usuarioAsignado?.id_usuario, // ← CORREGIDO
+                name: nuevoArticulo.usuarioAsignado?.nombre,
+              },
+              article: {
+                id: nuevoArticulo.id_articulo, // ← CORREGIDO
+                name: nuevoArticulo.campos?.nombre_articulo,
+              },
             }}
           />
         </Grid>
