@@ -166,33 +166,19 @@ const SignatureModal = ({
     }
   };
 
-  const generateVerificationHash = async () => {
-    try {
-      const data = `${userEmail}-${Date.now()}-${crypto.randomUUID()}`;
-      const encoder = new TextEncoder();
-      const dataBuffer = encoder.encode(data);
-      const hashBuffer = await crypto.subtle.digest("SHA-256", dataBuffer);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
-    } catch (error) {
-      console.error("Error generating hash:", error);
-      return `fallback-${Date.now()}-${Math.random()
-        .toString(36)
-        .substring(2, 15)}`;
-    }
-  };
-
-  // Agrega esta función en SignatureModal para generar hashes consistentes
-  const generateSecureHash = async (data, options = {}) => {
+  // Función de hash segura mejorada - REEMPLAZA generateVerificationHash
+  const generateSecureHash = async (options = {}) => {
     const {
       algorithm = "SHA-256",
       includeTimestamp = true,
       includeUniqueId = true,
-      documentId = null,
     } = options;
 
     try {
-      // Salts para el hash
+      // Datos base para el hash
+      const baseData = `${userEmail}-${documentData?.id || "unknown-document"}`;
+
+      // Salts para mayor seguridad
       const timestampSalt = includeTimestamp
         ? new Date().toISOString() +
           "|" +
@@ -200,10 +186,13 @@ const SignatureModal = ({
         : "";
 
       const uniqueIdSalt = includeUniqueId ? crypto.randomUUID() : "";
-      const documentSalt = documentId ? `|DOC-${documentId}` : "";
+      const documentSalt = documentData?.id ? `|DOC-${documentData.id}` : "";
+      const employeeSalt = documentData?.employeeId
+        ? `|EMP-${documentData.employeeId}`
+        : "";
 
       // Combinar todos los componentes
-      const combinedData = `${data}|${timestampSalt}|${uniqueIdSalt}${documentSalt}`;
+      const combinedData = `${baseData}|${timestampSalt}|${uniqueIdSalt}${documentSalt}${employeeSalt}`;
 
       // Codificar y calcular hash
       const encoder = new TextEncoder();
@@ -224,27 +213,31 @@ const SignatureModal = ({
           ? Intl.DateTimeFormat().resolvedOptions().timeZone
           : undefined,
         uniqueId: includeUniqueId ? uniqueIdSalt : undefined,
-        documentId: documentId || undefined,
+        documentId: documentData?.id || undefined,
+        employeeId: documentData?.employeeId || undefined,
       };
     } catch (error) {
       console.error("Error generando hash seguro:", error);
 
-      // Fallback seguro
-      const fallbackHash = await crypto.subtle.digest(
-        "SHA-256",
-        new TextEncoder().encode(
-          `${data}|${Date.now()}|${Math.random().toString(36).slice(2)}|${
-            nuevoArticulo?.id || "fallback"
-          }`
-        )
-      );
-      const fallbackArray = Array.from(new Uint8Array(fallbackHash));
+      // Fallback seguro con máxima entropía
+      const fallbackData = `${userEmail}|${Date.now()}|${Math.random()
+        .toString(36)
+        .slice(2)}|${
+        crypto.randomUUID?.() || Math.random().toString(36).slice(2)
+      }|${documentData?.id || "fallback"}`;
+      const encoder = new TextEncoder();
+      const dataBuffer = encoder.encode(fallbackData);
+      const hashBuffer = await crypto.subtle.digest("SHA-256", dataBuffer);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
 
       return {
-        hash: fallbackArray
-          .map((b) => b.toString(16).padStart(2, "0"))
-          .join(""),
+        hash: hashArray.map((b) => b.toString(16).padStart(2, "0")).join(""),
         algorithm: "SHA-256",
+        timestamp: new Date().toISOString(),
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        uniqueId: crypto.randomUUID?.() || Math.random().toString(36).slice(2),
+        documentId: documentData?.id || "fallback",
+        employeeId: documentData?.employeeId || undefined,
         isFallback: true,
         error: error.message,
       };
@@ -265,8 +258,8 @@ const SignatureModal = ({
         throw new Error(validationResult.message || "Código inválido");
       }
 
-      // 2. Si el OTP es válido, generar el hash y QR
-      const verificationHash = await generateVerificationHash();
+      // 2. Si el OTP es válido, generar el hash seguro y QR
+      const hashResult = await generateSecureHash();
 
       const verificationData = {
         documentId: documentData?.id || "RESP-" + Date.now(),
@@ -274,11 +267,19 @@ const SignatureModal = ({
         employeeName: documentData?.employee?.name || "N/A",
         email: userEmail,
         date: new Date().toISOString(),
-        hash: verificationHash,
+        hash: hashResult.hash,
         otp: otp,
-        timestamp: new Date().toISOString(),
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        validationId: validationResult.validationId, // ID de validación del backend
+        timestamp: hashResult.timestamp,
+        timezone: hashResult.timezone,
+        validationId: validationResult.validationId,
+        hashMetadata: {
+          algorithm: hashResult.algorithm,
+          uniqueId: hashResult.uniqueId,
+          documentId: hashResult.documentId,
+          employeeId: hashResult.employeeId,
+          isFallback: hashResult.isFallback || false,
+          error: hashResult.error,
+        },
       };
 
       setQrData(verificationData);
@@ -301,18 +302,15 @@ const SignatureModal = ({
           qrData: JSON.stringify(verificationData),
           codigo_verificacion: otp,
           timestamp: new Date().toISOString(),
-          verificationHash: verificationHash,
-          hashMetadata: {
-            algorithm: "SHA-256",
-            timestamp: new Date().toISOString(),
-            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-            uniqueId: crypto.randomUUID?.(),
-            documentId: verificationData.documentId,
-            validationId: validationResult.validationId,
-          },
+          verificationHash: hashResult.hash,
+          hashMetadata: hashResult,
+          validationId: validationResult.validationId,
         };
 
-        console.log("📤 SignatureModal enviando:", signatureCompleteData);
+        console.log(
+          "📤 SignatureModal enviando datos seguros:",
+          signatureCompleteData
+        );
 
         // Llamar a los callbacks
         if (onSignatureComplete) {
@@ -349,7 +347,7 @@ const SignatureModal = ({
   return (
     <Dialog
       open={open}
-      onClose={handleModalClose} // Usar la nueva función manejadora
+      onClose={handleModalClose}
       fullWidth
       maxWidth="xs"
       PaperProps={{
@@ -680,7 +678,7 @@ const SignatureModal = ({
               disabled={isLoading}
               sx={{
                 textTransform: "none",
-                borderRadius: "6px",
+                borderRadius: "极px",
                 color: colors.grey[700],
                 backgroundColor: "rgba(255,255,255,0.85)",
                 border: "1px solid",
@@ -711,7 +709,7 @@ const SignatureModal = ({
                 borderRadius: "6px",
                 color: colors.grey[700],
                 backgroundColor: "rgba(255,255,255,0.85)",
-                border: "1px solid",
+                border: "极px solid",
                 borderColor: colors.grey[300],
                 "&:hover": {
                   backgroundColor: colors.grey[100],
@@ -741,7 +739,7 @@ const SignatureModal = ({
                 backgroundColor: "rgba(255,255,255,0.85)",
                 border: "1px solid",
                 borderColor: colors.grey[300],
-                "&:hover": {
+                "极:hover": {
                   backgroundColor: colors.tealAccent[300],
                   borderColor: colors.tealAccent[500],
                   color: colors.grey[100],

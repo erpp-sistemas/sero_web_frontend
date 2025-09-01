@@ -33,7 +33,7 @@ import {
   LockPersonOutlined,
   Refresh,
 } from "@mui/icons-material";
-import { createResponsiva } from "../../api/responsive";
+import { createResponsiva, confirmationResponsiva } from "../../api/responsive";
 import { useSelector } from "react-redux";
 
 const Index = () => {
@@ -281,6 +281,29 @@ const Index = () => {
         }));
 
         await enviarResponsivaAlBackend(newSignatureStatus);
+
+        // 2. Enviar email de confirmación (no bloqueante)
+        sendConfirmationEmail(newSignatureStatus)
+          .then((emailResult) => {
+            if (emailResult) {
+              console.log("✅ Email de confirmación enviado exitosamente");
+              // Opcional: Mostrar mensaje de éxito
+              setSnackbar({
+                open: true,
+                message: "✅ Firma completada y email de confirmación enviado",
+                severity: "success",
+              });
+            } else {
+              console.log(
+                "⚠️ Email de confirmación no enviado, pero la firma fue exitosa"
+              );
+              // El error ya se maneja en sendConfirmationEmail
+            }
+          })
+          .catch((emailError) => {
+            console.error("Error no crítico en envío de email:", emailError);
+            // No mostrar error al usuario para no interrumpir el flujo principal
+          });
       } catch (error) {
         setSnackbar({
           open: true,
@@ -441,6 +464,76 @@ const Index = () => {
       throw error;
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // En la función sendConfirmationEmail, reemplaza el fetch directo por la función de la API
+  // En la función sendConfirmationEmail, modifica la preparación de equipmentData:
+  const sendConfirmationEmail = async (signatureData) => {
+    try {
+      // Extraer los campos EXACTAMENTE como se hace en el PDF
+      const equipmentData = Object.entries(nuevoArticulo.campos || {}).map(
+        ([key, value]) => ({
+          label: key.replace(/_/g, " ").toUpperCase(),
+          value:
+            typeof value === "number" && key.toLowerCase().includes("precio")
+              ? `$${value.toLocaleString("es-MX")}`
+              : String(value || "N/A"),
+        })
+      );      
+
+      console.log(nuevoArticulo.id_articulo)
+
+      const emailData = {
+        to: nuevoArticulo.usuarioAsignado?.email,
+        employeeName: nuevoArticulo.usuarioAsignado?.nombre || "N/A",        
+        documentId: nuevoArticulo?.id_articulo || "N/A",
+        documentName: nuevoArticulo.campos?.nombre_articulo || "N/A",
+        articleSerial: nuevoArticulo.campos?.serial_articulo || "N/A",
+        signingDate: signatureData.signedAt.toLocaleDateString("es-MX"),
+        signingTime: signatureData.signedAt.toLocaleTimeString("es-MX"),
+        verificationCode: signatureData.codigo_verificacion,
+        verificationHash: signatureData.verificationHash,
+        articleModel: nuevoArticulo.campos?.modelo_articulo || "N/A",
+        articleValue: nuevoArticulo.campos?.precio_articulo
+          ? `$${parseFloat(nuevoArticulo.campos.precio_articulo).toLocaleString(
+              "es-MX"
+            )}`
+          : "N/A",
+        location: nuevoArticulo.plaza?.nombre_plaza || "N/A",
+        assignmentDate:
+          nuevoArticulo.fecha_ingreso || new Date().toLocaleDateString("es-MX"),
+        portalUrl: `${window.location.origin}/mis-documentos`,
+        supportEmail: "soporte@erpp.mx",
+        hrEmail: "rh@erpp.mx",
+        supportPhone: "+52 55 1234 5678",
+        // Nuevo campo con los datos específicos del equipo (EXACTAMENTE como en el PDF)
+        equipmentData: equipmentData,
+      };
+
+      // ✅ Usar la función de la API en lugar de fetch directo
+      const result = await confirmationResponsiva(emailData);
+
+      if (result.success) {
+        console.log("📧 Email de confirmación enviado exitosamente");
+        return true;
+      } else {
+        throw new Error(
+          result.message || "Error al enviar el email de confirmación"
+        );
+      }
+    } catch (error) {
+      console.error("❌ Error enviando email de confirmación:", error);
+
+      // Mostrar snackbar de advertencia (no error crítico)
+      setSnackbar({
+        open: true,
+        message:
+          "✅ Firma completada, pero no se pudo enviar el email de confirmación",
+        severity: "warning",
+      });
+
+      return false;
     }
   };
 
@@ -1774,7 +1867,7 @@ const Index = () => {
               </Box>
             </Paper>
           )}
-          
+
           <SignatureModal
             open={signatureStatus.showModal}
             onClose={() =>
