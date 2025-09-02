@@ -261,6 +261,12 @@ const SignatureModal = ({
       // 2. Si el OTP es válido, generar el hash seguro y QR
       const hashResult = await generateSecureHash();
 
+      // 3. Generar token único para verificación
+      const validationToken = crypto.randomUUID();
+
+      // 4. Crear URL de verificación (LO MÁS IMPORTANTE)
+      const verificationUrl = `https://ser0.mx/verification-responsiva?token=${validationToken}&hash=${hashResult.hash}`;
+
       const verificationData = {
         documentId: documentData?.id || "RESP-" + Date.now(),
         employee: documentData?.employeeId || "N/A",
@@ -272,6 +278,9 @@ const SignatureModal = ({
         timestamp: hashResult.timestamp,
         timezone: hashResult.timezone,
         validationId: validationResult.validationId,
+        // NUEVO: Datos para la verificación
+        validationToken: validationToken,
+        verificationUrl: verificationUrl,
         hashMetadata: {
           algorithm: hashResult.algorithm,
           uniqueId: hashResult.uniqueId,
@@ -299,18 +308,15 @@ const SignatureModal = ({
         const signatureCompleteData = {
           success: true,
           qrImage: qrImage,
-          qrData: JSON.stringify(verificationData),
+          qrData: verificationUrl,
           codigo_verificacion: otp,
           timestamp: new Date().toISOString(),
           verificationHash: hashResult.hash,
           hashMetadata: hashResult,
           validationId: validationResult.validationId,
-        };
-
-        console.log(
-          "📤 SignatureModal enviando datos seguros:",
-          signatureCompleteData
-        );
+          validationToken: validationToken,
+        verificationUrl: verificationUrl
+        };       
 
         // Llamar a los callbacks
         if (onSignatureComplete) {
@@ -322,7 +328,7 @@ const SignatureModal = ({
             otp,
             {
               qrImage,
-              qrData: JSON.stringify(verificationData),
+              qrData: verificationUrl,
             },
             signatureCompleteData
           );
@@ -517,7 +523,7 @@ const SignatureModal = ({
                   }}
                 >
                   <QRCode
-                    value={JSON.stringify(qrData)}
+                    value={qrData.verificationUrl}
                     size={200}
                     level="H"
                     bgColor="white"

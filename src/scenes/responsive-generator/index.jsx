@@ -230,15 +230,14 @@ const Index = () => {
           signedAt: new Date(signatureCompleteData.timestamp),
           codigo_verificacion: signatureCompleteData.codigo_verificacion,
           timestamp_firma: signatureCompleteData.timestamp,
+          validationToken: signatureCompleteData.validationToken,
+          verificationUrl: signatureCompleteData.verificationUrl,
         };
 
         // ✅ Solo actualizar UI
         signatureStatusRef.current = newSignatureStatus;
         setSignatureStatus(newSignatureStatus);
         setPdfVersion((prev) => prev + 1);
-
-        // ❌ ELIMINAR esta línea - Ya se envía desde handleSignatureComplete
-        // await enviarResponsivaAlBackend(newSignatureStatus);
 
         return true;
       }
@@ -265,6 +264,8 @@ const Index = () => {
           signedAt: new Date(signatureData.timestamp),
           codigo_verificacion: signatureData.codigo_verificacion,
           timestamp_firma: signatureData.timestamp,
+          validationToken: signatureData.validationToken,
+          verificationUrl: signatureData.verificationUrl,
         };
 
         // ✅ ACTUALIZAR LA REFERENCIA
@@ -356,6 +357,9 @@ const Index = () => {
       unique_id_firma:
         currentSignatureStatus.hashMetadata?.uniqueId || crypto.randomUUID(),
 
+      validation_token: currentSignatureStatus.validationToken,
+      verification_url: currentSignatureStatus.verificationUrl,
+
       // ✅ QR CODE
       qr_image_base64: currentSignatureStatus.qrImage,
 
@@ -386,18 +390,6 @@ const Index = () => {
       if (responsivaData[key] === null || responsivaData[key] === undefined) {
         delete responsivaData[key];
       }
-    });
-
-    console.log("📦 Datos preparados para la responsiva:", {
-      responsivaData: {
-        ...responsivaData,
-        pdf_base64: pdfBase64
-          ? `Base64 (${pdfBase64.length} caracteres)`
-          : null,
-        qr_image_base64: currentSignatureStatus.qrImage
-          ? `Base64 (${currentSignatureStatus.qrImage.length} caracteres)`
-          : null,
-      },
     });
 
     return responsivaData;
@@ -467,7 +459,6 @@ const Index = () => {
     }
   };
 
-  // En la función sendConfirmationEmail, reemplaza el fetch directo por la función de la API
   // En la función sendConfirmationEmail, modifica la preparación de equipmentData:
   const sendConfirmationEmail = async (signatureData) => {
     try {
@@ -480,13 +471,13 @@ const Index = () => {
               ? `$${value.toLocaleString("es-MX")}`
               : String(value || "N/A"),
         })
-      );      
+      );
 
-      console.log(nuevoArticulo.id_articulo)
+      console.log(nuevoArticulo.id_articulo);
 
       const emailData = {
         to: nuevoArticulo.usuarioAsignado?.email,
-        employeeName: nuevoArticulo.usuarioAsignado?.nombre || "N/A",        
+        employeeName: nuevoArticulo.usuarioAsignado?.nombre || "N/A",
         documentId: nuevoArticulo?.id_articulo || "N/A",
         documentName: nuevoArticulo.campos?.nombre_articulo || "N/A",
         articleSerial: nuevoArticulo.campos?.serial_articulo || "N/A",
