@@ -230,7 +230,7 @@ function App() {
                         <Route path="/inventory-list" element={<InventoryList />} />
                         <Route path="/new-inventory" element={<NewInventory />} />
                         <Route path="/responsive-generator" element={<ResponsiveGenerator />} />
-                        <Route path="/verification-responsive" element={<VerificationResponsive />} />
+                        <Route path="/verification-responsiva" element={<VerificationResponsive />} />
 
                       </Routes>
                     </main>
