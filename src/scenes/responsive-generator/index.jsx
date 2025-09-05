@@ -333,7 +333,7 @@ const Index = () => {
       throw new Error("Faltan datos requeridos para la responsiva");
     }
 
-    const pdfBase64 = await generarPDF(true); // true indica que queremos base64
+    const pdfBase64 = await generarPDF(true, currentSignatureStatus); // true indica que queremos base64
 
     const responsivaData = {
       // ✅ DATOS BÁSICOS
@@ -1073,11 +1073,17 @@ const Index = () => {
     return y + 6;
   };
 
-  const generarPDF = async (returnBase64 = false) => {
+  const generarPDF = async (
+    returnBase64 = false,
+    customSignatureStatus = null
+  ) => {
     if (!nuevoArticulo || !images.loaded) {
       console.log("Faltan datos necesarios para generar el PDF");
       return returnBase64 ? null : undefined;
     }
+
+    // Usa el estado de firma más reciente si se proporciona
+    const signature = customSignatureStatus || signatureStatus;
 
     try {
       const doc = new jsPDF({
@@ -1330,22 +1336,22 @@ const Index = () => {
       );
 
       // QR solo si está firmado (encima de la línea del receptor)
-      if (signatureStatus.isSigned && signatureStatus.qrImage) {
+      if (signature.isSigned && signature.qrImage) {
         const qrSize = 90; // Tamaño moderado para no saturar
         const qrX = rightCenter - qrSize / 2; // Centrado sobre la línea
         const qrY = lineY - qrSize - 30; // 10pt arriba de la línea
 
-        doc.addImage(signatureStatus.qrImage, "PNG", qrX, qrY, qrSize, qrSize);
+        doc.addImage(signature.qrImage, "PNG", qrX, qrY, qrSize, qrSize);
 
         // Mostrar el token/hash de verificación debajo del QR
-        const token = signatureStatus.verificationHash;
+        const token = signature.verificationHash;
         const formattedToken = token.match(/.{1,8}/g).join(" "); // Separar cada 8 caracteres
 
         // Información de validación
         doc.setFontSize(6);
         doc.setTextColor(100, 100, 100);
         doc.text(
-          `Verificado: ${signatureStatus.signedAt.toLocaleString()}`,
+          `Verificado: ${signature.signedAt.toLocaleString()}`,
           rightCenter,
           qrY + qrSize + 2,
           { align: "center" }
@@ -1381,7 +1387,6 @@ const Index = () => {
       }
 
       if (returnBase64) {
-        // Retornar base64 para enviar al backend
         const pdfBlob = doc.output("blob");
         return new Promise((resolve) => {
           const reader = new FileReader();
@@ -1392,15 +1397,10 @@ const Index = () => {
           reader.readAsDataURL(pdfBlob);
         });
       } else {
-        // Generar para vista previa
         const pdfBlob = doc.output("blob");
         const newPdfUrl = URL.createObjectURL(pdfBlob);
         setPdfUrl(newPdfUrl);
       }
-
-      // const pdfBlob = doc.output("blob");
-      // const newPdfUrl = URL.createObjectURL(pdfBlob);
-      // setPdfUrl(newPdfUrl);
     } catch (error) {
       console.error("Error al generar el PDF:", error);
       return returnBase64 ? null : undefined;

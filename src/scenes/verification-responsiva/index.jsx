@@ -12,6 +12,8 @@ import {
   DialogContent,
   IconButton,
   useTheme,
+  Grid,
+  Divider,
 } from "@mui/material";
 import {
   Verified as VerifiedIcon,
@@ -22,6 +24,10 @@ import {
   Close as CloseIcon,
   Fullscreen as FullscreenIcon,
   Info as InfoIcon,
+  QrCode as QrCodeIcon,
+  CalendarToday as CalendarIcon,
+  Fingerprint as FingerprintIcon,
+  Description as DescriptionIcon,
 } from "@mui/icons-material";
 import { useSearchParams } from "react-router-dom";
 import { verifyResponsiva, getResponsivaPDFUrl } from "../../api/responsive.js";
@@ -87,33 +93,81 @@ const Index = () => {
     }
   };
 
-  const handleOpenInNewTab = () => {
-    if (pdfInfo?.pdfUrl) {
-      window.open(pdfInfo.pdfUrl, "_blank");
-    }
-  };
+  // const handleOpenInNewTab = () => {
+  //   if (pdfInfo?.pdfUrl) {
+  //     window.open(pdfInfo.pdfUrl, "_blank");
+  //   }
+  // };
 
-  const handleOpenDirectUrl = () => {
-    if (pdfInfo?.directUrl) {
-      window.open(pdfInfo.directUrl, "_blank");
+  // const handleOpenDirectUrl = () => {
+  //   if (pdfInfo?.directUrl) {
+  //     window.open(pdfInfo.directUrl, "_blank");
+  //   }
+  // };
+
+  const getBlobUrl = () => {
+    if (!pdfInfo?.pdfBase64) return null;
+
+    try {
+      // Limpiar el base64 (remover el prefijo data URL si existe)
+      const base64Data = pdfInfo.pdfBase64.replace(
+        /^data:application\/pdf;base64,/,
+        ""
+      );
+
+      // Convertir base64 a blob
+      const byteCharacters = atob(base64Data);
+      const byteArrays = [];
+
+      for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+        const slice = byteCharacters.slice(offset, offset + 512);
+        const byteNumbers = new Array(slice.length);
+
+        for (let i = 0; i < slice.length; i++) {
+          byteNumbers[i] = slice.charCodeAt(i);
+        }
+
+        const byteArray = new Uint8Array(byteNumbers);
+        byteArrays.push(byteArray);
+      }
+
+      const blob = new Blob(byteArrays, { type: "application/pdf" });
+      return URL.createObjectURL(blob);
+    } catch (error) {
+      console.error("Error creando blob URL:", error);
+      return null;
     }
   };
 
   // Componente de visor de PDF
   const PDFViewer = ({ fullscreen = false }) => {
+    const [blobUrl, setBlobUrl] = useState(null);
+
+    useEffect(() => {
+      const url = getBlobUrl();
+      setBlobUrl(url);
+
+      // Cleanup function para revocar la URL cuando el componente se desmonte
+      return () => {
+        if (url) {
+          URL.revokeObjectURL(url);
+        }
+      };
+    }, [pdfInfo?.pdfBase64]);
+
     if (pdfLoading) {
       return (
         <Box
           display="flex"
           justifyContent="center"
           alignItems="center"
-          minHeight={fullscreen ? "80vh" : "400px"}
+          minHeight={fullscreen ? "80vh" : "100%"}
           flexDirection="column"
           gap={2}
           sx={{
             backgroundColor:
-              theme.palette.mode === "dark" ? "#2c2c2c" : "#f8f9fa",
-            borderRadius: "8px",
+              theme.palette.mode === "dark" ? "#1a1a1a" : "#fafafa",
+            borderRadius: "12px",
           }}
         >
           <CircularProgress size={32} />
@@ -130,14 +184,14 @@ const Index = () => {
           display="flex"
           justifyContent="center"
           alignItems="center"
-          minHeight={fullscreen ? "80vh" : "400px"}
+          minHeight={fullscreen ? "80vh" : "100%"}
           flexDirection="column"
           gap={2}
           p={2}
           sx={{
             backgroundColor:
-              theme.palette.mode === "dark" ? "#2c2c2c" : "#f8f9fa",
-            borderRadius: "8px",
+              theme.palette.mode === "dark" ? "#1a1a1a" : "#fafafa",
+            borderRadius: "12px",
           }}
         >
           <ErrorIcon color="error" sx={{ fontSize: 40 }} />
@@ -177,19 +231,19 @@ const Index = () => {
       <Box
         sx={{
           width: "100%",
-          height: fullscreen ? "80vh" : "500px",
-          borderRadius: "8px",
+          height: fullscreen ? "80vh" : "100%",
+          borderRadius: "12px",
           overflow: "hidden",
           backgroundColor:
-            theme.palette.mode === "dark" ? "#2c2c2c" : "#f8f9fa",
+            theme.palette.mode === "dark" ? "#1a1a1a" : "#fafafa",
           boxShadow: "none",
           border: `1px solid ${
-            theme.palette.mode === "dark" ? "#404040" : "#e0e0e0"
+            theme.palette.mode === "dark" ? "#333" : "#e0e0e0"
           }`,
         }}
       >
         <iframe
-          src={pdfInfo.pdfUrl}
+          src={blobUrl}
           title="Documento verificado"
           style={{
             width: "100%",
@@ -237,10 +291,10 @@ const Index = () => {
           sx={{
             p: 4,
             borderRadius: "12px",
-            bgcolor: theme.palette.mode === "dark" ? "#1e1e1e" : "#ffffff",
-            boxShadow: "none",
+            bgcolor: theme.palette.mode === "dark" ? "#1a1a1a" : "#ffffff",
+            boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.05)",
             border: `1px solid ${
-              theme.palette.mode === "dark" ? "#404040" : "#e0e0e0"
+              theme.palette.mode === "dark" ? "#333" : "#e0e0e0"
             }`,
           }}
         >
@@ -267,6 +321,7 @@ const Index = () => {
               variant="contained"
               onClick={verifyAndLoadPDF}
               startIcon={<SecurityIcon />}
+              sx={{ borderRadius: "8px" }}
             >
               Reintentar verificación
             </Button>
@@ -281,180 +336,380 @@ const Index = () => {
   const { isValid, document } = verificationData;
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      {/* Header de verificación */}
-      <Paper
-        elevation={0}
-        sx={{
-          p: 4,
-          mb: 4,
-          borderRadius: "12px",
-          bgcolor: theme.palette.mode === "dark" ? "#1e1e1e" : "#ffffff",
-          boxShadow: "none",
-          border: `1px solid ${
-            isValid
-              ? theme.palette.mode === "dark"
-                ? "#404040"
-                : "#e0e0e0"
-              : theme.palette.mode === "dark"
-              ? "#f44336"
-              : "#ffebee"
-          }`,
-        }}
-      >
-        <Stack spacing={2} alignItems="center" textAlign="center">
-          {isValid ? (
-            <>
-              <Box
-                sx={{
-                  p: 1.5,
-                  borderRadius: "50%",
-                  bgcolor:
-                    theme.palette.mode === "dark"
-                      ? "success.dark"
-                      : "success.light",
-                  color:
-                    theme.palette.mode === "dark"
-                      ? "success.contrastText"
-                      : "success.main",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <VerifiedIcon sx={{ fontSize: 36 }} />
-              </Box>
-              <Typography variant="h4" fontWeight={600} color="text.primary">
-                Verificación exitosa
-              </Typography>
-              <Typography variant="body1" color="text.secondary">
-                Hemos confirmado que este documento es auténtico y no ha sido
-                alterado.
-              </Typography>
-              {document?.folio && (
-                <Chip
-                  label={`Folio: ${document.folio}`}
-                  sx={{
-                    backgroundColor:
-                      theme.palette.mode === "dark"
-                        ? "success.dark"
-                        : "success.light",
-                    color:
-                      theme.palette.mode === "dark" ? "#fff" : "success.dark",
-                    fontWeight: 500,
-                    fontSize: "0.9rem",
-                    height: 32,
-                  }}
-                />
-              )}
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  mt: 1,
-                  p: 1.5,
-                  borderRadius: "6px",
-                  backgroundColor:
-                    theme.palette.mode === "dark"
-                      ? "rgba(76, 175, 80, 0.1)"
-                      : "rgba(76, 175, 80, 0.05)",
-                  border: `1px solid ${
-                    theme.palette.mode === "dark"
-                      ? "rgba(76, 175, 80, 0.3)"
-                      : "rgba(76, 175, 80, 0.2)"
-                  }`,
-                  maxWidth: "500px",
-                }}
-              >
-                <InfoIcon sx={{ fontSize: 18, mr: 1, color: "success.main" }} />
-                <Typography variant="caption" color="text.secondary">
-                  Este documento fue firmado digitalmente y verificado con
-                  tecnología blockchain.
-                </Typography>
-              </Box>
-            </>
-          ) : (
-            <>
-              <Box
-                sx={{
-                  p: 1.5,
-                  borderRadius: "50%",
-                  bgcolor:
-                    theme.palette.mode === "dark"
-                      ? "error.dark"
-                      : "error.light",
-                  color:
-                    theme.palette.mode === "dark"
-                      ? "error.contrastText"
-                      : "error.main",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <ErrorIcon sx={{ fontSize: 36 }} />
-              </Box>
-              <Typography variant="h4" fontWeight={600} color="text.primary">
-                Verificación fallida
-              </Typography>
-              <Typography variant="body1" color="text.secondary">
-                No pudimos verificar la autenticidad de este documento.
-              </Typography>
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  mt: 1,
-                  p: 1.5,
-                  borderRadius: "6px",
-                  backgroundColor:
-                    theme.palette.mode === "dark"
-                      ? "rgba(244, 67, 54, 0.1)"
-                      : "rgba(244, 67, 54, 0.05)",
-                  border: `1px solid ${
-                    theme.palette.mode === "dark"
-                      ? "rgba(244, 67, 54, 0.3)"
-                      : "rgba(244, 67, 54, 0.2)"
-                  }`,
-                  maxWidth: "500px",
-                }}
-              >
-                <InfoIcon sx={{ fontSize: 18, mr: 1, color: "error.main" }} />
-                <Typography variant="caption" color="text.secondary">
-                  Esto puede deberse a una alteración del documento o a un error
-                  en el proceso de firma.
-                </Typography>
-              </Box>
-            </>
-          )}
-        </Stack>
-      </Paper>
+    <Container maxWidth="xl" sx={{ py: 3, px: { xs: 2, sm: 3 } }}>
+      <Grid container spacing={3}>
+        {/* Panel izquierdo - 40% - Información de verificación */}
+        <Grid item xs={12} md={5} lg={4}>
+          <Box sx={{ position: "sticky", top: 24 }}>
+            {/* Header de verificación */}
+            <Paper
+              elevation={0}
+              sx={{
+                p: 3,
+                borderRadius: "16px",
+                bgcolor: theme.palette.mode === "dark" ? "#1a1a1a" : "#ffffff",
+                boxShadow: "0px 2px 12px rgba(0, 0, 0, 0.08)",
+                border: `1px solid ${
+                  theme.palette.mode === "dark" ? "#333" : "#e0e0e0"
+                }`,
+                mb: 3,
+              }}
+            >
+              <Stack spacing={2.5} alignItems="center" textAlign="center">
+                {isValid ? (
+                  <>
+                    <Box
+                      sx={{
+                        p: 2,
+                        borderRadius: "50%",
+                        bgcolor:
+                          theme.palette.mode === "dark"
+                            ? "rgba(76, 175, 80, 0.15)"
+                            : "rgba(76, 175, 80, 0.08)",
+                        color: "success.main",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <VerifiedIcon sx={{ fontSize: 40 }} />
+                    </Box>
+                    <Typography
+                      variant="h5"
+                      fontWeight={600}
+                      color="text.primary"
+                    >
+                      Verificación exitosa
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ lineHeight: 1.6 }}
+                    >
+                      Hemos confirmado que este documento es auténtico y no ha
+                      sido alterado.
+                    </Typography>
+                    {document?.folio && (
+                      <Chip
+                        label={`Folio: ${document.folio}`}
+                        sx={{
+                          backgroundColor:
+                            theme.palette.mode === "dark"
+                              ? "rgba(76, 175, 80, 0.2)"
+                              : "rgba(76, 175, 80, 0.1)",
+                          color: "success.main",
+                          fontWeight: 500,
+                          height: 32,
+                          borderRadius: "6px",
+                        }}
+                      />
+                    )}
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "flex-start",
+                        mt: 1,
+                        p: 2,
+                        borderRadius: "12px",
+                        backgroundColor:
+                          theme.palette.mode === "dark"
+                            ? "rgba(76, 175, 80, 0.08)"
+                            : "rgba(76, 175, 80, 0.04)",
+                        border: `1px solid ${
+                          theme.palette.mode === "dark"
+                            ? "rgba(76, 175, 80, 0.2)"
+                            : "rgba(76, 175, 80, 0.1)"
+                        }`,
+                      }}
+                    >
+                      <InfoIcon
+                        sx={{
+                          fontSize: 18,
+                          mr: 1.5,
+                          color: "success.main",
+                          mt: 0.2,
+                        }}
+                      />
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{ lineHeight: 1.5 }}
+                      >
+                        Este documento fue firmado digitalmente y verificado con
+                        tecnología blockchain.
+                      </Typography>
+                    </Box>
+                  </>
+                ) : (
+                  <>
+                    <Box
+                      sx={{
+                        p: 2,
+                        borderRadius: "50%",
+                        bgcolor:
+                          theme.palette.mode === "dark"
+                            ? "rgba(244, 67, 54, 0.15)"
+                            : "rgba(244, 67, 54, 0.08)",
+                        color: "error.main",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <ErrorIcon sx={{ fontSize: 40 }} />
+                    </Box>
+                    <Typography
+                      variant="h5"
+                      fontWeight={600}
+                      color="text.primary"
+                    >
+                      Verificación fallida
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ lineHeight: 1.6 }}
+                    >
+                      No pudimos verificar la autenticidad de este documento.
+                    </Typography>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "flex-start",
+                        mt: 1,
+                        p: 2,
+                        borderRadius: "12px",
+                        backgroundColor:
+                          theme.palette.mode === "dark"
+                            ? "rgba(244, 67, 54, 0.08)"
+                            : "rgba(244, 67, 54, 0.04)",
+                        border: `1px solid ${
+                          theme.palette.mode === "dark"
+                            ? "rgba(244, 67, 54, 0.2)"
+                            : "rgba(244, 67, 54, 0.1)"
+                        }`,
+                      }}
+                    >
+                      <InfoIcon
+                        sx={{
+                          fontSize: 18,
+                          mr: 1.5,
+                          color: "error.main",
+                          mt: 0.2,
+                        }}
+                      />
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{ lineHeight: 1.5 }}
+                      >
+                        Esto puede deberse a una alteración del documento o a un
+                        error en el proceso de firma.
+                      </Typography>
+                    </Box>
+                  </>
+                )}
+              </Stack>
+            </Paper>
 
-      {isValid && (
-        <>
-          {/* Visor de PDF integrado */}
-          <Paper
-            elevation={0}
-            sx={{
-              p: 3,
-              borderRadius: "12px",
-              bgcolor: theme.palette.mode === "dark" ? "#1e1e1e" : "#ffffff",
-              boxShadow: "none",
-              border: `1px solid ${
-                theme.palette.mode === "dark" ? "#404040" : "#e0e0e0"
-              }`,
-              mb: 3,
-            }}
-          >
-            <Stack spacing={3}>
+            {isValid && (
+              /* Información del documento */
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 3,
+                  borderRadius: "16px",
+                  bgcolor:
+                    theme.palette.mode === "dark" ? "#1a1a1a" : "#ffffff",
+                  boxShadow: "0px 2px 12px rgba(0, 0, 0, 0.08)",
+                  border: `1px solid ${
+                    theme.palette.mode === "dark" ? "#333" : "#e0e0e0"
+                  }`,
+                }}
+              >
+                <Typography
+                  variant="subtitle1"
+                  fontWeight={600}
+                  gutterBottom
+                  sx={{ mb: 3, display: "flex", alignItems: "center", gap: 1 }}
+                >
+                  <DescriptionIcon fontSize="small" />
+                  Información de Verificación
+                </Typography>
+
+                <Stack spacing={2.5}>
+                  {/* Fecha de verificación */}
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: 2,
+                    }}
+                  >
+                    <CalendarIcon
+                      sx={{ color: "text.secondary", fontSize: 20, mt: 0.5 }}
+                    />
+                    <Box sx={{ flex: 1 }}>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        display="block"
+                        gutterBottom
+                      >
+                        Fecha de verificación
+                      </Typography>
+                      <Typography variant="body2" fontWeight={500}>
+                        {new Date().toLocaleDateString("es-MX", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  <Divider sx={{ my: 1 }} />
+
+                  {/* Folio del documento */}
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: 2,
+                    }}
+                  >
+                    <FingerprintIcon
+                      sx={{ color: "text.secondary", fontSize: 20, mt: 0.5 }}
+                    />
+                    <Box sx={{ flex: 1 }}>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        display="block"
+                        gutterBottom
+                      >
+                        Folio del documento
+                      </Typography>
+                      <Typography variant="body2" fontWeight={500}>
+                        {document.folio}
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  <Divider sx={{ my: 1 }} />
+
+                  {/* Fecha de firma */}
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: 2,
+                    }}
+                  >
+                    <CalendarIcon
+                      sx={{ color: "text.secondary", fontSize: 20, mt: 0.5 }}
+                    />
+                    <Box sx={{ flex: 1 }}>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        display="block"
+                        gutterBottom
+                      >
+                        Fecha de firma
+                      </Typography>
+                      <Typography variant="body2" fontWeight={500}>
+                        {new Date(document.fechaFirma).toLocaleDateString(
+                          "es-MX",
+                          {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          }
+                        )}
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  <Divider sx={{ my: 1 }} />
+
+                  {/* Estado */}
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: 2,
+                    }}
+                  >
+                    <QrCodeIcon
+                      sx={{ color: "text.secondary", fontSize: 20, mt: 0.5 }}
+                    />
+                    <Box sx={{ flex: 1 }}>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        display="block"
+                        gutterBottom
+                      >
+                        Estado
+                      </Typography>
+                      <Chip
+                        label={document.estado}
+                        color="success"
+                        size="small"
+                        variant="filled"
+                        sx={{
+                          height: 24,
+                          fontWeight: 500,
+                          borderRadius: "6px",
+                          "& .MuiChip-label": {
+                            px: 1.5,
+                            fontSize: "0.75rem",
+                          },
+                        }}
+                      />
+                    </Box>
+                  </Box>
+                </Stack>
+              </Paper>
+            )}
+          </Box>
+        </Grid>
+
+        {/* Panel derecho - 60% - Visor de PDF */}
+        <Grid item xs={12} md={7} lg={8}>
+          {isValid && (
+            <Paper
+              elevation={0}
+              sx={{
+                p: 3,
+                borderRadius: "16px",
+                bgcolor: theme.palette.mode === "dark" ? "#1a1a1a" : "#ffffff",
+                boxShadow: "0px 2px 12px rgba(0, 0, 0, 0.08)",
+                border: `1px solid ${
+                  theme.palette.mode === "dark" ? "#333" : "#e0e0e0"
+                }`,
+                height: "calc(100vh - 100px)",
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
               <Box
                 display="flex"
                 justifyContent="space-between"
                 alignItems="center"
                 flexWrap="wrap"
                 gap={2}
+                sx={{ mb: 3 }}
               >
-                <Typography variant="h6" fontWeight={600}>
+                <Typography
+                  variant="h6"
+                  fontWeight={600}
+                  sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                >
+                  <DescriptionIcon fontSize="small" />
                   Documento Verificado
                 </Typography>
 
@@ -463,308 +718,62 @@ const Index = () => {
                     variant="contained"
                     color="info"
                     size="small"
-                    startIcon={<FullscreenIcon />}
-                    onClick={() => setFullscreenOpen(true)}
-                    disabled={!pdfInfo}
-                    sx={{ borderRadius: "20px" }}
-                  >
-                    Pantalla completa
-                  </Button>
-                  <Button
-                    variant="contained"
-                    color="info"
-                    size="small"
-                    startIcon={<OpenInNewIcon />}
-                    onClick={handleOpenInNewTab}
-                    disabled={!pdfInfo}
-                    sx={{ borderRadius: "20px" }}
-                  >
-                    Abrir en pestaña
-                  </Button>
-                  <Button
-                    variant="contained"
-                    color="info"
-                    size="small"
                     startIcon={<DownloadIcon />}
                     onClick={handleDownloadPDF}
                     disabled={!pdfInfo}
-                    sx={{ borderRadius: "20px" }}
+                    sx={{ borderRadius: "8px", textTransform: "none" }}
                   >
                     Descargar
                   </Button>
                 </Box>
               </Box>
 
-              <PDFViewer />
-            </Stack>
-          </Paper>
-
-          {/* Modal de pantalla completa */}
-          <Dialog
-            open={fullscreenOpen}
-            onClose={() => setFullscreenOpen(false)}
-            maxWidth="xl"
-            fullWidth
-            sx={{
-              "& .MuiDialog-paper": {
-                height: "90vh",
-                maxHeight: "90vh",
-                overflow: "hidden",
-                borderRadius: "8px",
-                backgroundColor:
-                  theme.palette.mode === "dark" ? "#1e1e1e" : "#ffffff",
-              },
-            }}
-          >
-            <DialogContent sx={{ p: 0, height: "100%" }}>
-              <Box
-                display="flex"
-                justifyContent="flex-end"
-                alignItems="center"
-                position="absolute"
-                top={8}
-                right={8}
-                zIndex={1000}
-              >
-                <IconButton
-                  onClick={() => setFullscreenOpen(false)}
-                  size="medium"
-                  sx={{
-                    backgroundColor:
-                      theme.palette.mode === "dark" ? "#2c2c2c" : "#ffffff",
-                    boxShadow: theme.shadows[2],
-                    "&:hover": {
-                      backgroundColor:
-                        theme.palette.mode === "dark" ? "#3c3c3c" : "#f5f5f5",
-                    },
-                  }}
-                >
-                  <CloseIcon />
-                </IconButton>
+              <Box sx={{ flex: 1, minHeight: 0 }}>
+                <PDFViewer />
               </Box>
-              <PDFViewer fullscreen />
-            </DialogContent>
-          </Dialog>
+            </Paper>
+          )}
+        </Grid>
+      </Grid>
 
-          {/* Información del documento */}
-          <Paper
-            elevation={0}
-            sx={{
-              p: 3,
-              borderRadius: "12px",
-              bgcolor: theme.palette.mode === "dark" ? "#1e1e1e" : "#ffffff",
-              boxShadow: "none",
-              border: `1px solid ${
-                theme.palette.mode === "dark" ? "#404040" : "#e0e0e0"
-              }`,
-            }}
-          >
-            <Typography
-              variant="subtitle1"
-              fontWeight={600}
-              gutterBottom
-              sx={{ mb: 2 }}
-            >
-              Información de Verificación
-            </Typography>
-
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)" },
-                gap: 2,
-              }}
-            >
-              {/* Fecha de verificación */}
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  p: 1.5,
-                  borderRadius: "8px",
-                  backgroundColor:
-                    theme.palette.mode === "dark"
-                      ? "rgba(50, 50, 50, 0.3)"
-                      : "rgba(0, 0, 0, 0.02)",
-                  border: `1px solid ${
-                    theme.palette.mode === "dark" ? "#353535" : "#f0f0f0"
-                  }`,
-                }}
-              >
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  gutterBottom
-                >
-                  Fecha de verificación
-                </Typography>
-                <Typography variant="body2" fontWeight={500}>
-                  {new Date().toLocaleDateString("es-MX", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </Typography>
-              </Box>
-
-              {/* Folio del documento */}
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  p: 1.5,
-                  borderRadius: "8px",
-                  backgroundColor:
-                    theme.palette.mode === "dark"
-                      ? "rgba(50, 50, 50, 0.3)"
-                      : "rgba(0, 0, 0, 0.02)",
-                  border: `1px solid ${
-                    theme.palette.mode === "dark" ? "#353535" : "#f0f0f0"
-                  }`,
-                }}
-              >
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  gutterBottom
-                >
-                  Folio del documento
-                </Typography>
-                <Typography variant="body2" fontWeight={500}>
-                  {document.folio}
-                </Typography>
-              </Box>
-
-              {/* Fecha de firma */}
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  p: 1.5,
-                  borderRadius: "8px",
-                  backgroundColor:
-                    theme.palette.mode === "dark"
-                      ? "rgba(50, 50, 50, 0.3)"
-                      : "rgba(0, 0, 0, 0.02)",
-                  border: `1px solid ${
-                    theme.palette.mode === "dark" ? "#353535" : "#f0f0f0"
-                  }`,
-                }}
-              >
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  gutterBottom
-                >
-                  Fecha de firma
-                </Typography>
-                <Typography variant="body2" fontWeight={500}>
-                  {new Date(document.fechaFirma).toLocaleDateString("es-MX", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
-                </Typography>
-              </Box>
-
-              {/* Estado */}
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  p: 1.5,
-                  borderRadius: "8px",
-                  backgroundColor:
-                    theme.palette.mode === "dark"
-                      ? "rgba(50, 50, 50, 0.3)"
-                      : "rgba(0, 0, 0, 0.02)",
-                  border: `1px solid ${
-                    theme.palette.mode === "dark" ? "#353535" : "#f0f0f0"
-                  }`,
-                }}
-              >
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  gutterBottom
-                >
-                  Estado
-                </Typography>
-                <Box>
-                  <Chip
-                    label={document.estado}
-                    color="success"
-                    size="small"
-                    variant="filled"
-                    sx={{
-                      height: 24,
-                      fontWeight: 500,
-                      "& .MuiChip-label": {
-                        px: 1,
-                        fontSize: "0.75rem",
-                      },
-                    }}
-                  />
-                </Box>
-              </Box>
-            </Box>
-          </Paper>
-        </>
-      )}
-
+      {/* Footer */}
       <Box
         component="footer"
         sx={{
-          mt: 6,
-          pt: 2,
-          pb: 3,
-          px: 2,
+          mt: 4,
+          pt: 3,
           borderTop: `1px solid ${
-            theme.palette.mode === "dark" ? "#404040" : "#e0e0e0"
+            theme.palette.mode === "dark" ? "#333" : "#e0e0e0"
           }`,
           textAlign: "center",
         }}
       >
         <Container maxWidth="md">
-          {/* Información de derechos y versión */}
-          <Box>
+          <Typography variant="body2" color="text.secondary" gutterBottom>
+            Sistema de Verificación de Documentos • {new Date().getFullYear()}
+          </Typography>
+          <Typography variant="caption" color="text.disabled">
+            © {new Date().getFullYear()} ERPP Corporativo. Todos los derechos
+            reservados.
+          </Typography>
+          <Typography variant="caption" color="text.disabled" display="block">
+            Generado automáticamente por el sistema Ser0 • v2.1.0
+          </Typography>
+
+          {isValid && (
             <Typography
               variant="caption"
-              color="text.secondary"
+              color="text.disabled"
               display="block"
-              gutterBottom
+              sx={{ mt: 1 }}
             >
-              © {new Date().getFullYear()} ERPP Corporativo. Todos los derechos
-              reservados.
+              Verificado el {new Date().toLocaleDateString("es-MX")} a las{" "}
+              {new Date().toLocaleTimeString("es-MX", {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
             </Typography>
-            <Typography variant="caption" color="text.disabled">
-              Generado automáticamente por el sistema Ser0 • v2.1.0
-            </Typography>
-
-            {/* Timestamp de verificación */}
-            {isValid && (
-              <Typography
-                variant="caption"
-                color="text.disabled"
-                display="block"
-                sx={{ mt: 1 }}
-              >
-                Verificado el{" "}
-                {new Date().toLocaleDateString("es-MX", {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}{" "}
-                a las{" "}
-                {new Date().toLocaleTimeString("es-MX", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </Typography>
-            )}
-          </Box>
+          )}
         </Container>
       </Box>
     </Container>
