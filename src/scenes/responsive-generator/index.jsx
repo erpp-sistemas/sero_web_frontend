@@ -36,9 +36,20 @@ import {
 import { createResponsiva, confirmationResponsiva } from "../../api/responsive";
 import { useSelector } from "react-redux";
 
+const getInternetDate = async () => {
+  try {
+    const response = await fetch('http://worldtimeapi.org/api/timezone/America/Mexico_City');
+    const data = await response.json();
+    return new Date(data.datetime);
+  } catch (error) {
+    console.warn('Error obteniendo fecha de internet, usando fecha local:', error);
+    return new Date(); // Fallback a fecha local
+  }
+};
+
 const Index = () => {
   const { state } = useLocation();
-  const { nuevoArticulo } = state || {};
+  const { nuevoArticulo, tipo_responsiva, articuloId } = state || {};
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
@@ -323,6 +334,7 @@ const Index = () => {
 
   const prepareResponsivaData = async (currentSignatureStatus) => {
     const idArticulo = nuevoArticulo?.id_articulo;
+    const tipoResponsiva = state?.tipo_responsiva || "asignacion_inicial";
 
     if (
       !currentSignatureStatus.codigo_verificacion ||
@@ -369,8 +381,8 @@ const Index = () => {
       // ✅ INFORMACIÓN DEL DOCUMENTO
       motivo_cambio: motivoCambio || "Asignación inicial de equipo",
       observaciones: observaciones || "",
-      tipo_responsiva: "asignacion_inicial",
-      estado: "pendiente_firma",
+      tipo_responsiva: tipoResponsiva,
+      estado: "activa",
       folio_responsiva: `RESP-${nuevoArticulo.id_articulo}-${Date.now()}`,
 
       // ✅ UBICACIÓN Y CONTEXTO
@@ -1133,13 +1145,16 @@ const Index = () => {
       );
       y += PDF_STYLES.spacing.line;
 
+      const fechaEntregaConfiable = await getInternetDate();
+const fechaEntregaFormateada = fechaEntregaConfiable.toLocaleDateString('es-MX');
+
       const datosResponsable = [
         `- Nombre completo: ${nuevoArticulo.usuarioAsignado?.nombre || "N/A"}`,
         `- Puesto: ${nuevoArticulo.usuarioAsignado?.puesto?.nombre || "N/A"}`,
         `- Departamento: ${
           nuevoArticulo.usuarioAsignado?.area?.nombre || "N/A"
         }`,
-        `- Fecha de entrega: ${nuevoArticulo.fecha_ingreso || "N/A"}`,
+        `- Fecha de entrega: ${fechaEntregaFormateada || "N/A"}`,
         `- Correo institucional: ${
           nuevoArticulo.usuarioAsignado?.email || "N/A"
         }`,

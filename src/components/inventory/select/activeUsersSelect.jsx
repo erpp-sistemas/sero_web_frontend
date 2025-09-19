@@ -46,7 +46,7 @@ function ActiveUsersSelect({ selectedUser, handleUserChange }) {
       <TextField
         id="select-user"
         select
-        label="Usuario"
+        label="Selecciona un Usuario"
         variant="outlined"
         size="small"
         value={selectedUser?.id_usuario || ""}

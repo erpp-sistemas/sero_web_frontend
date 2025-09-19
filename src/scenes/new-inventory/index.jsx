@@ -258,10 +258,13 @@ function Index() {
               nombre_articulo: resultado.article.nombre_articulo,
             };
 
+            console.log(nuevoArticuloCompleto)
+
             navigate("/responsive-generator", {
               state: {
                 nuevoArticulo: nuevoArticuloCompleto, // ← Usar el objeto actualizado
                 articuloId: resultado.article.id_articulo,
+                tipo_responsiva: "asignacion_inicial",
               },
             });
           }, 1500);

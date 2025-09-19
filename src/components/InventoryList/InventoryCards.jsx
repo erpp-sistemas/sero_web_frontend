@@ -19,12 +19,15 @@ import { tokens } from "../../theme";
 import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import { useSpring, animated } from "@react-spring/web";
 import {
+  Assignment,
+  AssignmentOutlined,
   KeyboardArrowDown,
   OpenInNewOutlined,
   Search,
   SearchOff,
 } from "@mui/icons-material";
 import InventoryDetailModal from "./InventoryCards/InventoryDetailModal";
+import InventoryReassignmentModal from "./InventoryCards/InventoryReassignmentModal";
 import ExportToExcelButton from "./InventoryCards/ExportToExcelButton";
 import ExportPDFButton from "./InventoryCards/ExportPDFButton";
 
@@ -34,6 +37,7 @@ function InventoryCards({ inventoryCopy, loading, onSaveItem }) {
   const [localInventory, setLocalInventory] = useState(inventoryCopy || []);
   const [selectedItem, setSelectedItem] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
+   const [reassignModalOpen, setReassignModalOpen] = useState(false);
 
   useEffect(() => {
     setLocalInventory(inventoryCopy || []);
@@ -44,8 +48,18 @@ function InventoryCards({ inventoryCopy, loading, onSaveItem }) {
     setModalOpen(true);
   };
 
+   const handleReassign = (item) => {
+    setSelectedItem(item);
+    setReassignModalOpen(true);
+  };
+
   const handleCloseModal = () => {
     setModalOpen(false);
+    setSelectedItem(null);
+  };
+
+   const handleCloseReassignModal = () => {
+    setReassignModalOpen(false);
     setSelectedItem(null);
   };
 
@@ -214,7 +228,29 @@ function InventoryCards({ inventoryCopy, loading, onSaveItem }) {
                       </Typography>
                     </Box>
 
-                    <Box mt={1.5} display="flex" justifyContent="flex-end">
+                    <Box mt={1.5} display="flex" justifyContent="flex-end" gap={1}>
+                       {/* Botón de Reasignación */}
+                      <Button
+                        variant="contained"
+                        color="info"
+                        size="small"
+                        endIcon={<AssignmentOutlined />}
+                        sx={{
+                          textTransform: "none",
+                          borderRadius: "10px",
+                          borderColor: colors.blueAccent[400],
+                          // color: colors.blueAccent[400],
+                          fontWeight: 500,
+                          fontSize: "0.875rem",
+                          "&:hover": {
+                            backgroundColor: colors.blueAccent[50],
+                            borderColor: colors.blueAccent[600],
+                          },
+                        }}
+                        onClick={() => handleReassign(item)}
+                      >
+                        Reasignación
+                      </Button>
                       <Button
                         variant="contained"
                         size="small"
@@ -250,6 +286,11 @@ function InventoryCards({ inventoryCopy, loading, onSaveItem }) {
         onClose={handleCloseModal}
         item={selectedItem}
         onSave={handleSaveItem}
+      />
+      <InventoryReassignmentModal
+        open={reassignModalOpen}
+        onClose={handleCloseReassignModal}
+        item={selectedItem}        
       />
     </>
   );
