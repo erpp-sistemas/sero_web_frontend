@@ -38,11 +38,16 @@ import { useSelector } from "react-redux";
 
 const getInternetDate = async () => {
   try {
-    const response = await fetch('http://worldtimeapi.org/api/timezone/America/Mexico_City');
+    const response = await fetch(
+      "http://worldtimeapi.org/api/timezone/America/Mexico_City"
+    );
     const data = await response.json();
     return new Date(data.datetime);
   } catch (error) {
-    console.warn('Error obteniendo fecha de internet, usando fecha local:', error);
+    console.warn(
+      "Error obteniendo fecha de internet, usando fecha local:",
+      error
+    );
     return new Date(); // Fallback a fecha local
   }
 };
@@ -595,37 +600,38 @@ const Index = () => {
       text: "#333333",
       accent: "#4caf50",
     },
+    // Encuentra el objeto PDF_STYLES.fonts y cámbialo por:
     fonts: {
       title: {
-        size: 16,
+        size: 14, // ↑ Aumentado de 12 a 14 (para títulos principales)
         style: "bold",
         align: "left",
       },
       section: {
-        size: 12,
+        size: 11, // ↑ Aumentado de 9 a 11 (para secciones)
         style: "bold",
         align: "left",
       },
       bodyBold: {
-        size: 10,
+        size: 10, // ↑ Aumentado de 9 a 10 (texto en negrita)
         style: "bold",
         align: "justify",
       },
       body: {
-        size: 10,
+        size: 10, // ↑ Aumentado de 9 a 10 (texto normal)
         style: "normal",
         align: "justify",
       },
       small: {
-        size: 8,
+        size: 8, // ↑ Aumentado de 7 a 8 (texto pequeño)
         style: "normal",
         align: "left",
       },
     },
     spacing: {
-      section: 20,
-      line: 14,
-      bullet: 6,
+      section: 11,
+      line: 12,
+      bullet: 7,
     },
   };
 
@@ -955,22 +961,74 @@ const Index = () => {
     return y;
   };
 
+  // Agrega esta función después de addJustifiedText
+  const addTextWithBoldMarkers = (doc, text, x, y, maxWidth, options = {}) => {
+    const {
+      lineHeight = PDF_STYLES.spacing.line,
+      fontSize = PDF_STYLES.fonts.body.size,
+    } = options;
+
+    doc.setFontSize(fontSize);
+    doc.setTextColor(PDF_STYLES.colors.text);
+
+    const initialY = y;
+    let currentX = x;
+    let currentY = y;
+
+    // Dividir el texto usando los marcadores {{ }}
+    const parts = text.split(/(\{\{.*?\}\})/);
+
+    parts.forEach((part) => {
+      if (part.startsWith("{{") && part.endsWith("}}")) {
+        // Texto entre {{ }} → BOLD
+        const boldText = part.slice(2, -2);
+        doc.setFont("helvetica", "bold");
+
+        const boldWidth = doc.getTextWidth(boldText);
+        if (currentX + boldWidth > x + maxWidth) {
+          currentY += lineHeight;
+          currentX = x;
+        }
+
+        doc.text(boldText, currentX, currentY);
+        currentX += boldWidth;
+      } else if (part.trim() !== "") {
+        // Texto normal
+        doc.setFont("helvetica", "normal");
+
+        const lines = doc.splitTextToSize(part, maxWidth - (currentX - x));
+
+        lines.forEach((line, index) => {
+          if (index > 0) {
+            currentY += lineHeight;
+            currentX = x;
+          }
+
+          doc.text(line, currentX, currentY);
+          currentX += doc.getTextWidth(line);
+        });
+      }
+    });
+
+    return currentY + lineHeight;
+  };
+
   const drawCustomTable = (doc, data, startY, maxWidth) => {
     const tableConfig = {
-      rowHeight: 12, // Reducido de 16 a 12
-      padding: 4, // Reducido de 8 a 4
-      fontSize: 9, // Mantenemos el tamaño de fuente
+      rowHeight: 12, // ↑ Aumentado de 10 a 12
+      padding: 4, // ↑ Aumentado de 3 a 4
+      fontSize: 9, // ↑ Aumentado de 8 a 9 (¡ESTE ES EL MÁS IMPORTANTE!)
       lineWidth: 0.1,
       column1Width: maxWidth * 0.35,
       column2Width: maxWidth * 0.65,
       headerBg: "#ffffff",
       evenRowBg: "#ffffff",
-      oddRowBg: "#f8f8f8", // Más sutil que #fafafa
-      borderColor: "#eaeaea", // Más claro que #e0e0e0
+      oddRowBg: "#f8f8f8",
+      borderColor: "#eaeaea",
       textColor: "#333333",
       headerTextColor: "#666666",
-      headerFontSize: 9,
-      headerPadding: 4,
+      headerFontSize: 9, // ↑ Aumentado de 8 a 9
+      headerPadding: 4, // ↑ Aumentado de 3 a 4
       cellPadding: 3,
     };
 
@@ -1146,7 +1204,8 @@ const Index = () => {
       y += PDF_STYLES.spacing.line;
 
       const fechaEntregaConfiable = await getInternetDate();
-const fechaEntregaFormateada = fechaEntregaConfiable.toLocaleDateString('es-MX');
+      const fechaEntregaFormateada =
+        fechaEntregaConfiable.toLocaleDateString("es-MX");
 
       const datosResponsable = [
         `- Nombre completo: ${nuevoArticulo.usuarioAsignado?.nombre || "N/A"}`,
@@ -1238,42 +1297,69 @@ const fechaEntregaFormateada = fechaEntregaConfiable.toLocaleDateString('es-MX')
       y += PDF_STYLES.spacing.section;
 
       const condiciones = [
-        `Se hace constar: La empresa ERPP CORPORATIVO S.A. DE C.V. hace entrega del equipo ${
-          nuevoArticulo.campos?.nombre_articulo
-        }, propiedad de la misma, a favor de ${
+        // 1. FUNDAMENTO LEGAL (párrafo normal)
+        `Con fundamento en los artículos 110 de la Ley Federal del Trabajo, 47 de la Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP) y 78 del Código Civil Federal, ERPP CORPORATIVO S.A. DE C.V. hace entrega del equipo {{ ${
+          nuevoArticulo.campos?.nombre_articulo || "No disponible"
+        }}}, propiedad de la empresa, a favor de {{${
           nuevoArticulo.usuarioAsignado?.nombre || "el empleado"
-        } con CURP ${
-          nuevoArticulo.usuarioAsignado?.curp
-        }, con un valor comercial: $${
-          nuevoArticulo.campos?.precio_articulo
-        }. Declaro que el equipo recibido se encuentra en buen estado y funcionando correctamente.`,
-        "Asimismo, me comprometo a:",
-        "- Hacer uso exclusivo del equipo para fines estrictamente laborales.",
-        "- Dar cumplimiento a las políticas internas de la empresa.",
-        "- No realizar cambios de uso, configuración y/o programación sin la autorización correspondiente.",
-        "- Asegurar su buen uso, conservación y reportar cualquier incidente o daño; de lo contrario se deberá cubrir en su totalidad los gastos de reparación o reposición.",
-        "- Devolver el equipo en las mismas condiciones en que fue entregado, al término de mi relación laboral o cuando la empresa así lo requiera.",
+        }}} (CURP: {{${
+          nuevoArticulo.usuarioAsignado?.curp || "No disponible"
+        }}}), con un valor comercial actualizado de: {{$${
+          nuevoArticulo.campos?.precio_articulo || "No disponible"
+        }}}.`,
+
+        // 2. DECLARACIÓN BAJO PROTESTA (párrafo separado con énfasis)
+        `Declaro bajo protesta de decir VERDAD que el equipo se recibe en perfecto estado de funcionamiento y con todos sus accesorios completos.`,
+
+        // 3. COMPROMISOS (continúa igual)
+        "En consideración a lo anterior, me comprometo formalmente a:",
+        "- Hacer uso exclusivo del equipo para fines estrictamente laborales, prohibiendo cualquier uso personal, comercial o ilícito.",
+        "- Dar cumplimiento integral a todas las políticas internas de seguridad informática, protección de datos y uso de recursos tecnológicos.",
+        "- No realizar cambios de hardware, software, configuración o programación sin autorización expresa por escrito del departamento de TI.",
+        "- Abstenerme de prestar, ceder, transferir o comercializar el equipo a terceros bajo cualquier circunstancia.",
+        "- Asegurar su conservación, mantenimiento preventivo y reportar cualquier incidente o daño dentro de las 24 horas hábiles siguientes a su ocurrencia.",
+        "- Asumir los gastos por pérdida, daño o deterioro atribuible a mí, salvo casos de fuerza mayor debidamente justificados (ej. desastres naturales o robos con denuncia).",
+        "- Devolver el equipo con todos sus accesorios, manuales y embalaje original en las mismas condiciones físicas y funcionales, al término de la relación laboral, cambio de puesto o cuando la empresa así lo requiera.",
+
         "",
         "Una vez concluida mi relación con ERPP CORPORATIVO S.A. DE C.V., me comprometo a:",
-        "- Entregar de manera inmediata toda información documentada propiedad de la empresa, incluyendo, pero no limitada a: expedientes, reportes, estudios, actas, resoluciones, oficios, correspondencia, acuerdos, directivas, directrices, circulares, contratos, convenios, instructivos, notas, memorandos, estadísticas y cualquier otro registro.",
-        "- Devolver el equipo de cómputo con toda la información que contenga y en óptimas condiciones de funcionamiento.",
+        "- Entregar en un plazo máximo de 72 horas toda información y archivos de la empresa, físicos o digitales, incluyendo expedientes, reportes, contratos, correos y demás documentación relacionada.",
+        "- Devolver el equipo en óptimas condiciones de funcionamiento, sin retener, copiar, transferir o divulgar información de carácter confidencial, comercial o estratégica.",
+        "- Permitir la verificación técnica completa por parte del departamento de TI para certificar la eliminación total de información corporativa.",
+        "- Firmar el acta de entrega-recepción correspondiente ante testigos de ambas partes.",
+        // 4. CLAÚSULA FINAL
+        `Reconozco que el incumplimiento de estas obligaciones podrá derivar en sanciones laborales y/o acciones legales conforme a la normativa aplicable.`,
       ];
 
-      // Primer párrafo justificado
-      y = addJustifiedText(doc, condiciones[0], MARGINS.left, y, maxWidth, {
+      // Primer párrafo (fundamento legal) - normal
+      y = addTextWithBoldMarkers(
+        doc,
+        condiciones[0],
+        MARGINS.left,
+        y,
+        maxWidth,
+        {
+          fontSize: PDF_STYLES.fonts.body.size,
+        }
+      );
+      y += PDF_STYLES.spacing.line;
+
+      // Segundo párrafo (declaración bajo protesta) - CON ÉNFASIS
+      y = addJustifiedText(doc, condiciones[1], MARGINS.left, y, maxWidth, {
         fontSize: PDF_STYLES.fonts.body.size,
+        bold: false, // ← Mantener negrita para énfasis legal
       });
       y += PDF_STYLES.spacing.section;
 
-      // Subtítulo
-      y = addStyledText(doc, condiciones[1], MARGINS.left, y, maxWidth, {
+      // Tercera parte (compromisos)
+      y = addStyledText(doc, condiciones[2], MARGINS.left, y, maxWidth, {
         type: "section",
         align: "left",
       });
       y += PDF_STYLES.spacing.line;
 
       // Lista de compromisos
-      const compromisos1 = condiciones.slice(2, 7);
+      const compromisos1 = condiciones.slice(3, 10);
       compromisos1.forEach((item) => {
         if (item.trim() !== "") {
           y = addJustifiedText(doc, item, MARGINS.left + 10, y, maxWidth - 10, {
@@ -1285,20 +1371,35 @@ const fechaEntregaFormateada = fechaEntregaConfiable.toLocaleDateString('es-MX')
 
       // Segundo subtítulo
       y += PDF_STYLES.spacing.section;
-      y = addStyledText(doc, condiciones[8], MARGINS.left, y, maxWidth, {
+      y = addStyledText(doc, condiciones[11], MARGINS.left, y, maxWidth, {
         type: "section",
         align: "left",
       });
       y += PDF_STYLES.spacing.line;
 
       // Segunda lista de compromisos
-      const compromisos2 = condiciones.slice(9);
+      const compromisos2 = condiciones.slice(12, 16);
       compromisos2.forEach((item) => {
         y = addJustifiedText(doc, item, MARGINS.left + 10, y, maxWidth - 10, {
           fontSize: PDF_STYLES.fonts.body.size,
         });
         y += PDF_STYLES.spacing.bullet;
       });
+
+      // Cuarto párrafo (consecuencias) - Mismo estilo que "Declaro bajo protesta"
+      y += PDF_STYLES.spacing.section;
+      y = addJustifiedText(
+        doc,
+        condiciones[condiciones.length - 1],
+        MARGINS.left,
+        y,
+        maxWidth,
+        {
+          fontSize: PDF_STYLES.fonts.body.size,
+          bold: false, // ← Negrita para mantener consistencia con "Declaro bajo protesta"
+          align: "justify",
+        }
+      );
 
       // Firmas
       // Firmas - Área modificada para incluir el QR
