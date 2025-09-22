@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Button, useTheme } from "@mui/material";
-import { GridOn } from "@mui/icons-material";
+import { GridOn, GridOnOutlined } from "@mui/icons-material";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import { tokens } from "../../../theme";
@@ -104,25 +104,40 @@ const ExportToExcelButton = ({ data, filename = "inventario", loading }) => {
     <Button
       onClick={handleExport}
       variant="contained"
-      color="info"
       fullWidth
-      size="small"
-      endIcon={<GridOn />}
+      endIcon={
+        <GridOnOutlined sx={{ fontSize: 18, color: colors.textAccent }} />
+      }
       sx={{
-        textTransform: "none",
-        borderRadius: "10px",
-        borderColor: colors.grey[300],
-        color: colors.grey[800],
+        textTransform: "none", // minimalista, sin mayúsculas forzadas
+        borderRadius: "10px", // bordes redondeados suaves
         fontWeight: 500,
-        fontSize: "0.875rem",
-        "&:hover": {
-          backgroundColor: colors.grey[100],
-          borderColor: colors.primary[300],
-        },
+        fontSize: "0.875rem", // tamaño legible, consistente
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        gap: "8px",
+        gap: "8px", // espacio limpio entre texto e icono
+        backgroundColor: colors.accentGreen[100], // color normal
+        color: colors.textAccent, // contraste legible
+        border: "none",
+        cursor: "pointer",
+
+        "&:hover": {
+          backgroundColor: colors.accentGreen[200], // hover sutil
+        },
+        "&:active": {
+          backgroundColor: colors.accentGreen[300], // feedback presionado
+        },
+        "& .MuiButton-endIcon": {
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        },
+        transition: "background-color 0.3s ease, box-shadow 0.2s ease",
+        boxShadow: "none", // minimalismo: sin sombra por defecto
+        "&:hover, &:active": {
+          boxShadow: "0 2px 6px rgba(0,0,0,0.08)", // sombra muy ligera al interactuar
+        },
       }}
       disabled={loading || loadingGenerate}
     >

@@ -231,7 +231,7 @@ function InventoryReassignmentModal({
       <Grow in={open} timeout={300}>
         <Box
           sx={{
-            bgcolor: colors.primary[400],
+            bgcolor: colors.bgContainer,
             color: colors.grey[100],
             width: "90%",
             maxWidth: 700,
@@ -400,8 +400,13 @@ function InventoryReassignmentModal({
             sx={{
               p: 2,
               borderRadius: 2,
-              bgcolor: colors.primary[700],
-              border: `1px dashed ${colors.grey[300]}`,
+              bgcolor: colors.bgContainerSecondary,
+              border: `1px solid ${colors.borderContainer}`,
+              transition:
+                "background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease",
+              "&:hover": {
+                boxShadow: "0 2px 6px rgba(0,0,0,0.05)", // sombra ligera al hover
+              },
             }}
           >
             <Typography
@@ -479,52 +484,130 @@ function InventoryReassignmentModal({
             )}
           </Box>
 
-          <Divider sx={{ mb: 3, bgcolor: colors.grey[300] }} />
-
           {/* Mensaje de confirmación */}
-          <Box mb={4}>
-            <Typography
-              variant="body1"
-              fontWeight={500}
-              color="textSecondary"
-              mb={2}
-            >
-              ¿Está seguro que desea proceder con la reasignación de este
-              artículo?
-            </Typography>
-            <Typography variant="body2" color="textSecondary">
-              Esta acción permitirá cambiar la asignación actual del artículo a
-              un nuevo usuario y/o ubicación.
-            </Typography>
-          </Box>
+          <Box
+            sx={{
+              p: 2,
+              position: "sticky",
+              bottom: 0,
+              borderRadius: 2,
+              bgcolor: colors.bgContainerSecondary,
+              border: `1.5px dashed ${colors.accentGreen[300]}`, // separación sutil pero visible
+              boxShadow: `
+                0 -2px 4px rgba(0,0,0,0.06),
+                0 -6px 12px rgba(0,0,0,0.10)
+              `, // sombra ligera, más perceptible
+              backdropFilter: "blur(12px)", // efecto flotante minimalista
+              transition: "background-color 0.3s ease, box-shadow 0.3s ease",
+              "&:hover": {
+                boxShadow: `
+                0 -4px 8px rgba(0,0,0,0.08),
+                0 -8px 16px rgba(0,0,0,0.12)
+              `, // hover ligeramente más marcado
+              },
+              zIndex: 10,
+            }}
+          >
+            <Box mb={4}>
+              <Typography
+                variant="body1"
+                fontWeight={500}
+                color="textSecondary"
+                mb={2}
+              >
+                ¿Está seguro que desea proceder con la reasignación de este
+                artículo?
+              </Typography>
+              <Typography variant="body2" color="textSecondary">
+                Esta acción permitirá cambiar la asignación actual del artículo
+                a un nuevo usuario y/o ubicación.
+              </Typography>
+            </Box>
 
-          {/* Acciones */}
-          <Box display="flex" justifyContent="flex-end" gap={2}>
-            <Button
-              onClick={onClose}
-              variant="contained"
-              color="inherit"
-              sx={{
-                textTransform: "none",
-                borderRadius: "10px",
-                fontWeight: 500,
-              }}
-            >
-              Cancelar
-            </Button>
-            <Button
-              onClick={handleConfirmReassignment}
-              variant="contained"
-              color="info"
-              startIcon={<AssignmentIcon />}
-              sx={{
-                textTransform: "none",
-                borderRadius: "10px",
-                fontWeight: 500,
-              }}
-            >
-              Confirmar Reasignación
-            </Button>
+            {/* Acciones */}
+            <Box display="flex" justifyContent="flex-end" gap={2}>
+              <Button
+                onClick={onClose}
+                variant="contained"
+                sx={{
+                  textTransform: "none", // minimalista, sin mayúsculas forzadas
+                  borderRadius: "10px", // bordes redondeados suaves
+                  fontWeight: 500,
+                  fontSize: "0.875rem", // tamaño legible, consistente
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  gap: "8px", // espacio limpio entre texto e icono
+                  backgroundColor: colors.accentGreenSecondary[100], // color normal
+                  color: colors.textAccentSecondary, // contraste legible
+                  border: "none",
+                  cursor: "pointer",
+
+                  "&:hover": {
+                    backgroundColor: colors.accentGreenSecondary[200], // hover sutil
+                  },
+                  "&:active": {
+                    backgroundColor: colors.accentGreenSecondary[300], // feedback presionado
+                  },
+                  "& .MuiButton-endIcon": {
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  },
+                  transition:
+                    "background-color 0.3s ease, box-shadow 0.2s ease",
+                  boxShadow: "none", // minimalismo: sin sombra por defecto
+                  "&:hover, &:active": {
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.08)", // sombra muy ligera al interactuar
+                  },
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleConfirmReassignment}
+                variant="contained"
+                endIcon={
+                  <AssignmentIcon
+                    sx={{ fontSize: 18, color: colors.textAccent }}
+                  />
+                }
+                sx={{
+                  textTransform: "none", // minimalista, sin mayúsculas forzadas
+                  borderRadius: "10px", // bordes redondeados suaves
+                  fontWeight: 500,
+                  fontSize: "0.875rem", // tamaño legible, consistente
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  gap: "8px", // espacio limpio entre texto e icono
+                  backgroundColor: colors.accentGreen[100], // color normal
+                  color: colors.textAccent, // contraste legible
+                  border: "none",
+                  cursor: "pointer",
+
+                  "&:hover": {
+                    backgroundColor: colors.accentGreen[200], // hover sutil
+                  },
+                  "&:active": {
+                    backgroundColor: colors.accentGreen[300], // feedback presionado
+                  },
+                  "& .MuiButton-endIcon": {
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  },
+                  transition:
+                    "background-color 0.3s ease, box-shadow 0.2s ease",
+                  boxShadow: "none", // minimalismo: sin sombra por defecto
+                  "&:hover, &:active": {
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.08)", // sombra muy ligera al interactuar
+                  },
+                }}
+              >
+                Confirmar Reasignación
+              </Button>
+            </Box>
           </Box>
         </Box>
       </Grow>

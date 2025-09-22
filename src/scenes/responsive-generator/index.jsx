@@ -26,6 +26,7 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DownloadIcon from "@mui/icons-material/Download";
 import { tokens } from "../../theme";
 import {
+  AssignmentOutlined,
   CheckCircle,
   Close,
   ErrorOutline,
@@ -1536,9 +1537,13 @@ const Index = () => {
       <Typography
         variant="h4"
         gutterBottom
-        sx={{ color: "primary.main", fontWeight: "bold" }}
+        sx={{
+          color: colors.grey[100], // adaptable a modo oscuro/claro según token
+          fontWeight: 600, // ligeramente menos que "bold" puro para suavidad
+          mb: 2, // margen inferior consistente
+        }}
       >
-        Generar Responsiva de Equipo
+        Generar responsiva de equipo
       </Typography>
       {/* Snackbar para notificaciones */}
       {/* Snackbar para notificaciones - Estilo minimalista */}
@@ -1694,35 +1699,39 @@ const Index = () => {
       </Dialog>
       <Grid container spacing={3}>
         <Grid item xs={12} md={4}>
-          <Paper
-            elevation={0}
+          <Box
+            mb={3}
             sx={{
               p: 3,
-              mb: 3,
-              borderRadius: "12px",
-              border: "1px solid",
-              borderColor: "divider",
-              backgroundColor: "background.paper",
+              borderRadius: 2,
+              bgcolor: colors.bgContainer, // fondo sutil según modo
+              border: `1px solid ${colors.borderContainer}`, // borde punteado suave
+              transition:
+                "background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease",
+              "&:hover": {                
+                boxShadow: "0 2px 6px rgba(0,0,0,0.05)", // sombra ligera
+              },
             }}
           >
             <Typography
-              variant="h6"
-              gutterBottom
-              sx={{
-                color: "text.primary",
-                fontWeight: 600,
-                mb: 3,
-                fontSize: "1.1rem",
-              }}
+              variant="subtitle2"
+              fontWeight={600}
+              mb={2}
+              color={colors.grey[100]}
+              sx={{ display: "flex", alignItems: "center", gap: 1 }}
             >
-              Configuración del Documento
+              <AssignmentOutlined
+                sx={{ fontSize: 18, color: colors.accentGreen[100] }}
+              />
+              CONFIGURACIÓN DEL DOCUMENTO
             </Typography>
 
             <Box mb={3}>
               <Typography
-                variant="subtitle2"
-                gutterBottom
-                sx={{ fontWeight: 500, mb: 1, color: "text.primary" }}
+                variant="body1"
+                color={colors.grey[100]}
+                mb={1}
+                sx={{ fontWeight: 500 }}
               >
                 Motivo de Cambio
               </Typography>
@@ -1732,13 +1741,18 @@ const Index = () => {
                 placeholder="Describe el motivo del cambio de equipo..."
                 minRows={3}
                 sx={{
-                  backgroundColor: "transparent",
-                  borderRadius: "8px",
-                  border: "1px solid",
-                  borderColor: "divider",
+                  backgroundColor: colors.primary[800],
+                  borderRadius: 2,
+                  border: `1px solid ${colors.grey[400]}`,
                   p: 1.5,
+                  color: colors.grey[100],
+                  transition: "border-color 0.3s ease, box-shadow 0.3s ease",
+                  "&:hover": {
+                    borderColor: colors.grey[300],
+                  },
                   "&:focus": {
-                    borderColor: "primary.main",
+                    borderColor: colors.accentGreen[100],
+                    boxShadow: "0 0 0 3px rgba(34,197,94,0.2)", // resalta sutil al enfocar
                   },
                 }}
               />
@@ -1746,9 +1760,10 @@ const Index = () => {
 
             <Box>
               <Typography
-                variant="subtitle2"
-                gutterBottom
-                sx={{ fontWeight: 500, mb: 1, color: "text.primary" }}
+                variant="body1"
+                color={colors.grey[100]}
+                mb={1}
+                sx={{ fontWeight: 500 }}
               >
                 Observaciones
               </Typography>
@@ -1758,20 +1773,25 @@ const Index = () => {
                 placeholder="Añade cualquier observación relevante..."
                 minRows={4}
                 sx={{
-                  backgroundColor: "transparent",
-                  borderRadius: "8px",
-                  border: "1px solid",
-                  borderColor: "divider",
+                  backgroundColor: colors.primary[800],
+                  borderRadius: 2,
+                  border: `1px solid ${colors.grey[400]}`,
                   p: 1.5,
+                  color: colors.grey[100],
+                  transition: "border-color 0.3s ease, box-shadow 0.3s ease",
+                  "&:hover": {
+                    borderColor: colors.grey[300],
+                  },
                   "&:focus": {
-                    borderColor: "primary.main",
+                    borderColor: colors.accentGreen[100],
+                    boxShadow: "0 0 0 3px rgba(34,197,94,0.2)", // feedback accesible
                   },
                 }}
               />
             </Box>
-          </Paper>
+          </Box>
+
           <Box>
-            {/* Indicador de carga y estado de guardado - Estilo minimalista */}
             {saveState.isLoading && (
               <Alert
                 severity="info"
@@ -1779,11 +1799,23 @@ const Index = () => {
                 sx={{
                   mb: 2,
                   mt: 2,
-                  borderRadius: "8px",
-                  backgroundColor: "info.light",
-                  color: "info.dark",
+                  borderRadius: 2,
+                  border: `1px solid ${colors.borderContainer}`,
+                  bgcolor: colors.bgContainer, // coherente con el resto del diseño
+                  color: colors.grey[100],
+                  transition:
+                    "background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease",
+                  "&:hover": {
+                    borderColor: colors.accentGreen[100],
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.05)", // misma sombra ligera que el contenedor
+                  },
+                  "& .MuiAlert-icon": {
+                    color: colors.accentGreen[100], // ícono consistente con el resto
+                  },
                   "& .MuiAlert-message": {
-                    padding: "4px 0",
+                    padding: 0,
+                    fontSize: "0.9rem",
+                    fontWeight: 500,
                   },
                 }}
               >
@@ -1791,6 +1823,7 @@ const Index = () => {
               </Alert>
             )}
           </Box>
+
           {/* Botón de firma */}
           {!signatureStatus.isSigned ? (
             <Button
@@ -1800,47 +1833,69 @@ const Index = () => {
               }
               endIcon={
                 <LockPersonOutlined
-                  sx={{ fontSize: 18, color: colors.grey[700] }}
+                  sx={{ fontSize: 18, color: colors.textAccent }}
                 />
               }
               sx={{
-                textTransform: "none",
-                borderRadius: "6px",
-                color: colors.grey[700],
-                backgroundColor: "rgba(255,255,255,0.85)",
-                border: "1px solid",
-                borderColor: colors.grey[300],
+                textTransform: "none", // minimalista, sin mayúsculas forzadas
+                borderRadius: "10px", // bordes redondeados suaves
+                fontWeight: 500,
+                fontSize: "0.875rem", // tamaño legible, consistente
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: "8px", // espacio limpio entre texto e icono
+                backgroundColor: colors.accentGreen[100], // color normal
+                color: colors.textAccent, // contraste legible
+                border: "none",
+                cursor: "pointer",
+
                 "&:hover": {
-                  backgroundColor: colors.tealAccent[300],
-                  borderColor: colors.tealAccent[500],
-                  color: colors.grey[100],
-                  "& .MuiSvgIcon-root": {
-                    color: colors.tealAccent[800],
-                  },
+                  backgroundColor: colors.accentGreen[200], // hover sutil
+                },
+                "&:active": {
+                  backgroundColor: colors.accentGreen[300], // feedback presionado
+                },
+                "& .MuiButton-endIcon": {
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                },
+                transition: "background-color 0.3s ease, box-shadow 0.2s ease",
+                boxShadow: "none", // minimalismo: sin sombra por defecto
+                "&:hover, &:active": {
+                  boxShadow: "0 2px 6px rgba(0,0,0,0.08)", // sombra muy ligera al interactuar
                 },
               }}
             >
               Firmar Electrónicamente
             </Button>
           ) : (
-            <Paper
-              elevation={0}
+            <Box
               sx={{
-                p: 2.5,
-                mt: 2,
-                borderRadius: "12px",
-                border: "1px solid",
-                borderColor: "divider",
-                backgroundColor: "background.paper",
+                p: 3,
+                borderRadius: 2,
+                bgcolor: colors.bgContainer, // fondo sutil según modo
+                border: `1px solid ${colors.borderContainer}`, // borde punteado suave
+                transition:
+                  "background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease",
+                "&:hover": {                  
+                  boxShadow: "0 2px 6px rgba(0,0,0,0.05)", // sombra ligera
+                },
               }}
             >
               <Box display="flex" alignItems="center" mb={2}>
-                <VerifiedIcon color="success" />
                 <Typography
-                  variant="subtitle1"
-                  sx={{ ml: 1.5, fontWeight: 600 }}
+                  variant="subtitle2"
+                  fontWeight={600}
+                  mb={2}
+                  color={colors.grey[100]}
+                  sx={{ display: "flex", alignItems: "center", gap: 1 }}
                 >
-                  Documento firmado
+                  <VerifiedIcon
+                    sx={{ fontSize: 22, color: colors.accentGreen[100] }}
+                  />
+                  DOCUMENTO FIRMADO EXITOSAMENTE
                 </Typography>
               </Box>
 
@@ -1913,9 +1968,43 @@ const Index = () => {
               <Box display="flex" justifyContent="space-between" gap={1}>
                 <Button
                   variant="contained"
-                  color="info"
-                  size="small"
-                  endIcon={<DownloadIcon />}
+                  endIcon={
+                    <DownloadIcon
+                      sx={{ fontSize: 18, color: colors.textAccent }}
+                    />
+                  }
+                  sx={{
+                    textTransform: "none", // minimalista, sin mayúsculas forzadas
+                    borderRadius: "10px", // bordes redondeados suaves
+                    fontWeight: 500,
+                    fontSize: "0.875rem", // tamaño legible, consistente
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    gap: "8px", // espacio limpio entre texto e icono
+                    backgroundColor: colors.accentGreen[100], // color normal
+                    color: colors.textAccent, // contraste legible
+                    border: "none",
+                    cursor: "pointer",
+
+                    "&:hover": {
+                      backgroundColor: colors.accentGreen[200], // hover sutil
+                    },
+                    "&:active": {
+                      backgroundColor: colors.accentGreen[300], // feedback presionado
+                    },
+                    "& .MuiButton-endIcon": {
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    },
+                    transition:
+                      "background-color 0.3s ease, box-shadow 0.2s ease",
+                    boxShadow: "none", // minimalismo: sin sombra por defecto
+                    "&:hover, &:active": {
+                      boxShadow: "0 2px 6px rgba(0,0,0,0.08)", // sombra muy ligera al interactuar
+                    },
+                  }}
                   onClick={exportSignatureCertificate}
                 >
                   Exportar certificado
@@ -1972,7 +2061,7 @@ const Index = () => {
                   </Alert>
                 )}
               </Box>
-            </Paper>
+            </Box>
           )}
 
           <SignatureModal
@@ -2000,15 +2089,18 @@ const Index = () => {
         </Grid>
 
         <Grid item xs={12} md={8}>
-          <Paper
-            elevation={0}
+          <Box
+            mb={3}
             sx={{
-              p: 2,
-              height: "100%",
-              borderRadius: "12px",
-              border: "1px solid",
-              borderColor: "divider",
-              backgroundColor: "background.paper",
+              p: 3,
+              borderRadius: 2,
+              bgcolor: colors.bgContainer, // fondo sutil según modo
+              border: `1px solid ${colors.borderContainer}`, // borde punteado suave
+              transition:
+                "background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease",
+              "&:hover": {                
+                boxShadow: "0 2px 6px rgba(0,0,0,0.05)", // sombra ligera
+              },
             }}
           >
             <Typography
@@ -2024,18 +2116,33 @@ const Index = () => {
             </Typography>
 
             {pdfUrl ? (
-              <iframe
-                key={pdfVersion}
-                ref={pdfRef}
-                src={pdfUrl}
-                title="Vista previa de la responsiva"
-                width="100%"
-                height="700px"
-                style={{
-                  border: "1px solid #e0e0e0",
-                  borderRadius: "8px",
+              <Box
+                mb={3}
+                sx={{
+                  p: 2, // padding interno
+                  borderRadius: 2, // borde redondeado
+                  bgcolor: colors.bgContainerSecondary, // fondo sutil según tema
+                  border: `1px solid ${colors.borderContainer}`, // borde suave
+                  transition:
+                    "background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease",
+                  "&:hover": {                    
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.05)", // sombra ligera al hover
+                  },
                 }}
-              />
+              >
+                <iframe
+                  key={pdfVersion}
+                  ref={pdfRef}
+                  src={pdfUrl}
+                  title="Vista previa de la responsiva"
+                  width="100%"
+                  height="700px"
+                  style={{
+                    border: "none", // borde ya definido por el Box
+                    borderRadius: "8px",
+                  }}
+                />
+              </Box>
             ) : (
               <Box
                 display="flex"
@@ -2043,7 +2150,7 @@ const Index = () => {
                 justifyContent="center"
                 alignItems="center"
                 height="700px"
-                border="1px dashed #e0e0e0"
+                border="1px solid #e0e0e0"
                 borderRadius={2}
                 sx={{ backgroundColor: "grey.50" }}
               >
@@ -2055,7 +2162,7 @@ const Index = () => {
                 </Typography>
               </Box>
             )}
-          </Paper>
+          </Box>
         </Grid>
       </Grid>
     </Box>

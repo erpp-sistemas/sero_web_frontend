@@ -37,7 +37,7 @@ function InventoryCards({ inventoryCopy, loading, onSaveItem }) {
   const [localInventory, setLocalInventory] = useState(inventoryCopy || []);
   const [selectedItem, setSelectedItem] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
-   const [reassignModalOpen, setReassignModalOpen] = useState(false);
+  const [reassignModalOpen, setReassignModalOpen] = useState(false);
 
   useEffect(() => {
     setLocalInventory(inventoryCopy || []);
@@ -48,7 +48,7 @@ function InventoryCards({ inventoryCopy, loading, onSaveItem }) {
     setModalOpen(true);
   };
 
-   const handleReassign = (item) => {
+  const handleReassign = (item) => {
     setSelectedItem(item);
     setReassignModalOpen(true);
   };
@@ -58,7 +58,7 @@ function InventoryCards({ inventoryCopy, loading, onSaveItem }) {
     setSelectedItem(null);
   };
 
-   const handleCloseReassignModal = () => {
+  const handleCloseReassignModal = () => {
     setReassignModalOpen(false);
     setSelectedItem(null);
   };
@@ -135,19 +135,20 @@ function InventoryCards({ inventoryCopy, loading, onSaveItem }) {
             <Grow in={true} timeout={400 + index * 100} key={item.id_articulo}>
               <Grid item xs={12} sm={6} md={4}>
                 <Card
-                  elevation={2}
+                  elevation={0}
                   sx={{
                     display: "flex",
                     flexDirection: "row",
                     borderRadius: 3,
-                    border: `1px solid ${colors.grey[200]}`,
-                    backgroundColor: colors.grey[900],
+                    border: `1px solid ${colors.borderContainer}`,
+                    backgroundColor: colors.bgContainer,
                     overflow: "hidden",
-                    transition: "all 0.2s ease-in-out",
+                    transition:
+                      "background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease",
                     "&:hover": {
-                      boxShadow: 6,
+                      boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
                       transform: "translateY(-2px)",
-                      backgroundColor: colors.grey[800],
+                      backgroundColor: colors.bgContainerSecondary,
                     },
                   }}
                 >
@@ -228,23 +229,52 @@ function InventoryCards({ inventoryCopy, loading, onSaveItem }) {
                       </Typography>
                     </Box>
 
-                    <Box mt={1.5} display="flex" justifyContent="flex-end" gap={1}>
-                       {/* Botón de Reasignación */}
+                    <Box
+                      mt={1.5}
+                      display="flex"
+                      justifyContent="flex-end"
+                      gap={1}
+                    >
+                      {/* Botón de Reasignación */}
                       <Button
                         variant="contained"
                         color="info"
                         size="small"
-                        endIcon={<AssignmentOutlined />}
+                        endIcon={
+                          <AssignmentOutlined
+                            sx={{ fontSize: 18, color: colors.textAccent }}
+                          />
+                        }
                         sx={{
-                          textTransform: "none",
-                          borderRadius: "10px",
-                          borderColor: colors.blueAccent[400],
-                          // color: colors.blueAccent[400],
+                          textTransform: "none", // minimalista, sin mayúsculas forzadas
+                          borderRadius: "10px", // bordes redondeados suaves
                           fontWeight: 500,
-                          fontSize: "0.875rem",
+                          fontSize: "0.875rem", // tamaño legible, consistente
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          gap: "8px", // espacio limpio entre texto e icono
+                          backgroundColor: colors.accentGreen[100], // color normal
+                          color: colors.textAccent, // contraste legible
+                          border: "none",
+                          cursor: "pointer",
+
                           "&:hover": {
-                            backgroundColor: colors.blueAccent[50],
-                            borderColor: colors.blueAccent[600],
+                            backgroundColor: colors.accentGreen[200], // hover sutil
+                          },
+                          "&:active": {
+                            backgroundColor: colors.accentGreen[300], // feedback presionado
+                          },
+                          "& .MuiButton-endIcon": {
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          },
+                          transition:
+                            "background-color 0.3s ease, box-shadow 0.2s ease",
+                          boxShadow: "none", // minimalismo: sin sombra por defecto
+                          "&:hover, &:active": {
+                            boxShadow: "0 2px 6px rgba(0,0,0,0.08)", // sombra muy ligera al interactuar
                           },
                         }}
                         onClick={() => handleReassign(item)}
@@ -254,18 +284,44 @@ function InventoryCards({ inventoryCopy, loading, onSaveItem }) {
                       <Button
                         variant="contained"
                         size="small"
-                        endIcon={<OpenInNewOutlined />}
+                        endIcon={
+                          <OpenInNewOutlined
+                            sx={{
+                              fontSize: 18,
+                              color: colors.textAccentSecondary,
+                            }}
+                          />
+                        }
                         sx={{
-                          textTransform: "none",
-                          borderRadius: "10px",
-                          borderColor: colors.grey[300],
-                          backgroundColor: colors.grey[200],
-                          color: colors.grey[800],
+                          textTransform: "none", // minimalista, sin mayúsculas forzadas
+                          borderRadius: "10px", // bordes redondeados suaves
                           fontWeight: 500,
-                          fontSize: "0.875rem",
+                          fontSize: "0.875rem", // tamaño legible, consistente
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          gap: "8px", // espacio limpio entre texto e icono
+                          backgroundColor: colors.accentGreenSecondary[100], // color normal
+                          color: colors.textAccentSecondary, // contraste legible
+                          border: "none",
+                          cursor: "pointer",
+
                           "&:hover": {
-                            backgroundColor: colors.grey[400],
-                            borderColor: colors.primary[300],
+                            backgroundColor: colors.accentGreenSecondary[200], // hover sutil
+                          },
+                          "&:active": {
+                            backgroundColor: colors.accentGreenSecondary[300], // feedback presionado
+                          },
+                          "& .MuiButton-endIcon": {
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          },
+                          transition:
+                            "background-color 0.3s ease, box-shadow 0.2s ease",
+                          boxShadow: "none", // minimalismo: sin sombra por defecto
+                          "&:hover, &:active": {
+                            boxShadow: "0 2px 6px rgba(0,0,0,0.08)", // sombra muy ligera al interactuar
                           },
                         }}
                         onClick={() => handleViewDetails(item)}
@@ -290,13 +346,13 @@ function InventoryCards({ inventoryCopy, loading, onSaveItem }) {
       <InventoryReassignmentModal
         open={reassignModalOpen}
         onClose={handleCloseReassignModal}
-        item={selectedItem}        
+        item={selectedItem}
       />
     </>
   );
 }
 
-function InventoryViewer({ inventory, loading, onSaveItem  }) {
+function InventoryViewer({ inventory, loading, onSaveItem }) {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [itemsToShow, setItemsToShow] = useState(20);
@@ -392,7 +448,7 @@ function InventoryViewer({ inventory, loading, onSaveItem  }) {
   //         fotos: updatedPhotos,
   //       };
   //     });
-  //   });    
+  //   });
   // };
 
   const handleSaveItem = (id_articulo, changes) => {
@@ -434,18 +490,25 @@ function InventoryViewer({ inventory, loading, onSaveItem  }) {
         display="flex"
         alignItems="center"
         gap={1}
-        mb={2}
-        p={2}
-        bgcolor={colors.accentGreen[100]}
-        borderRadius={2}
-        boxShadow={3}
+        mb={3}
+        sx={{
+          p: 2,
+          borderRadius: 2,
+          bgcolor: colors.bgContainer, // fondo sutil según modo
+          border: `1px solid ${colors.borderContainer}`, // borde punteado suave
+          transition:
+            "background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease",
+          "&:hover": {
+            boxShadow: "0 2px 6px rgba(0,0,0,0.05)", // sombra ligera
+          },
+        }}
         elevation={12}
       >
         <Tooltip
           title="Cantidad total de artículos encontrados"
           placement="top-start"
         >
-          <Inventory2OutlinedIcon color="primary" />
+          <Inventory2OutlinedIcon sx={{ fontSize: 18 }} />
         </Tooltip>
 
         {loading ? (
@@ -453,7 +516,7 @@ function InventoryViewer({ inventory, loading, onSaveItem  }) {
         ) : (
           <Typography
             variant="h6"
-            color={colors.contentAccentGreen[100]}
+            color={colors.tealAccent}
             fontWeight="medium"
           >
             <Typography
@@ -498,32 +561,48 @@ function InventoryViewer({ inventory, loading, onSaveItem  }) {
                         size={16}
                         thickness={4}
                         sx={{
-                          color: colors.grey[100],
+                          color: colors.grey[300],
                         }}
                       />
                     ) : (
-                      <Search sx={{ color: colors.grey[100], fontSize: 20 }} />
+                      <Search sx={{ color: colors.grey[300], fontSize: 20 }} />
                     )}
                   </InputAdornment>
                 ),
               }}
               sx={{
                 "& .MuiOutlinedInput-root": {
-                  borderRadius: "8px",
+                  borderRadius: "10px",
                   fontSize: "0.875rem",
-                  backgroundColor: "transparent",
+                  backgroundColor: colors.bgContainer, // mismo fondo que usamos en contenedores
+                  transition: "border-color 0.2s ease, box-shadow 0.2s ease",
+
                   "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: colors.grey[300],
+                    borderColor: colors.borderContainer,
                   },
+
                   "&:hover .MuiOutlinedInput-notchedOutline": {
-                    borderColor: colors.primary[300],
+                    borderColor: colors.accentGreen[100], // hover sutil
                   },
+
                   "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                    borderColor: colors.primary[500],
+                    borderColor: colors.accentGreen[200],
+                    boxShadow: "0 0 0 3px rgba(34,197,94,0.15)", // realce minimalista accesible
+                  },
+
+                  "& input::placeholder": {
+                    color: colors.grey[400],
+                    opacity: 1,
                   },
                 },
+
+                "& .MuiInputAdornment-root": {
+                  marginRight: "8px",
+                },
+
                 "& .MuiFormHelperText-root": {
                   marginLeft: 1,
+                  fontSize: "0.75rem",
                   color: theme.palette.error.main,
                 },
               }}
@@ -544,7 +623,7 @@ function InventoryViewer({ inventory, loading, onSaveItem  }) {
       <InventoryCards
         inventoryCopy={visibleItems}
         loading={loading}
-         onSaveItem={handleSaveItem}
+        onSaveItem={handleSaveItem}
       />
 
       {/* Indicador inferior */}

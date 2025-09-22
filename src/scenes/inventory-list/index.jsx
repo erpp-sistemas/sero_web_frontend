@@ -13,9 +13,12 @@ import { tokens } from "../../theme";
 import { getAllInventory } from "../../api/inventory";
 import {
   DeleteSweep,
+  DeleteSweepOutlined,
   KeyboardArrowDown,
+  KeyboardArrowDownOutlined,
   NavigateNext,
   PlaylistAdd,
+  PlaylistAddOutlined,
 } from "@mui/icons-material";
 import { Breadcrumbs, Chip } from "@mui/material";
 import InventoryCards from "../../components/InventoryList/InventoryCards";
@@ -151,21 +154,23 @@ function Index() {
   };
 
   const handleSaveItem = (updatedInventory) => {
-  setAllInventory(updatedInventory);
+    setAllInventory(updatedInventory);
 
-  setFilteredObjects((prev) => {
-    // Actualizamos el último filtro con el inventario actualizado, 
-    // manteniendo la estructura de los filtros previos
-    const lastFiltered = prev.length > 0 ? prev[prev.length - 1] : [];
-    const newFiltered = lastFiltered.map((item) => {
-      return updatedInventory.find(
-        (inv) => inv.id_articulo === item.id_articulo
-      ) || item;
+    setFilteredObjects((prev) => {
+      // Actualizamos el último filtro con el inventario actualizado,
+      // manteniendo la estructura de los filtros previos
+      const lastFiltered = prev.length > 0 ? prev[prev.length - 1] : [];
+      const newFiltered = lastFiltered.map((item) => {
+        return (
+          updatedInventory.find(
+            (inv) => inv.id_articulo === item.id_articulo
+          ) || item
+        );
+      });
+
+      return [...prev.slice(0, -1), newFiltered];
     });
-
-    return [...prev.slice(0, -1), newFiltered];
-  });
-};
+  };
 
   return (
     <div className="p-4 space-y-6">
@@ -186,7 +191,7 @@ function Index() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-4">
           {loading
             ? // Mostrar 3 Skeletons mientras carga
               Array.from({ length: 3 }).map((_, idx) => (
@@ -197,28 +202,52 @@ function Index() {
             : Object.keys(selectedFilters).map((filterKey) => (
                 <Grow key={filterKey} in={true} timeout={300}>
                   <div key={filterKey} className="flex items-center">
-                    <FormControl fullWidth size="small" variant="outlined">
+                    <FormControl fullWidth size="small">
                       <InputLabel>{filterKey}</InputLabel>
                       <Select
                         value={selectedFilters[filterKey]}
                         label={filterKey}
                         onChange={(e) => applyFilter(filterKey, e.target.value)}
                         sx={{
-                          backgroundColor: "transparent",
-                          borderRadius: "8px",
+                          borderRadius: "10px",
                           fontSize: "0.875rem",
+                          marginBottom: 1,
+                          backgroundColor: colors.bgContainer, // mismo fondo que usamos en contenedores
+                          transition:
+                            "border-color 0.2s ease, box-shadow 0.2s ease",
+
                           "& .MuiOutlinedInput-notchedOutline": {
-                            borderColor: colors.grey[300],
+                            borderColor: colors.borderContainer,
                           },
+
                           "&:hover .MuiOutlinedInput-notchedOutline": {
-                            borderColor: colors.primary[300],
+                            borderColor: colors.accentGreen[100], // hover sutil
                           },
+
                           "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                            borderColor: colors.primary[500],
+                            borderColor: colors.accentGreen[200],
+                            boxShadow: "0 0 0 3px rgba(34,197,94,0.15)", // realce minimalista accesible
+                          },
+
+                          "& input::placeholder": {
+                            color: colors.grey[400],
+                            opacity: 1,
+                          },
+                          "& .MuiInputAdornment-root": {
+                            marginRight: "8px",
+                          },
+
+                          "& .MuiFormHelperText-root": {
+                            marginLeft: 1,
+                            fontSize: "0.75rem",
+                            color: theme.palette.error.main,
                           },
                         }}
                         IconComponent={(props) => (
-                          <KeyboardArrowDown {...props} sx={{ fontSize: 18 }} />
+                          <KeyboardArrowDownOutlined
+                            {...props}
+                            sx={{ color: colors.grey[300], fontSize: 20 }}
+                          />
                         )}
                       >
                         <MenuItem value="">Todos</MenuItem>
@@ -234,7 +263,7 @@ function Index() {
               ))}
         </div>
 
-        <div className="grid grid-cols-12 items-center gap-2 mt-4">
+        <div className="grid grid-cols-12 items-center gap-2 mt-2">
           <FormControl size="small" className="col-span-4">
             <InputLabel>Agregar filtro</InputLabel>
             {loading ? (
@@ -245,21 +274,43 @@ function Index() {
                 label="Agregar filtro"
                 onChange={(e) => setAddingFilter(e.target.value)}
                 sx={{
-                  backgroundColor: "transparent",
-                  borderRadius: "8px",
+                  borderRadius: "10px",
                   fontSize: "0.875rem",
+                  backgroundColor: colors.bgContainer, // mismo fondo que usamos en contenedores
+                  transition: "border-color 0.2s ease, box-shadow 0.2s ease",
+
                   "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: colors.grey[300],
+                    borderColor: colors.borderContainer,
                   },
+
                   "&:hover .MuiOutlinedInput-notchedOutline": {
-                    borderColor: colors.primary[300],
+                    borderColor: colors.accentGreen[100], // hover sutil
                   },
+
                   "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                    borderColor: colors.primary[500],
+                    borderColor: colors.accentGreen[200],
+                    boxShadow: "0 0 0 3px rgba(34,197,94,0.15)", // realce minimalista accesible
+                  },
+
+                  "& input::placeholder": {
+                    color: colors.grey[400],
+                    opacity: 1,
+                  },
+                  "& .MuiInputAdornment-root": {
+                    marginRight: "8px",
+                  },
+
+                  "& .MuiFormHelperText-root": {
+                    marginLeft: 1,
+                    fontSize: "0.75rem",
+                    color: theme.palette.error.main,
                   },
                 }}
                 IconComponent={(props) => (
-                  <KeyboardArrowDown {...props} sx={{ fontSize: 18 }} />
+                  <KeyboardArrowDownOutlined
+                    {...props}
+                    sx={{ color: colors.grey[300], fontSize: 20 }}
+                  />
                 )}
               >
                 {availableFilters
@@ -278,18 +329,41 @@ function Index() {
               variant="contained"
               color="info"
               fullWidth
-              endIcon={<PlaylistAdd sx={{ fontSize: 18 }} />}
+              endIcon={
+                <PlaylistAddOutlined
+                  sx={{ fontSize: 18, color: colors.textAccent }}
+                />
+              }
               disabled={loading}
               sx={{
-                textTransform: "none",
-                borderRadius: "10px",
-                borderColor: colors.grey[300],
-                color: colors.grey[800],
+                textTransform: "none", // minimalista, sin mayúsculas forzadas
+                borderRadius: "10px", // bordes redondeados suaves
                 fontWeight: 500,
-                fontSize: "0.875rem",
+                fontSize: "0.875rem", // tamaño legible, consistente
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: "8px", // espacio limpio entre texto e icono
+                backgroundColor: colors.accentGreen[100], // color normal
+                color: colors.textAccent, // contraste legible
+                border: "none",
+                cursor: "pointer",
+
                 "&:hover": {
-                  backgroundColor: colors.grey[100],
-                  borderColor: colors.primary[300],
+                  backgroundColor: colors.accentGreen[200], // hover sutil
+                },
+                "&:active": {
+                  backgroundColor: colors.accentGreen[300], // feedback presionado
+                },
+                "& .MuiButton-endIcon": {
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                },
+                transition: "background-color 0.3s ease, box-shadow 0.2s ease",
+                boxShadow: "none", // minimalismo: sin sombra por defecto
+                "&:hover, &:active": {
+                  boxShadow: "0 2px 6px rgba(0,0,0,0.08)", // sombra muy ligera al interactuar
                 },
               }}
             >
@@ -315,18 +389,41 @@ function Index() {
               variant="contained"
               color="error"
               fullWidth
-              endIcon={<DeleteSweep sx={{ fontSize: 18 }} />}
+              endIcon={
+                <DeleteSweepOutlined
+                  sx={{ fontSize: 18, color: colors.textAccentSecondary }}
+                />
+              }
               disabled={loading}
               sx={{
-                textTransform: "none",
-                borderRadius: "10px",
-                borderColor: colors.grey[300],
-                color: colors.grey[800],
+                textTransform: "none", // minimalista, sin mayúsculas forzadas
+                borderRadius: "10px", // bordes redondeados suaves
                 fontWeight: 500,
-                fontSize: "0.875rem",
+                fontSize: "0.875rem", // tamaño legible, consistente
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: "8px", // espacio limpio entre texto e icono
+                backgroundColor: colors.accentGreenSecondary[100], // color normal
+                color: colors.textAccentSecondary, // contraste legible
+                border: "none",
+                cursor: "pointer",
+
                 "&:hover": {
-                  backgroundColor: colors.redAccent[100],
-                  borderColor: colors.redAccent[200],
+                  backgroundColor: colors.accentGreenSecondary[200], // hover sutil
+                },
+                "&:active": {
+                  backgroundColor: colors.accentGreenSecondary[300], // feedback presionado
+                },
+                "& .MuiButton-endIcon": {
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                },
+                transition: "background-color 0.3s ease, box-shadow 0.2s ease",
+                boxShadow: "none", // minimalismo: sin sombra por defecto
+                "&:hover, &:active": {
+                  boxShadow: "0 2px 6px rgba(0,0,0,0.08)", // sombra muy ligera al interactuar
                 },
               }}
             >
@@ -385,7 +482,7 @@ function Index() {
                   : []
               }
               loading={loading}
-               onSaveItem={handleSaveItem}
+              onSaveItem={handleSaveItem}
             />
           )}
         </div>
