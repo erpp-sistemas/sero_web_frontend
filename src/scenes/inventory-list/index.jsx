@@ -61,7 +61,7 @@ function Index() {
           "subcategoria",
           "categoria",
           "plaza",
-          "activo",
+          "estado",
         ];
         const dynamicKeys = Object.keys(processedInventory[0] || {}).filter(
           (key) =>
@@ -111,9 +111,9 @@ function Index() {
       const baseObject = newFilteredObjects[newFilteredObjects.length - 1];
       const filtered = baseObject.filter((item) => {
         const value = item[filterName];
-        if (filterName === "activo") {
-          return value === (filterValue === "true");
-        }
+        // if (filterName === "activo") {
+        //   return value === (filterValue === "true");
+        // }
         return value === filterValue;
       });
       newFilteredObjects.push(filtered);
@@ -378,7 +378,7 @@ function Index() {
                   "subcategoria",
                   "categoria",
                   "plaza",
-                  "activo",
+                  "estado",
                 ];
                 const reset = {};
                 fixed.forEach((f) => (reset[f] = ""));

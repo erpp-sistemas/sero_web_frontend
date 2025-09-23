@@ -214,18 +214,37 @@ function InventoryCards({ inventoryCopy, loading, onSaveItem }) {
                           mt: 0.5,
                         }}
                       >
-                        <strong>Estatus:</strong>
+                        <strong>Estado de asignación:</strong>
                         <span
                           style={{
                             width: 10,
                             height: 10,
                             borderRadius: "50%",
-                            backgroundColor: item.activo
-                              ? colors.greenAccent[400]
-                              : colors.redAccent[300],
+                            backgroundColor:
+                              item.estado === "disponible"
+                                ? colors.greenAccent[400]
+                                : item.estado === "asignado"
+                                ? colors.blueAccent[400]
+                                : item.estado === "mantenimiento"
+                                ? colors.orangeAccent[400]
+                                : item.estado === "en_revision"
+                                ? colors.yellowAccent[400]
+                                : item.estado === "baja"
+                                ? colors.redAccent[300]
+                                : colors.grey[400],
                           }}
                         ></span>
-                        {item.activo ? "Activo" : "Inactivo"}
+                        {item.estado === "disponible"
+                          ? "Disponible"
+                          : item.estado === "asignado"
+                          ? "Asignado"
+                          : item.estado === "mantenimiento"
+                          ? "En Mantenimiento"
+                          : item.estado === "en_revision"
+                          ? "En Revisión"
+                          : item.estado === "baja"
+                          ? "Dado de Baja"
+                          : item.estado}
                       </Typography>
                     </Box>
 
