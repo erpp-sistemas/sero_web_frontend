@@ -183,7 +183,8 @@ function InventoryReassignmentModal({
     console.log("Datos de reasignación:", nuevoArticuloCompleto);
 
     // Redirigir a la página de generación de responsiva
-    navigate("/responsive-generator", {
+    // navigate("/responsive-generator", {
+    navigate("/return-generator", {
       state: {
         nuevoArticulo: nuevoArticuloCompleto, // ← Usar el objeto actualizado
         articuloId: itemCopy.id_articulo,
