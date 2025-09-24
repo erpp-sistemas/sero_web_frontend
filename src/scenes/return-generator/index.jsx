@@ -325,8 +325,12 @@ const Index = () => {
 
       // ✅ INFORMACIÓN DEL DOCUMENTO
       motivo_cambio: motivoCambio || "Asignación inicial de equipo",
+      descripcion_motivo_cambio: motivoCambio === "otro" ? motivoCambioOtro : "",
+      estado_articulo: estadoArticulo || "bueno",
+      descripcion_estado_articulo: estadoArticulo === "danado" ? estadoArticuloDanado : "",
+      url_fotos: fotosEvidencia || [],
       observaciones: observaciones || "",
-      tipo_responsiva: tipoResponsiva,
+      tipo_responsiva: "devolucion",//tipoResponsiva,
       estado: "activa",
       folio_responsiva: `RESP-${nuevoArticulo.id_articulo}-${Date.now()}`,
 

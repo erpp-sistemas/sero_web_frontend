@@ -21,13 +21,21 @@ import { useSpring, animated } from "@react-spring/web";
 import {
   Assignment,
   AssignmentOutlined,
+  AssignmentReturnOutlined,
+  DeleteOutline,
+  ExitToAppOutlined,
   KeyboardArrowDown,
+  KeyboardReturnOutlined,
   OpenInNewOutlined,
+  PublishedWithChangesOutlined,
   Search,
   SearchOff,
+  UndoOutlined,
+  VisibilityOutlined,
 } from "@mui/icons-material";
 import InventoryDetailModal from "./InventoryCards/InventoryDetailModal";
 import InventoryReassignmentModal from "./InventoryCards/InventoryReassignmentModal";
+import InventoryReturnModal from "./InventoryCards/InventoryReturnModal";
 import ExportToExcelButton from "./InventoryCards/ExportToExcelButton";
 import ExportPDFButton from "./InventoryCards/ExportPDFButton";
 
@@ -38,6 +46,7 @@ function InventoryCards({ inventoryCopy, loading, onSaveItem }) {
   const [selectedItem, setSelectedItem] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [reassignModalOpen, setReassignModalOpen] = useState(false);
+  const [returnModalOpen, setReturnModalOpen] = useState(false);
 
   useEffect(() => {
     setLocalInventory(inventoryCopy || []);
@@ -53,6 +62,11 @@ function InventoryCards({ inventoryCopy, loading, onSaveItem }) {
     setReassignModalOpen(true);
   };
 
+  const handleReturn = (item) => {
+    setSelectedItem(item);
+    setReturnModalOpen(true);
+  };
+
   const handleCloseModal = () => {
     setModalOpen(false);
     setSelectedItem(null);
@@ -60,6 +74,11 @@ function InventoryCards({ inventoryCopy, loading, onSaveItem }) {
 
   const handleCloseReassignModal = () => {
     setReassignModalOpen(false);
+    setSelectedItem(null);
+  };
+
+  const handleCloseReturnModal = () => {
+    setReturnModalOpen(false);
     setSelectedItem(null);
   };
 
@@ -255,98 +274,138 @@ function InventoryCards({ inventoryCopy, loading, onSaveItem }) {
                       gap={1}
                     >
                       {/* Botón de Reasignación */}
-                      <Button
-                        variant="contained"
-                        color="info"
-                        size="small"
-                        endIcon={
-                          <AssignmentOutlined
+                      <Tooltip title="Reasignacionar artículo">
+                        <Button
+                          variant="contained"                          
+                          size="small"
+                          sx={{
+                            textTransform: "none", // minimalista, sin mayúsculas forzadas
+                            borderRadius: "10px", // bordes redondeados suaves
+                            fontWeight: 500,
+                            fontSize: "0.875rem", // tamaño legible, consistente
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            gap: "8px", // espacio limpio entre texto e icono
+                            backgroundColor: colors.accentGreen[100], // color normal
+                            color: colors.textAccent, // contraste legible
+                            border: "none",
+                            cursor: "pointer",
+
+                            "&:hover": {
+                              backgroundColor: colors.accentGreen[200], // hover sutil
+                            },
+                            "&:active": {
+                              backgroundColor: colors.accentGreen[300], // feedback presionado
+                            },
+                            "& .MuiButton-endIcon": {
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                            },
+                            transition:
+                              "background-color 0.3s ease, box-shadow 0.2s ease",
+                            boxShadow: "none", // minimalismo: sin sombra por defecto
+                            "&:hover, &:active": {
+                              boxShadow: "0 2px 6px rgba(0,0,0,0.08)", // sombra muy ligera al interactuar
+                            },
+                          }}
+                          onClick={() => handleReassign(item)}
+                        >
+                          <PublishedWithChangesOutlined
                             sx={{ fontSize: 18, color: colors.textAccent }}
                           />
-                        }
-                        sx={{
-                          textTransform: "none", // minimalista, sin mayúsculas forzadas
-                          borderRadius: "10px", // bordes redondeados suaves
-                          fontWeight: 500,
-                          fontSize: "0.875rem", // tamaño legible, consistente
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center",
-                          gap: "8px", // espacio limpio entre texto e icono
-                          backgroundColor: colors.accentGreen[100], // color normal
-                          color: colors.textAccent, // contraste legible
-                          border: "none",
-                          cursor: "pointer",
-
-                          "&:hover": {
-                            backgroundColor: colors.accentGreen[200], // hover sutil
-                          },
-                          "&:active": {
-                            backgroundColor: colors.accentGreen[300], // feedback presionado
-                          },
-                          "& .MuiButton-endIcon": {
+                        </Button>
+                      </Tooltip>
+                      <Tooltip title="Devolución o baja del artículo">
+                        <Button
+                          variant="contained"                          
+                          size="small"
+                          sx={{
+                            textTransform: "none", // minimalista, sin mayúsculas forzadas
+                            borderRadius: "10px", // bordes redondeados suaves
+                            fontWeight: 500,
+                            fontSize: "0.875rem", // tamaño legible, consistente
                             display: "flex",
-                            alignItems: "center",
                             justifyContent: "center",
-                          },
-                          transition:
-                            "background-color 0.3s ease, box-shadow 0.2s ease",
-                          boxShadow: "none", // minimalismo: sin sombra por defecto
-                          "&:hover, &:active": {
-                            boxShadow: "0 2px 6px rgba(0,0,0,0.08)", // sombra muy ligera al interactuar
-                          },
-                        }}
-                        onClick={() => handleReassign(item)}
-                      >
-                        Reasignación
-                      </Button>
-                      <Button
-                        variant="contained"
-                        size="small"
-                        endIcon={
-                          <OpenInNewOutlined
+                            alignItems: "center",
+                            gap: "8px", // espacio limpio entre texto e icono
+                            backgroundColor: colors.accentGreen[100], // color normal
+                            color: colors.textAccent, // contraste legible
+                            border: "none",
+                            cursor: "pointer",
+
+                            "&:hover": {
+                              backgroundColor: colors.accentGreen[200], // hover sutil
+                            },
+                            "&:active": {
+                              backgroundColor: colors.accentGreen[300], // feedback presionado
+                            },
+                            "& .MuiButton-endIcon": {
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                            },
+                            transition:
+                              "background-color 0.3s ease, box-shadow 0.2s ease",
+                            boxShadow: "none", // minimalismo: sin sombra por defecto
+                            "&:hover, &:active": {
+                              boxShadow: "0 2px 6px rgba(0,0,0,0.08)", // sombra muy ligera al interactuar
+                            },
+                          }}
+                          onClick={() => handleReturn(item)}
+                        >
+                          <DeleteOutline
+                            sx={{ fontSize: 18, color: colors.textAccent }}
+                          />
+                        </Button>
+                      </Tooltip>
+                      <Tooltip title="Ver detalles del artículo">
+                        <Button
+                          variant="contained"
+                          size="small"
+                          sx={{
+                            textTransform: "none", // minimalista, sin mayúsculas forzadas
+                            borderRadius: "10px", // bordes redondeados suaves
+                            fontWeight: 500,
+                            fontSize: "0.875rem", // tamaño legible, consistente
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            gap: "8px", // espacio limpio entre texto e icono
+                            backgroundColor: colors.accentGreenSecondary[100], // color normal
+                            color: colors.textAccentSecondary, // contraste legible
+                            border: "none",
+                            cursor: "pointer",
+
+                            "&:hover": {
+                              backgroundColor: colors.accentGreenSecondary[200], // hover sutil
+                            },
+                            "&:active": {
+                              backgroundColor: colors.accentGreenSecondary[300], // feedback presionado
+                            },
+                            "& .MuiButton-endIcon": {
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                            },
+                            transition:
+                              "background-color 0.3s ease, box-shadow 0.2s ease",
+                            boxShadow: "none", // minimalismo: sin sombra por defecto
+                            "&:hover, &:active": {
+                              boxShadow: "0 2px 6px rgba(0,0,0,0.08)", // sombra muy ligera al interactuar
+                            },
+                          }}
+                          onClick={() => handleViewDetails(item)}
+                        >
+                          <VisibilityOutlined
                             sx={{
                               fontSize: 18,
                               color: colors.textAccentSecondary,
                             }}
                           />
-                        }
-                        sx={{
-                          textTransform: "none", // minimalista, sin mayúsculas forzadas
-                          borderRadius: "10px", // bordes redondeados suaves
-                          fontWeight: 500,
-                          fontSize: "0.875rem", // tamaño legible, consistente
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center",
-                          gap: "8px", // espacio limpio entre texto e icono
-                          backgroundColor: colors.accentGreenSecondary[100], // color normal
-                          color: colors.textAccentSecondary, // contraste legible
-                          border: "none",
-                          cursor: "pointer",
-
-                          "&:hover": {
-                            backgroundColor: colors.accentGreenSecondary[200], // hover sutil
-                          },
-                          "&:active": {
-                            backgroundColor: colors.accentGreenSecondary[300], // feedback presionado
-                          },
-                          "& .MuiButton-endIcon": {
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                          },
-                          transition:
-                            "background-color 0.3s ease, box-shadow 0.2s ease",
-                          boxShadow: "none", // minimalismo: sin sombra por defecto
-                          "&:hover, &:active": {
-                            boxShadow: "0 2px 6px rgba(0,0,0,0.08)", // sombra muy ligera al interactuar
-                          },
-                        }}
-                        onClick={() => handleViewDetails(item)}
-                      >
-                        Ver detalles
-                      </Button>
+                        </Button>
+                      </Tooltip>
                     </Box>
                   </CardContent>
                 </Card>
@@ -365,6 +424,12 @@ function InventoryCards({ inventoryCopy, loading, onSaveItem }) {
       <InventoryReassignmentModal
         open={reassignModalOpen}
         onClose={handleCloseReassignModal}
+        item={selectedItem}
+      />
+
+      <InventoryReturnModal
+        open={returnModalOpen}
+        onClose={handleCloseReturnModal}
         item={selectedItem}
       />
     </>
