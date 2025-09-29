@@ -38,7 +38,7 @@ import {
   LockPersonOutlined,
   Refresh,
 } from "@mui/icons-material";
-import { createResponsiva, confirmationResponsiva } from "../../api/responsive";
+import { createResponsiva, confirmationResponsiva, confirmationResponsivaReturn } from "../../api/responsive";
 import { useSelector } from "react-redux";
 
 const getInternetDate = async () => {
@@ -122,6 +122,18 @@ const Index = () => {
   useEffect(() => {
     signatureStatusRef.current = signatureStatus;
   }, [signatureStatus]);
+
+  // Función para limpiar los campos de configuración del documento
+  const limpiarCamposConfiguracion = () => {
+    setMotivoCambio("renuncia");
+    setMotivoCambioOtro("");
+    setEstadoArticulo("bueno");
+    setEstadoArticuloDanado("");
+    setFotosEvidencia([]);
+    setObservaciones("");
+
+    console.log("Campos de configuración limpiados");
+  };
 
   // Función para manejar reintentos de guardado
   const handleRetrySave = async () => {
@@ -325,12 +337,14 @@ const Index = () => {
 
       // ✅ INFORMACIÓN DEL DOCUMENTO
       motivo_cambio: motivoCambio || "Asignación inicial de equipo",
-      descripcion_motivo_cambio: motivoCambio === "otro" ? motivoCambioOtro : "",
+      descripcion_motivo_cambio:
+        motivoCambio === "otro" ? motivoCambioOtro : "",
       estado_articulo: estadoArticulo || "bueno",
-      descripcion_estado_articulo: estadoArticulo === "danado" ? estadoArticuloDanado : "",
+      descripcion_estado_articulo:
+        estadoArticulo === "danado" ? estadoArticuloDanado : "",
       url_fotos: fotosEvidencia || [],
       observaciones: observaciones || "",
-      tipo_responsiva: "devolucion",//tipoResponsiva,
+      tipo_responsiva: "devolucion", //tipoResponsiva,
       estado: "activa",
       folio_responsiva: `RESP-${nuevoArticulo.id_articulo}-${Date.now()}`,
 
@@ -395,6 +409,8 @@ const Index = () => {
         error: null,
         retryCount: 0,
       }));
+
+      limpiarCamposConfiguracion();
 
       return result;
     } catch (error) {
@@ -464,7 +480,7 @@ const Index = () => {
       };
 
       // ✅ Usar la función de la API en lugar de fetch directo
-      const result = await confirmationResponsiva(emailData);
+      const result = await confirmationResponsivaReturn(emailData);
 
       if (result.success) {
         console.log("📧 Email de confirmación enviado exitosamente");

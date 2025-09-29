@@ -32,6 +32,22 @@ export const confirmationResponsiva = async (payload) => {
   }
 };
 
+export const confirmationResponsivaReturn = async (payload) => {
+  try {
+    const response = await instance.post(
+      "/inventory/article/responsive/confirmation/return",  // ← Ruta que definimos
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error al guardar la responsiva:",
+      error.response?.data || error.message
+    );
+    throw error.response?.data || error;
+  }
+};
+
 // ✅ NUEVOS ENDPOINTS PARA VERIFICACIÓN
 export const verifyResponsiva = async (token, hash) => {
   try {

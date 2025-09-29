@@ -36,6 +36,8 @@ function InventoryReassignmentModal({
   const [selectedUser, setSelectedUser] = useState(null);
   const [resetKey, setResetKey] = useState(0);
 
+  console.log(item)
+
   useEffect(() => {
     if (open && item) {
       const copy = JSON.parse(JSON.stringify(item));
@@ -81,7 +83,7 @@ function InventoryReassignmentModal({
     // Eliminar campos que contengan "id_" o "_id", excepto "id_articulo"
     Object.keys(filteredItem).forEach((key) => {
       if (
-        (key.includes("id_") || key.includes("_id")) &&
+        (key.includes("id_") || key.includes("_id")) || key === "datos_usuario_asignado" &&
         key !== "id_articulo"
       ) {
         delete filteredItem[key];
@@ -183,8 +185,8 @@ function InventoryReassignmentModal({
     console.log("Datos de reasignación:", nuevoArticuloCompleto);
 
     // Redirigir a la página de generación de responsiva
-    // navigate("/responsive-generator", {
-    navigate("/return-generator", {
+    navigate("/responsive-generator", {
+    // navigate("/return-generator", {
       state: {
         nuevoArticulo: nuevoArticuloCompleto, // ← Usar el objeto actualizado
         articuloId: itemCopy.id_articulo,

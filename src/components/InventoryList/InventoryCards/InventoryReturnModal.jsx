@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Modal,
   Box,
@@ -16,84 +16,141 @@ import NoPhotographyOutlinedIcon from "@mui/icons-material/NoPhotographyOutlined
 import AssignmentReturnIcon from "@mui/icons-material/AssignmentReturn";
 import { tokens } from "../../../theme";
 import { AssignmentReturnedOutlined, InfoOutlined } from "@mui/icons-material";
-import PlaceSelectArray from "../../../components/select/placeSelectArray.jsx";
-import ActiveUsersSelect from "../../../components/inventory/select/activeUsersSelect";
 import { useNavigate } from "react-router-dom";
 
-function InventoryReturnModal({ open, onClose, item, onConfirmReturn }) {
+function InventoryReturnModal({
+  open,
+  onClose,
+  item,
+  onConfirmReturn,
+}) {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const navigate = useNavigate();
   const [showContent, setShowContent] = useState(false);
   const [itemCopy, setItemCopy] = useState(null);
   const [filteredItem, setFilteredItem] = useState(null);
-  const [selectedPlace, setSelectedPlace] = useState(null);
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [resetKey, setResetKey] = useState(0);
 
-  console.log(item)
+  console.log(item);
 
   useEffect(() => {
-    if (open && item) {
-      const copy = JSON.parse(JSON.stringify(item));
-      setItemCopy(copy);
+  if (open && item) {
+    const copy = JSON.parse(JSON.stringify(item));
 
-      const filtered = filterItemForReturn(copy);
-      setFilteredItem(filtered);
-
-      setResetKey((prevKey) => prevKey + 1);
-
-      const currentUserData = {
-        id_usuario: copy.id_usuario,
-        nombre: copy.usuario,
-        url_image: copy.imagen_usuario,
-        email: copy.email_usuario || null,
-        curp: copy.curp_usuario || null,
-        area: copy.area_usuario || null,
-        puesto: copy.puesto_usuario || null,
-      };
-
-      const currentPlaceData = {
-        id_plaza: copy.id_plaza,
-        nombre_plaza: copy.plaza || copy.nombre_plaza,
-        nombre: copy.plaza || copy.nombre_plaza,
-        descripcion: copy.descripcion_plaza || null,
-      };
-
-      setSelectedUser(currentUserData);
-      setSelectedPlace(currentPlaceData);
-
-      setShowContent(true);
-    } else {
-      const timeout = setTimeout(() => {
-        setShowContent(false);
-        setItemCopy(null);
-        setFilteredItem(null);
-        setSelectedPlace(null);
-        setSelectedUser(null);
-      }, 300);
-      return () => clearTimeout(timeout);
+    // --- Ajuste: convertir 'datos_usuario_asignado' de string a array ---
+    if (typeof copy.datos_usuario_asignado === "string") {
+      try {
+        copy.datos_usuario_asignado = JSON.parse(copy.datos_usuario_asignado);
+      } catch (error) {
+        console.error("Error parseando datos_usuario_asignado:", error);
+        copy.datos_usuario_asignado = [];
+      }
     }
-  }, [open, item]);
 
-  const handleUserChange = () => {
-    console.log("Intento de cambio de usuario bloqueado");
+    // --- Reformatear subcampos que vienen como string JSON ---
+    copy.datos_usuario_asignado = copy.datos_usuario_asignado.map((u) => {
+      const reformatted = { ...u };
+
+      // area_usuario_asignado
+      if (typeof reformatted.area_usuario_asignado === "string") {
+        try {
+          const area = JSON.parse(reformatted.area_usuario_asignado);
+          reformatted.area_usuario_asignado = {
+            id_area: area.id_area || null,
+            nombre: area.nombre || "",
+          };
+        } catch {
+          reformatted.area_usuario_asignado = { id_area: null, nombre_area: "" };
+        }
+      }
+
+      // puesto_usuario_asignado
+      if (typeof reformatted.puesto_usuario_asignado === "string") {
+        try {
+          const puesto = JSON.parse(reformatted.puesto_usuario_asignado);
+          reformatted.puesto_usuario_asignado = {
+            id_puesto: puesto.id_puesto || null,
+            nombre: puesto.nombre || "",
+          };
+        } catch {
+          reformatted.puesto_usuario_asignado = { id_puesto: null, nombre_puesto: "" };
+        }
+      }
+
+      // plaza_usuario_asignado (opcional si quieres mantenerla como objeto)
+      if (typeof reformatted.plaza_usuario_asignado === "string") {
+        try {
+          reformatted.plaza_usuario_asignado = JSON.parse(reformatted.plaza_usuario_asignado);
+        } catch {
+          reformatted.plaza_usuario_asignado = null;
+        }
+      }
+
+      return reformatted;
+    });
+
+    setItemCopy(copy);
+    console.log(copy)
+
+    // Filtrar el item inmediatamente para mostrarlo en los detalles
+    const filtered = filterItemForReturn(copy);
+    setFilteredItem(filtered);
+
+    setShowContent(true);
+  } else {
+    const timeout = setTimeout(() => {
+      setShowContent(false);
+      setItemCopy(null);
+      setFilteredItem(null);
+    }, 300);
+    return () => clearTimeout(timeout);
+  }
+}, [open, item]);
+
+
+
+  // Función para parsear datos_usuario_asignado
+  const parseDatosUsuario = (datosUsuario) => {
+    if (!datosUsuario) return {};
+    
+    try {
+      // Si es un string, intentar parsearlo como JSON
+      if (typeof datosUsuario === 'string') {
+        const parsed = JSON.parse(datosUsuario);
+        // Si es un array, tomar el primer elemento
+        return Array.isArray(parsed) ? parsed[0] || {} : parsed;
+      }
+      // Si es un array, tomar el primer elemento
+      if (Array.isArray(datosUsuario)) {
+        return datosUsuario[0] || {};
+      }
+      // Si ya es un objeto, devolverlo directamente
+      return datosUsuario;
+    } catch (error) {
+      console.error('Error al parsear datos_usuario_asignado:', error);
+      return {};
+    }
   };
 
-  const handlePlaceChange = useCallback(() => {
-    console.log("Intento de cambio de plaza bloqueado");
-  }, []);
-
+  // Función para filtrar el item eliminando campos no deseados
   const filterItemForReturn = (item) => {
     if (!item) return null;
+
+    // Crear una copia del item
     const filteredItem = { ...item };
 
+    // Eliminar campos que contengan "id_" o "_id", excepto "id_articulo"
     Object.keys(filteredItem).forEach((key) => {
-      if ((key.includes("id_") || key.includes("_id")) && key !== "id_articulo") {
+      if (
+        (key.includes("id_") || key.includes("_id")) || 
+        key === "datos_usuario_asignado" &&
+        key !== "id_articulo"
+      ) {
         delete filteredItem[key];
       }
     });
 
+    // Eliminar campos específicos adicionales
     delete filteredItem.usuario;
     delete filteredItem.plaza;
     delete filteredItem.imagen_usuario;
@@ -103,31 +160,42 @@ function InventoryReturnModal({ open, onClose, item, onConfirmReturn }) {
   };
 
   const generateReturnData = () => {
-    if (!itemCopy || !selectedUser || !selectedPlace) return null;
+    if (!itemCopy) return null;
 
-    let campos = filteredItem ? { ...filteredItem } : {};
+    // Crear el objeto campos con los datos filtrados
+    let campos = {};
+    if (filteredItem) {
+      campos = { ...filteredItem };
+    }
+
+    // Extraer información de categoría y subcategoría del artículo original
     const categoria = itemCopy.id_categoria || null;
     const subcategoria = itemCopy.id_subcategoria || null;
 
-    const plazaData = selectedPlace
-      ? {
-          id_plaza: selectedPlace.id_plaza,
-          nombre_plaza: selectedPlace.nombre_plaza || selectedPlace.nombre,
-        }
-      : null;
+    // Obtener y parsear datos del usuario asignado
+    const datosUsuario = parseDatosUsuario(itemCopy.datos_usuario_asignado);
+    console.log("Datos usuario parseados:", datosUsuario);
 
-    const usuarioAsignado = selectedUser
-      ? {
-          id_usuario: selectedUser.id_usuario,
-          url_image: selectedUser.url_image || null,
-          email: selectedUser.email || null,
-          curp: selectedUser.curp || null,
-          area: selectedUser.area || null,
-          puesto: selectedUser.puesto || null,
-          nombre: selectedUser.nombre || null,
-        }
-      : null;
+    // Estructurar el objeto de plaza usando los datos del usuario asignado
+    const plazaData = itemCopy.id_usuario ? {
+      id_plaza: datosUsuario.plaza_usuario_asignado?.id_plaza,
+      nombre_plaza: datosUsuario.plaza_usuario_asignado?.nombre,
+    } : null;
 
+    // Estructurar el objeto de usuario usando los datos del usuario asignado
+    const usuarioAsignado = datosUsuario.id_usuario ? {
+      id_usuario: datosUsuario.id_usuario || null,
+      url_image: datosUsuario.imagen_usuario || null,
+      email: datosUsuario.email_usuario_asignado || null,
+      curp: datosUsuario.curp_usuario_asignado || null,
+      area: datosUsuario.area_usuario_asignado || null,
+      puesto: datosUsuario.puesto_usuario_asignado || null,
+      nombre: datosUsuario.usuario || null,
+    } : null;
+
+    console.log(usuarioAsignado)
+
+    // Obtener las fotos del artículo (si existen)
     const fotos =
       itemCopy.fotos && Array.isArray(itemCopy.fotos)
         ? itemCopy.fotos.map((foto) => ({
@@ -136,7 +204,8 @@ function InventoryReturnModal({ open, onClose, item, onConfirmReturn }) {
           }))
         : [];
 
-    return {
+    // Construir el objeto final
+    const returnData = {
       categoria,
       subcategoria,
       plaza: plazaData,
@@ -148,17 +217,19 @@ function InventoryReturnModal({ open, onClose, item, onConfirmReturn }) {
       nombre_articulo: itemCopy.nombre_articulo || null,
       tipo_devolucion: "devolucion",
     };
+
+    return returnData;
   };
 
   const handleConfirmReturn = () => {
-    if (!itemCopy || !selectedUser || !selectedPlace) {
-      console.error("Faltan datos necesarios para devolución");
-      return;
-    }
+    if (!itemCopy) return;
 
+    // Generar el objeto de devolución
     const articuloCompleto = generateReturnData();
+
     console.log("Datos de devolución:", articuloCompleto);
 
+    // Redirigir a la página de generación de responsiva
     navigate("/return-generator", {
       state: {
         nuevoArticulo: articuloCompleto,
@@ -180,16 +251,28 @@ function InventoryReturnModal({ open, onClose, item, onConfirmReturn }) {
 
   if (!itemCopy && !showContent) return null;
 
-  const { usuario, imagen_usuario, fotos = [], plaza } = itemCopy || {};
+  const {
+    usuario,
+    imagen_usuario,
+    fotos = [],
+    plaza,
+    datos_usuario_asignado,
+  } = itemCopy || {};
 
+  // Parsear los datos del usuario asignado para la UI
+  const datosUsuarioParsed = parseDatosUsuario(datos_usuario_asignado);
+  console.log("Datos usuario para UI:", datosUsuarioParsed);
+
+  // Crear entries del item filtrado para mostrar en los detalles
   const filteredEntries = filteredItem
     ? Object.entries(filteredItem).filter(
-        ([, value]) =>
+        ([key, value]) =>
           value !== null &&
           value !== undefined &&
           value !== "" &&
           typeof value !== "object" &&
-          !Array.isArray(value)
+          !Array.isArray(value) &&
+          typeof value !== "function"
       )
     : [];
 
@@ -231,21 +314,19 @@ function InventoryReturnModal({ open, onClose, item, onConfirmReturn }) {
             fontWeight={500}
             color="textSecondary"
             mb={3}
-            sx={{ display: "flex", alignItems: "center", gap: 1 }}
           >
-            <InfoOutlined sx={{ color: colors.yellowAccent[300] }} />
-            Revise la información antes de proceder
+            <InfoOutlined sx={{ color: colors.yellowAccent[300], mr: 1 }} />
+            Revise la información del artículo antes de proceder con la devolución
           </Typography>
 
-          {/* --- Artículo --- */}
           <Typography variant="h6" fontWeight={600} gutterBottom>
             {itemCopy?.nombre_articulo || "Artículo sin nombre"}
           </Typography>
 
-          {/* Fotos */}
+          {/* Fotos del artículo (solo lectura) */}
           <Box mb={3}>
             <Typography variant="subtitle2" fontWeight={500} mb={1}>
-              Fotografías:
+              Fotografías del artículo:
             </Typography>
             <Grid container spacing={2}>
               {fotos.length > 0 ? (
@@ -255,6 +336,7 @@ function InventoryReturnModal({ open, onClose, item, onConfirmReturn }) {
                       sx={{
                         width: "100%",
                         aspectRatio: "1",
+                        backgroundColor: "#f6f6f6",
                         borderRadius: 2,
                         overflow: "hidden",
                         border: "1px solid #eee",
@@ -266,6 +348,7 @@ function InventoryReturnModal({ open, onClose, item, onConfirmReturn }) {
                       <img
                         src={foto.url_imagen}
                         alt={`Foto ${idx + 1}`}
+                        loading="lazy"
                         style={{
                           width: "100%",
                           height: "100%",
@@ -292,7 +375,11 @@ function InventoryReturnModal({ open, onClose, item, onConfirmReturn }) {
                     <NoPhotographyOutlinedIcon
                       sx={{ fontSize: 32, color: colors.grey[500], mb: 1 }}
                     />
-                    <Typography variant="body2" color={colors.grey[500]}>
+                    <Typography
+                      variant="body2"
+                      color={colors.grey[500]}
+                      textAlign="center"
+                    >
                       No hay fotos disponibles
                     </Typography>
                   </Box>
@@ -301,9 +388,9 @@ function InventoryReturnModal({ open, onClose, item, onConfirmReturn }) {
             </Grid>
           </Box>
 
-          <Divider sx={{ mb: 3 }} />
+          <Divider sx={{ mb: 3, bgcolor: colors.grey[300] }} />
 
-          {/* --- Asignación --- */}
+          {/* Información actual de asignación */}
           <Box mb={3}>
             <Typography
               variant="subtitle2"
@@ -311,19 +398,33 @@ function InventoryReturnModal({ open, onClose, item, onConfirmReturn }) {
               mb={2}
               color="textSecondary"
             >
-              Asignación actual:
+              Información actual de asignación:
             </Typography>
 
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
                 <Box display="flex" alignItems="center" gap={2}>
-                  <Avatar src={imagen_usuario} alt={usuario} sx={{ width: 48, height: 48 }} />
+                  <Avatar
+                    src={imagen_usuario}
+                    alt={usuario}
+                    sx={{ width: 48, height: 48 }}
+                  />
                   <Box>
-                    <Typography variant="body2" color="textSecondary" fontWeight={500}>
-                      Usuario:
+                    <Typography
+                      variant="body2"
+                      color="textSecondary"
+                      fontWeight={500}
+                    >
+                      USUARIO ACTUAL:
                     </Typography>
-                    <Typography variant="body1">
-                      {usuario || "No asignado"}
+                    <Typography variant="body1" fontWeight={400}>
+                      {itemCopy?.datos_usuario_asignado?.[0]?.usuario || "No disponible"}
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary">
+                      {itemCopy.datos_usuario_asignado?.[0]?.area_usuario_asignado?.nombre || ""}
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary">
+                      {itemCopy.datos_usuario_asignado?.[0]?.puesto_usuario_asignado?.nombre || ""}
                     </Typography>
                   </Box>
                 </Box>
@@ -331,78 +432,46 @@ function InventoryReturnModal({ open, onClose, item, onConfirmReturn }) {
 
               <Grid item xs={12} sm={6}>
                 <Box>
-                  <Typography variant="body2" color="textSecondary" fontWeight={500}>
-                    Plaza:
+                  <Typography
+                    variant="body2"
+                    color="textSecondary"
+                    fontWeight={500}
+                  >
+                    PLAZA ACTUAL:
                   </Typography>
-                  <Typography variant="body1">
-                    {plaza || "No asignada"}
-                  </Typography>
+                  <Typography variant="body1" fontWeight={400}>
+                    {itemCopy.datos_usuario_asignado?.[0]?.plaza_usuario_asignado?.nombre || ""}
+                  </Typography>  
                 </Box>
               </Grid>
             </Grid>
           </Box>
 
-          <Divider sx={{ mb: 3 }} />
+          <Divider sx={{ mb: 3, bgcolor: colors.grey[300] }} />
 
-          {/* --- Información para devolución --- */}
-          <Box
-            mb={3}
-            sx={{
-              p: 2,
-              borderRadius: 2,
-              bgcolor: colors.bgContainerSecondary,
-              border: `1px solid ${colors.borderContainer}`,
-            }}
-          >
-            <Typography
-              variant="subtitle2"
-              fontWeight={600}
-              mb={2}
-              sx={{ display: "flex", alignItems: "center", gap: 1 }}
-            >
-              <AssignmentReturnedOutlined sx={{ fontSize: 18, color: colors.accentGreen[100] }} />
-              Información para devolución:
-            </Typography>
-
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <ActiveUsersSelect
-                  key={`user-${resetKey}`}
-                  selectedUser={selectedUser}
-                  handleUserChange={handleUserChange}
-                  disabled
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <PlaceSelectArray
-                  key={`place-${resetKey}`}
-                  selectedPlace={selectedPlace}
-                  handlePlaceChange={handlePlaceChange}
-                  setSelectedPlace={setSelectedPlace}
-                  disabled
-                />
-              </Grid>
-            </Grid>
-          </Box>
-
-          <Divider sx={{ mb: 3 }} />
-
-          {/* --- Detalles del artículo --- */}
+          {/* Detalles del artículo FILTRADO (solo lectura) */}
           <Box mb={4}>
             <Typography variant="subtitle2" fontWeight={600} mb={2}>
-              Detalles del artículo:
+              Información del artículo (para devolución):
             </Typography>
+
             {filteredEntries.length > 0 ? (
               <Grid container spacing={2}>
                 {filteredEntries.map(([key, value]) => (
                   <Grid item xs={12} sm={6} key={key}>
-                    <Typography variant="body2" color="textSecondary" fontWeight={500}>
+                    <Typography
+                      variant="body2"
+                      color="textSecondary"
+                      fontWeight={500}
+                    >
                       {key.replace(/_/g, " ").toUpperCase()}:
                     </Typography>
-                    <Typography variant="body1">
+                    <Typography variant="body1" fontWeight={400}>
                       {key === "activo"
-                        ? value ? "Activo" : "Inactivo"
-                        : key.includes("precio")
+                        ? value
+                          ? "Activo"
+                          : "Inactivo"
+                        : key === "precio_articulo" || key.includes("precio")
                         ? formatCurrency(value)
                         : value || "N/A"}
                     </Typography>
@@ -411,12 +480,12 @@ function InventoryReturnModal({ open, onClose, item, onConfirmReturn }) {
               </Grid>
             ) : (
               <Typography variant="body2" color="textSecondary">
-                No hay información disponible
+                No hay información disponible para mostrar.
               </Typography>
             )}
           </Box>
 
-          {/* --- Confirmación --- */}
+          {/* Mensaje de confirmación */}
           <Box
             sx={{
               p: 2,
@@ -425,17 +494,36 @@ function InventoryReturnModal({ open, onClose, item, onConfirmReturn }) {
               borderRadius: 2,
               bgcolor: colors.bgContainerSecondary,
               border: `1.5px dashed ${colors.accentGreen[300]}`,
-              boxShadow: `0 -2px 4px rgba(0,0,0,0.06), 0 -6px 12px rgba(0,0,0,0.10)`,
+              boxShadow: `
+                0 -2px 4px rgba(0,0,0,0.06),
+                0 -6px 12px rgba(0,0,0,0.10)
+              `,
               backdropFilter: "blur(12px)",
+              transition: "background-color 0.3s ease, box-shadow 0.3s ease",
+              "&:hover": {
+                boxShadow: `
+                0 -4px 8px rgba(0,0,0,0.08),
+                0 -8px 16px rgba(0,0,0,0.12)
+              `,
+              },
+              zIndex: 10,
             }}
           >
-            <Typography variant="body1" fontWeight={500} color="textSecondary" mb={1}>
-              ¿Está seguro que desea proceder con la devolución?
-            </Typography>
-            <Typography variant="body2" color="textSecondary" mb={3}>
-              Se registrará la devolución con la información mostrada.
-            </Typography>
+            <Box mb={4}>
+              <Typography
+                variant="body1"
+                fontWeight={500}
+                color="textSecondary"
+                mb={2}
+              >
+                ¿Está seguro que desea proceder con la devolución de este artículo?
+              </Typography>
+              <Typography variant="body2" color="textSecondary">
+                Esta acción registrará la devolución del artículo con la información del usuario asignado mostrada.
+              </Typography>
+            </Box>
 
+            {/* Acciones */}
             <Box display="flex" justifyContent="flex-end" gap={2}>
               <Button
                 onClick={onClose}
@@ -445,9 +533,25 @@ function InventoryReturnModal({ open, onClose, item, onConfirmReturn }) {
                   borderRadius: "10px",
                   fontWeight: 500,
                   fontSize: "0.875rem",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  gap: "8px",
                   backgroundColor: colors.accentGreenSecondary[100],
                   color: colors.textAccentSecondary,
-                  "&:hover": { backgroundColor: colors.accentGreenSecondary[200] },
+                  border: "none",
+                  cursor: "pointer",
+                  "&:hover": {
+                    backgroundColor: colors.accentGreenSecondary[200],
+                  },
+                  "&:active": {
+                    backgroundColor: colors.accentGreenSecondary[300],
+                  },
+                  transition: "background-color 0.3s ease, box-shadow 0.2s ease",
+                  boxShadow: "none",
+                  "&:hover, &:active": {
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
+                  },
                 }}
               >
                 Cancelar
@@ -455,15 +559,35 @@ function InventoryReturnModal({ open, onClose, item, onConfirmReturn }) {
               <Button
                 onClick={handleConfirmReturn}
                 variant="contained"
-                endIcon={<AssignmentReturnIcon sx={{ fontSize: 18 }} />}
+                endIcon={
+                  <AssignmentReturnIcon
+                    sx={{ fontSize: 18, color: colors.textAccent }}
+                  />
+                }
                 sx={{
                   textTransform: "none",
                   borderRadius: "10px",
                   fontWeight: 500,
                   fontSize: "0.875rem",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  gap: "8px",
                   backgroundColor: colors.accentGreen[100],
                   color: colors.textAccent,
-                  "&:hover": { backgroundColor: colors.accentGreen[200] },
+                  border: "none",
+                  cursor: "pointer",
+                  "&:hover": {
+                    backgroundColor: colors.accentGreen[200],
+                  },
+                  "&:active": {
+                    backgroundColor: colors.accentGreen[300],
+                  },
+                  transition: "background-color 0.3s ease, box-shadow 0.2s ease",
+                  boxShadow: "none",
+                  "&:hover, &:active": {
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
+                  },
                 }}
               >
                 Confirmar Devolución
