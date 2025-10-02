@@ -72,6 +72,7 @@ import NewInventory from './scenes/new-inventory'
 import ResponsiveGenerator from './scenes/responsive-generator'
 import ReturnGenerator from './scenes/return-generator'
 import VerificationResponsive from './scenes/verification-responsiva'
+import Chat from './scenes/chat-support'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -233,7 +234,7 @@ function App() {
                         <Route path="/responsive-generator" element={<ResponsiveGenerator />} />
                         <Route path="/return-generator" element={<ReturnGenerator />} />
                         <Route path="/verification-responsiva" element={<VerificationResponsive />} />
-
+                        <Route path="/chat-support" element={<Chat />} />
                       </Routes>
                     </main>
                   </Box>
