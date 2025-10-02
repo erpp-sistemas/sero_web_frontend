@@ -88,6 +88,7 @@ const InventoryDetailModal = ({ open, onClose, item, onSave }) => {
       !key.toLowerCase().includes("id") &&
       key !== "imagen_usuario" &&
       key !== "usuario" &&
+      key !== "datos_usuario_asignado" &&
       value !== null &&
       value !== undefined &&
       value !== ""

@@ -69,3 +69,19 @@ export const updateArticlePhotos = async (payload) => {
     throw error.response?.data || error;
   }
 };
+
+export const createArticle = async (payload) => {
+  try {
+    const response = await instance.post(
+      "/inventory/article/create",  // ← Ruta que definimos
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error al crear el artículo:",
+      error.response?.data || error.message
+    );
+    throw error.response?.data || error;
+  }
+};

@@ -16,11 +16,14 @@ import {
   DialogContentText,
   DialogTitle,
   Chip,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import { useLocation } from "react-router-dom";
 import { jsPDF } from "jspdf";
 import InlineEditableText from "../../components/ResponsiveGenerator/InlineEditableText";
 import SignatureModal from "../../components/ResponsiveGenerator/SignatureModal";
+import PhotoUpload from "../../components/ReturnGenerator/PhotoUpload";
 import VerifiedIcon from "@mui/icons-material/Verified";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DownloadIcon from "@mui/icons-material/Download";
@@ -31,10 +34,11 @@ import {
   Close,
   ErrorOutline,
   Info,
+  KeyboardArrowDownOutlined,
   LockPersonOutlined,
   Refresh,
 } from "@mui/icons-material";
-import { createResponsiva, confirmationResponsiva } from "../../api/responsive";
+import { createResponsiva, confirmationResponsiva, confirmationResponsivaReturn } from "../../api/responsive";
 import { useSelector } from "react-redux";
 
 const getInternetDate = async () => {
@@ -79,7 +83,11 @@ const Index = () => {
   });
 
   const [observaciones, setObservaciones] = useState("");
-  const [motivoCambio, setMotivoCambio] = useState("");
+  const [motivoCambio, setMotivoCambio] = useState("renuncia");
+  const [motivoCambioOtro, setMotivoCambioOtro] = useState("");
+  const [estadoArticulo, setEstadoArticulo] = useState("bueno");
+  const [estadoArticuloDanado, setEstadoArticuloDanado] = useState("");
+  const [fotosEvidencia, setFotosEvidencia] = useState([]);
   const [images, setImages] = useState({
     erpp: null,
     headerRight: null,
@@ -115,6 +123,18 @@ const Index = () => {
     signatureStatusRef.current = signatureStatus;
   }, [signatureStatus]);
 
+  // Función para limpiar los campos de configuración del documento
+  const limpiarCamposConfiguracion = () => {
+    setMotivoCambio("renuncia");
+    setMotivoCambioOtro("");
+    setEstadoArticulo("bueno");
+    setEstadoArticuloDanado("");
+    setFotosEvidencia([]);
+    setObservaciones("");
+
+    console.log("Campos de configuración limpiados");
+  };
+
   // Función para manejar reintentos de guardado
   const handleRetrySave = async () => {
     if (!saveState.lastSignatureData) {
@@ -146,75 +166,6 @@ const Index = () => {
       ...prev,
       showRetryDialog: false,
     }));
-  };
-
-  // Generación segura de hash con nonce
-  const generateSecureHash = async (data, options = {}) => {
-    const {
-      algorithm = "SHA-256",
-      includeTimestamp = true,
-      includeUniqueId = true,
-      documentId = null,
-    } = options;
-
-    try {
-      // Salts para el hash
-      const timestampSalt = includeTimestamp
-        ? new Date().toISOString() +
-          "|" +
-          Intl.DateTimeFormat().resolvedOptions().timeZone
-        : "";
-
-      const uniqueIdSalt = includeUniqueId ? crypto.randomUUID() : "";
-      const documentSalt = documentId ? `|DOC-${documentId}` : "";
-
-      // Combinar todos los componentes
-      const combinedData = `${data}|${timestampSalt}|${uniqueIdSalt}${documentSalt}`;
-
-      // Codificar y calcular hash
-      const encoder = new TextEncoder();
-      const dataBuffer = encoder.encode(combinedData);
-      const hashBuffer = await crypto.subtle.digest(algorithm, dataBuffer);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-
-      // Convertir a hexadecimal
-      const hashHex = hashArray
-        .map((b) => b.toString(16).padStart(2, "0"))
-        .join("");
-
-      return {
-        hash: hashHex,
-        algorithm,
-        timestamp: includeTimestamp ? new Date().toISOString() : undefined,
-        timezone: includeTimestamp
-          ? Intl.DateTimeFormat().resolvedOptions().timeZone
-          : undefined,
-        uniqueId: includeUniqueId ? uniqueIdSalt : undefined,
-        documentId: documentId || undefined,
-      };
-    } catch (error) {
-      console.error("Error generando hash seguro:", error);
-
-      // Fallback seguro
-      const fallbackHash = await crypto.subtle.digest(
-        "SHA-256",
-        new TextEncoder().encode(
-          `${data}|${Date.now()}|${Math.random().toString(36).slice(2)}|${
-            nuevoArticulo?.id || "fallback"
-          }`
-        )
-      );
-      const fallbackArray = Array.from(new Uint8Array(fallbackHash));
-
-      return {
-        hash: fallbackArray
-          .map((b) => b.toString(16).padStart(2, "0"))
-          .join(""),
-        algorithm: "SHA-256",
-        isFallback: true,
-        error: error.message,
-      };
-    }
   };
 
   // Mock: Enviar OTP (conectar a tu API real)
@@ -385,9 +336,15 @@ const Index = () => {
       pdf_filename: `responsiva-${nuevoArticulo.id_articulo}-${Date.now()}.pdf`,
 
       // ✅ INFORMACIÓN DEL DOCUMENTO
-      motivo_cambio: motivoCambio ,
+      motivo_cambio: motivoCambio || "Asignación inicial de equipo",
+      descripcion_motivo_cambio:
+        motivoCambio === "otro" ? motivoCambioOtro : "",
+      estado_articulo: estadoArticulo || "bueno",
+      descripcion_estado_articulo:
+        estadoArticulo === "danado" ? estadoArticuloDanado : "",
+      url_fotos: fotosEvidencia || [],
       observaciones: observaciones || "",
-      tipo_responsiva: tipoResponsiva,
+      tipo_responsiva: "devolucion", //tipoResponsiva,
       estado: "activa",
       folio_responsiva: `RESP-${nuevoArticulo.id_articulo}-${Date.now()}`,
 
@@ -452,6 +409,8 @@ const Index = () => {
         error: null,
         retryCount: 0,
       }));
+
+      limpiarCamposConfiguracion();
 
       return result;
     } catch (error) {
@@ -521,7 +480,7 @@ const Index = () => {
       };
 
       // ✅ Usar la función de la API en lugar de fetch directo
-      const result = await confirmationResponsiva(emailData);
+      const result = await confirmationResponsivaReturn(emailData);
 
       if (result.success) {
         console.log("📧 Email de confirmación enviado exitosamente");
@@ -702,7 +661,34 @@ const Index = () => {
 
   const handleMotivoCambioChange = (value) => {
     setMotivoCambio(value);
+    if (value !== "otro") {
+      setMotivoCambioOtro("");
+    }
     setPdfVersion((prev) => prev + 1);
+  };
+
+  const handleMotivoCambioOtroChange = (value) => {
+    setMotivoCambioOtro(value);
+    setPdfVersion((prev) => prev + 1);
+  };
+
+  const handleEstadoArticuloChange = (value) => {
+    setEstadoArticulo(value);
+    if (value !== "dañado") {
+      setEstadoArticuloDanado("");
+    }
+    setPdfVersion((prev) => prev + 1);
+  };
+
+  const handleEstadoArticuloDanadoChange = (value) => {
+    setEstadoArticuloDanado(value);
+    setPdfVersion((prev) => prev + 1);
+  };
+
+  const handleFotosEvidenciaChange = (photos) => {
+    setFotosEvidencia(photos);
+    setPdfVersion((prev) => prev + 1);
+    console.log("Fotos actuales:", photos);
   };
 
   const handleObservacionesChange = (value) => {
@@ -1174,7 +1160,7 @@ const Index = () => {
       // Título principal (alineado a la izquierda como Notion)
       y = addStyledText(
         doc,
-        "Responsiva de Equipo",
+        "Responsiva de Devolución de Equipo",
         MARGINS.left,
         y,
         maxWidth,
@@ -1185,7 +1171,7 @@ const Index = () => {
       // Primer párrafo con justificación mejorada
       y = addJustifiedText(
         doc,
-        "Por medio del presente documento, hago constar que he recibido el siguiente equipo, propiedad de la empresa ERPP CORPORATIVO S.A. DE C.V.",
+        "Por medio del presente documento, hago constar que he realizado la devolución del equipo descrito a continuación, propiedad de ERPP CORPORATIVO S.A. DE C.V., quedando la empresa como único responsable de su custodia y uso a partir de esta fecha.",
         MARGINS.left,
         y,
         maxWidth,
@@ -1196,7 +1182,7 @@ const Index = () => {
       // Sección de datos del responsable
       y = addStyledText(
         doc,
-        "Datos del responsable",
+        "Información del responsable de la devolución",
         MARGINS.left,
         y,
         maxWidth,
@@ -1228,8 +1214,18 @@ const Index = () => {
         y += PDF_STYLES.spacing.bullet;
       });
 
-      // Sección de Motivo de Cambio (solo si tiene contenido)
-      if (motivoCambio && motivoCambio.trim() !== "") {
+      let motivoFinal = motivoCambio?.trim();
+
+      if (motivoCambio === "otro") {
+        if (motivoCambioOtro?.trim()) {
+          motivoFinal = `otro - ${motivoCambioOtro.trim()}`;
+        } else {
+          motivoFinal = "otro";
+        }
+      }
+
+      // Solo mostrar si hay algún valor válido
+      if (motivoFinal && motivoFinal !== "") {
         y += PDF_STYLES.spacing.section;
         y = addStyledText(doc, "Motivo de cambio", MARGINS.left, y, maxWidth, {
           type: "section",
@@ -1239,7 +1235,46 @@ const Index = () => {
 
         y = addJustifiedText(
           doc,
-          motivoCambio.trim(),
+          motivoFinal.trim(),
+          MARGINS.left + 10,
+          y,
+          maxWidth - 10,
+          {
+            fontSize: PDF_STYLES.fonts.body.size,
+            lineHeight: PDF_STYLES.spacing.line * 1.1,
+          }
+        );
+      }
+
+      let estadoArticuloFinal = estadoArticulo?.trim();
+
+      if (estadoArticulo === "danado") {
+        if (estadoArticuloDanado?.trim()) {
+          estadoArticuloFinal = `otro - ${estadoArticuloDanado.trim()}`;
+        } else {
+          estadoArticuloFinal = "otro";
+        }
+      }
+
+      // Solo mostrar si hay algún valor válido
+      if (estadoArticuloFinal && estadoArticuloFinal !== "") {
+        y += PDF_STYLES.spacing.section;
+        y = addStyledText(
+          doc,
+          "Estado del artículo",
+          MARGINS.left,
+          y,
+          maxWidth,
+          {
+            type: "section",
+            align: "left",
+          }
+        );
+        y += PDF_STYLES.spacing.line;
+
+        y = addJustifiedText(
+          doc,
+          estadoArticuloFinal.trim(),
           MARGINS.left + 10,
           y,
           maxWidth - 10,
@@ -1253,7 +1288,7 @@ const Index = () => {
       y += PDF_STYLES.spacing.section;
       y = addStyledText(
         doc,
-        "Datos del equipo entregado",
+        "Información del equipo devuelto",
         MARGINS.left,
         y,
         maxWidth,
@@ -1291,48 +1326,50 @@ const Index = () => {
       drawHeader(doc, pageWidth);
       y = MARGINS.top;
 
-      y = addStyledText(doc, "Condiciones y uso", MARGINS.left, y, maxWidth, {
-        type: "title",
-        align: "left",
-      });
+      y = addStyledText(
+        doc,
+        "Constancia de Devolución",
+        MARGINS.left,
+        y,
+        maxWidth,
+        {
+          type: "title",
+          align: "left",
+        }
+      );
       y += PDF_STYLES.spacing.section;
 
       const condiciones = [
-        // 1. FUNDAMENTO LEGAL (párrafo normal)
-        `Con fundamento en los artículos 110 de la Ley Federal del Trabajo, 47 de la Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP) y 78 del Código Civil Federal, ERPP CORPORATIVO S.A. DE C.V. hace entrega del equipo {{ ${
-          nuevoArticulo.campos?.nombre_articulo || "No disponible"
-        }}}, propiedad de la empresa, a favor de {{${
+        // 1. FUNDAMENTO LEGAL
+        `Con fundamento en los artículos 47 de la Ley Federal del Trabajo, 15 de la Ley Federal de Protección de Datos Personales y 78 del Código Civil Federal, ${
           nuevoArticulo.usuarioAsignado?.nombre || "el empleado"
-        }}} (CURP: {{${
-          nuevoArticulo.usuarioAsignado?.curp || "No disponible"
-        }}}), con un valor comercial actualizado de: {{$${
-          nuevoArticulo.campos?.precio_articulo || "No disponible"
-        }}}.`,
+        } hace entrega formal del equipo ${
+          nuevoArticulo.campos?.nombre_articulo || "No disponible"
+        } propiedad de ERPP CORPORATIVO S.A. DE C.V.`,
 
-        // 2. DECLARACIÓN BAJO PROTESTA (párrafo separado con énfasis)
-        `Declaro bajo protesta de decir VERDAD que el equipo se recibe en perfecto estado de funcionamiento y con todos sus accesorios completos.`,
+        // 2. DECLARACIÓN BAJO PROTESTA
+        `Declaro bajo protesta de decir VERDAD que el equipo se devuelve en el estado físico y funcional descrito en el presente documento, habiendo sido verificado conjuntamente con el representante autorizado de la empresa.`,
 
-        // 3. COMPROMISOS (continúa igual)
-        "En consideración a lo anterior, me comprometo formalmente a:",
-        "- Hacer uso exclusivo del equipo para fines estrictamente laborales, prohibiendo cualquier uso personal, comercial o ilícito.",
-        "- Dar cumplimiento integral a todas las políticas internas de seguridad informática, protección de datos y uso de recursos tecnológicos.",
-        "- No realizar cambios de hardware, software, configuración o programación sin autorización expresa por escrito del departamento de TI.",
-        "- Abstenerme de prestar, ceder, transferir o comercializar el equipo a terceros bajo cualquier circunstancia.",
-        "- Asegurar su conservación, mantenimiento preventivo y reportar cualquier incidente o daño dentro de las 24 horas hábiles siguientes a su ocurrencia.",
-        "- Asumir los gastos por pérdida, daño o deterioro atribuible a mí, salvo casos de fuerza mayor debidamente justificados (ej. desastres naturales o robos con denuncia).",
-        "- Devolver el equipo con todos sus accesorios, manuales y embalaje original en las mismas condiciones físicas y funcionales, al término de la relación laboral, cambio de puesto o cuando la empresa así lo requiera.",
+        // 3. SUBTÍTULO - COMPROMISOS
+        "Como parte del proceso de devolución, certifico que:",
 
-        "",
-        "Una vez concluida mi relación con ERPP CORPORATIVO S.A. DE C.V., me comprometo a:",
-        "- Entregar en un plazo máximo de 72 horas toda información y archivos de la empresa, físicos o digitales, incluyendo expedientes, reportes, contratos, correos y demás documentación relacionada.",
-        "- Devolver el equipo en óptimas condiciones de funcionamiento, sin retener, copiar, transferir o divulgar información de carácter confidencial, comercial o estratégica.",
-        "- Permitir la verificación técnica completa por parte del departamento de TI para certificar la eliminación total de información corporativa.",
-        "- Firmar el acta de entrega-recepción correspondiente ante testigos de ambas partes.",
-        // 4. CLAÚSULA FINAL
-        `Reconozco que el incumplimiento de estas obligaciones podrá derivar en sanciones laborales y/o acciones legales conforme a la normativa aplicable.`,
+        // Lista de compromisos
+        "- He eliminado toda información personal y he permitido la verificación técnica por parte del departamento de TI para la eliminación segura de datos corporativos.",
+        "- Entregó todos los accesorios, manuales y embalaje original que fueron proporcionados al momento de la asignación.",
+        "- No conservo copias físicas o digitales de información confidencial de la empresa.",
+        "- He notificado cualquier daño, pérdida o anomalía del equipo dentro de los plazos establecidos.",
+
+        // 4. ACEPTACIÓN DE POLÍTICAS INTERNAS
+        "Reconozco que este proceso de devolución se apega íntegramente a las políticas internas de administración de bienes de la empresa, mismas que me fueron previamente notificadas y de las cuales tengo pleno conocimiento.",
+
+        // 5. CLAÚSULA DE SANCIÓN POR INCUMPLIMIENTO
+        "En caso de incumplimiento o falsedad en la presente declaración, acepto que la empresa podrá ejercer las acciones legales correspondientes, incluyendo la retención proporcional de pagos o la reclamación de daños y perjuicios.",
+
+        // 6. CLAÚSULA FINAL DE LIBERACIÓN DE RESPONSABILIDAD
+        `Una vez firmado el presente documento, se da por concluida mi responsabilidad sobre el equipo devuelto, quedando ERPP CORPORATIVO S.A. DE C.V. como único responsable a partir de este momento.`,
       ];
 
-      // Primer párrafo (fundamento legal) - normal
+      // 1. FUNDAMENTO LEGAL
       y = addTextWithBoldMarkers(
         doc,
         condiciones[0],
@@ -1345,23 +1382,23 @@ const Index = () => {
       );
       y += PDF_STYLES.spacing.line;
 
-      // Segundo párrafo (declaración bajo protesta) - CON ÉNFASIS
+      // 2. DECLARACIÓN BAJO PROTESTA
       y = addJustifiedText(doc, condiciones[1], MARGINS.left, y, maxWidth, {
         fontSize: PDF_STYLES.fonts.body.size,
-        bold: false, // ← Mantener negrita para énfasis legal
+        bold: false,
       });
       y += PDF_STYLES.spacing.section;
 
-      // Tercera parte (compromisos)
+      // 3. SUBTÍTULO - COMPROMISOS
       y = addStyledText(doc, condiciones[2], MARGINS.left, y, maxWidth, {
         type: "section",
         align: "left",
       });
       y += PDF_STYLES.spacing.line;
 
-      // Lista de compromisos
-      const compromisos1 = condiciones.slice(3, 10);
-      compromisos1.forEach((item) => {
+      // LISTA DE COMPROMISOS
+      const compromisos = condiciones.slice(3, 7);
+      compromisos.forEach((item) => {
         if (item.trim() !== "") {
           y = addJustifiedText(doc, item, MARGINS.left + 10, y, maxWidth - 10, {
             fontSize: PDF_STYLES.fonts.body.size,
@@ -1370,37 +1407,29 @@ const Index = () => {
         }
       });
 
-      // Segundo subtítulo
+      // 4. ACEPTACIÓN DE POLÍTICAS
       y += PDF_STYLES.spacing.section;
-      y = addStyledText(doc, condiciones[11], MARGINS.left, y, maxWidth, {
-        type: "section",
-        align: "left",
+      y = addJustifiedText(doc, condiciones[7], MARGINS.left, y, maxWidth, {
+        fontSize: PDF_STYLES.fonts.body.size,
+        bold: false,
+        align: "justify",
       });
+
+      // 5. CLAÚSULA DE SANCIÓN
       y += PDF_STYLES.spacing.line;
-
-      // Segunda lista de compromisos
-      const compromisos2 = condiciones.slice(12, 16);
-      compromisos2.forEach((item) => {
-        y = addJustifiedText(doc, item, MARGINS.left + 10, y, maxWidth - 10, {
-          fontSize: PDF_STYLES.fonts.body.size,
-        });
-        y += PDF_STYLES.spacing.bullet;
+      y = addJustifiedText(doc, condiciones[8], MARGINS.left, y, maxWidth, {
+        fontSize: PDF_STYLES.fonts.body.size,
+        bold: false,
+        align: "justify",
       });
 
-      // Cuarto párrafo (consecuencias) - Mismo estilo que "Declaro bajo protesta"
+      // 6. CLAÚSULA FINAL
       y += PDF_STYLES.spacing.section;
-      y = addJustifiedText(
-        doc,
-        condiciones[condiciones.length - 1],
-        MARGINS.left,
-        y,
-        maxWidth,
-        {
-          fontSize: PDF_STYLES.fonts.body.size,
-          bold: false, // ← Negrita para mantener consistencia con "Declaro bajo protesta"
-          align: "justify",
-        }
-      );
+      y = addJustifiedText(doc, condiciones[9], MARGINS.left, y, maxWidth, {
+        fontSize: PDF_STYLES.fonts.body.size,
+        bold: false,
+        align: "justify",
+      });
 
       // Firmas
       // Firmas - Área modificada para incluir el QR
@@ -1543,7 +1572,7 @@ const Index = () => {
           mb: 2, // margen inferior consistente
         }}
       >
-        Generar responsiva de equipo
+        Generar responsiva de devolución de equipo
       </Typography>
       {/* Snackbar para notificaciones */}
       {/* Snackbar para notificaciones - Estilo minimalista */}
@@ -1708,7 +1737,7 @@ const Index = () => {
               border: `1px solid ${colors.borderContainer}`, // borde punteado suave
               transition:
                 "background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease",
-              "&:hover": {                
+              "&:hover": {
                 boxShadow: "0 2px 6px rgba(0,0,0,0.05)", // sombra ligera
               },
             }}
@@ -1733,30 +1762,196 @@ const Index = () => {
                 mb={1}
                 sx={{ fontWeight: 500 }}
               >
-                Motivo de Cambio
+                Motivo de Devolución
               </Typography>
-              <InlineEditableText
+              <Select
                 value={motivoCambio}
-                onChange={handleMotivoCambioChange}
-                placeholder="Describe el motivo del cambio de equipo..."
-                minRows={3}
+                onChange={(e) => handleMotivoCambioChange(e.target.value)}
+                fullWidth
+                size="small"
                 sx={{
-                  backgroundColor: colors.primary[800],
-                  borderRadius: 2,
-                  border: `1px solid ${colors.grey[400]}`,
-                  p: 1.5,
-                  color: colors.grey[100],
-                  transition: "border-color 0.3s ease, box-shadow 0.3s ease",
-                  "&:hover": {
-                    borderColor: colors.grey[300],
+                  borderRadius: "10px",
+                  fontSize: "0.875rem",
+                  backgroundColor: colors.bgContainer, // mismo fondo que usamos en contenedores
+                  transition: "border-color 0.2s ease, box-shadow 0.2s ease",
+
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: colors.borderContainer,
                   },
-                  "&:focus": {
-                    borderColor: colors.accentGreen[100],
-                    boxShadow: "0 0 0 3px rgba(34,197,94,0.2)", // resalta sutil al enfocar
+
+                  "&:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: colors.accentGreen[100], // hover sutil
+                  },
+
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: colors.accentGreen[200],
+                    boxShadow: "0 0 0 3px rgba(34,197,94,0.15)", // realce minimalista accesible
+                  },
+
+                  "& input::placeholder": {
+                    color: colors.grey[400],
+                    opacity: 1,
+                  },
+                  "& .MuiInputAdornment-root": {
+                    marginRight: "8px",
+                  },
+
+                  "& .MuiFormHelperText-root": {
+                    marginLeft: 1,
+                    fontSize: "0.75rem",
+                    color: theme.palette.error.main,
                   },
                 }}
-              />
+                IconComponent={(props) => (
+                  <KeyboardArrowDownOutlined
+                    {...props}
+                    sx={{ color: colors.grey[300], fontSize: 20 }}
+                  />
+                )}
+              >
+                <MenuItem value="renuncia">Renuncia voluntaria</MenuItem>
+                <MenuItem value="despido">Despido</MenuItem>
+                <MenuItem value="reemplazo">Reemplazo de equipo</MenuItem>
+                <MenuItem value="actualizacion">
+                  Actualización tecnológica
+                </MenuItem>
+                <MenuItem value="baja_tecnica">
+                  Baja técnica (ya no funciona)
+                </MenuItem>
+                <MenuItem value="otro">Otro</MenuItem>
+              </Select>
             </Box>
+
+            {motivoCambio === "otro" && (
+              <Box mb={3}>
+                <Typography
+                  variant="body1"
+                  color={colors.grey[100]}
+                  mb={1}
+                  sx={{ fontWeight: 500 }}
+                >
+                  Especifica el motivo
+                </Typography>
+                <InlineEditableText
+                  value={motivoCambioOtro}
+                  onChange={handleMotivoCambioOtroChange}
+                  placeholder="Describe el motivo del cambio de equipo..."
+                  minRows={3}
+                  sx={{
+                    backgroundColor: colors.primary[800],
+                    borderRadius: 2,
+                    border: `1px solid ${colors.grey[400]}`,
+                    p: 1.5,
+                    color: colors.grey[100],
+                    transition: "border-color 0.3s ease, box-shadow 0.3s ease",
+                    "&:hover": { borderColor: colors.grey[300] },
+                    "&:focus": {
+                      borderColor: colors.accentGreen[100],
+                      boxShadow: "0 0 0 3px rgba(34,197,94,0.2)",
+                    },
+                  }}
+                />
+              </Box>
+            )}
+
+            <Box mb={3}>
+              <Typography
+                variant="body1"
+                color={colors.grey[100]}
+                mb={1}
+                sx={{ fontWeight: 500 }}
+              >
+                Estado del Artículo
+              </Typography>
+              <Select
+                value={estadoArticulo}
+                onChange={(e) => handleEstadoArticuloChange(e.target.value)}
+                fullWidth
+                size="small"
+                sx={{
+                  borderRadius: "10px",
+                  fontSize: "0.875rem",
+                  backgroundColor: colors.bgContainer, // mismo fondo que usamos en contenedores
+                  transition: "border-color 0.2s ease, box-shadow 0.2s ease",
+
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: colors.borderContainer,
+                  },
+
+                  "&:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: colors.accentGreen[100], // hover sutil
+                  },
+
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: colors.accentGreen[200],
+                    boxShadow: "0 0 0 3px rgba(34,197,94,0.15)", // realce minimalista accesible
+                  },
+
+                  "& input::placeholder": {
+                    color: colors.grey[400],
+                    opacity: 1,
+                  },
+                  "& .MuiInputAdornment-root": {
+                    marginRight: "8px",
+                  },
+
+                  "& .MuiFormHelperText-root": {
+                    marginLeft: 1,
+                    fontSize: "0.75rem",
+                    color: theme.palette.error.main,
+                  },
+                }}
+                IconComponent={(props) => (
+                  <KeyboardArrowDownOutlined
+                    {...props}
+                    sx={{ color: colors.grey[300], fontSize: 20 }}
+                  />
+                )}
+              >
+                <MenuItem value="excelente">Excelente (como nuevo)</MenuItem>
+                <MenuItem value="bueno">Bueno (uso normal)</MenuItem>
+                <MenuItem value="regular">Regular (signos de uso)</MenuItem>
+                <MenuItem value="danado">Dañado (requiere reparación)</MenuItem>
+                <MenuItem value="perdido">Perdido</MenuItem>
+              </Select>
+            </Box>
+
+            {estadoArticulo === "danado" && (
+              <Box mb={3}>
+                <Typography
+                  variant="body1"
+                  color={colors.grey[100]}
+                  mb={1}
+                  sx={{ fontWeight: 500 }}
+                >
+                  Descripción del Daño
+                </Typography>
+                <InlineEditableText
+                  value={estadoArticuloDanado}
+                  onChange={handleEstadoArticuloDanadoChange}
+                  placeholder="Describe el daño del artículo..."
+                  minRows={3}
+                  sx={{
+                    backgroundColor: colors.primary[800],
+                    borderRadius: 2,
+                    border: `1px solid ${colors.grey[400]}`,
+                    p: 1.5,
+                    color: colors.grey[100],
+                    transition: "border-color 0.3s ease, box-shadow 0.3s ease",
+                    "&:hover": { borderColor: colors.grey[300] },
+                    "&:focus": {
+                      borderColor: colors.accentGreen[100],
+                      boxShadow: "0 0 0 3px rgba(34,197,94,0.2)",
+                    },
+                  }}
+                />
+              </Box>
+            )}
+
+            <PhotoUpload
+              onPhotosChange={handleFotosEvidenciaChange}
+              maxPhotos={5}
+            />
 
             <Box>
               <Typography
@@ -1879,7 +2074,7 @@ const Index = () => {
                 border: `1px solid ${colors.borderContainer}`, // borde punteado suave
                 transition:
                   "background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease",
-                "&:hover": {                  
+                "&:hover": {
                   boxShadow: "0 2px 6px rgba(0,0,0,0.05)", // sombra ligera
                 },
               }}
@@ -2098,7 +2293,7 @@ const Index = () => {
               border: `1px solid ${colors.borderContainer}`, // borde punteado suave
               transition:
                 "background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease",
-              "&:hover": {                
+              "&:hover": {
                 boxShadow: "0 2px 6px rgba(0,0,0,0.05)", // sombra ligera
               },
             }}
@@ -2125,7 +2320,7 @@ const Index = () => {
                   border: `1px solid ${colors.borderContainer}`, // borde suave
                   transition:
                     "background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease",
-                  "&:hover": {                    
+                  "&:hover": {
                     boxShadow: "0 2px 6px rgba(0,0,0,0.05)", // sombra ligera al hover
                   },
                 }}

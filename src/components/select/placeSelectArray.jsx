@@ -1,9 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { FormControl, InputLabel, Select, MenuItem, Box, Typography } from "@mui/material";
+import {
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Box,
+  Typography,
+  useTheme,
+} from "@mui/material";
 import KeyboardArrowDown from "@mui/icons-material/KeyboardArrowDown";
 import Lottie from "lottie-react";
 import loadingAnimation from "../../../public/loading-8.json";
+import { tokens } from "../../theme";
 
 const PlaceSelectArray = ({
   selectedPlace,
@@ -13,6 +22,8 @@ const PlaceSelectArray = ({
   const user = useSelector((state) => state.user);
   const placeServiceProcess = user.place_service_process || [];
   const [loading, setLoading] = useState(true);
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
 
   useEffect(() => {
     setLoading(true);
@@ -48,7 +59,7 @@ const PlaceSelectArray = ({
     <Box sx={{ position: "relative", width: "100%" }}>
       <FormControl
         fullWidth
-        size="small"
+        
         variant="outlined"
         disabled={loading || placeServiceProcess.length === 0}
       >
@@ -60,20 +71,42 @@ const PlaceSelectArray = ({
           onChange={handleChange}
           label="Selecciona Plaza"
           IconComponent={(props) => (
-            <KeyboardArrowDown {...props} sx={{ fontSize: 18 }} />
+            <KeyboardArrowDown
+              {...props}
+              sx={{ color: colors.grey[300], fontSize: 20 }}
+            />
           )}
           sx={{
-            backgroundColor: "transparent",
-            borderRadius: "8px",
+            borderRadius: "10px",
             fontSize: "0.875rem",
+            backgroundColor: colors.bgContainer, // mismo fondo que usamos en contenedores
+            transition: "border-color 0.2s ease, box-shadow 0.2s ease",
+
             "& .MuiOutlinedInput-notchedOutline": {
-              borderColor: "rgba(128,128,128,0.3)",
+              borderColor: colors.borderContainer,
             },
+
             "&:hover .MuiOutlinedInput-notchedOutline": {
-              borderColor: "rgba(0,120,212,0.6)",
+              borderColor: colors.accentGreen[100], // hover sutil
             },
+
             "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-              borderColor: "rgba(0,120,212,1)",
+              borderColor: colors.accentGreen[200],
+              boxShadow: "0 0 0 3px rgba(34,197,94,0.15)", // realce minimalista accesible
+            },
+
+            "& input::placeholder": {
+              color: colors.grey[400],
+              opacity: 1,
+            },
+            "& .MuiInputAdornment-root": {
+              marginRight: "8px",
+            },
+
+            "& .MuiFormHelperText-root": {
+              marginLeft: 1,
+              fontSize: "0.75rem",
+              color: theme.palette.error.main,
             },
           }}
         >

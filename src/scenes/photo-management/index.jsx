@@ -712,7 +712,7 @@ const Index = () => {
                 <Badge 
                   badgeContent={totalFotoFachadaUno}
                   color={totalFotoFachadaUno === totalResultados ? 'secondary' : 'error'}
-                  max={9999}                  
+                  max={99999999}                  
                 >
                   <Tooltip title="Descargar foto fachada 1">
                     <Button 
@@ -731,7 +731,7 @@ const Index = () => {
                 <Badge 
                   badgeContent={totalFotoFachadaDos} 
                   color={totalFotoFachadaDos === totalResultados ? 'secondary' : 'error'}
-                  max={9999}
+                  max={99999999}
                 >
                   <Tooltip title="Descargar foto fachada 2">
                     <Button 
@@ -750,7 +750,7 @@ const Index = () => {
                 <Badge 
                   badgeContent={totalFotoEvidenciaUno} 
                   color={totalFotoEvidenciaUno === totalResultados ? 'secondary' : 'error'}
-                  max={9999}
+                  max={99999999}
                 >
                   <Tooltip title="Descargar foto evidencia 1">
                     <Button 
@@ -769,7 +769,7 @@ const Index = () => {
                 <Badge 
                   badgeContent={totalFotoEvidenciaDos} 
                   color={totalFotoEvidenciaDos === totalResultados ? 'secondary' : 'error'}
-                  max={9999}
+                  max={99999999}
                 >
                   <Tooltip title="Descargar foto evidencia 2">
                     <Button

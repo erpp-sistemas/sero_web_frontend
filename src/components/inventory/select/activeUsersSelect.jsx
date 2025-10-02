@@ -8,10 +8,14 @@ import { getAllActiveUsers } from "../../../api/user";
 import Lottie from "lottie-react";
 import loadingAnimation from "../../../../public/loading-8.json";
 import KeyboardArrowDown from "@mui/icons-material/KeyboardArrowDown";
+import { tokens } from "../../../theme";
+import { useTheme } from "@mui/material";
 
 function ActiveUsersSelect({ selectedUser, handleUserChange }) {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
 
   useEffect(() => {
     const loadUsers = async () => {
@@ -19,7 +23,7 @@ function ActiveUsersSelect({ selectedUser, handleUserChange }) {
       try {
         const res = await getAllActiveUsers();
 
-         await new Promise((resolve) => setTimeout(resolve, 300));
+        await new Promise((resolve) => setTimeout(resolve, 300));
         setUsers(res);
 
         if (!selectedUser && res.length > 0) {
@@ -46,7 +50,7 @@ function ActiveUsersSelect({ selectedUser, handleUserChange }) {
       <TextField
         id="select-user"
         select
-        label="Usuario"
+        label="Selecciona un Usuario"
         variant="outlined"
         size="small"
         value={selectedUser?.id_usuario || ""}
@@ -54,22 +58,47 @@ function ActiveUsersSelect({ selectedUser, handleUserChange }) {
         disabled={loading}
         sx={{
           width: "100%",
-          backgroundColor: "transparent",
-          borderRadius: "8px",
-          fontSize: "0.875rem",
-          "& .MuiOutlinedInput-notchedOutline": {
-            borderColor: "#D1D5DB",
+          "& .MuiOutlinedInput-root": {
+            borderRadius: "10px",
+            fontSize: "0.875rem",
+            backgroundColor: colors.bgContainer, // mismo fondo que usamos en contenedores
+            transition: "border-color 0.2s ease, box-shadow 0.2s ease",
+
+            "& .MuiOutlinedInput-notchedOutline": {
+              borderColor: colors.borderContainer,
+            },
+
+            "&:hover .MuiOutlinedInput-notchedOutline": {
+              borderColor: colors.accentGreen[100], // hover sutil
+            },
+
+            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+              borderColor: colors.accentGreen[200],
+              boxShadow: "0 0 0 3px rgba(34,197,94,0.15)", // realce minimalista accesible
+            },
+
+            "& input::placeholder": {
+              color: colors.grey[400],
+              opacity: 1,
+            },
           },
-          "&:hover .MuiOutlinedInput-notchedOutline": {
-            borderColor: "#3B82F6",
+
+          "& .MuiInputAdornment-root": {
+            marginRight: "8px",
           },
-          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-            borderColor: "#2563EB",
+
+          "& .MuiFormHelperText-root": {
+            marginLeft: 1,
+            fontSize: "0.75rem",
+            color: theme.palette.error.main,
           },
         }}
         SelectProps={{
           IconComponent: (props) => (
-            <KeyboardArrowDown {...props} sx={{ fontSize: 18 }} />
+            <KeyboardArrowDown
+              {...props}
+              sx={{ color: colors.grey[300], fontSize: 20 }}
+            />
           ),
         }}
       >
@@ -121,7 +150,10 @@ function ActiveUsersSelect({ selectedUser, handleUserChange }) {
           <Typography variant="body2" sx={{ mr: 1, color: "gray" }}>
             Cargando...
           </Typography>
-          <Lottie animationData={loadingAnimation} style={{ width: 60, height: 60 }} />
+          <Lottie
+            animationData={loadingAnimation}
+            style={{ width: 60, height: 60 }}
+          />
         </Box>
       )}
     </Box>

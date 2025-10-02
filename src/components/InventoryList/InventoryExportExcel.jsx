@@ -1,9 +1,13 @@
 import React from "react";
-import { Button, Stack } from "@mui/material";
+import { Button, Stack, useTheme } from "@mui/material";
 import * as ExcelJS from "exceljs";
 import { Download } from "@mui/icons-material";
+import { tokens } from "../../theme";
 
 const InventoryExportExcel = ({ filteredInventory }) => {
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
+
   const exportToExcel = async () => {
     try {
       const workbook = new ExcelJS.Workbook();
@@ -118,11 +122,37 @@ const InventoryExportExcel = ({ filteredInventory }) => {
         onClick={exportToExcel}
         fullWidth
         color="info"
-        startIcon={<Download />}
+        endIcon={<Download sx={{ fontSize: 18, color: colors.textAccent }} />}
         sx={{
-          borderRadius: "35px",
-          color: "black",
-          fontWeight: "bold",
+          textTransform: "none", // minimalista, sin mayúsculas forzadas
+          borderRadius: "10px", // bordes redondeados suaves
+          fontWeight: 500,
+          fontSize: "0.875rem", // tamaño legible, consistente
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          gap: "8px", // espacio limpio entre texto e icono
+          backgroundColor: colors.accentGreen[100], // color normal
+          color: colors.textAccent, // contraste legible
+          border: "none",
+          cursor: "pointer",
+
+          "&:hover": {
+            backgroundColor: colors.accentGreen[200], // hover sutil
+          },
+          "&:active": {
+            backgroundColor: colors.accentGreen[300], // feedback presionado
+          },
+          "& .MuiButton-endIcon": {
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          },
+          transition: "background-color 0.3s ease, box-shadow 0.2s ease",
+          boxShadow: "none", // minimalismo: sin sombra por defecto
+          "&:hover, &:active": {
+            boxShadow: "0 2px 6px rgba(0,0,0,0.08)", // sombra muy ligera al interactuar
+          },
         }}
       >
         Exportar a Excel
