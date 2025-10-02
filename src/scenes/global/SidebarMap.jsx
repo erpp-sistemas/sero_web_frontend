@@ -19,6 +19,8 @@ import ModalDate from '../../components/modals/ModalDate';
 // COMPONENTS
 import InformacionSidebar from '../../components/map/InformacionSidebar';
 
+import { getDataGeoserver } from '../../api/geoserver';
+
 const SidebarMap = () => {
 
     const theme = useTheme();
@@ -269,6 +271,7 @@ const SidebarMap = () => {
     }
 
     const cargarLayerMap = async (layer, dates_filter = null) => {
+        console.log(layer)
         try {
             if (layer.url_geoserver !== '') {
                 if (layer.tipo === 'punto') {
@@ -291,6 +294,7 @@ const SidebarMap = () => {
 
     const cargaPunto = async (layer, dates_filter = null) => {
         const data = await cargarFeaturesLayer(layer.url_geoserver, dates_filter);
+        console.log(data)
         mapa_activo.mapa.addSource(layer.name_layer, { type: 'geojson', data: data })
         mapa_activo.mapa.addLayer({
             "id": layer.layer_id.toString(),
@@ -334,9 +338,11 @@ const SidebarMap = () => {
             url_request = `${url}&cql_filter=${encodeURIComponent(cqlFilter)}`;
             response = await fetch(url_request);
         }
-        if (!dates_filter) response = await fetch(url);
+        //if (!dates_filter) response = await fetch(url);
+        if (!dates_filter) response = await getDataGeoserver(url);
+        console.log(response)
 
-        const data = await response.json();
+        const data = await response.data;
         return data;
     }
 
