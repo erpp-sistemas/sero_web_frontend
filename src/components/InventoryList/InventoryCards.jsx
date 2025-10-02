@@ -19,18 +19,11 @@ import { tokens } from "../../theme";
 import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import { useSpring, animated } from "@react-spring/web";
 import {
-  Assignment,
-  AssignmentOutlined,
-  AssignmentReturnOutlined,
   DeleteOutline,
-  ExitToAppOutlined,
   KeyboardArrowDown,
-  KeyboardReturnOutlined,
-  OpenInNewOutlined,
   PublishedWithChangesOutlined,
   Search,
   SearchOff,
-  UndoOutlined,
   VisibilityOutlined,
 } from "@mui/icons-material";
 import InventoryDetailModal from "./InventoryCards/InventoryDetailModal";
@@ -47,6 +40,8 @@ function InventoryCards({ inventoryCopy, loading, onSaveItem }) {
   const [modalOpen, setModalOpen] = useState(false);
   const [reassignModalOpen, setReassignModalOpen] = useState(false);
   const [returnModalOpen, setReturnModalOpen] = useState(false);
+
+  console.log(inventoryCopy)
 
   useEffect(() => {
     setLocalInventory(inventoryCopy || []);
@@ -244,6 +239,9 @@ function InventoryCards({ inventoryCopy, loading, onSaveItem }) {
                                 ? colors.greenAccent[400]
                                 : item.estado === "asignado"
                                 ? colors.blueAccent[400]
+                                : item.estado ===
+                                  "asignado-sin responsiva digital"
+                                ? colors.tealAccent[400]
                                 : item.estado === "mantenimiento"
                                 ? colors.orangeAccent[400]
                                 : item.estado === "en_revision"
@@ -257,6 +255,8 @@ function InventoryCards({ inventoryCopy, loading, onSaveItem }) {
                           ? "Disponible"
                           : item.estado === "asignado"
                           ? "Asignado"
+                          : item.estado === "asignado-sin responsiva digital"
+                          ? "Asignado (Sin Responsiva Digital)"
                           : item.estado === "mantenimiento"
                           ? "En Mantenimiento"
                           : item.estado === "en_revision"
@@ -276,7 +276,7 @@ function InventoryCards({ inventoryCopy, loading, onSaveItem }) {
                       {/* Botón de Reasignación */}
                       <Tooltip title="Reasignacionar artículo">
                         <Button
-                          variant="contained"                          
+                          variant="contained"
                           size="small"
                           sx={{
                             textTransform: "none", // minimalista, sin mayúsculas forzadas
@@ -317,10 +317,17 @@ function InventoryCards({ inventoryCopy, loading, onSaveItem }) {
                           />
                         </Button>
                       </Tooltip>
-                      <Tooltip title="Devolución o baja del artículo">
+                      <Tooltip
+                        title={
+                          item.estado === "disponible"
+                            ? "No se puede devolver un artículo disponible"
+                            : "Devolución o baja del artículo"
+                        }
+                      >
                         <Button
-                          variant="contained"                          
+                          variant="contained"
                           size="small"
+                          disabled={item.estado === "disponible"}
                           sx={{
                             textTransform: "none", // minimalista, sin mayúsculas forzadas
                             borderRadius: "10px", // bordes redondeados suaves

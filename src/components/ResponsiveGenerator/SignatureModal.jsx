@@ -266,7 +266,7 @@ const SignatureModal = ({
 
       // 4. Crear URL de verificación (LO MÁS IMPORTANTE)
       // const verificationUrl = `https://ser0.mx/verification-responsiva?token=${validationToken}&hash=${hashResult.hash}`;
-      const verificationUrl = `http://localhost:5173/verification-responsiva?token=${validationToken}&hash=${hashResult.hash}`;
+      const verificationUrl = `https://ser0.mx/verification-responsiva?token=${validationToken}&hash=${hashResult.hash}`;
 
       const verificationData = {
         documentId: documentData?.id || "RESP-" + Date.now(),

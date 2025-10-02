@@ -491,7 +491,7 @@ function InventoryReassignmentModal({
           <Box
             sx={{
               p: 2,
-              position: "sticky",
+              // position: "sticky",
               bottom: 0,
               borderRadius: 2,
               bgcolor: colors.bgContainerSecondary,

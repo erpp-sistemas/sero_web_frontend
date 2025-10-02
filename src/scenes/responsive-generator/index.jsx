@@ -385,7 +385,7 @@ const Index = () => {
       pdf_filename: `responsiva-${nuevoArticulo.id_articulo}-${Date.now()}.pdf`,
 
       // ✅ INFORMACIÓN DEL DOCUMENTO
-      motivo_cambio: motivoCambio || "Asignación inicial de equipo",
+      motivo_cambio: motivoCambio ,
       observaciones: observaciones || "",
       tipo_responsiva: tipoResponsiva,
       estado: "activa",
