@@ -57,6 +57,10 @@ const getInternetDate = async () => {
   }
 };
 
+const hasValidEmail = (user) => {
+  return user?.email && user.email.trim() !== "";
+};
+
 const Index = () => {
   const { state } = useLocation();
   const { nuevoArticulo, tipo_responsiva, articuloId } = state || {};
@@ -122,6 +126,20 @@ const Index = () => {
   useEffect(() => {
     signatureStatusRef.current = signatureStatus;
   }, [signatureStatus]);
+
+  const handleFirmarClick = () => {
+    if (!hasValidEmail(nuevoArticulo?.usuarioAsignado)) {
+      setSnackbar({
+        open: true,
+        message: "❌ No se puede firmar: El usuario no tiene un email válido registrado",
+        severity: "error",
+      });
+      return;
+    }
+    
+    // Si tiene email válido, abrir el modal
+    setSignatureStatus({ ...signatureStatus, showModal: true });
+  };
 
   // Función para limpiar los campos de configuración del documento
   const limpiarCamposConfiguracion = () => {
@@ -2023,9 +2041,10 @@ const Index = () => {
           {!signatureStatus.isSigned ? (
             <Button
               variant="contained"
-              onClick={() =>
-                setSignatureStatus({ ...signatureStatus, showModal: true })
-              }
+              // onClick={() =>
+              //   setSignatureStatus({ ...signatureStatus, showModal: true })
+              // }
+              onClick={handleFirmarClick}
               endIcon={
                 <LockPersonOutlined
                   sx={{ fontSize: 18, color: colors.textAccent }}

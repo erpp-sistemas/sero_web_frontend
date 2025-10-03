@@ -67,6 +67,7 @@ const PlaceSelectArray = ({
         <Select
           labelId="place-select-label"
           id="place-select"
+          size="small"
           value={selectedPlace?.id_plaza || ""}
           onChange={handleChange}
           label="Selecciona Plaza"

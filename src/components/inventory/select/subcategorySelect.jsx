@@ -10,6 +10,8 @@ import {
 import KeyboardArrowDown from "@mui/icons-material/KeyboardArrowDown";
 import Lottie from "lottie-react";
 import loadingAnimation from "../../../../public/loading-8.json";
+import { useTheme } from "@mui/material";
+import { tokens } from "../../../theme";
 
 const SubcategorySelect = ({
   subcategories,
@@ -17,24 +19,25 @@ const SubcategorySelect = ({
   handleSubcategoryChange,
 }) => {
   const [loading, setLoading] = useState(false);
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
 
   useEffect(() => {
-  if (!subcategories) return;
+    if (!subcategories) return;
 
-  setLoading(true);
+    setLoading(true);
 
-  const timer = setTimeout(() => {
-    if (subcategories.length > 0 && !selectedSubcategory) {
-      handleSubcategoryChange({
-        target: { value: subcategories[0].id_subcategoria_inventario },
-      });
-    }
-    setLoading(false);
-  }, 300); // 300ms de “loading simulado”
+    const timer = setTimeout(() => {
+      if (subcategories.length > 0 && !selectedSubcategory) {
+        handleSubcategoryChange({
+          target: { value: subcategories[0].id_subcategoria_inventario },
+        });
+      }
+      setLoading(false);
+    }, 300); // 300ms de “loading simulado”
 
-  return () => clearTimeout(timer);
-}, [subcategories, selectedSubcategory]);
-
+    return () => clearTimeout(timer);
+  }, [subcategories, selectedSubcategory]);
 
   return (
     <Box sx={{ position: "relative", width: "100%" }}>
@@ -51,17 +54,36 @@ const SubcategorySelect = ({
             <KeyboardArrowDown {...props} sx={{ fontSize: 18 }} />
           )}
           sx={{
-            backgroundColor: "transparent",
-            borderRadius: "8px",
+            borderRadius: "10px",
             fontSize: "0.875rem",
+            backgroundColor: colors.bgContainer, // mismo fondo que usamos en contenedores
+            transition: "border-color 0.2s ease, box-shadow 0.2s ease",
+
             "& .MuiOutlinedInput-notchedOutline": {
-              borderColor: "rgba(128,128,128,0.3)",
+              borderColor: colors.borderContainer,
             },
+
             "&:hover .MuiOutlinedInput-notchedOutline": {
-              borderColor: "rgba(0,120,212,0.6)",
+              borderColor: colors.accentGreen[100], // hover sutil
             },
+
             "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-              borderColor: "rgba(0,120,212,1)",
+              borderColor: colors.accentGreen[200],
+              boxShadow: "0 0 0 3px rgba(34,197,94,0.15)", // realce minimalista accesible
+            },
+
+            "& input::placeholder": {
+              color: colors.grey[400],
+              opacity: 1,
+            },
+            "& .MuiInputAdornment-root": {
+              marginRight: "8px",
+            },
+
+            "& .MuiFormHelperText-root": {
+              marginLeft: 1,
+              fontSize: "0.75rem",
+              color: theme.palette.error.main,
             },
           }}
         >

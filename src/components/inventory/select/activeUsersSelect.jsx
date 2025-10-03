@@ -10,6 +10,8 @@ import loadingAnimation from "../../../../public/loading-8.json";
 import KeyboardArrowDown from "@mui/icons-material/KeyboardArrowDown";
 import { tokens } from "../../../theme";
 import { useTheme } from "@mui/material";
+import MarkEmailReadIcon from "@mui/icons-material/MarkEmailRead";
+import UnsubscribeIcon from "@mui/icons-material/Unsubscribe";
 
 function ActiveUsersSelect({ selectedUser, handleUserChange }) {
   const [users, setUsers] = useState([]);
@@ -43,6 +45,11 @@ function ActiveUsersSelect({ selectedUser, handleUserChange }) {
     const selectedId = event.target.value;
     const fullUser = users.find((u) => u.id_usuario === selectedId);
     handleUserChange(fullUser); // también enviamos el objeto completo aquí
+  };
+
+  // Función para verificar si el email es válido
+  const hasValidEmail = (user) => {
+    return user.email && user.email.trim() !== "";
   };
 
   return (
@@ -117,10 +124,33 @@ function ActiveUsersSelect({ selectedUser, handleUserChange }) {
                 alt={user.nombre}
                 sx={{ width: 40, height: 40 }}
               />
-              <Box sx={{ display: "flex", flexDirection: "column" }}>
-                <Typography variant="body1" fontWeight="bold">
-                  {user.nombre}
-                </Typography>
+              <Box 
+                sx={{ 
+                  display: "flex", 
+                  flexDirection: "column",
+                  flex: 1
+                }}
+              >
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <Typography variant="body1" fontWeight="bold">
+                    {user.nombre}
+                  </Typography>
+                  {hasValidEmail(user) ? (
+                    <MarkEmailReadIcon 
+                      sx={{ 
+                        color: colors.greenAccent[500], 
+                        fontSize: 18 
+                      }} 
+                    />
+                  ) : (
+                    <UnsubscribeIcon 
+                      sx={{ 
+                        color: theme.palette.error.main, 
+                        fontSize: 18 
+                      }} 
+                    />
+                  )}
+                </Box>
                 <Typography variant="body2" color="text.secondary">
                   {user.puesto?.nombre || "Puesto no disponible"}
                 </Typography>

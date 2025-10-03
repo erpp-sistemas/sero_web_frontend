@@ -11,10 +11,14 @@ import KeyboardArrowDown from "@mui/icons-material/KeyboardArrowDown";
 import Lottie from "lottie-react";
 import loadingAnimation from "../../../../public/loading-8.json";
 import { getAllInventoryCategory } from "../../../api/inventory";
+import { useTheme } from "@mui/material";
+import { tokens } from "../../../theme";
 
 function CategorySelect({ selectedCategory, handleCategoryChange }) {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
 
   useEffect(() => {
     const loadCategories = async () => {
@@ -53,17 +57,36 @@ function CategorySelect({ selectedCategory, handleCategoryChange }) {
             <KeyboardArrowDown {...props} sx={{ fontSize: 18 }} />
           )}
           sx={{
-            backgroundColor: "transparent",
-            borderRadius: "8px",
+            borderRadius: "10px",
             fontSize: "0.875rem",
+            backgroundColor: colors.bgContainer, // mismo fondo que usamos en contenedores
+            transition: "border-color 0.2s ease, box-shadow 0.2s ease",
+
             "& .MuiOutlinedInput-notchedOutline": {
-              borderColor: "rgba(128,128,128,0.3)", // gris claro
+              borderColor: colors.borderContainer,
             },
+
             "&:hover .MuiOutlinedInput-notchedOutline": {
-              borderColor: "rgba(0,120,212,0.6)", // azul suave hover
+              borderColor: colors.accentGreen[100], // hover sutil
             },
+
             "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-              borderColor: "rgba(0,120,212,1)", // azul foco
+              borderColor: colors.accentGreen[200],
+              boxShadow: "0 0 0 3px rgba(34,197,94,0.15)", // realce minimalista accesible
+            },
+
+            "& input::placeholder": {
+              color: colors.grey[400],
+              opacity: 1,
+            },
+            "& .MuiInputAdornment-root": {
+              marginRight: "8px",
+            },
+
+            "& .MuiFormHelperText-root": {
+              marginLeft: 1,
+              fontSize: "0.75rem",
+              color: theme.palette.error.main,
             },
           }}
         >
@@ -101,7 +124,10 @@ function CategorySelect({ selectedCategory, handleCategoryChange }) {
           <Typography variant="body2" sx={{ mr: 1, color: "gray" }}>
             Cargando...
           </Typography>
-          <Lottie animationData={loadingAnimation} style={{ width: 40, height: 40 }} />
+          <Lottie
+            animationData={loadingAnimation}
+            style={{ width: 40, height: 40 }}
+          />
         </Box>
       )}
     </Box>
