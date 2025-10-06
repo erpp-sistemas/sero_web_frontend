@@ -93,8 +93,9 @@ const QuickAlerts = ({ data = [] }) => {
           display: "flex",
           alignItems: "flex-start",
           gap: 2,
-          backgroundColor: colors.bgContainer,
-          boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
+          backgroundColor: colors.bgContainerSecondary,
+          boxShadow: "0 4px 16px rgba(0,0,0,0.2)",
+          
           borderRadius: 2,
           transition: "transform 0.2s ease",
           "&:hover": { transform: "translateY(-4px)" },

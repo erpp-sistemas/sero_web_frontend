@@ -77,7 +77,6 @@ const MapPositions = ({ data, selectedGestor }) => {
 
   const positionsToShow = React.useMemo(() => {
     if (!selectedGestor) {
-      // Última gestión de cada gestor
       const grouped = {};
       data.forEach((item) => {
         if (!item.latitude || !item.longitude) return;
@@ -101,6 +100,7 @@ const MapPositions = ({ data, selectedGestor }) => {
     }
   }, [data, selectedGestor]);
 
+  // 🗺️ Inicializa el mapa una sola vez
   useEffect(() => {
     if (!mapContainerRef.current || map.current) return;
 
@@ -111,6 +111,7 @@ const MapPositions = ({ data, selectedGestor }) => {
       longitude: -99.1332,
       latitude: 19.4326,
     };
+
     map.current = new mapboxgl.Map({
       container: mapContainerRef.current,
       style:
@@ -120,8 +121,21 @@ const MapPositions = ({ data, selectedGestor }) => {
       center: [parseFloat(first.longitude), parseFloat(first.latitude)],
       zoom: 12,
     });
-  }, [theme, positionsToShow]);
+  }, []);
 
+  // 🌗 Detecta cambio de tema y actualiza estilo del mapa
+  useEffect(() => {
+    if (!map.current) return;
+
+    const newStyle =
+      theme.palette.mode === "dark"
+        ? "mapbox://styles/mapbox/dark-v11"
+        : "mapbox://styles/mapbox/streets-v11";
+
+    map.current.setStyle(newStyle);
+  }, [theme.palette.mode]);
+
+  // 📍 Dibuja marcadores y popups
   useEffect(() => {
     if (!map.current) return;
 
@@ -133,8 +147,7 @@ const MapPositions = ({ data, selectedGestor }) => {
         gestor;
       if (!latitude || !longitude) return;
 
-      const isLastGestor = !selectedGestor; // true si estamos mostrando última gestión de cada gestor
-
+      const isLastGestor = !selectedGestor;
       const borderColor = property_status
         ?.toLowerCase()
         .includes("no localizado")
@@ -147,11 +160,11 @@ const MapPositions = ({ data, selectedGestor }) => {
       markerEl.style.justifyContent = "center";
       markerEl.style.border = `3px solid ${borderColor}`;
       markerEl.style.borderRadius = "50%";
-      markerEl.style.width = isLastGestor ? "65px" : "55px"; // más grande si última gestión
+      markerEl.style.width = isLastGestor ? "65px" : "55px";
       markerEl.style.height = isLastGestor ? "65px" : "55px";
       markerEl.style.backgroundColor = isLastGestor
         ? colors.primary[500]
-        : "#fff"; // fondo distintivo
+        : "#fff";
       markerEl.style.boxShadow = "0 2px 8px rgba(0,0,0,0.3)";
       markerEl.style.cursor = "pointer";
 
@@ -198,12 +211,13 @@ const MapPositions = ({ data, selectedGestor }) => {
             top: 10,
             right: 10,
             backgroundColor: colors.bgContainer,
+            border: `1px solid ${colors.borderContainer}`,
             color: colors.grey[100],
             padding: "6px 12px",
             borderRadius: "8px",
             boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
             fontSize: 12,
-            fontWeight: 600,
+            fontWeight: 500,
             pointerEvents: "none",
           }}
         >

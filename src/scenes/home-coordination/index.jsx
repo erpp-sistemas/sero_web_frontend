@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import WelcomeHeader from "../../components/HomeCoordination/WelcomeHeader";
 import FilterBar from "../../components/HomeCoordination/FilterBar";
@@ -17,7 +17,7 @@ import KpiCards from "../../components/HomeCoordination/KpiCards";
 import GestoresTable from "../../components/HomeCoordination/GestoresTable";
 import PerformanceIndicators from "../../components/HomeCoordination/PerformanceIndicators";
 import QuickAlerts from "../../components/HomeCoordination/QuickAlerts";
-import DashboardMapLayout  from "../../components/HomeCoordination/DashboardMapLayout";  
+import DashboardMapLayout from "../../components/HomeCoordination/DashboardMapLayout";
 
 function Index() {
   const user = useSelector((state) => state.user);
@@ -53,8 +53,15 @@ function Index() {
         setDashboardData([]);
         setError("No se encontraron datos para los filtros seleccionados.");
       } else {
-        setDashboardData(response.data);
-        console.log(response.data);
+        // 🔹 Formateo de fecha para mantener la hora exacta de la BD
+        const formattedData = response.data.map((item) => ({
+          ...item,
+          date_capture: item.date_capture
+            ? item.date_capture.replace("T", " ").substring(0, 19)
+            : null,
+        }));
+
+        setDashboardData(formattedData);
         setError(null);
       }
     } catch (err) {
@@ -149,17 +156,12 @@ function Index() {
   return (
     <Box className="p-4">
       <WelcomeHeader userName={user.name} role={user.profile} />
-      <FilterBar
-        plazas={user.place_service_process}
-        onChange={handleFilterChange}
-      />
+      <FilterBar plazas={user.place_service_process} onChange={handleFilterChange} />
 
       {loading && <DashboardSkeleton />}
 
       {!loading && error && (
-        <Typography
-          sx={{ mt: 4, textAlign: "center", color: colors.grey[200] }}
-        >
+        <Typography sx={{ mt: 4, textAlign: "center", color: colors.grey[200] }}>
           {error}
         </Typography>
       )}
@@ -168,9 +170,9 @@ function Index() {
         <>
           <KpiCards data={dashboardData} />
           <GestoresTable data={dashboardData} />
+          <DashboardMapLayout data={dashboardData} />
           <PerformanceIndicators data={dashboardData} />
-          <QuickAlerts data={dashboardData} />
-          <DashboardMapLayout  data={dashboardData} />
+          <QuickAlerts data={dashboardData} />          
         </>
       )}
     </Box>

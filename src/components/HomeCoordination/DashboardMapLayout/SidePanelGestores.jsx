@@ -49,7 +49,7 @@ const SidePanelGestores = ({ data, selectedGestor, onSelectGestor }) => {
         borderRadius: "12px",
         overflowY: "auto",
         overflowX: "hidden",
-        bgcolor: colors.bgContainer,
+        bgcolor: colors.bgContainerSecondary,
         border: `1px solid ${colors.borderContainer}`,
         boxShadow: "0 4px 16px rgba(0,0,0,0.2)",
         display: "flex",
@@ -93,7 +93,37 @@ const SidePanelGestores = ({ data, selectedGestor, onSelectGestor }) => {
             size="small"
             variant="contained"
             onClick={() => onSelectGestor(null)}
-            sx={{ fontSize: 12, textTransform: "none", mt: 1 }}
+            sx={{
+                textTransform: "none", // minimalista, sin mayúsculas forzadas
+                borderRadius: "10px", // bordes redondeados suaves
+                fontWeight: 500,
+                fontSize: "0.875rem", // tamaño legible, consistente
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: "8px", // espacio limpio entre texto e icono
+                backgroundColor: colors.accentGreenSecondary[100], // color normal
+                color: colors.textAccentSecondary, // contraste legible
+                border: "none",
+                cursor: "pointer",
+
+                "&:hover": {
+                  backgroundColor: colors.accentGreenSecondary[200], // hover sutil
+                },
+                "&:active": {
+                  backgroundColor: colors.accentGreenSecondary[300], // feedback presionado
+                },
+                "& .MuiButton-endIcon": {
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                },
+                transition: "background-color 0.3s ease, box-shadow 0.2s ease",
+                boxShadow: "none", // minimalismo: sin sombra por defecto
+                "&:hover, &:active": {
+                  boxShadow: "0 2px 6px rgba(0,0,0,0.08)", // sombra muy ligera al interactuar
+                },
+              }}
           >
             Volver a todas las últimas gestiones
           </Button>

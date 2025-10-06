@@ -12,7 +12,7 @@ const DashboardMapLayout = ({ data }) => {
   };
 
   return (
-    <Box sx={{ width: "100%", p: 3 }}> {/* padding general del dashboard */}
+    <Box sx={{ width: "100%", py: 3 }}> {/* padding general del dashboard */}
       {/* 🔹 Título de la sección */}
       <Typography
         variant="h5"

@@ -43,7 +43,7 @@ const PerformanceIndicators = ({ data = [] }) => {
         display: "flex",
         alignItems: "center",
         gap: 2,
-        backgroundColor: colors.bgContainer,
+        backgroundColor: colors.bgContainerSecondary,
         boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
         borderRadius: 2,
         transition: "all 0.2s ease-in-out",
