@@ -28,17 +28,10 @@ const TooltipCard = ({ gestor, colors }) => (
       boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
       fontFamily: "sans-serif",
       minWidth: 180,
-      transition:
-        "background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease",
     }}
   >
-    <CardContent
-      sx={{ p: 0, display: "flex", flexDirection: "column", gap: 1.2 }}
-    >
-      <Typography
-        sx={{ fontSize: 12, fontWeight: 600, color: colors.grey[100] }}
-        noWrap
-      >
+    <CardContent sx={{ p: 0, display: "flex", flexDirection: "column", gap: 1.2 }}>
+      <Typography sx={{ fontSize: 12, fontWeight: 600, color: colors.grey[100] }} noWrap>
         {gestor.person_who_capture}
       </Typography>
       <Typography sx={{ fontSize: 11, color: colors.grey[300] }} noWrap>
@@ -69,48 +62,47 @@ const TooltipCard = ({ gestor, colors }) => (
 const MapPositions = ({ data, selectedGestor }) => {
   const mapContainerRef = useRef(null);
   const map = useRef(null);
-  const markersRef = useRef([]);
+  const markersRef = useRef({});
+  const currentKeysRef = useRef(new Set());
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-
   const [elementsCount, setElementsCount] = useState(0);
 
+  // ✅ Filtramos registros con coordenadas válidas (no null, no 0)
   const positionsToShow = React.useMemo(() => {
-    if (!selectedGestor) {
-      const grouped = {};
-      data.forEach((item) => {
-        if (!item.latitude || !item.longitude) return;
-        const key = item.person_who_capture;
-        const date = new Date(item.date_capture);
-        if (!grouped[key] || date > new Date(grouped[key].date_capture)) {
-          grouped[key] = { ...item };
-        }
-      });
-      setElementsCount(Object.keys(grouped).length);
-      return Object.values(grouped);
-    } else {
-      const filtered = data.filter(
-        (item) =>
-          item.person_who_capture === selectedGestor &&
-          item.latitude &&
-          item.longitude
-      );
-      setElementsCount(filtered.length);
-      return filtered;
-    }
+    const isValidCoord = (lat, lng) =>
+      lat && lng && Math.abs(lat) > 0.001 && Math.abs(lng) > 0.001;
+
+    const filteredData = selectedGestor
+      ? data.filter(
+          (item) =>
+            item.person_who_capture === selectedGestor &&
+            isValidCoord(item.latitude, item.longitude)
+        )
+      : Object.values(
+          data.reduce((acc, item) => {
+            if (!isValidCoord(item.latitude, item.longitude)) return acc;
+            const key = item.person_who_capture;
+            const date = new Date(item.date_capture);
+            if (!acc[key] || date > new Date(acc[key].date_capture)) {
+              acc[key] = { ...item };
+            }
+            return acc;
+          }, {})
+        );
+
+    setElementsCount(filteredData.length);
+    return filteredData;
   }, [data, selectedGestor]);
 
-  // 🗺️ Inicializa el mapa una sola vez
+  // Inicializar mapa
   useEffect(() => {
     if (!mapContainerRef.current || map.current) return;
 
     mapboxgl.accessToken =
       "pk.eyJ1Ijoic2lzdGVtYXMyMzEyIiwiYSI6ImNsdThuaGczYTAwcnoydG54dG05OGxocXgifQ.J6tkaSWvRwfhXfiHoXzGFQ";
 
-    const first = positionsToShow[0] || {
-      longitude: -99.1332,
-      latitude: 19.4326,
-    };
+    const first = positionsToShow[0] || { longitude: -99.1332, latitude: 19.4326 };
 
     map.current = new mapboxgl.Map({
       container: mapContainerRef.current,
@@ -121,36 +113,44 @@ const MapPositions = ({ data, selectedGestor }) => {
       center: [parseFloat(first.longitude), parseFloat(first.latitude)],
       zoom: 12,
     });
-  }, []);
+  }, [theme, positionsToShow.length]);
 
-  // 🌗 Detecta cambio de tema y actualiza estilo del mapa
+  // Cambiar estilo al cambiar tema
   useEffect(() => {
     if (!map.current) return;
-
     const newStyle =
       theme.palette.mode === "dark"
         ? "mapbox://styles/mapbox/dark-v11"
         : "mapbox://styles/mapbox/streets-v11";
-
     map.current.setStyle(newStyle);
   }, [theme.palette.mode]);
 
-  // 📍 Dibuja marcadores y popups
+  // Actualizar markers
   useEffect(() => {
     if (!map.current) return;
 
-    markersRef.current.forEach((m) => m.remove());
-    markersRef.current = [];
+    const newKeys = new Set();
+    positionsToShow.forEach((p) => {
+      if (!p.latitude || !p.longitude) return;
+      newKeys.add(`${p.cuenta}_${p.date_capture}`);
+    });
 
+    // 🔹 Eliminar markers antiguos
+    Object.keys(markersRef.current).forEach((key) => {
+      if (!newKeys.has(key)) {
+        markersRef.current[key].remove();
+        delete markersRef.current[key];
+      }
+    });
+
+    // 🔹 Agregar markers nuevos
     positionsToShow.forEach((gestor) => {
-      const { latitude, longitude, photo_person_who_capture, property_status } =
-        gestor;
-      if (!latitude || !longitude) return;
+      const key = `${gestor.cuenta}_${gestor.date_capture}`;
+      if (markersRef.current[key]) return;
 
+      const { latitude, longitude, photo_person_who_capture, property_status } = gestor;
       const isLastGestor = !selectedGestor;
-      const borderColor = property_status
-        ?.toLowerCase()
-        .includes("no localizado")
+      const borderColor = property_status?.toLowerCase().includes("no localizado")
         ? colors.redAccent[500]
         : colors.greenAccent[400];
 
@@ -162,11 +162,17 @@ const MapPositions = ({ data, selectedGestor }) => {
       markerEl.style.borderRadius = "50%";
       markerEl.style.width = isLastGestor ? "65px" : "55px";
       markerEl.style.height = isLastGestor ? "65px" : "55px";
-      markerEl.style.backgroundColor = isLastGestor
-        ? colors.primary[500]
-        : "#fff";
+      markerEl.style.backgroundColor = isLastGestor ? colors.primary[500] : "#fff";
       markerEl.style.boxShadow = "0 2px 8px rgba(0,0,0,0.3)";
       markerEl.style.cursor = "pointer";
+
+      // Animación
+      let blinkCount = 0;
+      const blinkInterval = setInterval(() => {
+        markerEl.style.transform = blinkCount % 2 === 0 ? "scale(1.2)" : "scale(1)";
+        blinkCount++;
+        if (blinkCount > 3) clearInterval(blinkInterval);
+      }, 250);
 
       createRoot(markerEl).render(
         <Avatar
@@ -177,9 +183,7 @@ const MapPositions = ({ data, selectedGestor }) => {
       );
 
       const popupEl = document.createElement("div");
-      createRoot(popupEl).render(
-        <TooltipCard gestor={gestor} colors={colors} />
-      );
+      createRoot(popupEl).render(<TooltipCard gestor={gestor} colors={colors} />);
       const popup = new mapboxgl.Popup({ offset: 25 }).setDOMContent(popupEl);
 
       const marker = new mapboxgl.Marker(markerEl)
@@ -187,9 +191,12 @@ const MapPositions = ({ data, selectedGestor }) => {
         .setPopup(popup)
         .addTo(map.current);
 
-      markersRef.current.push(marker);
+      markersRef.current[key] = marker;
     });
 
+    currentKeysRef.current = newKeys;
+
+    // Centrar mapa
     if (positionsToShow.length > 0) {
       const first = positionsToShow[0];
       map.current.flyTo({
@@ -199,7 +206,7 @@ const MapPositions = ({ data, selectedGestor }) => {
         curve: 1.5,
       });
     }
-  }, [positionsToShow, colors, selectedGestor]);
+  }, [positionsToShow, selectedGestor, colors]);
 
   return (
     <div style={{ position: "relative" }}>

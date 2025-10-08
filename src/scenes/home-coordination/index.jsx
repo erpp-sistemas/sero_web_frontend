@@ -1,5 +1,5 @@
 // src/pages/HomeCoordination/Index.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import WelcomeHeader from "../../components/HomeCoordination/WelcomeHeader";
 import FilterBar from "../../components/HomeCoordination/FilterBar";
@@ -34,6 +34,9 @@ function Index() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // 🔹 Referencia a datos previos para animaciones
+  const prevDashboardData = useRef([]);
+
   // 🔹 Manejo de filtros
   const handleFilterChange = async (values) => {
     setFilters(values);
@@ -51,9 +54,11 @@ function Index() {
       );
 
       if (!response.data || response.data.length === 0) {
+        prevDashboardData.current = dashboardData; // Guardamos el anterior
         setDashboardData([]);
         setError("No se encontraron datos para los filtros seleccionados.");
       } else {
+        prevDashboardData.current = dashboardData; // Guardamos el anterior
         const formattedData = response.data.map((item) => ({
           ...item,
           date_capture: item.date_capture
@@ -114,59 +119,62 @@ function Index() {
   );
 
   useEffect(() => {
-    if (!messages || messages.length === 0) return;
+  if (!messages || messages.length === 0) return;
 
-    // Filtramos solo los mensajes de registro dinámico
-    const latestMessage = messages.find(
-      (msg) => msg.type === "on-register-form-dynamic-changed"
-    );
+  const latestMessage = messages.find(
+    (msg) => msg.type === "on-register-form-dynamic-changed"
+  );
+  if (!latestMessage) return;
 
-    if (!latestMessage) return;
+  const payload = latestMessage.payload || {};
+  const innerData = payload.data || {};
 
-    console.log("📡 WS recibido:", latestMessage);
+  const cuenta = innerData.cuenta || innerData.account || null;
+  const fecha = innerData.data?.fecha || innerData.fecha || null;
 
-    const payload = latestMessage.payload || {};
-    const innerData = payload.data || {};
+  const { plazaId, servicioId, procesoId } = filters;
+  if (!cuenta || !fecha || !plazaId || !servicioId || !procesoId) return;
 
-    const cuenta = innerData.cuenta || innerData.account || null;
-    const fecha = innerData.data?.fecha || innerData.fecha || null;
+  const fetchWSData = async () => {
+    try {
+      const response = await homeCoordinationWSRequest(
+        plazaId,
+        servicioId,
+        procesoId,
+        cuenta,
+        fecha
+      );
 
-    const { plazaId, servicioId, procesoId } = filters;
+      if (response.data && response.data.length > 0) {
+        const formattedData = response.data.map((item) => ({
+          ...item,
+          date_capture: item.date_capture
+            ? item.date_capture.replace("T", " ").substring(0, 19)
+            : null,
+        }));
 
-    if (!cuenta || !fecha) return;
-    if (!plazaId || !servicioId || !procesoId) return;
+        // 🔹 Evitar duplicados por "cuenta" + "date_capture"
+        setDashboardData((prev) => {
+          const existingKeys = new Set(prev.map((d) => d.cuenta + d.date_capture));
+          const newUnique = formattedData.filter(
+            (item) => !existingKeys.has(item.cuenta + item.date_capture)
+          );
+          // 🔹 Actualizamos prevDashboardData antes de setear el nuevo estado
+          prevDashboardData.current = prev;
+          return [...newUnique, ...prev];
+        });
 
-    const fetchWSData = async () => {
-      try {
-        const response = await homeCoordinationWSRequest(
-          plazaId,
-          servicioId,
-          procesoId,
-          cuenta,
-          fecha
-        );
-
-        if (response.data && response.data.length > 0) {
-          const formattedData = response.data.map((item) => ({
-            ...item,
-            date_capture: item.date_capture
-              ? item.date_capture.replace("T", " ").substring(0, 19)
-              : null,
-          }));
-
-          setDashboardData((prev) => [...formattedData, ...prev]);
-          console.log(`✅ ${formattedData.length} nuevos registros agregados`);
-        }
-      } catch (err) {
-        console.error("❌ Error al traer datos desde WS:", err);
+        console.log(`✅ ${formattedData.length} nuevos registros procesados`);
       }
-    };
+    } catch (err) {
+      console.error("❌ Error al traer datos desde WS:", err);
+    }
+  };
 
-    fetchWSData();
+  fetchWSData();
+  dispatch(cleanMessages());
+}, [messages, filters, dispatch]);
 
-    // Limpiar solo los mensajes que ya procesamos
-    dispatch(cleanMessages());
-  }, [messages, filters, dispatch]);
 
   return (
     <Box className="p-4">
@@ -192,11 +200,11 @@ function Index() {
 
       {!loading && !error && dashboardData.length > 0 && (
         <>
-          <KpiCards data={dashboardData} />
-          <GestoresTable data={dashboardData} />
-          <DashboardMapLayout data={dashboardData} />
-          <PerformanceIndicators data={dashboardData} />
-          <QuickAlerts data={dashboardData} />
+          <KpiCards data={dashboardData} prevData={prevDashboardData.current} />
+          <GestoresTable data={dashboardData} prevData={prevDashboardData.current} />
+          <DashboardMapLayout data={dashboardData} prevData={prevDashboardData.current} />
+          <PerformanceIndicators data={dashboardData} prevData={prevDashboardData.current} />
+          <QuickAlerts data={dashboardData} prevData={prevDashboardData.current} />
         </>
       )}
     </Box>

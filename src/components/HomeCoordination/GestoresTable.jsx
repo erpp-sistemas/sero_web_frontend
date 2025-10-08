@@ -1,82 +1,142 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import { useTheme, Box, Avatar, Typography, Tooltip } from "@mui/material";
 import { tokens } from "../../theme";
 import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 
-const GestoresTable = ({ data = [] }) => {
+const GestoresTable = ({ data = [], prevData = [] }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
-  const processedData = useMemo(() => {
-    const grouped = {};
+  const [rows, setRows] = useState([]);
+  const [highlightMap, setHighlightMap] = useState({});
+  const prevRowsRef = useRef([]);
 
+  // 🔹 Calcula métricas de un solo gestor
+  const calculateGestorMetrics = (gestorData) => {
+    const sortedDates = gestorData
+      .map((item) => new Date(item.date_capture))
+      .sort((a, b) => a - b);
+
+    let totalDiff = 0;
+    let maxDiff = 0;
+    let minDiff = sortedDates.length > 1 ? Infinity : 0;
+
+    for (let i = 1; i < sortedDates.length; i++) {
+      const diff = (sortedDates[i] - sortedDates[i - 1]) / 60000;
+      totalDiff += diff;
+      maxDiff = Math.max(maxDiff, diff);
+      minDiff = Math.min(minDiff, diff);
+    }
+
+    const avgDiff =
+      sortedDates.length > 1 ? totalDiff / (sortedDates.length - 1) : 0;
+
+    const firstGestion = sortedDates[0]
+      ? sortedDates[0].toLocaleTimeString("es-MX", {
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      : "-";
+
+    const lastGestion = sortedDates[sortedDates.length - 1]
+      ? sortedDates[sortedDates.length - 1].toLocaleTimeString("es-MX", {
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      : "-";
+
+    const gestiones_con_foto = gestorData.filter(
+      (i) => i.total_photos > 0
+    ).length;
+    const gestiones_sin_foto = gestorData.length - gestiones_con_foto;
+    const predios_localizados = gestorData.filter(
+      (i) => i.property_status === "Predio localizado"
+    ).length;
+    const predios_no_localizados = gestorData.length - predios_localizados;
+
+    return {
+      person_who_capture: gestorData[0].person_who_capture,
+      photo_person_who_capture: gestorData[0].photo_person_who_capture,
+      total_gestiones: gestorData.length,
+      gestiones_con_foto,
+      gestiones_sin_foto,
+      predios_localizados,
+      predios_no_localizados,
+      first_gestion: firstGestion,
+      last_gestion: lastGestion,
+      avg_time_between: avgDiff ? `${Math.round(avgDiff)}m` : "-",
+      max_diff: maxDiff ? `${Math.round(maxDiff)}m` : "-",
+      min_diff:
+        minDiff && minDiff !== Infinity ? `${Math.round(minDiff)}m` : "-",
+    };
+  };
+
+  // 🔹 Actualiza solo gestor afectado y lo mueve arriba
+  useEffect(() => {
+    if (!data || data.length === 0) return;
+
+    const groupedData = {};
     data.forEach((item) => {
-      const key = item.person_who_capture;
-      if (!grouped[key]) {
-        grouped[key] = {
-          person_who_capture: item.person_who_capture,
-          photo_person_who_capture: item.photo_person_who_capture,
-          total_gestiones: 0,
-          gestiones_con_foto: 0,
-          gestiones_sin_foto: 0,
-          predios_localizados: 0,
-          predios_no_localizados: 0,
-          date_captures: [],
-        };
-      }
-
-      grouped[key].total_gestiones += 1;
-      grouped[key].gestiones_con_foto += item.total_photos > 0 ? 1 : 0;
-      grouped[key].gestiones_sin_foto += item.total_photos === 0 ? 1 : 0;
-      grouped[key].predios_localizados +=
-        item.property_status === "Predio localizado" ? 1 : 0;
-      grouped[key].predios_no_localizados +=
-        item.property_status !== "Predio localizado" ? 1 : 0;
-      grouped[key].date_captures.push(new Date(item.date_capture));
+      if (!groupedData[item.person_who_capture])
+        groupedData[item.person_who_capture] = [];
+      groupedData[item.person_who_capture].push(item);
     });
 
-    // Convertir y ordenar
-    const result = Object.values(grouped).map((g) => {
-      const sortedDates = g.date_captures.sort((a, b) => a - b);
-      let totalDiff = 0;
-      let maxDiff = 0;
-      let minDiff = sortedDates.length > 1 ? Infinity : 0;
+    // Si no hay filas previas, calculamos todo
+    if (rows.length === 0) {
+      const allRows = Object.values(groupedData).map(calculateGestorMetrics);
+      setRows(allRows);
+      prevRowsRef.current = allRows;
+      return;
+    }
 
-      for (let i = 1; i < sortedDates.length; i++) {
-        const diff = (sortedDates[i] - sortedDates[i - 1]) / 60000;
-        totalDiff += diff;
-        maxDiff = Math.max(maxDiff, diff);
-        minDiff = Math.min(minDiff, diff);
+    const updatedRows = [...rows];
+    const newHighlight = {};
+    let lastUpdatedGestor = null;
+
+    // Detectar cuál gestor cambió (comparando con prevData)
+    Object.keys(groupedData).forEach((gestor) => {
+      const newMetrics = calculateGestorMetrics(groupedData[gestor]);
+      const prevRow = prevRowsRef.current.find(
+        (r) => r.person_who_capture === gestor
+      );
+
+      const changed =
+        !prevRow ||
+        prevRow.total_gestiones !== newMetrics.total_gestiones ||
+        prevRow.gestiones_con_foto !== newMetrics.gestiones_con_foto ||
+        prevRow.gestiones_sin_foto !== newMetrics.gestiones_sin_foto ||
+        prevRow.predios_localizados !== newMetrics.predios_localizados ||
+        prevRow.predios_no_localizados !== newMetrics.predios_no_localizados ||
+        prevRow.last_gestion !== newMetrics.last_gestion;
+
+      if (changed) {
+        newHighlight[gestor] = true;
+        lastUpdatedGestor = gestor;
+        const index = updatedRows.findIndex(
+          (r) => r.person_who_capture === gestor
+        );
+        if (index !== -1) updatedRows[index] = newMetrics;
       }
-
-      const avgDiff =
-        sortedDates.length > 1 ? totalDiff / (sortedDates.length - 1) : 0;
-
-      return {
-        ...g,
-        first_gestion: sortedDates[0]
-          ? sortedDates[0].toLocaleTimeString("es-MX", {
-              hour: "2-digit",
-              minute: "2-digit",
-            })
-          : "-",
-        last_gestion: sortedDates[sortedDates.length - 1]
-          ? sortedDates[sortedDates.length - 1].toLocaleTimeString("es-MX", {
-              hour: "2-digit",
-              minute: "2-digit",
-            })
-          : "-",
-        avg_time_between: avgDiff ? `${Math.round(avgDiff)}m` : "-",
-        max_diff: maxDiff ? `${Math.round(maxDiff)}m` : "-",
-        min_diff:
-          minDiff && minDiff !== Infinity ? `${Math.round(minDiff)}m` : "-",
-      };
     });
 
-    // 👉 Ordenar por total_gestiones de mayor a menor
-    return result.sort((a, b) => b.total_gestiones - a.total_gestiones);
+    // 🔹 Mover fila actualizada arriba
+    if (lastUpdatedGestor) {
+      const index = updatedRows.findIndex(
+        (r) => r.person_who_capture === lastUpdatedGestor
+      );
+      const [movedRow] = updatedRows.splice(index, 1);
+      updatedRows.unshift(movedRow);
+    }
+
+    setRows(updatedRows);
+    setHighlightMap(newHighlight);
+    prevRowsRef.current = updatedRows;
+
+    const timeout = setTimeout(() => setHighlightMap({}), 2000);
+    return () => clearTimeout(timeout);
   }, [data]);
 
   const columns = [
@@ -103,6 +163,21 @@ const GestoresTable = ({ data = [] }) => {
       headerName: "Total gestiones",
       flex: 1,
       minWidth: 130,
+      renderCell: (params) => (
+        <Typography
+          sx={{
+            color: highlightMap[params.row.person_who_capture]
+              ? "#4ade80"
+              : "inherit",
+            transition: "color 0.5s ease",
+            fontWeight: highlightMap[params.row.person_who_capture]
+              ? 600
+              : "normal",
+          }}
+        >
+          {params.row.total_gestiones}
+        </Typography>
+      ),
     },
     {
       field: "gestiones_foto",
@@ -114,11 +189,35 @@ const GestoresTable = ({ data = [] }) => {
         return (
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <Tooltip title={`${gestiones_con_foto} gestiones con foto`}>
-              <Typography variant="body2">{gestiones_con_foto}</Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: highlightMap[params.row.person_who_capture]
+                    ? "#4ade80"
+                    : "inherit",
+                  fontWeight: highlightMap[params.row.person_who_capture]
+                    ? 600
+                    : "normal",
+                }}
+              >
+                {gestiones_con_foto}
+              </Typography>
             </Tooltip>
             <span>/</span>
             <Tooltip title={`${gestiones_sin_foto} gestiones sin foto`}>
-              <Typography variant="body2">{gestiones_sin_foto}</Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: highlightMap[params.row.person_who_capture]
+                    ? "#4ade80"
+                    : "inherit",
+                  fontWeight: highlightMap[params.row.person_who_capture]
+                    ? 600
+                    : "normal",
+                }}
+              >
+                {gestiones_sin_foto}
+              </Typography>
             </Tooltip>
             {gestiones_sin_foto > 0 && (
               <WarningAmberOutlinedIcon
@@ -144,11 +243,35 @@ const GestoresTable = ({ data = [] }) => {
         return (
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <Tooltip title={`${predios_localizados} predios localizados`}>
-              <Typography variant="body2">{predios_localizados}</Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: highlightMap[params.row.person_who_capture]
+                    ? "#4ade80"
+                    : "inherit",
+                  fontWeight: highlightMap[params.row.person_who_capture]
+                    ? 600
+                    : "normal",
+                }}
+              >
+                {predios_localizados}
+              </Typography>
             </Tooltip>
             <span>/</span>
             <Tooltip title={`${predios_no_localizados} predios no localizados`}>
-              <Typography variant="body2">{predios_no_localizados}</Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: highlightMap[params.row.person_who_capture]
+                    ? "#4ade80"
+                    : "inherit",
+                  fontWeight: highlightMap[params.row.person_who_capture]
+                    ? 600
+                    : "normal",
+                }}
+              >
+                {predios_no_localizados}
+              </Typography>
             </Tooltip>
             {predios_no_localizados > 0 && (
               <WarningAmberOutlinedIcon
@@ -175,6 +298,20 @@ const GestoresTable = ({ data = [] }) => {
       headerName: "Última gestión",
       flex: 1,
       minWidth: 120,
+      renderCell: (params) => (
+        <Typography
+          sx={{
+            color: highlightMap[params.row.person_who_capture]
+              ? "#4ade80"
+              : "inherit",
+            fontWeight: highlightMap[params.row.person_who_capture]
+              ? 500
+              : "normal",
+          }}
+        >
+          {params.row.last_gestion}
+        </Typography>
+      ),
     },
     {
       field: "avg_time_between",
@@ -183,22 +320,26 @@ const GestoresTable = ({ data = [] }) => {
       minWidth: 150,
     },
     {
-  field: "max_min_diff",
-  headerName: "Máx / Mín diferencia",
-  flex: 1,
-  minWidth: 150,
-  renderCell: (params) => (
-    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-      <Tooltip title={`Mayor diferencia entre gestiones: ${params.row.max_diff}`}>
-        <Typography variant="body2">{params.row.max_diff}</Typography>
-      </Tooltip>
-      <span>/</span>
-      <Tooltip title={`Menor diferencia entre gestiones: ${params.row.min_diff}`}>
-        <Typography variant="body2">{params.row.min_diff}</Typography>
-      </Tooltip>
-    </Box>
-  ),
-},
+      field: "max_min_diff",
+      headerName: "Máx / Mín diferencia",
+      flex: 1,
+      minWidth: 150,
+      renderCell: (params) => (
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Tooltip
+            title={`Mayor diferencia entre gestiones: ${params.row.max_diff}`}
+          >
+            <Typography variant="body2">{params.row.max_diff}</Typography>
+          </Tooltip>
+          <span>/</span>
+          <Tooltip
+            title={`Menor diferencia entre gestiones: ${params.row.min_diff}`}
+          >
+            <Typography variant="body2">{params.row.min_diff}</Typography>
+          </Tooltip>
+        </Box>
+      ),
+    },
   ];
 
   return (
@@ -237,7 +378,7 @@ const GestoresTable = ({ data = [] }) => {
         }}
       >
         <DataGrid
-          rows={processedData}
+          rows={rows}
           columns={columns}
           pageSize={30}
           rowsPerPageOptions={[30]}
