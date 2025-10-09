@@ -63,33 +63,42 @@ const MapPositions = ({ data, selectedGestor }) => {
   const mapContainerRef = useRef(null);
   const map = useRef(null);
   const markersRef = useRef({});
-  const currentKeysRef = useRef(new Set());
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [elementsCount, setElementsCount] = useState(0);
+  const [missingPositionsCount, setMissingPositionsCount] = useState(0);
 
   // ✅ Filtramos registros con coordenadas válidas (no null, no 0)
   const positionsToShow = React.useMemo(() => {
     const isValidCoord = (lat, lng) =>
       lat && lng && Math.abs(lat) > 0.001 && Math.abs(lng) > 0.001;
 
-    const filteredData = selectedGestor
-      ? data.filter(
-          (item) =>
-            item.person_who_capture === selectedGestor &&
-            isValidCoord(item.latitude, item.longitude)
-        )
-      : Object.values(
-          data.reduce((acc, item) => {
-            if (!isValidCoord(item.latitude, item.longitude)) return acc;
-            const key = item.person_who_capture;
-            const date = new Date(item.date_capture);
-            if (!acc[key] || date > new Date(acc[key].date_capture)) {
-              acc[key] = { ...item };
-            }
-            return acc;
-          }, {})
-        );
+    let filteredData = [];
+    let missingCount = 0;
+
+    if (selectedGestor) {
+      filteredData = data.filter((item) => {
+        if (item.person_who_capture !== selectedGestor) return false;
+        if (!isValidCoord(item.latitude, item.longitude)) {
+          missingCount++;
+          return false;
+        }
+        return true;
+      });
+      setMissingPositionsCount(missingCount);
+    } else {
+      filteredData = Object.values(
+        data.reduce((acc, item) => {
+          if (!isValidCoord(item.latitude, item.longitude)) return acc;
+          const key = item.person_who_capture;
+          const date = new Date(item.date_capture);
+          if (!acc[key] || date > new Date(acc[key].date_capture)) {
+            acc[key] = { ...item };
+          }
+          return acc;
+        }, {})
+      );
+    }
 
     setElementsCount(filteredData.length);
     return filteredData;
@@ -131,17 +140,22 @@ const MapPositions = ({ data, selectedGestor }) => {
 
     const newKeys = new Set();
     positionsToShow.forEach((p) => {
-      if (!p.latitude || !p.longitude) return;
       newKeys.add(`${p.cuenta}_${p.date_capture}`);
     });
 
-    // 🔹 Eliminar markers antiguos
-    Object.keys(markersRef.current).forEach((key) => {
-      if (!newKeys.has(key)) {
-        markersRef.current[key].remove();
-        delete markersRef.current[key];
-      }
-    });
+    // 🔹 Si hay un gestor seleccionado, limpiar todos los markers
+    if (selectedGestor) {
+      Object.values(markersRef.current).forEach((marker) => marker.remove());
+      markersRef.current = {};
+    } else {
+      // 🔹 Eliminar markers que ya no existen
+      Object.keys(markersRef.current).forEach((key) => {
+        if (!newKeys.has(key)) {
+          markersRef.current[key].remove();
+          delete markersRef.current[key];
+        }
+      });
+    }
 
     // 🔹 Agregar markers nuevos
     positionsToShow.forEach((gestor) => {
@@ -166,7 +180,6 @@ const MapPositions = ({ data, selectedGestor }) => {
       markerEl.style.boxShadow = "0 2px 8px rgba(0,0,0,0.3)";
       markerEl.style.cursor = "pointer";
 
-      // Animación
       let blinkCount = 0;
       const blinkInterval = setInterval(() => {
         markerEl.style.transform = blinkCount % 2 === 0 ? "scale(1.2)" : "scale(1)";
@@ -193,8 +206,6 @@ const MapPositions = ({ data, selectedGestor }) => {
 
       markersRef.current[key] = marker;
     });
-
-    currentKeysRef.current = newKeys;
 
     // Centrar mapa
     if (positionsToShow.length > 0) {
@@ -229,7 +240,7 @@ const MapPositions = ({ data, selectedGestor }) => {
           }}
         >
           {selectedGestor
-            ? `Mostrando ${elementsCount} gestiones de ${selectedGestor}`
+            ? `Mostrando ${elementsCount} gestiones de ${selectedGestor} (${missingPositionsCount} sin posición)`
             : `Mostrando ${elementsCount} últimas gestiones`}
         </div>
       )}

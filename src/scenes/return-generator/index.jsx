@@ -38,7 +38,11 @@ import {
   LockPersonOutlined,
   Refresh,
 } from "@mui/icons-material";
-import { createResponsiva, confirmationResponsiva, confirmationResponsivaReturn } from "../../api/responsive";
+import {
+  createResponsiva,
+  confirmationResponsiva,
+  confirmationResponsivaReturn,
+} from "../../api/responsive";
 import { useSelector } from "react-redux";
 
 const getInternetDate = async () => {
@@ -131,12 +135,13 @@ const Index = () => {
     if (!hasValidEmail(nuevoArticulo?.usuarioAsignado)) {
       setSnackbar({
         open: true,
-        message: "❌ No se puede firmar: El usuario no tiene un email válido registrado",
+        message:
+          "❌ No se puede firmar: El usuario no tiene un email válido registrado",
         severity: "error",
       });
       return;
     }
-    
+
     // Si tiene email válido, abrir el modal
     setSignatureStatus({ ...signatureStatus, showModal: true });
   };
@@ -976,9 +981,74 @@ const Index = () => {
     doc.setFontSize(fontSize);
     doc.setTextColor(PDF_STYLES.colors.text);
 
-    const initialY = y;
-    let currentX = x;
     let currentY = y;
+    const initialX = x;
+    let currentX = x;
+
+    // Función para procesar un fragmento de texto
+    const processTextFragment = (text, isBold = false) => {
+      doc.setFont("helvetica", isBold ? "bold" : "normal");
+
+      const words = text.split(" ");
+      let line = "";
+
+      for (let i = 0; i < words.length; i++) {
+        const word = words[i];
+        const testLine = line + (line ? " " : "") + word;
+        const testWidth = doc.getTextWidth(testLine);
+
+        // Si la línea excede el ancho máximo
+        if (testWidth > maxWidth - (currentX - initialX)) {
+          if (line) {
+            // Dibujar la línea actual
+            doc.text(line, currentX, currentY);
+            currentY += lineHeight;
+            currentX = initialX;
+            line = word;
+          } else {
+            // Si una sola palabra es más larga que el ancho máximo
+            // Dividir la palabra
+            const characters = word.split("");
+            let subWord = "";
+
+            for (let j = 0; j < characters.length; j++) {
+              const char = characters[j];
+              const testChar = subWord + char;
+              const charWidth = doc.getTextWidth(testChar);
+
+              if (charWidth > maxWidth - (currentX - initialX)) {
+                if (subWord) {
+                  doc.text(subWord, currentX, currentY);
+                  currentY += lineHeight;
+                  currentX = initialX;
+                  subWord = char;
+                } else {
+                  // Carácter individual muy ancho (raro caso)
+                  doc.text(char, currentX, currentY);
+                  currentY += lineHeight;
+                  currentX = initialX;
+                  subWord = "";
+                }
+              } else {
+                subWord += char;
+              }
+            }
+
+            if (subWord) {
+              line = subWord;
+            }
+          }
+        } else {
+          line = testLine;
+        }
+      }
+
+      // Dibujar la última línea
+      if (line) {
+        doc.text(line, currentX, currentY);
+        currentX += doc.getTextWidth(line);
+      }
+    };
 
     // Dividir el texto usando los marcadores {{ }}
     const parts = text.split(/(\{\{.*?\}\})/);
@@ -987,31 +1057,21 @@ const Index = () => {
       if (part.startsWith("{{") && part.endsWith("}}")) {
         // Texto entre {{ }} → BOLD
         const boldText = part.slice(2, -2);
-        doc.setFont("helvetica", "bold");
-
-        const boldWidth = doc.getTextWidth(boldText);
-        if (currentX + boldWidth > x + maxWidth) {
-          currentY += lineHeight;
-          currentX = x;
-        }
-
-        doc.text(boldText, currentX, currentY);
-        currentX += boldWidth;
+        processTextFragment(boldText, true);
       } else if (part.trim() !== "") {
         // Texto normal
-        doc.setFont("helvetica", "normal");
+        processTextFragment(part, false);
+      }
 
-        const lines = doc.splitTextToSize(part, maxWidth - (currentX - x));
-
-        lines.forEach((line, index) => {
-          if (index > 0) {
-            currentY += lineHeight;
-            currentX = x;
-          }
-
-          doc.text(line, currentX, currentY);
-          currentX += doc.getTextWidth(line);
-        });
+      // Agregar espacio después de cada parte (excepto si es puntuación)
+      if (parts.length > 1) {
+        const spaceWidth = doc.getTextWidth(" ");
+        if (currentX + spaceWidth <= initialX + maxWidth) {
+          currentX += spaceWidth;
+        } else {
+          currentY += lineHeight;
+          currentX = initialX;
+        }
       }
     });
 
@@ -1314,9 +1374,18 @@ const Index = () => {
       );
       y += PDF_STYLES.spacing.line;
 
-      const camposData = Object.entries(nuevoArticulo.campos || {}).map(
-        ([key, value]) => [key.replace(/_/g, " ").toUpperCase(), value]
-      );
+      const camposData = Object.entries(nuevoArticulo.campos || {})
+        .filter(([key, value]) => {
+          // Filtrar campos que no queremos mostrar
+          if (value === null || value === undefined) return false;
+          if (typeof value === "string" && value.trim() === "") return false;
+          if (String(value).toLowerCase() === "null") return false;
+          if (String(value).toLowerCase() === "undefined") return false;
+          if (String(value).toLowerCase() === "n/a") return false;
+
+          return true;
+        })
+        .map(([key, value]) => [key.replace(/_/g, " ").toUpperCase(), value]);
 
       y = drawCustomTable(doc, camposData, y, maxWidth, pageWidth);
 
