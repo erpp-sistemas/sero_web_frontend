@@ -178,7 +178,9 @@ function App() {
                     <main className="content">
                       <Topbar setIsSidebar={setIsSidebar} />
                       <Routes>
-                        <Route path="/home" element={<Home />} />
+                        <Route path="/home" element={
+                          user.profile === 'Coordinador' ? <HomeCoordination /> : <Home />
+                        } />
                         <Route path="/dashboard-direccion" element={<Dashboard setLogin={setIsAuthenticated} />} />
                         <Route path="/team" element={<Team />} />
                         <Route path="/contacts" element={<Contacts />} />

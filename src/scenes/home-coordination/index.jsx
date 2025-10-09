@@ -21,6 +21,8 @@ function Index() {
   const messages = useSelector((state) => state.webSocket.messages);
   const dispatch = useDispatch();
 
+  console.log(user)
+
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
