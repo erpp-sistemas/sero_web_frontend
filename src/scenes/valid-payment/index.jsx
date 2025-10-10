@@ -56,6 +56,7 @@ const Index = () => {
   const [columns, setColumns] = useState([]);
 
   const [resultOriginal, setResultOriginal] = useState([]);
+  const [resultFormatedOriginal, setResultFormatedOriginal] = useState([]);
   const [result, setResult] = useState([]);
   const [filteredResult, setFilteredResult] = useState([]);
   const [filterText, setFilterText] = useState("");
@@ -254,7 +255,9 @@ const Index = () => {
         type
       );
 
-      setResultOriginal(response.data);
+      // setResultOriginal(response.data);
+      setResultOriginal(JSON.parse(response.data[0].pagos_validos));
+      setResultFormatedOriginal(JSON.parse(response.data[0].pagos_validos_formated));            
       console.log(response.data)
       setTypeFilter(1);
       setTitleFilter("Registros Encontrados");
@@ -477,160 +480,174 @@ const Index = () => {
   }, [resultOriginal]);
 
   const handleExportToExcel = async (filter) => {
-    try {
-      setIsLoading(true);
-      console.log(filter);
-      const workbook = new ExcelJS.Workbook();
-      const worksheet = workbook.addWorksheet("Registros Encontrados");
+  try {
+    setIsLoading(true);
+    console.log(filter);
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Registros Encontrados");
 
-      const headers = Object.keys(resultOriginal[0]);
-      worksheet.addRow(headers);
+    // Determinar qué conjunto de datos usar para los headers
+    let dataSource;
+    if (filter === 16) {
+      dataSource = resultFormatedOriginal;
+    } else {
+      dataSource = resultOriginal;
+    }
 
-      if (filter === 1) {
-        resultOriginal.forEach((row) => {
+    // Obtener headers del conjunto de datos correcto
+    const headers = dataSource.length > 0 ? Object.keys(dataSource[0]) : [];
+    worksheet.addRow(headers);
+
+    if (filter === 1) {
+      resultOriginal.forEach((row) => {
+        const values = headers.map((header) => row[header]);
+        worksheet.addRow(values);
+      });
+    } else if (filter === 2) {
+      resultOriginal.forEach((row) => {
+        if (row["estatus de gestion valida"] === "valida") {
           const values = headers.map((header) => row[header]);
           worksheet.addRow(values);
-        });
-      } else if (filter === 2) {
-        resultOriginal.forEach((row) => {
-          if (row["estatus de gestion valida"] === "valida") {
-            const values = headers.map((header) => row[header]);
-            worksheet.addRow(values);
-          }
-        });
-      } else if (filter === 3) {
-        resultOriginal.forEach((row) => {
-          if (row["estatus de gestion valida"] !== "valida") {
-            const values = headers.map((header) => row[header]);
-            worksheet.addRow(values);
-          }
-        });
-      } else if (filter === 4) {
-        resultOriginal.forEach((row) => {
-          if (row["estatus de gestion valida"] === "valida") {
-            if (row.latitud === 0) {
-              const values = headers.map((header) => row[header]);
-              worksheet.addRow(values);
-            }
-          }
-        });
-      } else if (filter === 5) {
-        resultOriginal.forEach((row) => {
-          if (row["estatus de gestion valida"] === "valida") {
-            if (row["foto fachada predio"] === "no") {
-              const values = headers.map((header) => row[header]);
-              worksheet.addRow(values);
-            }
-          }
-        });
-      } else if (filter === 6) {
-        resultOriginal.forEach((row) => {
-          if (row["estatus de gestion valida"] === "valida") {
-            if (row["foto evidencia predio"] === "no") {
-              const values = headers.map((header) => row[header]);
-              worksheet.addRow(values);
-            }
-          }
-        });
-      } else if (filter === 7) {
-        resultOriginal.forEach((row) => {
-          if (row["estatus de gestion valida"] === "valida") {
-            if (row["estatus_predio"] !== "Predio localizado") {
-              const values = headers.map((header) => row[header]);
-              worksheet.addRow(values);
-            }
-          }
-        });
-      } else if (filter === 8) {
-        resultOriginal.forEach((row) => {
-          if (row["estatus de gestion valida"] === "valida") {
-            if (row["total_pagado"] > 0 && row["total_pagado"] <= 100) {
-              const values = headers.map((header) => row[header]);
-              worksheet.addRow(values);
-            }
-          }
-        });
-      } else if (filter === 9) {
-        resultOriginal.forEach((row) => {
-          if (row["estatus de gestion valida"] === "valida") {
-            if (row["total_pagado"] > 1000 && row["total_pagado"] <= 5000) {
-              const values = headers.map((header) => row[header]);
-              worksheet.addRow(values);
-            }
-          }
-        });
-      } else if (filter === 10) {
-        resultOriginal.forEach((row) => {
-          if (row["estatus de gestion valida"] === "valida") {
-            if (row["total_pagado"] > 5000 && row["total_pagado"] <= 10000) {
-              const values = headers.map((header) => row[header]);
-              worksheet.addRow(values);
-            }
-          }
-        });
-      } else if (filter === 11) {
-        resultOriginal.forEach((row) => {
-          if (row["estatus de gestion valida"] === "valida") {
-            if (row["total_pagado"] > 10000 && row["total_pagado"] <= 25000) {
-              const values = headers.map((header) => row[header]);
-              worksheet.addRow(values);
-            }
-          }
-        });
-      } else if (filter === 12) {
-        resultOriginal.forEach((row) => {
-          if (row["estatus de gestion valida"] === "valida") {
-            if (row["total_pagado"] > 25000 && row["total_pagado"] <= 50000) {
-              const values = headers.map((header) => row[header]);
-              worksheet.addRow(values);
-            }
-          }
-        });
-      } else if (filter === 13) {
-        resultOriginal.forEach((row) => {
-          if (row["estatus de gestion valida"] === "valida") {
-            if (row["total_pagado"] > 50000 && row["total_pagado"] <= 100000) {
-              const values = headers.map((header) => row[header]);
-              worksheet.addRow(values);
-            }
-          }
-        });
-      } else if (filter === 14) {
-        resultOriginal.forEach((row) => {
-          if (row["estatus de gestion valida"] === "valida") {
-            if (row["total_pagado"] > 100000 && row["total_pagado"] <= 500000) {
-              const values = headers.map((header) => row[header]);
-              worksheet.addRow(values);
-            }
-          }
-        });
-      } else if (filter === 15) {
-        resultOriginal.forEach((row) => {
-          if (row["estatus de gestion valida"] === "valida") {
-            if (row["total_pagado"] > 500000) {
-              const values = headers.map((header) => row[header]);
-              worksheet.addRow(values);
-            }
-          }
-        });
-      }
-
-      const buffer = await workbook.xlsx.writeBuffer();
-      const blob = new Blob([buffer], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        }
       });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "Pagos validos.xlsx";
-      a.click();
-      window.URL.revokeObjectURL(url);
-      setIsLoading(false);
-    } catch (error) {
-      console.error("Error:", error);
-      return null;
+    } else if (filter === 3) {
+      resultOriginal.forEach((row) => {
+        if (row["estatus de gestion valida"] !== "valida") {
+          const values = headers.map((header) => row[header]);
+          worksheet.addRow(values);
+        }
+      });
+    } else if (filter === 4) {
+      resultOriginal.forEach((row) => {
+        if (row["estatus de gestion valida"] === "valida") {
+          if (row.latitud === 0) {
+            const values = headers.map((header) => row[header]);
+            worksheet.addRow(values);
+          }
+        }
+      });
+    } else if (filter === 5) {
+      resultOriginal.forEach((row) => {
+        if (row["estatus de gestion valida"] === "valida") {
+          if (row["foto fachada predio"] === "no") {
+            const values = headers.map((header) => row[header]);
+            worksheet.addRow(values);
+          }
+        }
+      });
+    } else if (filter === 6) {
+      resultOriginal.forEach((row) => {
+        if (row["estatus de gestion valida"] === "valida") {
+          if (row["foto evidencia predio"] === "no") {
+            const values = headers.map((header) => row[header]);
+            worksheet.addRow(values);
+          }
+        }
+      });
+    } else if (filter === 7) {
+      resultOriginal.forEach((row) => {
+        if (row["estatus de gestion valida"] === "valida") {
+          if (row["estatus_predio"] !== "Predio localizado") {
+            const values = headers.map((header) => row[header]);
+            worksheet.addRow(values);
+          }
+        }
+      });
+    } else if (filter === 8) {
+      resultOriginal.forEach((row) => {
+        if (row["estatus de gestion valida"] === "valida") {
+          if (row["total_pagado"] > 0 && row["total_pagado"] <= 100) {
+            const values = headers.map((header) => row[header]);
+            worksheet.addRow(values);
+          }
+        }
+      });
+    } else if (filter === 9) {
+      resultOriginal.forEach((row) => {
+        if (row["estatus de gestion valida"] === "valida") {
+          if (row["total_pagado"] > 1000 && row["total_pagado"] <= 5000) {
+            const values = headers.map((header) => row[header]);
+            worksheet.addRow(values);
+          }
+        }
+      });
+    } else if (filter === 10) {
+      resultOriginal.forEach((row) => {
+        if (row["estatus de gestion valida"] === "valida") {
+          if (row["total_pagado"] > 5000 && row["total_pagado"] <= 10000) {
+            const values = headers.map((header) => row[header]);
+            worksheet.addRow(values);
+          }
+        }
+      });
+    } else if (filter === 11) {
+      resultOriginal.forEach((row) => {
+        if (row["estatus de gestion valida"] === "valida") {
+          if (row["total_pagado"] > 10000 && row["total_pagado"] <= 25000) {
+            const values = headers.map((header) => row[header]);
+            worksheet.addRow(values);
+          }
+        }
+      });
+    } else if (filter === 12) {
+      resultOriginal.forEach((row) => {
+        if (row["estatus de gestion valida"] === "valida") {
+          if (row["total_pagado"] > 25000 && row["total_pagado"] <= 50000) {
+            const values = headers.map((header) => row[header]);
+            worksheet.addRow(values);
+          }
+        }
+      });
+    } else if (filter === 13) {
+      resultOriginal.forEach((row) => {
+        if (row["estatus de gestion valida"] === "valida") {
+          if (row["total_pagado"] > 50000 && row["total_pagado"] <= 100000) {
+            const values = headers.map((header) => row[header]);
+            worksheet.addRow(values);
+          }
+        }
+      });
+    } else if (filter === 14) {
+      resultOriginal.forEach((row) => {
+        if (row["estatus de gestion valida"] === "valida") {
+          if (row["total_pagado"] > 100000 && row["total_pagado"] <= 500000) {
+            const values = headers.map((header) => row[header]);
+            worksheet.addRow(values);
+          }
+        }
+      });
+    } else if (filter === 15) {
+      resultOriginal.forEach((row) => {
+        if (row["estatus de gestion valida"] === "valida") {
+          if (row["total_pagado"] > 500000) {
+            const values = headers.map((header) => row[header]);
+            worksheet.addRow(values);
+          }
+        }
+      });
+    } else if (filter === 16) {
+      resultFormatedOriginal.forEach((row) => {
+        const values = headers.map((header) => row[header]);
+        worksheet.addRow(values);
+      });
     }
-  };
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "Pagos validos.xlsx";
+    a.click();
+    window.URL.revokeObjectURL(url);
+    setIsLoading(false);
+  } catch (error) {
+    console.error("Error:", error);
+    return null;
+  }
+};
 
   const handleExportToExcelFull = async () => {
     try {

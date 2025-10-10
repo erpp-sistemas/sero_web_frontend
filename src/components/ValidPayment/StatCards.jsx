@@ -3,6 +3,7 @@ import { Box, ButtonGroup, IconButton, Tooltip, useTheme } from "@mui/material";
 import { tokens } from "../../theme";
 import {
   CloudDownload,
+  CloudSync,
   CurrencyExchange,
   DateRange,
   Preview,
@@ -56,6 +57,11 @@ const StatCards = ({
                 <Tooltip title="Descargar" arrow>
                   <IconButton onClick={() => handleExportToExcel(1)}>
                     <CloudDownload sx={{color: colors.accentGreen[100]}}/>
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Descargar reporte con formato" arrow>
+                  <IconButton onClick={() => handleExportToExcel(16)}>
+                    <CloudSync sx={{color: colors.accentGreen[100]}}/>
                   </IconButton>
                 </Tooltip>
                 <Tooltip title="Ver Registros" arrow>
