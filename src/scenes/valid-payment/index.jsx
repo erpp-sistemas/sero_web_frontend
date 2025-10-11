@@ -479,7 +479,9 @@ const Index = () => {
     console.log(typeFilter);
   }, [resultOriginal]);
 
-  const handleExportToExcel = async (filter) => {
+  
+
+const handleExportToExcel = async (filter) => {
   try {
     setIsLoading(true);
     console.log(filter);
@@ -496,33 +498,103 @@ const Index = () => {
 
     // Obtener headers del conjunto de datos correcto
     const headers = dataSource.length > 0 ? Object.keys(dataSource[0]) : [];
-    worksheet.addRow(headers);
+    
+    // Añadir headers con formato
+    const headerRow = worksheet.addRow(headers);
+    
+    // Aplicar formato a los headers
+    headerRow.eachCell((cell, colNumber) => {
+      // Color azul sutil para headers
+      cell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FFF8F9FA' }
+      };
+      
+      // Fuente en negrita y color azul
+      cell.font = {
+        bold: true,
+        color: { argb: 'FF212529' },
+        size: 10,
+        name: 'Arial'
+      };
+      
+      // Bordes sutiles
+      cell.border = {
+        top: { style: 'thin', color: { argb: 'FF7A7A7A' } },
+        left: { style: 'thin', color: { argb: 'FF7A7A7A' } },
+        bottom: { style: 'thin', color: { argb: 'FF3A3A3A' } },
+        right: { style: 'thin', color: { argb: 'FF3A3A3A' } }
+      };
+      
+      // Alineación centrada
+      cell.alignment = {
+        vertical: 'middle',
+        horizontal: 'center'
+      };
+    });
 
-    if (filter === 1) {
-      resultOriginal.forEach((row) => {
-        const values = headers.map((header) => row[header]);
-        worksheet.addRow(values);
+    // Función para añadir filas con formato
+    const addFormattedRow = (row) => {
+      const values = headers.map((header) => row[header]);
+      const dataRow = worksheet.addRow(values);
+      
+      // Aplicar formato a las celdas de datos
+      dataRow.eachCell((cell, colNumber) => {
+        // Fuente limpia y minimalista
+        cell.font = {
+          size: 10,
+          name: 'Arial',
+          color: { argb: 'FF424242' }
+        };
+        
+        // Bordes muy sutiles para las celdas de datos
+        cell.border = {
+          top: { style: 'thin', color: { argb: 'FFF5F5F5' } },
+          left: { style: 'thin', color: { argb: 'FFF5F5F5' } },
+          bottom: { style: 'thin', color: { argb: 'FFF5F5F5' } },
+          right: { style: 'thin', color: { argb: 'FFF5F5F5' } }
+        };
+        
+        // Alineación según el tipo de dato
+        const value = row[headers[colNumber - 1]];
+        if (typeof value === 'number') {
+          cell.alignment = { horizontal: 'right' };
+          if (Number.isInteger(value)) {
+            cell.numFmt = '#,##0';
+          } else {
+            cell.numFmt = '#,##0.00';
+          }
+        } else {
+          cell.alignment = { 
+            vertical: 'middle',
+            horizontal: 'left',
+            wrapText: true
+          };
+        }
       });
+    };
+
+    // Procesar datos según el filtro
+    if (filter === 1) {
+      resultOriginal.forEach(addFormattedRow);
     } else if (filter === 2) {
       resultOriginal.forEach((row) => {
         if (row["estatus de gestion valida"] === "valida") {
-          const values = headers.map((header) => row[header]);
-          worksheet.addRow(values);
+          addFormattedRow(row);
         }
       });
     } else if (filter === 3) {
       resultOriginal.forEach((row) => {
         if (row["estatus de gestion valida"] !== "valida") {
-          const values = headers.map((header) => row[header]);
-          worksheet.addRow(values);
+          addFormattedRow(row);
         }
       });
     } else if (filter === 4) {
       resultOriginal.forEach((row) => {
         if (row["estatus de gestion valida"] === "valida") {
           if (row.latitud === 0) {
-            const values = headers.map((header) => row[header]);
-            worksheet.addRow(values);
+            addFormattedRow(row);
           }
         }
       });
@@ -530,8 +602,7 @@ const Index = () => {
       resultOriginal.forEach((row) => {
         if (row["estatus de gestion valida"] === "valida") {
           if (row["foto fachada predio"] === "no") {
-            const values = headers.map((header) => row[header]);
-            worksheet.addRow(values);
+            addFormattedRow(row);
           }
         }
       });
@@ -539,8 +610,7 @@ const Index = () => {
       resultOriginal.forEach((row) => {
         if (row["estatus de gestion valida"] === "valida") {
           if (row["foto evidencia predio"] === "no") {
-            const values = headers.map((header) => row[header]);
-            worksheet.addRow(values);
+            addFormattedRow(row);
           }
         }
       });
@@ -548,8 +618,7 @@ const Index = () => {
       resultOriginal.forEach((row) => {
         if (row["estatus de gestion valida"] === "valida") {
           if (row["estatus_predio"] !== "Predio localizado") {
-            const values = headers.map((header) => row[header]);
-            worksheet.addRow(values);
+            addFormattedRow(row);
           }
         }
       });
@@ -557,8 +626,7 @@ const Index = () => {
       resultOriginal.forEach((row) => {
         if (row["estatus de gestion valida"] === "valida") {
           if (row["total_pagado"] > 0 && row["total_pagado"] <= 100) {
-            const values = headers.map((header) => row[header]);
-            worksheet.addRow(values);
+            addFormattedRow(row);
           }
         }
       });
@@ -566,8 +634,7 @@ const Index = () => {
       resultOriginal.forEach((row) => {
         if (row["estatus de gestion valida"] === "valida") {
           if (row["total_pagado"] > 1000 && row["total_pagado"] <= 5000) {
-            const values = headers.map((header) => row[header]);
-            worksheet.addRow(values);
+            addFormattedRow(row);
           }
         }
       });
@@ -575,8 +642,7 @@ const Index = () => {
       resultOriginal.forEach((row) => {
         if (row["estatus de gestion valida"] === "valida") {
           if (row["total_pagado"] > 5000 && row["total_pagado"] <= 10000) {
-            const values = headers.map((header) => row[header]);
-            worksheet.addRow(values);
+            addFormattedRow(row);
           }
         }
       });
@@ -584,8 +650,7 @@ const Index = () => {
       resultOriginal.forEach((row) => {
         if (row["estatus de gestion valida"] === "valida") {
           if (row["total_pagado"] > 10000 && row["total_pagado"] <= 25000) {
-            const values = headers.map((header) => row[header]);
-            worksheet.addRow(values);
+            addFormattedRow(row);
           }
         }
       });
@@ -593,8 +658,7 @@ const Index = () => {
       resultOriginal.forEach((row) => {
         if (row["estatus de gestion valida"] === "valida") {
           if (row["total_pagado"] > 25000 && row["total_pagado"] <= 50000) {
-            const values = headers.map((header) => row[header]);
-            worksheet.addRow(values);
+            addFormattedRow(row);
           }
         }
       });
@@ -602,8 +666,7 @@ const Index = () => {
       resultOriginal.forEach((row) => {
         if (row["estatus de gestion valida"] === "valida") {
           if (row["total_pagado"] > 50000 && row["total_pagado"] <= 100000) {
-            const values = headers.map((header) => row[header]);
-            worksheet.addRow(values);
+            addFormattedRow(row);
           }
         }
       });
@@ -611,8 +674,7 @@ const Index = () => {
       resultOriginal.forEach((row) => {
         if (row["estatus de gestion valida"] === "valida") {
           if (row["total_pagado"] > 100000 && row["total_pagado"] <= 500000) {
-            const values = headers.map((header) => row[header]);
-            worksheet.addRow(values);
+            addFormattedRow(row);
           }
         }
       });
@@ -620,18 +682,44 @@ const Index = () => {
       resultOriginal.forEach((row) => {
         if (row["estatus de gestion valida"] === "valida") {
           if (row["total_pagado"] > 500000) {
-            const values = headers.map((header) => row[header]);
-            worksheet.addRow(values);
+            addFormattedRow(row);
           }
         }
       });
     } else if (filter === 16) {
-      resultFormatedOriginal.forEach((row) => {
-        const values = headers.map((header) => row[header]);
-        worksheet.addRow(values);
-      });
+      resultFormatedOriginal.forEach(addFormattedRow);
     }
 
+    // Ajustar el ancho de las columnas automáticamente - MÉTODO COMPATIBLE CON EXCELJS
+    headers.forEach((header, index) => {
+      const columnIndex = index + 1;
+      const column = worksheet.getColumn(columnIndex);
+      
+      let maxLength = header.length;
+      
+      // Revisar todas las filas de esta columna
+      worksheet.eachRow((row, rowNumber) => {
+        if (rowNumber > 1) { // Saltar la fila de headers
+          const cell = row.getCell(columnIndex);
+          if (cell.value) {
+            const cellLength = cell.value.toString().length;
+            if (cellLength > maxLength) {
+              maxLength = cellLength;
+            }
+          }
+        }
+      });
+      
+      // Establecer el ancho con un poco de padding
+      column.width = Math.min(maxLength + 2, 50);
+    });
+
+    // Congelar la fila de headers
+    worksheet.views = [
+      { state: 'frozen', ySplit: 1, activeCell: 'A2' }
+    ];
+
+    // Generar y descargar el archivo
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -644,7 +732,8 @@ const Index = () => {
     window.URL.revokeObjectURL(url);
     setIsLoading(false);
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Error al exportar a Excel:", error);
+    setIsLoading(false);
     return null;
   }
 };
