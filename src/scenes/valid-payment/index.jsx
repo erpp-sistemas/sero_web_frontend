@@ -255,9 +255,9 @@ const Index = () => {
         type
       );
 
-      setResultOriginal(response.data);
-      // setResultOriginal(JSON.parse(response.data[0].pagos_validos));
-      // setResultFormatedOriginal(JSON.parse(response.data[0].pagos_validos_formated));            
+      // setResultOriginal(response.data);
+      setResultOriginal(JSON.parse(response.data[0].pagos_validos));
+      setResultFormatedOriginal(JSON.parse(response.data[0].pagos_validos_formated));            
       console.log(response.data)
       setTypeFilter(1);
       setTitleFilter("Registros Encontrados");
