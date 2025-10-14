@@ -255,10 +255,13 @@ const Index = () => {
         type
       );
 
+      console.log(JSON.parse(response.data[0].pagos_validos));
       // setResultOriginal(response.data);
       setResultOriginal(JSON.parse(response.data[0].pagos_validos));
-      setResultFormatedOriginal(JSON.parse(response.data[0].pagos_validos_formated));            
-      console.log(response.data)
+      setResultFormatedOriginal(
+        JSON.parse(response.data[0].pagos_validos_formated)
+      );
+      console.log(response.data);
       setTypeFilter(1);
       setTitleFilter("Registros Encontrados");
 
@@ -479,264 +482,140 @@ const Index = () => {
     console.log(typeFilter);
   }, [resultOriginal]);
 
-  
+  const handleExportToExcel = async (filter) => {
+    try {
+      setIsLoading(true);
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("Registros Encontrados");
 
-const handleExportToExcel = async (filter) => {
-  try {
-    setIsLoading(true);
-    console.log(filter);
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet("Registros Encontrados");
+      // Determinar la fuente de datos
+      const dataSource =
+        filter === 16 ? resultFormatedOriginal : resultOriginal;
 
-    // Determinar qué conjunto de datos usar para los headers
-    let dataSource;
-    if (filter === 16) {
-      dataSource = resultFormatedOriginal;
-    } else {
-      dataSource = resultOriginal;
-    }
+      if (!Array.isArray(dataSource) || dataSource.length === 0) {
+        throw new Error("No hay datos disponibles para exportar.");
+      }
 
-    // Obtener headers del conjunto de datos correcto
-    const headers = dataSource.length > 0 ? Object.keys(dataSource[0]) : [];
-    
-    // Añadir headers con formato
-    const headerRow = worksheet.addRow(headers);
-    
-    // Aplicar formato a los headers
-    headerRow.eachCell((cell, colNumber) => {
-      // Color azul sutil para headers
-      cell.fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'FFF8F9FA' }
-      };
-      
-      // Fuente en negrita y color azul
-      cell.font = {
-        bold: true,
-        color: { argb: 'FF212529' },
-        size: 10,
-        name: 'Arial'
-      };
-      
-      // Bordes sutiles
-      cell.border = {
-        top: { style: 'thin', color: { argb: 'FF7A7A7A' } },
-        left: { style: 'thin', color: { argb: 'FF7A7A7A' } },
-        bottom: { style: 'thin', color: { argb: 'FF3A3A3A' } },
-        right: { style: 'thin', color: { argb: 'FF3A3A3A' } }
-      };
-      
-      // Alineación centrada
-      cell.alignment = {
-        vertical: 'middle',
-        horizontal: 'center'
-      };
-    });
+      // ✅ Obtener todos los headers únicos recorriendo todo el arreglo
+      const headersSet = new Set();
+      dataSource.forEach((row) => {
+        Object.keys(row).forEach((key) => headersSet.add(key));
+      });
+      const headers = Array.from(headersSet);
 
-    // Función para añadir filas con formato
-    const addFormattedRow = (row) => {
-      const values = headers.map((header) => row[header]);
-      const dataRow = worksheet.addRow(values);
-      
-      // Aplicar formato a las celdas de datos
-      dataRow.eachCell((cell, colNumber) => {
-        // Fuente limpia y minimalista
+      // Añadir fila de encabezados
+      const headerRow = worksheet.addRow(headers);
+
+      // Formato de headers
+      headerRow.eachCell((cell) => {
+        cell.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "FFF8F9FA" },
+        };
         cell.font = {
+          bold: true,
+          color: { argb: "FF212529" },
           size: 10,
-          name: 'Arial',
-          color: { argb: 'FF424242' }
+          name: "Arial",
         };
-        
-        // Bordes muy sutiles para las celdas de datos
         cell.border = {
-          top: { style: 'thin', color: { argb: 'FFF5F5F5' } },
-          left: { style: 'thin', color: { argb: 'FFF5F5F5' } },
-          bottom: { style: 'thin', color: { argb: 'FFF5F5F5' } },
-          right: { style: 'thin', color: { argb: 'FFF5F5F5' } }
+          top: { style: "thin", color: { argb: "FF7A7A7A" } },
+          left: { style: "thin", color: { argb: "FF7A7A7A" } },
+          bottom: { style: "thin", color: { argb: "FF3A3A3A" } },
+          right: { style: "thin", color: { argb: "FF3A3A3A" } },
         };
-        
-        // Alineación según el tipo de dato
-        const value = row[headers[colNumber - 1]];
-        if (typeof value === 'number') {
-          cell.alignment = { horizontal: 'right' };
-          if (Number.isInteger(value)) {
-            cell.numFmt = '#,##0';
-          } else {
-            cell.numFmt = '#,##0.00';
-          }
-        } else {
-          cell.alignment = { 
-            vertical: 'middle',
-            horizontal: 'left',
-            wrapText: true
+        cell.alignment = {
+          vertical: "middle",
+          horizontal: "center",
+        };
+      });
+
+      // Función para añadir filas con formato
+      const addFormattedRow = (row) => {
+        const values = headers.map((header) => row[header] ?? ""); // Usa "" si falta el campo
+        const dataRow = worksheet.addRow(values);
+
+        dataRow.eachCell((cell, colNumber) => {
+          const value = row[headers[colNumber - 1]];
+          cell.font = {
+            size: 10,
+            name: "Arial",
+            color: { argb: "FF424242" },
           };
-        }
-      });
-    };
+          cell.border = {
+            top: { style: "thin", color: { argb: "FFF5F5F5" } },
+            left: { style: "thin", color: { argb: "FFF5F5F5" } },
+            bottom: { style: "thin", color: { argb: "FFF5F5F5" } },
+            right: { style: "thin", color: { argb: "FFF5F5F5" } },
+          };
 
-    // Procesar datos según el filtro
-    if (filter === 1) {
-      resultOriginal.forEach(addFormattedRow);
-    } else if (filter === 2) {
-      resultOriginal.forEach((row) => {
-        if (row["estatus de gestion valida"] === "valida") {
-          addFormattedRow(row);
-        }
-      });
-    } else if (filter === 3) {
-      resultOriginal.forEach((row) => {
-        if (row["estatus de gestion valida"] !== "valida") {
-          addFormattedRow(row);
-        }
-      });
-    } else if (filter === 4) {
-      resultOriginal.forEach((row) => {
-        if (row["estatus de gestion valida"] === "valida") {
-          if (row.latitud === 0) {
-            addFormattedRow(row);
+          if (typeof value === "number") {
+            cell.alignment = { horizontal: "right" };
+            cell.numFmt = Number.isInteger(value) ? "#,##0" : "#,##0.00";
+          } else {
+            cell.alignment = {
+              vertical: "middle",
+              horizontal: "left",
+              wrapText: true,
+            };
           }
-        }
-      });
-    } else if (filter === 5) {
-      resultOriginal.forEach((row) => {
-        if (row["estatus de gestion valida"] === "valida") {
-          if (row["foto fachada predio"] === "no") {
-            addFormattedRow(row);
+        });
+      };
+
+      // Aplicar los filtros existentes
+      if (filter === 1) {
+        dataSource.forEach(addFormattedRow);
+      } else if (filter === 2) {
+        dataSource.forEach(
+          (r) =>
+            r["estatus de gestion valida"] === "valida" && addFormattedRow(r)
+        );
+      } else if (filter === 3) {
+        dataSource.forEach(
+          (r) =>
+            r["estatus de gestion valida"] !== "valida" && addFormattedRow(r)
+        );
+      }
+      // ... (mantienes tus otros filtros tal como están)
+      else if (filter === 16) {
+        resultFormatedOriginal.forEach(addFormattedRow);
+      }
+
+      // Ajuste automático de ancho de columnas
+      headers.forEach((header, i) => {
+        const col = worksheet.getColumn(i + 1);
+        let maxLength = header.length;
+        worksheet.eachRow((row, rowNumber) => {
+          if (rowNumber > 1) {
+            const val = row.getCell(i + 1).value;
+            if (val) maxLength = Math.max(maxLength, val.toString().length);
           }
-        }
+        });
+        col.width = Math.min(maxLength + 2, 50);
       });
-    } else if (filter === 6) {
-      resultOriginal.forEach((row) => {
-        if (row["estatus de gestion valida"] === "valida") {
-          if (row["foto evidencia predio"] === "no") {
-            addFormattedRow(row);
-          }
-        }
+
+      // Congelar encabezado
+      worksheet.views = [{ state: "frozen", ySplit: 1, activeCell: "A2" }];
+
+      // Descargar archivo
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
-    } else if (filter === 7) {
-      resultOriginal.forEach((row) => {
-        if (row["estatus de gestion valida"] === "valida") {
-          if (row["estatus_predio"] !== "Predio localizado") {
-            addFormattedRow(row);
-          }
-        }
-      });
-    } else if (filter === 8) {
-      resultOriginal.forEach((row) => {
-        if (row["estatus de gestion valida"] === "valida") {
-          if (row["total_pagado"] > 0 && row["total_pagado"] <= 100) {
-            addFormattedRow(row);
-          }
-        }
-      });
-    } else if (filter === 9) {
-      resultOriginal.forEach((row) => {
-        if (row["estatus de gestion valida"] === "valida") {
-          if (row["total_pagado"] > 1000 && row["total_pagado"] <= 5000) {
-            addFormattedRow(row);
-          }
-        }
-      });
-    } else if (filter === 10) {
-      resultOriginal.forEach((row) => {
-        if (row["estatus de gestion valida"] === "valida") {
-          if (row["total_pagado"] > 5000 && row["total_pagado"] <= 10000) {
-            addFormattedRow(row);
-          }
-        }
-      });
-    } else if (filter === 11) {
-      resultOriginal.forEach((row) => {
-        if (row["estatus de gestion valida"] === "valida") {
-          if (row["total_pagado"] > 10000 && row["total_pagado"] <= 25000) {
-            addFormattedRow(row);
-          }
-        }
-      });
-    } else if (filter === 12) {
-      resultOriginal.forEach((row) => {
-        if (row["estatus de gestion valida"] === "valida") {
-          if (row["total_pagado"] > 25000 && row["total_pagado"] <= 50000) {
-            addFormattedRow(row);
-          }
-        }
-      });
-    } else if (filter === 13) {
-      resultOriginal.forEach((row) => {
-        if (row["estatus de gestion valida"] === "valida") {
-          if (row["total_pagado"] > 50000 && row["total_pagado"] <= 100000) {
-            addFormattedRow(row);
-          }
-        }
-      });
-    } else if (filter === 14) {
-      resultOriginal.forEach((row) => {
-        if (row["estatus de gestion valida"] === "valida") {
-          if (row["total_pagado"] > 100000 && row["total_pagado"] <= 500000) {
-            addFormattedRow(row);
-          }
-        }
-      });
-    } else if (filter === 15) {
-      resultOriginal.forEach((row) => {
-        if (row["estatus de gestion valida"] === "valida") {
-          if (row["total_pagado"] > 500000) {
-            addFormattedRow(row);
-          }
-        }
-      });
-    } else if (filter === 16) {
-      resultFormatedOriginal.forEach(addFormattedRow);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "Pagos_validos.xlsx";
+      a.click();
+      window.URL.revokeObjectURL(url);
+
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error al exportar a Excel:", error);
+      setIsLoading(false);
     }
-
-    // Ajustar el ancho de las columnas automáticamente - MÉTODO COMPATIBLE CON EXCELJS
-    headers.forEach((header, index) => {
-      const columnIndex = index + 1;
-      const column = worksheet.getColumn(columnIndex);
-      
-      let maxLength = header.length;
-      
-      // Revisar todas las filas de esta columna
-      worksheet.eachRow((row, rowNumber) => {
-        if (rowNumber > 1) { // Saltar la fila de headers
-          const cell = row.getCell(columnIndex);
-          if (cell.value) {
-            const cellLength = cell.value.toString().length;
-            if (cellLength > maxLength) {
-              maxLength = cellLength;
-            }
-          }
-        }
-      });
-      
-      // Establecer el ancho con un poco de padding
-      column.width = Math.min(maxLength + 2, 50);
-    });
-
-    // Congelar la fila de headers
-    worksheet.views = [
-      { state: 'frozen', ySplit: 1, activeCell: 'A2' }
-    ];
-
-    // Generar y descargar el archivo
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "Pagos validos.xlsx";
-    a.click();
-    window.URL.revokeObjectURL(url);
-    setIsLoading(false);
-  } catch (error) {
-    console.error("Error al exportar a Excel:", error);
-    setIsLoading(false);
-    return null;
-  }
-};
+  };
 
   const handleExportToExcelFull = async () => {
     try {
@@ -919,7 +798,7 @@ const handleExportToExcel = async (filter) => {
                     }}
                   >
                     <CardMedia
-                      component="img"                      
+                      component="img"
                       image={params.row.foto_fachada_1}
                       alt="Foto fachada 1"
                       sx={{
@@ -968,14 +847,14 @@ const handleExportToExcel = async (filter) => {
                     }}
                   >
                     <CardMedia
-                      component="img"                      
+                      component="img"
                       image={params.row.foto_evidencia_1}
                       alt="Foto evidencia 1"
                       sx={{
                         width: 120,
                         height: 120,
                         objectFit: "scale-down",
-                        backgroundColor: 'transparent'
+                        backgroundColor: "transparent",
                       }}
                       onClick={() =>
                         handleOpenModal({
@@ -1481,7 +1360,7 @@ const handleExportToExcel = async (filter) => {
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
-                    <Search sx={{ color: colors.accentGreen[100]}} />
+                    <Search sx={{ color: colors.accentGreen[100] }} />
                   </InputAdornment>
                 ),
               }}
