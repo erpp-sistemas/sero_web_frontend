@@ -70,6 +70,7 @@ import CitizenAttentionAppointments from './scenes/citizen-attention-appointment
 import InventoryList from './scenes/inventory-list'
 import NewInventory from './scenes/new-inventory'
 import ResponsiveGenerator from './scenes/responsive-generator'
+import ResponsiveGeneratorInitial from './scenes/responsive-generator-initial'
 import ReturnGenerator from './scenes/return-generator'
 import VerificationResponsive from './scenes/verification-responsiva'
 import Chat from './scenes/chat-support'
@@ -235,6 +236,7 @@ function App() {
                         <Route path="/inventory-list" element={<InventoryList />} />
                         <Route path="/new-inventory" element={<NewInventory />} />
                         <Route path="/responsive-generator" element={<ResponsiveGenerator />} />
+                        <Route path="/responsive-generator-initial" element={<ResponsiveGeneratorInitial />} />
                         <Route path="/return-generator" element={<ReturnGenerator />} />
                         <Route path="/verification-responsiva" element={<VerificationResponsive />} />
                         <Route path="/chat-support" element={<Chat />} />

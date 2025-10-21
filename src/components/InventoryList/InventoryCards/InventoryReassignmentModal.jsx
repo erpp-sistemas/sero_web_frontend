@@ -15,7 +15,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import NoPhotographyOutlinedIcon from "@mui/icons-material/NoPhotographyOutlined";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import { tokens } from "../../../theme";
-import { AssignmentOutlined, InfoOutlined } from "@mui/icons-material";
+import { AssignmentOutlined, AssignmentTurnedInOutlined, InfoOutlined } from "@mui/icons-material";
 import PlaceSelectArray from "../../../components/select/placeSelectArray.jsx";
 import ActiveUsersSelect from "../../../components/inventory/select/activeUsersSelect";
 import { useNavigate } from "react-router-dom";
@@ -191,6 +191,32 @@ function InventoryReassignmentModal({
         nuevoArticulo: nuevoArticuloCompleto, // ← Usar el objeto actualizado
         articuloId: itemCopy.id_articulo,
         tipo_responsiva: "reasignacion",
+      },
+    });
+
+    onClose();
+  };
+
+  const handleConfirmAssignmentInitial = () => {
+    // if (!item) return;
+
+    // const filteredItem = filterItemForReassignment(item);
+    // console.log("Item filtrado para reasignación:", filteredItem);
+
+    if (!itemCopy || !selectedUser || !selectedPlace) return;
+
+    // Generar el objeto de reasignación
+    const nuevoArticuloCompleto = generateReassignmentData();
+
+    console.log("Datos de reasignación:", nuevoArticuloCompleto);
+
+    // Redirigir a la página de generación de responsiva
+    navigate("/responsive-generator-initial", {
+    // navigate("/return-generator", {
+      state: {
+        nuevoArticulo: nuevoArticuloCompleto, // ← Usar el objeto actualizado
+        articuloId: itemCopy.id_articulo,
+        tipo_responsiva: "asignacion_inicial_con_responsiva",
       },
     });
 
@@ -566,6 +592,49 @@ function InventoryReassignmentModal({
                 }}
               >
                 Cancelar
+              </Button>
+              <Button
+                onClick={handleConfirmAssignmentInitial}
+                variant="contained"
+                endIcon={
+                  <AssignmentTurnedInOutlined
+                    sx={{ fontSize: 18, color: colors.textAccent }}
+                  />
+                }
+                sx={{
+                  textTransform: "none", // minimalista, sin mayúsculas forzadas
+                  borderRadius: "10px", // bordes redondeados suaves
+                  fontWeight: 500,
+                  fontSize: "0.875rem", // tamaño legible, consistente
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  gap: "8px", // espacio limpio entre texto e icono
+                  backgroundColor: colors.accentGreen[100], // color normal
+                  color: colors.textAccent, // contraste legible
+                  border: "none",
+                  cursor: "pointer",
+
+                  "&:hover": {
+                    backgroundColor: colors.accentGreen[200], // hover sutil
+                  },
+                  "&:active": {
+                    backgroundColor: colors.accentGreen[300], // feedback presionado
+                  },
+                  "& .MuiButton-endIcon": {
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  },
+                  transition:
+                    "background-color 0.3s ease, box-shadow 0.2s ease",
+                  boxShadow: "none", // minimalismo: sin sombra por defecto
+                  "&:hover, &:active": {
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.08)", // sombra muy ligera al interactuar
+                  },
+                }}
+              >
+                Confirmar Asignación Inicial
               </Button>
               <Button
                 onClick={handleConfirmReassignment}
