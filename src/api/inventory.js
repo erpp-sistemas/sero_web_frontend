@@ -85,3 +85,19 @@ export const createArticle = async (payload) => {
     throw error.response?.data || error;
   }
 };
+
+export const updateArticle = async (payload) => {
+  try {
+    const response = await instance.put(
+      "/inventory/article/update",  // ← Ruta que definimos
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error al crear el artículo:",
+      error.response?.data || error.message
+    );
+    throw error.response?.data || error;
+  }
+};
