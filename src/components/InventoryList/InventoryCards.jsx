@@ -41,7 +41,7 @@ function InventoryCards({ inventoryCopy, loading, onSaveItem }) {
   const [reassignModalOpen, setReassignModalOpen] = useState(false);
   const [returnModalOpen, setReturnModalOpen] = useState(false);
 
-  console.log(inventoryCopy)
+  console.log(inventoryCopy);
 
   useEffect(() => {
     setLocalInventory(inventoryCopy || []);
@@ -512,61 +512,68 @@ function InventoryViewer({ inventory, loading, onSaveItem }) {
     }, 500);
   };
 
-  // Función para actualizar inventoryCopy con cambios de fotos
-  // const handleSaveItem = (id_articulo, changes) => {
-  //   setInventoryCopy((currentInventory) => {
-  //     return currentInventory.map((item) => {
-  //       if (item.id_articulo !== id_articulo) return item;
-
-  //       let updatedPhotos = item.fotos ? [...item.fotos] : [];
-
-  //       if (changes.deletedPhotoIds && changes.deletedPhotoIds.length > 0) {
-  //         updatedPhotos = updatedPhotos.filter(
-  //           (photo) => !changes.deletedPhotoIds.includes(photo.id_foto_articulo)
-  //         );
-  //       }
-
-  //       if (changes.newPhotos && changes.newPhotos.length > 0) {
-  //         // Limpiamos properties para evitar objetos pesados
-  //         const newPhotosCleaned = changes.newPhotos.map(
-  //           ({ file, imagen64, ...rest }) => rest
-  //         );
-  //         updatedPhotos = [...updatedPhotos, ...newPhotosCleaned];
-  //       }
-
-  //       return {
-  //         ...item,
-  //         fotos: updatedPhotos,
-  //       };
-  //     });
-  //   });
-  // };
-
+  // Función para manejar las actualizaciones del componente hijo
   const handleSaveItem = (id_articulo, changes) => {
+    console.log("📥 Recibiendo cambios del hijo:", { id_articulo, changes });
+
     setInventoryCopy((currentInventory) => {
       const updatedInventory = currentInventory.map((item) => {
         if (item.id_articulo !== id_articulo) return item;
 
-        let updatedPhotos = item.fotos ? [...item.fotos] : [];
-
-        if (changes.deletedPhotoIds && changes.deletedPhotoIds.length > 0) {
-          updatedPhotos = updatedPhotos.filter(
-            (photo) => !changes.deletedPhotoIds.includes(photo.id_foto_articulo)
+        // Si viene un artículo completo actualizado (caso de información)
+        if (changes.updatedItem) {
+          console.log(
+            "🔄 Actualizando artículo completo:",
+            changes.updatedItem
           );
+          return changes.updatedItem;
         }
 
-        if (changes.newPhotos && changes.newPhotos.length > 0) {
-          const newPhotosCleaned = changes.newPhotos.map(
-            ({ file, imagen64, ...rest }) => rest
-          );
-          updatedPhotos = [...updatedPhotos, ...newPhotosCleaned];
+        // Si son cambios específicos de fotos
+        if (changes.type === "photos") {
+          let updatedPhotos = item.fotos ? [...item.fotos] : [];
+
+          // Eliminar fotos marcadas para borrar
+          if (changes.deletedPhotoIds && changes.deletedPhotoIds.length > 0) {
+            updatedPhotos = updatedPhotos.filter(
+              (photo) =>
+                !changes.deletedPhotoIds.includes(photo.id_foto_articulo)
+            );
+          }
+
+          // Agregar nuevas fotos
+          if (changes.newPhotos && changes.newPhotos.length > 0) {
+            const newPhotosCleaned = changes.newPhotos.map(
+              ({ file, imagen64, ...rest }) => rest
+            );
+            updatedPhotos = [...updatedPhotos, ...newPhotosCleaned];
+          }
+
+          console.log("🖼️ Fotos actualizadas:", updatedPhotos);
+          return {
+            ...item,
+            fotos: updatedPhotos,
+          };
         }
 
-        return { ...item, fotos: updatedPhotos };
+        // Si son cambios específicos de información (campos modificados)
+        if (changes.type === "info" && changes.modifiedFields) {
+          console.log(
+            "📝 Actualizando campos modificados:",
+            changes.modifiedFields
+          );
+          return {
+            ...item,
+            ...changes.modifiedFields,
+          };
+        }
+
+        return item;
       });
 
       // Propagar hacia el padre el inventario completo actualizado
       if (onSaveItem) {
+        console.log("⬆️ Propagando cambios al padre:", updatedInventory);
         onSaveItem(updatedInventory);
       }
 

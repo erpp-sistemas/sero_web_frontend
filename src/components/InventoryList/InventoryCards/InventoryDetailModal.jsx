@@ -230,16 +230,25 @@ const InventoryDetailModal = ({ open, onClose, item, onSave }) => {
         payload
       );
       const response = await updateArticle(payload);
-      console.log("✅ Respuesta simulada:", response);
+      console.log("✅ Respuesta del servidor:", response);
 
-      if (onSave) {
-        onSave(id_articulo, { updatedInfo: response.updatedInfo });
-      }
-
-      setOriginalItem((prev) => ({
-        ...prev,
+      // ACTUALIZAR EL ESTADO LOCAL PRIMERO
+      const updatedItem = {
+        ...itemCopy,
         ...modifiedFields,
-      }));
+      };
+
+      setItemCopy(updatedItem);
+      setOriginalItem(updatedItem);
+
+      // LLAMAR AL PADRE CON LOS DATOS ACTUALIZADOS
+      if (onSave) {
+        onSave(id_articulo, {
+          updatedItem: updatedItem, // Pasar el artículo completo actualizado
+          modifiedFields: modifiedFields,
+          type: "info", // Para identificar el tipo de actualización
+        });
+      }
 
       setIsEditingInfo(false);
       setSaveInfoSuccess(true);
@@ -663,33 +672,36 @@ const InventoryDetailModal = ({ open, onClose, item, onSave }) => {
 
       console.log(response);
 
+      // ACTUALIZAR EL ESTADO LOCAL PRIMERO
+      const updatedFotos = itemCopy.fotos.filter(
+        (foto) => !deletedPhotoIds.includes(foto.id_foto_articulo)
+      );
+
+      const fotosConNuevas = [
+        ...updatedFotos,
+        ...response.newPhotos.map(({ id_foto_articulo, url_imagen }) => ({
+          id_foto_articulo,
+          url_imagen,
+        })),
+      ];
+
+      const updatedItem = {
+        ...itemCopy,
+        fotos: fotosConNuevas,
+      };
+
+      setItemCopy(updatedItem);
+      setOriginalItem(updatedItem);
+
+      // LLAMAR AL PADRE CON LOS DATOS ACTUALIZADOS
       if (onSave) {
         onSave(id_articulo, {
+          updatedItem: updatedItem, // Pasar el artículo completo actualizado
           deletedPhotoIds,
           newPhotos: response.newPhotos,
+          type: "photos", // Para identificar el tipo de actualización
         });
       }
-
-      setItemCopy((prev) => {
-        if (!prev) return prev;
-
-        const fotosActualizadas = prev.fotos.filter(
-          (foto) => !deletedPhotoIds.includes(foto.id_foto_articulo)
-        );
-
-        const fotosConNuevas = [
-          ...fotosActualizadas,
-          ...response.newPhotos.map(({ id_foto_articulo, url_imagen }) => ({
-            id_foto_articulo,
-            url_imagen,
-          })),
-        ];
-
-        return {
-          ...prev,
-          fotos: fotosConNuevas,
-        };
-      });
 
       setPhotosToDelete([]);
       setNewPhotos([]);
