@@ -40,16 +40,16 @@ import { useSelector } from "react-redux";
 
 const formatFecha = (fechaString) => {
   if (!fechaString) return "N/A";
-  const [year, month, day] = fechaString.split('-');
+  const [year, month, day] = fechaString.split("-");
   const fecha = new Date(year, month - 1, day);
-  return fecha.toLocaleDateString('es-MX');
+  return fecha.toLocaleDateString("es-MX");
 };
 
 const getTodayLocalDate = () => {
   const now = new Date();
   const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 };
 
@@ -100,7 +100,9 @@ const Index = () => {
 
   const [observaciones, setObservaciones] = useState("");
   const [motivoCambio, setMotivoCambio] = useState("");
-  const [selectedFechaEntrega, setSelectedFechaEntrega] = useState(getTodayLocalDate());
+  const [selectedFechaEntrega, setSelectedFechaEntrega] = useState(
+    getTodayLocalDate()
+  );
   const [images, setImages] = useState({
     erpp: null,
     headerRight: null,
@@ -433,7 +435,8 @@ const Index = () => {
       plaza_asignacion: nuevoArticulo.plaza?.nombre_plaza || "CDMX",
 
       // ✅ FECHAS
-      fecha_asignacion: selectedFechaEntrega || new Date().toISOString().split("T")[0],
+      fecha_asignacion:
+        selectedFechaEntrega || new Date().toISOString().split("T")[0],
       fecha_limite_firma: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
         .toISOString()
         .split("T")[0],
@@ -748,7 +751,7 @@ const Index = () => {
 
   const handleFechaEntregaChange = (event) => {
     const nuevaFecha = event.target.value;
-    console.log(nuevaFecha)
+    console.log(nuevaFecha);
     setSelectedFechaEntrega(nuevaFecha);
     setPdfVersion((prev) => prev + 1); // Actualizar PDF cuando cambia la fecha
   };
@@ -1304,7 +1307,7 @@ const Index = () => {
 
       const fechaEntregaConfiable = await getInternetDate();
       const fechaEntregaFormateada = formatFecha(selectedFechaEntrega);
-        //selectedFechaEntrega.toLocaleDateString("es-MX");
+      //selectedFechaEntrega.toLocaleDateString("es-MX");
 
       const datosResponsable = [
         `- Nombre completo: ${nuevoArticulo.usuarioAsignado?.nombre || "N/A"}`,
@@ -1361,12 +1364,38 @@ const Index = () => {
 
       const camposData = Object.entries(nuevoArticulo.campos || {})
         .filter(([key, value]) => {
-          // Filtrar campos que no queremos mostrar
-          if (value === null || value === undefined) return false;
-          if (typeof value === "string" && value.trim() === "") return false;
-          if (String(value).toLowerCase() === "null") return false;
-          if (String(value).toLowerCase() === "undefined") return false;
-          if (String(value).toLowerCase() === "n/a") return false;
+          if (!key || !value) return false;
+
+          const keyLower = key.toLowerCase();
+          const valueStr = String(value).trim().toLowerCase();
+
+          // Omitir campos con nombre que contenga "activo"
+          if (keyLower.includes("activo")) return false;
+
+          if (keyLower.includes("estado")) return false;
+
+          if (keyLower.includes("area")) return false;
+
+          if (keyLower.includes("ubicacion")) return false;
+
+          if (keyLower.includes("condicion_actual")) return false;
+
+          if (keyLower.includes("fecha")) return false;
+
+          if (keyLower.includes("precio")) return false;
+
+          // Omitir valores vacíos, nulos o no válidos
+          if (
+            valueStr === "" ||
+            valueStr === "null" ||
+            valueStr === "undefined" ||
+            valueStr === "n/a" ||
+            valueStr === "n/d"
+          )
+            return false;
+
+          // Omitir fechas "1999-01-01" en cualquier formato
+          if (valueStr.includes("1999-01-01")) return false;
 
           return true;
         })
@@ -1842,7 +1871,7 @@ const Index = () => {
               >
                 Fecha de entrega
               </Typography>
-              <TextField                
+              <TextField
                 size="small"
                 type="date"
                 value={selectedFechaEntrega}

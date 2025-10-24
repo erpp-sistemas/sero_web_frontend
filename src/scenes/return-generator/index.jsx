@@ -1377,11 +1377,38 @@ const Index = () => {
       const camposData = Object.entries(nuevoArticulo.campos || {})
         .filter(([key, value]) => {
           // Filtrar campos que no queremos mostrar
-          if (value === null || value === undefined) return false;
-          if (typeof value === "string" && value.trim() === "") return false;
-          if (String(value).toLowerCase() === "null") return false;
-          if (String(value).toLowerCase() === "undefined") return false;
-          if (String(value).toLowerCase() === "n/a") return false;
+          if (!key || !value) return false;
+
+          const keyLower = key.toLowerCase();
+          const valueStr = String(value).trim().toLowerCase();
+
+          // Omitir campos con nombre que contenga "activo"
+          if (keyLower.includes("activo")) return false;
+
+          if (keyLower.includes("estado")) return false;
+
+          if (keyLower.includes("area")) return false;
+
+          if (keyLower.includes("ubicacion")) return false;
+
+          if (keyLower.includes("condicion_actual")) return false;
+
+          if (keyLower.includes("fecha")) return false;
+
+          if (keyLower.includes("precio")) return false;
+
+          // Omitir valores vacíos, nulos o no válidos
+          if (
+            valueStr === "" ||
+            valueStr === "null" ||
+            valueStr === "undefined" ||
+            valueStr === "n/a" ||
+            valueStr === "n/d"
+          )
+            return false;
+
+          // Omitir fechas "1999-01-01" en cualquier formato
+          if (valueStr.includes("1999-01-01")) return false;
 
           return true;
         })
