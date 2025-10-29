@@ -75,6 +75,7 @@ import ReturnGenerator from './scenes/return-generator'
 import VerificationResponsive from './scenes/verification-responsiva'
 import Chat from './scenes/chat-support'
 import HomeCoordination from './scenes/home-coordination'
+import PaymentValidation from './scenes/payment-validation'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -241,6 +242,7 @@ function App() {
                         <Route path="/verification-responsiva" element={<VerificationResponsive />} />
                         <Route path="/chat-support" element={<Chat />} />
                         <Route path="/home-coordination" element={<HomeCoordination />} />
+                        <Route path="/payment-validation" element={<PaymentValidation />} />
                       </Routes>
                     </main>
                   </Box>
