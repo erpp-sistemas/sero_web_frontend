@@ -6,7 +6,6 @@ import DashboardSkeleton from "../../components/PaymentValidation/DashboardSkele
 import ResumenGeneral from "../../components/PaymentValidation/ResumenGeneral";
 import IndicadoresGestion from "../../components/PaymentValidation/IndicadoresGestion";
 import ResumenEstatusGestion from "../../components/PaymentValidation/ResumenEstatusGestion";
-import DistribucionPagos from "../../components/PaymentValidation/DistribucionPagos";
 import DistribucionMontosPorEstatus from "../../components/PaymentValidation/DistribucionMontosPorEstatus";
 import { paymentValidationResultsRequest } from "../../api/payment";
 import {
@@ -158,7 +157,7 @@ function Index() {
       {/* Área para componentes del dashboard */}
       {(pagosValidos.length > 0 || pagosFormateados.length > 0) && !loading && (
         <Box sx={{ mt: 4 }}>
-            <ResumenGeneral pagosValidos={pagosValidos} />
+            <ResumenGeneral pagosValidos={pagosValidos} pagosFormateados={pagosFormateados}  />
             <IndicadoresGestion pagosValidos={pagosValidos} />
             <ResumenEstatusGestion pagosValidos={pagosValidos} />            
             <DistribucionMontosPorEstatus pagosValidos={pagosValidos} />

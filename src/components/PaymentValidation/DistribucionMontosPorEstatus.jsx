@@ -28,7 +28,7 @@ const DistribucionMontosPorEstatus = ({ pagosValidos = [] }) => {
   // 🔹 Colores específicos para secciones importantes
   const COLOR_VALIDO = colors.accentGreen[100]; // Verde suave para válidos
   const COLOR_ESTANDAR = colors.grey[100]; // Gris estándar para el resto
-  const COLOR_TAB_ACTIVA = colors.blueAccent[600]; // ✅ Azul para tabs activas
+  const COLOR_TAB_ACTIVA = colors.blueAccent[600]; // Azul para tabs activas (excepto Gestión válida)
 
   // 🔹 Definición de rangos de monto
   const rangosMonto = [
@@ -83,6 +83,17 @@ const DistribucionMontosPorEstatus = ({ pagosValidos = [] }) => {
         descripcion: "Estatus no definido",
       }
     );
+  };
+
+  // 🔹 Función para obtener color de tab activa
+  const getColorTabActiva = (index) => {
+    const estatus = estatusDisponibles[index];
+    return estatus === "Gestión válida" ? COLOR_VALIDO : COLOR_TAB_ACTIVA;
+  };
+
+  // 🔹 Obtener color del indicador basado en la tab activa actual
+  const getColorIndicador = () => {
+    return getColorTabActiva(estatusActivo);
   };
 
   // 🔹 Cálculo de distribución por estatus y rangos
@@ -533,7 +544,7 @@ const DistribucionMontosPorEstatus = ({ pagosValidos = [] }) => {
         <Typography
           variant="h6"
           sx={{
-            color: COLOR_ESTANDAR, // ✅ Usar COLOR_ESTANDAR
+            color: COLOR_ESTANDAR,
             fontWeight: 600,
             fontSize: "1.125rem",
           }}
@@ -555,14 +566,12 @@ const DistribucionMontosPorEstatus = ({ pagosValidos = [] }) => {
             sx={{ fontSize: 48, color: colors.grey[500], mb: 2 }}
           />
           <Typography variant="body1" sx={{ color: COLOR_ESTANDAR }}>
-            {" "}
-            {/* ✅ Usar COLOR_ESTANDAR */}
             No hay datos disponibles para mostrar
           </Typography>
         </Box>
       ) : (
         <>
-          {/* Tabs de estatus con iconos y color azul para activas */}
+          {/* Tabs de estatus - Gestión válida en verde, otras en azul */}
           <Box
             sx={{ borderBottom: 1, borderColor: colors.borderContainer, mb: 3 }}
           >
@@ -571,27 +580,45 @@ const DistribucionMontosPorEstatus = ({ pagosValidos = [] }) => {
               onChange={(e, nuevoValor) => setEstatusActivo(nuevoValor)}
               sx={{
                 "& .MuiTab-root": {
-                  color: COLOR_ESTANDAR, // ✅ Usar COLOR_ESTANDAR
+                  color: COLOR_ESTANDAR,
                   fontWeight: 500,
                   fontSize: "0.875rem",
                   textTransform: "none",
                   minHeight: 48,
                   "&:hover": {
-                    color: COLOR_TAB_ACTIVA, // ✅ Usar COLOR_TAB_ACTIVA (azul)
+                    color: (theme) => {
+                      // Para hover, usar el color que corresponda a cada tab individual
+                      const estatus = estatusDisponibles[theme.tabIndex];
+                      return estatus === "Gestión válida"
+                        ? COLOR_VALIDO
+                        : COLOR_TAB_ACTIVA;
+                    },
                   },
                 },
                 "& .Mui-selected": {
-                  color: COLOR_TAB_ACTIVA, // ✅ Usar COLOR_TAB_ACTIVA (azul)
+                  color: (theme) => {
+                    const estatus = estatusDisponibles[theme.tabIndex];
+                    const color =
+                      estatus === "Gestión válida"
+                        ? COLOR_VALIDO
+                        : COLOR_TAB_ACTIVA;
+                    return `${color} !important`;
+                  },
                   fontWeight: 600,
                 },
                 "& .MuiTabs-indicator": {
-                  backgroundColor: COLOR_TAB_ACTIVA, // ✅ Usar COLOR_TAB_ACTIVA (azul)
+                  backgroundColor: getColorIndicador(), // ✅ CORRECCIÓN: Usar función que obtiene el color basado en la tab activa actual
                 },
               }}
             >
               {estatusDisponibles.map((estatus, index) => {
                 const config = getEstatusConfig(estatus);
                 const IconComponent = config.icon;
+                const esTabActiva = estatusActivo === index;
+                const esGestionValidaTab = estatus === "Gestión válida";
+                const colorTabActiva = esGestionValidaTab
+                  ? COLOR_VALIDO
+                  : COLOR_TAB_ACTIVA;
 
                 return (
                   <Tab
@@ -603,20 +630,29 @@ const DistribucionMontosPorEstatus = ({ pagosValidos = [] }) => {
                         <IconComponent
                           sx={{
                             fontSize: 20,
-                            // ✅ AJUSTE: Iconos de tabs activas en azul
-                            color:
-                              estatusActivo === index
-                                ? COLOR_TAB_ACTIVA
-                                : config.color,
+                            color: esTabActiva
+                              ? colorTabActiva
+                              : COLOR_ESTANDAR,
                           }}
                         />
-                        <span>{estatus}</span>
+                        <Typography
+                          component="span"
+                          sx={{
+                              color: esTabActiva ? colorTabActiva : COLOR_ESTANDAR,
+                            fontSize: "inherit",
+                            fontWeight: "inherit",
+                          }}
+                        >
+                          {estatus}
+                        </Typography>
                         <Chip
                           label={distribucion[estatus].total}
                           size="small"
                           sx={{
                             backgroundColor: colors.bgContainerSticky,
-                            color: COLOR_ESTANDAR, // ✅ Usar COLOR_ESTANDAR
+                            color: esTabActiva
+                              ? colorTabActiva
+                              : COLOR_ESTANDAR,
                             fontSize: "0.7rem",
                             height: 20,
                             minWidth: 20,
@@ -624,6 +660,20 @@ const DistribucionMontosPorEstatus = ({ pagosValidos = [] }) => {
                         />
                       </Box>
                     }
+                    sx={{
+                      "&.Mui-selected": {
+                        color: `${colorTabActiva} !important`,
+                      },
+                      "&:hover": {
+                        color: `${colorTabActiva} !important`,
+                        "& .MuiChip-root": {
+                          color: `${colorTabActiva} !important`,
+                        },
+                        "& .MuiSvgIcon-root": {
+                          color: `${colorTabActiva} !important`,
+                        },
+                      },
+                    }}
                   />
                 );
               })}
@@ -654,7 +704,6 @@ const DistribucionMontosPorEstatus = ({ pagosValidos = [] }) => {
                     variant="h6"
                     sx={{
                       fontWeight: 600,
-                      // ✅ Para Gestión válida usar COLOR_VALIDO, para otros COLOR_ESTANDAR
                       color: esGestionValida ? COLOR_VALIDO : COLOR_ESTANDAR,
                     }}
                   >
@@ -672,7 +721,6 @@ const DistribucionMontosPorEstatus = ({ pagosValidos = [] }) => {
                     variant="h6"
                     sx={{
                       fontWeight: 600,
-                      // ✅ Para Gestión válida usar COLOR_VALIDO, para otros usar color del estatus
                       color: esGestionValida
                         ? COLOR_VALIDO
                         : configEstatusActual.color,
@@ -693,7 +741,7 @@ const DistribucionMontosPorEstatus = ({ pagosValidos = [] }) => {
                 width: "100%",
                 "& .MuiDataGrid-root": {
                   border: "none",
-                  color: COLOR_ESTANDAR, // ✅ Usar COLOR_ESTANDAR
+                  color: COLOR_ESTANDAR,
                   backgroundColor: colors.bgContainer,
                 },
                 "& .MuiDataGrid-cell": {
