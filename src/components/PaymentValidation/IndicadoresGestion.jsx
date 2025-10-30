@@ -20,6 +20,19 @@ const IndicadoresGestion = ({ pagosValidos = [] }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
+  // 🔹 Colores específicos para secciones importantes
+  const COLOR_VALIDO = colors.accentGreen[100];  // Verde suave para válidos
+  const COLOR_ESTANDAR = colors.grey[100];       // Gris estándar para el resto
+
+  // 🔹 Semaforo vial con AZUL para no confundir con el verde de válidos
+  const getSemaforoColor = (pct) => {
+    if (pct <= 5) return colors.blueAccent[600];   // Azul - Excelente (0-5%)
+    if (pct <= 15) return colors.blueAccent[600];  // Azul claro - Bueno (5-15%)
+    if (pct <= 30) return colors.yellowAccent[400]; // Amarillo - Regular (15-30%)
+    if (pct <= 50) return colors.yellowAccent[500]; // Amarillo oscuro - Preocupante (30-50%)
+    return colors.redAccent[400];                  // Rojo - Crítico (>50%)
+  };
+
   // 🔹 Cálculo de métricas
   const data = useMemo(() => {
     const pagosValidosFiltrados = pagosValidos.filter(
@@ -48,7 +61,6 @@ const IndicadoresGestion = ({ pagosValidos = [] }) => {
       (p) => p.estatus_predio !== "Predio localizado"
     );
 
-    // 🔹 MANTENEMOS cálculo de montos para Resumen de Pagos
     const sum = (arr) =>
       arr.reduce((acc, cur) => acc + (parseFloat(cur.total_pagado) || 0), 0);
 
@@ -58,11 +70,11 @@ const IndicadoresGestion = ({ pagosValidos = [] }) => {
       total_gestiones_validas: pagosValidosFiltrados.length,
       pagos_validos: {
         count: pagosValidosFiltrados.length,
-        monto: sum(pagosValidosFiltrados), // ✅ MANTENEMOS monto
+        monto: sum(pagosValidosFiltrados),
       },
       pagos_no_validos: {
         count: pagosNoValidosFiltrados.length,
-        monto: sum(pagosNoValidosFiltrados), // ✅ MANTENEMOS monto
+        monto: sum(pagosNoValidosFiltrados),
       },
       sin_posicion: {
         count: sinPosicion.length,
@@ -87,25 +99,7 @@ const IndicadoresGestion = ({ pagosValidos = [] }) => {
     };
   }, [pagosValidos]);
 
-  // 🔹 Color invertido: menor porcentaje = mejor (verde), mayor = peor (rojo)
-  const getProgressColor = (pct) => {
-    if (pct <= 5) return colors.greenAccent[400]; // Excelente (0-5%)
-    if (pct <= 15) return colors.greenAccent[300]; // Bueno (5-15%)
-    if (pct <= 30) return colors.yellowAccent[400]; // Regular (15-30%)
-    if (pct <= 50) return colors.yellowAccent[500]; // Preocupante (30-50%)
-    return colors.redAccent[400]; // Crítico (>50%)
-  };
-
-  // 🔹 Obtener etiqueta del nivel de calidad
-  const getQualityLabel = (pct) => {
-    if (pct <= 5) return "Excelente";
-    if (pct <= 15) return "Bueno";
-    if (pct <= 30) return "Regular";
-    if (pct <= 50) return "Preocupante";
-    return "Crítico";
-  };
-
-  // 🔹 Card compacta para Calidad de Datos (SIN montos)
+  // 🔹 Card compacta para Calidad de Datos con semáforo AZUL
   const CardCalidadDatos = ({
     icon: Icon,
     title,
@@ -114,16 +108,14 @@ const IndicadoresGestion = ({ pagosValidos = [] }) => {
     total,
     delay = 0,
   }) => {
-    const progressColor = getProgressColor(pct);
-    const qualityLabel = getQualityLabel(pct);
+    const semaforoColor = getSemaforoColor(pct);
 
     return (
       <Grow in={true} timeout={400 + delay}>
         <Box
-          className="p-3 rounded-xl"
+          className="p-4 rounded-xl"
           sx={{
             backgroundColor: colors.bgContainer,
-            border: `1px solid ${colors.borderContainer}`,
             transition: "all 0.2s ease",
             height: "100%",
             minHeight: "120px",
@@ -139,8 +131,8 @@ const IndicadoresGestion = ({ pagosValidos = [] }) => {
           <Box
             sx={{ display: "flex", alignItems: "flex-start", gap: 2, mb: 2 }}
           >
-            {/* Icono sin fondo, solo con color */}
-            <Box sx={{ color: progressColor, flexShrink: 0 }}>
+            {/* Icono en color estándar */}
+            <Box sx={{ color: COLOR_ESTANDAR, flexShrink: 0 }}>
               <Icon sx={{ fontSize: 24 }} />
             </Box>
 
@@ -149,7 +141,7 @@ const IndicadoresGestion = ({ pagosValidos = [] }) => {
                 variant="subtitle1"
                 sx={{
                   fontWeight: 600,
-                  color: colors.grey[100],
+                  color: COLOR_ESTANDAR,
                   lineHeight: 1.3,
                   fontSize: "0.9rem",
                 }}
@@ -158,32 +150,22 @@ const IndicadoresGestion = ({ pagosValidos = [] }) => {
               </Typography>
             </Box>
 
+            {/* Porcentaje con color del semáforo AZUL/AMARILLO/ROJO */}
             <Box sx={{ textAlign: "right", minWidth: "60px" }}>
               <Typography
                 variant="h5"
                 sx={{
                   fontWeight: 700,
-                  color: progressColor,
+                  color: semaforoColor,
                   lineHeight: 1,
                 }}
               >
                 {pct.toFixed(1)}%
               </Typography>
-              <Typography
-                variant="caption"
-                sx={{
-                  color: progressColor,
-                  fontWeight: 600,
-                  fontSize: "0.65rem",
-                  textTransform: "uppercase",
-                }}
-              >
-                {qualityLabel}
-              </Typography>
             </Box>
           </Box>
 
-          {/* Progress Bar compacta */}
+          {/* Progress Bar con color del semáforo AZUL/AMARILLO/ROJO */}
           <Box sx={{ mb: 2, mt: "auto" }}>
             <LinearProgress
               variant="determinate"
@@ -193,14 +175,14 @@ const IndicadoresGestion = ({ pagosValidos = [] }) => {
                 borderRadius: 3,
                 backgroundColor: colors.grey[700],
                 "& .MuiLinearProgress-bar": {
-                  backgroundColor: progressColor,
+                  backgroundColor: semaforoColor,
                   borderRadius: 3,
                 },
               }}
             />
           </Box>
 
-          {/* Solo conteo de registros - más simple */}
+          {/* Conteo de registros en color estándar */}
           <Box>
             <Typography
               variant="body2"
@@ -213,7 +195,10 @@ const IndicadoresGestion = ({ pagosValidos = [] }) => {
             >
               <Box
                 component="span"
-                sx={{ fontWeight: 600, color: colors.grey[100] }}
+                sx={{
+                  fontWeight: 600,
+                  color: COLOR_ESTANDAR,
+                }}
               >
                 {count.toLocaleString("es-MX")}
               </Box>
@@ -230,113 +215,6 @@ const IndicadoresGestion = ({ pagosValidos = [] }) => {
     );
   };
 
-  // 🔹 Componente de leyenda de colores
-  const ColorLegend = () => (
-    <Box
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        gap: 2,
-        mb: 2,
-        flexWrap: "wrap",
-      }}
-    >
-      <Typography
-        variant="caption"
-        sx={{ color: colors.grey[500], mr: 1, fontSize: "0.7rem" }}
-      >
-        Calidad:
-      </Typography>
-
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-          <Box
-            sx={{
-              width: 8,
-              height: 8,
-              borderRadius: "50%",
-              backgroundColor: colors.greenAccent[400],
-            }}
-          />
-          <Typography
-            variant="caption"
-            sx={{ color: colors.grey[400], fontSize: "0.65rem" }}
-          >
-            0-5% Excelente
-          </Typography>
-        </Box>
-
-        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-          <Box
-            sx={{
-              width: 8,
-              height: 8,
-              borderRadius: "50%",
-              backgroundColor: colors.greenAccent[300],
-            }}
-          />
-          <Typography
-            variant="caption"
-            sx={{ color: colors.grey[400], fontSize: "0.65rem" }}
-          >
-            5-15% Bueno
-          </Typography>
-        </Box>
-
-        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-          <Box
-            sx={{
-              width: 8,
-              height: 8,
-              borderRadius: "50%",
-              backgroundColor: colors.yellowAccent[400],
-            }}
-          />
-          <Typography
-            variant="caption"
-            sx={{ color: colors.grey[400], fontSize: "0.65rem" }}
-          >
-            15-30% Regular
-          </Typography>
-        </Box>
-
-        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-          <Box
-            sx={{
-              width: 8,
-              height: 8,
-              borderRadius: "50%",
-              backgroundColor: colors.yellowAccent[500],
-            }}
-          />
-          <Typography
-            variant="caption"
-            sx={{ color: colors.grey[400], fontSize: "0.65rem" }}
-          >
-            30-50% Preocupante
-          </Typography>
-        </Box>
-
-        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-          <Box
-            sx={{
-              width: 8,
-              height: 8,
-              borderRadius: "50%",
-              backgroundColor: colors.redAccent[400],
-            }}
-          />
-          <Typography
-            variant="caption"
-            sx={{ color: colors.grey[400], fontSize: "0.65rem" }}
-          >
-            {`>50% Crítico`}
-          </Typography>
-        </Box>
-      </Box>
-    </Box>
-  );
-
   return (
     <Box sx={{ mt: 6 }}>
       {/* Título principal */}
@@ -344,7 +222,7 @@ const IndicadoresGestion = ({ pagosValidos = [] }) => {
         variant="h6"
         sx={{
           mb: 3,
-          color: colors.grey[200],
+          color: COLOR_ESTANDAR,
           fontWeight: 600,
           fontSize: "1.125rem",
         }}
@@ -365,26 +243,30 @@ const IndicadoresGestion = ({ pagosValidos = [] }) => {
           Resumen de Pagos
         </Typography>
         <Box className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
+          {/* PAGOS VÁLIDOS - Color específico verde */}
           <Grow in={true} timeout={400}>
             <Box
-              className="p-4 rounded-xl shadow-sm"
+              className="p-4 rounded-xl"
               sx={{
                 backgroundColor: colors.bgContainer,
                 display: "flex",
                 alignItems: "center",
                 gap: 2,
-                transition: "transform 0.2s ease, box-shadow 0.2s ease",
+                transition: "all 0.2s ease",
                 "&:hover": {
                   transform: "translateY(-1px)",
                   boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
                 },
               }}
             >
-              <Box sx={{ color: colors.greenAccent[400], fontSize: 28 }}>
+              <Box sx={{ color: COLOR_VALIDO, fontSize: 28 }}>
                 <PaidOutlinedIcon />
               </Box>
               <Box sx={{ flex: 1 }}>
-                <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                <Typography
+                  variant="h6"
+                  sx={{ fontWeight: 600, color: COLOR_VALIDO }}
+                >
                   {data.pagos_validos.count.toLocaleString("es-MX")}
                 </Typography>
                 <Typography
@@ -393,10 +275,9 @@ const IndicadoresGestion = ({ pagosValidos = [] }) => {
                 >
                   Pagos válidos
                 </Typography>
-                {/* ✅ MANTENEMOS monto en Resumen de Pagos */}
                 <Typography
                   variant="body2"
-                  sx={{ color: colors.grey[500], fontWeight: 500 }}
+                  sx={{ color: COLOR_VALIDO, fontWeight: 500 }}
                 >
                   ${data.pagos_validos.monto.toLocaleString("es-MX")}
                 </Typography>
@@ -404,26 +285,27 @@ const IndicadoresGestion = ({ pagosValidos = [] }) => {
             </Box>
           </Grow>
 
+          {/* PAGOS NO VÁLIDOS - Colores estándar */}
           <Grow in={true} timeout={500}>
             <Box
-              className="p-4 rounded-xl shadow-sm"
+              className="p-4 rounded-xl"
               sx={{
                 backgroundColor: colors.bgContainer,
                 display: "flex",
                 alignItems: "center",
                 gap: 2,
-                transition: "transform 0.2s ease, box-shadow 0.2s ease",
+                transition: "all 0.2s ease",
                 "&:hover": {
                   transform: "translateY(-1px)",
                   boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
                 },
               }}
             >
-              <Box sx={{ color: colors.redAccent[400], fontSize: 28 }}>
+              <Box sx={{ color: COLOR_ESTANDAR, fontSize: 28 }}>
                 <BlockOutlinedIcon />
               </Box>
               <Box sx={{ flex: 1 }}>
-                <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                <Typography variant="h6" sx={{ fontWeight: 600, color: COLOR_ESTANDAR }}>
                   {data.pagos_no_validos.count.toLocaleString("es-MX")}
                 </Typography>
                 <Typography
@@ -432,11 +314,7 @@ const IndicadoresGestion = ({ pagosValidos = [] }) => {
                 >
                   Pagos no válidos
                 </Typography>
-                {/* ✅ MANTENEMOS monto en Resumen de Pagos */}
-                <Typography
-                  variant="body2"
-                  sx={{ color: colors.grey[500], fontWeight: 500 }}
-                >
+                <Typography variant="body2" sx={{ color: COLOR_ESTANDAR, fontWeight: 500 }}>
                   ${data.pagos_no_validos.monto.toLocaleString("es-MX")}
                 </Typography>
               </Box>
@@ -447,40 +325,17 @@ const IndicadoresGestion = ({ pagosValidos = [] }) => {
 
       <Divider sx={{ my: 4, borderColor: colors.borderContainer }} />
 
-      {/* 📊 Calidad de Datos (SIN montos) */}
+      {/* 📊 Calidad de Datos (SIN montos) - CON SEMÁFORO AZUL */}
       <Box>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-end",
-            mb: 2,
-          }}
-        >
-          <Typography
-            variant="subtitle1"
-            sx={{
-              color: colors.grey[300],
-              fontWeight: 500,
-            }}
-          >
-            Calidad de Datos en Gestiones Válidas
-          </Typography>
-
-          {/* Leyenda de colores */}
-          <ColorLegend />
-        </Box>
-
         <Typography
-          variant="body2"
+          variant="subtitle1"
           sx={{
-            color: colors.grey[500],
+            color: colors.grey[300],
+            fontWeight: 500,
             mb: 3,
-            fontSize: "0.75rem",
-            fontStyle: "italic",
           }}
         >
-          Porcentaje menor indica mejor calidad de datos
+          Calidad de Datos en Gestiones Válidas
         </Typography>
 
         {/* Grid compacto 2x2 */}

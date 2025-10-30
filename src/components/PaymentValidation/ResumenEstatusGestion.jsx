@@ -14,6 +14,30 @@ const ResumenEstatusGestion = ({ pagosValidos = [] }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
+  // 🔹 Colores específicos para secciones importantes
+  const COLOR_VALIDO = colors.accentGreen[100]; // Verde suave para válidos
+  const COLOR_ESTANDAR = colors.grey[100]; // Gris estándar para el resto
+
+  // 🔹 Función para obtener color de porcentaje según el estatus
+  const getColorPorcentaje = (estatusNombre, evaluacion = null) => {
+    // Caso especial: Gestión válida con período no válido
+    if (
+      estatusNombre === "Gestión válida" &&
+      evaluacion === "PERIODO_NO_VALIDO"
+    ) {
+      return colors.redAccent[400];
+    }
+
+    // Para Gestión válida (incluyendo período válido), usar COLOR_VALIDO
+    if (estatusNombre === "Gestión válida") {
+      return COLOR_VALIDO;
+    }
+
+    // Para otros estatus, usar los colores definidos en getEstatusConfig
+    const config = getEstatusConfig(estatusNombre);
+    return config.color;
+  };
+
   // 🔹 Cálculo de resumen por estatus
   const resumenEstatus = useMemo(() => {
     if (!Array.isArray(pagosValidos) || pagosValidos.length === 0) {
@@ -80,7 +104,7 @@ const ResumenEstatusGestion = ({ pagosValidos = [] }) => {
     const configs = {
       "Gestión válida": {
         icon: CheckCircleOutlineIcon,
-        color: colors.greenAccent[400], // ✅ Cambiado a greenAccent[400]
+        color: colors.accentGreen[100],
         descripcion:
           "Pago con gestión realizada antes del pago y dentro del rango de días válidos",
       },
@@ -123,19 +147,19 @@ const ResumenEstatusGestion = ({ pagosValidos = [] }) => {
     if (evaluacion === "PERIODO_VALIDO") {
       return {
         label: "Período válido",
-        color: colors.greenAccent[400], // ✅ Cambiado a greenAccent[400]
+        color: COLOR_VALIDO,
         icon: ExpandLessOutlinedIcon,
       };
     } else if (evaluacion === "PERIODO_NO_VALIDO") {
       return {
         label: "Período no válido",
-        color: colors.redAccent[400],
+        color: colors.redAccent[400], // Rojo para período no válido
         icon: ExpandMoreOutlinedIcon,
       };
     } else {
       return {
         label: evaluacion,
-        color: colors.grey[500],
+        color: COLOR_ESTANDAR,
         icon: HelpOutlineOutlinedIcon,
       };
     }
@@ -158,7 +182,7 @@ const ResumenEstatusGestion = ({ pagosValidos = [] }) => {
         variant="h6"
         sx={{
           mb: 3,
-          color: colors.grey[200],
+          color: COLOR_ESTANDAR,
           fontWeight: 600,
           fontSize: "1.125rem",
         }}
@@ -171,6 +195,18 @@ const ResumenEstatusGestion = ({ pagosValidos = [] }) => {
         {resumenEstatus.estatus.map((estatus, index) => {
           const config = getEstatusConfig(estatus.nombre);
           const IconComponent = config.icon;
+
+          // Determinar si es una sección de gestión válida
+          const esGestionValida = estatus.nombre === "Gestión válida";
+          const porcentaje =
+            (estatus.count / resumenEstatus.totalGeneral) * 100;
+          const colorPorcentaje = getColorPorcentaje(estatus.nombre);
+
+          // Para secciones no válidas, usar COLOR_ESTANDAR para todo excepto porcentajes
+          const colorIcono = esGestionValida ? config.color : COLOR_ESTANDAR;
+          const colorTitulo = esGestionValida ? config.color : COLOR_ESTANDAR;
+          const colorCantidad = esGestionValida ? config.color : COLOR_ESTANDAR;
+          const colorMonto = esGestionValida ? COLOR_VALIDO : COLOR_ESTANDAR;
 
           return (
             <Grow
@@ -199,8 +235,8 @@ const ResumenEstatusGestion = ({ pagosValidos = [] }) => {
                     mb: 2,
                   }}
                 >
-                  {/* Icono con color del estatus */}
-                  <Box sx={{ color: config.color, flexShrink: 0, mt: 0.5 }}>
+                  {/* Icono - COLOR_VALIDO para válidos, COLOR_ESTANDAR para otros */}
+                  <Box sx={{ color: colorIcono, flexShrink: 0, mt: 0.5 }}>
                     <IconComponent sx={{ fontSize: 28 }} />
                   </Box>
 
@@ -209,7 +245,7 @@ const ResumenEstatusGestion = ({ pagosValidos = [] }) => {
                       variant="subtitle1"
                       sx={{
                         fontWeight: 600,
-                        color: colors.grey[100],
+                        color: colorTitulo, // COLOR_VALIDO para válidos, COLOR_ESTANDAR para otros
                         lineHeight: 1.3,
                         mb: 1,
                       }}
@@ -236,13 +272,12 @@ const ResumenEstatusGestion = ({ pagosValidos = [] }) => {
                       sx={{
                         fontWeight: 600,
                         color: colors.grey[100],
-                        
                       }}
                     >
                       <Box
                         component="span"
                         sx={{
-                          color: colors.grey[100],
+                          color: colorCantidad, // COLOR_VALIDO para válidos, COLOR_ESTANDAR para otros
                         }}
                       >
                         {formatNumber(estatus.count)}
@@ -260,7 +295,7 @@ const ResumenEstatusGestion = ({ pagosValidos = [] }) => {
                       <Box
                         component="span"
                         sx={{
-                          color: colors.greenAccent[400],
+                          color: colorMonto, // COLOR_VALIDO para válidos, COLOR_ESTANDAR para otros
                         }}
                       >
                         {formatCurrency(estatus.monto)}
@@ -268,23 +303,18 @@ const ResumenEstatusGestion = ({ pagosValidos = [] }) => {
                     </Typography>
                   </Box>
 
-                  {/* Porcentaje - Formato unificado */}
+                  {/* Porcentaje - Mantiene colores del semáforo para todos */}
                   <Box sx={{ textAlign: "right", minWidth: "70px" }}>
                     <Typography
                       variant="h5"
                       sx={{
                         fontWeight: 700,
-                        color: config.color,
+                        color: colorPorcentaje, // Colores del semáforo para todos
                         lineHeight: 1,
-                        
                       }}
                     >
-                      {(
-                        (estatus.count / resumenEstatus.totalGeneral) *
-                        100
-                      ).toFixed(1)}
-                      %
-                    </Typography>                    
+                      {porcentaje.toFixed(1)}%
+                    </Typography>
                   </Box>
                 </Box>
 
@@ -315,6 +345,38 @@ const ResumenEstatusGestion = ({ pagosValidos = [] }) => {
                           ([evaluacion, datos], subIndex) => {
                             const evalConfig = getEvaluacionConfig(evaluacion);
                             const EvalIcon = evalConfig.icon;
+                            const esPeriodoValido =
+                              evaluacion === "PERIODO_VALIDO";
+                            const esPeriodoNoValido =
+                              evaluacion === "PERIODO_NO_VALIDO";
+                            const porcentajeInterno =
+                              (datos.count / estatus.count) * 100;
+                            const colorPorcentajeInterno = getColorPorcentaje(
+                              estatus.nombre,
+                              evaluacion
+                            );
+
+                            // Para período no válido, todo en rojo (incluyendo título, cantidad y monto)
+                            const colorIconoInterno = esPeriodoNoValido
+                              ? colors.redAccent[400]
+                              : esPeriodoValido
+                              ? COLOR_VALIDO
+                              : COLOR_ESTANDAR;
+                            const colorTituloInterno = esPeriodoNoValido
+                              ? colors.redAccent[400]
+                              : esPeriodoValido
+                              ? COLOR_VALIDO
+                              : COLOR_ESTANDAR;
+                            const colorCantidadInterno = esPeriodoNoValido
+                              ? colors.redAccent[400]
+                              : esPeriodoValido
+                              ? COLOR_VALIDO
+                              : COLOR_ESTANDAR;
+                            const colorMontoInterno = esPeriodoNoValido
+                              ? colors.redAccent[400]
+                              : esPeriodoValido
+                              ? COLOR_VALIDO
+                              : COLOR_ESTANDAR;
 
                             return (
                               <Box
@@ -333,7 +395,7 @@ const ResumenEstatusGestion = ({ pagosValidos = [] }) => {
                                   },
                                 }}
                               >
-                                <Box sx={{ color: evalConfig.color }}>
+                                <Box sx={{ color: colorIconoInterno }}>
                                   <EvalIcon sx={{ fontSize: 20 }} />
                                 </Box>
 
@@ -342,7 +404,7 @@ const ResumenEstatusGestion = ({ pagosValidos = [] }) => {
                                     variant="body2"
                                     sx={{
                                       fontWeight: 600,
-                                      color: colors.grey[100],
+                                      color: colorTituloInterno,
                                       mb: 0.5,
                                     }}
                                   >
@@ -355,13 +417,12 @@ const ResumenEstatusGestion = ({ pagosValidos = [] }) => {
                                     sx={{
                                       fontWeight: 600,
                                       color: colors.grey[100],
-                                      
                                     }}
                                   >
                                     <Box
                                       component="span"
                                       sx={{
-                                        color: colors.grey[100],
+                                        color: colorCantidadInterno,
                                       }}
                                     >
                                       {formatNumber(datos.count)}
@@ -379,7 +440,7 @@ const ResumenEstatusGestion = ({ pagosValidos = [] }) => {
                                     <Box
                                       component="span"
                                       sx={{
-                                        color: colors.greenAccent[400],
+                                        color: colorMontoInterno,
                                       }}
                                     >
                                       {formatCurrency(datos.monto)}
@@ -387,20 +448,16 @@ const ResumenEstatusGestion = ({ pagosValidos = [] }) => {
                                   </Typography>
                                 </Box>
 
-                                {/* Porcentaje interno con formato unificado */}
+                                {/* Porcentaje interno mantiene colores del semáforo */}
                                 <Typography
                                   variant="body1"
                                   sx={{
-                                    color: evalConfig.color,
+                                    color: colorPorcentajeInterno,
                                     fontWeight: 700,
                                     fontSize: "1rem",
                                   }}
                                 >
-                                  {(
-                                    (datos.count / estatus.count) *
-                                    100
-                                  ).toFixed(1)}
-                                  %
+                                  {porcentajeInterno.toFixed(1)}%
                                 </Typography>
                               </Box>
                             );
@@ -432,7 +489,7 @@ const ResumenEstatusGestion = ({ pagosValidos = [] }) => {
           />
           <Typography
             variant="h6"
-            sx={{ fontWeight: 600, color: colors.grey[400] }}
+            sx={{ fontWeight: 600, color: COLOR_ESTANDAR }}
           >
             No hay datos disponibles para mostrar
           </Typography>

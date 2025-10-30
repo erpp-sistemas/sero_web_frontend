@@ -16,11 +16,19 @@ import AttachMoneyOutlinedIcon from "@mui/icons-material/AttachMoneyOutlined";
 import ShowChartOutlinedIcon from "@mui/icons-material/ShowChartOutlined";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
+import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
+import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
+import { PersonRemoveOutlined } from "@mui/icons-material";
 
 const DistribucionMontosPorEstatus = ({ pagosValidos = [] }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [estatusActivo, setEstatusActivo] = useState(0);
+
+  // 🔹 Colores específicos para secciones importantes
+  const COLOR_VALIDO = colors.accentGreen[100]; // Verde suave para válidos
+  const COLOR_ESTANDAR = colors.grey[100]; // Gris estándar para el resto
+  const COLOR_TAB_ACTIVA = colors.blueAccent[600]; // ✅ Azul para tabs activas
 
   // 🔹 Definición de rangos de monto
   const rangosMonto = [
@@ -33,6 +41,49 @@ const DistribucionMontosPorEstatus = ({ pagosValidos = [] }) => {
     { label: "100,000 a 500,000", min: 100000, max: 500000 },
     { label: "Más de 500,000", min: 500000, max: Infinity },
   ];
+
+  // 🔹 Configuración de estatus con iconos y colores
+  const getEstatusConfig = (nombre) => {
+    const configs = {
+      "Gestión válida": {
+        icon: CheckCircleOutlineIcon,
+        color: COLOR_VALIDO, // ✅ Usar COLOR_VALIDO estandarizado
+        descripcion:
+          "Pago con gestión realizada antes del pago y dentro del rango de días válidos",
+      },
+      "Sin gestión": {
+        icon: HelpOutlineOutlinedIcon,
+        color: COLOR_ESTANDAR, // ✅ Usar COLOR_ESTANDAR
+        descripcion:
+          "No se ha realizado ninguna acción de gestión sobre este pago",
+      },
+      "Gestión posterior": {
+        icon: AccessTimeOutlinedIcon,
+        color: COLOR_ESTANDAR, // ✅ Usar COLOR_ESTANDAR
+        descripcion: "Tiene gestión realizada pero después de la fecha de pago",
+      },
+      "Gestión fuera de rango": {
+        icon: CancelOutlinedIcon,
+        color: COLOR_ESTANDAR, // ✅ Usar COLOR_ESTANDAR
+        descripcion:
+          "Tiene gestión antes del pago pero supera el rango de días válidos",
+      },
+      "No existe en nuestra cartera": {
+        icon: PersonRemoveOutlined,
+        color: COLOR_ESTANDAR, // ✅ Usar COLOR_ESTANDAR
+        descripcion:
+          "No se encuentra en nuestro padrón de contribuyentes o cuentas",
+      },
+    };
+
+    return (
+      configs[nombre] || {
+        icon: HelpOutlineOutlinedIcon,
+        color: COLOR_ESTANDAR,
+        descripcion: "Estatus no definido",
+      }
+    );
+  };
 
   // 🔹 Cálculo de distribución por estatus y rangos
   const distribucion = useMemo(() => {
@@ -133,6 +184,7 @@ const DistribucionMontosPorEstatus = ({ pagosValidos = [] }) => {
   const estatusActual = estatusDisponibles[estatusActivo] || "";
   const datosEstatusActual = distribucion[estatusActual];
   const esGestionValida = estatusActual === "Gestión válida";
+  const configEstatusActual = getEstatusConfig(estatusActual);
 
   // 🔹 Función para formatear números
   const formatNumber = (number) => number.toLocaleString("es-MX");
@@ -172,6 +224,16 @@ const DistribucionMontosPorEstatus = ({ pagosValidos = [] }) => {
     });
   }, [datosEstatusActual, esGestionValida]);
 
+  // 🔹 Calcular altura dinámica basada en número de filas
+  const alturaTabla = useMemo(() => {
+    const alturaHeader = 56;
+    const alturaFila = 52;
+    const alturaFooter = 0;
+    const margenExtra = 8;
+
+    return alturaHeader + rows.length * alturaFila + alturaFooter + margenExtra;
+  }, [rows.length]);
+
   // 🔹 Columnas base para DataGrid (sin progressbar para Gestión válida)
   const columnasBase = [
     {
@@ -180,7 +242,10 @@ const DistribucionMontosPorEstatus = ({ pagosValidos = [] }) => {
       flex: 1,
       minWidth: 150,
       renderCell: (params) => (
-        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+        <Typography
+          variant="body2"
+          sx={{ fontWeight: 500, color: COLOR_ESTANDAR }}
+        >
           {params.value}
         </Typography>
       ),
@@ -194,7 +259,7 @@ const DistribucionMontosPorEstatus = ({ pagosValidos = [] }) => {
         <Typography
           variant="body2"
           sx={{
-            color: params.value > 0 ? colors.blueAccent[300] : colors.grey[500],
+            color: params.value > 0 ? COLOR_ESTANDAR : colors.grey[500],
             fontWeight: params.value > 0 ? 600 : 400,
             fontStyle: params.value === 0 ? "italic" : "normal",
           }}
@@ -212,8 +277,14 @@ const DistribucionMontosPorEstatus = ({ pagosValidos = [] }) => {
         <Typography
           variant="body2"
           sx={{
-            color:
-              params.value > 0 ? colors.greenAccent[400] : colors.grey[500],
+            // ✅ AJUSTE: Para Gestión válida usar COLOR_ESTANDAR, para otros usar color del estatus
+            color: esGestionValida
+              ? params.value > 0
+                ? COLOR_ESTANDAR
+                : colors.grey[500]
+              : params.value > 0
+              ? configEstatusActual.color
+              : colors.grey[500],
             fontWeight: params.value > 0 ? 600 : 400,
             fontStyle: params.value === 0 ? "italic" : "normal",
           }}
@@ -234,7 +305,10 @@ const DistribucionMontosPorEstatus = ({ pagosValidos = [] }) => {
               <Typography
                 variant="body2"
                 sx={{
-                  color: params.value > 0 ? colors.grey[100] : colors.grey[500],
+                  color:
+                    params.value > 0
+                      ? configEstatusActual.color
+                      : colors.grey[500],
                   fontWeight: params.value > 0 ? 600 : 400,
                   fontStyle: params.value === 0 ? "italic" : "normal",
                 }}
@@ -266,10 +340,7 @@ const DistribucionMontosPorEstatus = ({ pagosValidos = [] }) => {
                     borderRadius: 3,
                     backgroundColor: colors.grey[700],
                     "& .MuiLinearProgress-bar": {
-                      backgroundColor:
-                        params.row.porcentaje > 0
-                          ? colors.blueAccent[400]
-                          : colors.grey[600],
+                      backgroundColor: configEstatusActual.color,
                       borderRadius: 3,
                     },
                   }}
@@ -279,7 +350,7 @@ const DistribucionMontosPorEstatus = ({ pagosValidos = [] }) => {
                   sx={{
                     color:
                       params.row.porcentaje > 0
-                        ? colors.grey[400]
+                        ? COLOR_ESTANDAR
                         : colors.grey[500],
                     minWidth: 35,
                     fontStyle:
@@ -305,9 +376,12 @@ const DistribucionMontosPorEstatus = ({ pagosValidos = [] }) => {
         <Tooltip title="Período Válido - Gestión realizada en período correcto">
           <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
             <CheckCircleOutlineIcon
-              sx={{ fontSize: 16, color: colors.greenAccent[400] }}
+              sx={{ fontSize: 16, color: COLOR_VALIDO }}
             />
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+            <Typography
+              variant="body2"
+              sx={{ fontWeight: 600, color: COLOR_ESTANDAR }}
+            >
               Período Válido
             </Typography>
           </Box>
@@ -315,14 +389,12 @@ const DistribucionMontosPorEstatus = ({ pagosValidos = [] }) => {
       ),
       renderCell: (params) => (
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <CheckCircleOutlineIcon
-            sx={{ fontSize: 16, color: colors.greenAccent[400] }}
-          />
+          <CheckCircleOutlineIcon sx={{ fontSize: 16, color: COLOR_VALIDO }} />
           <Typography
             variant="body2"
             sx={{
-              color:
-                params.value > 0 ? colors.blueAccent[300] : colors.grey[500],
+              // ✅ AJUSTE: Cantidades de período válido en COLOR_VALIDO
+              color: params.value > 0 ? COLOR_VALIDO : colors.grey[500],
               fontWeight: params.value > 0 ? 600 : 400,
               fontStyle: params.value === 0 ? "italic" : "normal",
             }}
@@ -341,9 +413,12 @@ const DistribucionMontosPorEstatus = ({ pagosValidos = [] }) => {
         <Tooltip title="Monto en Período Válido">
           <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
             <CheckCircleOutlineIcon
-              sx={{ fontSize: 16, color: colors.greenAccent[400] }}
+              sx={{ fontSize: 16, color: COLOR_VALIDO }}
             />
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+            <Typography
+              variant="body2"
+              sx={{ fontWeight: 600, color: COLOR_ESTANDAR }}
+            >
               Monto Válido
             </Typography>
           </Box>
@@ -351,14 +426,11 @@ const DistribucionMontosPorEstatus = ({ pagosValidos = [] }) => {
       ),
       renderCell: (params) => (
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <CheckCircleOutlineIcon
-            sx={{ fontSize: 16, color: colors.greenAccent[400] }}
-          />
+          <CheckCircleOutlineIcon sx={{ fontSize: 16, color: COLOR_VALIDO }} />
           <Typography
             variant="body2"
             sx={{
-              color:
-                params.value > 0 ? colors.greenAccent[400] : colors.grey[500],
+              color: params.value > 0 ? COLOR_VALIDO : colors.grey[500],
               fontWeight: params.value > 0 ? 600 : 400,
               fontStyle: params.value === 0 ? "italic" : "normal",
             }}
@@ -379,7 +451,10 @@ const DistribucionMontosPorEstatus = ({ pagosValidos = [] }) => {
             <CancelOutlinedIcon
               sx={{ fontSize: 16, color: colors.redAccent[400] }}
             />
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+            <Typography
+              variant="body2"
+              sx={{ fontWeight: 600, color: COLOR_ESTANDAR }}
+            >
               Período No Válido
             </Typography>
           </Box>
@@ -393,8 +468,9 @@ const DistribucionMontosPorEstatus = ({ pagosValidos = [] }) => {
           <Typography
             variant="body2"
             sx={{
+              // ✅ AJUSTE: Cantidades de período no válido en redAccent
               color:
-                params.value > 0 ? colors.blueAccent[300] : colors.grey[500],
+                params.value > 0 ? colors.redAccent[400] : colors.grey[500],
               fontWeight: params.value > 0 ? 600 : 400,
               fontStyle: params.value === 0 ? "italic" : "normal",
             }}
@@ -415,7 +491,10 @@ const DistribucionMontosPorEstatus = ({ pagosValidos = [] }) => {
             <CancelOutlinedIcon
               sx={{ fontSize: 16, color: colors.redAccent[400] }}
             />
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+            <Typography
+              variant="body2"
+              sx={{ fontWeight: 600, color: COLOR_ESTANDAR }}
+            >
               Monto No Válido
             </Typography>
           </Box>
@@ -430,7 +509,7 @@ const DistribucionMontosPorEstatus = ({ pagosValidos = [] }) => {
             variant="body2"
             sx={{
               color:
-                params.value > 0 ? colors.greenAccent[400] : colors.grey[500],
+                params.value > 0 ? colors.redAccent[400] : colors.grey[500],
               fontWeight: params.value > 0 ? 600 : 400,
               fontStyle: params.value === 0 ? "italic" : "normal",
             }}
@@ -451,13 +530,10 @@ const DistribucionMontosPorEstatus = ({ pagosValidos = [] }) => {
     <Box sx={{ mt: 6 }}>
       {/* Título principal */}
       <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3 }}>
-        <ShowChartOutlinedIcon
-          sx={{ color: colors.blueAccent[400], fontSize: 28 }}
-        />
         <Typography
           variant="h6"
           sx={{
-            color: colors.grey[200],
+            color: COLOR_ESTANDAR, // ✅ Usar COLOR_ESTANDAR
             fontWeight: 600,
             fontSize: "1.125rem",
           }}
@@ -478,13 +554,15 @@ const DistribucionMontosPorEstatus = ({ pagosValidos = [] }) => {
           <AttachMoneyOutlinedIcon
             sx={{ fontSize: 48, color: colors.grey[500], mb: 2 }}
           />
-          <Typography variant="body1" sx={{ color: colors.grey[400] }}>
+          <Typography variant="body1" sx={{ color: COLOR_ESTANDAR }}>
+            {" "}
+            {/* ✅ Usar COLOR_ESTANDAR */}
             No hay datos disponibles para mostrar
           </Typography>
         </Box>
       ) : (
         <>
-          {/* Tabs de estatus */}
+          {/* Tabs de estatus con iconos y color azul para activas */}
           <Box
             sx={{ borderBottom: 1, borderColor: colors.borderContainer, mb: 3 }}
           >
@@ -493,42 +571,62 @@ const DistribucionMontosPorEstatus = ({ pagosValidos = [] }) => {
               onChange={(e, nuevoValor) => setEstatusActivo(nuevoValor)}
               sx={{
                 "& .MuiTab-root": {
-                  color: colors.grey[100],
+                  color: COLOR_ESTANDAR, // ✅ Usar COLOR_ESTANDAR
                   fontWeight: 500,
                   fontSize: "0.875rem",
                   textTransform: "none",
                   minHeight: 48,
+                  "&:hover": {
+                    color: COLOR_TAB_ACTIVA, // ✅ Usar COLOR_TAB_ACTIVA (azul)
+                  },
                 },
                 "& .Mui-selected": {
-                  color: colors.greenAccent[400],
+                  color: COLOR_TAB_ACTIVA, // ✅ Usar COLOR_TAB_ACTIVA (azul)
                   fontWeight: 600,
                 },
                 "& .MuiTabs-indicator": {
-                  backgroundColor: colors.greenAccent[400],
+                  backgroundColor: COLOR_TAB_ACTIVA, // ✅ Usar COLOR_TAB_ACTIVA (azul)
                 },
               }}
             >
-              {estatusDisponibles.map((estatus, index) => (
-                <Tab
-                  key={estatus}
-                  label={
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                      <span>{estatus}</span>
-                      <Chip
-                        label={distribucion[estatus].total}
-                        size="small"
-                        sx={{
-                          backgroundColor: colors.primary[500],
-                          color: colors.grey[300],
-                          fontSize: "0.7rem",
-                          height: 20,
-                          minWidth: 20,
-                        }}
-                      />
-                    </Box>
-                  }
-                />
-              ))}
+              {estatusDisponibles.map((estatus, index) => {
+                const config = getEstatusConfig(estatus);
+                const IconComponent = config.icon;
+
+                return (
+                  <Tab
+                    key={estatus}
+                    label={
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                      >
+                        <IconComponent
+                          sx={{
+                            fontSize: 20,
+                            // ✅ AJUSTE: Iconos de tabs activas en azul
+                            color:
+                              estatusActivo === index
+                                ? COLOR_TAB_ACTIVA
+                                : config.color,
+                          }}
+                        />
+                        <span>{estatus}</span>
+                        <Chip
+                          label={distribucion[estatus].total}
+                          size="small"
+                          sx={{
+                            backgroundColor: colors.bgContainerSticky,
+                            color: COLOR_ESTANDAR, // ✅ Usar COLOR_ESTANDAR
+                            fontSize: "0.7rem",
+                            height: 20,
+                            minWidth: 20,
+                          }}
+                        />
+                      </Box>
+                    }
+                  />
+                );
+              })}
             </Tabs>
           </Box>
 
@@ -554,7 +652,11 @@ const DistribucionMontosPorEstatus = ({ pagosValidos = [] }) => {
                   </Typography>
                   <Typography
                     variant="h6"
-                    sx={{ fontWeight: 600, color: colors.grey[100] }}
+                    sx={{
+                      fontWeight: 600,
+                      // ✅ Para Gestión válida usar COLOR_VALIDO, para otros COLOR_ESTANDAR
+                      color: esGestionValida ? COLOR_VALIDO : COLOR_ESTANDAR,
+                    }}
                   >
                     {formatNumber(datosEstatusActual.total)} registros
                   </Typography>
@@ -568,7 +670,13 @@ const DistribucionMontosPorEstatus = ({ pagosValidos = [] }) => {
                   </Typography>
                   <Typography
                     variant="h6"
-                    sx={{ fontWeight: 600, color: colors.greenAccent[400] }}
+                    sx={{
+                      fontWeight: 600,
+                      // ✅ Para Gestión válida usar COLOR_VALIDO, para otros usar color del estatus
+                      color: esGestionValida
+                        ? COLOR_VALIDO
+                        : configEstatusActual.color,
+                    }}
                   >
                     {formatCurrency(datosEstatusActual.montoTotal)}
                   </Typography>
@@ -577,15 +685,15 @@ const DistribucionMontosPorEstatus = ({ pagosValidos = [] }) => {
             </Box>
           )}
 
-          {/* DataGrid con el mismo estilo que GestoresTable */}
+          {/* DataGrid con altura dinámica y sin paginación */}
           {datosEstatusActual && (
             <Box
               sx={{
-                height: 500,
+                height: alturaTabla,
                 width: "100%",
                 "& .MuiDataGrid-root": {
                   border: "none",
-                  color: colors.grey[300],
+                  color: COLOR_ESTANDAR, // ✅ Usar COLOR_ESTANDAR
                   backgroundColor: colors.bgContainer,
                 },
                 "& .MuiDataGrid-cell": {
@@ -597,20 +705,26 @@ const DistribucionMontosPorEstatus = ({ pagosValidos = [] }) => {
                   fontWeight: 600,
                 },
                 "& .MuiDataGrid-footerContainer": {
-                  borderTop: `1px solid ${colors.borderContainer}`,
+                  display: "none",
                 },
                 "& .MuiDataGrid-row:hover": {
                   backgroundColor: colors.primary[400],
                 },
+                "& .MuiDataGrid-cellCheckbox, & .MuiDataGrid-columnHeaderCheckbox":
+                  {
+                    display: "none",
+                  },
               }}
             >
               <DataGrid
                 rows={rows}
                 columns={columnas}
-                pageSize={10}
-                rowsPerPageOptions={[10]}
                 disableSelectionOnClick
                 disableColumnMenu
+                hideFooter
+                disableColumnSelector
+                disableDensitySelector
+                disableMultipleRowSelection
               />
             </Box>
           )}
