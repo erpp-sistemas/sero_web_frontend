@@ -21,6 +21,19 @@ const ResumenGeneral = ({ pagosValidos = [], pagosFormateados = [] }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
+  // 🔹 Función para filtrar campos de fotos
+  const filtrarCamposFotos = (campos) => {
+    const camposExcluidos = [     
+      'fotos'      
+    ];
+    
+    return campos.filter(campo => 
+      !camposExcluidos.some(excluido => 
+        campo.toLowerCase().includes(excluido.toLowerCase())
+      )
+    );
+  };
+
   // 🔹 Función para crear Excel con diseño minimalista mejorado
   const crearExcelConEstilo = (datos, nombreHoja, nombreArchivo) => {
     if (!datos.length) {
@@ -32,14 +45,17 @@ const ResumenGeneral = ({ pagosValidos = [], pagosFormateados = [] }) => {
       const workbook = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet(nombreHoja);
 
-      // Obtener todas las claves únicas
+      // Obtener todas las claves únicas y filtrar campos de fotos
       const allKeys = new Set();
       datos.forEach((item) => {
         Object.keys(item).forEach((key) => allKeys.add(key));
       });
 
-      // Definir columnas
-      const columnas = Array.from(allKeys).map((key) => ({
+      // Filtrar campos de fotos
+      const camposFiltrados = filtrarCamposFotos(Array.from(allKeys));
+
+      // Definir columnas solo con campos filtrados
+      const columnas = camposFiltrados.map((key) => ({
         header: key,
         key: key,
         width: 15, // Ancho base
@@ -47,10 +63,10 @@ const ResumenGeneral = ({ pagosValidos = [], pagosFormateados = [] }) => {
 
       worksheet.columns = columnas;
 
-      // Agregar datos
+      // Agregar datos solo con campos filtrados
       datos.forEach((item) => {
         const rowData = {};
-        allKeys.forEach((key) => {
+        camposFiltrados.forEach((key) => {
           rowData[key] = item[key] !== undefined ? item[key] : "";
         });
         worksheet.addRow(rowData);
