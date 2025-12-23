@@ -13,7 +13,7 @@ export const initializeWebSocket = (dispatch) => {
         let url;
         (mode === 'dev')
             ? url = 'ws://localhost:3001/ws'
-            : url = 'wss://erpp.center/sero-web/ws';
+            : url = 'wss://seroapi.store/sero-web/ws';
 
         socket = new WebSocket(url);
 
