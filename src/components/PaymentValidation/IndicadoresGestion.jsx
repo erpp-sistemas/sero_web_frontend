@@ -30,13 +30,14 @@ const IndicadoresGestion = ({ pagosValidos = [] }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
-  console.log(pagosValidos)
+  console.log(pagosValidos);
 
   // 🔹 Estados para los modales
   const [modalSinFotosOpen, setModalSinFotosOpen] = useState(false);
   const [modalTodasLasFotosOpen, setModalTodasLasFotosOpen] = useState(false);
-  const [tipoFotoModal, setTipoFotoModal] = useState(''); // 'fachada' o 'evidencia'
+  const [tipoFotoModal, setTipoFotoModal] = useState(""); // 'fachada' o 'evidencia'
   const [registrosSinFoto, setRegistrosSinFoto] = useState([]);
+  const [registrosTodasLasFotos, setRegistrosTodasLasFotos] = useState([]);
 
   // 🔹 Colores específicos para secciones importantes
   const COLOR_VALIDO = colors.accentGreen[100];
@@ -44,11 +45,16 @@ const IndicadoresGestion = ({ pagosValidos = [] }) => {
 
   // 🔹 Función para filtrar campos - SOLO excluir "fotos" exacto
   const filtrarCamposFotos = (campos) => {
-    return campos.filter(campo => campo !== 'fotos');
+    return campos.filter((campo) => campo !== "fotos");
   };
 
   // 🔹 Función para crear Excel con diseño minimalista mejorado
-  const crearExcelConEstilo = (datos, nombreHoja, nombreArchivo, camposExcluir = []) => {
+  const crearExcelConEstilo = (
+    datos,
+    nombreHoja,
+    nombreArchivo,
+    camposExcluir = []
+  ) => {
     if (!datos.length) {
       alert("No hay datos para descargar");
       return;
@@ -63,8 +69,8 @@ const IndicadoresGestion = ({ pagosValidos = [] }) => {
         Object.keys(item).forEach((key) => allKeys.add(key));
       });
 
-      const camposFiltrados = Array.from(allKeys).filter(campo => 
-        !camposExcluir.includes(campo)
+      const camposFiltrados = Array.from(allKeys).filter(
+        (campo) => !camposExcluir.includes(campo)
       );
 
       const columnas = camposFiltrados.map((key) => ({
@@ -191,7 +197,12 @@ const IndicadoresGestion = ({ pagosValidos = [] }) => {
         p["estatus de gestion valida"] === "Gestión válida" &&
         p.evaluacion_periodos === "PERIODO_VALIDO"
     );
-    crearExcelConEstilo(pagosValidosFiltrados, "Pagos Válidos", "pagos-validos", ['fotos']);
+    crearExcelConEstilo(
+      pagosValidosFiltrados,
+      "Pagos Válidos",
+      "pagos-validos",
+      ["fotos"]
+    );
   };
 
   const descargarPagosNoValidos = () => {
@@ -201,7 +212,12 @@ const IndicadoresGestion = ({ pagosValidos = [] }) => {
         (p["estatus de gestion valida"] === "Gestión válida" &&
           p.evaluacion_periodos === "PERIODO_NO_VALIDO")
     );
-    crearExcelConEstilo(pagosNoValidosFiltrados, "Pagos No Válidos", "pagos-no-validos", ['fotos']);
+    crearExcelConEstilo(
+      pagosNoValidosFiltrados,
+      "Pagos No Válidos",
+      "pagos-no-validos",
+      ["fotos"]
+    );
   };
 
   const descargarSinFotoFachada = () => {
@@ -213,11 +229,12 @@ const IndicadoresGestion = ({ pagosValidos = [] }) => {
     const sinFotoFachada = pagosValidosFiltrados.filter(
       (p) => p["foto fachada predio"] === 0
     );
-    crearExcelConEstilo(sinFotoFachada, "Sin Foto Fachada", "sin-foto-fachada", [
-      'fotos',
-      'foto evidencia predio', 
-      'urlImagenEvidencia'
-    ]);
+    crearExcelConEstilo(
+      sinFotoFachada,
+      "Sin Foto Fachada",
+      "sin-foto-fachada",
+      ["fotos", "foto evidencia predio", "urlImagenEvidencia"]
+    );
   };
 
   const descargarPrediosNoLocalizados = () => {
@@ -229,7 +246,12 @@ const IndicadoresGestion = ({ pagosValidos = [] }) => {
     const prediosNoLocalizados = pagosValidosFiltrados.filter(
       (p) => p.estatus_predio !== "Predio localizado"
     );
-    crearExcelConEstilo(prediosNoLocalizados, "Predios No Localizados", "predios-no-localizados", ['fotos']);
+    crearExcelConEstilo(
+      prediosNoLocalizados,
+      "Predios No Localizados",
+      "predios-no-localizados",
+      ["fotos"]
+    );
   };
 
   const descargarSinFotoEvidencia = () => {
@@ -241,11 +263,12 @@ const IndicadoresGestion = ({ pagosValidos = [] }) => {
     const sinFotoEvidencia = pagosValidosFiltrados.filter(
       (p) => p["foto evidencia predio"] === 0
     );
-    crearExcelConEstilo(sinFotoEvidencia, "Sin Foto Evidencia", "sin-foto-evidencia", [
-      'fotos',
-      'foto fachada predio',
-      'urlImagenFachada'
-    ]);
+    crearExcelConEstilo(
+      sinFotoEvidencia,
+      "Sin Foto Evidencia",
+      "sin-foto-evidencia",
+      ["fotos", "foto fachada predio", "urlImagenFachada"]
+    );
   };
 
   const descargarSinPosicion = () => {
@@ -257,84 +280,54 @@ const IndicadoresGestion = ({ pagosValidos = [] }) => {
     const sinPosicion = pagosValidosFiltrados.filter(
       (p) => !p.latitud || p.latitud === 0
     );
-    crearExcelConEstilo(sinPosicion, "Sin Posición GPS", "sin-posicion-gps", ['fotos']);
+    crearExcelConEstilo(sinPosicion, "Sin Posición GPS", "sin-posicion-gps", [
+      "fotos",
+    ]);
   };
 
   // 🔹 NUEVAS FUNCIONES PARA GESTIÓN DE FOTOS
 
   // Función para abrir modal de registros sin fotos
-  const abrirModalSinFotos = React.useCallback((tipo) => {
+  const abrirModalSinFotos = React.useCallback(
+    (tipo) => {
+      const pagosValidosFiltrados = pagosValidos.filter(
+        (p) =>
+          p["estatus de gestion valida"] === "Gestión válida" &&
+          p.evaluacion_periodos === "PERIODO_VALIDO"
+      );
+
+      let registrosFiltrados = [];
+
+      if (tipo === "fachada") {
+        registrosFiltrados = pagosValidosFiltrados.filter(
+          (p) => p["foto fachada predio"] === 0
+        );
+      } else if (tipo === "evidencia") {
+        registrosFiltrados = pagosValidosFiltrados.filter(
+          (p) => p["foto evidencia predio"] === 0
+        );
+      }
+
+      setRegistrosSinFoto(registrosFiltrados);
+      setTipoFotoModal(tipo);
+      setModalSinFotosOpen(true);
+    },
+    [pagosValidos]
+  );
+
+  // Función para abrir modal con todas las fotos de pagos válidos
+  const abrirModalTodasLasFotos = React.useCallback(() => {
+
+    console.log(pagosValidos)
     const pagosValidosFiltrados = pagosValidos.filter(
       (p) =>
         p["estatus de gestion valida"] === "Gestión válida" &&
         p.evaluacion_periodos === "PERIODO_VALIDO"
     );
 
-    let registrosFiltrados = [];
-    
-    if (tipo === 'fachada') {
-      registrosFiltrados = pagosValidosFiltrados.filter(
-        (p) => p["foto fachada predio"] === 0
-      );
-    } else if (tipo === 'evidencia') {
-      registrosFiltrados = pagosValidosFiltrados.filter(
-        (p) => p["foto evidencia predio"] === 0
-      );
-    }
-
-    setRegistrosSinFoto(registrosFiltrados);
-    setTipoFotoModal(tipo);
-    setModalSinFotosOpen(true);
+    setRegistrosTodasLasFotos(pagosValidosFiltrados);
+    setModalTodasLasFotosOpen(true);
   }, [pagosValidos]);
-
-  // Función para abrir modal con todas las fotos de pagos válidos
-  const abrirModalTodasLasFotos = React.useCallback(() => {
-  const pagosValidosFiltrados = pagosValidos.filter(
-    (p) =>
-      p["estatus de gestion valida"] === "Gestión válida" &&
-      p.evaluacion_periodos === "PERIODO_VALIDO"
-  );
-
-  const todasLasFotos = [];
-
-  pagosValidosFiltrados.forEach((pago) => {
-    let fotosArray = [];
-
-    // --- Normalizar campo fotos ---
-    if (pago.fotos) {
-      // Si viene como string → parseamos
-      if (typeof pago.fotos === "string") {
-        try {
-          fotosArray = JSON.parse(pago.fotos);
-        } catch (e) {
-          console.error("Error al parsear campo fotos:", e, pago.fotos);
-          fotosArray = [];
-        }
-      }
-
-      // Si ya viene como array → usarlo
-      else if (Array.isArray(pago.fotos)) {
-        fotosArray = pago.fotos;
-      }
-    }
-
-    // --- Agregar fotos normalizadas ---
-    fotosArray.forEach((foto) => {
-      todasLasFotos.push({
-        ...foto,
-        cuenta: pago.cuenta,
-        referencia: pago.referencia || "",
-        total_pagado: pago.total_pagado,
-      });
-    });
-  });
-
-  console.log(todasLasFotos)
-
-  setRegistrosSinFoto(todasLasFotos);
-  setModalTodasLasFotosOpen(true);
-}, [pagosValidos]);
-
 
   // Función para simular envío de foto al backend
   const enviarFotoAlBackend = async (registro, archivo, tipo) => {
@@ -347,23 +340,25 @@ const IndicadoresGestion = ({ pagosValidos = [] }) => {
       });
 
       // Simular envío al backend
-      console.log('Enviando foto al backend:', {
+      console.log("Enviando foto al backend:", {
         cuenta: registro.cuenta,
         tipo,
-        archivo: base64.substring(0, 100) + '...', // Log parcial
-        registro
+        archivo: base64.substring(0, 100) + "...", // Log parcial
+        registro,
       });
 
       // Aquí iría la llamada real al API
       // await api.enviarFoto(registro.cuenta, tipo, base64);
 
-      alert(`Foto ${tipo} enviada correctamente para la cuenta ${registro.cuenta}`);
-      
+      alert(
+        `Foto ${tipo} enviada correctamente para la cuenta ${registro.cuenta}`
+      );
+
       // En una implementación real, actualizaríamos el estado local o re-fetchearíamos los datos
       return true;
     } catch (error) {
-      console.error('Error al enviar foto:', error);
-      alert('Error al enviar la foto');
+      console.error("Error al enviar foto:", error);
+      alert("Error al enviar la foto");
       return false;
     }
   };
@@ -418,45 +413,47 @@ const IndicadoresGestion = ({ pagosValidos = [] }) => {
         descargar: descargarPagosValidos,
         verFotos: abrirModalTodasLasFotos,
         tooltip: "Descargar listado de pagos válidos (excluye campo 'fotos')",
-        tooltipFotos: "Ver todas las fotos de pagos válidos"
+        tooltipFotos: "Ver todas las fotos de pagos válidos",
       },
       pagos_no_validos: {
         count: pagosNoValidosFiltrados.length,
         monto: sum(pagosNoValidosFiltrados),
         descargar: descargarPagosNoValidos,
-        tooltip: "Descargar listado de pagos no válidos (excluye campo 'fotos')"
+        tooltip:
+          "Descargar listado de pagos no válidos (excluye campo 'fotos')",
       },
       sin_posicion: {
         count: sinPosicion.length,
         pct: (sinPosicion.length / totalValidos) * 100,
         total: totalValidos,
         descargar: descargarSinPosicion,
-        tooltip: "Descargar registros sin posición GPS (excluye campo 'fotos')"
+        tooltip: "Descargar registros sin posición GPS (excluye campo 'fotos')",
       },
       sin_foto_fachada: {
         count: sinFotoFachada.length,
         pct: (sinFotoFachada.length / totalValidos) * 100,
         total: totalValidos,
         descargar: descargarSinFotoFachada,
-        adjuntarFoto: () => abrirModalSinFotos('fachada'),
+        adjuntarFoto: () => abrirModalSinFotos("fachada"),
         tooltip: "Descargar registros sin foto de fachada",
-        tooltipAdjuntar: "Gestionar fotos de fachada faltantes"
+        tooltipAdjuntar: "Gestionar fotos de fachada faltantes",
       },
       sin_foto_evidencia: {
         count: sinFotoEvidencia.length,
         pct: (sinFotoEvidencia.length / totalValidos) * 100,
         total: totalValidos,
         descargar: descargarSinFotoEvidencia,
-        adjuntarFoto: () => abrirModalSinFotos('evidencia'),
+        adjuntarFoto: () => abrirModalSinFotos("evidencia"),
         tooltip: "Descargar registros sin foto de evidencia",
-        tooltipAdjuntar: "Gestionar fotos de evidencia faltantes"
+        tooltipAdjuntar: "Gestionar fotos de evidencia faltantes",
       },
       predios_no_localizados: {
         count: prediosNoLocalizados.length,
         pct: (prediosNoLocalizados.length / totalValidos) * 100,
         total: totalValidos,
         descargar: descargarPrediosNoLocalizados,
-        tooltip: "Descargar registros de predios no localizados (excluye campo 'fotos')"
+        tooltip:
+          "Descargar registros de predios no localizados (excluye campo 'fotos')",
       },
     };
   }, [pagosValidos]);
@@ -472,7 +469,7 @@ const IndicadoresGestion = ({ pagosValidos = [] }) => {
     descargar,
     adjuntarFoto,
     tooltip,
-    tooltipAdjuntar
+    tooltipAdjuntar,
   }) => {
     const semaforoColor = getSemaforoColor(pct);
 
@@ -550,7 +547,13 @@ const IndicadoresGestion = ({ pagosValidos = [] }) => {
           </Box>
 
           {/* Footer con conteo y botones */}
-          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
             {/* Conteo de registros en color estándar */}
             <Box sx={{ flex: 1 }}>
               <Typography
@@ -605,7 +608,7 @@ const IndicadoresGestion = ({ pagosValidos = [] }) => {
                 </Tooltip>
               )}
 
-              {/* Botón de adjuntar foto (solo para cards de fotos) */}
+              {/* Botón de adjuntar foto (solo para cards de fotos)
               {adjuntarFoto && (
                 <Tooltip title={tooltipAdjuntar} arrow>
                   <IconButton
@@ -626,7 +629,7 @@ const IndicadoresGestion = ({ pagosValidos = [] }) => {
                     <AddPhotoAlternateOutlinedIcon fontSize="small" />
                   </IconButton>
                 </Tooltip>
-              )}
+              )} */}
             </Box>
           </Box>
         </Box>
@@ -702,9 +705,17 @@ const IndicadoresGestion = ({ pagosValidos = [] }) => {
                   ${data.pagos_validos.monto.toLocaleString("es-MX")}
                 </Typography>
               </Box>
-              
+
               {/* Botones de acción para Pagos Válidos */}
-              <Box sx={{ display: "flex", gap: 0.5, position: "absolute", top: 8, right: 8 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  gap: 0.5,
+                  position: "absolute",
+                  top: 8,
+                  right: 8,
+                }}
+              >
                 {/* Botón de descarga */}
                 <Tooltip title={data.pagos_validos.tooltip} arrow>
                   <IconButton
@@ -726,7 +737,7 @@ const IndicadoresGestion = ({ pagosValidos = [] }) => {
                   </IconButton>
                 </Tooltip>
 
-                {/* Botón de ver fotos */}
+                {/* Botón de ver fotos
                 <Tooltip title={data.pagos_validos.tooltipFotos} arrow>
                   <IconButton
                     size="small"
@@ -745,7 +756,7 @@ const IndicadoresGestion = ({ pagosValidos = [] }) => {
                   >
                     <PhotoLibraryOutlinedIcon fontSize="small" />
                   </IconButton>
-                </Tooltip>
+                </Tooltip> */}
               </Box>
             </Box>
           </Grow>
@@ -771,7 +782,10 @@ const IndicadoresGestion = ({ pagosValidos = [] }) => {
                 <BlockOutlinedIcon />
               </Box>
               <Box sx={{ flex: 1 }}>
-                <Typography variant="h6" sx={{ fontWeight: 600, color: COLOR_ESTANDAR }}>
+                <Typography
+                  variant="h6"
+                  sx={{ fontWeight: 600, color: COLOR_ESTANDAR }}
+                >
                   {data.pagos_no_validos.count.toLocaleString("es-MX")}
                 </Typography>
                 <Typography
@@ -780,11 +794,14 @@ const IndicadoresGestion = ({ pagosValidos = [] }) => {
                 >
                   Pagos no válidos
                 </Typography>
-                <Typography variant="body2" sx={{ color: COLOR_ESTANDAR, fontWeight: 500 }}>
+                <Typography
+                  variant="body2"
+                  sx={{ color: COLOR_ESTANDAR, fontWeight: 500 }}
+                >
                   ${data.pagos_no_validos.monto.toLocaleString("es-MX")}
                 </Typography>
               </Box>
-              
+
               {/* Botón de descarga para Pagos No Válidos */}
               <Tooltip title={data.pagos_no_validos.tooltip} arrow>
                 <IconButton
@@ -873,7 +890,7 @@ const IndicadoresGestion = ({ pagosValidos = [] }) => {
             delay={300}
             descargar={data.sin_posicion.descargar}
             tooltip={data.sin_posicion.tooltip}
-          />          
+          />
         </Box>
       </Box>
 
@@ -889,7 +906,7 @@ const IndicadoresGestion = ({ pagosValidos = [] }) => {
       <ModalTodasLasFotos
         open={modalTodasLasFotosOpen}
         onClose={() => setModalTodasLasFotosOpen(false)}
-        fotos={registrosSinFoto}
+        fotos={registrosTodasLasFotos}
       />
     </Box>
   );
