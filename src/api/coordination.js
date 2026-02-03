@@ -5,3 +5,4 @@ export const homeCoordinationRequest = (place_id, service_id, process_id) => axi
 export const homeCoordinationWSRequest = (place_id, service_id, process_id, account, date_capture) => axios.get(`/HomeCoordinationWS/${place_id}/${service_id}/${process_id}/${account}/${date_capture}`)
 export const viewPositionDailyWorkSummaryRequest = (place_id, service_id, process_id, user_id, date_capture) => axios.get(`/ViewPositionDailyWorkSummary/${place_id}/${service_id}/${process_id}/${user_id}/${date_capture}`)
 export const viewPositionVerifiedAddressRequest = (place_id, service_id, process_id, user_id, date_capture) => axios.get(`/ViewPositionVerifiedAddress/${place_id}/${service_id}/${process_id}/${user_id}/${date_capture}`)
+export const coordinatorMonitorResultsRequest = (id_plaza, id_servicio, id_procesos, fecha_inicio, fecha_fin) => axios.get(`/CoordinatorMonitorResults/${id_plaza}/${id_servicio}/${id_procesos}/${fecha_inicio}/${fecha_fin}`)

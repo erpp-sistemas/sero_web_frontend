@@ -76,6 +76,7 @@ import VerificationResponsive from './scenes/verification-responsiva'
 import Chat from './scenes/chat-support'
 import HomeCoordination from './scenes/home-coordination'
 import PaymentValidation from './scenes/payment-validation'
+import CoordinationMonitor from './scenes/coordinator-monitor'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -243,6 +244,7 @@ function App() {
                         <Route path="/chat-support" element={<Chat />} />
                         <Route path="/home-coordination" element={<HomeCoordination />} />
                         <Route path="/payment-validation" element={<PaymentValidation />} />
+                        <Route path="/coordinator-monitor" element={<CoordinationMonitor />} />
                       </Routes>
                     </main>
                   </Box>
