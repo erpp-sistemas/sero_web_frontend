@@ -46,7 +46,7 @@ const PerformanceMonitor = ({ data = [] }) => {
   const COLOR_TAB_ACTIVA = colors.blueAccent[600];
 
   // ============================================
-  // ANÁLISIS DE DATOS (MANTENIDO)
+  // ANÁLISIS DE DATOS (SIMPLIFICADO - YA VIENE FOTOS COMO ARRAY)
   // ============================================
 
   const { usuarios, resumen } = useMemo(() => {
@@ -75,6 +75,22 @@ const PerformanceMonitor = ({ data = [] }) => {
       usuario.total++;
       usuario.fechas.add(new Date(registro.fecha).toISOString().split("T")[0]);
 
+      // 🔹 Fotos ya vienen como array desde el backend - sin necesidad de parseo
+      const fotosArray = Array.isArray(registro.fotos) ? registro.fotos : [];
+      
+      // 🔹 Clasificar fotos por tipo (opcional, para facilitar acceso en el modal)
+      const fotosFachada = fotosArray.filter(foto => {
+        if (!foto || typeof foto !== 'object') return false;
+        const tipo = (foto.tipo || '').toLowerCase();
+        return tipo.includes('fachada') || tipo.includes('predio');
+      });
+      
+      const fotosEvidencia = fotosArray.filter(foto => {
+        if (!foto || typeof foto !== 'object') return false;
+        const tipo = (foto.tipo || '').toLowerCase();
+        return tipo.includes('evidencia');
+      });
+
       usuario.registros.push({
         id: registro.id,
         cuenta: registro.cuenta,
@@ -86,9 +102,22 @@ const PerformanceMonitor = ({ data = [] }) => {
           registro.longitud &&
           registro.latitud !== 0 &&
           registro.longitud !== 0,
+        // 🔹 Usar campos numéricos del backend (ya deberían estar correctos)
         fotosFachada: registro.fotos_fachada || 0,
         fotosEvidencia: registro.fotos_evidencia || 0,
         totalFotos: registro.total_fotos || 0,
+        // 🔹 Array de fotos ya procesado desde el backend
+        fotos: fotosArray,
+        // 🔹 Opcional: fotos separadas por tipo para fácil acceso en el modal
+        fotosPorTipo: {
+          fachada: fotosFachada,
+          evidencia: fotosEvidencia,
+        },
+        // 🔹 Información adicional
+        coordenadas: registro.latitud && registro.longitud ? {
+          latitud: registro.latitud,
+          longitud: registro.longitud,
+        } : null,
       });
 
       if (registro.estatus_gestion === "COMPLETA") {
@@ -1036,7 +1065,7 @@ const PerformanceMonitor = ({ data = [] }) => {
         )}
       </Box>
 
-      {/* 🔹 Diálogo de detalles */}
+      {/* 🔹 Diálogo de detalles - Ahora recibe información completa de fotos */}
       <GestorDetallesDialog
         open={dialogoAbierto}
         onClose={() => {
