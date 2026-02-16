@@ -12,6 +12,7 @@ import PerformanceMonitor from "../../components/CoordinatorMonitor/PerformanceM
 import { coordinatorMonitorResultsRequest } from "../../api/coordination";
 import { Box, Typography, Alert, Snackbar, useTheme } from "@mui/material";
 import { tokens } from "../../theme";
+import AsistenciaMonitor from "../../components/CoordinatorMonitor/AsistenciaMonitor";
 
 function Index() {
   const user = useSelector((state) => state.user);
@@ -148,6 +149,7 @@ function Index() {
           
           <CoordinatorKpiCards data={registerResult} />          
           <PerformanceMonitor data={registerResult} />
+          <AsistenciaMonitor data={registerResult} />
           {/* Aquí irán los componentes que vamos a agregar: */}
           {/* - KPI Cards */}
           {/* - Tablas de datos */}
