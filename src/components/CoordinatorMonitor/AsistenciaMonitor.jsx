@@ -11,9 +11,9 @@ import {
   Tab,
   TextField,
   InputAdornment,
-  Grow,
   Paper,
-  useTheme
+  useTheme,
+  Grow
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import {
@@ -38,13 +38,13 @@ const AsistenciaMonitor = ({ data = [] }) => {
   // ============================================
   // ESTADOS
   // ============================================
-  const [tabActiva, setTabActiva] = useState(0); // 0:Todos, 1:Completa, 2:Sin salida, 3:Sin entrada, 4:Sin asistencia
+  const [tabActiva, setTabActiva] = useState(0);
   const [busqueda, setBusqueda] = useState("");
   const [gestorSeleccionado, setGestorSeleccionado] = useState(null);
   const [dialogoAbierto, setDialogoAbierto] = useState(false);
 
   // ============================================
-  // COLORES - Misma paleta
+  // COLORES
   // ============================================
   const COLOR_TEXTO = colors.grey[100];
   const COLOR_FONDO = colors.bgContainer;
@@ -126,22 +126,11 @@ const AsistenciaMonitor = ({ data = [] }) => {
   };
 
   // ============================================
-  // ANÁLISIS - MANTENEMOS LA ESTRUCTURA ORIGINAL
+  // ANÁLISIS - Versión modificada con campos de asistencia
   // ============================================
-  const { gestores, resumenDias } = useMemo(() => {
+  const { gestores } = useMemo(() => {
     if (!data.length) {
-      return {
-        gestores: [],
-        resumenDias: {
-          totalGestores: 0,
-          totalDias: 0,
-          totalRegistros: 0,
-          completas: 0,
-          sinSalida: 0,
-          sinEntrada: 0,
-          sinAsistencia: 0
-        }
-      };
+      return { gestores: [] };
     }
 
     // Agrupar por USUARIO y por FECHA
@@ -176,6 +165,11 @@ const AsistenciaMonitor = ({ data = [] }) => {
           horaSalida: null,
           lugarEntrada: null,
           lugarSalida: null,
+          // ✅ NUEVOS CAMPOS DE ASISTENCIA
+          minutos_desde_entrada: null,
+          minutos_hasta_salida: null,
+          metros_desde_entrada: null,
+          metros_hasta_salida: null,          
           totalGestionesDia: 0,
           gestionesCompletasDia: 0,
           fotosDia: 0,
@@ -194,6 +188,9 @@ const AsistenciaMonitor = ({ data = [] }) => {
         if (!asistenciaDia.horaEntrada || new Date(registro.hora_entrada) < new Date(asistenciaDia.horaEntrada)) {
           asistenciaDia.horaEntrada = registro.hora_entrada;
           asistenciaDia.lugarEntrada = registro.lugar_asistencia_entrada;
+          // ✅ Guardar minutos_desde_entrada del registro más temprano
+          asistenciaDia.minutos_desde_entrada = registro.minutos_desde_entrada;
+          asistenciaDia.metros_desde_entrada = registro.metros_desde_entrada;
         }
       }
       
@@ -202,6 +199,9 @@ const AsistenciaMonitor = ({ data = [] }) => {
         if (!asistenciaDia.horaSalida || new Date(registro.hora_salida) > new Date(asistenciaDia.horaSalida)) {
           asistenciaDia.horaSalida = registro.hora_salida;
           asistenciaDia.lugarSalida = registro.lugar_asistencia_salida;
+          // ✅ Guardar minutos_hasta_salida del registro más tardío
+          asistenciaDia.minutos_hasta_salida = registro.minutos_hasta_salida;
+          asistenciaDia.metros_hasta_salida = registro.metros_hasta_salida;
         }
       }
 
@@ -231,7 +231,12 @@ const AsistenciaMonitor = ({ data = [] }) => {
             horasTrabajadas,
             eficienciaDia: asistencia.totalGestionesDia > 0 
               ? (asistencia.gestionesCompletasDia / asistencia.totalGestionesDia * 100).toFixed(1)
-              : 0
+              : 0,
+            // ✅ Aseguramos que estos campos existan
+            minutos_desde_entrada: asistencia.minutos_desde_entrada,
+            minutos_hasta_salida: asistencia.minutos_hasta_salida,
+            metros_desde_entrada: asistencia.metros_desde_entrada,
+            metros_hasta_salida: asistencia.metros_hasta_salida
           };
         })
         .sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
@@ -242,6 +247,57 @@ const AsistenciaMonitor = ({ data = [] }) => {
       const sinEntrada = asistenciasArray.filter(a => a.estatus_asistencia === "SIN_ENTRADA").length;
       const sinAsistencia = asistenciasArray.filter(a => a.estatus_asistencia === "SIN_ASISTENCIA").length;
 
+      // Calcular porcentajes para determinar el estatus predominante
+      const porcentajeCompletas = totalDias > 0 ? (completas / totalDias * 100).toFixed(1) : 0;
+      const porcentajeSinSalida = totalDias > 0 ? (sinSalida / totalDias * 100).toFixed(1) : 0;
+      const porcentajeSinEntrada = totalDias > 0 ? (sinEntrada / totalDias * 100).toFixed(1) : 0;
+      const porcentajeSinAsistencia = totalDias > 0 ? (sinAsistencia / totalDias * 100).toFixed(1) : 0;
+
+      // Determinar el estatus PREDOMINANTE (el de mayor porcentaje)
+      let estatusPredominante = "COMPLETA";
+      let maxPorcentaje = parseFloat(porcentajeCompletas);
+      
+      if (parseFloat(porcentajeSinSalida) > maxPorcentaje) {
+        estatusPredominante = "SIN_SALIDA";
+        maxPorcentaje = parseFloat(porcentajeSinSalida);
+      }
+      if (parseFloat(porcentajeSinEntrada) > maxPorcentaje) {
+        estatusPredominante = "SIN_ENTRADA";
+        maxPorcentaje = parseFloat(porcentajeSinEntrada);
+      }
+      if (parseFloat(porcentajeSinAsistencia) > maxPorcentaje) {
+        estatusPredominante = "SIN_ASISTENCIA";
+        maxPorcentaje = parseFloat(porcentajeSinAsistencia);
+      }
+
+      // Calcular porcentaje de asistencia (días que al menos entró)
+      const diasConEntrada = completas + sinSalida;
+      const porcentajeAsistencia = totalDias > 0 ? (diasConEntrada / totalDias * 100).toFixed(1) : 0;
+
+      // Color e ícono según estatus predominante
+      let color, icono;
+      switch (estatusPredominante) {
+        case "COMPLETA":
+          color = COLOR_COMPLETA;
+          icono = <CheckCircle />;
+          break;
+        case "SIN_SALIDA":
+          color = COLOR_SIN_SALIDA;
+          icono = <Logout sx={{ transform: 'rotate(180deg)' }} />;
+          break;
+        case "SIN_ENTRADA":
+          color = COLOR_SIN_ENTRADA;
+          icono = <Login />;
+          break;
+        case "SIN_ASISTENCIA":
+          color = COLOR_SIN_ASISTENCIA;
+          icono = <EventBusy />;
+          break;
+        default:
+          color = COLOR_TEXTO;
+          icono = <Warning />;
+      }
+
       return {
         ...gestor,
         asistencias: asistenciasArray,
@@ -250,33 +306,30 @@ const AsistenciaMonitor = ({ data = [] }) => {
         sinSalida,
         sinEntrada,
         sinAsistencia,
-        porcentajeAsistencia: totalDias > 0 ? ((completas + sinSalida) / totalDias * 100).toFixed(1) : 0,
+        porcentajeAsistencia,
+        estatusPredominante,
+        color,
+        icono,
         ultimoEstatus: asistenciasArray[0]?.estatus_asistencia || null,
         ultimoIcono: asistenciasArray[0]?.estatus_asistencia ? getIconoPorEstatus(asistenciasArray[0].estatus_asistencia) : null,
         ultimoColor: asistenciasArray[0]?.estatus_asistencia ? getColorPorEstatus(asistenciasArray[0].estatus_asistencia) : null,
-        ultimoLabel: asistenciasArray[0]?.estatus_asistencia ? getLabelPorEstatus(asistenciasArray[0].estatus_asistencia) : null
+        ultimoLabel: asistenciasArray[0]?.estatus_asistencia ? getLabelPorEstatus(asistenciasArray[0].estatus_asistencia) : null,
+        porcentajes: {
+          completas: porcentajeCompletas,
+          sinSalida: porcentajeSinSalida,
+          sinEntrada: porcentajeSinEntrada,
+          sinAsistencia: porcentajeSinAsistencia
+        }
       };
     });
 
-    // Resumen en DÍAS (¡LO QUE QUEREMOS!)
-    const resumenDias = {
-      totalGestores: gestoresArray.length,
-      totalDias: fechasUnicas.size,
-      totalRegistros: data.length,
-      completas: gestoresArray.reduce((acc, g) => acc + g.completas, 0),
-      sinSalida: gestoresArray.reduce((acc, g) => acc + g.sinSalida, 0),
-      sinEntrada: gestoresArray.reduce((acc, g) => acc + g.sinEntrada, 0),
-      sinAsistencia: gestoresArray.reduce((acc, g) => acc + g.sinAsistencia, 0)
-    };
-
     return {
-      gestores: gestoresArray.sort((a, b) => b.completas - a.completas),
-      resumenDias
+      gestores: gestoresArray.sort((a, b) => b.completas - a.completas)
     };
   }, [data]);
 
   // ============================================
-  // FILTROS - Tabs por estatus
+  // FILTROS - Por estatus PREDOMINANTE
   // ============================================
   const gestoresFiltrados = useMemo(() => {
     let filtrados = [...gestores];
@@ -288,15 +341,14 @@ const AsistenciaMonitor = ({ data = [] }) => {
       );
     }
 
-    // Filtrar por el ÚLTIMO estatus del gestor
     if (tabActiva === 1) {
-      filtrados = filtrados.filter(g => g.ultimoEstatus === "COMPLETA");
+      filtrados = filtrados.filter(g => g.estatusPredominante === "COMPLETA");
     } else if (tabActiva === 2) {
-      filtrados = filtrados.filter(g => g.ultimoEstatus === "SIN_SALIDA");
+      filtrados = filtrados.filter(g => g.estatusPredominante === "SIN_SALIDA");
     } else if (tabActiva === 3) {
-      filtrados = filtrados.filter(g => g.ultimoEstatus === "SIN_ENTRADA");
+      filtrados = filtrados.filter(g => g.estatusPredominante === "SIN_ENTRADA");
     } else if (tabActiva === 4) {
-      filtrados = filtrados.filter(g => g.ultimoEstatus === "SIN_ASISTENCIA");
+      filtrados = filtrados.filter(g => g.estatusPredominante === "SIN_ASISTENCIA");
     }
 
     return filtrados;
@@ -314,7 +366,7 @@ const AsistenciaMonitor = ({ data = [] }) => {
   };
 
   // ============================================
-  // COLUMNAS DEL DATAGRID - IGUAL QUE EN LA VERSIÓN BASE
+  // COLUMNAS DEL DATAGRID
   // ============================================
   const columns = [
     {
@@ -522,73 +574,194 @@ const AsistenciaMonitor = ({ data = [] }) => {
   return (
     <>
       <Box sx={{ mt: 6 }}>
-        {/* HEADER - Simplificado con resumen en DÍAS */}
+        {/* Título principal */}
         <Box sx={{ mb: 3 }}>
-          <Typography variant="h6" sx={{ color: COLOR_TEXTO, fontWeight: 600, fontSize: "1.125rem", mb: 0.5 }}>
+          <Typography
+            variant="h6"
+            sx={{
+              color: COLOR_TEXTO,
+              fontWeight: 600,
+              fontSize: "1.125rem",
+              mb: 0.5,
+            }}
+          >
             Control de Asistencia
           </Typography>
-          <Typography variant="body2" sx={{ color: colors.grey[400], fontSize: "0.875rem" }}>
-            Registros de entrada/salida por gestor
+          <Typography
+            variant="body2"
+            sx={{
+              color: colors.grey[400],
+              fontSize: "0.875rem",
+            }}
+          >
+            Comportamiento histórico de asistencia por gestor
           </Typography>
         </Box>
 
-        {/* TARJETA DE RESUMEN EN DÍAS - NUEVA */}
-        <Grow in={true} timeout={400}>
-          <Paper
-            sx={{
-              p: 2.5,
-              mb: 3,
-              bgcolor: COLOR_FONDO,
-              borderRadius: "16px",
-              transition: "transform 0.2s ease, box-shadow 0.2s ease",
-              "&:hover": { transform: "translateY(-2px)", boxShadow: "0 4px 12px rgba(0,0,0,0.08)" }
-            }}
-          >
-            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1.5 }}>
-              <Typography variant="body2" sx={{ color: colors.grey[400], fontWeight: 500 }}>
-                Resumen en días (total de todos los gestores)
-              </Typography>
-              <Typography variant="body2" sx={{ color: COLOR_TEXTO, fontWeight: 600 }}>
-                {resumenDias.totalDias} días analizados
-              </Typography>
-            </Box>
+        {/* HEADER MINIMALISTA */}
+        <Box className="grid grid-cols-1 gap-3 mb-4">
+          <Grow in={true} timeout={400}>
+            <Box
+              className="p-4 rounded-xl shadow-sm"
+              sx={{
+                backgroundColor: COLOR_FONDO,
+                transition: "transform 0.2s ease, box-shadow 0.2s ease",
+                "&:hover": {
+                  transform: "translateY(-1px)",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                },
+              }}
+            >
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <Box>
+                  {/* Primera línea: gestores y días */}
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: colors.grey[400],
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                      fontSize: "0.875rem",
+                      mb: 1,
+                    }}
+                  >
+                    <Box
+                      component="span"
+                      sx={{ fontWeight: 500, color: COLOR_TEXTO }}
+                    >
+                      {gestores.length} gestores
+                    </Box>
+                    <Box component="span" sx={{ color: colors.grey[500] }}>
+                      •
+                    </Box>
+                    <Box component="span">
+                      {new Set(data.map(d => new Date(d.fecha).toISOString().split('T')[0])).size} días analizados
+                    </Box>
+                  </Typography>
 
-            <Box sx={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 2 }}>
-              <Box>
-                <Typography variant="h4" sx={{ color: COLOR_COMPLETA, fontWeight: 700, lineHeight: 1.2 }}>
-                  {resumenDias.completas}
-                </Typography>
-                <Typography variant="caption" sx={{ color: colors.grey[400] }}>
-                  dias completos
-                </Typography>
-              </Box>
-              <Box>
-                <Typography variant="h4" sx={{ color: COLOR_SIN_SALIDA, fontWeight: 700, lineHeight: 1.2 }}>
-                  {resumenDias.sinSalida}
-                </Typography>
-                <Typography variant="caption" sx={{ color: colors.grey[400] }}>
-                  dias sin salida
-                </Typography>
-              </Box>
-              <Box>
-                <Typography variant="h4" sx={{ color: COLOR_SIN_ENTRADA, fontWeight: 700, lineHeight: 1.2 }}>
-                  {resumenDias.sinEntrada}
-                </Typography>
-                <Typography variant="caption" sx={{ color: colors.grey[400] }}>
-                  dias sin entrada
-                </Typography>
-              </Box>
-              <Box>
-                <Typography variant="h4" sx={{ color: COLOR_SIN_ASISTENCIA, fontWeight: 700, lineHeight: 1.2 }}>
-                  {resumenDias.sinAsistencia}
-                </Typography>
-                <Typography variant="caption" sx={{ color: colors.grey[400] }}>
-                  dias sin asistencia
-                </Typography>
+                  {/* Segunda línea: distribución por perfil */}
+                  <Box sx={{ display: "flex", gap: 1.5, alignItems: "center" }}>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <Box
+                        sx={{
+                          width: 8,
+                          height: 8,
+                          borderRadius: "50%",
+                          backgroundColor: COLOR_COMPLETA,
+                        }}
+                      />
+                      <Typography
+                        variant="body2"
+                        sx={{ color: colors.grey[400], fontSize: "0.75rem" }}
+                      >
+                        {gestores.filter(g => g.estatusPredominante === "COMPLETA").length} Completas
+                      </Typography>
+                    </Box>
+                    <Box
+                      component="span"
+                      sx={{ color: colors.grey[500], fontSize: "0.75rem" }}
+                    >
+                      •
+                    </Box>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <Box
+                        sx={{
+                          width: 8,
+                          height: 8,
+                          borderRadius: "50%",
+                          backgroundColor: COLOR_SIN_SALIDA,
+                        }}
+                      />
+                      <Typography
+                        variant="body2"
+                        sx={{ color: colors.grey[400], fontSize: "0.75rem" }}
+                      >
+                        {gestores.filter(g => g.estatusPredominante === "SIN_SALIDA").length} Sin salida
+                      </Typography>
+                    </Box>
+                    <Box
+                      component="span"
+                      sx={{ color: colors.grey[500], fontSize: "0.75rem" }}
+                    >
+                      •
+                    </Box>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <Box
+                        sx={{
+                          width: 8,
+                          height: 8,
+                          borderRadius: "50%",
+                          backgroundColor: COLOR_SIN_ENTRADA,
+                        }}
+                      />
+                      <Typography
+                        variant="body2"
+                        sx={{ color: colors.grey[400], fontSize: "0.75rem" }}
+                      >
+                        {gestores.filter(g => g.estatusPredominante === "SIN_ENTRADA").length} Sin entrada
+                      </Typography>
+                    </Box>
+                    <Box
+                      component="span"
+                      sx={{ color: colors.grey[500], fontSize: "0.75rem" }}
+                    >
+                      •
+                    </Box>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <Box
+                        sx={{
+                          width: 8,
+                          height: 8,
+                          borderRadius: "50%",
+                          backgroundColor: COLOR_SIN_ASISTENCIA,
+                        }}
+                      />
+                      <Typography
+                        variant="body2"
+                        sx={{ color: colors.grey[400], fontSize: "0.75rem" }}
+                      >
+                        {gestores.filter(g => g.estatusPredominante === "SIN_ASISTENCIA").length} Sin asistencia
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Box>
+
+                {/* Lado derecho - porcentaje general */}
+                <Box sx={{ textAlign: "right" }}>
+                  <Typography
+                    variant="h5"
+                    sx={{
+                      fontWeight: 700,
+                      color: COLOR_TEXTO,
+                      lineHeight: 1,
+                    }}
+                  >
+                    {(
+                      gestores.reduce((acc, g) => acc + parseFloat(g.porcentajeAsistencia), 0) / 
+                      (gestores.length || 1)
+                    ).toFixed(0)}%
+                  </Typography>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: colors.grey[400],
+                      fontSize: "0.75rem",
+                    }}
+                  >
+                    Asistencia promedio
+                  </Typography>
+                </Box>
               </Box>
             </Box>
-          </Paper>
-        </Grow>
+          </Grow>
+        </Box>
 
         {/* FILTROS Y TABS */}
         <Box className="p-4 rounded-xl shadow-sm mb-4" sx={{ backgroundColor: COLOR_FONDO }}>
@@ -624,7 +797,7 @@ const AsistenciaMonitor = ({ data = [] }) => {
             />
           </Box>
 
-          {/* Tabs - Filtrar por estatus de HOY */}
+          {/* Tabs */}
           <Box sx={{ borderBottom: 1, borderColor: colors.borderContainer }}>
             <Tabs
               value={tabActiva}
@@ -651,7 +824,7 @@ const AsistenciaMonitor = ({ data = [] }) => {
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                     <Typography component="span">Todos</Typography>
                     <Chip
-                      label={resumenDias.totalGestores}
+                      label={gestores.length}
                       size="small"
                       sx={{
                         backgroundColor: colors.bgContainerSticky,
@@ -669,10 +842,10 @@ const AsistenciaMonitor = ({ data = [] }) => {
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                     <CheckCircle sx={{ fontSize: 18, color: tabActiva === 1 ? COLOR_COMPLETA : COLOR_TEXTO }} />
                     <Typography component="span" sx={{ color: tabActiva === 1 ? COLOR_COMPLETA : COLOR_TEXTO }}>
-                      Completa
+                      Completas
                     </Typography>
                     <Chip
-                      label={gestores.filter(g => g.ultimoEstatus === "COMPLETA").length}
+                      label={gestores.filter(g => g.estatusPredominante === "COMPLETA").length}
                       size="small"
                       sx={{
                         backgroundColor: colors.bgContainerSticky,
@@ -693,7 +866,7 @@ const AsistenciaMonitor = ({ data = [] }) => {
                       Sin salida
                     </Typography>
                     <Chip
-                      label={gestores.filter(g => g.ultimoEstatus === "SIN_SALIDA").length}
+                      label={gestores.filter(g => g.estatusPredominante === "SIN_SALIDA").length}
                       size="small"
                       sx={{
                         backgroundColor: colors.bgContainerSticky,
@@ -714,7 +887,7 @@ const AsistenciaMonitor = ({ data = [] }) => {
                       Sin entrada
                     </Typography>
                     <Chip
-                      label={gestores.filter(g => g.ultimoEstatus === "SIN_ENTRADA").length}
+                      label={gestores.filter(g => g.estatusPredominante === "SIN_ENTRADA").length}
                       size="small"
                       sx={{
                         backgroundColor: colors.bgContainerSticky,
@@ -735,7 +908,7 @@ const AsistenciaMonitor = ({ data = [] }) => {
                       Sin asistencia
                     </Typography>
                     <Chip
-                      label={gestores.filter(g => g.ultimoEstatus === "SIN_ASISTENCIA").length}
+                      label={gestores.filter(g => g.estatusPredominante === "SIN_ASISTENCIA").length}
                       size="small"
                       sx={{
                         backgroundColor: colors.bgContainerSticky,
@@ -752,7 +925,7 @@ const AsistenciaMonitor = ({ data = [] }) => {
           </Box>
         </Box>
 
-        {/* DATAGRID - IGUAL QUE EN LA VERSIÓN BASE */}
+        {/* DATAGRID */}
         <Paper sx={{ bgcolor: COLOR_FONDO, borderRadius: "16px", overflow: "hidden" }}>
           {gestoresFiltrados.length === 0 ? (
             <Box sx={{ p: 6, textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
@@ -781,8 +954,16 @@ const AsistenciaMonitor = ({ data = [] }) => {
                   border: "none",
                   color: COLOR_TEXTO,
                   bgcolor: COLOR_FONDO,
-                  "& .MuiDataGrid-cell": { borderBottom: `1px solid ${COLOR_BORDE}`, display: "flex", alignItems: "center" },
-                  "& .MuiDataGrid-columnHeaders": { bgcolor: COLOR_FONDO, borderBottom: `1px solid ${COLOR_BORDE}`, fontWeight: 600 },
+                  "& .MuiDataGrid-cell": { 
+                    borderBottom: `1px solid ${COLOR_BORDE}`, 
+                    display: "flex", 
+                    alignItems: "center" 
+                  },
+                  "& .MuiDataGrid-columnHeaders": { 
+                    bgcolor: COLOR_FONDO, 
+                    borderBottom: `1px solid ${COLOR_BORDE}`, 
+                    fontWeight: 600 
+                  },
                   "& .MuiDataGrid-footerContainer": { display: "none" },
                   "& .MuiDataGrid-row:hover": { bgcolor: colors.primary[400] + "20" },
                   "& .MuiDataGrid-cellCheckbox, & .MuiDataGrid-columnHeaderCheckbox": { display: "none" },
@@ -801,7 +982,7 @@ const AsistenciaMonitor = ({ data = [] }) => {
             <Typography variant="body2" sx={{ color: colors.grey[400] }}>
               Mostrando {gestoresFiltrados.length} gestores
               {busqueda && ` • Filtrado: "${busqueda}"`}
-              {tabActiva > 0 && ` • ${["Todos", "Completa", "Sin salida", "Sin entrada", "Sin asistencia"][tabActiva]}`}
+              {tabActiva > 0 && ` • ${["Todos", "Completas", "Sin salida", "Sin entrada", "Sin asistencia"][tabActiva]}`}
             </Typography>
             <Button
               startIcon={<Download />}
@@ -821,7 +1002,8 @@ const AsistenciaMonitor = ({ data = [] }) => {
                   sin_entrada: g.sinEntrada,
                   sin_asistencia: g.sinAsistencia,
                   porcentaje_asistencia: g.porcentajeAsistencia + "%",
-                  ultimo_estatus: g.ultimoEstatus
+                  ultimo_estatus: g.ultimoEstatus,
+                  perfil: g.estatusPredominante
                 }));
                 
                 const dataStr = JSON.stringify(reporte, null, 2);

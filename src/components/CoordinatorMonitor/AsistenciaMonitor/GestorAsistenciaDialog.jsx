@@ -41,7 +41,7 @@ import {
   ExpandLess,
   GpsFixed,
   PhotoCamera,
-  Schedule
+  Schedule,
 } from "@mui/icons-material";
 import { tokens } from "../../../theme";
 
@@ -90,16 +90,21 @@ const CardResumenDialog = ({
 // ============================================
 // COMPONENTE CHIP ESTATUS (mismo diseño)
 // ============================================
-const ChipEstatusAsistencia = ({ estatus, getColorPorEstatus, getIconoPorEstatus, getLabelPorEstatus }) => {
+const ChipEstatusAsistencia = ({
+  estatus,
+  getColorPorEstatus,
+  getIconoPorEstatus,
+  getLabelPorEstatus,
+}) => {
   const color = getColorPorEstatus(estatus);
   const icono = getIconoPorEstatus(estatus);
   const label = getLabelPorEstatus(estatus);
-  
+
   return (
     <Tooltip title={label}>
       <Chip
         icon={icono}
-        label={estatus.replace('_', ' ')}
+        label={estatus.replace("_", " ")}
         size="small"
         sx={{
           backgroundColor: color + "20",
@@ -107,9 +112,9 @@ const ChipEstatusAsistencia = ({ estatus, getColorPorEstatus, getIconoPorEstatus
           fontWeight: 600,
           fontSize: "0.7rem",
           minWidth: 90,
-          '& .MuiChip-icon': {
+          "& .MuiChip-icon": {
             color: color,
-          }
+          },
         }}
       />
     </Tooltip>
@@ -136,11 +141,11 @@ const GestorAsistenciaDialog = ({
   formatHora,
   getColorPorEstatus,
   getIconoPorEstatus,
-  getLabelPorEstatus
+  getLabelPorEstatus,
 }) => {
   const theme = useTheme();
   const colors = colorsProp || tokens(theme.palette.mode);
-  
+
   // Props con valores por defecto
   const COLOR_TEXTO = COLOR_TEXTO_PROPS || colors.grey[100];
   const COLOR_FONDO = COLOR_FONDO_PROPS || colors.bgContainer;
@@ -148,14 +153,15 @@ const GestorAsistenciaDialog = ({
   const COLOR_COMPLETA = COLOR_COMPLETA_PROPS || colors.accentGreen[100];
   const COLOR_SIN_SALIDA = COLOR_SIN_SALIDA_PROPS || colors.blueAccent[400];
   const COLOR_SIN_ENTRADA = COLOR_SIN_ENTRADA_PROPS || colors.yellowAccent[400];
-  const COLOR_SIN_ASISTENCIA = COLOR_SIN_ASISTENCIA_PROPS || colors.redAccent[400];
+  const COLOR_SIN_ASISTENCIA =
+    COLOR_SIN_ASISTENCIA_PROPS || colors.redAccent[400];
 
   // Estados
   const [filtroEstatus, setFiltroEstatus] = useState("TODOS");
   const [pagina, setPagina] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [diaExpandido, setDiaExpandido] = useState(null);
-  
+
   const gestorAnteriorRef = useRef(null);
 
   // ============================================
@@ -163,12 +169,18 @@ const GestorAsistenciaDialog = ({
   // ============================================
   const getColorFiltro = (estatus) => {
     switch (estatus) {
-      case "TODOS": return colors.blueAccent[600];
-      case "COMPLETA": return COLOR_COMPLETA;
-      case "SIN_SALIDA": return COLOR_SIN_SALIDA;
-      case "SIN_ENTRADA": return COLOR_SIN_ENTRADA;
-      case "SIN_ASISTENCIA": return COLOR_SIN_ASISTENCIA;
-      default: return COLOR_TEXTO;
+      case "TODOS":
+        return colors.blueAccent[600];
+      case "COMPLETA":
+        return COLOR_COMPLETA;
+      case "SIN_SALIDA":
+        return COLOR_SIN_SALIDA;
+      case "SIN_ENTRADA":
+        return COLOR_SIN_ENTRADA;
+      case "SIN_ASISTENCIA":
+        return COLOR_SIN_ASISTENCIA;
+      default:
+        return COLOR_TEXTO;
     }
   };
 
@@ -177,12 +189,18 @@ const GestorAsistenciaDialog = ({
   // ============================================
   const getIconoFiltro = (estatus) => {
     switch (estatus) {
-      case "TODOS": return <AssignmentOutlined sx={{ fontSize: 18 }} />;
-      case "COMPLETA": return <CheckCircle sx={{ fontSize: 18 }} />;
-      case "SIN_SALIDA": return <Logout sx={{ fontSize: 18, transform: 'rotate(180deg)' }} />;
-      case "SIN_ENTRADA": return <Login sx={{ fontSize: 18 }} />;
-      case "SIN_ASISTENCIA": return <EventBusy sx={{ fontSize: 18 }} />;
-      default: return <Warning sx={{ fontSize: 18 }} />;
+      case "TODOS":
+        return <AssignmentOutlined sx={{ fontSize: 18 }} />;
+      case "COMPLETA":
+        return <CheckCircle sx={{ fontSize: 18 }} />;
+      case "SIN_SALIDA":
+        return <Logout sx={{ fontSize: 18, transform: "rotate(180deg)" }} />;
+      case "SIN_ENTRADA":
+        return <Login sx={{ fontSize: 18 }} />;
+      case "SIN_ASISTENCIA":
+        return <EventBusy sx={{ fontSize: 18 }} />;
+      default:
+        return <Warning sx={{ fontSize: 18 }} />;
     }
   };
 
@@ -191,12 +209,14 @@ const GestorAsistenciaDialog = ({
   // ============================================
   const asistenciasFiltradas = useMemo(() => {
     if (!gestor?.asistencias) return [];
-    
+
     if (filtroEstatus === "TODOS") {
       return gestor.asistencias;
     }
-    
-    return gestor.asistencias.filter(dia => dia.estatus_asistencia === filtroEstatus);
+
+    return gestor.asistencias.filter(
+      (dia) => dia.estatus_asistencia === filtroEstatus,
+    );
   }, [gestor, filtroEstatus]);
 
   // ============================================
@@ -217,21 +237,29 @@ const GestorAsistenciaDialog = ({
         COMPLETA: 0,
         SIN_SALIDA: 0,
         SIN_ENTRADA: 0,
-        SIN_ASISTENCIA: 0
+        SIN_ASISTENCIA: 0,
       };
     }
-    
-    const completas = gestor.asistencias.filter(d => d.estatus_asistencia === "COMPLETA").length;
-    const sinSalida = gestor.asistencias.filter(d => d.estatus_asistencia === "SIN_SALIDA").length;
-    const sinEntrada = gestor.asistencias.filter(d => d.estatus_asistencia === "SIN_ENTRADA").length;
-    const sinAsistencia = gestor.asistencias.filter(d => d.estatus_asistencia === "SIN_ASISTENCIA").length;
-    
+
+    const completas = gestor.asistencias.filter(
+      (d) => d.estatus_asistencia === "COMPLETA",
+    ).length;
+    const sinSalida = gestor.asistencias.filter(
+      (d) => d.estatus_asistencia === "SIN_SALIDA",
+    ).length;
+    const sinEntrada = gestor.asistencias.filter(
+      (d) => d.estatus_asistencia === "SIN_ENTRADA",
+    ).length;
+    const sinAsistencia = gestor.asistencias.filter(
+      (d) => d.estatus_asistencia === "SIN_ASISTENCIA",
+    ).length;
+
     return {
       TODOS: gestor.asistencias.length,
       COMPLETA: completas,
       SIN_SALIDA: sinSalida,
       SIN_ENTRADA: sinEntrada,
-      SIN_ASISTENCIA: sinAsistencia
+      SIN_ASISTENCIA: sinAsistencia,
     };
   }, [gestor]);
 
@@ -267,11 +295,11 @@ const GestorAsistenciaDialog = ({
       fullWidth
       PaperProps={{
         sx: {
-          maxHeight: '90vh',
-          borderRadius: '12px',
-          overflow: 'hidden',
-          bgcolor: COLOR_FONDO
-        }
+          maxHeight: "90vh",
+          borderRadius: "12px",
+          overflow: "hidden",
+          bgcolor: COLOR_FONDO,
+        },
       }}
     >
       {/* HEADER */}
@@ -298,23 +326,23 @@ const GestorAsistenciaDialog = ({
               {gestor.nombre}
             </Typography>
             <Typography variant="body2" sx={{ color: colors.grey[400] }}>
-              ID: {gestor.id} • {gestor.totalRegistros.toLocaleString()} registros • {gestor.totalDias} días trabajados
+              ID: {gestor.id} • {gestor.totalRegistros.toLocaleString()}{" "}
+              registros • {gestor.totalDias} días trabajados
             </Typography>
           </Box>
         </Box>
-        <IconButton
-          onClick={onClose}
-          sx={{ color: colors.grey[400] }}
-        >
+        <IconButton onClick={onClose} sx={{ color: colors.grey[400] }}>
           <Close />
         </IconButton>
       </DialogTitle>
 
-      <DialogContent sx={{ 
-        backgroundColor: COLOR_FONDO, 
-        p: 3,
-        overflow: 'auto'
-      }}>
+      <DialogContent
+        sx={{
+          backgroundColor: COLOR_FONDO,
+          p: 3,
+          overflow: "auto",
+        }}
+      >
         {/* 4 CARDS DE RESUMEN */}
         <Box className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <CardResumenDialog
@@ -341,7 +369,11 @@ const GestorAsistenciaDialog = ({
             titulo="Sin salida"
             valor={gestor.sinSalida || 0}
             color={COLOR_SIN_SALIDA}
-            icono={<Logout sx={{ color: COLOR_SIN_SALIDA, transform: 'rotate(180deg)' }} />}
+            icono={
+              <Logout
+                sx={{ color: COLOR_SIN_SALIDA, transform: "rotate(180deg)" }}
+              />
+            }
             colors={colors}
             COLOR_TEXTO={COLOR_TEXTO}
             COLOR_FONDO={COLOR_FONDO}
@@ -363,23 +395,23 @@ const GestorAsistenciaDialog = ({
         <Box sx={{ mb: 3 }}>
           <Typography
             variant="subtitle1"
-            sx={{ 
-              fontWeight: 600, 
+            sx={{
+              fontWeight: 600,
               color: COLOR_TEXTO,
               mb: 2,
               display: "flex",
               alignItems: "center",
-              gap: 1
+              gap: 1,
             }}
           >
             📊 Filtrar por estatus de asistencia
-            <Typography 
-              component="span" 
-              variant="caption" 
-              sx={{ 
+            <Typography
+              component="span"
+              variant="caption"
+              sx={{
                 color: colors.grey[500],
                 fontWeight: 400,
-                ml: 1
+                ml: 1,
               }}
             >
               (Haz clic para filtrar)
@@ -387,18 +419,24 @@ const GestorAsistenciaDialog = ({
           </Typography>
 
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-            {["TODOS", "COMPLETA", "SIN_SALIDA", "SIN_ENTRADA", "SIN_ASISTENCIA"].map((estatus) => {
+            {[
+              "TODOS",
+              "COMPLETA",
+              "SIN_SALIDA",
+              "SIN_ENTRADA",
+              "SIN_ASISTENCIA",
+            ].map((estatus) => {
               const color = getColorFiltro(estatus);
               const estaActivo = filtroEstatus === estatus;
               const cantidad = conteoEstatus[estatus] || 0;
-              
+
               if (cantidad === 0 && estatus !== "TODOS") return null;
 
               return (
                 <Chip
                   key={estatus}
                   icon={getIconoFiltro(estatus)}
-                  label={`${estatus === "TODOS" ? "Todos" : estatus.replace('_', ' ')} (${cantidad})`}
+                  label={`${estatus === "TODOS" ? "Todos" : estatus.replace("_", " ")} (${cantidad})`}
                   onClick={() => handleClicChip(estatus)}
                   sx={{
                     backgroundColor: estaActivo ? color + "30" : color + "10",
@@ -412,9 +450,9 @@ const GestorAsistenciaDialog = ({
                     height: 28,
                     transition: "all 0.2s ease",
                     cursor: "pointer",
-                    '& .MuiChip-icon': {
+                    "& .MuiChip-icon": {
                       color: estaActivo ? color : colors.grey[500],
-                    }
+                    },
                   }}
                 />
               );
@@ -437,17 +475,7 @@ const GestorAsistenciaDialog = ({
               sx={{ fontWeight: 600, color: COLOR_TEXTO }}
             >
               📅 Historial diario
-              <Typography 
-                component="span" 
-                variant="caption" 
-                sx={{ 
-                  color: colors.grey[500],
-                  fontWeight: 400,
-                  ml: 1
-                }}
-              >
-                (Haz clic en ▶ para ver registros del día)
-              </Typography>
+              
             </Typography>
             <Typography
               variant="body2"
@@ -457,7 +485,7 @@ const GestorAsistenciaDialog = ({
                 <>Mostrando {asistenciasFiltradas.length} días</>
               ) : (
                 <>
-                  Filtrado: <strong>{filtroEstatus.replace('_', ' ')}</strong> • 
+                  Filtrado: <strong>{filtroEstatus.replace("_", " ")}</strong> •
                   {asistenciasFiltradas.length} de {gestor.totalDias} días
                 </>
               )}
@@ -465,270 +493,415 @@ const GestorAsistenciaDialog = ({
           </Box>
 
           {asistenciasPaginadas.length === 0 ? (
-            <Box sx={{ 
-              textAlign: 'center', 
-              py: 8,
-              backgroundColor: colors.primary[900],
-              borderRadius: '8px',
-              border: `1px solid ${COLOR_BORDE}`
-            }}>
-              <EventBusy sx={{ fontSize: 48, color: colors.grey[600], mb: 2 }} />
+            <Box
+              sx={{
+                textAlign: "center",
+                py: 8,
+                backgroundColor: colors.primary[900],
+                borderRadius: "8px",
+                border: `1px solid ${COLOR_BORDE}`,
+              }}
+            >
+              <EventBusy
+                sx={{ fontSize: 48, color: colors.grey[600], mb: 2 }}
+              />
               <Typography variant="h6" sx={{ color: COLOR_TEXTO, mb: 1 }}>
                 No hay registros para mostrar
               </Typography>
               <Typography variant="body2" sx={{ color: colors.grey[400] }}>
-                {filtroEstatus !== "TODOS" 
-                  ? `No hay días con estatus "${filtroEstatus.replace('_', ' ')}"`
+                {filtroEstatus !== "TODOS"
+                  ? `No hay días con estatus "${filtroEstatus.replace("_", " ")}"`
                   : "Este gestor no tiene registros de asistencia"}
               </Typography>
             </Box>
           ) : (
-            <TableContainer 
-              component={Paper} 
-              sx={{ 
+            <TableContainer
+              component={Paper}
+              sx={{
                 backgroundColor: COLOR_FONDO,
                 border: `1px solid ${COLOR_BORDE}`,
-                borderRadius: '8px',
-                overflow: 'hidden'
+                borderRadius: "8px",
+                overflow: "hidden",
               }}
             >
-              <Table>
+              <Table size="small">
                 <TableHead>
                   <TableRow>
-                    <TableCell sx={{ width: 50, color: COLOR_TEXTO, fontWeight: 600, borderBottom: `1px solid ${COLOR_BORDE}` }}></TableCell>
-                    <TableCell sx={{ color: COLOR_TEXTO, fontWeight: 600, borderBottom: `1px solid ${COLOR_BORDE}` }}>Fecha</TableCell>
-                    <TableCell sx={{ color: COLOR_TEXTO, fontWeight: 600, borderBottom: `1px solid ${COLOR_BORDE}` }}>Estatus</TableCell>
-                    <TableCell sx={{ color: COLOR_TEXTO, fontWeight: 600, borderBottom: `1px solid ${COLOR_BORDE}` }}>Entrada</TableCell>
-                    <TableCell sx={{ color: COLOR_TEXTO, fontWeight: 600, borderBottom: `1px solid ${COLOR_BORDE}` }}>Salida</TableCell>
-                    <TableCell sx={{ color: COLOR_TEXTO, fontWeight: 600, borderBottom: `1px solid ${COLOR_BORDE}` }} align="center">Jornada</TableCell>
-                    <TableCell sx={{ color: COLOR_TEXTO, fontWeight: 600, borderBottom: `1px solid ${COLOR_BORDE}` }} align="center">Gestiones</TableCell>
-                    <TableCell sx={{ color: COLOR_TEXTO, fontWeight: 600, borderBottom: `1px solid ${COLOR_BORDE}` }} align="center">Fotos</TableCell>
+                    <TableCell
+                      sx={{
+                        color: COLOR_TEXTO,
+                        fontWeight: 600,
+                        borderBottom: `1px solid ${COLOR_BORDE}`,
+                        width: 60,
+                      }}
+                    >
+                      Fecha
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        color: COLOR_TEXTO,
+                        fontWeight: 600,
+                        borderBottom: `1px solid ${COLOR_BORDE}`,
+                        width: 80,
+                      }}
+                    >
+                      Estatus
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        color: COLOR_TEXTO,
+                        fontWeight: 600,
+                        borderBottom: `1px solid ${COLOR_BORDE}`,
+                        width: 65,
+                      }}
+                    >
+                      <Tooltip title="Hora de entrada" arrow>
+                        <span>Entrada</span>
+                      </Tooltip>
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        color: COLOR_TEXTO,
+                        fontWeight: 600,
+                        borderBottom: `1px solid ${COLOR_BORDE}`,
+                        width: 65,
+                      }}
+                    >
+                      <Tooltip title="Hora de salida" arrow>
+                        <span>Salida</span>
+                      </Tooltip>
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        color: COLOR_TEXTO,
+                        fontWeight: 600,
+                        borderBottom: `1px solid ${COLOR_BORDE}`,
+                        width: 70,
+                      }}
+                    >
+                      <Tooltip
+                        title="Tiempo desde que llegó hasta su primer registro"
+                        arrow
+                      >
+                        <span>Inicio</span>
+                      </Tooltip>
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        color: COLOR_TEXTO,
+                        fontWeight: 600,
+                        borderBottom: `1px solid ${COLOR_BORDE}`,
+                        width: 70,
+                      }}
+                    >
+                      <Tooltip
+                        title="Tiempo entre su último registro y su salida"
+                        arrow
+                      >
+                        <span>Fin</span>
+                      </Tooltip>
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        color: COLOR_TEXTO,
+                        fontWeight: 600,
+                        borderBottom: `1px solid ${COLOR_BORDE}`,
+                        width: 70,
+                      }}
+                    >
+                      <Tooltip
+                        title="Distancia entre donde marcó entrada y su primer registro"
+                        arrow
+                      >
+                        <span>Dist. inicio</span>
+                      </Tooltip>
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        color: COLOR_TEXTO,
+                        fontWeight: 600,
+                        borderBottom: `1px solid ${COLOR_BORDE}`,
+                        width: 70,
+                      }}
+                    >
+                      <Tooltip
+                        title="Distancia entre su último registro y donde marcó salida"
+                        arrow
+                      >
+                        <span>Dist. fin</span>
+                      </Tooltip>
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        color: COLOR_TEXTO,
+                        fontWeight: 600,
+                        borderBottom: `1px solid ${COLOR_BORDE}`,
+                        width: 70,
+                      }}
+                      align="center"
+                    >
+                      <Tooltip title="Ver ubicaciones en mapa" arrow>
+                        <span>📍</span>
+                      </Tooltip>
+                    </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {asistenciasPaginadas.map((dia) => {
-                    const isExpanded = diaExpandido === dia.fechaKey;
-                    const colorEstatus = getColorPorEstatus(dia.estatus_asistencia);
-                    const tieneRegistros = dia.registros?.length > 0;
-                    
-                    return (
-                      <React.Fragment key={dia.fechaKey}>
-                        <TableRow 
-                          sx={{ 
-                            '&:hover': { backgroundColor: colors.primary[400] },
-                            borderBottom: isExpanded ? 'none' : `1px solid ${colors.primary[700]}`
-                          }}
-                        >
-                          <TableCell>
-                            <IconButton
-                              size="small"
-                              onClick={() => {
-                                setDiaExpandido(isExpanded ? null : dia.fechaKey);
-                              }}
-                              sx={{
-                                color: tieneRegistros ? colors.grey[300] : colors.grey[600],
-                                transform: isExpanded ? 'rotate(180deg)' : 'none',
-                                transition: 'transform 0.2s ease',
-                                '&:hover': {
-                                  color: tieneRegistros ? COLOR_TEXTO : colors.grey[600],
-                                }
-                              }}
-                              disabled={!tieneRegistros}
-                            >
-                              {isExpanded ? <ExpandLess /> : <ExpandMore />}
-                            </IconButton>
-                          </TableCell>
-                          <TableCell>
-                            <Typography variant="body2" sx={{ fontWeight: 600, color: COLOR_TEXTO }}>
-                              {formatFechaLegible(dia.fecha)}
-                            </Typography>
-                          </TableCell>
-                          <TableCell>
-                            <ChipEstatusAsistencia
-                              estatus={dia.estatus_asistencia}
-                              getColorPorEstatus={getColorPorEstatus}
-                              getIconoPorEstatus={getIconoPorEstatus}
-                              getLabelPorEstatus={getLabelPorEstatus}
-                            />
-                          </TableCell>
-                          <TableCell>
-                            {dia.horaEntrada ? (
-                              <Box>
-                                <Typography variant="body2" sx={{ color: COLOR_SIN_SALIDA, fontWeight: 600 }}>
-                                  {formatHora(dia.horaEntrada)}
-                                </Typography>
-                                {dia.lugarEntrada && (
-                                  <Tooltip title={dia.lugarEntrada}>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                      <LocationOn sx={{ fontSize: 12, color: colors.grey[400] }} />
-                                      <Typography variant="caption" sx={{ color: colors.grey[400] }}>
-                                        {dia.registroTemprano?.metros_desde_entrada?.toFixed(0)}m
-                                      </Typography>
-                                    </Box>
-                                  </Tooltip>
-                                )}
-                              </Box>
-                            ) : (
-                              <Typography variant="body2" sx={{ color: colors.grey[500] }}>
-                                —
-                              </Typography>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            {dia.horaSalida ? (
-                              <Box>
-                                <Typography variant="body2" sx={{ color: COLOR_COMPLETA, fontWeight: 600 }}>
-                                  {formatHora(dia.horaSalida)}
-                                </Typography>
-                                {dia.lugarSalida && (
-                                  <Tooltip title={dia.lugarSalida}>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                      <LocationOn sx={{ fontSize: 12, color: colors.grey[400] }} />
-                                      <Typography variant="caption" sx={{ color: colors.grey[400] }}>
-                                        {dia.registroTardio?.metros_hasta_salida?.toFixed(0)}m
-                                      </Typography>
-                                    </Box>
-                                  </Tooltip>
-                                )}
-                              </Box>
-                            ) : (
-                              <Typography variant="body2" sx={{ color: colors.grey[500] }}>
-                                —
-                              </Typography>
-                            )}
-                          </TableCell>
-                          <TableCell align="center">
-                            {dia.horasTrabajadas ? (
-                              <Typography variant="body2" sx={{ color: COLOR_TEXTO, fontWeight: 600 }}>
-                                {dia.horasTrabajadas}h
-                              </Typography>
-                            ) : dia.horaEntrada ? (
-                              <Tooltip title="Sin registro de salida">
-                                <AccessTime sx={{ color: COLOR_SIN_SALIDA, fontSize: 20 }} />
-                              </Tooltip>
-                            ) : (
-                              <Typography variant="body2" sx={{ color: colors.grey[500] }}>
-                                —
-                              </Typography>
-                            )}
-                          </TableCell>
-                          <TableCell align="center">
-                            <Typography variant="body2" sx={{ color: COLOR_TEXTO, fontWeight: 600 }}>
-                              {dia.totalGestionesDia}
-                            </Typography>
-                            <Typography variant="caption" sx={{ color: colors.grey[400] }}>
-                              {dia.eficienciaDia}%
-                            </Typography>
-                          </TableCell>
-                          <TableCell align="center">
-                            <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center' }}>
-                              <Tooltip title={`${dia.fotosDia} fotos`}>
-                                <Chip
-                                  label={dia.fotosDia}
-                                  size="small"
-                                  icon={<PhotoCamera sx={{ fontSize: 12 }} />}
-                                  sx={{
-                                    backgroundColor: dia.fotosDia > 0 
-                                      ? COLOR_COMPLETA + "20" 
-                                      : COLOR_SIN_ASISTENCIA + "20",
-                                    color: dia.fotosDia > 0 ? COLOR_COMPLETA : COLOR_SIN_ASISTENCIA,
-                                    fontSize: "0.7rem",
-                                    minWidth: 40,
-                                    height: 22,
-                                  }}
-                                />
-                              </Tooltip>
-                            </Box>
-                          </TableCell>
-                        </TableRow>
+                    // Función para determinar color según tiempo (minutos)
+                    const getColorPorTiempo = (minutos) => {
+                      if (!minutos) return colors.grey[500];
+                      if (minutos <= 15) return COLOR_COMPLETA; // Verde - Bueno
+                      if (minutos <= 30) return COLOR_SIN_ENTRADA; // Amarillo - Precaución
+                      return COLOR_SIN_ASISTENCIA; // Rojo - Grave
+                    };
 
-                        {/* FILA EXPANDIDA CON REGISTROS DEL DÍA */}
-                        {isExpanded && dia.registros && dia.registros.length > 0 && (
-                          <TableRow>
-                            <TableCell colSpan={8} sx={{ 
-                              p: 0,
-                              borderBottom: `1px solid ${colors.primary[700]}`,
-                              backgroundColor: colors.primary[900]
-                            }}>
-                              <Collapse in={isExpanded} timeout="auto">
-                                <Box sx={{ p: 3 }}>
-                                  <Typography variant="subtitle2" sx={{ color: COLOR_TEXTO, fontWeight: 600, mb: 2 }}>
-                                    Registros del día ({dia.registros.length})
-                                  </Typography>
-                                  
-                                  <Box sx={{ maxHeight: 300, overflow: 'auto' }}>
-                                    {dia.registros.map((registro, idx) => (
-                                      <Paper
-                                        key={registro.id || idx}
-                                        sx={{
-                                          p: 1.5,
-                                          mb: 1,
-                                          bgcolor: colors.primary[800],
-                                          borderRadius: '8px',
-                                          border: `1px solid ${colors.primary[700]}`
-                                        }}
-                                      >
-                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                          <Box>
-                                            <Typography variant="body2" sx={{ color: COLOR_TEXTO, fontWeight: 500 }}>
-                                              {registro.cuenta}
-                                            </Typography>
-                                            <Typography variant="caption" sx={{ color: colors.grey[400] }}>
-                                              {formatHora(registro.fecha)} • {registro.estatus_gestion}
-                                            </Typography>
-                                          </Box>
-                                          <Box sx={{ display: 'flex', gap: 1 }}>
-                                            {registro.total_fotos > 0 && (
-                                              <Chip
-                                                label={`${registro.total_fotos} fotos`}
-                                                size="small"
-                                                sx={{ fontSize: '0.7rem', height: 20 }}
-                                              />
-                                            )}
-                                            {registro.latitud && registro.longitud && (
-                                              <Tooltip title="Con GPS">
-                                                <GpsFixed sx={{ color: COLOR_COMPLETA, fontSize: 18 }} />
-                                              </Tooltip>
-                                            )}
-                                          </Box>
-                                        </Box>
-                                      </Paper>
-                                    ))}
-                                  </Box>
-                                </Box>
-                              </Collapse>
-                            </TableCell>
-                          </TableRow>
-                        )}
-                      </React.Fragment>
+                    // Función para determinar color según distancia (metros)
+                    const getColorPorDistancia = (metros) => {
+                      if (!metros) return colors.grey[500];
+                      if (metros <= 500) return COLOR_COMPLETA; // Verde - Cerca
+                      if (metros <= 2000) return COLOR_SIN_ENTRADA; // Amarillo - Regular
+                      return COLOR_SIN_ASISTENCIA; // Rojo - Muy lejos
+                    };
+
+                    // Formatear distancia (metros a km si es necesario)
+                    const formatearDistancia = (metros) => {
+                      if (!metros) return "—";
+                      if (metros < 1000) return `${Math.round(metros)} m`;
+                      return `${(metros / 1000).toFixed(1)} km`;
+                    };
+
+                    return (
+                      <TableRow
+                        key={dia.fechaKey}
+                        sx={{
+                          "&:hover": { backgroundColor: colors.primary[400] },
+                        }}
+                      >
+                        <TableCell>
+                          <Typography
+                            variant="body2"
+                            sx={{ color: COLOR_TEXTO }}
+                          >
+                            {formatFecha(dia.fecha)}
+                          </Typography>
+                        </TableCell>
+
+                        <TableCell>
+                          <ChipEstatusAsistencia
+                            estatus={dia.estatus_asistencia}
+                            getColorPorEstatus={getColorPorEstatus}
+                            getIconoPorEstatus={getIconoPorEstatus}
+                            getLabelPorEstatus={getLabelPorEstatus}
+                          />
+                        </TableCell>
+
+                        <TableCell>
+                          {dia.horaEntrada ? (
+                            <Typography
+                              variant="body2"
+                              sx={{ color: COLOR_TEXTO }}
+                            >
+                              {formatHora(dia.horaEntrada)}
+                            </Typography>
+                          ) : (
+                            <Typography
+                              variant="body2"
+                              sx={{ color: colors.grey[500] }}
+                            >
+                              —
+                            </Typography>
+                          )}
+                        </TableCell>
+
+                        <TableCell>
+                          {dia.horaSalida ? (
+                            <Typography
+                              variant="body2"
+                              sx={{ color: COLOR_TEXTO }}
+                            >
+                              {formatHora(dia.horaSalida)}
+                            </Typography>
+                          ) : (
+                            <Typography
+                              variant="body2"
+                              sx={{ color: colors.grey[500] }}
+                            >
+                              —
+                            </Typography>
+                          )}
+                        </TableCell>
+
+                        <TableCell>
+                          {dia.minutos_desde_entrada ? (
+                            <Tooltip
+                              title={`Tiempo hasta primer registro: ${dia.minutos_desde_entrada} minutos`}
+                              arrow
+                            >
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  color: getColorPorTiempo(
+                                    dia.minutos_desde_entrada,
+                                  ),
+                                  fontWeight:
+                                    dia.minutos_desde_entrada > 15 ? 600 : 400,
+                                }}
+                              >
+                                {dia.minutos_desde_entrada} min
+                              </Typography>
+                            </Tooltip>
+                          ) : (
+                            <Typography
+                              variant="body2"
+                              sx={{ color: colors.grey[500] }}
+                            >
+                              —
+                            </Typography>
+                          )}
+                        </TableCell>
+
+                        <TableCell>
+                          {dia.minutos_hasta_salida ? (
+                            <Tooltip
+                              title={`Tiempo desde último registro: ${dia.minutos_hasta_salida} minutos`}
+                              arrow
+                            >
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  color: getColorPorTiempo(
+                                    dia.minutos_hasta_salida,
+                                  ),
+                                  fontWeight:
+                                    dia.minutos_hasta_salida > 15 ? 600 : 400,
+                                }}
+                              >
+                                {dia.minutos_hasta_salida} min
+                              </Typography>
+                            </Tooltip>
+                          ) : (
+                            <Typography
+                              variant="body2"
+                              sx={{ color: colors.grey[500] }}
+                            >
+                              —
+                            </Typography>
+                          )}
+                        </TableCell>
+
+                        <TableCell>
+                          {dia.metros_desde_entrada ? (
+                            <Tooltip
+                              title={`Distancia al primer registro: ${formatearDistancia(dia.metros_desde_entrada)}`}
+                              arrow
+                            >
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  color: getColorPorDistancia(
+                                    dia.metros_desde_entrada,
+                                  ),
+                                  fontWeight:
+                                    dia.metros_desde_entrada > 500 ? 600 : 400,
+                                }}
+                              >
+                                {formatearDistancia(dia.metros_desde_entrada)}
+                              </Typography>
+                            </Tooltip>
+                          ) : (
+                            <Typography
+                              variant="body2"
+                              sx={{ color: colors.grey[500] }}
+                            >
+                              —
+                            </Typography>
+                          )}
+                        </TableCell>
+
+                        <TableCell>
+                          {dia.metros_hasta_salida ? (
+                            <Tooltip
+                              title={`Distancia al último registro: ${formatearDistancia(dia.metros_hasta_salida)}`}
+                              arrow
+                            >
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  color: getColorPorDistancia(
+                                    dia.metros_hasta_salida,
+                                  ),
+                                  fontWeight:
+                                    dia.metros_hasta_salida > 500 ? 600 : 400,
+                                }}
+                              >
+                                {formatearDistancia(dia.metros_hasta_salida)}
+                              </Typography>
+                            </Tooltip>
+                          ) : (
+                            <Typography
+                              variant="body2"
+                              sx={{ color: colors.grey[500] }}
+                            >
+                              —
+                            </Typography>
+                          )}
+                        </TableCell>
+
+                        <TableCell align="center">
+                          <Box
+                            sx={{
+                              display: "flex",
+                              gap: 0.5,
+                              justifyContent: "center",
+                            }}
+                          >
+                            {dia.lugarEntrada && (
+                              <Tooltip title="Ver ubicación de entrada" arrow>
+                                <IconButton
+                                  size="small"
+                                  onClick={() =>
+                                    window.open(dia.lugarEntrada, "_blank")
+                                  }
+                                  sx={{ color: colors.grey[400], p: 0.5 }}
+                                >
+                                  <LocationOn sx={{ fontSize: 18 }} />
+                                </IconButton>
+                              </Tooltip>
+                            )}
+                            {dia.lugarSalida && (
+                              <Tooltip title="Ver ubicación de salida" arrow>
+                                <IconButton
+                                  size="small"
+                                  onClick={() =>
+                                    window.open(dia.lugarSalida, "_blank")
+                                  }
+                                  sx={{ color: colors.grey[400], p: 0.5 }}
+                                >
+                                  <Logout
+                                    sx={{
+                                      fontSize: 16,
+                                      transform: "rotate(180deg)",
+                                    }}
+                                  />
+                                </IconButton>
+                              </Tooltip>
+                            )}
+                            {!dia.lugarEntrada && !dia.lugarSalida && (
+                              <Typography
+                                variant="body2"
+                                sx={{ color: colors.grey[500] }}
+                              >
+                                —
+                              </Typography>
+                            )}
+                          </Box>
+                        </TableCell>
+                      </TableRow>
                     );
                   })}
                 </TableBody>
               </Table>
-
-              {/* PAGINACIÓN */}
-              <TablePagination
-                component="div"
-                count={asistenciasFiltradas.length}
-                page={pagina}
-                onPageChange={(e, newPage) => setPagina(newPage)}
-                rowsPerPage={pageSize}
-                onRowsPerPageChange={(e) => {
-                  setPageSize(parseInt(e.target.value, 10));
-                  setPagina(0);
-                }}
-                rowsPerPageOptions={[5, 10, 25, 50]}
-                sx={{
-                  color: COLOR_TEXTO,
-                  borderTop: `1px solid ${COLOR_BORDE}`,
-                  '& .MuiTablePagination-selectIcon': {
-                    color: COLOR_TEXTO,
-                  },
-                  '& .MuiTablePagination-select': {
-                    color: COLOR_TEXTO,
-                  }
-                }}
-              />
             </TableContainer>
           )}
         </Box>
@@ -743,13 +916,10 @@ const GestorAsistenciaDialog = ({
           justifyContent: "space-between",
         }}
       >
-        <Button
-          onClick={onClose}
-          sx={{ color: colors.grey[400] }}
-        >
+        <Button onClick={onClose} sx={{ color: colors.grey[400] }}>
           Cerrar
         </Button>
-        
+
         <Button
           variant="contained"
           startIcon={<Download />}
@@ -763,9 +933,9 @@ const GestorAsistenciaDialog = ({
                 sin_salida: gestor.sinSalida,
                 sin_entrada: gestor.sinEntrada,
                 sin_asistencia: gestor.sinAsistencia,
-                porcentaje_asistencia: gestor.porcentajeAsistencia + "%"
+                porcentaje_asistencia: gestor.porcentajeAsistencia + "%",
               },
-              historial: gestor.asistencias.map(dia => ({
+              historial: gestor.asistencias.map((dia) => ({
                 fecha: formatFecha(dia.fecha),
                 estatus: dia.estatus_asistencia,
                 entrada: formatHora(dia.horaEntrada),
@@ -773,15 +943,17 @@ const GestorAsistenciaDialog = ({
                 horas: dia.horasTrabajadas || "—",
                 gestiones: dia.totalGestionesDia,
                 eficiencia: dia.eficienciaDia + "%",
-                fotos: dia.fotosDia
-              }))
+                fotos: dia.fotosDia,
+              })),
             };
 
             const dataStr = JSON.stringify(reporte, null, 2);
-            const dataUri = "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
+            const dataUri =
+              "data:application/json;charset=utf-8," +
+              encodeURIComponent(dataStr);
             const link = document.createElement("a");
             link.href = dataUri;
-            link.download = `asistencia_${gestor.nombre.replace(/\s+/g, '_')}_${gestor.id}.json`;
+            link.download = `asistencia_${gestor.nombre.replace(/\s+/g, "_")}_${gestor.id}.json`;
             link.click();
           }}
           sx={{
