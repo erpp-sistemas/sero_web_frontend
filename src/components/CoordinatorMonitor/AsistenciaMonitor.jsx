@@ -26,7 +26,8 @@ import {
   Login,
   Logout,
   EventBusy,
-  Assignment
+  Assignment,
+  InfoOutlined
 } from "@mui/icons-material";
 import { tokens } from "../../theme";
 import GestorAsistenciaDialog from "./AsistenciaMonitor/GestorAsistenciaDialog";
@@ -364,6 +365,15 @@ const AsistenciaMonitor = ({ data = [] }) => {
     if (index === 4) return COLOR_SIN_ASISTENCIA;
     return COLOR_TAB_ACTIVA;
   };
+
+  const tabsInfo = [
+  { nombre: "Todos", color: COLOR_TAB_ACTIVA, descripcion: "todos los gestores" },
+  { nombre: "Completas", color: COLOR_COMPLETA, descripcion: "Completas", explicacion: "días con entrada y salida registrada" },
+  { nombre: "Sin salida", color: COLOR_SIN_SALIDA, descripcion: "Sin salida", explicacion: "días que registraron entrada pero no salida" },
+  { nombre: "Sin entrada", color: COLOR_SIN_ENTRADA, descripcion: "Sin entrada", explicacion: "días que registraron salida pero no entrada" },
+  { nombre: "Sin asistencia", color: COLOR_SIN_ASISTENCIA, descripcion: "Sin asistencia", explicacion: "días sin ningún registro" }
+];
+
 
   // ============================================
   // COLUMNAS DEL DATAGRID
@@ -799,130 +809,155 @@ const AsistenciaMonitor = ({ data = [] }) => {
 
           {/* Tabs */}
           <Box sx={{ borderBottom: 1, borderColor: colors.borderContainer }}>
-            <Tabs
-              value={tabActiva}
-              onChange={(e, nuevoValor) => setTabActiva(nuevoValor)}
-              sx={{
-                "& .MuiTab-root": {
-                  color: COLOR_TEXTO,
-                  fontWeight: 500,
-                  fontSize: "0.875rem",
-                  textTransform: "none",
-                  minHeight: 48
-                },
-                "& .Mui-selected": {
-                  color: `${getColorTabActiva(tabActiva)} !important`,
-                  fontWeight: 600
-                },
-                "& .MuiTabs-indicator": {
-                  backgroundColor: getColorTabActiva(tabActiva)
-                }
-              }}
-            >
-              <Tab
-                label={
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <Typography component="span">Todos</Typography>
-                    <Chip
-                      label={gestores.length}
-                      size="small"
-                      sx={{
-                        backgroundColor: colors.bgContainerSticky,
-                        color: tabActiva === 0 ? COLOR_TAB_ACTIVA : COLOR_TEXTO,
-                        fontSize: "0.7rem",
-                        height: 20,
-                        minWidth: 20
-                      }}
-                    />
-                  </Box>
-                }
-              />
-              <Tab
-                label={
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <CheckCircle sx={{ fontSize: 18, color: tabActiva === 1 ? COLOR_COMPLETA : COLOR_TEXTO }} />
-                    <Typography component="span" sx={{ color: tabActiva === 1 ? COLOR_COMPLETA : COLOR_TEXTO }}>
-                      Completas
-                    </Typography>
-                    <Chip
-                      label={gestores.filter(g => g.estatusPredominante === "COMPLETA").length}
-                      size="small"
-                      sx={{
-                        backgroundColor: colors.bgContainerSticky,
-                        color: tabActiva === 1 ? COLOR_COMPLETA : COLOR_TEXTO,
-                        fontSize: "0.7rem",
-                        height: 20,
-                        minWidth: 20
-                      }}
-                    />
-                  </Box>
-                }
-              />
-              <Tab
-                label={
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <Logout sx={{ fontSize: 18, transform: 'rotate(180deg)', color: tabActiva === 2 ? COLOR_SIN_SALIDA : COLOR_TEXTO }} />
-                    <Typography component="span" sx={{ color: tabActiva === 2 ? COLOR_SIN_SALIDA : COLOR_TEXTO }}>
-                      Sin salida
-                    </Typography>
-                    <Chip
-                      label={gestores.filter(g => g.estatusPredominante === "SIN_SALIDA").length}
-                      size="small"
-                      sx={{
-                        backgroundColor: colors.bgContainerSticky,
-                        color: tabActiva === 2 ? COLOR_SIN_SALIDA : COLOR_TEXTO,
-                        fontSize: "0.7rem",
-                        height: 20,
-                        minWidth: 20
-                      }}
-                    />
-                  </Box>
-                }
-              />
-              <Tab
-                label={
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <Login sx={{ fontSize: 18, color: tabActiva === 3 ? COLOR_SIN_ENTRADA : COLOR_TEXTO }} />
-                    <Typography component="span" sx={{ color: tabActiva === 3 ? COLOR_SIN_ENTRADA : COLOR_TEXTO }}>
-                      Sin entrada
-                    </Typography>
-                    <Chip
-                      label={gestores.filter(g => g.estatusPredominante === "SIN_ENTRADA").length}
-                      size="small"
-                      sx={{
-                        backgroundColor: colors.bgContainerSticky,
-                        color: tabActiva === 3 ? COLOR_SIN_ENTRADA : COLOR_TEXTO,
-                        fontSize: "0.7rem",
-                        height: 20,
-                        minWidth: 20
-                      }}
-                    />
-                  </Box>
-                }
-              />
-              <Tab
-                label={
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <EventBusy sx={{ fontSize: 18, color: tabActiva === 4 ? COLOR_SIN_ASISTENCIA : COLOR_TEXTO }} />
-                    <Typography component="span" sx={{ color: tabActiva === 4 ? COLOR_SIN_ASISTENCIA : COLOR_TEXTO }}>
-                      Sin asistencia
-                    </Typography>
-                    <Chip
-                      label={gestores.filter(g => g.estatusPredominante === "SIN_ASISTENCIA").length}
-                      size="small"
-                      sx={{
-                        backgroundColor: colors.bgContainerSticky,
-                        color: tabActiva === 4 ? COLOR_SIN_ASISTENCIA : COLOR_TEXTO,
-                        fontSize: "0.7rem",
-                        height: 20,
-                        minWidth: 20
-                      }}
-                    />
-                  </Box>
-                }
-              />
-            </Tabs>
-          </Box>
+  <Tabs
+    value={tabActiva}
+    onChange={(e, nuevoValor) => setTabActiva(nuevoValor)}
+    sx={{
+      "& .MuiTab-root": {
+        color: COLOR_TEXTO,
+        fontWeight: 500,
+        fontSize: "0.875rem",
+        textTransform: "none",
+        minHeight: 48
+      },
+      "& .Mui-selected": {
+        color: `${getColorTabActiva(tabActiva)} !important`,
+        fontWeight: 600
+      },
+      "& .MuiTabs-indicator": {
+        backgroundColor: getColorTabActiva(tabActiva)
+      }
+    }}
+  >
+    <Tab
+      label={
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Typography component="span">Todos</Typography>
+          <Chip
+            label={gestores.length}
+            size="small"
+            sx={{
+              backgroundColor: colors.bgContainerSticky,
+              color: tabActiva === 0 ? COLOR_TAB_ACTIVA : COLOR_TEXTO,
+              fontSize: "0.7rem",
+              height: 20,
+              minWidth: 20
+            }}
+          />
+        </Box>
+      }
+    />
+    <Tab
+      label={
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <CheckCircle sx={{ fontSize: 18, color: tabActiva === 1 ? COLOR_COMPLETA : COLOR_TEXTO }} />
+          <Typography component="span" sx={{ color: tabActiva === 1 ? COLOR_COMPLETA : COLOR_TEXTO }}>
+            Completas
+          </Typography>
+          <Chip
+            label={gestores.filter(g => g.estatusPredominante === "COMPLETA").length}
+            size="small"
+            sx={{
+              backgroundColor: colors.bgContainerSticky,
+              color: tabActiva === 1 ? COLOR_COMPLETA : COLOR_TEXTO,
+              fontSize: "0.7rem",
+              height: 20,
+              minWidth: 20
+            }}
+          />
+        </Box>
+      }
+    />
+    <Tab
+      label={
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Logout sx={{ fontSize: 18, transform: 'rotate(180deg)', color: tabActiva === 2 ? COLOR_SIN_SALIDA : COLOR_TEXTO }} />
+          <Typography component="span" sx={{ color: tabActiva === 2 ? COLOR_SIN_SALIDA : COLOR_TEXTO }}>
+            Sin salida
+          </Typography>
+          <Chip
+            label={gestores.filter(g => g.estatusPredominante === "SIN_SALIDA").length}
+            size="small"
+            sx={{
+              backgroundColor: colors.bgContainerSticky,
+              color: tabActiva === 2 ? COLOR_SIN_SALIDA : COLOR_TEXTO,
+              fontSize: "0.7rem",
+              height: 20,
+              minWidth: 20
+            }}
+          />
+        </Box>
+      }
+    />
+    <Tab
+      label={
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Login sx={{ fontSize: 18, color: tabActiva === 3 ? COLOR_SIN_ENTRADA : COLOR_TEXTO }} />
+          <Typography component="span" sx={{ color: tabActiva === 3 ? COLOR_SIN_ENTRADA : COLOR_TEXTO }}>
+            Sin entrada
+          </Typography>
+          <Chip
+            label={gestores.filter(g => g.estatusPredominante === "SIN_ENTRADA").length}
+            size="small"
+            sx={{
+              backgroundColor: colors.bgContainerSticky,
+              color: tabActiva === 3 ? COLOR_SIN_ENTRADA : COLOR_TEXTO,
+              fontSize: "0.7rem",
+              height: 20,
+              minWidth: 20
+            }}
+          />
+        </Box>
+      }
+    />
+    <Tab
+      label={
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <EventBusy sx={{ fontSize: 18, color: tabActiva === 4 ? COLOR_SIN_ASISTENCIA : COLOR_TEXTO }} />
+          <Typography component="span" sx={{ color: tabActiva === 4 ? COLOR_SIN_ASISTENCIA : COLOR_TEXTO }}>
+            Sin asistencia
+          </Typography>
+          <Chip
+            label={gestores.filter(g => g.estatusPredominante === "SIN_ASISTENCIA").length}
+            size="small"
+            sx={{
+              backgroundColor: colors.bgContainerSticky,
+              color: tabActiva === 4 ? COLOR_SIN_ASISTENCIA : COLOR_TEXTO,
+              fontSize: "0.7rem",
+              height: 20,
+              minWidth: 20
+            }}
+          />
+        </Box>
+      }
+    />
+  </Tabs>
+</Box>
+
+{/* 📌 LEYENDA DINÁMICA - cambia según la tab seleccionada */}
+<Box sx={{ mt: 1.5, mb: 1, display: "flex", alignItems: "center", gap: 1 }}>
+  <InfoOutlined sx={{ fontSize: 14, color: colors.grey[500] }} />
+  <Typography
+    variant="caption"
+    sx={{
+      color: colors.grey[500],
+      fontSize: "0.7rem",
+      fontStyle: "italic",
+    }}
+  >
+    {tabActiva === 0 ? (
+      <>Mostrando <strong style={{ color: COLOR_TEXTO }}>todos los gestores</strong>. Cada gestor aparece en la categoría de su comportamiento predominante.</>
+    ) : (
+      <>
+        Gestores cuyo comportamiento predominante es{" "}
+        <strong style={{ color: tabsInfo[tabActiva].color }}>
+          {tabsInfo[tabActiva].descripcion}
+        </strong>{" "}
+        ({tabsInfo[tabActiva].explicacion}), aunque también puedan tener otros tipos de días.
+      </>
+    )}
+  </Typography>
+</Box>
         </Box>
 
         {/* DATAGRID */}
