@@ -30,6 +30,7 @@ import {
   InfoOutlined
 } from "@mui/icons-material";
 import { tokens } from "../../theme";
+import * as ExcelJS from "exceljs";
 import GestorAsistenciaDialog from "./AsistenciaMonitor/GestorAsistenciaDialog";
 
 const AsistenciaMonitor = ({ data = [] }) => {
@@ -76,6 +77,16 @@ const AsistenciaMonitor = ({ data = [] }) => {
     try {
       const fecha = new Date(fechaISO);
       return `${fecha.getDate().toString().padStart(2, '0')}/${(fecha.getMonth() + 1).toString().padStart(2, '0')}/${fecha.getFullYear()}`;
+    } catch {
+      return "—";
+    }
+  };
+
+  const formatFechaHora = (fechaISO) => {
+    if (!fechaISO) return "—";
+    try {
+      const fecha = new Date(fechaISO);
+      return `${fecha.toLocaleDateString('es-MX')} ${fecha.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}`;
     } catch {
       return "—";
     }
@@ -166,7 +177,6 @@ const AsistenciaMonitor = ({ data = [] }) => {
           horaSalida: null,
           lugarEntrada: null,
           lugarSalida: null,
-          // ✅ NUEVOS CAMPOS DE ASISTENCIA
           minutos_desde_entrada: null,
           minutos_hasta_salida: null,
           metros_desde_entrada: null,
@@ -189,7 +199,6 @@ const AsistenciaMonitor = ({ data = [] }) => {
         if (!asistenciaDia.horaEntrada || new Date(registro.hora_entrada) < new Date(asistenciaDia.horaEntrada)) {
           asistenciaDia.horaEntrada = registro.hora_entrada;
           asistenciaDia.lugarEntrada = registro.lugar_asistencia_entrada;
-          // ✅ Guardar minutos_desde_entrada del registro más temprano
           asistenciaDia.minutos_desde_entrada = registro.minutos_desde_entrada;
           asistenciaDia.metros_desde_entrada = registro.metros_desde_entrada;
         }
@@ -200,7 +209,6 @@ const AsistenciaMonitor = ({ data = [] }) => {
         if (!asistenciaDia.horaSalida || new Date(registro.hora_salida) > new Date(asistenciaDia.horaSalida)) {
           asistenciaDia.horaSalida = registro.hora_salida;
           asistenciaDia.lugarSalida = registro.lugar_asistencia_salida;
-          // ✅ Guardar minutos_hasta_salida del registro más tardío
           asistenciaDia.minutos_hasta_salida = registro.minutos_hasta_salida;
           asistenciaDia.metros_hasta_salida = registro.metros_hasta_salida;
         }
@@ -233,7 +241,6 @@ const AsistenciaMonitor = ({ data = [] }) => {
             eficienciaDia: asistencia.totalGestionesDia > 0 
               ? (asistencia.gestionesCompletasDia / asistencia.totalGestionesDia * 100).toFixed(1)
               : 0,
-            // ✅ Aseguramos que estos campos existan
             minutos_desde_entrada: asistencia.minutos_desde_entrada,
             minutos_hasta_salida: asistencia.minutos_hasta_salida,
             metros_desde_entrada: asistencia.metros_desde_entrada,
@@ -275,28 +282,19 @@ const AsistenciaMonitor = ({ data = [] }) => {
       const diasConEntrada = completas + sinSalida;
       const porcentajeAsistencia = totalDias > 0 ? (diasConEntrada / totalDias * 100).toFixed(1) : 0;
 
-      // Color e ícono según estatus predominante
-      let color, icono;
-      switch (estatusPredominante) {
-        case "COMPLETA":
-          color = COLOR_COMPLETA;
-          icono = <CheckCircle />;
-          break;
-        case "SIN_SALIDA":
-          color = COLOR_SIN_SALIDA;
-          icono = <Logout sx={{ transform: 'rotate(180deg)' }} />;
-          break;
-        case "SIN_ENTRADA":
-          color = COLOR_SIN_ENTRADA;
-          icono = <Login />;
-          break;
-        case "SIN_ASISTENCIA":
-          color = COLOR_SIN_ASISTENCIA;
-          icono = <EventBusy />;
-          break;
-        default:
-          color = COLOR_TEXTO;
-          icono = <Warning />;
+      // Determinar nivel de desempeño para el icono de estado
+      let nivel = "regular";
+      let color = COLOR_SIN_ENTRADA;
+      let icono = <Warning />;
+
+      if (porcentajeAsistencia >= 90) {
+        nivel = "eficiente";
+        color = COLOR_COMPLETA;
+        icono = <CheckCircle />;
+      } else if (porcentajeAsistencia < 70) {
+        nivel = "atencion";
+        color = COLOR_SIN_ASISTENCIA;
+        icono = <Error />;
       }
 
       return {
@@ -309,12 +307,9 @@ const AsistenciaMonitor = ({ data = [] }) => {
         sinAsistencia,
         porcentajeAsistencia,
         estatusPredominante,
+        nivel,
         color,
         icono,
-        ultimoEstatus: asistenciasArray[0]?.estatus_asistencia || null,
-        ultimoIcono: asistenciasArray[0]?.estatus_asistencia ? getIconoPorEstatus(asistenciasArray[0].estatus_asistencia) : null,
-        ultimoColor: asistenciasArray[0]?.estatus_asistencia ? getColorPorEstatus(asistenciasArray[0].estatus_asistencia) : null,
-        ultimoLabel: asistenciasArray[0]?.estatus_asistencia ? getLabelPorEstatus(asistenciasArray[0].estatus_asistencia) : null,
         porcentajes: {
           completas: porcentajeCompletas,
           sinSalida: porcentajeSinSalida,
@@ -367,33 +362,32 @@ const AsistenciaMonitor = ({ data = [] }) => {
   };
 
   const tabsInfo = [
-  { nombre: "Todos", color: COLOR_TAB_ACTIVA, descripcion: "todos los gestores" },
-  { nombre: "Completas", color: COLOR_COMPLETA, descripcion: "Completas", explicacion: "días con entrada y salida registrada" },
-  { nombre: "Sin salida", color: COLOR_SIN_SALIDA, descripcion: "Sin salida", explicacion: "días que registraron entrada pero no salida" },
-  { nombre: "Sin entrada", color: COLOR_SIN_ENTRADA, descripcion: "Sin entrada", explicacion: "días que registraron salida pero no entrada" },
-  { nombre: "Sin asistencia", color: COLOR_SIN_ASISTENCIA, descripcion: "Sin asistencia", explicacion: "días sin ningún registro" }
-];
-
+    { nombre: "Todos", color: COLOR_TAB_ACTIVA, descripcion: "todos los gestores" },
+    { nombre: "Completas", color: COLOR_COMPLETA, descripcion: "Completas", explicacion: "días con entrada y salida registrada" },
+    { nombre: "Sin salida", color: COLOR_SIN_SALIDA, descripcion: "Sin salida", explicacion: "días que registraron entrada pero no salida" },
+    { nombre: "Sin entrada", color: COLOR_SIN_ENTRADA, descripcion: "Sin entrada", explicacion: "días que registraron salida pero no entrada" },
+    { nombre: "Sin asistencia", color: COLOR_SIN_ASISTENCIA, descripcion: "Sin asistencia", explicacion: "días sin ningún registro" }
+  ];
 
   // ============================================
-  // COLUMNAS DEL DATAGRID
+  // COLUMNAS DEL DATAGRID (CON ESTADO)
   // ============================================
   const columns = [
     {
-      field: "ultimoEstatus",
-      headerName: "Hoy",
+      field: "icono",
+      headerName: "Estado",
       flex: 0.5,
       minWidth: 60,
       renderCell: (params) => (
-        <Tooltip title={params.row.ultimoLabel || "Sin información"}>
+        <Tooltip title={`${params.row.porcentajeAsistencia}% - ${params.row.nivel === "eficiente" ? "Alto desempeño" : params.row.nivel === "regular" ? "Desempeño medio" : "Bajo desempeño"}`}>
           <Box sx={{ 
-            color: params.row.ultimoColor, 
+            color: params.row.color, 
             display: "flex", 
             justifyContent: "center",
             alignItems: "center",
             height: "100%"
           }}>
-            {params.row.ultimoIcono}
+            {params.row.icono}
           </Box>
         </Tooltip>
       ),
@@ -512,8 +506,7 @@ const AsistenciaMonitor = ({ data = [] }) => {
           <Typography
             variant="body2"
             sx={{
-              color: params.value >= 90 ? COLOR_COMPLETA : 
-                     params.value >= 70 ? COLOR_SIN_SALIDA : COLOR_SIN_ASISTENCIA,
+              color: params.row.color,
               fontWeight: 700,
               textAlign: "right",
               mb: 0.5
@@ -531,8 +524,7 @@ const AsistenciaMonitor = ({ data = [] }) => {
             <Box sx={{ 
               width: `${params.value}%`, 
               height: "100%", 
-              bgcolor: params.value >= 90 ? COLOR_COMPLETA : 
-                       params.value >= 70 ? COLOR_SIN_SALIDA : COLOR_SIN_ASISTENCIA 
+              bgcolor: params.row.color
             }} />
           </Box>
         </Box>
@@ -565,6 +557,93 @@ const AsistenciaMonitor = ({ data = [] }) => {
       sortable: false
     }
   ];
+
+  // ============================================
+  // DESCARGA A EXCEL
+  // ============================================
+  const handleDownloadExcel = async () => {
+    if (!gestoresFiltrados.length) return;
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Asistencia", {
+      views: [{ state: "frozen", xSplit: 0, ySplit: 1 }],
+    });
+
+    // Obtener SOLO las columnas visibles (excluir acciones)
+    const visibleColumns = columns.filter(col => col.field !== "acciones");
+    
+    // Crear encabezados exactamente como los ve el usuario
+    const headers = visibleColumns.map(col => col.headerName);
+    
+    // Estilo de encabezados minimalista
+    const headerRow = worksheet.addRow(headers);
+    headerRow.eachCell((cell) => {
+      cell.font = { bold: true, color: { argb: "FF374151" } };
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFF3F4F6" },
+      };
+      cell.alignment = { vertical: "middle", horizontal: "left" };
+      cell.border = {
+        bottom: { style: "thin", color: { argb: "FFE5E7EB" } },
+      };
+    });
+
+    // Mapeo de niveles a texto para Excel
+    const nivelMap = {
+      "eficiente": "Alto desempeño",
+      "regular": "Desempeño medio",
+      "atencion": "Bajo desempeño"
+    };
+
+    // Exportar datos visibles
+    gestoresFiltrados.forEach((gestor) => {
+      const rowData = visibleColumns.map(col => {
+        if (col.field === "icono") {
+          return nivelMap[gestor.nivel] || gestor.nivel || "";
+        }
+        if (col.field === "porcentajeAsistencia") {
+          return `${gestor.porcentajeAsistencia}%`;
+        }
+        return gestor[col.field] ?? "";
+      });
+
+      const row = worksheet.addRow(rowData);
+      
+      row.eachCell((cell) => {
+        cell.alignment = { vertical: "middle", horizontal: "left" };
+        cell.font = { color: { argb: "FF1F2937" } };
+        cell.border = {
+          bottom: { style: "thin", color: { argb: "FFF9FAFB" } },
+        };
+      });
+    });
+
+    // Ajustar ancho de columnas
+    worksheet.columns.forEach((column) => {
+      let maxLength = 10;
+      column.eachCell({ includeEmpty: true }, (cell) => {
+        const length = cell.value ? cell.value.toString().length : 10;
+        maxLength = Math.max(maxLength, length);
+      });
+      column.width = Math.min(maxLength + 2, 30);
+    });
+
+    // Generar archivo
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    
+    const categoria = ["todos", "completas", "sin_salida", "sin_entrada", "sin_asistencia"][tabActiva];
+    link.download = `asistencia_${categoria}_${new Date().toISOString().split("T")[0]}.xlsx`;
+    
+    link.click();
+    URL.revokeObjectURL(link.href);
+  };
 
   // Altura dinámica
   const alturaTabla = useMemo(() => {
@@ -809,155 +888,155 @@ const AsistenciaMonitor = ({ data = [] }) => {
 
           {/* Tabs */}
           <Box sx={{ borderBottom: 1, borderColor: colors.borderContainer }}>
-  <Tabs
-    value={tabActiva}
-    onChange={(e, nuevoValor) => setTabActiva(nuevoValor)}
-    sx={{
-      "& .MuiTab-root": {
-        color: COLOR_TEXTO,
-        fontWeight: 500,
-        fontSize: "0.875rem",
-        textTransform: "none",
-        minHeight: 48
-      },
-      "& .Mui-selected": {
-        color: `${getColorTabActiva(tabActiva)} !important`,
-        fontWeight: 600
-      },
-      "& .MuiTabs-indicator": {
-        backgroundColor: getColorTabActiva(tabActiva)
-      }
-    }}
-  >
-    <Tab
-      label={
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Typography component="span">Todos</Typography>
-          <Chip
-            label={gestores.length}
-            size="small"
-            sx={{
-              backgroundColor: colors.bgContainerSticky,
-              color: tabActiva === 0 ? COLOR_TAB_ACTIVA : COLOR_TEXTO,
-              fontSize: "0.7rem",
-              height: 20,
-              minWidth: 20
-            }}
-          />
-        </Box>
-      }
-    />
-    <Tab
-      label={
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <CheckCircle sx={{ fontSize: 18, color: tabActiva === 1 ? COLOR_COMPLETA : COLOR_TEXTO }} />
-          <Typography component="span" sx={{ color: tabActiva === 1 ? COLOR_COMPLETA : COLOR_TEXTO }}>
-            Completas
-          </Typography>
-          <Chip
-            label={gestores.filter(g => g.estatusPredominante === "COMPLETA").length}
-            size="small"
-            sx={{
-              backgroundColor: colors.bgContainerSticky,
-              color: tabActiva === 1 ? COLOR_COMPLETA : COLOR_TEXTO,
-              fontSize: "0.7rem",
-              height: 20,
-              minWidth: 20
-            }}
-          />
-        </Box>
-      }
-    />
-    <Tab
-      label={
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Logout sx={{ fontSize: 18, transform: 'rotate(180deg)', color: tabActiva === 2 ? COLOR_SIN_SALIDA : COLOR_TEXTO }} />
-          <Typography component="span" sx={{ color: tabActiva === 2 ? COLOR_SIN_SALIDA : COLOR_TEXTO }}>
-            Sin salida
-          </Typography>
-          <Chip
-            label={gestores.filter(g => g.estatusPredominante === "SIN_SALIDA").length}
-            size="small"
-            sx={{
-              backgroundColor: colors.bgContainerSticky,
-              color: tabActiva === 2 ? COLOR_SIN_SALIDA : COLOR_TEXTO,
-              fontSize: "0.7rem",
-              height: 20,
-              minWidth: 20
-            }}
-          />
-        </Box>
-      }
-    />
-    <Tab
-      label={
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Login sx={{ fontSize: 18, color: tabActiva === 3 ? COLOR_SIN_ENTRADA : COLOR_TEXTO }} />
-          <Typography component="span" sx={{ color: tabActiva === 3 ? COLOR_SIN_ENTRADA : COLOR_TEXTO }}>
-            Sin entrada
-          </Typography>
-          <Chip
-            label={gestores.filter(g => g.estatusPredominante === "SIN_ENTRADA").length}
-            size="small"
-            sx={{
-              backgroundColor: colors.bgContainerSticky,
-              color: tabActiva === 3 ? COLOR_SIN_ENTRADA : COLOR_TEXTO,
-              fontSize: "0.7rem",
-              height: 20,
-              minWidth: 20
-            }}
-          />
-        </Box>
-      }
-    />
-    <Tab
-      label={
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <EventBusy sx={{ fontSize: 18, color: tabActiva === 4 ? COLOR_SIN_ASISTENCIA : COLOR_TEXTO }} />
-          <Typography component="span" sx={{ color: tabActiva === 4 ? COLOR_SIN_ASISTENCIA : COLOR_TEXTO }}>
-            Sin asistencia
-          </Typography>
-          <Chip
-            label={gestores.filter(g => g.estatusPredominante === "SIN_ASISTENCIA").length}
-            size="small"
-            sx={{
-              backgroundColor: colors.bgContainerSticky,
-              color: tabActiva === 4 ? COLOR_SIN_ASISTENCIA : COLOR_TEXTO,
-              fontSize: "0.7rem",
-              height: 20,
-              minWidth: 20
-            }}
-          />
-        </Box>
-      }
-    />
-  </Tabs>
-</Box>
+            <Tabs
+              value={tabActiva}
+              onChange={(e, nuevoValor) => setTabActiva(nuevoValor)}
+              sx={{
+                "& .MuiTab-root": {
+                  color: COLOR_TEXTO,
+                  fontWeight: 500,
+                  fontSize: "0.875rem",
+                  textTransform: "none",
+                  minHeight: 48
+                },
+                "& .Mui-selected": {
+                  color: `${getColorTabActiva(tabActiva)} !important`,
+                  fontWeight: 600
+                },
+                "& .MuiTabs-indicator": {
+                  backgroundColor: getColorTabActiva(tabActiva)
+                }
+              }}
+            >
+              <Tab
+                label={
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <Typography component="span">Todos</Typography>
+                    <Chip
+                      label={gestores.length}
+                      size="small"
+                      sx={{
+                        backgroundColor: colors.bgContainerSticky,
+                        color: tabActiva === 0 ? COLOR_TAB_ACTIVA : COLOR_TEXTO,
+                        fontSize: "0.7rem",
+                        height: 20,
+                        minWidth: 20
+                      }}
+                    />
+                  </Box>
+                }
+              />
+              <Tab
+                label={
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <CheckCircle sx={{ fontSize: 18, color: tabActiva === 1 ? COLOR_COMPLETA : COLOR_TEXTO }} />
+                    <Typography component="span" sx={{ color: tabActiva === 1 ? COLOR_COMPLETA : COLOR_TEXTO }}>
+                      Completas
+                    </Typography>
+                    <Chip
+                      label={gestores.filter(g => g.estatusPredominante === "COMPLETA").length}
+                      size="small"
+                      sx={{
+                        backgroundColor: colors.bgContainerSticky,
+                        color: tabActiva === 1 ? COLOR_COMPLETA : COLOR_TEXTO,
+                        fontSize: "0.7rem",
+                        height: 20,
+                        minWidth: 20
+                      }}
+                    />
+                  </Box>
+                }
+              />
+              <Tab
+                label={
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <Logout sx={{ fontSize: 18, transform: 'rotate(180deg)', color: tabActiva === 2 ? COLOR_SIN_SALIDA : COLOR_TEXTO }} />
+                    <Typography component="span" sx={{ color: tabActiva === 2 ? COLOR_SIN_SALIDA : COLOR_TEXTO }}>
+                      Sin salida
+                    </Typography>
+                    <Chip
+                      label={gestores.filter(g => g.estatusPredominante === "SIN_SALIDA").length}
+                      size="small"
+                      sx={{
+                        backgroundColor: colors.bgContainerSticky,
+                        color: tabActiva === 2 ? COLOR_SIN_SALIDA : COLOR_TEXTO,
+                        fontSize: "0.7rem",
+                        height: 20,
+                        minWidth: 20
+                      }}
+                    />
+                  </Box>
+                }
+              />
+              <Tab
+                label={
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <Login sx={{ fontSize: 18, color: tabActiva === 3 ? COLOR_SIN_ENTRADA : COLOR_TEXTO }} />
+                    <Typography component="span" sx={{ color: tabActiva === 3 ? COLOR_SIN_ENTRADA : COLOR_TEXTO }}>
+                      Sin entrada
+                    </Typography>
+                    <Chip
+                      label={gestores.filter(g => g.estatusPredominante === "SIN_ENTRADA").length}
+                      size="small"
+                      sx={{
+                        backgroundColor: colors.bgContainerSticky,
+                        color: tabActiva === 3 ? COLOR_SIN_ENTRADA : COLOR_TEXTO,
+                        fontSize: "0.7rem",
+                        height: 20,
+                        minWidth: 20
+                      }}
+                    />
+                  </Box>
+                }
+              />
+              <Tab
+                label={
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <EventBusy sx={{ fontSize: 18, color: tabActiva === 4 ? COLOR_SIN_ASISTENCIA : COLOR_TEXTO }} />
+                    <Typography component="span" sx={{ color: tabActiva === 4 ? COLOR_SIN_ASISTENCIA : COLOR_TEXTO }}>
+                      Sin asistencia
+                    </Typography>
+                    <Chip
+                      label={gestores.filter(g => g.estatusPredominante === "SIN_ASISTENCIA").length}
+                      size="small"
+                      sx={{
+                        backgroundColor: colors.bgContainerSticky,
+                        color: tabActiva === 4 ? COLOR_SIN_ASISTENCIA : COLOR_TEXTO,
+                        fontSize: "0.7rem",
+                        height: 20,
+                        minWidth: 20
+                      }}
+                    />
+                  </Box>
+                }
+              />
+            </Tabs>
+          </Box>
 
-{/* 📌 LEYENDA DINÁMICA - cambia según la tab seleccionada */}
-<Box sx={{ mt: 1.5, mb: 1, display: "flex", alignItems: "center", gap: 1 }}>
-  <InfoOutlined sx={{ fontSize: 14, color: colors.grey[500] }} />
-  <Typography
-    variant="caption"
-    sx={{
-      color: colors.grey[500],
-      fontSize: "0.7rem",
-      fontStyle: "italic",
-    }}
-  >
-    {tabActiva === 0 ? (
-      <>Mostrando <strong style={{ color: COLOR_TEXTO }}>todos los gestores</strong>. Cada gestor aparece en la categoría de su comportamiento predominante.</>
-    ) : (
-      <>
-        Gestores cuyo comportamiento predominante es{" "}
-        <strong style={{ color: tabsInfo[tabActiva].color }}>
-          {tabsInfo[tabActiva].descripcion}
-        </strong>{" "}
-        ({tabsInfo[tabActiva].explicacion}), aunque también puedan tener otros tipos de días.
-      </>
-    )}
-  </Typography>
-</Box>
+          {/* 📌 LEYENDA DINÁMICA */}
+          <Box sx={{ mt: 1.5, mb: 1, display: "flex", alignItems: "center", gap: 1 }}>
+            <InfoOutlined sx={{ fontSize: 14, color: colors.grey[500] }} />
+            <Typography
+              variant="caption"
+              sx={{
+                color: colors.grey[500],
+                fontSize: "0.7rem",
+                fontStyle: "italic",
+              }}
+            >
+              {tabActiva === 0 ? (
+                <>Mostrando <strong style={{ color: COLOR_TEXTO }}>todos los gestores</strong>. Cada gestor aparece en la categoría de su comportamiento predominante.</>
+              ) : (
+                <>
+                  Gestores cuyo comportamiento predominante es{" "}
+                  <strong style={{ color: tabsInfo[tabActiva].color }}>
+                    {tabsInfo[tabActiva].descripcion}
+                  </strong>{" "}
+                  ({tabsInfo[tabActiva].explicacion}), aunque también puedan tener otros tipos de días.
+                </>
+              )}
+            </Typography>
+          </Box>
         </Box>
 
         {/* DATAGRID */}
@@ -1011,7 +1090,7 @@ const AsistenciaMonitor = ({ data = [] }) => {
           )}
         </Paper>
 
-        {/* CONTADOR DE RESULTADOS */}
+        {/* CONTADOR DE RESULTADOS Y EXPORTACIÓN */}
         {gestoresFiltrados.length > 0 && (
           <Box sx={{ mt: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <Typography variant="body2" sx={{ color: colors.grey[400] }}>
@@ -1022,34 +1101,14 @@ const AsistenciaMonitor = ({ data = [] }) => {
             <Button
               startIcon={<Download />}
               size="small"
+              onClick={handleDownloadExcel}
               sx={{
                 color: COLOR_TEXTO,
                 textTransform: "none",
                 "&:hover": { bgcolor: colors.primary[400] + "20" }
               }}
-              onClick={() => {
-                const reporte = gestoresFiltrados.map(g => ({
-                  gestor: g.nombre,
-                  id: g.id,
-                  dias_totales: g.totalDias,
-                  completas: g.completas,
-                  sin_salida: g.sinSalida,
-                  sin_entrada: g.sinEntrada,
-                  sin_asistencia: g.sinAsistencia,
-                  porcentaje_asistencia: g.porcentajeAsistencia + "%",
-                  ultimo_estatus: g.ultimoEstatus,
-                  perfil: g.estatusPredominante
-                }));
-                
-                const dataStr = JSON.stringify(reporte, null, 2);
-                const dataUri = "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
-                const link = document.createElement("a");
-                link.href = dataUri;
-                link.download = `reporte_asistencia_${new Date().toISOString().split('T')[0]}.json`;
-                link.click();
-              }}
             >
-              Exportar reporte
+              Exportar a Excel
             </Button>
           </Box>
         )}

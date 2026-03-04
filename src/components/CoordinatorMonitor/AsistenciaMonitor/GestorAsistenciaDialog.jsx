@@ -44,9 +44,10 @@ import {
   Schedule,
 } from "@mui/icons-material";
 import { tokens } from "../../../theme";
+import * as ExcelJS from "exceljs";
 
 // ============================================
-// COMPONENTE CARD RESUMEN (mismo diseño)
+// COMPONENTE CARD RESUMEN
 // ============================================
 const CardResumenDialog = ({
   titulo,
@@ -88,7 +89,7 @@ const CardResumenDialog = ({
 );
 
 // ============================================
-// COMPONENTE CHIP ESTATUS (mismo diseño)
+// COMPONENTE CHIP ESTATUS
 // ============================================
 const ChipEstatusAsistencia = ({
   estatus,
@@ -273,6 +274,159 @@ const GestorAsistenciaDialog = ({
   };
 
   // ============================================
+  // FORMATO DE FECHA Y HORA PARA EXCEL
+  // ============================================
+  const formatFechaHora = (fechaISO) => {
+    if (!fechaISO) return "—";
+    try {
+      const fecha = new Date(fechaISO);
+      return `${fecha.toLocaleDateString("es-MX")} ${fecha.toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" })}`;
+    } catch {
+      return "—";
+    }
+  };
+
+  // ============================================
+  // DESCARGA A EXCEL
+  // ============================================
+  const handleDownloadExcel = async () => {
+    if (!gestor || !asistenciasFiltradas.length) return;
+
+    const workbook = new ExcelJS.Workbook();
+    
+    // ========== HOJA 1: RESUMEN ==========
+    const resumenSheet = workbook.addWorksheet("Resumen", {
+      views: [{ state: "frozen", xSplit: 0, ySplit: 1 }],
+    });
+
+    const resumenData = [
+      ["Gestor", gestor.nombre],
+      ["ID", gestor.id],
+      ["Total días", gestor.totalDias || 0],
+      ["Total registros", gestor.totalRegistros || 0],
+      ["Completas", gestor.completas || 0],
+      ["Sin salida", gestor.sinSalida || 0],
+      ["Sin entrada", gestor.sinEntrada || 0],
+      ["Sin asistencia", gestor.sinAsistencia || 0],
+      ["% Asistencia", gestor.porcentajeAsistencia + "%"],
+      ["Filtro aplicado", filtroEstatus === "TODOS" ? "Todos" : filtroEstatus.replace("_", " ")],
+      ["Días mostrados", asistenciasFiltradas.length],
+    ];
+
+    resumenData.forEach((row, index) => {
+      const excelRow = resumenSheet.addRow(row);
+      if (index === 0) {
+        excelRow.getCell(1).font = { bold: true };
+        excelRow.getCell(2).font = { bold: true };
+      }
+    });
+
+    resumenSheet.columns.forEach((column) => {
+      column.width = 20;
+    });
+
+    // ========== HOJA 2: HISTORIAL DIARIO ==========
+    const historialSheet = workbook.addWorksheet("Historial", {
+      views: [{ state: "frozen", xSplit: 0, ySplit: 1 }],
+    });
+
+    // MISMAS COLUMNAS QUE LA TABLA
+    const headers = [
+      "Fecha",
+      "Estatus",
+      "Entrada",
+      "Salida",
+      "Inicio (min)",
+      "Fin (min)",
+      "Dist. inicio",
+      "Dist. fin",
+    ];
+
+    const headerRow = historialSheet.addRow(headers);
+    headerRow.eachCell((cell) => {
+      cell.font = { bold: true, color: { argb: "FF374151" } };
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFF3F4F6" },
+      };
+      cell.alignment = { vertical: "middle", horizontal: "left" };
+      cell.border = {
+        bottom: { style: "thin", color: { argb: "FFE5E7EB" } },
+      };
+    });
+
+    // EXPORTAR SOLO LOS DÍAS FILTRADOS
+    asistenciasFiltradas.forEach((dia) => {
+      // Formatear distancia
+      const formatearDistancia = (metros) => {
+        if (!metros) return "—";
+        if (metros < 1000) return `${Math.round(metros)} m`;
+        return `${(metros / 1000).toFixed(1)} km`;
+      };
+
+      const row = historialSheet.addRow([
+        formatFechaHora(dia.fecha),
+        dia.estatus_asistencia.replace("_", " "),
+        dia.horaEntrada ? formatHora(dia.horaEntrada) : "—",
+        dia.horaSalida ? formatHora(dia.horaSalida) : "—",
+        dia.minutos_desde_entrada || "—",
+        dia.minutos_hasta_salida || "—",
+        formatearDistancia(dia.metros_desde_entrada),
+        formatearDistancia(dia.metros_hasta_salida),
+      ]);
+
+      row.eachCell((cell) => {
+        cell.alignment = { vertical: "middle", horizontal: "left" };
+        cell.font = { color: { argb: "FF1F2937" } };
+        cell.border = {
+          bottom: { style: "thin", color: { argb: "FFF9FAFB" } },
+        };
+      });
+
+      // Aplicar color al estatus
+      const estatusCell = row.getCell(2);
+      if (dia.estatus_asistencia === "COMPLETA") {
+        estatusCell.font = { color: { argb: "FF10B981" } }; // Verde
+      } else if (dia.estatus_asistencia === "SIN_SALIDA") {
+        estatusCell.font = { color: { argb: "FF3B82F6" } }; // Azul
+      } else if (dia.estatus_asistencia === "SIN_ENTRADA") {
+        estatusCell.font = { color: { argb: "FFF59E0B" } }; // Amarillo
+      } else if (dia.estatus_asistencia === "SIN_ASISTENCIA") {
+        estatusCell.font = { color: { argb: "FFEF4444" } }; // Rojo
+      }
+    });
+
+    // Ajustar ancho de columnas
+    historialSheet.columns.forEach((column) => {
+      let maxLength = 10;
+      column.eachCell({ includeEmpty: true }, (cell) => {
+        const length = cell.value ? cell.value.toString().length : 10;
+        maxLength = Math.max(maxLength, length);
+      });
+      column.width = Math.min(maxLength + 2, 25);
+    });
+
+    // ========== GENERAR ARCHIVO ==========
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+
+    const filtroTexto =
+      filtroEstatus === "TODOS"
+        ? "todos"
+        : filtroEstatus.replace(/_/g, "_").toLowerCase();
+
+    link.download = `asistencia_${gestor.nombre.replace(/\s+/g, "_")}_${filtroTexto}_${new Date().toISOString().split("T")[0]}.xlsx`;
+
+    link.click();
+    URL.revokeObjectURL(link.href);
+  };
+
+  // ============================================
   // RESET AL CAMBIAR GESTOR
   // ============================================
   useEffect(() => {
@@ -326,7 +480,7 @@ const GestorAsistenciaDialog = ({
               {gestor.nombre}
             </Typography>
             <Typography variant="body2" sx={{ color: colors.grey[400] }}>
-              ID: {gestor.id} • {gestor.totalRegistros.toLocaleString()}{" "}
+              ID: {gestor.id} • {gestor.totalRegistros?.toLocaleString()}{" "}
               registros • {gestor.totalDias} días trabajados
             </Typography>
           </Box>
@@ -381,7 +535,7 @@ const GestorAsistenciaDialog = ({
           />
           <CardResumenDialog
             titulo="Sin entrada"
-            valor={gestor.sinEntrada + gestor.sinAsistencia || 0}
+            valor={(gestor.sinEntrada || 0) + (gestor.sinAsistencia || 0)}
             color={COLOR_SIN_ASISTENCIA}
             icono={<EventBusy sx={{ color: COLOR_SIN_ASISTENCIA }} />}
             colors={colors}
@@ -475,7 +629,6 @@ const GestorAsistenciaDialog = ({
               sx={{ fontWeight: 600, color: COLOR_TEXTO }}
             >
               📅 Historial diario
-              
             </Typography>
             <Typography
               variant="body2"
@@ -902,6 +1055,30 @@ const GestorAsistenciaDialog = ({
                   })}
                 </TableBody>
               </Table>
+
+              {/* PAGINACIÓN */}
+              <TablePagination
+                component="div"
+                count={asistenciasFiltradas.length}
+                page={pagina}
+                onPageChange={(e, newPage) => setPagina(newPage)}
+                rowsPerPage={pageSize}
+                onRowsPerPageChange={(e) => {
+                  setPageSize(parseInt(e.target.value, 10));
+                  setPagina(0);
+                }}
+                rowsPerPageOptions={[5, 10, 25, 50]}
+                sx={{
+                  color: COLOR_TEXTO,
+                  borderTop: `1px solid ${COLOR_BORDE}`,
+                  "& .MuiTablePagination-selectIcon": {
+                    color: COLOR_TEXTO,
+                  },
+                  "& .MuiTablePagination-select": {
+                    color: COLOR_TEXTO,
+                  },
+                }}
+              />
             </TableContainer>
           )}
         </Box>
@@ -920,47 +1097,20 @@ const GestorAsistenciaDialog = ({
           Cerrar
         </Button>
 
+        {/* ✅ BOTÓN DE EXCEL - ESTILO MINIMALISTA */}
         <Button
-          variant="contained"
+          variant="text"
           startIcon={<Download />}
-          onClick={() => {
-            const reporte = {
-              gestor: gestor.nombre,
-              id: gestor.id,
-              total_dias: gestor.totalDias,
-              estadisticas: {
-                completas: gestor.completas,
-                sin_salida: gestor.sinSalida,
-                sin_entrada: gestor.sinEntrada,
-                sin_asistencia: gestor.sinAsistencia,
-                porcentaje_asistencia: gestor.porcentajeAsistencia + "%",
-              },
-              historial: gestor.asistencias.map((dia) => ({
-                fecha: formatFecha(dia.fecha),
-                estatus: dia.estatus_asistencia,
-                entrada: formatHora(dia.horaEntrada),
-                salida: formatHora(dia.horaSalida),
-                horas: dia.horasTrabajadas || "—",
-                gestiones: dia.totalGestionesDia,
-                eficiencia: dia.eficienciaDia + "%",
-                fotos: dia.fotosDia,
-              })),
-            };
-
-            const dataStr = JSON.stringify(reporte, null, 2);
-            const dataUri =
-              "data:application/json;charset=utf-8," +
-              encodeURIComponent(dataStr);
-            const link = document.createElement("a");
-            link.href = dataUri;
-            link.download = `asistencia_${gestor.nombre.replace(/\s+/g, "_")}_${gestor.id}.json`;
-            link.click();
-          }}
+          onClick={handleDownloadExcel}
           sx={{
-            backgroundColor: COLOR_COMPLETA,
-            color: colors.grey[900],
-            fontWeight: 600,
-            "&:hover": { backgroundColor: COLOR_COMPLETA + "CC" },
+            color: colors.grey[400],
+            textTransform: "none",
+            fontWeight: 400,
+            fontSize: "0.875rem",
+            "&:hover": {
+              backgroundColor: colors.primary[400] + "20",
+              color: COLOR_TEXTO,
+            },
           }}
         >
           Descargar reporte

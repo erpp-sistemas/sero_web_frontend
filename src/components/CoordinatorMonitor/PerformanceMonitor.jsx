@@ -12,7 +12,7 @@ import {
   TextField,
   InputAdornment,
   Grow,
-  useTheme
+  useTheme,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import {
@@ -24,6 +24,7 @@ import {
   Error,
 } from "@mui/icons-material";
 import { tokens } from "../../theme";
+import * as ExcelJS from "exceljs";
 
 import GestorDetallesDialog from "./PerformanceMonitor/GestorDetallesDialog";
 
@@ -46,7 +47,7 @@ const PerformanceMonitor = ({ data = [] }) => {
   const COLOR_TAB_ACTIVA = colors.blueAccent[600];
 
   // ============================================
-  // ANÁLISIS DE DATOS (SIMPLIFICADO - YA VIENE FOTOS COMO ARRAY)
+  // ANÁLISIS DE DATOS
   // ============================================
 
   const { usuarios, resumen } = useMemo(() => {
@@ -75,20 +76,18 @@ const PerformanceMonitor = ({ data = [] }) => {
       usuario.total++;
       usuario.fechas.add(new Date(registro.fecha).toISOString().split("T")[0]);
 
-      // 🔹 Fotos ya vienen como array desde el backend - sin necesidad de parseo
       const fotosArray = Array.isArray(registro.fotos) ? registro.fotos : [];
-      
-      // 🔹 Clasificar fotos por tipo (opcional, para facilitar acceso en el modal)
-      const fotosFachada = fotosArray.filter(foto => {
-        if (!foto || typeof foto !== 'object') return false;
-        const tipo = (foto.tipo || '').toLowerCase();
-        return tipo.includes('fachada') || tipo.includes('predio');
+
+      const fotosFachada = fotosArray.filter((foto) => {
+        if (!foto || typeof foto !== "object") return false;
+        const tipo = (foto.tipo || "").toLowerCase();
+        return tipo.includes("fachada") || tipo.includes("predio");
       });
-      
-      const fotosEvidencia = fotosArray.filter(foto => {
-        if (!foto || typeof foto !== 'object') return false;
-        const tipo = (foto.tipo || '').toLowerCase();
-        return tipo.includes('evidencia');
+
+      const fotosEvidencia = fotosArray.filter((foto) => {
+        if (!foto || typeof foto !== "object") return false;
+        const tipo = (foto.tipo || "").toLowerCase();
+        return tipo.includes("evidencia");
       });
 
       usuario.registros.push({
@@ -102,22 +101,21 @@ const PerformanceMonitor = ({ data = [] }) => {
           registro.longitud &&
           registro.latitud !== 0 &&
           registro.longitud !== 0,
-        // 🔹 Usar campos numéricos del backend (ya deberían estar correctos)
         fotosFachada: registro.fotos_fachada || 0,
         fotosEvidencia: registro.fotos_evidencia || 0,
         totalFotos: registro.total_fotos || 0,
-        // 🔹 Array de fotos ya procesado desde el backend
         fotos: fotosArray,
-        // 🔹 Opcional: fotos separadas por tipo para fácil acceso en el modal
         fotosPorTipo: {
           fachada: fotosFachada,
           evidencia: fotosEvidencia,
         },
-        // 🔹 Información adicional
-        coordenadas: registro.latitud && registro.longitud ? {
-          latitud: registro.latitud,
-          longitud: registro.longitud,
-        } : null,
+        coordenadas:
+          registro.latitud && registro.longitud
+            ? {
+                latitud: registro.latitud,
+                longitud: registro.longitud,
+              }
+            : null,
       });
 
       if (registro.estatus_gestion === "COMPLETA") {
@@ -207,25 +205,97 @@ const PerformanceMonitor = ({ data = [] }) => {
     setDialogoAbierto(true);
   };
 
-  const descargarReporteUsuario = (usuario) => {
-    const reporte = {
-      gestor: usuario.nombre,
-      id: usuario.id,
-      completas: usuario.completas,
-      incompletas: usuario.incompletas,
-      invalidas: usuario.invalidas,
-      porcentaje: usuario.porcentajeExito.toFixed(1) + "%",
+  /* ======================================================
+   DESCARGA A EXCEL - SOLO LO QUE VE EL USUARIO
+====================================================== */
+  const handleDownloadExcel = async () => {
+    if (!usuariosFiltrados.length) return;
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Desempeño", {
+      views: [{ state: "frozen", xSplit: 0, ySplit: 1 }],
+    });
+
+    // 📌 Obtener SOLO las columnas visibles del DataGrid (excluimos acciones)
+    const visibleColumns = columns.filter((col) => col.field !== "acciones");
+
+    // 📌 Crear encabezados exactamente como los ve el usuario
+    const headers = visibleColumns.map((col) => col.headerName);
+
+    // 📌 Estilo de encabezados
+    const headerRow = worksheet.addRow(headers);
+    headerRow.eachCell((cell) => {
+      cell.font = { bold: true, color: { argb: "FF374151" } };
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFF3F4F6" },
+      };
+      cell.alignment = { vertical: "middle", horizontal: "left" };
+      cell.border = {
+        bottom: { style: "thin", color: { argb: "FFE5E7EB" } },
+      };
+    });
+
+    // 📌 Mapeo de niveles a texto legible
+    const nivelMap = {
+      eficiente: "Excelente/Alto",
+      regular: "Regular/Medio",
+      atencion: "Crítico/Bajo",
     };
 
-    const dataStr = JSON.stringify(reporte, null, 2);
-    const dataUri =
-      "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
-    const exportFileDefaultName = `gestor_${usuario.id}.json`;
+    // 📌 Exportar SOLO los datos visibles
+    usuariosFiltrados.forEach((usuario) => {
+      const rowData = visibleColumns.map((col) => {
+        const value = usuario[col.field];
 
-    const linkElement = document.createElement("a");
-    linkElement.setAttribute("href", dataUri);
-    linkElement.setAttribute("download", exportFileDefaultName);
-    linkElement.click();
+        // Formatear porcentaje
+        if (col.field === "porcentajeExito") {
+          return `${value.toFixed(1)}%`;
+        }
+
+        // Para la columna "Estado", mostrar texto en lugar de icono
+        if (col.field === "icono") {
+          return nivelMap[usuario.nivel] || usuario.nivel;
+        }
+
+        return value ?? "";
+      });
+
+      const row = worksheet.addRow(rowData);
+
+      row.eachCell((cell) => {
+        cell.alignment = { vertical: "middle", horizontal: "left" };
+        cell.font = { color: { argb: "FF1F2937" } };
+        cell.border = {
+          bottom: { style: "thin", color: { argb: "FFF9FAFB" } },
+        };
+      });
+    });
+
+    // 📌 Ajustar ancho de columnas
+    worksheet.columns.forEach((column) => {
+      let maxLength = 10;
+      column.eachCell({ includeEmpty: true }, (cell) => {
+        const length = cell.value ? cell.value.toString().length : 10;
+        maxLength = Math.max(maxLength, length);
+      });
+      column.width = Math.min(maxLength + 2, 30);
+    });
+
+    // 📌 Generar y descargar
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+
+    const categoria = ["todos", "critico", "regular", "excelente"][tabActiva];
+    link.download = `desempeno_${categoria}_${new Date().toISOString().split("T")[0]}.xlsx`;
+
+    link.click();
+    URL.revokeObjectURL(link.href);
   };
 
   // 🔹 Función para obtener color de tab activa
@@ -263,7 +333,7 @@ const PerformanceMonitor = ({ data = [] }) => {
   }, [usuarios, busqueda, tabActiva]);
 
   // ============================================
-  // CONFIGURACIÓN DATAGRID (SIMPLIFICADA)
+  // CONFIGURACIÓN DATAGRID
   // ============================================
 
   const columns = [
@@ -421,21 +491,6 @@ const PerformanceMonitor = ({ data = [] }) => {
               <Visibility fontSize="small" />
             </IconButton>
           </Tooltip>
-          <Tooltip title="Descargar reporte">
-            <IconButton
-              size="small"
-              onClick={() => descargarReporteUsuario(params.row)}
-              sx={{
-                color: colors.grey[400],
-                "&:hover": {
-                  color: COLOR_EFICIENTE,
-                  backgroundColor: COLOR_EFICIENTE + "20",
-                },
-              }}
-            >
-              <Download fontSize="small" />
-            </IconButton>
-          </Tooltip>
         </Box>
       ),
       sortable: false,
@@ -447,16 +502,16 @@ const PerformanceMonitor = ({ data = [] }) => {
     const alturaHeader = 56;
     const alturaFila = 52;
     const margenExtra = 16;
-    
+
     if (usuariosFiltrados.length <= 5) {
-      return alturaHeader + (usuariosFiltrados.length * alturaFila) + margenExtra;
+      return alturaHeader + usuariosFiltrados.length * alturaFila + margenExtra;
     }
-    
+
     return 500;
   }, [usuariosFiltrados.length]);
 
   // ============================================
-  // RENDER PRINCIPAL (SIMPLIFICADO)
+  // RENDER PRINCIPAL
   // ============================================
 
   return (
@@ -630,7 +685,7 @@ const PerformanceMonitor = ({ data = [] }) => {
             backgroundColor: COLOR_FONDO,
           }}
         >
-          {/* Barra de búsqueda ampliada */}
+          {/* Barra de búsqueda */}
           <Box sx={{ display: "flex", gap: 2, alignItems: "center", mb: 2 }}>
             <TextField
               fullWidth
@@ -891,7 +946,7 @@ const PerformanceMonitor = ({ data = [] }) => {
           </Box>
         </Box>
 
-        {/* 🔹 DataGrid para mostrar gestores */}
+        {/* DataGrid para mostrar gestores */}
         <Box
           className="rounded-xl shadow-sm"
           sx={{
@@ -963,7 +1018,7 @@ const PerformanceMonitor = ({ data = [] }) => {
                 rows={usuariosFiltrados}
                 columns={columns}
                 disableRowSelectionOnClick
-                disableColumnMenu={false} // Permite sorting nativo
+                disableColumnMenu={false}
                 disableColumnSelector
                 disableDensitySelector
                 disableMultipleRowSelection
@@ -1008,7 +1063,7 @@ const PerformanceMonitor = ({ data = [] }) => {
           )}
         </Box>
 
-        {/* 🔹 Contador de resultados */}
+        {/* Contador de resultados y EXPORTACIÓN A EXCEL */}
         {usuariosFiltrados.length > 0 && (
           <Box
             sx={{
@@ -1021,51 +1076,29 @@ const PerformanceMonitor = ({ data = [] }) => {
             <Typography variant="body2" sx={{ color: colors.grey[400] }}>
               Mostrando {usuariosFiltrados.length} gestores
               {busqueda && ` • Filtrado por: "${busqueda}"`}
-              {tabActiva > 0 && ` • Categoría: ${["Todos", "Crítico/Bajo", "Regular/Medio", "Excelente/Alto"][tabActiva]}`}
+              {tabActiva > 0 &&
+                ` • Categoría: ${["Todos", "Crítico/Bajo", "Regular/Medio", "Excelente/Alto"][tabActiva]}`}
             </Typography>
-            {tabActiva === 0 && usuariosFiltrados.length > 0 && (
-              <Button
-                startIcon={<Download />}
-                size="small"
-                sx={{
-                  color: COLOR_TEXTO,
-                  textTransform: "none",
-                  "&:hover": {
-                    backgroundColor: colors.primary[400],
-                  },
-                }}
-                onClick={() => {
-                  const reporteCompleto = usuariosFiltrados.map((u) => ({
-                    gestor: u.nombre,
-                    id: u.id,
-                    total: u.total,
-                    completas: u.completas,
-                    incompletas: u.incompletas,
-                    invalidas: u.invalidas,
-                    porcentaje: u.porcentajeExito.toFixed(1) + "%",
-                    nivel: u.nivel,
-                  }));
-                  const dataStr = JSON.stringify(reporteCompleto, null, 2);
-                  const dataUri =
-                    "data:application/json;charset=utf-8," +
-                    encodeURIComponent(dataStr);
-                  const linkElement = document.createElement("a");
-                  linkElement.setAttribute("href", dataUri);
-                  linkElement.setAttribute(
-                    "download",
-                    `reporte_gestores_${tabActiva === 0 ? "todos" : tabActiva === 1 ? "critico" : tabActiva === 2 ? "regular" : "excelente"}.json`,
-                  );
-                  linkElement.click();
-                }}
-              >
-                Exportar lista completa
-              </Button>
-            )}
+
+            <Button
+              startIcon={<Download />}
+              size="small"
+              onClick={handleDownloadExcel}
+              sx={{
+                color: COLOR_TEXTO,
+                textTransform: "none",
+                "&:hover": {
+                  backgroundColor: colors.primary[400] + "20",
+                },
+              }}
+            >
+              Exportar a Excel
+            </Button>
           </Box>
         )}
       </Box>
 
-      {/* 🔹 Diálogo de detalles - Ahora recibe información completa de fotos */}
+      {/* Diálogo de detalles */}
       <GestorDetallesDialog
         open={dialogoAbierto}
         onClose={() => {

@@ -60,9 +60,19 @@ import {
   Collections as CollectionsIcon,
 } from "@mui/icons-material";
 import { tokens } from "../../../theme";
+import * as ExcelJS from "exceljs";
 
 // 🔹 Componente para vista modal ampliada de foto
-const FotoAmpliadaDialog = ({ open, foto, onClose, onDownload, onNext, onPrev, totalFotos, index }) => {
+const FotoAmpliadaDialog = ({
+  open,
+  foto,
+  onClose,
+  onDownload,
+  onNext,
+  onPrev,
+  totalFotos,
+  index,
+}) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
@@ -77,61 +87,78 @@ const FotoAmpliadaDialog = ({ open, foto, onClose, onDownload, onNext, onPrev, t
       TransitionComponent={Zoom}
       PaperProps={{
         sx: {
-          backgroundColor: 'rgba(0,0,0,0.95)',
-          backdropFilter: 'blur(12px)',
-          borderRadius: '16px',
-          overflow: 'hidden',
-          maxWidth: '95vw',
-          maxHeight: '95vh'
-        }
+          backgroundColor: "rgba(0,0,0,0.95)",
+          backdropFilter: "blur(12px)",
+          borderRadius: "16px",
+          overflow: "hidden",
+          maxWidth: "95vw",
+          maxHeight: "95vh",
+        },
       }}
     >
-      <DialogTitle sx={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center',
-        p: 2.5,
-        borderBottom: `1px solid ${colors.primary[700]}`
-      }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Box sx={{
-            backgroundColor: foto.tipo === 'FACHADA' ? colors.greenAccent[900] : colors.blueAccent[900],
-            borderRadius: '8px',
-            p: 1,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1
-          }}>
-            {foto.tipo === 'FACHADA' ? (
-              <HouseIcon sx={{ color: colors.greenAccent[300], fontSize: 20 }} />
+      <DialogTitle
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          p: 2.5,
+          borderBottom: `1px solid ${colors.primary[700]}`,
+        }}
+      >
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          <Box
+            sx={{
+              backgroundColor:
+                foto.tipo === "FACHADA"
+                  ? colors.greenAccent[900]
+                  : colors.blueAccent[900],
+              borderRadius: "8px",
+              p: 1,
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+            }}
+          >
+            {foto.tipo === "FACHADA" ? (
+              <HouseIcon
+                sx={{ color: colors.greenAccent[300], fontSize: 20 }}
+              />
             ) : (
-              <DescriptionIcon sx={{ color: colors.blueAccent[300], fontSize: 20 }} />
+              <DescriptionIcon
+                sx={{ color: colors.blueAccent[300], fontSize: 20 }}
+              />
             )}
-            <Typography variant="subtitle2" sx={{ color: colors.grey[100], fontWeight: 600 }}>
-              {foto.tipo === 'FACHADA' ? 'Fachada' : 'Evidencia'}
+            <Typography
+              variant="subtitle2"
+              sx={{ color: colors.grey[100], fontWeight: 600 }}
+            >
+              {foto.tipo === "FACHADA" ? "Fachada" : "Evidencia"}
             </Typography>
           </Box>
           <Typography variant="body1" sx={{ color: colors.grey[100] }}>
             {foto.cuenta}
           </Typography>
         </Box>
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Typography variant="caption" sx={{ 
-            color: colors.grey[400],
-            display: 'flex',
-            alignItems: 'center',
-            mr: 1
-          }}>
+        <Box sx={{ display: "flex", gap: 1 }}>
+          <Typography
+            variant="caption"
+            sx={{
+              color: colors.grey[400],
+              display: "flex",
+              alignItems: "center",
+              mr: 1,
+            }}
+          >
             {index + 1} / {totalFotos}
           </Typography>
           <Tooltip title="Anterior">
             <span>
-              <IconButton 
-                onClick={onPrev} 
+              <IconButton
+                onClick={onPrev}
                 disabled={index === 0}
-                sx={{ 
+                sx={{
                   color: colors.grey[100],
-                  '&:disabled': { color: colors.grey[700] }
+                  "&:disabled": { color: colors.grey[700] },
                 }}
               >
                 <ArrowBack />
@@ -140,12 +167,12 @@ const FotoAmpliadaDialog = ({ open, foto, onClose, onDownload, onNext, onPrev, t
           </Tooltip>
           <Tooltip title="Siguiente">
             <span>
-              <IconButton 
-                onClick={onNext} 
+              <IconButton
+                onClick={onNext}
                 disabled={index === totalFotos - 1}
-                sx={{ 
+                sx={{
                   color: colors.grey[100],
-                  '&:disabled': { color: colors.grey[700] }
+                  "&:disabled": { color: colors.grey[700] },
                 }}
               >
                 <ArrowForward />
@@ -153,7 +180,10 @@ const FotoAmpliadaDialog = ({ open, foto, onClose, onDownload, onNext, onPrev, t
             </span>
           </Tooltip>
           <Tooltip title="Descargar">
-            <IconButton onClick={() => onDownload(foto)} sx={{ color: colors.grey[100] }}>
+            <IconButton
+              onClick={() => onDownload(foto)}
+              sx={{ color: colors.grey[100] }}
+            >
               <DownloadIcon />
             </IconButton>
           </Tooltip>
@@ -162,67 +192,80 @@ const FotoAmpliadaDialog = ({ open, foto, onClose, onDownload, onNext, onPrev, t
           </IconButton>
         </Box>
       </DialogTitle>
-      <DialogContent sx={{ 
-        p: 0, 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center',
-        minHeight: '60vh',
-        position: 'relative'
-      }}>
-        <Box sx={{ 
-          position: 'relative', 
-          width: '100%', 
-          height: '100%',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          p: 3
-        }}>
+      <DialogContent
+        sx={{
+          p: 0,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "60vh",
+          position: "relative",
+        }}
+      >
+        <Box
+          sx={{
+            position: "relative",
+            width: "100%",
+            height: "100%",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            p: 3,
+          }}
+        >
           <img
             src={foto.urlImagen || foto.url}
             alt={foto.nombreFoto || foto.descripcion}
             style={{
-              maxWidth: '100%',
-              maxHeight: '70vh',
-              borderRadius: '12px',
-              boxShadow: '0 16px 48px rgba(0,0,0,0.4)',
-              objectFit: 'contain',
-              backgroundColor: colors.primary[900]
+              maxWidth: "100%",
+              maxHeight: "70vh",
+              borderRadius: "12px",
+              boxShadow: "0 16px 48px rgba(0,0,0,0.4)",
+              objectFit: "contain",
+              backgroundColor: colors.primary[900],
             }}
           />
-          <Box sx={{ 
-            position: 'absolute', 
-            bottom: 32, 
-            left: '50%',
-            transform: 'translateX(-50%)',
-            backgroundColor: 'rgba(0,0,0,0.75)',
-            borderRadius: '24px',
-            p: 1.5,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 2,
-            backdropFilter: 'blur(8px)'
-          }}>
+          <Box
+            sx={{
+              position: "absolute",
+              bottom: 32,
+              left: "50%",
+              transform: "translateX(-50%)",
+              backgroundColor: "rgba(0,0,0,0.75)",
+              borderRadius: "24px",
+              p: 1.5,
+              display: "flex",
+              alignItems: "center",
+              gap: 2,
+              backdropFilter: "blur(8px)",
+            }}
+          >
             {foto.verificada && (
               <Tooltip title="Verificada">
-                <Box sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 0.5,
-                  backgroundColor: colors.greenAccent[800],
-                  borderRadius: '12px',
-                  p: '4px 8px'
-                }}>
-                  <Verified sx={{ fontSize: 16, color: colors.greenAccent[300] }} />
-                  <Typography variant="caption" sx={{ color: colors.grey[100], fontWeight: 500 }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 0.5,
+                    backgroundColor: colors.greenAccent[800],
+                    borderRadius: "12px",
+                    p: "4px 8px",
+                  }}
+                >
+                  <Verified
+                    sx={{ fontSize: 16, color: colors.greenAccent[300] }}
+                  />
+                  <Typography
+                    variant="caption"
+                    sx={{ color: colors.grey[100], fontWeight: 500 }}
+                  >
                     Verificada
                   </Typography>
                 </Box>
               </Tooltip>
             )}
             <Typography variant="caption" sx={{ color: colors.grey[300] }}>
-              {foto.nombreFoto || 'Sin nombre'}
+              {foto.nombreFoto || "Sin nombre"}
             </Typography>
             <Typography variant="caption" sx={{ color: colors.grey[500] }}>
               {new Date(foto.fechaCaptura || foto.fecha).toLocaleDateString()}
@@ -234,12 +277,24 @@ const FotoAmpliadaDialog = ({ open, foto, onClose, onDownload, onNext, onPrev, t
   );
 };
 
-// 🔹 Componente ChipContadorFoto - ESTILO ESPECÍFICO DEL COMPONENTE ANTIGUO CON ICONO
-const ChipContadorFoto = ({ tipo, cantidad, COLOR_EFICIENTE, COLOR_REGULAR, icono, tooltipTitle }) => {
+// 🔹 Componente ChipContadorFoto
+const ChipContadorFoto = ({
+  tipo,
+  cantidad,
+  COLOR_EFICIENTE,
+  COLOR_REGULAR,
+  icono,
+  tooltipTitle,
+}) => {
   const tieneFotos = cantidad > 0;
-  
+
   return (
-    <Tooltip title={tooltipTitle || `${cantidad} ${tipo === 'FACHADA' ? 'fachada' : 'evidencia'}${cantidad !== 1 ? 's' : ''}`}>
+    <Tooltip
+      title={
+        tooltipTitle ||
+        `${cantidad} ${tipo === "FACHADA" ? "fachada" : "evidencia"}${cantidad !== 1 ? "s" : ""}`
+      }
+    >
       <Chip
         label={cantidad}
         size="small"
@@ -252,46 +307,53 @@ const ChipContadorFoto = ({ tipo, cantidad, COLOR_EFICIENTE, COLOR_REGULAR, icon
           fontSize: "0.7rem",
           minWidth: 40,
           height: 22,
-          '& .MuiChip-icon': {
-            fontSize: '0.8rem',
-            marginLeft: '4px',
-            marginRight: '2px',
+          "& .MuiChip-icon": {
+            fontSize: "0.8rem",
+            marginLeft: "4px",
+            marginRight: "2px",
           },
-          '& .MuiChip-label': {
+          "& .MuiChip-label": {
             px: 0.5,
-          }
+          },
         }}
       />
     </Tooltip>
   );
 };
 
-// 🔹 Componente para mini galería inline - CON EL NUEVO ESTILO
-const MiniGaleria = ({ fotos, cuenta, onImageClick, startingIndex = 0, COLOR_EFICIENTE, COLOR_REGULAR }) => {
+// 🔹 Componente para mini galería inline
+const MiniGaleria = ({
+  fotos,
+  cuenta,
+  onImageClick,
+  startingIndex = 0,
+  COLOR_EFICIENTE,
+  COLOR_REGULAR,
+}) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  
-  // 🔹 Separar fotos por tipo
-  const fotosFachada = fotos.filter(f => f.tipo === 'FACHADA');
-  const fotosEvidencia = fotos.filter(f => f.tipo === 'EVIDENCIA');
+
+  const fotosFachada = fotos.filter((f) => f.tipo === "FACHADA");
+  const fotosEvidencia = fotos.filter((f) => f.tipo === "EVIDENCIA");
   const todasLasFotos = [...fotosFachada, ...fotosEvidencia];
-  
-  // 🔹 Mostrar máximo 4 fotos en vista previa
+
   const fotosParaMostrar = todasLasFotos.slice(0, 4);
   const fotosRestantes = todasLasFotos.length - 4;
 
   if (todasLasFotos.length === 0) {
     return (
-      <Box sx={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center',
-        height: 80,
-        backgroundColor: colors.primary[900],
-        borderRadius: '8px',
-        border: `1px dashed ${colors.primary[700]}`,
-        color: colors.grey[600]
-      }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          height: 80,
+          backgroundColor: colors.primary[900],
+          borderRadius: "8px",
+          border: `1px dashed ${colors.primary[700]}`,
+          color: colors.grey[600],
+        }}
+      >
         <ImageIcon sx={{ mr: 1, color: colors.grey[500] }} />
         <Typography variant="caption">Sin fotos</Typography>
       </Box>
@@ -300,13 +362,14 @@ const MiniGaleria = ({ fotos, cuenta, onImageClick, startingIndex = 0, COLOR_EFI
 
   return (
     <Box>
-      {/* 🔹 Contadores de fotos - CON EL ESTILO ESPECÍFICO */}
-      <Box sx={{ 
-        display: 'flex', 
-        gap: 1, 
-        mb: 2,
-        justifyContent: 'center'
-      }}>
+      <Box
+        sx={{
+          display: "flex",
+          gap: 1,
+          mb: 2,
+          justifyContent: "center",
+        }}
+      >
         <ChipContadorFoto
           tipo="FACHADA"
           cantidad={fotosFachada.length}
@@ -314,7 +377,7 @@ const MiniGaleria = ({ fotos, cuenta, onImageClick, startingIndex = 0, COLOR_EFI
           COLOR_REGULAR={COLOR_REGULAR}
           icono={<HouseIcon sx={{ fontSize: 12 }} />}
         />
-        
+
         <ChipContadorFoto
           tipo="EVIDENCIA"
           cantidad={fotosEvidencia.length}
@@ -324,48 +387,49 @@ const MiniGaleria = ({ fotos, cuenta, onImageClick, startingIndex = 0, COLOR_EFI
         />
       </Box>
 
-      {/* 🔹 Galería de miniaturas - SIMPLIFICADA */}
-      <Box sx={{ 
-        display: 'flex',
-        alignItems: 'center',
-        gap: 1,
-        p: 1,
-        backgroundColor: colors.primary[900],
-        borderRadius: '8px',
-        border: `1px solid ${colors.primary[700]}`,
-        overflow: 'auto',
-        '&::-webkit-scrollbar': {
-          height: 4,
-        },
-        '&::-webkit-scrollbar-thumb': {
-          backgroundColor: colors.primary[600],
-          borderRadius: 2,
-        }
-      }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1,
+          p: 1,
+          backgroundColor: colors.primary[900],
+          borderRadius: "8px",
+          border: `1px solid ${colors.primary[700]}`,
+          overflow: "auto",
+          "&::-webkit-scrollbar": {
+            height: 4,
+          },
+          "&::-webkit-scrollbar-thumb": {
+            backgroundColor: colors.primary[600],
+            borderRadius: 2,
+          },
+        }}
+      >
         {fotosParaMostrar.map((foto, index) => {
           const imagenUrl = foto.urlImagen || foto.url;
-          const esFachada = foto.tipo === 'FACHADA';
-          
+          const esFachada = foto.tipo === "FACHADA";
+
           return (
-            <Tooltip 
-              key={foto.id} 
-              title={`${esFachada ? 'Fachada' : 'Evidencia'} - ${foto.nombreFoto || 'Sin nombre'}`}
+            <Tooltip
+              key={foto.id}
+              title={`${esFachada ? "Fachada" : "Evidencia"} - ${foto.nombreFoto || "Sin nombre"}`}
             >
               <Card
                 sx={{
-                  position: 'relative',
-                  borderRadius: '6px',
-                  overflow: 'hidden',
-                  cursor: 'pointer',
+                  position: "relative",
+                  borderRadius: "6px",
+                  overflow: "hidden",
+                  cursor: "pointer",
                   flexShrink: 0,
                   width: 80,
                   height: 80,
                   border: `2px solid ${esFachada ? colors.greenAccent[700] : colors.blueAccent[700]}`,
-                  transition: 'all 0.2s ease',
-                  '&:hover': {
-                    transform: 'scale(1.05)',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
-                  }
+                  transition: "all 0.2s ease",
+                  "&:hover": {
+                    transform: "scale(1.05)",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+                  },
                 }}
                 onClick={() => onImageClick(startingIndex + index)}
               >
@@ -375,80 +439,93 @@ const MiniGaleria = ({ fotos, cuenta, onImageClick, startingIndex = 0, COLOR_EFI
                   image={imagenUrl}
                   alt={foto.nombreFoto || `Foto ${index + 1}`}
                   sx={{
-                    objectFit: 'cover',
-                    width: '100%',
-                    backgroundColor: colors.primary[900]
+                    objectFit: "cover",
+                    width: "100%",
+                    backgroundColor: colors.primary[900],
                   }}
                   onError={(e) => {
-                    e.target.src = `https://via.placeholder.com/80/${esFachada ? '1b5e20' : '0d47a1'}/ffffff?text=${esFachada ? 'F' : 'E'}`;
+                    e.target.src = `https://via.placeholder.com/80/${esFachada ? "1b5e20" : "0d47a1"}/ffffff?text=${esFachada ? "F" : "E"}`;
                   }}
                 />
-                <Box sx={{
-                  position: 'absolute',
-                  top: 4,
-                  right: 4,
-                }}>
+                <Box
+                  sx={{
+                    position: "absolute",
+                    top: 4,
+                    right: 4,
+                  }}
+                >
                   {foto.verificada && (
                     <Tooltip title="Verificada">
-                      <Verified sx={{ 
-                        fontSize: 14, 
-                        color: colors.greenAccent[500],
-                        filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.5))'
-                      }} />
+                      <Verified
+                        sx={{
+                          fontSize: 14,
+                          color: colors.greenAccent[500],
+                          filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.5))",
+                        }}
+                      />
                     </Tooltip>
                   )}
                 </Box>
-                {/* Indicador de tipo en miniatura - SOLO ICONO */}
-                <Box sx={{
-                  position: 'absolute',
-                  bottom: 4,
-                  left: 4,
-                  backgroundColor: 'rgba(0,0,0,0.6)',
-                  borderRadius: '4px',
-                  width: 20,
-                  height: 20,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backdropFilter: 'blur(4px)'
-                }}>
+                <Box
+                  sx={{
+                    position: "absolute",
+                    bottom: 4,
+                    left: 4,
+                    backgroundColor: "rgba(0,0,0,0.6)",
+                    borderRadius: "4px",
+                    width: 20,
+                    height: 20,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    backdropFilter: "blur(4px)",
+                  }}
+                >
                   {esFachada ? (
-                    <HouseIcon sx={{ fontSize: 12, color: colors.greenAccent[300] }} />
+                    <HouseIcon
+                      sx={{ fontSize: 12, color: colors.greenAccent[300] }}
+                    />
                   ) : (
-                    <DescriptionIcon sx={{ fontSize: 12, color: colors.blueAccent[300] }} />
+                    <DescriptionIcon
+                      sx={{ fontSize: 12, color: colors.blueAccent[300] }}
+                    />
                   )}
                 </Box>
               </Card>
             </Tooltip>
           );
         })}
-        
+
         {fotosRestantes > 0 && (
           <Tooltip title={`${fotosRestantes} fotos más`}>
-            <Box sx={{
-              width: 80,
-              height: 80,
-              backgroundColor: colors.primary[800],
-              borderRadius: '6px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              border: `1px dashed ${colors.primary[600]}`,
-              cursor: 'pointer',
-              flexDirection: 'column',
-              gap: 0.5,
-              '&:hover': {
-                backgroundColor: colors.primary[700],
-              }
-            }}
-            onClick={() => onImageClick(startingIndex + 4)}
+            <Box
+              sx={{
+                width: 80,
+                height: 80,
+                backgroundColor: colors.primary[800],
+                borderRadius: "6px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                border: `1px dashed ${colors.primary[600]}`,
+                cursor: "pointer",
+                flexDirection: "column",
+                gap: 0.5,
+                "&:hover": {
+                  backgroundColor: colors.primary[700],
+                },
+              }}
+              onClick={() => onImageClick(startingIndex + 4)}
             >
               <PhotoIcon sx={{ fontSize: 24, color: colors.grey[400] }} />
-              <Typography variant="h6" sx={{ 
-                color: colors.grey[400],
-                fontWeight: 600,
-                fontSize: '0.9rem'
-              }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  color: colors.grey[400],
+                  fontWeight: 600,
+                  fontSize: "0.9rem",
+                }}
+              >
                 +{fotosRestantes}
               </Typography>
             </Box>
@@ -513,7 +590,7 @@ const GestorDetallesDialog = ({
 }) => {
   const theme = useTheme();
   const colors = colorsProp || tokens(theme.palette.mode);
-  
+
   // Usar props o valores por defecto
   const COLOR_TEXTO = COLOR_TEXTO_PROPS || colors.grey[100];
   const COLOR_FONDO = COLOR_FONDO_PROPS || colors.bgContainer;
@@ -531,7 +608,7 @@ const GestorDetallesDialog = ({
   const [gestionExpandida, setGestionExpandida] = useState(null);
   const [fotoAmpliada, setFotoAmpliada] = useState(null);
   const [fotoAmpliadaIndex, setFotoAmpliadaIndex] = useState(0);
-  
+
   // 🔹 Ref para seguimiento
   const usuarioAnteriorRef = useRef(null);
 
@@ -545,9 +622,9 @@ const GestorDetallesDialog = ({
 
   const formatMotivoGestion = (motivo) => {
     if (motivo === "TODOS") return "Todos";
-    
+
     const motivoNormalizado = normalizarMotivo(motivo);
-    
+
     if (motivoNormalizado === "COMPLETA") return "Completa";
 
     const formatos = {
@@ -560,16 +637,21 @@ const GestorDetallesDialog = ({
       FALTA_FOTO_EVIDENCIA: "Falta foto evidencia",
     };
 
-    return formatos[motivoNormalizado] || motivoNormalizado.replace(/_/g, " ").toLowerCase();
+    return (
+      formatos[motivoNormalizado] ||
+      motivoNormalizado.replace(/_/g, " ").toLowerCase()
+    );
   };
 
   const getColorMotivo = (motivo) => {
     if (motivo === "TODOS") {
-      return filtroMotivo === "TODOS" ? COLOR_TODOS_ACTIVE : COLOR_TODOS_INACTIVE;
+      return filtroMotivo === "TODOS"
+        ? COLOR_TODOS_ACTIVE
+        : COLOR_TODOS_INACTIVE;
     }
-    
+
     const motivoNormalizado = normalizarMotivo(motivo);
-    
+
     if (motivoNormalizado === "COMPLETA") return COLOR_EFICIENTE;
     if (motivoNormalizado.includes("GPS")) return COLOR_ATENCION;
     if (motivoNormalizado.includes("FOTO")) return COLOR_REGULAR;
@@ -578,16 +660,17 @@ const GestorDetallesDialog = ({
 
   const getIconoMotivo = (motivo) => {
     if (motivo === "TODOS") {
-      const color = filtroMotivo === "TODOS" ? COLOR_TODOS_ACTIVE : COLOR_TODOS_INACTIVE;
+      const color =
+        filtroMotivo === "TODOS" ? COLOR_TODOS_ACTIVE : COLOR_TODOS_INACTIVE;
       return <Apps sx={{ color }} />;
     }
-    
+
     const motivoNormalizado = normalizarMotivo(motivo);
-    
+
     if (motivoNormalizado === "COMPLETA")
       return <CheckCircle sx={{ color: COLOR_EFICIENTE }} />;
 
-    if (motivoNormalizado.includes("GPS")) 
+    if (motivoNormalizado.includes("GPS"))
       return <Error sx={{ color: COLOR_ATENCION }} />;
     if (motivoNormalizado.includes("FOTO"))
       return <Warning sx={{ color: COLOR_REGULAR }} />;
@@ -604,17 +687,18 @@ const GestorDetallesDialog = ({
   // 🔹 Calcular gestiones filtradas
   const gestionesFiltradas = useMemo(() => {
     if (!usuario?.registros) return [];
-    
+
     const registros = usuario.registros || [];
-    
+
     if (filtroMotivo && filtroMotivo !== "TODOS") {
       const motivoFiltroNormalizado = normalizarMotivo(filtroMotivo);
-      
-      return registros.filter(registro => 
-        normalizarMotivo(registro.motivo_gestion) === motivoFiltroNormalizado
+
+      return registros.filter(
+        (registro) =>
+          normalizarMotivo(registro.motivo_gestion) === motivoFiltroNormalizado,
       );
     }
-    
+
     return registros;
   }, [usuario, filtroMotivo]);
 
@@ -624,126 +708,131 @@ const GestorDetallesDialog = ({
     return gestionesFiltradas.slice(startIndex, startIndex + pageSize);
   }, [gestionesFiltradas, paginaGestiones, pageSize]);
 
-  // 🔹 Extraer todas las fotos de todas las gestiones filtradas (REACTIVO AL FILTRO)
+  // 🔹 Extraer todas las fotos de todas las gestiones filtradas
   const fotosFiltradas = useMemo(() => {
     const fotos = [];
-    
+
     gestionesFiltradas.forEach((gestion) => {
       if (Array.isArray(gestion.fotos)) {
         gestion.fotos.forEach((foto) => {
-          if (foto && typeof foto === 'object' && foto.urlImagen) {
-            const tipoFoto = (foto.tipo || '').toUpperCase();
-            const esFachada = tipoFoto.includes('FACHADA') || tipoFoto.includes('PREDIO');
-            
+          if (foto && typeof foto === "object" && foto.urlImagen) {
+            const tipoFoto = (foto.tipo || "").toUpperCase();
+            const esFachada =
+              tipoFoto.includes("FACHADA") || tipoFoto.includes("PREDIO");
+
             fotos.push({
               id: `${gestion.cuenta}-${foto.idRegistroFoto || Date.now()}`,
               urlImagen: foto.urlImagen,
               url: foto.urlImagen,
-              tipo: esFachada ? 'FACHADA' : 'EVIDENCIA',
+              tipo: esFachada ? "FACHADA" : "EVIDENCIA",
               cuenta: gestion.cuenta,
               fecha: gestion.fecha,
               fechaCaptura: foto.fechaCaptura,
               nombreFoto: foto.nombreFoto,
-              descripcion: foto.tipo || (esFachada ? 'Fachada' : 'Evidencia'),
+              descripcion: foto.tipo || (esFachada ? "Fachada" : "Evidencia"),
               verificada: foto.verificada || false,
               gestionId: gestion.id || gestion.cuenta,
-              metadata: foto
+              metadata: foto,
             });
           }
         });
       }
     });
-    
+
     return fotos;
-  }, [gestionesFiltradas]); // Solo depende de gestionesFiltradas
+  }, [gestionesFiltradas]);
 
   // 🔹 Extraer todas las fotos de todas las gestiones (para el total)
   const todasLasFotos = useMemo(() => {
     const fotos = [];
-    
+
     (usuario?.registros || []).forEach((gestion) => {
       if (Array.isArray(gestion.fotos)) {
         gestion.fotos.forEach((foto) => {
-          if (foto && typeof foto === 'object' && foto.urlImagen) {
-            const tipoFoto = (foto.tipo || '').toUpperCase();
-            const esFachada = tipoFoto.includes('FACHADA') || tipoFoto.includes('PREDIO');
-            
+          if (foto && typeof foto === "object" && foto.urlImagen) {
+            const tipoFoto = (foto.tipo || "").toUpperCase();
+            const esFachada =
+              tipoFoto.includes("FACHADA") || tipoFoto.includes("PREDIO");
+
             fotos.push({
               id: `${gestion.cuenta}-${foto.idRegistroFoto || Date.now()}`,
               urlImagen: foto.urlImagen,
               url: foto.urlImagen,
-              tipo: esFachada ? 'FACHADA' : 'EVIDENCIA',
+              tipo: esFachada ? "FACHADA" : "EVIDENCIA",
               cuenta: gestion.cuenta,
               fecha: gestion.fecha,
               fechaCaptura: foto.fechaCaptura,
               nombreFoto: foto.nombreFoto,
-              descripcion: foto.tipo || (esFachada ? 'Fachada' : 'Evidencia'),
+              descripcion: foto.tipo || (esFachada ? "Fachada" : "Evidencia"),
               verificada: foto.verificada || false,
               gestionId: gestion.id || gestion.cuenta,
-              metadata: foto
+              metadata: foto,
             });
           }
         });
       }
     });
-    
+
     return fotos;
   }, [usuario]);
 
   // 🔹 Obtener todas las fotos de una gestión específica
   const getFotosDeGestion = (gestion) => {
     if (!gestion || !Array.isArray(gestion.fotos)) return [];
-    
-    return gestion.fotos.map((foto, index) => {
-      const tipoFoto = (foto.tipo || '').toUpperCase();
-      const esFachada = tipoFoto.includes('FACHADA') || tipoFoto.includes('PREDIO');
-      
-      return {
-        id: `${gestion.cuenta}-${foto.idRegistroFoto || index}`,
-        urlImagen: foto.urlImagen,
-        url: foto.urlImagen,
-        tipo: esFachada ? 'FACHADA' : 'EVIDENCIA',
-        cuenta: gestion.cuenta,
-        fecha: gestion.fecha,
-        fechaCaptura: foto.fechaCaptura,
-        nombreFoto: foto.nombreFoto,
-        descripcion: foto.tipo || (esFachada ? 'Fachada' : 'Evidencia'),
-        verificada: foto.verificada || false,
-        metadata: foto
-      };
-    }).filter(foto => foto.urlImagen);
+
+    return gestion.fotos
+      .map((foto, index) => {
+        const tipoFoto = (foto.tipo || "").toUpperCase();
+        const esFachada =
+          tipoFoto.includes("FACHADA") || tipoFoto.includes("PREDIO");
+
+        return {
+          id: `${gestion.cuenta}-${foto.idRegistroFoto || index}`,
+          urlImagen: foto.urlImagen,
+          url: foto.urlImagen,
+          tipo: esFachada ? "FACHADA" : "EVIDENCIA",
+          cuenta: gestion.cuenta,
+          fecha: gestion.fecha,
+          fechaCaptura: foto.fechaCaptura,
+          nombreFoto: foto.nombreFoto,
+          descripcion: foto.tipo || (esFachada ? "Fachada" : "Evidencia"),
+          verificada: foto.verificada || false,
+          metadata: foto,
+        };
+      })
+      .filter((foto) => foto.urlImagen);
   };
 
   // 🔹 Función para encontrar el índice global de una foto
   const findFotoGlobalIndex = (fotoLocal, gestion) => {
     if (!fotoLocal || !gestion) return 0;
-    
-    const gestionIndex = gestionesFiltradas.findIndex(g => g.cuenta === gestion.cuenta);
+
+    const gestionIndex = gestionesFiltradas.findIndex(
+      (g) => g.cuenta === gestion.cuenta,
+    );
     let fotoIndex = 0;
-    
-    // Sumar fotos de todas las gestiones anteriores
+
     for (let i = 0; i < gestionIndex; i++) {
       fotoIndex += getFotosDeGestion(gestionesFiltradas[i]).length;
     }
-    
-    // Encontrar el índice de la foto en la gestión actual
+
     const fotosDeGestion = getFotosDeGestion(gestion);
-    const localIndex = fotosDeGestion.findIndex(f => f.id === fotoLocal.id);
-    
+    const localIndex = fotosDeGestion.findIndex((f) => f.id === fotoLocal.id);
+
     return fotoIndex + localIndex;
   };
 
   // 🔹 Calcular motivos
   const motivosArray = useMemo(() => {
     if (!usuario?.motivos && !usuario?.registros) return [];
-    
+
     const motivosContados = {};
-    
-    (usuario.registros || []).forEach(registro => {
+
+    (usuario.registros || []).forEach((registro) => {
       const motivo = normalizarMotivo(registro.motivo_gestion);
       motivosContados[motivo] = (motivosContados[motivo] || 0) + 1;
     });
-    
+
     return Object.entries(motivosContados).sort((a, b) => b[1] - a[1]);
   }, [usuario]);
 
@@ -787,13 +876,188 @@ const GestorDetallesDialog = ({
   const descargarFoto = (foto) => {
     const url = foto.urlImagen || foto.url;
     if (!url) return;
-    
-    const link = document.createElement('a');
+
+    const link = document.createElement("a");
     link.href = url;
-    link.download = `${foto.tipo}_${foto.cuenta}_${foto.nombreFoto || new Date(foto.fecha).toISOString().split('T')[0]}.jpg`;
+    link.download = `${foto.tipo}_${foto.cuenta}_${foto.nombreFoto || new Date(foto.fecha).toISOString().split("T")[0]}.jpg`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  /* ======================================================
+     DESCARGA A EXCEL - SOLO LO QUE SE VE EN EL DATAGRID
+  ====================================================== */
+  const handleDownloadExcel = async () => {
+    if (!usuario) return;
+
+    const workbook = new ExcelJS.Workbook();
+
+    // ========== HOJA 1: RESUMEN DEL GESTOR ==========
+    const resumenSheet = workbook.addWorksheet("Resumen", {
+      views: [{ state: "frozen", xSplit: 0, ySplit: 1 }],
+    });
+
+    const resumenData = [
+      ["Gestor", usuario.nombre],
+      ["ID", usuario.id],
+      ["Días trabajados", usuario.diasTrabajados || 0],
+      ["Total gestiones", usuario.total || 0],
+      ["Completas", usuario.completas || 0],
+      ["Con problemas", usuario.incompletas || 0],
+      ["Inválidas", usuario.invalidas || 0],
+      ["% Éxito", usuario.porcentajeExito?.toFixed(1) + "%"],
+      [
+        "Filtro aplicado",
+        filtroMotivo === "TODOS" ? "Todos" : formatMotivoGestion(filtroMotivo),
+      ],
+      ["Gestiones mostradas", gestionesFiltradas.length],
+    ];
+
+    resumenData.forEach((row, index) => {
+      const excelRow = resumenSheet.addRow(row);
+      if (index === 0) {
+        excelRow.getCell(1).font = { bold: true };
+        excelRow.getCell(2).font = { bold: true };
+      }
+    });
+
+    resumenSheet.columns.forEach((column) => {
+      column.width = 20;
+    });
+
+    // ========== HOJA 2: GESTIONES FILTRADAS (LO QUE VE EL USUARIO) ==========
+    const gestionesSheet = workbook.addWorksheet("Gestiones", {
+      views: [{ state: "frozen", xSplit: 0, ySplit: 1 }],
+    });
+
+    // 📌 MISMAS COLUMNAS QUE EL DATAGRID
+    const headers = [
+      "Cuenta",
+      "Fecha",
+      "Estado",
+      "Motivo",
+      "GPS",
+      "Fachada",
+      "Evidencia",
+    ];
+
+    const headerRow = gestionesSheet.addRow(headers);
+    headerRow.eachCell((cell) => {
+      cell.font = { bold: true, color: { argb: "FF374151" } };
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFF3F4F6" },
+      };
+      cell.alignment = { vertical: "middle", horizontal: "left" };
+      cell.border = {
+        bottom: { style: "thin", color: { argb: "FFE5E7EB" } },
+      };
+    });
+
+    // 📌 EXPORTAR SOLO LAS GESTIONES FILTRADAS (las que ve el usuario)
+    gestionesFiltradas.forEach((gestion) => {
+      // Formatear fecha con hora
+      const fecha = new Date(gestion.fecha);
+      const fechaFormateada = `${fecha.toLocaleDateString("es-MX")} ${fecha.toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" })}`;
+
+      // Formato descriptivo de fotos
+      const fotosFachada = gestion.fotosFachada || 0;
+      const fotosEvidencia = gestion.fotosEvidencia || 0;
+      const fotosTexto = `Fachada: ${fotosFachada}, Evidencia: ${fotosEvidencia}`;
+
+      const row = gestionesSheet.addRow([
+        gestion.cuenta || "",
+        fechaFormateada,
+        gestion.estatus_gestion || "",
+        gestion.motivo_gestion === "COMPLETA" || !gestion.motivo_gestion
+          ? "Completa"
+          : formatMotivoGestion(gestion.motivo_gestion),
+        gestion.tieneGPS ? "Sí" : "No",
+        gestion.fotosFachada || 0, // Columna separada
+        gestion.fotosEvidencia || 0, // Columna separada
+      ]);
+
+      row.eachCell((cell) => {
+        cell.alignment = { vertical: "middle", horizontal: "left" };
+        cell.font = { color: { argb: "FF1F2937" } };
+        cell.border = {
+          bottom: { style: "thin", color: { argb: "FFF9FAFB" } },
+        };
+      });
+
+      // Aplicar color al texto según el estado
+      const estadoCell = row.getCell(3);
+      if (gestion.estatus_gestion === "COMPLETA") {
+        estadoCell.font = { color: { argb: "FF10B981" } }; // Verde
+      } else if (gestion.estatus_gestion === "INCOMPLETA") {
+        estadoCell.font = { color: { argb: "FFF59E0B" } }; // Amarillo
+      } else if (gestion.estatus_gestion === "INVALIDA") {
+        estadoCell.font = { color: { argb: "FFEF4444" } }; // Rojo
+      }
+    });
+
+    // Ajustar ancho de columnas
+    gestionesSheet.columns.forEach((column) => {
+      let maxLength = 10;
+      column.eachCell({ includeEmpty: true }, (cell) => {
+        const length = cell.value ? cell.value.toString().length : 10;
+        maxLength = Math.max(maxLength, length);
+      });
+      column.width = Math.min(maxLength + 2, 40);
+    });
+
+    // ========== HOJA 3: MOTIVOS (RESUMEN) ==========
+    const motivosSheet = workbook.addWorksheet("Motivos", {
+      views: [{ state: "frozen", xSplit: 0, ySplit: 1 }],
+    });
+
+    const motivosHeaders = ["Motivo", "Cantidad"];
+    const motivosHeaderRow = motivosSheet.addRow(motivosHeaders);
+    motivosHeaderRow.eachCell((cell) => {
+      cell.font = { bold: true, color: { argb: "FF374151" } };
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFF3F4F6" },
+      };
+    });
+
+    const motivos = usuario.motivos || {};
+    Object.entries(motivos).forEach(([motivo, cantidad]) => {
+      const row = motivosSheet.addRow([
+        motivo === "COMPLETA"
+          ? "Completa"
+          : motivo.replace(/_/g, " ").toLowerCase(),
+        cantidad,
+      ]);
+      row.eachCell((cell) => {
+        cell.font = { color: { argb: "FF1F2937" } };
+      });
+    });
+
+    motivosSheet.columns.forEach((column) => {
+      column.width = 25;
+    });
+
+    // ========== GENERAR ARCHIVO ==========
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+
+    const filtroTexto =
+      filtroMotivo === "TODOS"
+        ? "todos"
+        : filtroMotivo.replace(/_/g, "_").toLowerCase();
+
+    link.download = `reporte_${usuario.nombre.replace(/\s+/g, "_")}_${usuario.id}_${filtroTexto}_${new Date().toISOString().split("T")[0]}.xlsx`;
+
+    link.click();
+    URL.revokeObjectURL(link.href);
   };
 
   // 🔹 Reset al cambiar usuario
@@ -819,10 +1083,10 @@ const GestorDetallesDialog = ({
         fullWidth
         PaperProps={{
           sx: {
-            maxHeight: '90vh',
-            borderRadius: '12px',
-            overflow: 'hidden'
-          }
+            maxHeight: "90vh",
+            borderRadius: "12px",
+            overflow: "hidden",
+          },
         }}
       >
         <DialogTitle
@@ -850,19 +1114,18 @@ const GestorDetallesDialog = ({
               </Typography>
             </Box>
           </Box>
-          <IconButton
-            onClick={onClose}
-            sx={{ color: colors.grey[400] }}
-          >
+          <IconButton onClick={onClose} sx={{ color: colors.grey[400] }}>
             <Close />
           </IconButton>
         </DialogTitle>
 
-        <DialogContent sx={{ 
-          backgroundColor: COLOR_FONDO, 
-          p: 3,
-          overflow: 'auto'
-        }}>
+        <DialogContent
+          sx={{
+            backgroundColor: COLOR_FONDO,
+            p: 3,
+            overflow: "auto",
+          }}
+        >
           {/* 🔹 4 CARDS DE RESUMEN */}
           <Box className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <CardResumenDialog
@@ -911,23 +1174,23 @@ const GestorDetallesDialog = ({
           <Box sx={{ mb: 3 }}>
             <Typography
               variant="subtitle1"
-              sx={{ 
-                fontWeight: 600, 
+              sx={{
+                fontWeight: 600,
                 color: COLOR_TEXTO,
                 mb: 2,
                 display: "flex",
                 alignItems: "center",
-                gap: 1
+                gap: 1,
               }}
             >
               📊 Distribución por tipo de gestión
-              <Typography 
-                component="span" 
-                variant="caption" 
-                sx={{ 
+              <Typography
+                component="span"
+                variant="caption"
+                sx={{
                   color: colors.grey[500],
                   fontWeight: 400,
-                  ml: 1
+                  ml: 1,
                 }}
               >
                 (Haz clic para filtrar)
@@ -979,13 +1242,13 @@ const GestorDetallesDialog = ({
                 sx={{ fontWeight: 600, color: COLOR_TEXTO }}
               >
                 📝 Gestiones registradas
-                <Typography 
-                  component="span" 
-                  variant="caption" 
-                  sx={{ 
+                <Typography
+                  component="span"
+                  variant="caption"
+                  sx={{
                     color: colors.grey[500],
                     fontWeight: 400,
-                    ml: 1
+                    ml: 1,
                   }}
                 >
                   (Haz clic en ▶ para ver fotos)
@@ -999,51 +1262,114 @@ const GestorDetallesDialog = ({
                   <>Mostrando {gestionesFiltradas.length} registros</>
                 ) : (
                   <>
-                    Filtrado: <strong>{formatMotivoGestion(filtroMotivo)}</strong> • 
-                    {gestionesFiltradas.length} de {usuario.total || 0} registros
+                    Filtrado:{" "}
+                    <strong>{formatMotivoGestion(filtroMotivo)}</strong> •
+                    {gestionesFiltradas.length} de {usuario.total || 0}{" "}
+                    registros
                   </>
                 )}
               </Typography>
             </Box>
 
             {paginatedGestiones.length === 0 ? (
-              <Box sx={{ 
-                textAlign: 'center', 
-                py: 8,
-                backgroundColor: colors.primary[900],
-                borderRadius: '8px',
-                border: `1px solid ${COLOR_BORDE}`
-              }}>
-                <AssignmentOutlined sx={{ fontSize: 48, color: colors.grey[600], mb: 2 }} />
+              <Box
+                sx={{
+                  textAlign: "center",
+                  py: 8,
+                  backgroundColor: colors.primary[900],
+                  borderRadius: "8px",
+                  border: `1px solid ${COLOR_BORDE}`,
+                }}
+              >
+                <AssignmentOutlined
+                  sx={{ fontSize: 48, color: colors.grey[600], mb: 2 }}
+                />
                 <Typography variant="h6" sx={{ color: COLOR_TEXTO, mb: 1 }}>
                   No hay gestiones para mostrar
                 </Typography>
                 <Typography variant="body2" sx={{ color: colors.grey[400] }}>
-                  {filtroMotivo !== "TODOS" 
+                  {filtroMotivo !== "TODOS"
                     ? `No hay gestiones con el filtro "${formatMotivoGestion(filtroMotivo)}"`
                     : "Este usuario no tiene gestiones registradas"}
                 </Typography>
               </Box>
             ) : (
-              <TableContainer 
-                component={Paper} 
-                sx={{ 
+              <TableContainer
+                component={Paper}
+                sx={{
                   backgroundColor: COLOR_FONDO,
                   border: `1px solid ${COLOR_BORDE}`,
-                  borderRadius: '8px',
-                  overflow: 'hidden'
+                  borderRadius: "8px",
+                  overflow: "hidden",
                 }}
               >
                 <Table>
                   <TableHead>
                     <TableRow>
-                      <TableCell sx={{ width: 50, color: COLOR_TEXTO, fontWeight: 600, borderBottom: `1px solid ${COLOR_BORDE}` }}></TableCell>
-                      <TableCell sx={{ color: COLOR_TEXTO, fontWeight: 600, borderBottom: `1px solid ${COLOR_BORDE}` }}>Cuenta</TableCell>
-                      <TableCell sx={{ color: COLOR_TEXTO, fontWeight: 600, borderBottom: `1px solid ${COLOR_BORDE}` }}>Fecha</TableCell>
-                      <TableCell sx={{ color: COLOR_TEXTO, fontWeight: 600, borderBottom: `1px solid ${COLOR_BORDE}` }}>Estado</TableCell>
-                      <TableCell sx={{ color: COLOR_TEXTO, fontWeight: 600, borderBottom: `1px solid ${COLOR_BORDE}` }}>Motivo</TableCell>
-                      <TableCell sx={{ color: COLOR_TEXTO, fontWeight: 600, borderBottom: `1px solid ${COLOR_BORDE}` }} align="center">GPS</TableCell>
-                      <TableCell sx={{ color: COLOR_TEXTO, fontWeight: 600, borderBottom: `1px solid ${COLOR_BORDE}` }} align="center">Fotos</TableCell>
+                      <TableCell
+                        sx={{
+                          width: 50,
+                          color: COLOR_TEXTO,
+                          fontWeight: 600,
+                          borderBottom: `1px solid ${COLOR_BORDE}`,
+                        }}
+                      ></TableCell>
+                      <TableCell
+                        sx={{
+                          color: COLOR_TEXTO,
+                          fontWeight: 600,
+                          borderBottom: `1px solid ${COLOR_BORDE}`,
+                        }}
+                      >
+                        Cuenta
+                      </TableCell>
+                      <TableCell
+                        sx={{
+                          color: COLOR_TEXTO,
+                          fontWeight: 600,
+                          borderBottom: `1px solid ${COLOR_BORDE}`,
+                        }}
+                      >
+                        Fecha
+                      </TableCell>
+                      <TableCell
+                        sx={{
+                          color: COLOR_TEXTO,
+                          fontWeight: 600,
+                          borderBottom: `1px solid ${COLOR_BORDE}`,
+                        }}
+                      >
+                        Estado
+                      </TableCell>
+                      <TableCell
+                        sx={{
+                          color: COLOR_TEXTO,
+                          fontWeight: 600,
+                          borderBottom: `1px solid ${COLOR_BORDE}`,
+                        }}
+                      >
+                        Motivo
+                      </TableCell>
+                      <TableCell
+                        sx={{
+                          color: COLOR_TEXTO,
+                          fontWeight: 600,
+                          borderBottom: `1px solid ${COLOR_BORDE}`,
+                        }}
+                        align="center"
+                      >
+                        GPS
+                      </TableCell>
+                      <TableCell
+                        sx={{
+                          color: COLOR_TEXTO,
+                          fontWeight: 600,
+                          borderBottom: `1px solid ${COLOR_BORDE}`,
+                        }}
+                        align="center"
+                      >
+                        Fotos
+                      </TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -1051,30 +1377,46 @@ const GestorDetallesDialog = ({
                       const fotos = getFotosDeGestion(gestion);
                       const tieneFotos = fotos.length > 0;
                       const isExpanded = gestionExpandida === gestion.cuenta;
-                      const fotosFachada = fotos.filter(f => f.tipo === 'FACHADA').length;
-                      const fotosEvidencia = fotos.filter(f => f.tipo === 'EVIDENCIA').length;
-                      
+                      const fotosFachada = fotos.filter(
+                        (f) => f.tipo === "FACHADA",
+                      ).length;
+                      const fotosEvidencia = fotos.filter(
+                        (f) => f.tipo === "EVIDENCIA",
+                      ).length;
+
                       return (
                         <React.Fragment key={gestion.cuenta || gestion.id}>
-                          <TableRow 
-                            sx={{ 
-                              '&:hover': { backgroundColor: colors.primary[400] },
-                              borderBottom: isExpanded ? 'none' : `1px solid ${colors.primary[700]}`
+                          <TableRow
+                            sx={{
+                              "&:hover": {
+                                backgroundColor: colors.primary[400],
+                              },
+                              borderBottom: isExpanded
+                                ? "none"
+                                : `1px solid ${colors.primary[700]}`,
                             }}
                           >
                             <TableCell>
                               <IconButton
                                 size="small"
                                 onClick={() => {
-                                  setGestionExpandida(isExpanded ? null : gestion.cuenta);
+                                  setGestionExpandida(
+                                    isExpanded ? null : gestion.cuenta,
+                                  );
                                 }}
                                 sx={{
-                                  color: tieneFotos ? colors.grey[300] : colors.grey[600],
-                                  transform: isExpanded ? 'rotate(180deg)' : 'none',
-                                  transition: 'transform 0.2s ease',
-                                  '&:hover': {
-                                    color: tieneFotos ? COLOR_TEXTO : colors.grey[600],
-                                  }
+                                  color: tieneFotos
+                                    ? colors.grey[300]
+                                    : colors.grey[600],
+                                  transform: isExpanded
+                                    ? "rotate(180deg)"
+                                    : "none",
+                                  transition: "transform 0.2s ease",
+                                  "&:hover": {
+                                    color: tieneFotos
+                                      ? COLOR_TEXTO
+                                      : colors.grey[600],
+                                  },
                                 }}
                                 disabled={!tieneFotos}
                               >
@@ -1082,12 +1424,18 @@ const GestorDetallesDialog = ({
                               </IconButton>
                             </TableCell>
                             <TableCell>
-                              <Typography variant="body2" sx={{ fontWeight: 500, color: COLOR_TEXTO }}>
+                              <Typography
+                                variant="body2"
+                                sx={{ fontWeight: 500, color: COLOR_TEXTO }}
+                              >
                                 {gestion.cuenta}
                               </Typography>
                             </TableCell>
                             <TableCell>
-                              <Typography variant="body2" sx={{ color: colors.grey[300] }}>
+                              <Typography
+                                variant="body2"
+                                sx={{ color: colors.grey[300] }}
+                              >
                                 {new Date(gestion.fecha).toLocaleDateString()}
                               </Typography>
                             </TableCell>
@@ -1096,11 +1444,15 @@ const GestorDetallesDialog = ({
                                 label={gestion.estatus_gestion}
                                 size="small"
                                 sx={{
-                                  backgroundColor: getColorEstado(gestion.estatus_gestion) + "20",
-                                  color: getColorEstado(gestion.estatus_gestion),
+                                  backgroundColor:
+                                    getColorEstado(gestion.estatus_gestion) +
+                                    "20",
+                                  color: getColorEstado(
+                                    gestion.estatus_gestion,
+                                  ),
                                   fontSize: "0.7rem",
                                   fontWeight: 600,
-                                  minWidth: 90
+                                  minWidth: 90,
                                 }}
                               />
                             </TableCell>
@@ -1109,7 +1461,11 @@ const GestorDetallesDialog = ({
                                 variant="body2"
                                 sx={{
                                   color: getColorMotivo(gestion.motivo_gestion),
-                                  fontStyle: gestion.motivo_gestion === "COMPLETA" || !gestion.motivo_gestion ? "normal" : "italic",
+                                  fontStyle:
+                                    gestion.motivo_gestion === "COMPLETA" ||
+                                    !gestion.motivo_gestion
+                                      ? "normal"
+                                      : "italic",
                                 }}
                               >
                                 {formatMotivoGestion(gestion.motivo_gestion)}
@@ -1117,14 +1473,23 @@ const GestorDetallesDialog = ({
                             </TableCell>
                             <TableCell align="center">
                               {gestion.tieneGPS ? (
-                                <CheckCircle sx={{ color: COLOR_EFICIENTE, fontSize: 20 }} />
+                                <CheckCircle
+                                  sx={{ color: COLOR_EFICIENTE, fontSize: 20 }}
+                                />
                               ) : (
-                                <Error sx={{ color: COLOR_ATENCION, fontSize: 20 }} />
+                                <Error
+                                  sx={{ color: COLOR_ATENCION, fontSize: 20 }}
+                                />
                               )}
                             </TableCell>
                             <TableCell align="center">
-                              {/* 🔹 ESTILO EXACTO DEL COMPONENTE ANTERIOR CON ICONOS - VERSIÓN SIMPLIFICADA */}
-                              <Box sx={{ display: "flex", gap: 1, justifyContent: "center" }}>
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  gap: 1,
+                                  justifyContent: "center",
+                                }}
+                              >
                                 <Chip
                                   label={fotosFachada}
                                   size="small"
@@ -1135,24 +1500,28 @@ const GestorDetallesDialog = ({
                                         ? COLOR_EFICIENTE + "20"
                                         : COLOR_REGULAR + "20",
                                     color:
-                                      fotosFachada > 0 ? COLOR_EFICIENTE : COLOR_REGULAR,
+                                      fotosFachada > 0
+                                        ? COLOR_EFICIENTE
+                                        : COLOR_REGULAR,
                                     fontSize: "0.7rem",
                                     minWidth: 40,
                                     height: 22,
-                                    '& .MuiChip-icon': {
-                                      fontSize: '0.8rem',
-                                      marginLeft: '4px',
-                                      marginRight: '2px',
+                                    "& .MuiChip-icon": {
+                                      fontSize: "0.8rem",
+                                      marginLeft: "4px",
+                                      marginRight: "2px",
                                     },
-                                    '& .MuiChip-label': {
+                                    "& .MuiChip-label": {
                                       px: 0.5,
-                                    }
+                                    },
                                   }}
                                 />
                                 <Chip
                                   label={fotosEvidencia}
                                   size="small"
-                                  icon={<DescriptionIcon sx={{ fontSize: 12 }} />}
+                                  icon={
+                                    <DescriptionIcon sx={{ fontSize: 12 }} />
+                                  }
                                   sx={{
                                     backgroundColor:
                                       fotosEvidencia > 0
@@ -1165,40 +1534,74 @@ const GestorDetallesDialog = ({
                                     fontSize: "0.7rem",
                                     minWidth: 40,
                                     height: 22,
-                                    '& .MuiChip-icon': {
-                                      fontSize: '0.8rem',
-                                      marginLeft: '4px',
-                                      marginRight: '2px',
+                                    "& .MuiChip-icon": {
+                                      fontSize: "0.8rem",
+                                      marginLeft: "4px",
+                                      marginRight: "2px",
                                     },
-                                    '& .MuiChip-label': {
+                                    "& .MuiChip-label": {
                                       px: 0.5,
-                                    }
+                                    },
                                   }}
                                 />
                               </Box>
                             </TableCell>
                           </TableRow>
-                          
+
                           {/* Fila expandida con galería */}
                           {isExpanded && (
                             <TableRow>
-                              <TableCell colSpan={7} sx={{ 
-                                p: 0,
-                                borderBottom: `1px solid ${colors.primary[700]}`,
-                                backgroundColor: colors.primary[900]
-                              }}>
+                              <TableCell
+                                colSpan={7}
+                                sx={{
+                                  p: 0,
+                                  borderBottom: `1px solid ${colors.primary[700]}`,
+                                  backgroundColor: colors.primary[900],
+                                }}
+                              >
                                 <Collapse in={isExpanded} timeout="auto">
                                   <Box sx={{ p: 3 }}>
-                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                        <PhotoLibrary sx={{ color: COLOR_TEXTO }} />
-                                        <Typography variant="subtitle2" sx={{ color: COLOR_TEXTO, fontWeight: 600 }}>
+                                    <Box
+                                      sx={{
+                                        display: "flex",
+                                        justifyContent: "space-between",
+                                        alignItems: "center",
+                                        mb: 2,
+                                      }}
+                                    >
+                                      <Box
+                                        sx={{
+                                          display: "flex",
+                                          alignItems: "center",
+                                          gap: 1,
+                                        }}
+                                      >
+                                        <PhotoLibrary
+                                          sx={{ color: COLOR_TEXTO }}
+                                        />
+                                        <Typography
+                                          variant="subtitle2"
+                                          sx={{
+                                            color: COLOR_TEXTO,
+                                            fontWeight: 600,
+                                          }}
+                                        >
                                           Galería de fotos
                                         </Typography>
                                       </Box>
-                                      <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                                        <Typography variant="caption" sx={{ color: colors.grey[400] }}>
-                                          {fotos.length} foto{fotos.length !== 1 ? 's' : ''}
+                                      <Box
+                                        sx={{
+                                          display: "flex",
+                                          gap: 1,
+                                          alignItems: "center",
+                                        }}
+                                      >
+                                        <Typography
+                                          variant="caption"
+                                          sx={{ color: colors.grey[400] }}
+                                        >
+                                          {fotos.length} foto
+                                          {fotos.length !== 1 ? "s" : ""}
                                         </Typography>
                                         {fotos.length > 0 && (
                                           <Button
@@ -1212,7 +1615,7 @@ const GestorDetallesDialog = ({
                                             }}
                                             sx={{
                                               color: colors.blueAccent[400],
-                                              fontSize: '0.75rem'
+                                              fontSize: "0.75rem",
                                             }}
                                           >
                                             Ver todas
@@ -1220,15 +1623,15 @@ const GestorDetallesDialog = ({
                                         )}
                                       </Box>
                                     </Box>
-                                    
-                                    {/* 🔹 MINIGALERÍA CON EL MISMO ESTILO */}
-                                    <MiniGaleria 
+
+                                    <MiniGaleria
                                       fotos={fotos}
                                       cuenta={gestion.cuenta}
                                       onImageClick={(index) => {
                                         const foto = fotos[index];
                                         if (foto) {
-                                          const globalIndex = findFotoGlobalIndex(foto, gestion);
+                                          const globalIndex =
+                                            findFotoGlobalIndex(foto, gestion);
                                           setFotoAmpliadaIndex(globalIndex);
                                           setFotoAmpliada(foto);
                                         }
@@ -1236,12 +1639,34 @@ const GestorDetallesDialog = ({
                                       COLOR_EFICIENTE={COLOR_EFICIENTE}
                                       COLOR_REGULAR={COLOR_REGULAR}
                                     />
-                                    
+
                                     {gestion.coordenadas && (
-                                      <Box sx={{ mt: 2, display: 'flex', gap: 2, alignItems: 'center' }}>
-                                        <GpsIcon sx={{ color: colors.grey[500], fontSize: 16 }} />
-                                        <Typography variant="caption" sx={{ color: colors.grey[500] }}>
-                                          GPS: {gestion.coordenadas.latitud?.toFixed(6)}, {gestion.coordenadas.longitud?.toFixed(6)}
+                                      <Box
+                                        sx={{
+                                          mt: 2,
+                                          display: "flex",
+                                          gap: 2,
+                                          alignItems: "center",
+                                        }}
+                                      >
+                                        <GpsIcon
+                                          sx={{
+                                            color: colors.grey[500],
+                                            fontSize: 16,
+                                          }}
+                                        />
+                                        <Typography
+                                          variant="caption"
+                                          sx={{ color: colors.grey[500] }}
+                                        >
+                                          GPS:{" "}
+                                          {gestion.coordenadas.latitud?.toFixed(
+                                            6,
+                                          )}
+                                          ,{" "}
+                                          {gestion.coordenadas.longitud?.toFixed(
+                                            6,
+                                          )}
                                         </Typography>
                                       </Box>
                                     )}
@@ -1255,7 +1680,7 @@ const GestorDetallesDialog = ({
                     })}
                   </TableBody>
                 </Table>
-                
+
                 {/* Paginación */}
                 <TablePagination
                   component="div"
@@ -1271,9 +1696,9 @@ const GestorDetallesDialog = ({
                   sx={{
                     color: COLOR_TEXTO,
                     borderTop: `1px solid ${COLOR_BORDE}`,
-                    '& .MuiTablePagination-selectIcon': {
+                    "& .MuiTablePagination-selectIcon": {
                       color: COLOR_TEXTO,
-                    }
+                    },
                   }}
                 />
               </TableContainer>
@@ -1289,39 +1714,41 @@ const GestorDetallesDialog = ({
             justifyContent: "space-between",
           }}
         >
-          <Button
-            onClick={onClose}
-            sx={{ color: colors.grey[400] }}
-          >
+          <Button onClick={onClose} sx={{ color: colors.grey[400] }}>
             Cerrar
           </Button>
-          
-          {/* 🔹 CONTADORES DE FOTOS CON EL MISMO ESTILO DE CHIPS */}
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: 1,
-            justifyContent: 'center'
-          }}>
+
+          {/* 🔹 CONTADORES DE FOTOS */}
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              justifyContent: "center",
+            }}
+          >
             <ChipContadorFoto
               tipo="FACHADA"
-              cantidad={fotosFiltradas.filter(f => f.tipo === 'FACHADA').length}
+              cantidad={
+                fotosFiltradas.filter((f) => f.tipo === "FACHADA").length
+              }
               COLOR_EFICIENTE={COLOR_EFICIENTE}
               COLOR_REGULAR={COLOR_REGULAR}
               icono={<HouseIcon sx={{ fontSize: 12 }} />}
-              tooltipTitle={`${fotosFiltradas.filter(f => f.tipo === 'FACHADA').length} fachada${fotosFiltradas.filter(f => f.tipo === 'FACHADA').length !== 1 ? 's' : ''} en gestiones filtradas`}
+              tooltipTitle={`${fotosFiltradas.filter((f) => f.tipo === "FACHADA").length} fachada${fotosFiltradas.filter((f) => f.tipo === "FACHADA").length !== 1 ? "s" : ""} en gestiones filtradas`}
             />
-            
+
             <ChipContadorFoto
               tipo="EVIDENCIA"
-              cantidad={fotosFiltradas.filter(f => f.tipo === 'EVIDENCIA').length}
+              cantidad={
+                fotosFiltradas.filter((f) => f.tipo === "EVIDENCIA").length
+              }
               COLOR_EFICIENTE={COLOR_EFICIENTE}
               COLOR_REGULAR={COLOR_REGULAR}
               icono={<DescriptionIcon sx={{ fontSize: 12 }} />}
-              tooltipTitle={`${fotosFiltradas.filter(f => f.tipo === 'EVIDENCIA').length} evidencia${fotosFiltradas.filter(f => f.tipo === 'EVIDENCIA').length !== 1 ? 's' : ''} en gestiones filtradas`}
+              tooltipTitle={`${fotosFiltradas.filter((f) => f.tipo === "EVIDENCIA").length} evidencia${fotosFiltradas.filter((f) => f.tipo === "EVIDENCIA").length !== 1 ? "s" : ""} en gestiones filtradas`}
             />
-            
-            {/* Chip para el total */}
+
             <Tooltip title={`Total de fotos en gestiones filtradas`}>
               <Chip
                 label={`📸 ${fotosFiltradas.length}`}
@@ -1332,51 +1759,28 @@ const GestorDetallesDialog = ({
                   fontSize: "0.7rem",
                   minWidth: 50,
                   height: 22,
-                  '& .MuiChip-label': {
+                  "& .MuiChip-label": {
                     px: 0.5,
-                  }
+                  },
                 }}
               />
             </Tooltip>
           </Box>
-          
+
+          {/* ✅ BOTÓN DE EXCEL - ESTILO MINIMALISTA */}
           <Button
-            variant="contained"
+            variant="text"
             startIcon={<Download />}
-            onClick={() => {
-              if (!usuario) return;
-
-              const reporte = {
-                usuario: usuario.nombre,
-                id: usuario.id,
-                estadisticas: {
-                  total: usuario.total,
-                  completas: usuario.completas,
-                  incompletas: usuario.incompletas,
-                  invalidas: usuario.invalidas,
-                  porcentajeExito: usuario.porcentajeExito?.toFixed(1) + "%",
-                  fotosTotales: todasLasFotos.length,
-                  fotosFachada: todasLasFotos.filter(f => f.tipo === 'FACHADA').length,
-                  fotosEvidencia: todasLasFotos.filter(f => f.tipo === 'EVIDENCIA').length,
-                },
-                motivos: usuario.motivos,
-              };
-
-              const dataStr = JSON.stringify(reporte, null, 2);
-              const dataUri =
-                "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
-              const exportFileDefaultName = `reporte_${usuario.nombre.replace(/\s+/g, "_")}_${usuario.id}.json`;
-
-              const linkElement = document.createElement("a");
-              linkElement.setAttribute("href", dataUri);
-              linkElement.setAttribute("download", exportFileDefaultName);
-              linkElement.click();
-            }}
+            onClick={handleDownloadExcel}
             sx={{
-              backgroundColor: COLOR_EFICIENTE,
-              color: colors.grey[900],
-              fontWeight: 600,
-              "&:hover": { backgroundColor: COLOR_EFICIENTE + "CC" },
+              color: colors.grey[400],
+              textTransform: "none",
+              fontWeight: 400,
+              fontSize: "0.875rem",
+              "&:hover": {
+                backgroundColor: colors.primary[400] + "20",
+                color: COLOR_TEXTO,
+              },
             }}
           >
             Descargar reporte
