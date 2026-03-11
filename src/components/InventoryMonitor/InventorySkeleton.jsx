@@ -1,152 +1,81 @@
-// src/components/Inventory/InventoryMinimalSkeleton.jsx
+// src/components/Inventory/InventorySkeleton.jsx
 import React from "react";
-import { Box, Skeleton, useTheme, alpha } from "@mui/material";
-import { tokens } from "../../theme";
+import { Box, Skeleton, Card, Grid } from "@mui/material";
 
 const InventorySkeleton = () => {
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
-
   return (
     <Box sx={{ width: "100%", mt: 2 }}>
-      {/* Línea superior muy sutil - solo 3 elementos */}
-      <Box sx={{ display: "flex", gap: 2, mb: 4 }}>
-        <Skeleton 
-          variant="text" 
-          width={120} 
-          height={24} 
-          sx={{ 
-            bgcolor: alpha(colors.primary[400], 0.9),
-            borderRadius: "4px"
-          }} 
-        />
-        <Skeleton 
-          variant="text" 
-          width={80} 
-          height={24} 
-          sx={{ 
-            bgcolor: alpha(colors.primary[400], 0.9),
-            borderRadius: "4px"
-          }} 
-        />
-        <Skeleton 
-          variant="text" 
-          width={100} 
-          height={24} 
-          sx={{ 
-            bgcolor: alpha(colors.primary[400], 0.9),
-            borderRadius: "4px"
-          }} 
-        />
+      {/* Skeletons para filtros */}
+      <Box sx={{ display: "flex", gap: 2, mb: 3, flexWrap: "wrap" }}>
+        <Skeleton variant="rectangular" width={280} height={40} sx={{ borderRadius: 2 }} />
+        <Skeleton variant="rectangular" width={140} height={40} sx={{ borderRadius: 2 }} />
+        <Skeleton variant="rectangular" width={150} height={40} sx={{ borderRadius: 2 }} />
+        <Skeleton variant="rectangular" width={150} height={40} sx={{ borderRadius: 2 }} />
       </Box>
 
-      {/* Grid de 4 cards ultra sutiles */}
-      <Box sx={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 2, mb: 4 }}>
-        {Array.from({ length: 4 }).map((_, i) => (
-          <Box
-            key={i}
-            sx={{
-              p: 2,
-              borderRadius: "12px",
-              border: `1px solid ${alpha(colors.primary[400], 0.9)}`,
-            }}
-          >
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-              <Skeleton 
-                variant="circular" 
-                width={32} 
-                height={32} 
-                sx={{ bgcolor: alpha(colors.primary[400], 0.9) }} 
-              />
-              <Box sx={{ flex: 1 }}>
-                <Skeleton 
-                  variant="text" 
-                  width="60%" 
-                  height={20} 
-                  sx={{ bgcolor: alpha(colors.primary[400], 0.9) }} 
-                />
-                <Skeleton 
-                  variant="text" 
-                  width="40%" 
-                  height={14} 
-                  sx={{ bgcolor: alpha(colors.primary[400], 0.9) }} 
-                />
-              </Box>
-            </Box>
-          </Box>
-        ))}
-      </Box>
-
-      {/* Dos cards más grandes */}
-      <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 3 }}>
-        {Array.from({ length: 2 }).map((_, i) => (
-          <Box
-            key={i}
-            sx={{
-              p: 2,
-              borderRadius: "12px",
-              border: `1px solid ${alpha(colors.primary[400], 0.9)}`,
-            }}
-          >
-            <Skeleton 
-              variant="text" 
-              width="40%" 
-              height={18} 
-              sx={{ bgcolor: alpha(colors.primary[400], 0.9), mb: 2 }} 
-            />
-            {Array.from({ length: 3 }).map((_, j) => (
-              <Box key={j} sx={{ mb: 1.5 }}>
-                <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.5 }}>
-                  <Skeleton 
-                    variant="text" 
-                    width="30%" 
-                    height={14} 
-                    sx={{ bgcolor: alpha(colors.primary[400], 0.9) }} 
-                  />
-                  <Skeleton 
-                    variant="text" 
-                    width="15%" 
-                    height={14} 
-                    sx={{ bgcolor: alpha(colors.primary[400], 0.9) }} 
-                  />
+      {/* Skeleton para KPI Cards */}
+      <Grid container spacing={2} sx={{ mb: 4 }}>
+        {[1, 2, 3, 4, 5].map((i) => (
+          <Grid item xs={12} sm={6} md={2.4} key={i}>
+            <Card sx={{ p: 2, borderRadius: 3 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                <Skeleton variant="circular" width={40} height={40} />
+                <Box sx={{ flex: 1 }}>
+                  <Skeleton variant="text" width="60%" height={24} />
+                  <Skeleton variant="text" width="40%" height={16} />
                 </Box>
-                <Skeleton 
-                  variant="rounded" 
-                  width="100%" 
-                  height={4} 
-                  sx={{ bgcolor: alpha(colors.primary[400], 0.9) }} 
-                />
+              </Box>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
+
+      {/* Skeleton para gráficos (categorías y subcategorías) */}
+      <Grid container spacing={2} sx={{ mb: 4 }}>
+        <Grid item xs={12} md={6}>
+          <Card sx={{ p: 2, borderRadius: 3 }}>
+            <Skeleton variant="text" width="40%" height={24} sx={{ mb: 2 }} />
+            {[1, 2, 3, 4, 5].map((i) => (
+              <Box key={i} sx={{ mb: 2 }}>
+                <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.5 }}>
+                  <Skeleton variant="text" width="30%" height={16} />
+                  <Skeleton variant="text" width="15%" height={16} />
+                </Box>
+                <Skeleton variant="rectangular" width="100%" height={6} sx={{ borderRadius: 3 }} />
               </Box>
             ))}
-          </Box>
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Card sx={{ p: 2, borderRadius: 3 }}>
+            <Skeleton variant="text" width="40%" height={24} sx={{ mb: 2 }} />
+            {[1, 2, 3, 4, 5].map((i) => (
+              <Box key={i} sx={{ mb: 2 }}>
+                <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.5 }}>
+                  <Skeleton variant="text" width="30%" height={16} />
+                  <Skeleton variant="text" width="15%" height={16} />
+                </Box>
+                <Skeleton variant="rectangular" width="100%" height={6} sx={{ borderRadius: 3 }} />
+              </Box>
+            ))}
+          </Card>
+        </Grid>
+      </Grid>
+
+      {/* Skeleton para tabs */}
+      <Box sx={{ display: "flex", gap: 2, mb: 3 }}>
+        {[1, 2, 3, 4].map((i) => (
+          <Skeleton key={i} variant="rectangular" width={100} height={40} sx={{ borderRadius: 2 }} />
         ))}
       </Box>
 
-      {/* Alerta sutil al final */}
-      <Box
-        sx={{
-          mt: 3,
-          p: 1.5,
-          borderRadius: "8px",
-          border: `1px solid ${alpha(colors.primary[400], 0.9)}`,
-          display: "flex",
-          alignItems: "center",
-          gap: 1.5,
-        }}
-      >
-        <Skeleton 
-          variant="circular" 
-          width={20} 
-          height={20} 
-          sx={{ bgcolor: alpha(colors.primary[400], 0.9) }} 
-        />
-        <Skeleton 
-          variant="text" 
-          width="40%" 
-          height={16} 
-          sx={{ bgcolor: alpha(colors.primary[400], 0.9) }} 
-        />
-      </Box>
+      {/* Skeleton para tabla */}
+      <Card sx={{ p: 2, borderRadius: 3 }}>
+        <Skeleton variant="text" width="30%" height={28} sx={{ mb: 2 }} />
+        {[1, 2, 3, 4, 5, 6].map((i) => (
+          <Skeleton key={i} variant="rectangular" width="100%" height={48} sx={{ mb: 1, borderRadius: 1 }} />
+        ))}
+      </Card>
     </Box>
   );
 };

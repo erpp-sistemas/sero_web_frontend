@@ -20,6 +20,8 @@ import {
   CheckCircle,
   Warning,
   Error,
+  SearchOff,
+  Settings,
 } from "@mui/icons-material";
 import { tokens } from "../../theme";
 import * as ExcelJS from "exceljs";
@@ -70,7 +72,12 @@ const StatusBadge = ({ estado, activo, id_usuario, condicion }) => {
   );
 };
 
-const InventoryList = ({ data = [], onVerDetalle, onAsignar, onEditar, onBaja }) => {
+const InventoryList = ({
+  data = [],
+  onVerDetalle,
+  onGestionar,  // 🔹 NUEVO: unifica asignar, devolver y baja
+  onEditar,
+}) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
@@ -91,7 +98,10 @@ const InventoryList = ({ data = [], onVerDetalle, onAsignar, onEditar, onBaja })
       headerName: "Folio",
       width: 100,
       renderCell: (params) => (
-        <Typography variant="body2" sx={{ fontWeight: 500, color: COLOR_TEXTO }}>
+        <Typography
+          variant="body2"
+          sx={{ fontWeight: 500, color: COLOR_TEXTO }}
+        >
           {params.value}
         </Typography>
       ),
@@ -103,7 +113,10 @@ const InventoryList = ({ data = [], onVerDetalle, onAsignar, onEditar, onBaja })
       minWidth: 220,
       renderCell: (params) => (
         <Box>
-          <Typography variant="body2" sx={{ fontWeight: 600, color: COLOR_TEXTO }}>
+          <Typography
+            variant="body2"
+            sx={{ fontWeight: 600, color: COLOR_TEXTO }}
+          >
             {params.value}
           </Typography>
           <Typography variant="caption" sx={{ color: colors.grey[400] }}>
@@ -157,7 +170,10 @@ const InventoryList = ({ data = [], onVerDetalle, onAsignar, onEditar, onBaja })
               </Typography>
             </>
           ) : (
-            <Typography variant="body2" sx={{ color: colors.grey[500], fontStyle: "italic" }}>
+            <Typography
+              variant="body2"
+              sx={{ color: colors.grey[500], fontStyle: "italic" }}
+            >
               Sin asignar
             </Typography>
           )}
@@ -179,11 +195,17 @@ const InventoryList = ({ data = [], onVerDetalle, onAsignar, onEditar, onBaja })
       headerName: "Condición",
       width: 100,
       renderCell: (params) => {
-        const color = params.value === "excelente" ? colors.accentGreen[100] :
-                     params.value === "bueno" ? colors.blueAccent[400] :
-                     colors.redAccent[400];
+        const color =
+          params.value === "excelente"
+            ? colors.accentGreen[100]
+            : params.value === "bueno"
+              ? colors.blueAccent[400]
+              : colors.redAccent[400];
         return (
-          <Typography variant="body2" sx={{ color, fontWeight: 500, textTransform: "capitalize" }}>
+          <Typography
+            variant="body2"
+            sx={{ color, fontWeight: 500, textTransform: "capitalize" }}
+          >
             {params.value || "—"}
           </Typography>
         );
@@ -193,44 +215,52 @@ const InventoryList = ({ data = [], onVerDetalle, onAsignar, onEditar, onBaja })
       field: "acciones",
       headerName: "",
       width: 140,
-      renderCell: (params) => (
-        <Box sx={{ display: "flex", gap: 0.5 }}>
-          <Tooltip title="Ver detalle">
-            <IconButton size="small" onClick={() => onVerDetalle?.(params.row)} sx={{ color: colors.grey[400] }}>
-              <Visibility fontSize="small" />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Editar">
-            <IconButton size="small" onClick={() => onEditar?.(params.row)} sx={{ color: colors.grey[400] }}>
-              <Edit fontSize="small" />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Asignar">
-            <span>
+      renderCell: (params) => {
+        const isActive = params.row.activo !== false;
+        
+        return (
+          <Box sx={{ display: "flex", gap: 0.5 }}>
+            <Tooltip title="Ver detalle">
               <IconButton
                 size="small"
-                disabled={params.row.activo === false}
-                onClick={() => onAsignar?.(params.row)}
-                sx={{ color: params.row.activo === false ? colors.grey[600] : colors.grey[400] }}
+                onClick={() => onVerDetalle?.(params.row)}
+                sx={{ color: colors.grey[400] }}
               >
-                <Person fontSize="small" />
+                <Visibility fontSize="small" />
               </IconButton>
-            </span>
-          </Tooltip>
-          <Tooltip title="Dar de baja">
-            <span>
+            </Tooltip>
+            
+            <Tooltip title="Editar">
               <IconButton
                 size="small"
-                disabled={params.row.activo === false}
-                onClick={() => onBaja?.(params.row)}
-                sx={{ color: params.row.activo === false ? colors.grey[600] : colors.grey[400] }}
+                onClick={() => onEditar?.(params.row)}
+                sx={{ color: colors.grey[400] }}
               >
-                <Delete fontSize="small" />
+                <Edit fontSize="small" />
               </IconButton>
-            </span>
-          </Tooltip>
-        </Box>
-      ),
+            </Tooltip>
+            
+            <Tooltip title={params.row.id_usuario ? "Gestionar artículo" : "Asignar"}>
+              <span>
+                <IconButton
+                  size="small"
+                  disabled={!isActive}
+                  onClick={() => onGestionar?.(params.row)}
+                  sx={{
+                    color: !isActive ? colors.grey[600] : colors.grey[400],
+                  }}
+                >
+                  {params.row.id_usuario ? (
+                    <Settings fontSize="small" />
+                  ) : (
+                    <Person fontSize="small" />
+                  )}
+                </IconButton>
+              </span>
+            </Tooltip>
+          </Box>
+        );
+      },
     },
   ];
 
@@ -245,19 +275,23 @@ const InventoryList = ({ data = [], onVerDetalle, onAsignar, onEditar, onBaja })
       views: [{ state: "frozen", xSplit: 0, ySplit: 1 }],
     });
 
-    const exportColumns = columns.filter(col => col.field !== "acciones");
-    const headers = exportColumns.map(col => col.headerName);
+    const exportColumns = columns.filter((col) => col.field !== "acciones");
+    const headers = exportColumns.map((col) => col.headerName);
 
     const headerRow = worksheet.addRow(headers);
     headerRow.eachCell((cell) => {
       cell.font = { bold: true, color: { argb: "FF374151" } };
-      cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF3F4F6" } };
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFF3F4F6" },
+      };
       cell.alignment = { vertical: "middle", horizontal: "left" };
       cell.border = { bottom: { style: "thin", color: { argb: "FFE5E7EB" } } };
     });
 
     data.forEach((item) => {
-      const rowData = exportColumns.map(col => {
+      const rowData = exportColumns.map((col) => {
         if (col.field === "estado") {
           if (item.activo === false) return "Dado de baja";
           if (item.condicion_actual === "malo") return "Mantenimiento";
@@ -279,7 +313,9 @@ const InventoryList = ({ data = [], onVerDetalle, onAsignar, onEditar, onBaja })
     });
 
     const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
     link.download = `inventario_${new Date().toISOString().split("T")[0]}.xlsx`;
@@ -287,18 +323,27 @@ const InventoryList = ({ data = [], onVerDetalle, onAsignar, onEditar, onBaja })
     URL.revokeObjectURL(link.href);
   };
 
-  // Altura dinámica (mismo que PerformanceMonitor)
+  // Altura dinámica
   const alturaTabla = useMemo(() => {
     const alturaHeader = 56;
     const alturaFila = 68;
     const margenExtra = 16;
-    return data.length <= 8 ? alturaHeader + (data.length * alturaFila) + margenExtra : 550;
+    return data.length <= 8
+      ? alturaHeader + data.length * alturaFila + margenExtra
+      : 550;
   }, [data.length]);
 
   return (
     <Box sx={{ width: "100%" }}>
-      {/* Header con contador y exportación - mismo estilo */}
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+      {/* Header con contador y exportación */}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 2,
+        }}
+      >
         <Typography variant="body2" sx={{ color: colors.grey[400] }}>
           Mostrando {data.length} artículos
         </Typography>
@@ -309,51 +354,101 @@ const InventoryList = ({ data = [], onVerDetalle, onAsignar, onEditar, onBaja })
           sx={{
             color: COLOR_TEXTO,
             textTransform: "none",
-            "&:hover": { bgcolor: colors.primary[400] + "20" }
+            "&:hover": { bgcolor: colors.primary[400] + "20" },
           }}
         >
           Exportar a Excel
         </Button>
       </Box>
 
-      {/* DataGrid - mismo estilo que PerformanceMonitor */}
-      <Paper sx={{ bgcolor: COLOR_FONDO, borderRadius: "16px", overflow: "hidden" }}>
-        <Box sx={{ height: alturaTabla, width: "100%" }}>
-          <DataGrid
-            rows={data}
-            columns={columns}
-            getRowId={(row) => row.id_articulo}
-            disableRowSelectionOnClick
-            disableColumnMenu
-            disableColumnSelector
-            disableDensitySelector
-            hideFooter
-            sortingMode="client"
-            initialState={{ sorting: { sortModel: [{ field: "folio", sort: "asc" }] } }}
+      {/* DataGrid o mensaje de sin resultados */}
+      {data.length === 0 ? (
+        <Paper
+          sx={{
+            bgcolor: COLOR_FONDO,
+            borderRadius: "16px",
+            p: 6,
+            textAlign: "center",
+          }}
+        >
+          <Box
             sx={{
-              border: "none",
-              color: COLOR_TEXTO,
-              bgcolor: COLOR_FONDO,
-              "& .MuiDataGrid-cell": {
-                borderBottom: `1px solid ${COLOR_BORDE}`,
-                display: "flex",
-                alignItems: "center",
-              },
-              "& .MuiDataGrid-columnHeaders": {
-                bgcolor: COLOR_FONDO,
-                borderBottom: `1px solid ${COLOR_BORDE}`,
-                fontWeight: 600,
-              },
-              "& .MuiDataGrid-footerContainer": { display: "none" },
-              "& .MuiDataGrid-row:hover": { bgcolor: colors.primary[400] + "20" },
-              "& .MuiDataGrid-cellCheckbox, & .MuiDataGrid-columnHeaderCheckbox": { display: "none" },
-              "& .MuiDataGrid-columnSeparator": { display: "none" },
-              "& .MuiDataGrid-virtualScroller": { bgcolor: COLOR_FONDO },
-              "& .MuiDataGrid-columnHeaders": { position: "sticky", top: 0, zIndex: 1 },
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 2,
             }}
-          />
-        </Box>
-      </Paper>
+          >
+            <SearchOff sx={{ fontSize: 48, color: colors.grey[500] }} />
+            <Typography
+              variant="h6"
+              sx={{ fontWeight: 600, color: COLOR_TEXTO }}
+            >
+              No se encontraron artículos
+            </Typography>
+            <Typography
+              variant="body2"
+              sx={{ color: colors.grey[400], maxWidth: 400 }}
+            >
+              No hay artículos que coincidan con los criterios de búsqueda.
+              Intenta con otros filtros.
+            </Typography>
+          </Box>
+        </Paper>
+      ) : (
+        <Paper
+          sx={{
+            bgcolor: COLOR_FONDO,
+            borderRadius: "16px",
+            overflow: "hidden",
+          }}
+        >
+          <Box sx={{ height: alturaTabla, width: "100%" }}>
+            <DataGrid
+              rows={data}
+              columns={columns}
+              getRowId={(row) => row.id_articulo}
+              disableRowSelectionOnClick
+              disableColumnMenu
+              disableColumnSelector
+              disableDensitySelector
+              hideFooter
+              sortingMode="client"
+              initialState={{
+                sorting: { sortModel: [{ field: "folio", sort: "asc" }] },
+              }}
+              sx={{
+                border: "none",
+                color: COLOR_TEXTO,
+                bgcolor: COLOR_FONDO,
+                "& .MuiDataGrid-cell": {
+                  borderBottom: `1px solid ${COLOR_BORDE}`,
+                  display: "flex",
+                  alignItems: "center",
+                },
+                "& .MuiDataGrid-columnHeaders": {
+                  bgcolor: COLOR_FONDO,
+                  borderBottom: `1px solid ${COLOR_BORDE}`,
+                  fontWeight: 600,
+                },
+                "& .MuiDataGrid-footerContainer": { display: "none" },
+                "& .MuiDataGrid-row:hover": {
+                  bgcolor: colors.primary[400] + "20",
+                },
+                "& .MuiDataGrid-cellCheckbox, & .MuiDataGrid-columnHeaderCheckbox":
+                  { display: "none" },
+                "& .MuiDataGrid-columnSeparator": { display: "none" },
+                "& .MuiDataGrid-virtualScroller": { bgcolor: COLOR_FONDO },
+                "& .MuiDataGrid-columnHeaders": {
+                  position: "sticky",
+                  top: 0,
+                  zIndex: 1,
+                },
+              }}
+            />
+          </Box>
+        </Paper>
+      )}
     </Box>
   );
 };

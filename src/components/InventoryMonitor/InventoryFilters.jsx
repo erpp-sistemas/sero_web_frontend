@@ -1,4 +1,5 @@
 // src/components/Inventory/InventoryFilters.jsx
+// Versión mejorada con búsqueda por usuario
 import React from "react";
 import {
   Box,
@@ -13,12 +14,14 @@ import {
   useTheme,
   Grow,
   Typography,
+  Tooltip,
 } from "@mui/material";
 import { tokens } from "../../theme";
 import {
   Search,
   Clear,
   KeyboardArrowDownOutlined,
+  PersonSearch,
 } from "@mui/icons-material";
 
 const InventoryFilters = ({ 
@@ -44,38 +47,40 @@ const InventoryFilters = ({
         sx={{
           p: 2,
           mb: 3,
-          bgcolor: colors.bgContainer,
+          bgcolor: colors.bgContainerSecondary,
           borderRadius: "12px",
           border: `1px solid ${colors.primary[500]}`,
         }}
       >
         <Box sx={{ display: "flex", gap: 2, alignItems: "center", flexWrap: "wrap" }}>
-          {/* Búsqueda */}
-          <TextField
-            size="small"
-            placeholder="Buscar por nombre, folio o serie..."
-            value={filters.busqueda}
-            onChange={(e) => onFilterChange({ ...filters, busqueda: e.target.value })}
-            disabled={loading}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Search sx={{ fontSize: 18, color: colors.grey[400] }} />
-                </InputAdornment>
-              ),
-            }}
-            sx={{
-              flex: 2,
-              minWidth: 250,
-              "& .MuiOutlinedInput-root": {
-                borderRadius: "8px",
-                fontSize: "0.875rem",
-                backgroundColor: colors.bgContainer,
-              },
-            }}
-          />
+          {/* Búsqueda MEJORADA - ahora busca en nombre, folio, serie, marca Y USUARIO */}
+          <Tooltip title="Buscar por nombre de artículo, folio, serie, marca o usuario asignado" arrow>
+            <TextField
+              size="small"
+              placeholder="Buscar por nombre del articulo, folio, serie, marca o usuario..."
+              value={filters.busqueda}
+              onChange={(e) => onFilterChange({ ...filters, busqueda: e.target.value })}
+              disabled={loading}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <PersonSearch sx={{ fontSize: 18, color: colors.grey[400] }} />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{
+                flex: 2,
+                minWidth: 300,
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "8px",
+                  fontSize: "0.875rem",
+                  backgroundColor: colors.bgContainer,
+                },
+              }}
+            />
+          </Tooltip>
 
-          {/* Filtro por categoría - DINÁMICO */}
+          {/* Filtro por categoría */}
           <FormControl size="small" sx={{ minWidth: 150 }}>
             <InputLabel sx={{ color: colors.grey[400] }}>Categoría</InputLabel>
             <Select
@@ -95,7 +100,7 @@ const InventoryFilters = ({
             </Select>
           </FormControl>
 
-          {/* Filtro por plaza - DINÁMICO */}
+          {/* Filtro por plaza */}
           <FormControl size="small" sx={{ minWidth: 150 }}>
             <InputLabel sx={{ color: colors.grey[400] }}>Plaza</InputLabel>
             <Select

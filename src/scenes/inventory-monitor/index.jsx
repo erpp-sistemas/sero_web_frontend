@@ -21,6 +21,10 @@ import InventoryList from "../../components/InventoryMonitor/InventoryList";
 import InventoryFilters from "../../components/InventoryMonitor/InventoryFilters";
 import InventorySkeleton from "../../components/InventoryMonitor/InventorySkeleton";
 
+// Modales
+import InventoryDetailDialog from "../../components/InventoryMonitor/InventoryList/InventoryDetailDialog";
+import InventoryManageDialog from "../../components/InventoryMonitor/InventoryList/InventoryManageDialog";
+
 const Index = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -30,11 +34,15 @@ const Index = () => {
   // ============================================
   const [inventory, setInventory] = useState([]);
   const [filteredInventory, setFilteredInventory] = useState([]);
-  const [dashboardData, setDashboardData] = useState([]); // Datos para el dashboard (con filtros)
+  const [dashboardData, setDashboardData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [tabActiva, setTabActiva] = useState(0);
-  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "info" });
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "info",
+  });
 
   // Estados para filtros
   const [filters, setFilters] = useState({
@@ -42,6 +50,11 @@ const Index = () => {
     categoria: "todos",
     plaza: "todos",
   });
+
+  // Estados para modales
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [manageOpen, setManageOpen] = useState(false);
+  const [selectedArticulo, setSelectedArticulo] = useState(null);
 
   // ============================================
   // COLORES
@@ -63,19 +76,23 @@ const Index = () => {
         const response = await getAllInventory();
 
         const processedData = response
-          .filter(item => item && typeof item === "object")
-          .map(item => ({
+          .filter((item) => item && typeof item === "object")
+          .map((item) => ({
             ...item,
-            estado_calculado: !item.id_usuario && item.activo !== false ? "disponible" :
-                              item.activo === false ? "baja" :
-                              item.condicion_actual === "malo" ? "mantenimiento" :
-                              "asignado",
+            estado_calculado:
+              !item.id_usuario && item.activo !== false
+                ? "disponible"
+                : item.activo === false
+                  ? "baja"
+                  : item.condicion_actual === "malo"
+                    ? "mantenimiento"
+                    : "asignado",
             fotos: Array.isArray(item.fotos) ? item.fotos : [],
           }));
 
         setInventory(processedData);
         setFilteredInventory(processedData);
-        setDashboardData(processedData); // Inicialmente todos los datos
+        setDashboardData(processedData);
 
         setSnackbar({
           open: true,
@@ -102,93 +119,125 @@ const Index = () => {
   // OPCIONES DINÁMICAS
   // ============================================
   const categorias = useMemo(() => {
-    const unique = new Set(inventory.map(item => item.categoria).filter(Boolean));
+    const unique = new Set(
+      inventory.map((item) => item.categoria).filter(Boolean),
+    );
     return ["todos", ...Array.from(unique).sort()];
   }, [inventory]);
 
   const plazas = useMemo(() => {
-    const unique = new Set(inventory.map(item => item.plaza).filter(Boolean));
+    const unique = new Set(inventory.map((item) => item.plaza).filter(Boolean));
     return ["todos", ...Array.from(unique).sort()];
   }, [inventory]);
 
   // ============================================
-  // ESTADOS DINÁMICOS
-  // ============================================
-  const estadosDisponibles = useMemo(() => {
-    const estados = new Set();
-    inventory.forEach(item => {
-      if (item.activo === false) estados.add("baja");
-      else if (item.condicion_actual === "malo") estados.add("mantenimiento");
-      else if (item.id_usuario) estados.add("asignado");
-      else estados.add("disponible");
-    });
-    return Array.from(estados).sort();
-  }, [inventory]);
-
-  // ============================================
-  // CONFIGURACIÓN DE TABS
+  // CONFIGURACIÓN DE TABS - SOLO CON DATOS
   // ============================================
   const tabsConfig = useMemo(() => {
+    // Primero calculamos los datos base con los filtros actuales
+    let baseData = [...inventory];
+
+    if (filters.busqueda) {
+      const busquedaLower = filters.busqueda.toLowerCase();
+      baseData = baseData.filter(
+        (item) =>
+          item.nombre_articulo?.toLowerCase().includes(busquedaLower) ||
+          item.folio?.toLowerCase().includes(busquedaLower) ||
+          item.numero_serie?.toLowerCase().includes(busquedaLower) ||
+          item.marca?.toLowerCase().includes(busquedaLower),
+      );
+    }
+
+    if (filters.categoria !== "todos") {
+      baseData = baseData.filter(
+        (item) => item.categoria === filters.categoria,
+      );
+    }
+
+    if (filters.plaza !== "todos") {
+      baseData = baseData.filter((item) => item.plaza === filters.plaza);
+    }
+
+    // Configuración base con "Todos" siempre presente
     const config = [
       {
         key: "todos",
         label: "Todos",
         color: COLOR_TAB_ACTIVA,
-        filter: () => true
-      }
+        filter: () => true,
+        count: baseData.length,
+      },
     ];
 
-    if (estadosDisponibles.includes("disponible")) {
+    // Función para contar elementos de un tipo específico
+    const contar = (filterFn) => baseData.filter(filterFn).length;
+
+    // Agregar "Disponibles" solo si hay al menos 1
+    const disponibles = contar(
+      (item) => !item.id_usuario && item.activo !== false,
+    );
+    if (disponibles > 0) {
       config.push({
         key: "disponible",
         label: "Disponibles",
         color: colors.accentGreen[100],
-        filter: (item) => !item.id_usuario && item.activo !== false
+        filter: (item) => !item.id_usuario && item.activo !== false,
+        count: disponibles,
       });
     }
-    if (estadosDisponibles.includes("asignado")) {
+
+    // Agregar "Asignados" solo si hay al menos 1
+    const asignados = contar(
+      (item) =>
+        item.id_usuario &&
+        item.activo !== false &&
+        item.condicion_actual !== "malo",
+    );
+    if (asignados > 0) {
       config.push({
         key: "asignado",
         label: "Asignados",
         color: colors.blueAccent[400],
-        filter: (item) => item.id_usuario && item.activo !== false && item.condicion_actual !== "malo"
+        filter: (item) =>
+          item.id_usuario &&
+          item.activo !== false &&
+          item.condicion_actual !== "malo",
+        count: asignados,
       });
     }
-    if (estadosDisponibles.includes("mantenimiento")) {
+
+    // Agregar "Mantenimiento" solo si hay al menos 1
+    const mantenimiento = contar(
+      (item) => item.condicion_actual === "malo" && item.activo !== false,
+    );
+    if (mantenimiento > 0) {
       config.push({
         key: "mantenimiento",
         label: "Mantenimiento",
         color: colors.yellowAccent[400],
-        filter: (item) => item.condicion_actual === "malo" && item.activo !== false
+        filter: (item) =>
+          item.condicion_actual === "malo" && item.activo !== false,
+        count: mantenimiento,
       });
     }
-    if (estadosDisponibles.includes("baja")) {
+
+    // Agregar "Dados de baja" solo si hay al menos 1
+    const baja = contar((item) => item.activo === false);
+    if (baja > 0) {
       config.push({
         key: "baja",
         label: "Dados de baja",
         color: colors.redAccent[400],
-        filter: (item) => item.activo === false
+        filter: (item) => item.activo === false,
+        count: baja,
       });
     }
 
     return config;
-  }, [estadosDisponibles, colors, COLOR_TAB_ACTIVA]);
+  }, [inventory, filters, colors, COLOR_TAB_ACTIVA]);
 
   // ============================================
-  // CONTEO POR ESTADO
-  // ============================================
-  const counts = useMemo(() => {
-    const result = { todos: inventory.length };
-    tabsConfig.forEach(tab => {
-      if (tab.key !== "todos") {
-        result[tab.key] = inventory.filter(tab.filter).length;
-      }
-    });
-    return result;
-  }, [inventory, tabsConfig]);
-
-  // ============================================
-  // FUNCIONES DE FILTRADO (AHORA ACTUALIZAN DASHBOARD)
+  // FUNCIONES DE FILTRADO
   // ============================================
   const handleFilterChange = (newFilters) => {
     setFilters(newFilters);
@@ -202,58 +251,69 @@ const Index = () => {
 
   const applyAllFilters = (currentFilters, currentTab) => {
     let filtered = [...inventory];
-    
-    // Aplicar todos los filtros para la lista
+
+    // Aplicar filtros de búsqueda, categoría y plaza
     if (currentFilters.busqueda) {
       const busquedaLower = currentFilters.busqueda.toLowerCase();
-      filtered = filtered.filter(item =>
-        item.nombre_articulo?.toLowerCase().includes(busquedaLower) ||
-        item.folio?.toLowerCase().includes(busquedaLower) ||
-        item.numero_serie?.toLowerCase().includes(busquedaLower) ||
-        item.marca?.toLowerCase().includes(busquedaLower)
+      filtered = filtered.filter(
+        (item) =>
+          // Búsqueda en campos del artículo
+          item.nombre_articulo?.toLowerCase().includes(busquedaLower) ||
+          item.folio?.toLowerCase().includes(busquedaLower) ||
+          item.numero_serie?.toLowerCase().includes(busquedaLower) ||
+          item.marca?.toLowerCase().includes(busquedaLower) ||
+          item.modelo?.toLowerCase().includes(busquedaLower) ||
+          // Búsqueda por nombre de usuario asignado
+          item.usuario?.toLowerCase().includes(busquedaLower),
       );
     }
-    
+
     if (currentFilters.categoria !== "todos") {
-      filtered = filtered.filter(item => item.categoria === currentFilters.categoria);
+      filtered = filtered.filter(
+        (item) => item.categoria === currentFilters.categoria,
+      );
     }
-    
+
     if (currentFilters.plaza !== "todos") {
-      filtered = filtered.filter(item => item.plaza === currentFilters.plaza);
+      filtered = filtered.filter((item) => item.plaza === currentFilters.plaza);
     }
-    
+
+    // Aplicar filtro de tab (estado)
     if (currentTab > 0) {
       const tabConfig = tabsConfig[currentTab];
       if (tabConfig) {
         filtered = filtered.filter(tabConfig.filter);
       }
     }
-    
-    // Actualizar lista filtrada
+
     setFilteredInventory(filtered);
 
     // Para el dashboard, aplicamos SOLO los filtros de búsqueda, categoría y plaza
-    // (NO el filtro de tab, para que el dashboard muestre el panorama general)
     let dashboardFiltered = [...inventory];
-    
+
     if (currentFilters.busqueda) {
       const busquedaLower = currentFilters.busqueda.toLowerCase();
-      dashboardFiltered = dashboardFiltered.filter(item =>
-        item.nombre_articulo?.toLowerCase().includes(busquedaLower) ||
-        item.folio?.toLowerCase().includes(busquedaLower) ||
-        item.numero_serie?.toLowerCase().includes(busquedaLower) ||
-        item.marca?.toLowerCase().includes(busquedaLower)
+      dashboardFiltered = dashboardFiltered.filter(
+        (item) =>
+          item.nombre_articulo?.toLowerCase().includes(busquedaLower) ||
+          item.folio?.toLowerCase().includes(busquedaLower) ||
+          item.numero_serie?.toLowerCase().includes(busquedaLower) ||
+          item.marca?.toLowerCase().includes(busquedaLower),
       );
     }
-    
+
     if (currentFilters.categoria !== "todos") {
-      dashboardFiltered = dashboardFiltered.filter(item => item.categoria === currentFilters.categoria);
+      dashboardFiltered = dashboardFiltered.filter(
+        (item) => item.categoria === currentFilters.categoria,
+      );
     }
-    
+
     if (currentFilters.plaza !== "todos") {
-      dashboardFiltered = dashboardFiltered.filter(item => item.plaza === currentFilters.plaza);
+      dashboardFiltered = dashboardFiltered.filter(
+        (item) => item.plaza === currentFilters.plaza,
+      );
     }
-    
+
     setDashboardData(dashboardFiltered);
   };
 
@@ -277,22 +337,43 @@ const Index = () => {
   };
 
   // ============================================
-  // MANEJADORES DE ACCIONES
+  // MANEJADORES DE ACCIONES - ACTUALIZADOS
   // ============================================
   const handleVerDetalle = (articulo) => {
-    console.log("Ver detalle:", articulo);
+    setSelectedArticulo(articulo);
+    setDetailOpen(true);
   };
 
-  const handleAsignar = (articulo) => {
-    console.log("Asignar:", articulo);
+  const handleGestionar = (articulo) => {
+    setSelectedArticulo(articulo);
+    setManageOpen(true);
   };
 
   const handleEditar = (articulo) => {
     console.log("Editar:", articulo);
+    // Implementar después
   };
 
-  const handleBaja = (articulo) => {
-    console.log("Dar de baja:", articulo);
+  const handleDevolver = (idArticulo, data) => {
+    console.log("Devolver:", idArticulo, data);
+    // Aquí iría la llamada a la API
+    // Actualizar el artículo en el estado local
+    setSnackbar({
+      open: true,
+      message: "Artículo devuelto correctamente",
+      severity: "success",
+    });
+  };
+
+  const handleBaja = (idArticulo, data) => {
+    console.log("Dar de baja:", idArticulo, data);
+    // Aquí iría la llamada a la API
+    // Actualizar el artículo en el estado local
+    setSnackbar({
+      open: true,
+      message: "Artículo dado de baja correctamente",
+      severity: "success",
+    });
   };
 
   const handleCloseSnackbar = () => {
@@ -300,13 +381,32 @@ const Index = () => {
   };
 
   return (
-    <Box sx={{ width: "100%", maxWidth: "100%", overflowX: "hidden", mt: 6, px: 2 }}>
-      {/* Título - mismo estilo que PerformanceMonitor */}
+    <Box
+      sx={{
+        width: "100%",
+        maxWidth: "100%",
+        overflowX: "hidden",
+        mt: 6,
+        px: 2,
+      }}
+    >
+      {/* Título */}
       <Box sx={{ mb: 3 }}>
-        <Typography variant="h6" sx={{ color: COLOR_TEXTO, fontWeight: 600, fontSize: "1.125rem", mb: 0.5 }}>
+        <Typography
+          variant="h6"
+          sx={{
+            color: COLOR_TEXTO,
+            fontWeight: 600,
+            fontSize: "1.125rem",
+            mb: 0.5,
+          }}
+        >
           Gestión de Inventario
         </Typography>
-        <Typography variant="body2" sx={{ color: colors.grey[400], fontSize: "0.875rem" }}>
+        <Typography
+          variant="body2"
+          sx={{ color: colors.grey[400], fontSize: "0.875rem" }}
+        >
           Control y administración de activos de la empresa
         </Typography>
       </Box>
@@ -323,61 +423,72 @@ const Index = () => {
         loading={loading}
       />
 
-      {/* DASHBOARD - Reactivo a filtros */}
+      {/* DASHBOARD */}
       {!loading && !error && dashboardData.length > 0 && (
         <InventoryDashboard data={dashboardData} />
       )}
 
-      {/* TABS DINÁMICOS */}
-      <Box sx={{ borderBottom: 1, borderColor: colors.borderContainer, mb: 3 }}>
-        <Tabs
-          value={tabActiva}
-          onChange={handleTabChange}
-          sx={{
-            "& .MuiTab-root": {
-              color: COLOR_TEXTO,
-              fontWeight: 500,
-              fontSize: "0.875rem",
-              textTransform: "none",
-              minHeight: 48,
-            },
-            "& .Mui-selected": {
-              color: `${getColorTabActiva()} !important`,
-              fontWeight: 600,
-            },
-            "& .MuiTabs-indicator": {
-              backgroundColor: getColorTabActiva(),
-            },
-          }}
+      {/* TABS DINÁMICOS - SOLO CON DATOS */}
+      {tabsConfig.length > 1 && (
+        <Box
+          sx={{ borderBottom: 1, borderColor: colors.borderContainer, mb: 3 }}
         >
-          {tabsConfig.map((tab, index) => (
-            <Tab
-              key={tab.key}
-              label={
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <Typography component="span">{tab.label}</Typography>
-                  <Chip
-                    label={counts[tab.key] || 0}
-                    size="small"
-                    sx={{
-                      backgroundColor: colors.bgContainerSticky,
-                      color: tabActiva === index ? tab.color : COLOR_TEXTO,
-                      fontSize: "0.7rem",
-                      height: 20,
-                    }}
-                  />
-                </Box>
-              }
-            />
-          ))}
-        </Tabs>
-      </Box>
+          <Tabs
+            value={tabActiva}
+            onChange={handleTabChange}
+            sx={{
+              "& .MuiTab-root": {
+                color: COLOR_TEXTO,
+                fontWeight: 500,
+                fontSize: "0.875rem",
+                textTransform: "none",
+                minHeight: 48,
+              },
+              "& .Mui-selected": {
+                color: `${getColorTabActiva()} !important`,
+                fontWeight: 600,
+              },
+              "& .MuiTabs-indicator": {
+                backgroundColor: getColorTabActiva(),
+              },
+            }}
+          >
+            {tabsConfig.map((tab, index) => (
+              <Tab
+                key={tab.key}
+                label={
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <Typography component="span">{tab.label}</Typography>
+                    <Chip
+                      label={tab.count}
+                      size="small"
+                      sx={{
+                        backgroundColor: colors.bgContainerSticky,
+                        color: tabActiva === index ? tab.color : COLOR_TEXTO,
+                        fontSize: "0.7rem",
+                        height: 20,
+                      }}
+                    />
+                  </Box>
+                }
+              />
+            ))}
+          </Tabs>
+        </Box>
+      )}
 
       {/* CONTENIDO PRINCIPAL */}
       {loading ? (
         <InventorySkeleton />
       ) : error ? (
-        <Alert severity="error" sx={{ mt: 2, bgcolor: colors.redAccent[400] + "20", color: colors.redAccent[400] }}>
+        <Alert
+          severity="error"
+          sx={{
+            mt: 2,
+            bgcolor: colors.redAccent[400] + "20",
+            color: colors.redAccent[400],
+          }}
+        >
           {error}
         </Alert>
       ) : (
@@ -386,9 +497,9 @@ const Index = () => {
             <InventoryList
               data={filteredInventory}
               onVerDetalle={handleVerDetalle}
-              onAsignar={handleAsignar}
+              onGestionar={handleGestionar}  
               onEditar={handleEditar}
-              onBaja={handleBaja}
+              // onBaja ya no se necesita, se maneja en onGestionar
             />
           </Box>
         </Grow>
@@ -401,10 +512,30 @@ const Index = () => {
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
       >
-        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: "100%" }}>
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
           {snackbar.message}
         </Alert>
       </Snackbar>
+
+      {/* Modales */}
+      <InventoryDetailDialog
+        open={detailOpen}
+        onClose={() => setDetailOpen(false)}
+        articulo={selectedArticulo}
+      />
+
+      <InventoryManageDialog
+        open={manageOpen}
+        onClose={() => setManageOpen(false)}
+        articulo={selectedArticulo}
+        onDevolver={handleDevolver}
+        onBaja={handleBaja}
+        // Las funciones de reasignación se manejarán internamente
+      />
     </Box>
   );
 };
