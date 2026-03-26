@@ -27,6 +27,18 @@ import {
   TablePagination,
   Avatar,
   AvatarGroup,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
+  Divider,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  FormHelperText,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import {
   Close,
@@ -58,9 +70,16 @@ import {
   HomeWork as HomeWorkIcon,
   ReceiptLong as ReceiptLongIcon,
   Collections as CollectionsIcon,
+  MoreVert,
+  Edit,
+  Delete,
+  AddPhotoAlternate,
+  Save,
+  Cancel,
 } from "@mui/icons-material";
 import { tokens } from "../../../theme";
 import * as ExcelJS from "exceljs";
+import { TIPOS_FOTO, TAREAS } from "../../../constants/catalogos";
 
 // 🔹 Componente para vista modal ampliada de foto
 const FotoAmpliadaDialog = ({
@@ -70,6 +89,8 @@ const FotoAmpliadaDialog = ({
   onDownload,
   onNext,
   onPrev,
+  onEdit,
+  onDelete,
   totalFotos,
   index,
 }) => {
@@ -179,6 +200,22 @@ const FotoAmpliadaDialog = ({
               </IconButton>
             </span>
           </Tooltip>
+          <Tooltip title="Editar foto">
+            <IconButton
+              onClick={() => onEdit(foto)}
+              sx={{ color: colors.grey[100] }}
+            >
+              <Edit />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Eliminar foto">
+            <IconButton
+              onClick={() => onDelete(foto)}
+              sx={{ color: colors.grey[100] }}
+            >
+              <Delete />
+            </IconButton>
+          </Tooltip>
           <Tooltip title="Descargar">
             <IconButton
               onClick={() => onDownload(foto)}
@@ -277,6 +314,775 @@ const FotoAmpliadaDialog = ({
   );
 };
 
+// 🔹 Componente para editar/agregar foto - VERSIÓN CORREGIDA
+const FotoEditorDialog = ({
+  open,
+  onClose,
+  onSave,
+  foto,
+  modo,
+  cuenta,
+  fechaRegistro,
+  colors,
+  COLOR_TEXTO,
+  COLOR_FONDO,
+  COLOR_BORDE,
+}) => {
+  const theme = useTheme();
+  const themeColors = colors || tokens(theme.palette.mode);
+  
+  const [formData, setFormData] = useState({
+    nombreFoto: "",
+    tipo: "Evidencia",
+    idTarea: "",
+    fechaCaptura: "",
+  });
+
+  const [imagenPreview, setImagenPreview] = useState(null);
+  const [imagenBase64, setImagenBase64] = useState(null);
+  const [cargandoImagen, setCargandoImagen] = useState(false);
+  const [enviando, setEnviando] = useState(false);
+  const [errors, setErrors] = useState({});
+  const fileInputRef = useRef(null);
+
+  // Cargar datos al abrir el diálogo
+  useEffect(() => {
+    if (open) {
+      if (foto && modo === "editar") {
+        console.log("📸 Cargando foto para editar:", foto);
+        
+        // Normalizar el tipo de foto
+        let tipoNormalizado = "Evidencia";
+        const tipoOriginal = (foto.tipo || "").toUpperCase();
+        if (tipoOriginal === "FACHADA" || tipoOriginal === "FACHADA PREDIO") {
+          tipoNormalizado = "Fachada predio";
+        } else if (tipoOriginal === "EVIDENCIA") {
+          tipoNormalizado = "Evidencia";
+        } else if (foto.tipo === "Fachada predio") {
+          tipoNormalizado = "Fachada predio";
+        }
+
+        // Obtener idTarea - probar diferentes nombres de campo
+        let idTareaValor = "";
+        if (foto.idTarea) {
+          idTareaValor = String(foto.idTarea);
+        } else if (foto.id_tarea) {
+          idTareaValor = String(foto.id_tarea);
+        } else if (foto.metadata?.idTarea) {
+          idTareaValor = String(foto.metadata.idTarea);
+        } else if (foto.metadata?.id_tarea) {
+          idTareaValor = String(foto.metadata.id_tarea);
+        }
+        
+        console.log("📋 idTarea encontrado:", idTareaValor);
+
+        setFormData({
+          nombreFoto: foto.nombreFoto || "",
+          tipo: tipoNormalizado,
+          idTarea: idTareaValor,
+          fechaCaptura: foto.fechaCaptura ? new Date(foto.fechaCaptura).toISOString().slice(0, 16) : "",
+        });
+        setImagenPreview(foto.urlImagen || foto.url || null);
+        setImagenBase64(null);
+      } else if (modo === "agregar") {
+        const ahora = new Date();
+        const fechaCapturaISO = ahora.toISOString().slice(0, 16);
+        const nombreGenerado = `${cuenta}${ahora.toISOString()}`;
+        
+        setFormData({
+          nombreFoto: nombreGenerado,
+          tipo: "Evidencia",
+          idTarea: "",
+          fechaCaptura: fechaCapturaISO,
+        });
+        setImagenPreview(null);
+        setImagenBase64(null);
+      }
+      setErrors({});
+    }
+  }, [foto, modo, cuenta, fechaRegistro, open]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: null }));
+    }
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setErrors(prev => ({ ...prev, imagen: "Solo se permiten archivos de imagen" }));
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      setErrors(prev => ({ ...prev, imagen: "La imagen no debe exceder los 10MB" }));
+      return;
+    }
+
+    setCargandoImagen(true);
+    
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result;
+      setImagenBase64(base64String);
+      setImagenPreview(base64String);
+      setCargandoImagen(false);
+      if (errors.imagen) {
+        setErrors(prev => ({ ...prev, imagen: null }));
+      }
+    };
+    reader.onerror = () => {
+      setCargandoImagen(false);
+      setErrors(prev => ({ ...prev, imagen: "Error al leer el archivo" }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveImage = () => {
+    setImagenPreview(null);
+    setImagenBase64(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleSubmit = async () => {
+    const newErrors = {};
+    if (!formData.nombreFoto.trim()) {
+      newErrors.nombreFoto = "El nombre es requerido";
+    }
+    if (!imagenBase64 && modo === "agregar") {
+      newErrors.imagen = "La imagen es requerida";
+    }
+    if (!formData.idTarea) {
+      newErrors.idTarea = "La tarea es requerida";
+    }
+    if (!formData.tipo) {
+      newErrors.tipo = "El tipo de foto es requerido";
+    }
+    if (!formData.fechaCaptura) {
+      newErrors.fechaCaptura = "La fecha de captura es requerida";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setEnviando(true);
+    
+    try {
+      const datosParaGuardar = {
+        ...formData,
+        idTarea: parseInt(formData.idTarea),
+        fechaCaptura: new Date(formData.fechaCaptura).toISOString(),
+        nombreFoto: modo === "agregar" ? `${cuenta}${new Date().toISOString()}` : formData.nombreFoto,
+        imagenBase64: modo === "agregar" ? imagenBase64 : null,
+        urlImagenExistente: modo === "editar" ? foto?.urlImagen : null,
+      };
+
+      await onSave(datosParaGuardar);
+    } finally {
+      setEnviando(false);
+    }
+  };
+
+  return (
+    <Dialog
+      open={open}
+      onClose={!enviando ? onClose : undefined}
+      maxWidth="sm"
+      fullWidth
+      PaperProps={{
+        sx: {
+          backgroundColor: COLOR_FONDO,
+          borderRadius: "20px",
+          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+          overflow: "hidden",
+        },
+      }}
+    >
+      <DialogTitle
+        sx={{
+          p: 3,
+          pb: 1.5,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+          backgroundColor: COLOR_FONDO,
+          borderBottom: `1px solid ${COLOR_BORDE}`,
+        }}
+      >
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+          <Box
+            sx={{
+              width: 40,
+              height: 40,
+              borderRadius: "12px",
+              backgroundColor: themeColors.blueAccent[500] + "10",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            {modo === "agregar" ? (
+              <AddPhotoAlternate sx={{ color: themeColors.blueAccent[400], fontSize: 20 }} />
+            ) : (
+              <Edit sx={{ color: themeColors.blueAccent[400], fontSize: 20 }} />
+            )}
+          </Box>
+          <Box>
+            <Typography
+              variant="h6"
+              sx={{
+                color: COLOR_TEXTO,
+                fontWeight: 500,
+                fontSize: "1.1rem",
+                letterSpacing: "-0.01em",
+              }}
+            >
+              {modo === "agregar" ? "Nueva foto" : "Editar foto"}
+            </Typography>
+            <Typography
+              variant="caption"
+              sx={{
+                color: themeColors.grey[500],
+                display: "block",
+                mt: 0.25,
+              }}
+            >
+              {cuenta}
+            </Typography>
+          </Box>
+        </Box>
+        <IconButton 
+          onClick={onClose} 
+          disabled={enviando}
+          sx={{ color: themeColors.grey[400], mt: -0.5 }}
+        >
+          <Close />
+        </IconButton>
+      </DialogTitle>
+
+      <DialogContent sx={{ p: 3, pt: 1, backgroundColor: COLOR_FONDO }}>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
+          
+          {/* Área de imagen */}
+          <Box>
+            <Typography
+              variant="caption"
+              sx={{
+                color: themeColors.grey[500],
+                display: "block",
+                mb: 1,
+                fontWeight: 500,
+                textTransform: "uppercase",
+                fontSize: "0.65rem",
+                letterSpacing: "0.02em",
+              }}
+            >
+              {modo === "agregar" ? "Imagen" : "Imagen actual"}
+            </Typography>
+            
+            {!imagenPreview ? (
+              <Box
+                onClick={() => !enviando && fileInputRef.current?.click()}
+                sx={{
+                  width: "100%",
+                  height: 160,
+                  border: `2px dashed ${errors.imagen ? themeColors.redAccent[400] : COLOR_BORDE}`,
+                  borderRadius: "12px",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 1,
+                  cursor: enviando ? "not-allowed" : "pointer",
+                  opacity: enviando ? 0.6 : 1,
+                  backgroundColor: themeColors.primary[800] + "30",
+                  transition: "all 0.2s ease",
+                  "&:hover": {
+                    borderColor: !enviando ? themeColors.blueAccent[400] : COLOR_BORDE,
+                    backgroundColor: !enviando ? themeColors.primary[800] + "50" : themeColors.primary[800] + "30",
+                  },
+                }}
+              >
+                {cargandoImagen ? (
+                  <>
+                    <Box sx={{ width: 32, height: 32, border: `2px solid ${themeColors.blueAccent[400]}`, borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+                    <Typography variant="body2" sx={{ color: themeColors.grey[500] }}>
+                      Procesando imagen...
+                    </Typography>
+                  </>
+                ) : (
+                  <>
+                    <PhotoCamera sx={{ color: themeColors.grey[500], fontSize: 32 }} />
+                    <Typography variant="body2" sx={{ color: themeColors.grey[500] }}>
+                      Haz clic para seleccionar imagen
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: themeColors.grey[600] }}>
+                      JPG, PNG, GIF hasta 10MB
+                    </Typography>
+                  </>
+                )}
+              </Box>
+            ) : (
+              <Box
+                sx={{
+                  position: "relative",
+                  borderRadius: "12px",
+                  overflow: "hidden",
+                  backgroundColor: themeColors.primary[900],
+                  border: `1px solid ${COLOR_BORDE}`,
+                }}
+              >
+                <img
+                  src={imagenPreview}
+                  alt="Preview"
+                  style={{
+                    width: "100%",
+                    maxHeight: 200,
+                    objectFit: "contain",
+                    display: "block",
+                  }}
+                />
+                {!enviando && (
+                  <IconButton
+                    onClick={handleRemoveImage}
+                    sx={{
+                      position: "absolute",
+                      top: 8,
+                      right: 8,
+                      backgroundColor: "rgba(0,0,0,0.6)",
+                      color: "white",
+                      "&:hover": {
+                        backgroundColor: "rgba(0,0,0,0.8)",
+                      },
+                    }}
+                    size="small"
+                  >
+                    <Close sx={{ fontSize: 16 }} />
+                  </IconButton>
+                )}
+              </Box>
+            )}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              disabled={enviando}
+              style={{ display: "none" }}
+            />
+            {errors.imagen && (
+              <Typography
+                variant="caption"
+                sx={{ color: themeColors.redAccent[400], mt: 0.5, display: "block", ml: 0.5 }}
+              >
+                {errors.imagen}
+              </Typography>
+            )}
+          </Box>
+
+          {/* Nombre de la foto */}
+          <Box>
+            <Typography
+              variant="caption"
+              sx={{
+                color: themeColors.grey[500],
+                display: "block",
+                mb: 0.5,
+                ml: 0.5,
+                fontWeight: 500,
+                textTransform: "uppercase",
+                fontSize: "0.65rem",
+                letterSpacing: "0.02em",
+              }}
+            >
+              Nombre de la foto
+            </Typography>
+            <TextField
+              name="nombreFoto"
+              value={formData.nombreFoto}
+              onChange={handleChange}
+              disabled={modo === "agregar" || enviando}
+              fullWidth
+              size="small"
+              error={!!errors.nombreFoto}
+              helperText={errors.nombreFoto}
+              sx={{
+                "& .MuiInputLabel-root": { color: themeColors.grey[400] },
+                "& .MuiOutlinedInput-root": {
+                  color: COLOR_TEXTO,
+                  "& fieldset": { borderColor: COLOR_BORDE, borderWidth: "1px" },
+                  "&.Mui-disabled": {
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      borderColor: themeColors.primary[700],
+                    },
+                  },
+                  "&:hover fieldset": { borderColor: themeColors.blueAccent[400] },
+                  "&.Mui-focused fieldset": { borderColor: themeColors.blueAccent[400] },
+                },
+              }}
+            />
+          </Box>
+
+          {/* Tipo de foto - chips minimalistas */}
+          <Box>
+            <Typography
+              variant="caption"
+              sx={{
+                color: themeColors.grey[500],
+                display: "block",
+                mb: 1,
+                ml: 0.5,
+                fontWeight: 500,
+                textTransform: "uppercase",
+                fontSize: "0.65rem",
+                letterSpacing: "0.02em",
+              }}
+            >
+              Tipo de foto
+            </Typography>
+            <Box sx={{ display: "flex", gap: 1 }}>
+              {TIPOS_FOTO.map((tipo) => (
+                <Box
+                  key={tipo.value}
+                  onClick={() => !enviando && setFormData(prev => ({ ...prev, tipo: tipo.value }))}
+                  sx={{
+                    px: 2,
+                    py: 0.75,
+                    borderRadius: "30px",
+                    backgroundColor: formData.tipo === tipo.value 
+                      ? (tipo.value === "Fachada predio" ? themeColors.greenAccent[500] + "15" : themeColors.blueAccent[500] + "15")
+                      : "transparent",
+                    border: `1px solid ${formData.tipo === tipo.value 
+                      ? (tipo.value === "Fachada predio" ? themeColors.greenAccent[500] : themeColors.blueAccent[500])
+                      : COLOR_BORDE}`,
+                    color: formData.tipo === tipo.value
+                      ? (tipo.value === "Fachada predio" ? themeColors.greenAccent[300] : themeColors.blueAccent[300])
+                      : themeColors.grey[400],
+                    fontSize: "0.8rem",
+                    fontWeight: 500,
+                    cursor: enviando ? "not-allowed" : "pointer",
+                    opacity: enviando ? 0.6 : 1,
+                    transition: "all 0.2s ease",
+                    "&:hover": {
+                      backgroundColor: !enviando && formData.tipo === tipo.value 
+                        ? (tipo.value === "Fachada predio" ? themeColors.greenAccent[500] + "25" : themeColors.blueAccent[500] + "25")
+                        : !enviando ? themeColors.primary[700] + "30" : "transparent",
+                    },
+                  }}
+                >
+                  {tipo.label}
+                </Box>
+              ))}
+            </Box>
+            {errors.tipo && (
+              <Typography
+                variant="caption"
+                sx={{ color: themeColors.redAccent[400], mt: 0.5, display: "block", ml: 0.5 }}
+              >
+                {errors.tipo}
+              </Typography>
+            )}
+          </Box>
+
+          {/* Tarea - select con valor seleccionado */}
+          <Box>
+            <Typography
+              variant="caption"
+              sx={{
+                color: themeColors.grey[500],
+                display: "block",
+                mb: 0.5,
+                ml: 0.5,
+                fontWeight: 500,
+                textTransform: "uppercase",
+                fontSize: "0.65rem",
+                letterSpacing: "0.02em",
+              }}
+            >
+              Tarea
+            </Typography>
+            <FormControl fullWidth size="small" error={!!errors.idTarea} disabled={enviando}>
+              <Select
+                name="idTarea"
+                value={formData.idTarea}
+                onChange={handleChange}
+                displayEmpty
+                sx={{
+                  color: COLOR_TEXTO,
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: COLOR_BORDE,
+                  },
+                  "&:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: themeColors.blueAccent[400],
+                  },
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: themeColors.blueAccent[400],
+                  },
+                  "&.Mui-disabled": {
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      borderColor: themeColors.primary[700],
+                    },
+                  },
+                }}
+              >
+                <MenuItem value="" disabled>
+                  <em style={{ color: themeColors.grey[500] }}>Seleccionar tarea</em>
+                </MenuItem>
+                {TAREAS.map((tarea) => (
+                  <MenuItem key={tarea.id_tarea} value={String(tarea.id_tarea)}>
+                    {tarea.nombre}
+                  </MenuItem>
+                ))}
+              </Select>
+              {errors.idTarea && (
+                <FormHelperText error>{errors.idTarea}</FormHelperText>
+              )}
+            </FormControl>
+          </Box>
+
+          {/* Fecha de captura */}
+          <Box>
+            <Typography
+              variant="caption"
+              sx={{
+                color: themeColors.grey[500],
+                display: "block",
+                mb: 0.5,
+                ml: 0.5,
+                fontWeight: 500,
+                textTransform: "uppercase",
+                fontSize: "0.65rem",
+                letterSpacing: "0.02em",
+              }}
+            >
+              Fecha de captura
+            </Typography>
+            <TextField
+              name="fechaCaptura"
+              type="datetime-local"
+              value={formData.fechaCaptura}
+              onChange={handleChange}
+              disabled={modo === "agregar" || enviando}
+              fullWidth
+              size="small"
+              error={!!errors.fechaCaptura}
+              helperText={errors.fechaCaptura}
+              sx={{
+                "& .MuiInputLabel-root": { color: themeColors.grey[400] },
+                "& .MuiOutlinedInput-root": {
+                  color: COLOR_TEXTO,
+                  "& fieldset": { borderColor: COLOR_BORDE },
+                  "&.Mui-disabled": {
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      borderColor: themeColors.primary[700],
+                    },
+                  },
+                  "&:hover fieldset": { borderColor: themeColors.blueAccent[400] },
+                  "&.Mui-focused fieldset": { borderColor: themeColors.blueAccent[400] },
+                },
+              }}
+            />
+          </Box>
+        </Box>
+      </DialogContent>
+
+      <DialogActions
+        sx={{
+          borderTop: `1px solid ${COLOR_BORDE}`,
+          p: 2.5,
+          gap: 1,
+          backgroundColor: COLOR_FONDO,
+        }}
+      >
+        <Button
+          onClick={onClose}
+          disabled={enviando}
+          sx={{
+            color: themeColors.grey[400],
+            textTransform: "none",
+            fontWeight: 400,
+            "&:hover": {
+              backgroundColor: themeColors.primary[400] + "20",
+            },
+          }}
+        >
+          Cancelar
+        </Button>
+        <Button
+          variant="contained"
+          onClick={handleSubmit}
+          disabled={enviando || cargandoImagen}
+          sx={{
+            backgroundColor: themeColors.blueAccent[600],
+            color: themeColors.grey[100],
+            textTransform: "none",
+            fontWeight: 500,
+            px: 3,
+            minWidth: 140,
+            "&:hover": {
+              backgroundColor: themeColors.blueAccent[700],
+            },
+            "&.Mui-disabled": {
+              backgroundColor: themeColors.primary[600],
+              color: themeColors.grey[500],
+            },
+          }}
+        >
+          {enviando ? (
+            <>
+              <Box
+                component="span"
+                sx={{
+                  width: 16,
+                  height: 16,
+                  border: `2px solid ${themeColors.grey[100]}`,
+                  borderTopColor: "transparent",
+                  borderRadius: "50%",
+                  display: "inline-block",
+                  animation: "spin 0.8s linear infinite",
+                  mr: 1,
+                }}
+              />
+              {modo === "agregar" ? "Agregando..." : "Guardando..."}
+            </>
+          ) : cargandoImagen ? (
+            "Procesando imagen..."
+          ) : (
+            modo === "agregar" ? "Agregar foto" : "Guardar cambios"
+          )}
+        </Button>
+      </DialogActions>
+
+      <style>
+        {`
+          @keyframes spin {
+            from {
+              transform: rotate(0deg);
+            }
+            to {
+              transform: rotate(360deg);
+            }
+          }
+        `}
+      </style>
+    </Dialog>
+  );
+};
+
+// 🔹 Componente para confirmar eliminación
+const ConfirmDeleteDialog = ({
+  open,
+  onClose,
+  onConfirm,
+  foto,
+  colors,
+  COLOR_FONDO,
+  COLOR_BORDE,
+}) => {
+  return (
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="xs"
+      fullWidth
+      PaperProps={{
+        sx: {
+          backgroundColor: COLOR_FONDO,
+          borderRadius: "12px",
+        },
+      }}
+    >
+      <DialogTitle
+        sx={{
+          borderBottom: `1px solid ${COLOR_BORDE}`,
+          p: 2.5,
+        }}
+      >
+        <Typography
+          variant="h6"
+          sx={{ color: colors.redAccent[400], fontWeight: 600 }}
+        >
+          Confirmar eliminación
+        </Typography>
+      </DialogTitle>
+
+      <DialogContent sx={{ p: 3 }}>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          <Typography sx={{ color: colors.grey[300] }}>
+            ¿Estás seguro de que deseas eliminar esta foto?
+          </Typography>
+          {foto && (
+            <Box
+              sx={{
+                p: 2,
+                backgroundColor: colors.bgContainerSecondary,
+                borderRadius: "8px",
+                border: `1px solid ${COLOR_BORDE}`,
+              }}
+            >
+              <Typography variant="body2" sx={{ color: colors.grey[400] }}>
+                <strong>Nombre:</strong> {foto.nombreFoto || "Sin nombre"}
+              </Typography>
+              <Typography variant="body2" sx={{ color: colors.grey[400] }}>
+                <strong>Tipo:</strong>{" "}
+                {foto.tipo === "FACHADA" ? "Fachada predio" : "Evidencia"}
+              </Typography>
+              <Typography variant="body2" sx={{ color: colors.grey[400] }}>
+                <strong>Cuenta:</strong> {foto.cuenta}
+              </Typography>
+            </Box>
+          )}
+        </Box>
+      </DialogContent>
+
+      <DialogActions
+        sx={{
+          borderTop: `1px solid ${COLOR_BORDE}`,
+          p: 2.5,
+          gap: 1,
+        }}
+      >
+        <Button
+          onClick={onClose}
+          sx={{
+            color: colors.grey[400],
+            textTransform: "none",
+          }}
+        >
+          Cancelar
+        </Button>
+        <Button
+          variant="contained"
+          onClick={onConfirm}
+          startIcon={<Delete />}
+          sx={{
+            backgroundColor: colors.redAccent[600],
+            color: colors.grey[100],
+            textTransform: "none",
+            "&:hover": {
+              backgroundColor: colors.redAccent[700],
+            },
+          }}
+        >
+          Eliminar
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
+
 // 🔹 Componente ChipContadorFoto
 const ChipContadorFoto = ({
   tipo,
@@ -321,17 +1127,21 @@ const ChipContadorFoto = ({
   );
 };
 
-// 🔹 Componente para mini galería inline
+// 🔹 Componente para mini galería inline - con menú de acciones en esquina superior derecha
 const MiniGaleria = ({
   fotos,
   cuenta,
   onImageClick,
+  onEditFoto,
+  onDeleteFoto,
   startingIndex = 0,
   COLOR_EFICIENTE,
   COLOR_REGULAR,
 }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [selectedFoto, setSelectedFoto] = useState(null);
 
   const fotosFachada = fotos.filter((f) => f.tipo === "FACHADA");
   const fotosEvidencia = fotos.filter((f) => f.tipo === "EVIDENCIA");
@@ -339,6 +1149,31 @@ const MiniGaleria = ({
 
   const fotosParaMostrar = todasLasFotos.slice(0, 4);
   const fotosRestantes = todasLasFotos.length - 4;
+
+  const handleMenuOpen = (event, foto) => {
+    event.stopPropagation();
+    setAnchorEl(event.currentTarget);
+    setSelectedFoto(foto);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setSelectedFoto(null);
+  };
+
+  const handleEdit = () => {
+    handleMenuClose();
+    if (selectedFoto) {
+      onEditFoto(selectedFoto);
+    }
+  };
+
+  const handleDelete = () => {
+    handleMenuClose();
+    if (selectedFoto) {
+      onDeleteFoto(selectedFoto);
+    }
+  };
 
   if (todasLasFotos.length === 0) {
     return (
@@ -348,9 +1183,9 @@ const MiniGaleria = ({
           alignItems: "center",
           justifyContent: "center",
           height: 80,
-          backgroundColor: colors.primary[900],
+          backgroundColor: colors.bgContainerSecondary,
           borderRadius: "8px",
-          border: `1px dashed ${colors.primary[700]}`,
+          border: `1px solid ${colors.primary[700]}`,
           color: colors.grey[600],
         }}
       >
@@ -393,9 +1228,8 @@ const MiniGaleria = ({
           alignItems: "center",
           gap: 1,
           p: 1,
-          backgroundColor: colors.primary[900],
+          backgroundColor: colors.bgContainerSecondary,
           borderRadius: "8px",
-          border: `1px solid ${colors.primary[700]}`,
           overflow: "auto",
           "&::-webkit-scrollbar": {
             height: 4,
@@ -411,88 +1245,123 @@ const MiniGaleria = ({
           const esFachada = foto.tipo === "FACHADA";
 
           return (
-            <Tooltip
-              key={foto.id}
-              title={`${esFachada ? "Fachada" : "Evidencia"} - ${foto.nombreFoto || "Sin nombre"}`}
-            >
-              <Card
-                sx={{
-                  position: "relative",
-                  borderRadius: "6px",
-                  overflow: "hidden",
-                  cursor: "pointer",
-                  flexShrink: 0,
-                  width: 80,
-                  height: 80,
-                  border: `2px solid ${esFachada ? colors.greenAccent[700] : colors.blueAccent[700]}`,
-                  transition: "all 0.2s ease",
-                  "&:hover": {
-                    transform: "scale(1.05)",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
-                  },
-                }}
-                onClick={() => onImageClick(startingIndex + index)}
+            <Box key={foto.id} sx={{ position: "relative" }}>
+              <Tooltip
+                title={`${esFachada ? "Fachada predio" : "Evidencia"} - ${foto.nombreFoto || "Sin nombre"}`}
               >
-                <CardMedia
-                  component="img"
-                  height="80"
-                  image={imagenUrl}
-                  alt={foto.nombreFoto || `Foto ${index + 1}`}
+                <Card
                   sx={{
-                    objectFit: "cover",
-                    width: "100%",
-                    backgroundColor: colors.primary[900],
+                    position: "relative",
+                    borderRadius: "6px",
+                    overflow: "hidden",
+                    cursor: "pointer",
+                    flexShrink: 0,
+                    width: 80,
+                    height: 80,
+                    border: `2px solid ${esFachada ? colors.greenAccent[700] : colors.blueAccent[700]}`,
+                    transition: "all 0.2s ease",
+                    "&:hover": {
+                      transform: "scale(1.05)",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+                      "& .foto-actions": {
+                        opacity: 1,
+                      },
+                    },
                   }}
-                  onError={(e) => {
-                    e.target.src = `https://via.placeholder.com/80/${esFachada ? "1b5e20" : "0d47a1"}/ffffff?text=${esFachada ? "F" : "E"}`;
-                  }}
-                />
-                <Box
-                  sx={{
-                    position: "absolute",
-                    top: 4,
-                    right: 4,
-                  }}
+                  onClick={() => onImageClick(startingIndex + index)}
                 >
-                  {foto.verificada && (
-                    <Tooltip title="Verificada">
-                      <Verified
-                        sx={{
-                          fontSize: 14,
-                          color: colors.greenAccent[500],
-                          filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.5))",
-                        }}
+                  <CardMedia
+                    component="img"
+                    height="80"
+                    image={imagenUrl}
+                    alt={foto.nombreFoto || `Foto ${index + 1}`}
+                    sx={{
+                      objectFit: "cover",
+                      width: "100%",
+                      backgroundColor: colors.primary[900],
+                    }}
+                    onError={(e) => {
+                      e.target.src = `https://via.placeholder.com/80/${esFachada ? "1b5e20" : "0d47a1"}/ffffff?text=${esFachada ? "F" : "E"}`;
+                    }}
+                  />
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      top: 4,
+                      right: 4,
+                    }}
+                  >
+                    {foto.verificada && (
+                      <Tooltip title="Verificada">
+                        <Verified
+                          sx={{
+                            fontSize: 14,
+                            color: colors.greenAccent[500],
+                            filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.5))",
+                          }}
+                        />
+                      </Tooltip>
+                    )}
+                  </Box>
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      bottom: 4,
+                      left: 4,
+                      backgroundColor: "rgba(0,0,0,0.6)",
+                      borderRadius: "4px",
+                      width: 20,
+                      height: 20,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      backdropFilter: "blur(4px)",
+                    }}
+                  >
+                    {esFachada ? (
+                      <HouseIcon
+                        sx={{ fontSize: 12, color: colors.greenAccent[300] }}
                       />
-                    </Tooltip>
-                  )}
-                </Box>
-                <Box
-                  sx={{
-                    position: "absolute",
-                    bottom: 4,
-                    left: 4,
-                    backgroundColor: "rgba(0,0,0,0.6)",
-                    borderRadius: "4px",
-                    width: 20,
-                    height: 20,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    backdropFilter: "blur(4px)",
-                  }}
-                >
-                  {esFachada ? (
-                    <HouseIcon
-                      sx={{ fontSize: 12, color: colors.greenAccent[300] }}
-                    />
-                  ) : (
-                    <DescriptionIcon
-                      sx={{ fontSize: 12, color: colors.blueAccent[300] }}
-                    />
-                  )}
-                </Box>
-              </Card>
-            </Tooltip>
+                    ) : (
+                      <DescriptionIcon
+                        sx={{ fontSize: 12, color: colors.blueAccent[300] }}
+                      />
+                    )}
+                  </Box>
+
+                  {/* Botón de acciones al hacer hover - en esquina superior derecha */}
+                  <Box
+                    className="foto-actions"
+                    sx={{
+                      position: "absolute",
+                      top: 4,
+                      right: 4,
+                      opacity: 0,
+                      transition: "opacity 0.2s ease",
+                      zIndex: 10,
+                    }}
+                  >
+                    <IconButton
+                      size="small"
+                      onClick={(e) => handleMenuOpen(e, foto)}
+                      sx={{
+                        color: "white",
+                        backgroundColor: "rgba(0,0,0,0.6)",
+                        padding: "2px",
+                        "&:hover": {
+                          backgroundColor: "rgba(0,0,0,0.8)",
+                        },
+                        "& .MuiSvgIcon-root": {
+                          fontSize: 16,
+                        },
+                      }}
+                    >
+                      <MoreVert />
+                    </IconButton>
+                  </Box>
+                </Card>
+              </Tooltip>
+            </Box>
           );
         })}
 
@@ -532,6 +1401,35 @@ const MiniGaleria = ({
           </Tooltip>
         )}
       </Box>
+
+      {/* Menú de acciones para fotos */}
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+        PaperProps={{
+          sx: {
+            backgroundColor: colors.bgContainer,
+            border: `1px solid ${colors.primary[700]}`,
+            borderRadius: "8px",
+            minWidth: 160,
+          },
+        }}
+      >
+        <MenuItem onClick={handleEdit} sx={{ color: colors.grey[300] }}>
+          <ListItemIcon>
+            <Edit sx={{ color: colors.blueAccent[400], fontSize: 18 }} />
+          </ListItemIcon>
+          <ListItemText>Editar</ListItemText>
+        </MenuItem>
+        <Divider sx={{ backgroundColor: colors.primary[700] }} />
+        <MenuItem onClick={handleDelete} sx={{ color: colors.grey[300] }}>
+          <ListItemIcon>
+            <Delete sx={{ color: colors.redAccent[400], fontSize: 18 }} />
+          </ListItemIcon>
+          <ListItemText>Eliminar</ListItemText>
+        </MenuItem>
+      </Menu>
     </Box>
   );
 };
@@ -608,6 +1506,13 @@ const GestorDetallesDialog = ({
   const [gestionExpandida, setGestionExpandida] = useState(null);
   const [fotoAmpliada, setFotoAmpliada] = useState(null);
   const [fotoAmpliadaIndex, setFotoAmpliadaIndex] = useState(0);
+
+  // 🔹 Estados para edición de fotos
+  const [fotoEditando, setFotoEditando] = useState(null);
+  const [modoEditor, setModoEditor] = useState(null);
+  const [gestionSeleccionada, setGestionSeleccionada] = useState(null);
+  const [fotoEliminar, setFotoEliminar] = useState(null);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
   // 🔹 Ref para seguimiento
   const usuarioAnteriorRef = useRef(null);
@@ -729,10 +1634,13 @@ const GestorDetallesDialog = ({
               fecha: gestion.fecha,
               fechaCaptura: foto.fechaCaptura,
               nombreFoto: foto.nombreFoto,
-              descripcion: foto.tipo || (esFachada ? "Fachada" : "Evidencia"),
+              descripcion:
+                foto.tipo || (esFachada ? "Fachada predio" : "Evidencia"),
               verificada: foto.verificada || false,
               gestionId: gestion.id || gestion.cuenta,
               metadata: foto,
+              idTarea: foto.idTarea,
+              idRegistroFoto: foto.idRegistroFoto,
             });
           }
         });
@@ -763,7 +1671,8 @@ const GestorDetallesDialog = ({
               fecha: gestion.fecha,
               fechaCaptura: foto.fechaCaptura,
               nombreFoto: foto.nombreFoto,
-              descripcion: foto.tipo || (esFachada ? "Fachada" : "Evidencia"),
+              descripcion:
+                foto.tipo || (esFachada ? "Fachada predio" : "Evidencia"),
               verificada: foto.verificada || false,
               gestionId: gestion.id || gestion.cuenta,
               metadata: foto,
@@ -795,9 +1704,12 @@ const GestorDetallesDialog = ({
           fecha: gestion.fecha,
           fechaCaptura: foto.fechaCaptura,
           nombreFoto: foto.nombreFoto,
-          descripcion: foto.tipo || (esFachada ? "Fachada" : "Evidencia"),
+          descripcion:
+            foto.tipo || (esFachada ? "Fachada predio" : "Evidencia"),
           verificada: foto.verificada || false,
           metadata: foto,
+          idTarea: foto.idTarea,
+          idRegistroFoto: foto.idRegistroFoto,
         };
       })
       .filter((foto) => foto.urlImagen);
@@ -885,6 +1797,117 @@ const GestorDetallesDialog = ({
     document.body.removeChild(link);
   };
 
+  // 🔹 FUNCIONES PARA MANEJO DE FOTOS
+  const [cargandoGuardado, setCargandoGuardado] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+
+  const handleAgregarFoto = (gestion) => {
+    setGestionSeleccionada(gestion);
+    setFotoEditando(null);
+    setModoEditor("agregar");
+  };
+
+  const handleEditarFoto = (foto) => {
+    setFotoEditando(foto);
+    setGestionSeleccionada(
+      gestionesFiltradas.find((g) => g.cuenta === foto.cuenta),
+    );
+    setModoEditor("editar");
+  };
+
+  const handleEliminarFoto = (foto) => {
+    setFotoEliminar(foto);
+    setConfirmDeleteOpen(true);
+  };
+
+  const handleGuardarFoto = async (datos) => {
+    setCargandoGuardado(true);
+
+    try {
+      let urlImagen = datos.urlImagenExistente;
+
+      // Simular subida de imagen al backend
+      if (datos.imagenBase64) {
+        // Simulación de subida a S3
+        console.log("📤 Subiendo imagen a S3...");
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+
+        // Simular URL generada por el backend
+        urlImagen = `https://fotos-sero-movil.s3.amazonaws.com/${datos.nombreFoto.replace(/[^a-zA-Z0-9]/g, "_")}.jpg`;
+        console.log("✅ Imagen subida exitosamente:", urlImagen);
+      }
+
+      const fotoCompleta = {
+        cuenta: gestionSeleccionada?.cuenta,
+        idAspUser: usuario?.id,
+        nombreFoto: datos.nombreFoto,
+        idTarea: datos.idTarea,
+        fechaCaptura: datos.fechaCaptura,
+        tipo: datos.tipo === "Fachada predio" ? "FACHADA" : "EVIDENCIA",
+        urlImagen: urlImagen,
+        fechaSincronizacion: new Date().toISOString(),
+        id_servicio: 2, // Temporal
+        medio_carga: false,
+        tipo_carga: false,
+      };
+
+      if (modoEditor === "editar" && fotoEditando?.idRegistroFoto) {
+        fotoCompleta.idRegistroFoto = fotoEditando.idRegistroFoto;
+      }
+
+      console.log("💾 Guardando en base de datos:", fotoCompleta);
+
+      // Simular guardado en BD
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      // Mostrar mensaje de éxito
+      setSnackbarMessage(
+        `Foto ${modoEditor === "agregar" ? "agregada" : "actualizada"} correctamente`,
+      );
+      setSnackbarSeverity("success");
+      setSnackbarOpen(true);
+
+      // Cerrar diálogo
+      setFotoEditando(null);
+      setGestionSeleccionada(null);
+      setModoEditor(null);
+    } catch (error) {
+      console.error("❌ Error al guardar foto:", error);
+      setSnackbarMessage("Error al guardar la foto. Intenta nuevamente.");
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+    } finally {
+      setCargandoGuardado(false);
+    }
+  };
+
+  const handleConfirmarEliminar = async () => {
+    setCargandoGuardado(true);
+
+    try {
+      console.log("🗑️ Eliminando foto:", fotoEliminar);
+
+      // Simular eliminación en BD
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      setSnackbarMessage("Foto eliminada correctamente");
+      setSnackbarSeverity("success");
+      setSnackbarOpen(true);
+
+      setFotoEliminar(null);
+      setConfirmDeleteOpen(false);
+    } catch (error) {
+      console.error("❌ Error al eliminar foto:", error);
+      setSnackbarMessage("Error al eliminar la foto. Intenta nuevamente.");
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+    } finally {
+      setCargandoGuardado(false);
+    }
+  };
+
   /* ======================================================
      DESCARGA A EXCEL - SOLO LO QUE SE VE EN EL DATAGRID
   ====================================================== */
@@ -893,7 +1916,6 @@ const GestorDetallesDialog = ({
 
     const workbook = new ExcelJS.Workbook();
 
-    // ========== HOJA 1: RESUMEN DEL GESTOR ==========
     const resumenSheet = workbook.addWorksheet("Resumen", {
       views: [{ state: "frozen", xSplit: 0, ySplit: 1 }],
     });
@@ -926,12 +1948,10 @@ const GestorDetallesDialog = ({
       column.width = 20;
     });
 
-    // ========== HOJA 2: GESTIONES FILTRADAS (LO QUE VE EL USUARIO) ==========
     const gestionesSheet = workbook.addWorksheet("Gestiones", {
       views: [{ state: "frozen", xSplit: 0, ySplit: 1 }],
     });
 
-    // 📌 MISMAS COLUMNAS QUE EL DATAGRID
     const headers = [
       "Cuenta",
       "Fecha",
@@ -956,16 +1976,9 @@ const GestorDetallesDialog = ({
       };
     });
 
-    // 📌 EXPORTAR SOLO LAS GESTIONES FILTRADAS (las que ve el usuario)
     gestionesFiltradas.forEach((gestion) => {
-      // Formatear fecha con hora
       const fecha = new Date(gestion.fecha);
       const fechaFormateada = `${fecha.toLocaleDateString("es-MX")} ${fecha.toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" })}`;
-
-      // Formato descriptivo de fotos
-      const fotosFachada = gestion.fotosFachada || 0;
-      const fotosEvidencia = gestion.fotosEvidencia || 0;
-      const fotosTexto = `Fachada: ${fotosFachada}, Evidencia: ${fotosEvidencia}`;
 
       const row = gestionesSheet.addRow([
         gestion.cuenta || "",
@@ -975,8 +1988,8 @@ const GestorDetallesDialog = ({
           ? "Completa"
           : formatMotivoGestion(gestion.motivo_gestion),
         gestion.tieneGPS ? "Sí" : "No",
-        gestion.fotosFachada || 0, // Columna separada
-        gestion.fotosEvidencia || 0, // Columna separada
+        gestion.fotosFachada || 0,
+        gestion.fotosEvidencia || 0,
       ]);
 
       row.eachCell((cell) => {
@@ -987,18 +2000,16 @@ const GestorDetallesDialog = ({
         };
       });
 
-      // Aplicar color al texto según el estado
       const estadoCell = row.getCell(3);
       if (gestion.estatus_gestion === "COMPLETA") {
-        estadoCell.font = { color: { argb: "FF10B981" } }; // Verde
+        estadoCell.font = { color: { argb: "FF10B981" } };
       } else if (gestion.estatus_gestion === "INCOMPLETA") {
-        estadoCell.font = { color: { argb: "FFF59E0B" } }; // Amarillo
+        estadoCell.font = { color: { argb: "FFF59E0B" } };
       } else if (gestion.estatus_gestion === "INVALIDA") {
-        estadoCell.font = { color: { argb: "FFEF4444" } }; // Rojo
+        estadoCell.font = { color: { argb: "FFEF4444" } };
       }
     });
 
-    // Ajustar ancho de columnas
     gestionesSheet.columns.forEach((column) => {
       let maxLength = 10;
       column.eachCell({ includeEmpty: true }, (cell) => {
@@ -1008,7 +2019,6 @@ const GestorDetallesDialog = ({
       column.width = Math.min(maxLength + 2, 40);
     });
 
-    // ========== HOJA 3: MOTIVOS (RESUMEN) ==========
     const motivosSheet = workbook.addWorksheet("Motivos", {
       views: [{ state: "frozen", xSplit: 0, ySplit: 1 }],
     });
@@ -1041,7 +2051,6 @@ const GestorDetallesDialog = ({
       column.width = 25;
     });
 
-    // ========== GENERAR ARCHIVO ==========
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -1068,6 +2077,9 @@ const GestorDetallesDialog = ({
       setFiltroMotivo("TODOS");
       setGestionExpandida(null);
       setFotoAmpliada(null);
+      setFotoEditando(null);
+      setGestionSeleccionada(null);
+      setModoEditor(null);
       usuarioAnteriorRef.current = usuario.id;
     }
   }, [open, usuario]);
@@ -1389,11 +2401,12 @@ const GestorDetallesDialog = ({
                           <TableRow
                             sx={{
                               "&:hover": {
-                                backgroundColor: colors.primary[400],
+                                backgroundColor: colors.bgContainerSecondary,
                               },
                               borderBottom: isExpanded
                                 ? "none"
                                 : `1px solid ${colors.primary[700]}`,
+                              transition: "background-color 0.2s ease",
                             }}
                           >
                             <TableCell>
@@ -1411,11 +2424,15 @@ const GestorDetallesDialog = ({
                                   transform: isExpanded
                                     ? "rotate(180deg)"
                                     : "none",
-                                  transition: "transform 0.2s ease",
+                                  transition:
+                                    "transform 0.2s ease, color 0.2s ease",
                                   "&:hover": {
                                     color: tieneFotos
                                       ? COLOR_TEXTO
                                       : colors.grey[600],
+                                    backgroundColor: tieneFotos
+                                      ? colors.primary[400] + "20"
+                                      : "transparent",
                                   },
                                 }}
                                 disabled={!tieneFotos}
@@ -1510,6 +2527,10 @@ const GestorDetallesDialog = ({
                                       fontSize: "0.8rem",
                                       marginLeft: "4px",
                                       marginRight: "2px",
+                                      color:
+                                        fotosFachada > 0
+                                          ? COLOR_EFICIENTE
+                                          : COLOR_REGULAR,
                                     },
                                     "& .MuiChip-label": {
                                       px: 0.5,
@@ -1538,6 +2559,10 @@ const GestorDetallesDialog = ({
                                       fontSize: "0.8rem",
                                       marginLeft: "4px",
                                       marginRight: "2px",
+                                      color:
+                                        fotosEvidencia > 0
+                                          ? COLOR_EFICIENTE
+                                          : COLOR_REGULAR,
                                     },
                                     "& .MuiChip-label": {
                                       px: 0.5,
@@ -1548,7 +2573,6 @@ const GestorDetallesDialog = ({
                             </TableCell>
                           </TableRow>
 
-                          {/* Fila expandida con galería */}
                           {isExpanded && (
                             <TableRow>
                               <TableCell
@@ -1556,11 +2580,18 @@ const GestorDetallesDialog = ({
                                 sx={{
                                   p: 0,
                                   borderBottom: `1px solid ${colors.primary[700]}`,
-                                  backgroundColor: colors.primary[900],
+                                  backgroundColor: "transparent",
                                 }}
                               >
                                 <Collapse in={isExpanded} timeout="auto">
-                                  <Box sx={{ p: 3 }}>
+                                  <Box
+                                    sx={{
+                                      p: 3,
+                                      backgroundColor: colors.bgContainer,
+                                      borderTop: `1px solid ${COLOR_BORDE}`,
+                                      borderBottom: `1px solid ${COLOR_BORDE}`,
+                                    }}
+                                  >
                                     <Box
                                       sx={{
                                         display: "flex",
@@ -1577,13 +2608,19 @@ const GestorDetallesDialog = ({
                                         }}
                                       >
                                         <PhotoLibrary
-                                          sx={{ color: COLOR_TEXTO }}
+                                          sx={{
+                                            color: colors.blueAccent[400],
+                                            fontSize: 20,
+                                          }}
                                         />
                                         <Typography
                                           variant="subtitle2"
                                           sx={{
-                                            color: COLOR_TEXTO,
+                                            color: colors.grey[300],
                                             fontWeight: 600,
+                                            fontSize: "0.8rem",
+                                            textTransform: "uppercase",
+                                            letterSpacing: "0.3px",
                                           }}
                                         >
                                           Galería de fotos
@@ -1603,6 +2640,26 @@ const GestorDetallesDialog = ({
                                           {fotos.length} foto
                                           {fotos.length !== 1 ? "s" : ""}
                                         </Typography>
+
+                                        <Button
+                                          size="small"
+                                          startIcon={<AddPhotoAlternate />}
+                                          onClick={() =>
+                                            handleAgregarFoto(gestion)
+                                          }
+                                          sx={{
+                                            color: colors.greenAccent[400],
+                                            fontSize: "0.7rem",
+                                            textTransform: "none",
+                                            "&:hover": {
+                                              backgroundColor:
+                                                colors.greenAccent[400] + "20",
+                                            },
+                                          }}
+                                        >
+                                          Agregar
+                                        </Button>
+
                                         {fotos.length > 0 && (
                                           <Button
                                             size="small"
@@ -1615,7 +2672,12 @@ const GestorDetallesDialog = ({
                                             }}
                                             sx={{
                                               color: colors.blueAccent[400],
-                                              fontSize: "0.75rem",
+                                              fontSize: "0.7rem",
+                                              textTransform: "none",
+                                              "&:hover": {
+                                                backgroundColor:
+                                                  colors.blueAccent[400] + "20",
+                                              },
                                             }}
                                           >
                                             Ver todas
@@ -1636,6 +2698,8 @@ const GestorDetallesDialog = ({
                                           setFotoAmpliada(foto);
                                         }
                                       }}
+                                      onEditFoto={handleEditarFoto}
+                                      onDeleteFoto={handleEliminarFoto}
                                       COLOR_EFICIENTE={COLOR_EFICIENTE}
                                       COLOR_REGULAR={COLOR_REGULAR}
                                     />
@@ -1647,17 +2711,22 @@ const GestorDetallesDialog = ({
                                           display: "flex",
                                           gap: 2,
                                           alignItems: "center",
+                                          p: 1.5,
+                                          backgroundColor:
+                                            colors.bgContainerSecondary,
+                                          borderRadius: "8px",
+                                          border: `1px solid ${COLOR_BORDE}`,
                                         }}
                                       >
                                         <GpsIcon
                                           sx={{
-                                            color: colors.grey[500],
+                                            color: colors.grey[400],
                                             fontSize: 16,
                                           }}
                                         />
                                         <Typography
                                           variant="caption"
-                                          sx={{ color: colors.grey[500] }}
+                                          sx={{ color: colors.grey[400] }}
                                         >
                                           GPS:{" "}
                                           {gestion.coordenadas.latitud?.toFixed(
@@ -1681,7 +2750,6 @@ const GestorDetallesDialog = ({
                   </TableBody>
                 </Table>
 
-                {/* Paginación */}
                 <TablePagination
                   component="div"
                   count={gestionesFiltradas.length}
@@ -1718,7 +2786,6 @@ const GestorDetallesDialog = ({
             Cerrar
           </Button>
 
-          {/* 🔹 CONTADORES DE FOTOS */}
           <Box
             sx={{
               display: "flex",
@@ -1767,7 +2834,6 @@ const GestorDetallesDialog = ({
             </Tooltip>
           </Box>
 
-          {/* ✅ BOTÓN DE EXCEL - ESTILO MINIMALISTA */}
           <Button
             variant="text"
             startIcon={<Download />}
@@ -1788,7 +2854,6 @@ const GestorDetallesDialog = ({
         </DialogActions>
       </Dialog>
 
-      {/* 🔹 DIALOG PARA FOTO AMPLIADA */}
       <FotoAmpliadaDialog
         open={Boolean(fotoAmpliada)}
         foto={fotoAmpliada}
@@ -1796,9 +2861,65 @@ const GestorDetallesDialog = ({
         onDownload={descargarFoto}
         onNext={handleNextFoto}
         onPrev={handlePrevFoto}
+        onEdit={handleEditarFoto}
+        onDelete={handleEliminarFoto}
         totalFotos={fotosFiltradas.length}
         index={fotoAmpliadaIndex}
       />
+
+      <FotoEditorDialog
+        open={Boolean(modoEditor)}
+        onClose={() => {
+          setFotoEditando(null);
+          setGestionSeleccionada(null);
+          setModoEditor(null);
+        }}
+        onSave={handleGuardarFoto}
+        foto={fotoEditando}
+        modo={modoEditor}
+        cuenta={gestionSeleccionada?.cuenta}
+        fechaRegistro={gestionSeleccionada?.fecha}
+        colors={colors}
+        COLOR_TEXTO={COLOR_TEXTO}
+        COLOR_FONDO={COLOR_FONDO}
+        COLOR_BORDE={COLOR_BORDE}
+      />
+
+      <ConfirmDeleteDialog
+        open={confirmDeleteOpen}
+        onClose={() => {
+          setFotoEliminar(null);
+          setConfirmDeleteOpen(false);
+        }}
+        onConfirm={handleConfirmarEliminar}
+        foto={fotoEliminar}
+        colors={colors}
+        COLOR_FONDO={COLOR_FONDO}
+        COLOR_BORDE={COLOR_BORDE}
+      />
+
+      {/* 🔹 SNACKBAR PARA NOTIFICACIONES */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={4000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
+          severity={snackbarSeverity}
+          sx={{
+            backgroundColor:
+              snackbarSeverity === "success"
+                ? colors.greenAccent[800]
+                : colors.redAccent[800],
+            color: colors.grey[100],
+            borderRadius: "12px",
+          }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </>
   );
 };

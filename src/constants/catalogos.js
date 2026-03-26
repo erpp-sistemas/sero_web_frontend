@@ -1,0 +1,43 @@
+// src/constants/catalogos.js
+export const TIPOS_FOTO = [
+  { value: "Evidencia", label: "Evidencia" },
+  { value: "Fachada predio", label: "Fachada predio" }
+];
+
+export const TAREAS = [
+  { id_tarea: 1, nombre: "1ra Carta Invitación" },
+  { id_tarea: 2, nombre: "2da Carta Invitación" },
+  { id_tarea: 3, nombre: "3ra Carta Invitación" },
+  { id_tarea: 4, nombre: "Citatorio 1er Requerimiento Obligaciones Omitidas" },
+  { id_tarea: 5, nombre: "Notificación 1er Requerimiento Obligaciones Omitidas" },
+  { id_tarea: 6, nombre: "Citatorio 2do Requerimiento Obligaciones Omitidas" },
+  { id_tarea: 7, nombre: "Notificación 2do Requerimiento Obligaciones Omitidas" },
+  { id_tarea: 8, nombre: "Citatorio Determinación De Crédito Fiscal" },
+  { id_tarea: 9, nombre: "Notificación Determinación De Crédito Fiscal" },
+  { id_tarea: 10, nombre: "Citatorio Mandamiento De Ejecución" },
+  { id_tarea: 11, nombre: "Notificación Mandamiento De Ejecución" },
+  { id_tarea: 12, nombre: "Citatorio Requerimiento De Pago" },
+  { id_tarea: 13, nombre: "Notificación Requerimiento De Pago" },
+  { id_tarea: 14, nombre: "Remate Y/o Adjudicación" },
+  { id_tarea: 15, nombre: "Citatorio Reducción De Suministro" },
+  { id_tarea: 16, nombre: "Notificación Reducción De Suministro" },
+  { id_tarea: 17, nombre: "Esto Es Una Prueba" },
+  { id_tarea: 18, nombre: "Sello En Proceso De Restricción De Suministro" },
+  { id_tarea: 19, nombre: "Restricción Y Sello De Restricción" },
+  { id_tarea: 20, nombre: "Restricción De Suministro" },
+  { id_tarea: 22, nombre: "Lectura De Medidor" },
+  { id_tarea: 23, nombre: "Lona/sello Embargo Precautorio" },
+  { id_tarea: 24, nombre: "Carta Invitación Ultimo Aviso" },
+  { id_tarea: 25, nombre: "4ta Carta Invitación" },
+  { id_tarea: 26, nombre: "Entrega Producto" },
+  { id_tarea: 27, nombre: "Requerimiento de pago" },
+  { id_tarea: 28, nombre: "Carta invitación de diferencias de construcción" },
+  { id_tarea: 29, nombre: "Entrega de recibo" },
+  { id_tarea: 30, nombre: "Servicio Público" },
+  { id_tarea: 31, nombre: "Supervisión gestor" },
+  { id_tarea: 32, nombre: "Entrega vehiculo" },
+  { id_tarea: 33, nombre: "Carga producto" },
+  { id_tarea: 34, nombre: "Atención ciudadana 1er acercamiento" },
+  { id_tarea: 35, nombre: "Atención ciudadana censo comercios" },
+  { id_tarea: 36, nombre: "Atención ciudadana censo construcción" },
+];
