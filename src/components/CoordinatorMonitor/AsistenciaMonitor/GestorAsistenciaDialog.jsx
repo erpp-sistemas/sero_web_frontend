@@ -166,6 +166,49 @@ const GestorAsistenciaDialog = ({
   const gestorAnteriorRef = useRef(null);
 
   // ============================================
+  // FORMATO DE HORA AM/PM SIN PROBLEMAS DE ZONA HORARIA
+  // ============================================
+  const formatHoraAmPm = (hora) => {
+    if (!hora) return "—";
+    
+    let horas, minutos;
+    
+    // Si es un string con formato HH:MM:SS o HH:MM:SS.mmm
+    if (typeof hora === 'string') {
+      // Extraer horas y minutos
+      const match = hora.match(/(\d{2}):(\d{2}):(\d{2})/);
+      if (match) {
+        horas = parseInt(match[1], 10);
+        minutos = match[2];
+      } else {
+        return "—";
+      }
+    } 
+    // Si es un objeto Date o timestamp
+    else {
+      try {
+        const fecha = new Date(hora);
+        if (isNaN(fecha.getTime())) return "—";
+        // Usar UTC para evitar conversión de zona horaria
+        horas = fecha.getUTCHours();
+        minutos = fecha.getUTCMinutes().toString().padStart(2, '0');
+      } catch {
+        return "—";
+      }
+    }
+    
+    // Convertir a formato 12 horas
+    const periodo = horas >= 12 ? 'p.m.' : 'a.m.';
+    let horas12 = horas % 12;
+    horas12 = horas12 === 0 ? 12 : horas12; // 0 se convierte en 12
+    
+    // Formatear minutos con 2 dígitos
+    const minutosStr = minutos.toString().padStart(2, '0');
+    
+    return `${horas12}:${minutosStr} ${periodo}`;
+  };
+
+  // ============================================
   // OBTENER COLOR PARA FILTROS
   // ============================================
   const getColorFiltro = (estatus) => {
@@ -368,8 +411,8 @@ const GestorAsistenciaDialog = ({
       const row = historialSheet.addRow([
         formatFechaHora(dia.fecha),
         dia.estatus_asistencia.replace("_", " "),
-        dia.horaEntrada ? formatHora(dia.horaEntrada) : "—",
-        dia.horaSalida ? formatHora(dia.horaSalida) : "—",
+        dia.horaEntrada ? formatHoraAmPm(dia.horaEntrada) : "—",
+        dia.horaSalida ? formatHoraAmPm(dia.horaSalida) : "—",
         dia.minutos_desde_entrada || "—",
         dia.minutos_hasta_salida || "—",
         formatearDistancia(dia.metros_desde_entrada),
@@ -855,7 +898,7 @@ const GestorAsistenciaDialog = ({
                               variant="body2"
                               sx={{ color: COLOR_TEXTO }}
                             >
-                              {formatHora(dia.horaEntrada)}
+                              {formatHoraAmPm(dia.horaEntrada)}
                             </Typography>
                           ) : (
                             <Typography
@@ -873,7 +916,7 @@ const GestorAsistenciaDialog = ({
                               variant="body2"
                               sx={{ color: COLOR_TEXTO }}
                             >
-                              {formatHora(dia.horaSalida)}
+                              {formatHoraAmPm(dia.horaSalida)}
                             </Typography>
                           ) : (
                             <Typography

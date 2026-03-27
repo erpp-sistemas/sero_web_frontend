@@ -79,7 +79,7 @@ import {
 } from "@mui/icons-material";
 import { tokens } from "../../../theme";
 import * as ExcelJS from "exceljs";
-import { TIPOS_FOTO, TAREAS } from "../../../constants/catalogos";
+import { TIPOS_FOTO } from "../../../constants/catalogos";
 
 // 🔹 Componente para vista modal ampliada de foto
 const FotoAmpliadaDialog = ({
@@ -314,7 +314,7 @@ const FotoAmpliadaDialog = ({
   );
 };
 
-// 🔹 Componente para editar/agregar foto - VERSIÓN CORREGIDA
+// 🔹 Componente para editar/agregar foto - SIN TAREA
 const FotoEditorDialog = ({
   open,
   onClose,
@@ -334,7 +334,6 @@ const FotoEditorDialog = ({
   const [formData, setFormData] = useState({
     nombreFoto: "",
     tipo: "Evidencia",
-    idTarea: "",
     fechaCaptura: "",
   });
 
@@ -362,24 +361,9 @@ const FotoEditorDialog = ({
           tipoNormalizado = "Fachada predio";
         }
 
-        // Obtener idTarea - probar diferentes nombres de campo
-        let idTareaValor = "";
-        if (foto.idTarea) {
-          idTareaValor = String(foto.idTarea);
-        } else if (foto.id_tarea) {
-          idTareaValor = String(foto.id_tarea);
-        } else if (foto.metadata?.idTarea) {
-          idTareaValor = String(foto.metadata.idTarea);
-        } else if (foto.metadata?.id_tarea) {
-          idTareaValor = String(foto.metadata.id_tarea);
-        }
-        
-        console.log("📋 idTarea encontrado:", idTareaValor);
-
         setFormData({
           nombreFoto: foto.nombreFoto || "",
           tipo: tipoNormalizado,
-          idTarea: idTareaValor,
           fechaCaptura: foto.fechaCaptura ? new Date(foto.fechaCaptura).toISOString().slice(0, 16) : "",
         });
         setImagenPreview(foto.urlImagen || foto.url || null);
@@ -392,7 +376,6 @@ const FotoEditorDialog = ({
         setFormData({
           nombreFoto: nombreGenerado,
           tipo: "Evidencia",
-          idTarea: "",
           fechaCaptura: fechaCapturaISO,
         });
         setImagenPreview(null);
@@ -462,9 +445,6 @@ const FotoEditorDialog = ({
     if (!imagenBase64 && modo === "agregar") {
       newErrors.imagen = "La imagen es requerida";
     }
-    if (!formData.idTarea) {
-      newErrors.idTarea = "La tarea es requerida";
-    }
     if (!formData.tipo) {
       newErrors.tipo = "El tipo de foto es requerido";
     }
@@ -482,7 +462,6 @@ const FotoEditorDialog = ({
     try {
       const datosParaGuardar = {
         ...formData,
-        idTarea: parseInt(formData.idTarea),
         fechaCaptura: new Date(formData.fechaCaptura).toISOString(),
         nombreFoto: modo === "agregar" ? `${cuenta}${new Date().toISOString()}` : formData.nombreFoto,
         imagenBase64: modo === "agregar" ? imagenBase64 : null,
@@ -794,62 +773,6 @@ const FotoEditorDialog = ({
                 {errors.tipo}
               </Typography>
             )}
-          </Box>
-
-          {/* Tarea - select con valor seleccionado */}
-          <Box>
-            <Typography
-              variant="caption"
-              sx={{
-                color: themeColors.grey[500],
-                display: "block",
-                mb: 0.5,
-                ml: 0.5,
-                fontWeight: 500,
-                textTransform: "uppercase",
-                fontSize: "0.65rem",
-                letterSpacing: "0.02em",
-              }}
-            >
-              Tarea
-            </Typography>
-            <FormControl fullWidth size="small" error={!!errors.idTarea} disabled={enviando}>
-              <Select
-                name="idTarea"
-                value={formData.idTarea}
-                onChange={handleChange}
-                displayEmpty
-                sx={{
-                  color: COLOR_TEXTO,
-                  "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: COLOR_BORDE,
-                  },
-                  "&:hover .MuiOutlinedInput-notchedOutline": {
-                    borderColor: themeColors.blueAccent[400],
-                  },
-                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                    borderColor: themeColors.blueAccent[400],
-                  },
-                  "&.Mui-disabled": {
-                    "& .MuiOutlinedInput-notchedOutline": {
-                      borderColor: themeColors.primary[700],
-                    },
-                  },
-                }}
-              >
-                <MenuItem value="" disabled>
-                  <em style={{ color: themeColors.grey[500] }}>Seleccionar tarea</em>
-                </MenuItem>
-                {TAREAS.map((tarea) => (
-                  <MenuItem key={tarea.id_tarea} value={String(tarea.id_tarea)}>
-                    {tarea.nombre}
-                  </MenuItem>
-                ))}
-              </Select>
-              {errors.idTarea && (
-                <FormHelperText error>{errors.idTarea}</FormHelperText>
-              )}
-            </FormControl>
           </Box>
 
           {/* Fecha de captura */}
@@ -1489,6 +1412,8 @@ const GestorDetallesDialog = ({
   const theme = useTheme();
   const colors = colorsProp || tokens(theme.palette.mode);
 
+  console.log("Renderizando GestorDetallesDialog para usuario:", usuario);
+
   // Usar props o valores por defecto
   const COLOR_TEXTO = COLOR_TEXTO_PROPS || colors.grey[100];
   const COLOR_FONDO = COLOR_FONDO_PROPS || colors.bgContainer;
@@ -1513,6 +1438,12 @@ const GestorDetallesDialog = ({
   const [gestionSeleccionada, setGestionSeleccionada] = useState(null);
   const [fotoEliminar, setFotoEliminar] = useState(null);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+
+  // 🔹 Estado para loading y notificaciones
+  const [cargandoGuardado, setCargandoGuardado] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
 
   // 🔹 Ref para seguimiento
   const usuarioAnteriorRef = useRef(null);
@@ -1589,6 +1520,18 @@ const GestorDetallesDialog = ({
     return COLOR_ATENCION;
   };
 
+  // 🔹 Función para actualizar el estado de las fotos en el usuario
+  const actualizarFotosEnRegistro = (cuenta, nuevaListaFotos) => {
+    if (!usuario?.registros) return;
+    
+    const registroIndex = usuario.registros.findIndex(r => r.cuenta === cuenta);
+    if (registroIndex !== -1) {
+      usuario.registros[registroIndex].fotos = nuevaListaFotos;
+      // Forzar actualización del estado
+      setUsuario({ ...usuario });
+    }
+  };
+
   // 🔹 Calcular gestiones filtradas
   const gestionesFiltradas = useMemo(() => {
     if (!usuario?.registros) return [];
@@ -1639,7 +1582,6 @@ const GestorDetallesDialog = ({
               verificada: foto.verificada || false,
               gestionId: gestion.id || gestion.cuenta,
               metadata: foto,
-              idTarea: foto.idTarea,
               idRegistroFoto: foto.idRegistroFoto,
             });
           }
@@ -1708,7 +1650,6 @@ const GestorDetallesDialog = ({
             foto.tipo || (esFachada ? "Fachada predio" : "Evidencia"),
           verificada: foto.verificada || false,
           metadata: foto,
-          idTarea: foto.idTarea,
           idRegistroFoto: foto.idRegistroFoto,
         };
       })
@@ -1797,12 +1738,7 @@ const GestorDetallesDialog = ({
     document.body.removeChild(link);
   };
 
-  // 🔹 FUNCIONES PARA MANEJO DE FOTOS
-  const [cargandoGuardado, setCargandoGuardado] = useState(false);
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
-
+  // 🔹 FUNCIONES PARA MANEJO DE FOTOS CON ACTUALIZACIÓN DE ESTADO LOCAL
   const handleAgregarFoto = (gestion) => {
     setGestionSeleccionada(gestion);
     setFotoEditando(null);
@@ -1827,49 +1763,76 @@ const GestorDetallesDialog = ({
 
     try {
       let urlImagen = datos.urlImagenExistente;
+      let nuevoIdRegistroFoto = fotoEditando?.idRegistroFoto;
+      const cuentaActual = gestionSeleccionada?.cuenta;
 
       // Simular subida de imagen al backend
       if (datos.imagenBase64) {
-        // Simulación de subida a S3
         console.log("📤 Subiendo imagen a S3...");
         await new Promise((resolve) => setTimeout(resolve, 1500));
-
-        // Simular URL generada por el backend
         urlImagen = `https://fotos-sero-movil.s3.amazonaws.com/${datos.nombreFoto.replace(/[^a-zA-Z0-9]/g, "_")}.jpg`;
         console.log("✅ Imagen subida exitosamente:", urlImagen);
       }
 
+      // Simular ID para nueva foto
+      if (modoEditor === "agregar") {
+        nuevoIdRegistroFoto = Date.now();
+      }
+
       const fotoCompleta = {
-        cuenta: gestionSeleccionada?.cuenta,
+        idRegistroFoto: nuevoIdRegistroFoto,
+        cuenta: cuentaActual,
         idAspUser: usuario?.id,
         nombreFoto: datos.nombreFoto,
-        idTarea: datos.idTarea,
         fechaCaptura: datos.fechaCaptura,
         tipo: datos.tipo === "Fachada predio" ? "FACHADA" : "EVIDENCIA",
         urlImagen: urlImagen,
         fechaSincronizacion: new Date().toISOString(),
-        id_servicio: 2, // Temporal
+        id_servicio: 2,
         medio_carga: false,
         tipo_carga: false,
+        verificada: false,
       };
 
-      if (modoEditor === "editar" && fotoEditando?.idRegistroFoto) {
-        fotoCompleta.idRegistroFoto = fotoEditando.idRegistroFoto;
-      }
-
       console.log("💾 Guardando en base de datos:", fotoCompleta);
-
-      // Simular guardado en BD
       await new Promise((resolve) => setTimeout(resolve, 800));
 
-      // Mostrar mensaje de éxito
+      // 🔹 ACTUALIZAR EL ESTADO LOCAL
+      if (usuario?.registros) {
+        const registroIndex = usuario.registros.findIndex(r => r.cuenta === cuentaActual);
+        
+        if (registroIndex !== -1) {
+          const registro = usuario.registros[registroIndex];
+          const fotosActuales = registro.fotos || [];
+          
+          let nuevasFotos;
+          if (modoEditor === "agregar") {
+            // Agregar nueva foto al inicio del array
+            nuevasFotos = [fotoCompleta, ...fotosActuales];
+          } else {
+            // Editar foto existente
+            nuevasFotos = fotosActuales.map(f => 
+              f.idRegistroFoto === fotoEditando?.idRegistroFoto ? fotoCompleta : f
+            );
+          }
+          
+          // Actualizar el registro
+          usuario.registros[registroIndex] = {
+            ...registro,
+            fotos: nuevasFotos
+          };
+          
+          // Forzar actualización del estado
+          setUsuario({ ...usuario });
+        }
+      }
+
       setSnackbarMessage(
         `Foto ${modoEditor === "agregar" ? "agregada" : "actualizada"} correctamente`,
       );
       setSnackbarSeverity("success");
       setSnackbarOpen(true);
 
-      // Cerrar diálogo
       setFotoEditando(null);
       setGestionSeleccionada(null);
       setModoEditor(null);
@@ -1887,10 +1850,33 @@ const GestorDetallesDialog = ({
     setCargandoGuardado(true);
 
     try {
-      console.log("🗑️ Eliminando foto:", fotoEliminar);
+      const cuentaActual = fotoEliminar?.cuenta;
+      const idAEliminar = fotoEliminar?.idRegistroFoto;
 
-      // Simular eliminación en BD
+      console.log("🗑️ Eliminando foto:", fotoEliminar);
       await new Promise((resolve) => setTimeout(resolve, 800));
+
+      // 🔹 ACTUALIZAR EL ESTADO LOCAL - ELIMINAR FOTO
+      if (usuario?.registros && cuentaActual && idAEliminar) {
+        const registroIndex = usuario.registros.findIndex(r => r.cuenta === cuentaActual);
+        
+        if (registroIndex !== -1) {
+          const registro = usuario.registros[registroIndex];
+          const fotosActuales = registro.fotos || [];
+          
+          // Filtrar la foto eliminada
+          const nuevasFotos = fotosActuales.filter(f => f.idRegistroFoto !== idAEliminar);
+          
+          // Actualizar el registro
+          usuario.registros[registroIndex] = {
+            ...registro,
+            fotos: nuevasFotos
+          };
+          
+          // Forzar actualización del estado
+          setUsuario({ ...usuario });
+        }
+      }
 
       setSnackbarMessage("Foto eliminada correctamente");
       setSnackbarSeverity("success");
