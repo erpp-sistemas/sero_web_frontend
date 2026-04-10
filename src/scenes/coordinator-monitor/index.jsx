@@ -37,9 +37,113 @@ function Index() {
     severity: "info",
   });
 
+  // 🔹 Estado para almacenar los valores actuales de plaza y servicio
+  const [currentPlazaId, setCurrentPlazaId] = useState(null);
+  const [currentServicioId, setCurrentServicioId] = useState(null);
+
+  const calcularMotivoYEstadoRegistro = (registro) => {
+    const fotos = Array.isArray(registro.fotos) ? registro.fotos : [];
+    const fotosFachada = fotos.filter((foto) => {
+      const tipo = (foto.tipo || "").toString().toUpperCase();
+      return tipo.includes("FACHADA") || tipo.includes("PREDIO");
+    }).length;
+    const fotosEvidencia = fotos.filter((foto) => {
+      const tipo = (foto.tipo || "").toString().toUpperCase();
+      return tipo.includes("EVIDENCIA");
+    }).length;
+
+    const tieneGPS =
+      registro.tieneGPS ??
+      Boolean(
+        registro.latitud &&
+        registro.longitud &&
+        registro.latitud !== 0 &&
+        registro.longitud !== 0,
+      );
+
+    let motivo = "COMPLETA";
+    if (!tieneGPS) {
+      if (fotosFachada === 0 && fotosEvidencia === 0) {
+        motivo = "SIN_GPS_Y_SIN_FOTOS";
+      } else if (fotosFachada === 0) {
+        motivo = "SIN_GPS_Y_FALTA_FOTO_FACHADA";
+      } else if (fotosEvidencia === 0) {
+        motivo = "SIN_GPS_Y_FALTA_FOTO_EVIDENCIA";
+      } else {
+        motivo = "SIN_GPS";
+      }
+    } else if (fotosFachada === 0 && fotosEvidencia === 0) {
+      motivo = "FALTAN_AMBAS_FOTOS";
+    } else if (fotosFachada === 0) {
+      motivo = "FALTA_FOTO_FACHADA";
+    } else if (fotosEvidencia === 0) {
+      motivo = "FALTA_FOTO_EVIDENCIA";
+    }
+
+    const estatus =
+      registro.estatus_gestion === "INVALIDA"
+        ? "INVALIDA"
+        : motivo === "COMPLETA"
+          ? "COMPLETA"
+          : "INCOMPLETA";
+
+    return {
+      motivo_gestion: motivo,
+      estatus_gestion: estatus,
+      fotos_fachada: fotosFachada,
+      fotos_evidencia: fotosEvidencia,
+      total_fotos: fotos.length,
+    };
+  };
+
+  const getRegistroKey = (registro) => {
+    if (!registro) return null;
+    const cuenta = registro.cuenta || "";
+    const fecha = registro.fecha || registro.date_capture || "";
+    return registro.id ? registro.id : `${cuenta}-${fecha}`;
+  };
+
+  const handleRegisterResultUpdate = (usuarioActualizado) => {
+    if (!usuarioActualizado?.registros?.length) return;
+
+    // Crear un Map para búsqueda rápida por ID de registro
+    const registrosActualizadosMap = new Map();
+
+    usuarioActualizado.registros.forEach((registro) => {
+      const key = registro.id || `${registro.cuenta}-${registro.fecha}`;
+      registrosActualizadosMap.set(key, registro);
+    });
+
+    // Actualizar registerResult
+    setRegisterResult((prevRegisterResult) =>
+      prevRegisterResult.map((registro) => {
+        const registroKey =
+          registro.id || `${registro.cuenta}-${registro.fecha}`;
+        const registroActualizado = registrosActualizadosMap.get(registroKey);
+
+        if (!registroActualizado) return registro;
+
+        // Preservar el array de fotos actualizado
+        const fotosActualizadas =
+          registroActualizado.fotos || registro.fotos || [];
+
+        // Devolver el registro actualizado con todos los campos
+        return {
+          ...registro,
+          ...registroActualizado,
+          fotos: fotosActualizadas,
+        };
+      }),
+    );
+  };
+
   // 🔹 Manejo de filtros y petición al backend
   const handleFilterChange = async (values) => {
     setFilters(values);
+
+    // Guardar los valores actuales de plaza y servicio
+    setCurrentPlazaId(values.plazaId);
+    setCurrentServicioId(values.servicioId);
 
     if (!values.plazaId || !values.servicioId || !values.procesoId) return;
 
@@ -61,6 +165,7 @@ function Index() {
         const registerResultData = response.data || [];
 
         setRegisterResult(registerResultData);
+        console.log(registerResultData);
         const totalRegister = registerResultData.length;
 
         setSnackbar({
@@ -147,9 +252,13 @@ function Index() {
       {/* Área para componentes del dashboard */}
       {registerResult.length > 0 && !loading && (
         <Box sx={{ mt: 4 }}>
-          
-          <CoordinatorKpiCards data={registerResult} />          
-          <PerformanceMonitor data={registerResult} />
+          <CoordinatorKpiCards data={registerResult} />
+          <PerformanceMonitor
+            data={registerResult}
+            plazaId={currentPlazaId}
+            servicioId={currentServicioId}
+            onDataUpdate={handleRegisterResultUpdate}
+          />
           <AsistenciaMonitor data={registerResult} />
           <MapaGestores data={registerResult} />
           {/* Aquí irán los componentes que vamos a agregar: */}

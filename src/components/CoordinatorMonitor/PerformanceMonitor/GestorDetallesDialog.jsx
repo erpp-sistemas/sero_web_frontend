@@ -1,5 +1,11 @@
 // src/components/CoordinatorMonitor/GestorDetallesDialog.jsx
-import React, { useState, useMemo, useEffect, useRef } from "react";
+import React, {
+  useState,
+  useMemo,
+  useEffect,
+  useRef,
+  useCallback,
+} from "react";
 import {
   Dialog,
   DialogTitle,
@@ -25,8 +31,6 @@ import {
   TableHead,
   TableRow,
   TablePagination,
-  Avatar,
-  AvatarGroup,
   Menu,
   MenuItem,
   ListItemIcon,
@@ -39,6 +43,7 @@ import {
   FormHelperText,
   Snackbar,
   Alert,
+  CircularProgress,
 } from "@mui/material";
 import {
   Close,
@@ -52,9 +57,7 @@ import {
   PhotoCamera,
   PhotoLibrary,
   Home,
-  CameraAlt,
   Verified,
-  Check,
   Download as DownloadIcon,
   ExpandMore,
   ExpandLess,
@@ -66,10 +69,6 @@ import {
   House as HouseIcon,
   Description as DescriptionIcon,
   Photo as PhotoIcon,
-  Camera as CameraIcon,
-  HomeWork as HomeWorkIcon,
-  ReceiptLong as ReceiptLongIcon,
-  Collections as CollectionsIcon,
   MoreVert,
   Edit,
   Delete,
@@ -80,6 +79,12 @@ import {
 import { tokens } from "../../../theme";
 import * as ExcelJS from "exceljs";
 import { TIPOS_FOTO } from "../../../constants/catalogos";
+import {
+  insertFotoRequest,
+  updateFotoRequest,
+  deleteFotoRequest,
+  fileToBase64,
+} from "../../../api/photo";
 
 // 🔹 Componente para vista modal ampliada de foto
 const FotoAmpliadaDialog = ({
@@ -112,8 +117,9 @@ const FotoAmpliadaDialog = ({
           backdropFilter: "blur(12px)",
           borderRadius: "16px",
           overflow: "hidden",
-          maxWidth: "95vw",
-          maxHeight: "95vh",
+          maxWidth: "min(90vw, 900px)", // ← Limitar ancho máximo
+          maxHeight: "min(90vh, 700px)", // ← Limitar altura máxima
+          margin: "auto",
         },
       }}
     >
@@ -247,7 +253,7 @@ const FotoAmpliadaDialog = ({
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
-            p: 3,
+            p: 2,
           }}
         >
           <img
@@ -255,7 +261,7 @@ const FotoAmpliadaDialog = ({
             alt={foto.nombreFoto || foto.descripcion}
             style={{
               maxWidth: "100%",
-              maxHeight: "70vh",
+              maxHeight: "calc(90vh - 180px)", // ← Altura dinámica
               borderRadius: "12px",
               boxShadow: "0 16px 48px rgba(0,0,0,0.4)",
               objectFit: "contain",
@@ -314,7 +320,7 @@ const FotoAmpliadaDialog = ({
   );
 };
 
-// 🔹 Componente para editar/agregar foto - SIN TAREA
+// 🔹 Componente para editar/agregar foto - VERSIÓN OPTIMIZADA
 const FotoEditorDialog = ({
   open,
   onClose,
@@ -323,6 +329,7 @@ const FotoEditorDialog = ({
   modo,
   cuenta,
   fechaRegistro,
+  existingFechasCaptura = [],
   colors,
   COLOR_TEXTO,
   COLOR_FONDO,
@@ -330,27 +337,45 @@ const FotoEditorDialog = ({
 }) => {
   const theme = useTheme();
   const themeColors = colors || tokens(theme.palette.mode);
-  
+
   const [formData, setFormData] = useState({
-    nombreFoto: "",
     tipo: "Evidencia",
     fechaCaptura: "",
+    horaCaptura: "",
   });
 
   const [imagenPreview, setImagenPreview] = useState(null);
-  const [imagenBase64, setImagenBase64] = useState(null);
+  const [imagenFile, setImagenFile] = useState(null);
   const [cargandoImagen, setCargandoImagen] = useState(false);
   const [enviando, setEnviando] = useState(false);
   const [errors, setErrors] = useState({});
   const fileInputRef = useRef(null);
 
+  // Función para generar nombre de foto basado en cuenta + fecha
+  const generarNombreFoto = (fecha) => {
+    return `${cuenta}${fecha.toISOString()}`;
+  };
+
+  // Función para generar hora sugerida (basada en la última foto + 1 minuto)
+  const generarHoraSugerida = (fechasExistentes, fechaBase) => {
+    if (!fechasExistentes || fechasExistentes.length === 0) {
+      const fechaSugerida = new Date(fechaBase);
+      fechaSugerida.setMinutes(fechaSugerida.getMinutes() + 18);
+      return fechaSugerida;
+    }
+
+    const fechasExistentesDate = fechasExistentes.map((f) => new Date(f));
+    const fechaMasReciente = new Date(Math.max(...fechasExistentesDate));
+    fechaMasReciente.setMinutes(fechaMasReciente.getMinutes() + 1);
+
+    return fechaMasReciente;
+  };
+
   // Cargar datos al abrir el diálogo
   useEffect(() => {
     if (open) {
       if (foto && modo === "editar") {
-        console.log("📸 Cargando foto para editar:", foto);
-        
-        // Normalizar el tipo de foto
+        // Normalizar el tipo de foto (capitalizado)
         let tipoNormalizado = "Evidencia";
         const tipoOriginal = (foto.tipo || "").toUpperCase();
         if (tipoOriginal === "FACHADA" || tipoOriginal === "FACHADA PREDIO") {
@@ -361,29 +386,32 @@ const FotoEditorDialog = ({
           tipoNormalizado = "Fachada predio";
         }
 
+        const fechaCaptura = new Date(foto.fechaCaptura);
         setFormData({
-          nombreFoto: foto.nombreFoto || "",
           tipo: tipoNormalizado,
-          fechaCaptura: foto.fechaCaptura ? new Date(foto.fechaCaptura).toISOString().slice(0, 16) : "",
+          fechaCaptura: fechaCaptura.toISOString().slice(0, 10),
+          horaCaptura: fechaCaptura.toTimeString().slice(0, 8),
         });
         setImagenPreview(foto.urlImagen || foto.url || null);
-        setImagenBase64(null);
+        setImagenFile(null);
       } else if (modo === "agregar") {
-        const ahora = new Date();
-        const fechaCapturaISO = ahora.toISOString().slice(0, 16);
-        const nombreGenerado = `${cuenta}${ahora.toISOString()}`;
-        
+        const fechaBase = fechaRegistro ? new Date(fechaRegistro) : new Date();
+        const fechaSugerida = generarHoraSugerida(
+          existingFechasCaptura,
+          fechaBase,
+        );
+
         setFormData({
-          nombreFoto: nombreGenerado,
           tipo: "Evidencia",
-          fechaCaptura: fechaCapturaISO,
+          fechaCaptura: fechaSugerida.toISOString().slice(0, 10),
+          horaCaptura: fechaSugerida.toTimeString().slice(0, 8),
         });
         setImagenPreview(null);
-        setImagenBase64(null);
+        setImagenFile(null);
       }
       setErrors({});
     }
-  }, [foto, modo, cuenta, fechaRegistro, open]);
+  }, [foto, modo, cuenta, fechaRegistro, open, existingFechasCaptura]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -396,60 +424,97 @@ const FotoEditorDialog = ({
     }
   };
 
+  // Validar que la hora no duplique una existente
+  const validarHoraUnica = (fechaCapturaStr, horaStr, fechasExistentes) => {
+    const fechaHoraSeleccionada = new Date(`${fechaCapturaStr}T${horaStr}`);
+
+    for (const fechaExistente of fechasExistentes) {
+      const fechaExistenteDate = new Date(fechaExistente);
+      if (
+        Math.abs(
+          fechaExistenteDate.getTime() - fechaHoraSeleccionada.getTime(),
+        ) < 1000
+      ) {
+        return false;
+      }
+    }
+    return true;
+  };
+
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    if (!file.type.startsWith('image/')) {
-      setErrors(prev => ({ ...prev, imagen: "Solo se permiten archivos de imagen" }));
+    if (!file.type.startsWith("image/")) {
+      setErrors((prev) => ({
+        ...prev,
+        imagen: "Solo se permiten archivos de imagen",
+      }));
       return;
     }
 
     if (file.size > 10 * 1024 * 1024) {
-      setErrors(prev => ({ ...prev, imagen: "La imagen no debe exceder los 10MB" }));
+      setErrors((prev) => ({
+        ...prev,
+        imagen: "La imagen no debe exceder los 10MB",
+      }));
       return;
     }
 
     setCargandoImagen(true);
-    
+
     const reader = new FileReader();
     reader.onloadend = () => {
-      const base64String = reader.result;
-      setImagenBase64(base64String);
-      setImagenPreview(base64String);
+      setImagenPreview(reader.result);
+      setImagenFile(file);
       setCargandoImagen(false);
       if (errors.imagen) {
-        setErrors(prev => ({ ...prev, imagen: null }));
+        setErrors((prev) => ({ ...prev, imagen: null }));
       }
     };
     reader.onerror = () => {
       setCargandoImagen(false);
-      setErrors(prev => ({ ...prev, imagen: "Error al leer el archivo" }));
+      setErrors((prev) => ({ ...prev, imagen: "Error al leer el archivo" }));
     };
     reader.readAsDataURL(file);
   };
 
   const handleRemoveImage = () => {
     setImagenPreview(null);
-    setImagenBase64(null);
+    setImagenFile(null);
     if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      fileInputRef.current.value = "";
     }
   };
 
   const handleSubmit = async () => {
     const newErrors = {};
-    if (!formData.nombreFoto.trim()) {
-      newErrors.nombreFoto = "El nombre es requerido";
-    }
-    if (!imagenBase64 && modo === "agregar") {
+
+    // En edición, la imagen es opcional (puede mantener la existente)
+    if (!imagenFile && modo === "agregar") {
       newErrors.imagen = "La imagen es requerida";
     }
     if (!formData.tipo) {
       newErrors.tipo = "El tipo de foto es requerido";
     }
     if (!formData.fechaCaptura) {
-      newErrors.fechaCaptura = "La fecha de captura es requerida";
+      newErrors.fechaCaptura = "La fecha es requerida";
+    }
+    if (!formData.horaCaptura) {
+      newErrors.horaCaptura = "La hora es requerida";
+    }
+
+    // Validar hora única (solo en agregar)
+    if (modo === "agregar" && existingFechasCaptura.length > 0) {
+      const esUnica = validarHoraUnica(
+        formData.fechaCaptura,
+        formData.horaCaptura,
+        existingFechasCaptura,
+      );
+      if (!esUnica) {
+        newErrors.horaCaptura =
+          "Ya existe una foto con esta hora. Por favor, selecciona una hora diferente.";
+      }
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -458,17 +523,51 @@ const FotoEditorDialog = ({
     }
 
     setEnviando(true);
-    
+
     try {
+      // Combinar fecha y hora
+      const fechaCapturaCompleta = new Date(
+        `${formData.fechaCaptura}T${formData.horaCaptura}`,
+      );
+
+      // Generar nombre de foto automáticamente
+      const nombreFoto = generarNombreFoto(fechaCapturaCompleta);
+
+      // Convertir imagen a base64 si existe una nueva imagen seleccionada
+      let imagenBase64 = null;
+      if (imagenFile) {
+        imagenBase64 = await fileToBase64(imagenFile);
+        console.log("📸 Nueva imagen seleccionada, convertida a base64");
+      } else if (modo === "editar" && !imagenFile) {
+        console.log(
+          "📸 Manteniendo imagen existente, no se envía nueva imagen",
+        );
+      }
+
+      // Capitalizar el tipo para enviar a BD
+      const tipoCapitalizado =
+        formData.tipo === "Fachada predio" ? "FACHADA" : "EVIDENCIA";
+
       const datosParaGuardar = {
-        ...formData,
-        fechaCaptura: new Date(formData.fechaCaptura).toISOString(),
-        nombreFoto: modo === "agregar" ? `${cuenta}${new Date().toISOString()}` : formData.nombreFoto,
-        imagenBase64: modo === "agregar" ? imagenBase64 : null,
+        nombreFoto: nombreFoto,
+        tipo: tipoCapitalizado,
+        fechaCaptura: fechaCapturaCompleta.toISOString(),
+        imagenBase64: imagenBase64, // Si es null, el backend mantendrá la imagen existente
         urlImagenExistente: modo === "editar" ? foto?.urlImagen : null,
+        idRegistroFotoExistente:
+          modo === "editar" ? foto?.idRegistroFoto : null,
       };
 
+      console.log("📤 Enviando datos para edición:", {
+        tieneNuevaImagen: !!imagenBase64,
+        idRegistroFoto: datosParaGuardar.idRegistroFotoExistente,
+        nombreFoto: datosParaGuardar.nombreFoto,
+      });
+
       await onSave(datosParaGuardar);
+    } catch (error) {
+      console.error("❌ Error al preparar datos:", error);
+      setErrors((prev) => ({ ...prev, general: error.message }));
     } finally {
       setEnviando(false);
     }
@@ -513,7 +612,9 @@ const FotoEditorDialog = ({
             }}
           >
             {modo === "agregar" ? (
-              <AddPhotoAlternate sx={{ color: themeColors.blueAccent[400], fontSize: 20 }} />
+              <AddPhotoAlternate
+                sx={{ color: themeColors.blueAccent[400], fontSize: 20 }}
+              />
             ) : (
               <Edit sx={{ color: themeColors.blueAccent[400], fontSize: 20 }} />
             )}
@@ -542,8 +643,8 @@ const FotoEditorDialog = ({
             </Typography>
           </Box>
         </Box>
-        <IconButton 
-          onClick={onClose} 
+        <IconButton
+          onClick={onClose}
           disabled={enviando}
           sx={{ color: themeColors.grey[400], mt: -0.5 }}
         >
@@ -553,7 +654,6 @@ const FotoEditorDialog = ({
 
       <DialogContent sx={{ p: 3, pt: 1, backgroundColor: COLOR_FONDO }}>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
-          
           {/* Área de imagen */}
           <Box>
             <Typography
@@ -570,7 +670,7 @@ const FotoEditorDialog = ({
             >
               {modo === "agregar" ? "Imagen" : "Imagen actual"}
             </Typography>
-            
+
             {!imagenPreview ? (
               <Box
                 onClick={() => !enviando && fileInputRef.current?.click()}
@@ -589,25 +689,43 @@ const FotoEditorDialog = ({
                   backgroundColor: themeColors.primary[800] + "30",
                   transition: "all 0.2s ease",
                   "&:hover": {
-                    borderColor: !enviando ? themeColors.blueAccent[400] : COLOR_BORDE,
-                    backgroundColor: !enviando ? themeColors.primary[800] + "50" : themeColors.primary[800] + "30",
+                    borderColor: !enviando
+                      ? themeColors.blueAccent[400]
+                      : COLOR_BORDE,
+                    backgroundColor: !enviando
+                      ? themeColors.primary[800] + "50"
+                      : themeColors.primary[800] + "30",
                   },
                 }}
               >
                 {cargandoImagen ? (
                   <>
-                    <Box sx={{ width: 32, height: 32, border: `2px solid ${themeColors.blueAccent[400]}`, borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
-                    <Typography variant="body2" sx={{ color: themeColors.grey[500] }}>
+                    <CircularProgress
+                      size={32}
+                      sx={{ color: themeColors.blueAccent[400] }}
+                    />
+                    <Typography
+                      variant="body2"
+                      sx={{ color: themeColors.grey[500] }}
+                    >
                       Procesando imagen...
                     </Typography>
                   </>
                 ) : (
                   <>
-                    <PhotoCamera sx={{ color: themeColors.grey[500], fontSize: 32 }} />
-                    <Typography variant="body2" sx={{ color: themeColors.grey[500] }}>
+                    <PhotoCamera
+                      sx={{ color: themeColors.grey[500], fontSize: 32 }}
+                    />
+                    <Typography
+                      variant="body2"
+                      sx={{ color: themeColors.grey[500] }}
+                    >
                       Haz clic para seleccionar imagen
                     </Typography>
-                    <Typography variant="caption" sx={{ color: themeColors.grey[600] }}>
+                    <Typography
+                      variant="caption"
+                      sx={{ color: themeColors.grey[600] }}
+                    >
                       JPG, PNG, GIF hasta 10MB
                     </Typography>
                   </>
@@ -664,54 +782,16 @@ const FotoEditorDialog = ({
             {errors.imagen && (
               <Typography
                 variant="caption"
-                sx={{ color: themeColors.redAccent[400], mt: 0.5, display: "block", ml: 0.5 }}
+                sx={{
+                  color: themeColors.redAccent[400],
+                  mt: 0.5,
+                  display: "block",
+                  ml: 0.5,
+                }}
               >
                 {errors.imagen}
               </Typography>
             )}
-          </Box>
-
-          {/* Nombre de la foto */}
-          <Box>
-            <Typography
-              variant="caption"
-              sx={{
-                color: themeColors.grey[500],
-                display: "block",
-                mb: 0.5,
-                ml: 0.5,
-                fontWeight: 500,
-                textTransform: "uppercase",
-                fontSize: "0.65rem",
-                letterSpacing: "0.02em",
-              }}
-            >
-              Nombre de la foto
-            </Typography>
-            <TextField
-              name="nombreFoto"
-              value={formData.nombreFoto}
-              onChange={handleChange}
-              disabled={modo === "agregar" || enviando}
-              fullWidth
-              size="small"
-              error={!!errors.nombreFoto}
-              helperText={errors.nombreFoto}
-              sx={{
-                "& .MuiInputLabel-root": { color: themeColors.grey[400] },
-                "& .MuiOutlinedInput-root": {
-                  color: COLOR_TEXTO,
-                  "& fieldset": { borderColor: COLOR_BORDE, borderWidth: "1px" },
-                  "&.Mui-disabled": {
-                    "& .MuiOutlinedInput-notchedOutline": {
-                      borderColor: themeColors.primary[700],
-                    },
-                  },
-                  "&:hover fieldset": { borderColor: themeColors.blueAccent[400] },
-                  "&.Mui-focused fieldset": { borderColor: themeColors.blueAccent[400] },
-                },
-              }}
-            />
           </Box>
 
           {/* Tipo de foto - chips minimalistas */}
@@ -735,29 +815,47 @@ const FotoEditorDialog = ({
               {TIPOS_FOTO.map((tipo) => (
                 <Box
                   key={tipo.value}
-                  onClick={() => !enviando && setFormData(prev => ({ ...prev, tipo: tipo.value }))}
+                  onClick={() =>
+                    !enviando &&
+                    setFormData((prev) => ({ ...prev, tipo: tipo.value }))
+                  }
                   sx={{
                     px: 2,
                     py: 0.75,
                     borderRadius: "30px",
-                    backgroundColor: formData.tipo === tipo.value 
-                      ? (tipo.value === "Fachada predio" ? themeColors.greenAccent[500] + "15" : themeColors.blueAccent[500] + "15")
-                      : "transparent",
-                    border: `1px solid ${formData.tipo === tipo.value 
-                      ? (tipo.value === "Fachada predio" ? themeColors.greenAccent[500] : themeColors.blueAccent[500])
-                      : COLOR_BORDE}`,
-                    color: formData.tipo === tipo.value
-                      ? (tipo.value === "Fachada predio" ? themeColors.greenAccent[300] : themeColors.blueAccent[300])
-                      : themeColors.grey[400],
+                    backgroundColor:
+                      formData.tipo === tipo.value
+                        ? tipo.value === "Fachada predio"
+                          ? themeColors.greenAccent[500] + "15"
+                          : themeColors.blueAccent[500] + "15"
+                        : "transparent",
+                    border: `1px solid ${
+                      formData.tipo === tipo.value
+                        ? tipo.value === "Fachada predio"
+                          ? themeColors.greenAccent[500]
+                          : themeColors.blueAccent[500]
+                        : COLOR_BORDE
+                    }`,
+                    color:
+                      formData.tipo === tipo.value
+                        ? tipo.value === "Fachada predio"
+                          ? themeColors.greenAccent[300]
+                          : themeColors.blueAccent[300]
+                        : themeColors.grey[400],
                     fontSize: "0.8rem",
                     fontWeight: 500,
                     cursor: enviando ? "not-allowed" : "pointer",
                     opacity: enviando ? 0.6 : 1,
                     transition: "all 0.2s ease",
                     "&:hover": {
-                      backgroundColor: !enviando && formData.tipo === tipo.value 
-                        ? (tipo.value === "Fachada predio" ? themeColors.greenAccent[500] + "25" : themeColors.blueAccent[500] + "25")
-                        : !enviando ? themeColors.primary[700] + "30" : "transparent",
+                      backgroundColor:
+                        !enviando && formData.tipo === tipo.value
+                          ? tipo.value === "Fachada predio"
+                            ? themeColors.greenAccent[500] + "25"
+                            : themeColors.blueAccent[500] + "25"
+                          : !enviando
+                            ? themeColors.primary[700] + "30"
+                            : "transparent",
                     },
                   }}
                 >
@@ -768,21 +866,26 @@ const FotoEditorDialog = ({
             {errors.tipo && (
               <Typography
                 variant="caption"
-                sx={{ color: themeColors.redAccent[400], mt: 0.5, display: "block", ml: 0.5 }}
+                sx={{
+                  color: themeColors.redAccent[400],
+                  mt: 0.5,
+                  display: "block",
+                  ml: 0.5,
+                }}
               >
                 {errors.tipo}
               </Typography>
             )}
           </Box>
 
-          {/* Fecha de captura */}
+          {/* Fecha y hora de captura */}
           <Box>
             <Typography
               variant="caption"
               sx={{
                 color: themeColors.grey[500],
                 display: "block",
-                mb: 0.5,
+                mb: 1,
                 ml: 0.5,
                 fontWeight: 500,
                 textTransform: "uppercase",
@@ -790,33 +893,97 @@ const FotoEditorDialog = ({
                 letterSpacing: "0.02em",
               }}
             >
-              Fecha de captura
+              Fecha y hora de captura
             </Typography>
-            <TextField
-              name="fechaCaptura"
-              type="datetime-local"
-              value={formData.fechaCaptura}
-              onChange={handleChange}
-              disabled={modo === "agregar" || enviando}
-              fullWidth
-              size="small"
-              error={!!errors.fechaCaptura}
-              helperText={errors.fechaCaptura}
-              sx={{
-                "& .MuiInputLabel-root": { color: themeColors.grey[400] },
-                "& .MuiOutlinedInput-root": {
-                  color: COLOR_TEXTO,
-                  "& fieldset": { borderColor: COLOR_BORDE },
-                  "&.Mui-disabled": {
-                    "& .MuiOutlinedInput-notchedOutline": {
-                      borderColor: themeColors.primary[700],
+            <Box sx={{ display: "flex", gap: 2 }}>
+              {/* Fecha - siempre deshabilitada */}
+              <Box sx={{ flex: 1 }}>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: themeColors.grey[500],
+                    display: "block",
+                    mb: 0.5,
+                    ml: 0.5,
+                    fontSize: "0.7rem",
+                  }}
+                >
+                  Fecha
+                </Typography>
+                <TextField
+                  type="date"
+                  value={formData.fechaCaptura}
+                  disabled={true}
+                  fullWidth
+                  size="small"
+                  sx={{
+                    "& .MuiInputLabel-root": { color: themeColors.grey[400] },
+                    "& .MuiOutlinedInput-root": {
+                      color: COLOR_TEXTO,
+                      "& fieldset": { borderColor: COLOR_BORDE },
+                      "&.Mui-disabled": {
+                        "& .MuiOutlinedInput-notchedOutline": {
+                          borderColor: themeColors.primary[700],
+                        },
+                      },
                     },
-                  },
-                  "&:hover fieldset": { borderColor: themeColors.blueAccent[400] },
-                  "&.Mui-focused fieldset": { borderColor: themeColors.blueAccent[400] },
-                },
-              }}
-            />
+                  }}
+                />
+              </Box>
+
+              {/* Hora - editable */}
+              <Box sx={{ flex: 1 }}>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: themeColors.grey[500],
+                    display: "block",
+                    mb: 0.5,
+                    ml: 0.5,
+                    fontSize: "0.7rem",
+                  }}
+                >
+                  Hora
+                </Typography>
+                <TextField
+                  type="time"
+                  value={formData.horaCaptura}
+                  onChange={(e) => {
+                    setFormData((prev) => ({
+                      ...prev,
+                      horaCaptura: e.target.value,
+                    }));
+                    if (errors.horaCaptura) {
+                      setErrors((prev) => ({ ...prev, horaCaptura: null }));
+                    }
+                  }}
+                  disabled={enviando}
+                  fullWidth
+                  size="small"
+                  error={!!errors.horaCaptura}
+                  helperText={errors.horaCaptura}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                  inputProps={{
+                    step: 1,
+                  }}
+                  sx={{
+                    "& .MuiInputLabel-root": { color: themeColors.grey[400] },
+                    "& .MuiOutlinedInput-root": {
+                      color: COLOR_TEXTO,
+                      "& fieldset": { borderColor: COLOR_BORDE },
+                      "&:hover fieldset": {
+                        borderColor: themeColors.blueAccent[400],
+                      },
+                      "&.Mui-focused fieldset": {
+                        borderColor: themeColors.blueAccent[400],
+                      },
+                    },
+                  }}
+                />
+              </Box>
+            </Box>
           </Box>
         </Box>
       </DialogContent>
@@ -865,41 +1032,21 @@ const FotoEditorDialog = ({
         >
           {enviando ? (
             <>
-              <Box
-                component="span"
-                sx={{
-                  width: 16,
-                  height: 16,
-                  border: `2px solid ${themeColors.grey[100]}`,
-                  borderTopColor: "transparent",
-                  borderRadius: "50%",
-                  display: "inline-block",
-                  animation: "spin 0.8s linear infinite",
-                  mr: 1,
-                }}
+              <CircularProgress
+                size={16}
+                sx={{ color: themeColors.grey[100], mr: 1 }}
               />
               {modo === "agregar" ? "Agregando..." : "Guardando..."}
             </>
           ) : cargandoImagen ? (
             "Procesando imagen..."
+          ) : modo === "agregar" ? (
+            "Agregar foto"
           ) : (
-            modo === "agregar" ? "Agregar foto" : "Guardar cambios"
+            "Guardar cambios"
           )}
         </Button>
       </DialogActions>
-
-      <style>
-        {`
-          @keyframes spin {
-            from {
-              transform: rotate(0deg);
-            }
-            to {
-              transform: rotate(360deg);
-            }
-          }
-        `}
-      </style>
     </Dialog>
   );
 };
@@ -1050,13 +1197,14 @@ const ChipContadorFoto = ({
   );
 };
 
-// 🔹 Componente para mini galería inline - con menú de acciones en esquina superior derecha
+// 🔹 Componente para mini galería inline - CON BOTÓN DE AGREGAR MINIMALISTA
 const MiniGaleria = ({
   fotos,
   cuenta,
   onImageClick,
   onEditFoto,
   onDeleteFoto,
+  onAgregarFoto,
   startingIndex = 0,
   COLOR_EFICIENTE,
   COLOR_REGULAR,
@@ -1069,6 +1217,7 @@ const MiniGaleria = ({
   const fotosFachada = fotos.filter((f) => f.tipo === "FACHADA");
   const fotosEvidencia = fotos.filter((f) => f.tipo === "EVIDENCIA");
   const todasLasFotos = [...fotosFachada, ...fotosEvidencia];
+  const tieneFotos = todasLasFotos.length > 0;
 
   const fotosParaMostrar = todasLasFotos.slice(0, 4);
   const fotosRestantes = todasLasFotos.length - 4;
@@ -1098,28 +1247,9 @@ const MiniGaleria = ({
     }
   };
 
-  if (todasLasFotos.length === 0) {
-    return (
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          height: 80,
-          backgroundColor: colors.bgContainerSecondary,
-          borderRadius: "8px",
-          border: `1px solid ${colors.primary[700]}`,
-          color: colors.grey[600],
-        }}
-      >
-        <ImageIcon sx={{ mr: 1, color: colors.grey[500] }} />
-        <Typography variant="caption">Sin fotos</Typography>
-      </Box>
-    );
-  }
-
   return (
     <Box>
+      {/* Contadores de fotos */}
       <Box
         sx={{
           display: "flex",
@@ -1145,14 +1275,15 @@ const MiniGaleria = ({
         />
       </Box>
 
+      {/* Galería de fotos + Botón agregar minimalista */}
       <Box
         sx={{
           display: "flex",
           alignItems: "center",
-          gap: 1,
+          gap: 1.5,
           p: 1,
           backgroundColor: colors.bgContainerSecondary,
-          borderRadius: "8px",
+          borderRadius: "12px",
           overflow: "auto",
           "&::-webkit-scrollbar": {
             height: 4,
@@ -1163,165 +1294,271 @@ const MiniGaleria = ({
           },
         }}
       >
-        {fotosParaMostrar.map((foto, index) => {
-          const imagenUrl = foto.urlImagen || foto.url;
-          const esFachada = foto.tipo === "FACHADA";
-
-          return (
-            <Box key={foto.id} sx={{ position: "relative" }}>
-              <Tooltip
-                title={`${esFachada ? "Fachada predio" : "Evidencia"} - ${foto.nombreFoto || "Sin nombre"}`}
-              >
-                <Card
-                  sx={{
-                    position: "relative",
-                    borderRadius: "6px",
-                    overflow: "hidden",
-                    cursor: "pointer",
-                    flexShrink: 0,
-                    width: 80,
-                    height: 80,
-                    border: `2px solid ${esFachada ? colors.greenAccent[700] : colors.blueAccent[700]}`,
-                    transition: "all 0.2s ease",
-                    "&:hover": {
-                      transform: "scale(1.05)",
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
-                      "& .foto-actions": {
-                        opacity: 1,
-                      },
-                    },
-                  }}
-                  onClick={() => onImageClick(startingIndex + index)}
-                >
-                  <CardMedia
-                    component="img"
-                    height="80"
-                    image={imagenUrl}
-                    alt={foto.nombreFoto || `Foto ${index + 1}`}
-                    sx={{
-                      objectFit: "cover",
-                      width: "100%",
-                      backgroundColor: colors.primary[900],
-                    }}
-                    onError={(e) => {
-                      e.target.src = `https://via.placeholder.com/80/${esFachada ? "1b5e20" : "0d47a1"}/ffffff?text=${esFachada ? "F" : "E"}`;
-                    }}
-                  />
-                  <Box
-                    sx={{
-                      position: "absolute",
-                      top: 4,
-                      right: 4,
-                    }}
-                  >
-                    {foto.verificada && (
-                      <Tooltip title="Verificada">
-                        <Verified
-                          sx={{
-                            fontSize: 14,
-                            color: colors.greenAccent[500],
-                            filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.5))",
-                          }}
-                        />
-                      </Tooltip>
-                    )}
-                  </Box>
-                  <Box
-                    sx={{
-                      position: "absolute",
-                      bottom: 4,
-                      left: 4,
-                      backgroundColor: "rgba(0,0,0,0.6)",
-                      borderRadius: "4px",
-                      width: 20,
-                      height: 20,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      backdropFilter: "blur(4px)",
-                    }}
-                  >
-                    {esFachada ? (
-                      <HouseIcon
-                        sx={{ fontSize: 12, color: colors.greenAccent[300] }}
-                      />
-                    ) : (
-                      <DescriptionIcon
-                        sx={{ fontSize: 12, color: colors.blueAccent[300] }}
-                      />
-                    )}
-                  </Box>
-
-                  {/* Botón de acciones al hacer hover - en esquina superior derecha */}
-                  <Box
-                    className="foto-actions"
-                    sx={{
-                      position: "absolute",
-                      top: 4,
-                      right: 4,
-                      opacity: 0,
-                      transition: "opacity 0.2s ease",
-                      zIndex: 10,
-                    }}
-                  >
-                    <IconButton
-                      size="small"
-                      onClick={(e) => handleMenuOpen(e, foto)}
-                      sx={{
-                        color: "white",
-                        backgroundColor: "rgba(0,0,0,0.6)",
-                        padding: "2px",
-                        "&:hover": {
-                          backgroundColor: "rgba(0,0,0,0.8)",
-                        },
-                        "& .MuiSvgIcon-root": {
-                          fontSize: 16,
-                        },
-                      }}
-                    >
-                      <MoreVert />
-                    </IconButton>
-                  </Box>
-                </Card>
-              </Tooltip>
-            </Box>
-          );
-        })}
-
-        {fotosRestantes > 0 && (
-          <Tooltip title={`${fotosRestantes} fotos más`}>
-            <Box
+        {/* Botón para agregar foto - ESTILO MINIMALISTA */}
+        <Tooltip title="Agregar foto" arrow>
+          <Box
+            sx={{
+              width: 72,
+              height: 72,
+              borderRadius: "8px",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 0.5,
+              cursor: "pointer",
+              backgroundColor: "transparent",
+              border: `1px dashed ${colors.primary[500]}`,
+              transition: "all 0.2s cubic-bezier(0.2, 0, 0, 1)",
+              flexShrink: 0,
+              "&:hover": {
+                borderColor: colors.blueAccent[400],
+                backgroundColor: colors.blueAccent[400] + "08",
+                transform: "translateY(-1px)",
+              },
+            }}
+            onClick={() => onAgregarFoto()}
+          >
+            <AddPhotoAlternate
               sx={{
-                width: 80,
-                height: 80,
-                backgroundColor: colors.primary[800],
-                borderRadius: "6px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                border: `1px dashed ${colors.primary[600]}`,
-                cursor: "pointer",
-                flexDirection: "column",
-                gap: 0.5,
-                "&:hover": {
-                  backgroundColor: colors.primary[700],
+                color: colors.grey[500],
+                fontSize: 20,
+                transition: "color 0.2s ease",
+                ".MuiBox-root:hover &": {
+                  color: colors.blueAccent[400],
                 },
               }}
-              onClick={() => onImageClick(startingIndex + 4)}
+            />
+            <Typography
+              variant="caption"
+              sx={{
+                color: colors.grey[500],
+                fontSize: "0.65rem",
+                fontWeight: 400,
+                letterSpacing: "0.01em",
+                transition: "color 0.2s ease",
+                ".MuiBox-root:hover &": {
+                  color: colors.blueAccent[400],
+                },
+              }}
             >
-              <PhotoIcon sx={{ fontSize: 24, color: colors.grey[400] }} />
-              <Typography
-                variant="h6"
-                sx={{
-                  color: colors.grey[400],
-                  fontWeight: 600,
-                  fontSize: "0.9rem",
-                }}
-              >
-                +{fotosRestantes}
-              </Typography>
-            </Box>
-          </Tooltip>
+              Agregar
+            </Typography>
+          </Box>
+        </Tooltip>
+
+        {/* Mostrar fotos existentes */}
+        {!tieneFotos ? (
+          <Box
+            sx={{
+              flex: 1,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              py: 2,
+              color: colors.grey[500],
+            }}
+          >
+            <Typography
+              variant="caption"
+              sx={{ fontSize: "0.7rem", letterSpacing: "0.01em" }}
+            >
+              Sin fotos registradas
+            </Typography>
+          </Box>
+        ) : (
+          <>
+            {fotosParaMostrar.map((foto, index) => {
+              const imagenUrl = foto.urlImagen || foto.url;
+              const esFachada = foto.tipo === "FACHADA";
+
+              return (
+                <Box key={foto.id} sx={{ position: "relative", flexShrink: 0 }}>
+                  <Tooltip
+                    title={
+                      <Box>
+                        <Typography variant="caption" display="block">
+                          {esFachada ? "Fachada predio" : "Evidencia"}
+                        </Typography>
+                        <Typography
+                          variant="caption"
+                          display="block"
+                          sx={{ fontSize: "0.65rem", color: colors.grey[100] }}
+                        >
+                          {new Date(foto.fechaCaptura).toLocaleString("es-MX", {
+                            year: "numeric",
+                            month: "2-digit",
+                            day: "2-digit",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            second: "2-digit",
+                            hour12: false,
+                          })}
+                        </Typography>
+                      </Box>
+                    }
+                    arrow
+                  >
+                    <Card
+                      sx={{
+                        position: "relative",
+                        borderRadius: "8px",
+                        overflow: "hidden",
+                        cursor: "pointer",
+                        width: 72,
+                        height: 72,
+                        border: `1px solid ${esFachada ? colors.greenAccent[700] : colors.blueAccent[700]}`,
+                        transition: "all 0.2s cubic-bezier(0.2, 0, 0, 1)",
+                        "&:hover": {
+                          transform: "scale(1.03)",
+                          boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                          "& .foto-actions": {
+                            opacity: 1,
+                          },
+                        },
+                      }}
+                      onClick={() => onImageClick(startingIndex + index)}
+                    >
+                      <CardMedia
+                        component="img"
+                        height="72"
+                        image={imagenUrl}
+                        alt={foto.nombreFoto || `Foto ${index + 1}`}
+                        sx={{
+                          objectFit: "cover",
+                          width: "100%",
+                          backgroundColor: colors.primary[900],
+                        }}
+                        onError={(e) => {
+                          e.target.src = `https://via.placeholder.com/72/${esFachada ? "1b5e20" : "0d47a1"}/ffffff?text=${esFachada ? "F" : "E"}`;
+                        }}
+                      />
+                      <Box
+                        sx={{
+                          position: "absolute",
+                          top: 4,
+                          right: 4,
+                        }}
+                      >
+                        {foto.verificada && (
+                          <Tooltip title="Verificada" arrow>
+                            <Verified
+                              sx={{
+                                fontSize: 12,
+                                color: colors.greenAccent[500],
+                                filter:
+                                  "drop-shadow(0 1px 2px rgba(0,0,0,0.3))",
+                              }}
+                            />
+                          </Tooltip>
+                        )}
+                      </Box>
+                      <Box
+                        sx={{
+                          position: "absolute",
+                          bottom: 4,
+                          left: 4,
+                          backgroundColor: "rgba(0,0,0,0.5)",
+                          borderRadius: "4px",
+                          width: 18,
+                          height: 18,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          backdropFilter: "blur(2px)",
+                        }}
+                      >
+                        {esFachada ? (
+                          <HouseIcon
+                            sx={{
+                              fontSize: 10,
+                              color: colors.greenAccent[300],
+                            }}
+                          />
+                        ) : (
+                          <DescriptionIcon
+                            sx={{ fontSize: 10, color: colors.blueAccent[300] }}
+                          />
+                        )}
+                      </Box>
+
+                      {/* Botón de acciones al hacer hover */}
+                      <Box
+                        className="foto-actions"
+                        sx={{
+                          position: "absolute",
+                          top: 4,
+                          right: 4,
+                          opacity: 0,
+                          transition: "opacity 0.2s ease",
+                          zIndex: 10,
+                        }}
+                      >
+                        <IconButton
+                          size="small"
+                          onClick={(e) => handleMenuOpen(e, foto)}
+                          sx={{
+                            color: "white",
+                            backgroundColor: "rgba(0,0,0,0.5)",
+                            padding: "2px",
+                            width: 20,
+                            height: 20,
+                            "&:hover": {
+                              backgroundColor: "rgba(0,0,0,0.7)",
+                            },
+                            "& .MuiSvgIcon-root": {
+                              fontSize: 12,
+                            },
+                          }}
+                        >
+                          <MoreVert />
+                        </IconButton>
+                      </Box>
+                    </Card>
+                  </Tooltip>
+                </Box>
+              );
+            })}
+
+            {fotosRestantes > 0 && (
+              <Tooltip title={`${fotosRestantes} fotos más`} arrow>
+                <Box
+                  sx={{
+                    width: 72,
+                    height: 72,
+                    backgroundColor: colors.primary[800],
+                    borderRadius: "8px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    border: `1px solid ${colors.primary[600]}`,
+                    cursor: "pointer",
+                    flexDirection: "column",
+                    gap: 0.5,
+                    flexShrink: 0,
+                    transition: "all 0.2s ease",
+                    "&:hover": {
+                      backgroundColor: colors.primary[700],
+                      transform: "scale(1.02)",
+                    },
+                  }}
+                  onClick={() => onImageClick(startingIndex + 4)}
+                >
+                  <PhotoIcon sx={{ fontSize: 18, color: colors.grey[400] }} />
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: colors.grey[400],
+                      fontWeight: 500,
+                      fontSize: "0.7rem",
+                    }}
+                  >
+                    +{fotosRestantes}
+                  </Typography>
+                </Box>
+              </Tooltip>
+            )}
+          </>
         )}
       </Box>
 
@@ -1334,23 +1571,52 @@ const MiniGaleria = ({
           sx: {
             backgroundColor: colors.bgContainer,
             border: `1px solid ${colors.primary[700]}`,
-            borderRadius: "8px",
-            minWidth: 160,
+            borderRadius: "10px",
+            minWidth: 150,
+            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
           },
         }}
       >
-        <MenuItem onClick={handleEdit} sx={{ color: colors.grey[300] }}>
+        <MenuItem
+          onClick={handleEdit}
+          sx={{
+            color: colors.grey[300],
+            fontSize: "0.8rem",
+            py: 0.75,
+            "&:hover": {
+              backgroundColor: colors.primary[700] + "40",
+            },
+          }}
+        >
           <ListItemIcon>
-            <Edit sx={{ color: colors.blueAccent[400], fontSize: 18 }} />
+            <Edit sx={{ color: colors.blueAccent[400], fontSize: 16 }} />
           </ListItemIcon>
-          <ListItemText>Editar</ListItemText>
+          <ListItemText
+            sx={{ "& .MuiTypography-root": { fontSize: "0.8rem" } }}
+          >
+            Editar
+          </ListItemText>
         </MenuItem>
-        <Divider sx={{ backgroundColor: colors.primary[700] }} />
-        <MenuItem onClick={handleDelete} sx={{ color: colors.grey[300] }}>
+        <Divider sx={{ backgroundColor: colors.primary[700], my: 0.5 }} />
+        <MenuItem
+          onClick={handleDelete}
+          sx={{
+            color: colors.grey[300],
+            fontSize: "0.8rem",
+            py: 0.75,
+            "&:hover": {
+              backgroundColor: colors.redAccent[800] + "40",
+            },
+          }}
+        >
           <ListItemIcon>
-            <Delete sx={{ color: colors.redAccent[400], fontSize: 18 }} />
+            <Delete sx={{ color: colors.redAccent[400], fontSize: 16 }} />
           </ListItemIcon>
-          <ListItemText>Eliminar</ListItemText>
+          <ListItemText
+            sx={{ "& .MuiTypography-root": { fontSize: "0.8rem" } }}
+          >
+            Eliminar
+          </ListItemText>
         </MenuItem>
       </Menu>
     </Box>
@@ -1401,6 +1667,9 @@ const GestorDetallesDialog = ({
   open,
   onClose,
   usuario,
+  onUsuarioUpdate,
+  placeId = null, // ← Nueva prop
+  servicioId = null, // ← Nueva prop
   colors: colorsProp,
   COLOR_TEXTO: COLOR_TEXTO_PROPS,
   COLOR_FONDO: COLOR_FONDO_PROPS,
@@ -1411,8 +1680,6 @@ const GestorDetallesDialog = ({
 }) => {
   const theme = useTheme();
   const colors = colorsProp || tokens(theme.palette.mode);
-
-  console.log("Renderizando GestorDetallesDialog para usuario:", usuario);
 
   // Usar props o valores por defecto
   const COLOR_TEXTO = COLOR_TEXTO_PROPS || colors.grey[100];
@@ -1447,6 +1714,13 @@ const GestorDetallesDialog = ({
 
   // 🔹 Ref para seguimiento
   const usuarioAnteriorRef = useRef(null);
+
+  const fechasCapturaExistentes = useMemo(() => {
+    if (!gestionSeleccionada?.fotos) return [];
+    return gestionSeleccionada.fotos.map((f) => f.fechaCaptura).filter(Boolean);
+  }, [gestionSeleccionada]);
+
+  console.log("usuario", usuario);
 
   // 🔹 FUNCIONES AUXILIARES
   const normalizarMotivo = (motivo) => {
@@ -1520,18 +1794,6 @@ const GestorDetallesDialog = ({
     return COLOR_ATENCION;
   };
 
-  // 🔹 Función para actualizar el estado de las fotos en el usuario
-  const actualizarFotosEnRegistro = (cuenta, nuevaListaFotos) => {
-    if (!usuario?.registros) return;
-    
-    const registroIndex = usuario.registros.findIndex(r => r.cuenta === cuenta);
-    if (registroIndex !== -1) {
-      usuario.registros[registroIndex].fotos = nuevaListaFotos;
-      // Forzar actualización del estado
-      setUsuario({ ...usuario });
-    }
-  };
-
   // 🔹 Calcular gestiones filtradas
   const gestionesFiltradas = useMemo(() => {
     if (!usuario?.registros) return [];
@@ -1549,6 +1811,18 @@ const GestorDetallesDialog = ({
 
     return registros;
   }, [usuario, filtroMotivo]);
+
+  // 🔹 Resetear filtro si el motivo activo ya no tiene registros
+  useEffect(() => {
+    if (
+      filtroMotivo !== "TODOS" &&
+      gestionesFiltradas.length === 0 &&
+      usuario?.registros?.length > 0
+    ) {
+      setFiltroMotivo("TODOS");
+      setPaginaGestiones(0);
+    }
+  }, [filtroMotivo, gestionesFiltradas.length, usuario?.registros?.length]);
 
   // 🔹 Calcular páginas
   const paginatedGestiones = useMemo(() => {
@@ -1569,7 +1843,7 @@ const GestorDetallesDialog = ({
               tipoFoto.includes("FACHADA") || tipoFoto.includes("PREDIO");
 
             fotos.push({
-              id: `${gestion.cuenta}-${foto.idRegistroFoto || Date.now()}`,
+              id: `${getRegistroKey(gestion)}-${foto.idRegistroFoto || Date.now()}`,
               urlImagen: foto.urlImagen,
               url: foto.urlImagen,
               tipo: esFachada ? "FACHADA" : "EVIDENCIA",
@@ -1580,7 +1854,7 @@ const GestorDetallesDialog = ({
               descripcion:
                 foto.tipo || (esFachada ? "Fachada predio" : "Evidencia"),
               verificada: foto.verificada || false,
-              gestionId: gestion.id || gestion.cuenta,
+              gestionId: getRegistroKey(gestion),
               metadata: foto,
               idRegistroFoto: foto.idRegistroFoto,
             });
@@ -1605,7 +1879,7 @@ const GestorDetallesDialog = ({
               tipoFoto.includes("FACHADA") || tipoFoto.includes("PREDIO");
 
             fotos.push({
-              id: `${gestion.cuenta}-${foto.idRegistroFoto || Date.now()}`,
+              id: `${getRegistroKey(gestion)}-${foto.idRegistroFoto || Date.now()}`,
               urlImagen: foto.urlImagen,
               url: foto.urlImagen,
               tipo: esFachada ? "FACHADA" : "EVIDENCIA",
@@ -1616,8 +1890,9 @@ const GestorDetallesDialog = ({
               descripcion:
                 foto.tipo || (esFachada ? "Fachada predio" : "Evidencia"),
               verificada: foto.verificada || false,
-              gestionId: gestion.id || gestion.cuenta,
+              gestionId: getRegistroKey(gestion),
               metadata: foto,
+              idRegistroFoto: foto.idRegistroFoto,
             });
           }
         });
@@ -1627,7 +1902,6 @@ const GestorDetallesDialog = ({
     return fotos;
   }, [usuario]);
 
-  // 🔹 Obtener todas las fotos de una gestión específica
   const getFotosDeGestion = (gestion) => {
     if (!gestion || !Array.isArray(gestion.fotos)) return [];
 
@@ -1638,7 +1912,7 @@ const GestorDetallesDialog = ({
           tipoFoto.includes("FACHADA") || tipoFoto.includes("PREDIO");
 
         return {
-          id: `${gestion.cuenta}-${foto.idRegistroFoto || index}`,
+          id: `${getRegistroKey(gestion)}-${foto.idRegistroFoto || index}`,
           urlImagen: foto.urlImagen,
           url: foto.urlImagen,
           tipo: esFachada ? "FACHADA" : "EVIDENCIA",
@@ -1651,9 +1925,11 @@ const GestorDetallesDialog = ({
           verificada: foto.verificada || false,
           metadata: foto,
           idRegistroFoto: foto.idRegistroFoto,
+          gestionId: getRegistroKey(gestion),
         };
       })
-      .filter((foto) => foto.urlImagen);
+      .filter((foto) => foto.urlImagen)
+      .sort((a, b) => new Date(b.fechaCaptura) - new Date(a.fechaCaptura)); // Ordenar por fecha descendente
   };
 
   // 🔹 Función para encontrar el índice global de una foto
@@ -1661,7 +1937,7 @@ const GestorDetallesDialog = ({
     if (!fotoLocal || !gestion) return 0;
 
     const gestionIndex = gestionesFiltradas.findIndex(
-      (g) => g.cuenta === gestion.cuenta,
+      (g) => getRegistroKey(g) === getRegistroKey(gestion),
     );
     let fotoIndex = 0;
 
@@ -1726,6 +2002,78 @@ const GestorDetallesDialog = ({
   };
 
   // 🔹 Función para descargar foto individual
+  const calcularEstadoYMotivo = (registro) => {
+    const fotos = registro.fotos || [];
+    const fotosFachada = fotos.filter((f) => {
+      const tipo = (f.tipo || "").toString().toUpperCase();
+      return tipo.includes("FACHADA") || tipo.includes("PREDIO");
+    }).length;
+    const fotosEvidencia = fotos.filter((f) => {
+      const tipo = (f.tipo || "").toString().toUpperCase();
+      return tipo.includes("EVIDENCIA");
+    }).length;
+    const tieneGPS =
+      registro.tieneGPS ??
+      Boolean(
+        registro.latitud &&
+        registro.longitud &&
+        registro.latitud !== 0 &&
+        registro.longitud !== 0,
+      );
+
+    let motivo = "COMPLETA";
+    if (!tieneGPS) {
+      if (fotosFachada === 0 && fotosEvidencia === 0) {
+        motivo = "SIN_GPS_Y_SIN_FOTOS";
+      } else if (fotosFachada === 0) {
+        motivo = "SIN_GPS_Y_FALTA_FOTO_FACHADA";
+      } else if (fotosEvidencia === 0) {
+        motivo = "SIN_GPS_Y_FALTA_FOTO_EVIDENCIA";
+      } else {
+        motivo = "SIN_GPS";
+      }
+    } else {
+      if (fotosFachada === 0 && fotosEvidencia === 0) {
+        motivo = "FALTAN_AMBAS_FOTOS";
+      } else if (fotosFachada === 0) {
+        motivo = "FALTA_FOTO_FACHADA";
+      } else if (fotosEvidencia === 0) {
+        motivo = "FALTA_FOTO_EVIDENCIA";
+      } else {
+        motivo = "COMPLETA";
+      }
+    }
+
+    const estado =
+      registro.estatus_gestion === "INVALIDA"
+        ? "INVALIDA"
+        : motivo === "COMPLETA"
+          ? "COMPLETA"
+          : "INCOMPLETA";
+
+    return {
+      motivo_gestion: motivo,
+      estatus_gestion: estado,
+      fotosFachada, // Preservar para cálculos internos
+      fotosEvidencia, // Preservar para cálculos internos
+      totalFotos: fotos.length, // Preservar para cálculos internos
+      // Campos en formato snake_case para consistencia con backend
+      fotos_fachada: fotosFachada,
+      fotos_evidencia: fotosEvidencia,
+      total_fotos: fotos.length,
+    };
+  };
+
+  function getRegistroKey(registro) {
+    if (!registro) return null;
+
+    const cuenta = registro.cuenta || "";
+    const fecha =
+      registro.fecha || registro.date_capture || registro.fechaCaptura || "";
+
+    return registro.id ? registro.id : `${cuenta}-${fecha}`;
+  }
+
   const descargarFoto = (foto) => {
     const url = foto.urlImagen || foto.url;
     if (!url) return;
@@ -1738,7 +2086,216 @@ const GestorDetallesDialog = ({
     document.body.removeChild(link);
   };
 
-  // 🔹 FUNCIONES PARA MANEJO DE FOTOS CON ACTUALIZACIÓN DE ESTADO LOCAL
+  // ============================================
+  // FUNCIÓN CENTRALIZADA PARA RECALCULAR REGISTRO
+  // Basada en la lógica SQL proporcionada
+  // ============================================
+
+  const recalcularRegistro = (registro) => {
+    // 1. Obtener fotos (asegurar array)
+    const fotos = Array.isArray(registro.fotos) ? registro.fotos : [];
+
+    // 2. Calcular conteos de fotos
+    const fotosFachada = fotos.filter((foto) => {
+      const tipo = (foto.tipo || "").toString().toUpperCase();
+      return tipo.includes("FACHADA") || tipo.includes("PREDIO");
+    }).length;
+
+    const fotosEvidencia = fotos.filter((foto) => {
+      const tipo = (foto.tipo || "").toString().toUpperCase();
+      return tipo.includes("EVIDENCIA");
+    }).length;
+
+    const totalFotos = fotos.length;
+
+    // 3. Determinar si tiene GPS válido
+    const tieneGPS = Boolean(
+      registro.latitud &&
+      registro.longitud &&
+      registro.latitud !== 0 &&
+      registro.longitud !== 0,
+    );
+
+    // 4. Obtener estatus_predio (normalizar a minúsculas para comparación)
+    const estatusPredio = (registro.estatus_predio || "").toLowerCase();
+    const esNoLocalizado = estatusPredio !== "predio localizado";
+
+    // 5. Aplicar lógica SQL para estatus_gestion
+    let estatusGestion = "INCOMPLETA";
+
+    if (esNoLocalizado && fotosEvidencia >= 1) {
+      estatusGestion = "COMPLETA";
+    } else if (esNoLocalizado && fotosEvidencia === 0) {
+      estatusGestion = "INCOMPLETA";
+    } else if (!tieneGPS && totalFotos === 0) {
+      estatusGestion = "INVALIDA";
+    } else if (fotosFachada >= 1 && fotosEvidencia >= 1 && !tieneGPS) {
+      estatusGestion = "INCOMPLETA";
+    } else if (tieneGPS && fotosFachada >= 1 && fotosEvidencia >= 1) {
+      estatusGestion = "COMPLETA";
+    } else {
+      estatusGestion = "INCOMPLETA";
+    }
+
+    // 6. Aplicar lógica SQL para motivo_gestion
+    let motivoGestion = null;
+
+    if (esNoLocalizado && fotosEvidencia >= 1) {
+      motivoGestion = null;
+    } else if (esNoLocalizado && fotosEvidencia === 0) {
+      motivoGestion = "NO_LOCALIZADO_SIN_EVIDENCIA";
+    } else if (!tieneGPS && totalFotos === 0) {
+      motivoGestion = "SIN_GPS_Y_SIN_FOTOS";
+    } else if (!tieneGPS && fotosFachada === 0 && fotosEvidencia >= 1) {
+      motivoGestion = "SIN_GPS_Y_FALTA_FOTO_FACHADA";
+    } else if (!tieneGPS && fotosFachada >= 1 && fotosEvidencia === 0) {
+      motivoGestion = "SIN_GPS_Y_FALTA_FOTO_EVIDENCIA";
+    } else if (!tieneGPS && fotosFachada >= 1 && fotosEvidencia >= 1) {
+      motivoGestion = "SIN_GPS";
+    } else if (fotosFachada === 0 && fotosEvidencia === 0) {
+      motivoGestion = "FALTAN_AMBAS_FOTOS";
+    } else if (fotosFachada === 0) {
+      motivoGestion = "FALTA_FOTO_FACHADA";
+    } else if (fotosEvidencia === 0) {
+      motivoGestion = "FALTA_FOTO_EVIDENCIA";
+    } else {
+      motivoGestion = null;
+    }
+
+    // 7. Devolver registro actualizado con todos los campos
+    return {
+      ...registro,
+      total_fotos: totalFotos,
+      fotos_fachada: fotosFachada,
+      fotos_evidencia: fotosEvidencia,
+      totalFotos: totalFotos, // camelCase para uso interno
+      fotosFachada: fotosFachada, // camelCase para uso interno
+      fotosEvidencia: fotosEvidencia, // camelCase para uso interno
+      tieneGPS: tieneGPS,
+      estatus_gestion: estatusGestion,
+      motivo_gestion: motivoGestion,
+      estatusGestion: estatusGestion, // camelCase para uso interno
+      motivoGestion: motivoGestion, // camelCase para uso interno
+    };
+  };
+
+  // ============================================
+  // FUNCIÓN PARA RECALCULAR TOTALES DEL USUARIO
+  // ============================================
+
+  const recalcularTotalesUsuario = (usuario) => {
+    const registros = usuario.registros || [];
+
+    let total = 0;
+    let completas = 0;
+    let incompletas = 0;
+    let invalidas = 0;
+    const motivos = {};
+
+    registros.forEach((registro) => {
+      total++;
+
+      const estatus =
+        registro.estatus_gestion || registro.estatusGestion || "INCOMPLETA";
+
+      if (estatus === "COMPLETA") {
+        completas++;
+      } else if (estatus === "INCOMPLETA") {
+        incompletas++;
+      } else if (estatus === "INVALIDA") {
+        invalidas++;
+      }
+
+      const motivo =
+        registro.motivo_gestion || registro.motivoGestion || "COMPLETA";
+      const motivoKey = motivo === null ? "COMPLETA" : motivo;
+      motivos[motivoKey] = (motivos[motivoKey] || 0) + 1;
+    });
+
+    const porcentajeExito = total > 0 ? (completas / total) * 100 : 0;
+
+    // Determinar nivel de desempeño
+    let nivel = "regular";
+    let color = COLOR_REGULAR;
+    let icono = <Warning />;
+
+    if (porcentajeExito >= 90) {
+      nivel = "eficiente";
+      color = COLOR_EFICIENTE;
+      icono = <CheckCircle />;
+    } else if (porcentajeExito < 70) {
+      nivel = "atencion";
+      color = COLOR_ATENCION;
+      icono = <Error />;
+    }
+
+    return {
+      ...usuario,
+      total,
+      completas,
+      incompletas,
+      invalidas,
+      motivos,
+      porcentajeExito,
+      nivel,
+      color,
+      icono,
+    };
+  };
+
+  // ============================================
+  // VERSIÓN CORREGIDA DE actualizarRegistroEnUsuario
+  // ============================================
+
+  const actualizarRegistroEnUsuario = useCallback(
+    (registroId, updater) => {
+      if (!usuario?.registros) return;
+
+      // 1. Actualizar el registro específico
+      const registrosActualizados = usuario.registros.map((registro) => {
+        if (getRegistroKey(registro) === registroId) {
+          // Aplicar el updater para modificar fotos
+          const registroModificado = updater(registro);
+          // Recalcular completamente el registro con la nueva lógica
+          return recalcularRegistro(registroModificado);
+        }
+        return recalcularRegistro(registro); // Asegurar que todos los registros estén bien formados
+      });
+
+      // 2. Crear usuario actualizado
+      let usuarioActualizado = {
+        ...usuario,
+        registros: registrosActualizados,
+      };
+
+      // 3. Recalcular todos los totales del usuario
+      usuarioActualizado = recalcularTotalesUsuario(usuarioActualizado);
+
+      // 4. Preparar datos para enviar al padre (convertir a snake_case si es necesario)
+      const registrosParaPadre = usuarioActualizado.registros.map((reg) => ({
+        ...reg,
+        // Asegurar campos snake_case para el padre (Index)
+        total_fotos: reg.total_fotos ?? reg.totalFotos,
+        fotos_fachada: reg.fotos_fachada ?? reg.fotosFachada,
+        fotos_evidencia: reg.fotos_evidencia ?? reg.fotosEvidencia,
+        estatus_gestion: reg.estatus_gestion ?? reg.estatusGestion,
+        motivo_gestion: reg.motivo_gestion ?? reg.motivoGestion,
+      }));
+
+      const usuarioParaPadre = {
+        ...usuarioActualizado,
+        registros: registrosParaPadre,
+      };
+
+      // 5. Notificar al padre
+      if (onUsuarioUpdate) {
+        onUsuarioUpdate(usuarioParaPadre);
+      }
+    },
+    [usuario, onUsuarioUpdate],
+  );
+
+  // 🔹 FUNCIONES PARA MANEJO DE FOTOS CON LLAMADA REAL AL BACKEND
   const handleAgregarFoto = (gestion) => {
     setGestionSeleccionada(gestion);
     setFotoEditando(null);
@@ -1748,7 +2305,7 @@ const GestorDetallesDialog = ({
   const handleEditarFoto = (foto) => {
     setFotoEditando(foto);
     setGestionSeleccionada(
-      gestionesFiltradas.find((g) => g.cuenta === foto.cuenta),
+      gestionesFiltradas.find((g) => getRegistroKey(g) === foto.gestionId),
     );
     setModoEditor("editar");
   };
@@ -1758,87 +2315,128 @@ const GestorDetallesDialog = ({
     setConfirmDeleteOpen(true);
   };
 
+  // 🔹 FUNCIÓN PARA GUARDAR FOTO (CREAR O ACTUALIZAR)
   const handleGuardarFoto = async (datos) => {
     setCargandoGuardado(true);
 
     try {
       let urlImagen = datos.urlImagenExistente;
-      let nuevoIdRegistroFoto = fotoEditando?.idRegistroFoto;
-      const cuentaActual = gestionSeleccionada?.cuenta;
+      let idRegistroFoto = datos.idRegistroFotoExistente;
+      const fechaCapturaEnvio = datos.fechaCaptura;
 
-      // Simular subida de imagen al backend
-      if (datos.imagenBase64) {
-        console.log("📤 Subiendo imagen a S3...");
-        await new Promise((resolve) => setTimeout(resolve, 1500));
-        urlImagen = `https://fotos-sero-movil.s3.amazonaws.com/${datos.nombreFoto.replace(/[^a-zA-Z0-9]/g, "_")}.jpg`;
-        console.log("✅ Imagen subida exitosamente:", urlImagen);
-      }
+      console.log("📸 Procesando foto:", {
+        modo: modoEditor,
+        tieneNuevaImagen: !!datos.imagenBase64,
+        idRegistroFoto: idRegistroFoto,
+        nombreFoto: datos.nombreFoto,
+      });
 
-      // Simular ID para nueva foto
-      if (modoEditor === "agregar") {
-        nuevoIdRegistroFoto = Date.now();
-      }
-
-      const fotoCompleta = {
-        idRegistroFoto: nuevoIdRegistroFoto,
-        cuenta: cuentaActual,
+      // Preparar datos para enviar al backend
+      const fotoData = {
+        place_id: placeId,
+        cuenta: gestionSeleccionada?.cuenta,
         idAspUser: usuario?.id,
         nombreFoto: datos.nombreFoto,
-        fechaCaptura: datos.fechaCaptura,
-        tipo: datos.tipo === "Fachada predio" ? "FACHADA" : "EVIDENCIA",
-        urlImagen: urlImagen,
-        fechaSincronizacion: new Date().toISOString(),
-        id_servicio: 2,
+        fechaCaptura: fechaCapturaEnvio,
+        tipo: datos.tipo, // Ya viene capitalizado del modal
+        imagenBase64: datos.imagenBase64 || null,
+        urlImagenExistente: datos.urlImagenExistente,
+        id_servicio: servicioId || 2,
         medio_carga: false,
         tipo_carga: false,
-        verificada: false,
       };
 
-      console.log("💾 Guardando en base de datos:", fotoCompleta);
-      await new Promise((resolve) => setTimeout(resolve, 800));
-
-      // 🔹 ACTUALIZAR EL ESTADO LOCAL
-      if (usuario?.registros) {
-        const registroIndex = usuario.registros.findIndex(r => r.cuenta === cuentaActual);
-        
-        if (registroIndex !== -1) {
-          const registro = usuario.registros[registroIndex];
-          const fotosActuales = registro.fotos || [];
-          
-          let nuevasFotos;
-          if (modoEditor === "agregar") {
-            // Agregar nueva foto al inicio del array
-            nuevasFotos = [fotoCompleta, ...fotosActuales];
-          } else {
-            // Editar foto existente
-            nuevasFotos = fotosActuales.map(f => 
-              f.idRegistroFoto === fotoEditando?.idRegistroFoto ? fotoCompleta : f
-            );
-          }
-          
-          // Actualizar el registro
-          usuario.registros[registroIndex] = {
-            ...registro,
-            fotos: nuevasFotos
-          };
-          
-          // Forzar actualización del estado
-          setUsuario({ ...usuario });
-        }
+      // En edición, asegurar que enviamos el idRegistroFoto
+      if (modoEditor === "editar" && datos.idRegistroFotoExistente) {
+        fotoData.idRegistroFoto = datos.idRegistroFotoExistente;
       }
 
-      setSnackbarMessage(
-        `Foto ${modoEditor === "agregar" ? "agregada" : "actualizada"} correctamente`,
-      );
-      setSnackbarSeverity("success");
-      setSnackbarOpen(true);
+      console.log("📤 Enviando al backend:", {
+        ...fotoData,
+        imagenBase64: fotoData.imagenBase64
+          ? `[BASE64 length: ${fotoData.imagenBase64.length}]`
+          : "null",
+      });
 
-      setFotoEditando(null);
-      setGestionSeleccionada(null);
-      setModoEditor(null);
+      let response;
+
+      if (modoEditor === "agregar") {
+        console.log("📤 Insertando nueva foto...");
+        response = await insertFotoRequest(fotoData);
+      } else {
+        console.log("✏️ Actualizando foto existente...");
+        response = await updateFotoRequest(fotoData);
+      }
+
+      console.log("📥 Respuesta del backend:", response.data);
+
+      if (response.data.success) {
+        urlImagen = response.data.urlImagen || datos.urlImagenExistente;
+        idRegistroFoto =
+          response.data.idRegistroFoto || datos.idRegistroFotoExistente;
+
+        const fotoGuardada = {
+          idRegistroFoto: idRegistroFoto, // Asegurar que este ID es correcto
+          cuenta: gestionSeleccionada?.cuenta,
+          idAspUser: usuario?.id,
+          nombreFoto: datos.nombreFoto,
+          fechaCaptura: fechaCapturaEnvio,
+          tipo: datos.tipo,
+          urlImagen: urlImagen,
+          fechaSincronizacion: new Date().toISOString(),
+          id_servicio: servicioId || 2,
+          medio_carga: false,
+          tipo_carga: false,
+          verificada: false,
+        };
+
+        // Actualizar estado local
+        actualizarRegistroEnUsuario(
+          getRegistroKey(gestionSeleccionada),
+          (registro) => {
+            const fotosActuales = registro.fotos || [];
+            let nuevasFotos;
+
+            if (modoEditor === "agregar") {
+              // Agregar nueva foto al inicio (más reciente)
+              nuevasFotos = [fotoGuardada, ...fotosActuales];
+            } else {
+              // Actualizar foto existente - usar idRegistroFoto para encontrar la correcta
+              nuevasFotos = fotosActuales.map((f) =>
+                f.idRegistroFoto === idRegistroFoto ? fotoGuardada : f,
+              );
+            }
+
+            return {
+              ...registro,
+              fotos: nuevasFotos,
+            };
+          },
+        );
+
+        setSnackbarMessage(
+          response.data.message || "Foto guardada correctamente",
+        );
+        setSnackbarSeverity("success");
+        setSnackbarOpen(true);
+
+        setFotoEditando(null);
+        setGestionSeleccionada(null);
+        setModoEditor(null);
+      } else {
+        setSnackbarMessage(
+          error.response?.data?.message || "Error al guardar la foto",
+        );
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
+      }
     } catch (error) {
       console.error("❌ Error al guardar foto:", error);
-      setSnackbarMessage("Error al guardar la foto. Intenta nuevamente.");
+      console.error("Detalle del error:", error.response?.data);
+      setSnackbarMessage(
+        error.response?.data?.message ||
+          "Error al guardar la foto. Intenta nuevamente.",
+      );
       setSnackbarSeverity("error");
       setSnackbarOpen(true);
     } finally {
@@ -1846,47 +2444,58 @@ const GestorDetallesDialog = ({
     }
   };
 
+  // 🔹 FUNCIÓN PARA ELIMINAR FOTO
   const handleConfirmarEliminar = async () => {
     setCargandoGuardado(true);
 
     try {
-      const cuentaActual = fotoEliminar?.cuenta;
-      const idAEliminar = fotoEliminar?.idRegistroFoto;
-
       console.log("🗑️ Eliminando foto:", fotoEliminar);
-      await new Promise((resolve) => setTimeout(resolve, 800));
 
-      // 🔹 ACTUALIZAR EL ESTADO LOCAL - ELIMINAR FOTO
-      if (usuario?.registros && cuentaActual && idAEliminar) {
-        const registroIndex = usuario.registros.findIndex(r => r.cuenta === cuentaActual);
-        
-        if (registroIndex !== -1) {
-          const registro = usuario.registros[registroIndex];
+      const response = await deleteFotoRequest({
+        place_id: placeId,
+        idRegistroFoto: fotoEliminar.idRegistroFoto,
+      });
+
+      if (response.data.success) {
+        const registroIdAEliminar =
+          fotoEliminar.gestionId ||
+          getRegistroKey({
+            cuenta: fotoEliminar.cuenta,
+            fecha: fotoEliminar.fecha || fotoEliminar.fechaCaptura,
+          });
+
+        // 🔹 ACTUALIZAR EL ESTADO LOCAL - ELIMINAR FOTO DEL REGISTRO ESPECÍFICO
+        actualizarRegistroEnUsuario(registroIdAEliminar, (registro) => {
           const fotosActuales = registro.fotos || [];
-          
-          // Filtrar la foto eliminada
-          const nuevasFotos = fotosActuales.filter(f => f.idRegistroFoto !== idAEliminar);
-          
-          // Actualizar el registro
-          usuario.registros[registroIndex] = {
+          const nuevasFotos = fotosActuales.filter(
+            (f) => f.idRegistroFoto !== fotoEliminar.idRegistroFoto,
+          );
+
+          return {
             ...registro,
-            fotos: nuevasFotos
+            fotos: nuevasFotos,
           };
-          
-          // Forzar actualización del estado
-          setUsuario({ ...usuario });
-        }
+        });
+
+        setSnackbarMessage(response.data.message);
+        setSnackbarSeverity("success");
+        setSnackbarOpen(true);
+
+        setFotoEliminar(null);
+        setConfirmDeleteOpen(false);
+      } else {
+        setSnackbarMessage(
+          response.data.message || "Error al eliminar la foto",
+        );
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
       }
-
-      setSnackbarMessage("Foto eliminada correctamente");
-      setSnackbarSeverity("success");
-      setSnackbarOpen(true);
-
-      setFotoEliminar(null);
-      setConfirmDeleteOpen(false);
     } catch (error) {
       console.error("❌ Error al eliminar foto:", error);
-      setSnackbarMessage("Error al eliminar la foto. Intenta nuevamente.");
+      setSnackbarMessage(
+        error.response?.data?.message ||
+          "Error al eliminar la foto. Intenta nuevamente.",
+      );
       setSnackbarSeverity("error");
       setSnackbarOpen(true);
     } finally {
@@ -1895,7 +2504,7 @@ const GestorDetallesDialog = ({
   };
 
   /* ======================================================
-     DESCARGA A EXCEL - SOLO LO QUE SE VE EN EL DATAGRID
+     DESCARGA A EXCEL
   ====================================================== */
   const handleDownloadExcel = async () => {
     if (!usuario) return;
@@ -2249,7 +2858,7 @@ const GestorDetallesDialog = ({
                     ml: 1,
                   }}
                 >
-                  (Haz clic en ▶ para ver fotos)
+                  (Haz clic en ▶ para expandir)
                 </Typography>
               </Typography>
               <Typography
@@ -2373,7 +2982,6 @@ const GestorDetallesDialog = ({
                   <TableBody>
                     {paginatedGestiones.map((gestion) => {
                       const fotos = getFotosDeGestion(gestion);
-                      const tieneFotos = fotos.length > 0;
                       const isExpanded = gestionExpandida === gestion.cuenta;
                       const fotosFachada = fotos.filter(
                         (f) => f.tipo === "FACHADA",
@@ -2384,6 +2992,7 @@ const GestorDetallesDialog = ({
 
                       return (
                         <React.Fragment key={gestion.cuenta || gestion.id}>
+                          {/* Fila principal */}
                           <TableRow
                             sx={{
                               "&:hover": {
@@ -2404,26 +3013,18 @@ const GestorDetallesDialog = ({
                                   );
                                 }}
                                 sx={{
-                                  color: tieneFotos
-                                    ? colors.grey[300]
-                                    : colors.grey[600],
+                                  color: colors.grey[300],
                                   transform: isExpanded
                                     ? "rotate(180deg)"
                                     : "none",
-                                  transition:
-                                    "transform 0.2s ease, color 0.2s ease",
+                                  transition: "transform 0.2s ease",
                                   "&:hover": {
-                                    color: tieneFotos
-                                      ? COLOR_TEXTO
-                                      : colors.grey[600],
-                                    backgroundColor: tieneFotos
-                                      ? colors.primary[400] + "20"
-                                      : "transparent",
+                                    color: COLOR_TEXTO,
+                                    backgroundColor: colors.primary[400] + "20",
                                   },
                                 }}
-                                disabled={!tieneFotos}
                               >
-                                {isExpanded ? <ExpandLess /> : <ExpandMore />}
+                                <ExpandMore />
                               </IconButton>
                             </TableCell>
                             <TableCell>
@@ -2559,6 +3160,7 @@ const GestorDetallesDialog = ({
                             </TableCell>
                           </TableRow>
 
+                          {/* Fila expandida con galería - SIEMPRE EXPANDIBLE */}
                           {isExpanded && (
                             <TableRow>
                               <TableCell
@@ -2627,25 +3229,6 @@ const GestorDetallesDialog = ({
                                           {fotos.length !== 1 ? "s" : ""}
                                         </Typography>
 
-                                        <Button
-                                          size="small"
-                                          startIcon={<AddPhotoAlternate />}
-                                          onClick={() =>
-                                            handleAgregarFoto(gestion)
-                                          }
-                                          sx={{
-                                            color: colors.greenAccent[400],
-                                            fontSize: "0.7rem",
-                                            textTransform: "none",
-                                            "&:hover": {
-                                              backgroundColor:
-                                                colors.greenAccent[400] + "20",
-                                            },
-                                          }}
-                                        >
-                                          Agregar
-                                        </Button>
-
                                         {fotos.length > 0 && (
                                           <Button
                                             size="small"
@@ -2686,6 +3269,9 @@ const GestorDetallesDialog = ({
                                       }}
                                       onEditFoto={handleEditarFoto}
                                       onDeleteFoto={handleEliminarFoto}
+                                      onAgregarFoto={() =>
+                                        handleAgregarFoto(gestion)
+                                      }
                                       COLOR_EFICIENTE={COLOR_EFICIENTE}
                                       COLOR_REGULAR={COLOR_REGULAR}
                                     />
@@ -2865,6 +3451,7 @@ const GestorDetallesDialog = ({
         modo={modoEditor}
         cuenta={gestionSeleccionada?.cuenta}
         fechaRegistro={gestionSeleccionada?.fecha}
+        existingFechasCaptura={fechasCapturaExistentes} // ← Nueva prop
         colors={colors}
         COLOR_TEXTO={COLOR_TEXTO}
         COLOR_FONDO={COLOR_FONDO}
@@ -2889,18 +3476,25 @@ const GestorDetallesDialog = ({
         open={snackbarOpen}
         autoHideDuration={4000}
         onClose={() => setSnackbarOpen(false)}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
       >
         <Alert
           onClose={() => setSnackbarOpen(false)}
           severity={snackbarSeverity}
           sx={{
+            width: "100%",
             backgroundColor:
               snackbarSeverity === "success"
-                ? colors.greenAccent[800]
-                : colors.redAccent[800],
+                ? colors.greenAccent[200]
+                : snackbarSeverity === "error"
+                  ? colors.redAccent[200]
+                  : colors.blueAccent[200],
             color: colors.grey[100],
             borderRadius: "12px",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+            "& .MuiAlert-icon": {
+              color: colors.grey[100],
+            },
           }}
         >
           {snackbarMessage}

@@ -28,13 +28,20 @@ import * as ExcelJS from "exceljs";
 
 import GestorDetallesDialog from "./PerformanceMonitor/GestorDetallesDialog";
 
-const PerformanceMonitor = ({ data = [] }) => {
+const PerformanceMonitor = ({ data = [], plazaId, servicioId, onDataUpdate }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [tabActiva, setTabActiva] = useState(0);
   const [busqueda, setBusqueda] = useState("");
   const [usuarioSeleccionado, setUsuarioSeleccionado] = useState(null);
   const [dialogoAbierto, setDialogoAbierto] = useState(false);
+
+  const handleUsuarioUpdate = (usuarioActualizado) => {
+    setUsuarioSeleccionado(usuarioActualizado);
+    if (onDataUpdate) {
+      onDataUpdate(usuarioActualizado);
+    }
+  };
 
   // 🔹 Colores
   const COLOR_TEXTO = colors.grey[100];
@@ -91,11 +98,7 @@ const PerformanceMonitor = ({ data = [] }) => {
       });
 
       usuario.registros.push({
-        id: registro.id,
-        cuenta: registro.cuenta,
-        fecha: registro.fecha,
-        estatus_gestion: registro.estatus_gestion,
-        motivo_gestion: registro.motivo_gestion,
+        ...registro,
         tieneGPS:
           registro.latitud &&
           registro.longitud &&
@@ -1105,7 +1108,10 @@ const PerformanceMonitor = ({ data = [] }) => {
           setDialogoAbierto(false);
           setUsuarioSeleccionado(null);
         }}
+        placeId={plazaId}        // ← Pasar plazaId
+        servicioId={servicioId}  // ← Pasar servicioId
         usuario={usuarioSeleccionado}
+        onUsuarioUpdate={handleUsuarioUpdate}
         colors={colors}
         COLOR_TEXTO={COLOR_TEXTO}
         COLOR_FONDO={COLOR_FONDO}
