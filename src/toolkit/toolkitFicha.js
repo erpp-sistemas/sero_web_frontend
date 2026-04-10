@@ -132,6 +132,7 @@ const formatearFila = async (data, folio) => {
         gestor: 'gestor',
         giro: 'giro',
         proceso: 'proceso',
+				periodo: 'periodo',
         tarea_gestionada: 'tarea_gestionada',
         fecha_gestion: 'fecha_de_gestion',
         tabla_gestion: 'tabla_gestion',
