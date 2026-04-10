@@ -23,14 +23,13 @@ const ResumenGeneral = ({ pagosValidos = [], pagosFormateados = [] }) => {
 
   // 🔹 Función para filtrar campos de fotos
   const filtrarCamposFotos = (campos) => {
-    const camposExcluidos = [     
-      'fotos'      
-    ];
-    
-    return campos.filter(campo => 
-      !camposExcluidos.some(excluido => 
-        campo.toLowerCase().includes(excluido.toLowerCase())
-      )
+    const camposExcluidos = ["fotos"];
+
+    return campos.filter(
+      (campo) =>
+        !camposExcluidos.some((excluido) =>
+          campo.toLowerCase().includes(excluido.toLowerCase()),
+        ),
     );
   };
 
@@ -45,9 +44,20 @@ const ResumenGeneral = ({ pagosValidos = [], pagosFormateados = [] }) => {
       const workbook = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet(nombreHoja);
 
+      // Crear una copia profunda de los datos para no modificar el original
+      const datosTransformados = datos.map((item) => {
+        const nuevoItem = { ...item };
+        // Renombrar 'periodo' a 'periodo_pago' si existe
+        if (nuevoItem.hasOwnProperty("periodo")) {
+          nuevoItem["periodo_pago"] = nuevoItem["periodo"];
+          delete nuevoItem["periodo"];
+        }
+        return nuevoItem;
+      });
+
       // Obtener todas las claves únicas y filtrar campos de fotos
       const allKeys = new Set();
-      datos.forEach((item) => {
+      datosTransformados.forEach((item) => {
         Object.keys(item).forEach((key) => allKeys.add(key));
       });
 
@@ -64,7 +74,7 @@ const ResumenGeneral = ({ pagosValidos = [], pagosFormateados = [] }) => {
       worksheet.columns = columnas;
 
       // Agregar datos solo con campos filtrados
-      datos.forEach((item) => {
+      datosTransformados.forEach((item) => {
         const rowData = {};
         camposFiltrados.forEach((key) => {
           rowData[key] = item[key] !== undefined ? item[key] : "";
@@ -109,7 +119,7 @@ const ResumenGeneral = ({ pagosValidos = [], pagosFormateados = [] }) => {
         const headerLength = column.header.length;
         const finalWidth = Math.max(
           8,
-          Math.min(35, Math.max(maxLength, headerLength) + 2)
+          Math.min(35, Math.max(maxLength, headerLength) + 2),
         );
         column.width = finalWidth;
       });
@@ -198,7 +208,7 @@ const ResumenGeneral = ({ pagosValidos = [], pagosFormateados = [] }) => {
     crearExcelConEstilo(
       pagosFormateados,
       "Pagos Formato Personalizado",
-      "pagos-formato-personalizado"
+      "pagos-formato-personalizado",
     );
   };
 
