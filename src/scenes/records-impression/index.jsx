@@ -118,6 +118,7 @@ const Impression = () => {
 			valor_catastral: registro.valor_catastral,
 			fecha_actualizacion: registro.fecha_actualizacion,
 			fecha_corte_adeudo: registro.fecha_corte_adeudo,
+			periodo: registro.periodo,
 			monto_adeudo: registro.monto_adeudo,
 			user: paquete.usuario 
 		}
@@ -196,6 +197,7 @@ const Impression = () => {
 						valor_catastral: registro.valor_catastral, 
 						fecha_actualizacion: registro.fecha_actualizacion,
 						fecha_corte_adeudo: registro.fecha_corte_adeudo,
+						periodo: registro.periodo,
 						monto_adeudo: registro.monto_adeudo,
 						pagos: [] 
 					}
@@ -272,6 +274,7 @@ const Impression = () => {
 			fecha_pago: registro.fecha_pago,
 			recibo: registro.recibo,
 			descuento: registro.descuento,
+			periodo: registro.periodo,
 			descripcion: registro.descripcion,
 			fecha_actualizacion: registro.fecha_actualizacion,
 			fecha_corte_adeudo: registro.fecha_corte_adeudo,
