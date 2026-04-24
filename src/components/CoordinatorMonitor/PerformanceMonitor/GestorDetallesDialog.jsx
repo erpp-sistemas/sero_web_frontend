@@ -85,6 +85,7 @@ import {
   deleteFotoRequest,
   fileToBase64,
 } from "../../../api/photo";
+import { useSelector } from "react-redux";
 
 // 🔹 Componente para vista modal ampliada de foto
 const FotoAmpliadaDialog = ({
@@ -1680,6 +1681,17 @@ const GestorDetallesDialog = ({
 }) => {
   const theme = useTheme();
   const colors = colorsProp || tokens(theme.palette.mode);
+  const user = useSelector((state) => state.user);
+
+  const userIdSession = user?.user_id || null;
+  
+  console.log("user en dialog:", user);
+  console.log("userIdSession extraído:", userIdSession);
+  
+  // Validación
+  if (!userIdSession && open) {
+    console.warn("⚠️ No se pudo obtener el user_id desde Redux. La bitácora no registrará quién hizo la acción.");
+  }
 
   // Usar props o valores por defecto
   const COLOR_TEXTO = COLOR_TEXTO_PROPS || colors.grey[100];
@@ -2344,6 +2356,7 @@ const GestorDetallesDialog = ({
         id_servicio: servicioId || 2,
         medio_carga: false,
         tipo_carga: false,
+        id_usuario_session: userIdSession,
       };
 
       // En edición, asegurar que enviamos el idRegistroFoto
@@ -2388,6 +2401,7 @@ const GestorDetallesDialog = ({
           medio_carga: false,
           tipo_carga: false,
           verificada: false,
+          id_usuario_session: userIdSession,
         };
 
         // Actualizar estado local
@@ -2454,6 +2468,7 @@ const GestorDetallesDialog = ({
       const response = await deleteFotoRequest({
         place_id: placeId,
         idRegistroFoto: fotoEliminar.idRegistroFoto,
+        id_usuario_session: userIdSession,
       });
 
       if (response.data.success) {

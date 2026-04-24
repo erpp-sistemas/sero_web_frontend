@@ -18,6 +18,7 @@ import MapaGestores from "../../components/CoordinatorMonitor/MapaGestores";
 function Index() {
   const user = useSelector((state) => state.user);
   const colors = tokens(useTheme().palette.mode);
+  console.log("user de redux", JSON.stringify(user.user_id));
 
   const [filters, setFilters] = useState({
     plazaId: null,
