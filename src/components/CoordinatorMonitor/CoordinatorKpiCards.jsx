@@ -41,7 +41,77 @@ const CoordinatorKpiCards = ({ data = [] }) => {
   ).length;
 
   /* ======================================================
-     DESCARGA A EXCEL - 100% DINÁMICA (EXCLUYE ID Y FOTOS)
+     FUNCIÓN PARA FORMATEAR FECHAS Y HORAS
+  ====================================================== */
+  
+  // Formatear datetime completo (fecha + hora)
+  const formatDateTime = (value) => {
+    if (!value) return "";
+    
+    if (value instanceof Date) {
+      return value.toLocaleString("es-MX", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false,
+      });
+    }
+    
+    if (typeof value === "string" && value.match(/^\d{4}-\d{2}-\d{2}T/)) {
+      const date = new Date(value);
+      return date.toLocaleString("es-MX", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false,
+      });
+    }
+    
+    return value;
+  };
+
+  // Formatear solo hora (para hora_entrada y hora_salida)
+  const formatTimeOnly = (value) => {
+    if (!value) return "";
+    
+    if (value instanceof Date) {
+      return value.toLocaleTimeString("es-MX", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false,
+      });
+    }
+    
+    if (typeof value === "string") {
+      // Si es datetime string ISO
+      if (value.match(/^\d{4}-\d{2}-\d{2}T/)) {
+        const date = new Date(value);
+        return date.toLocaleTimeString("es-MX", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: false,
+        });
+      }
+      
+      // Si ya es solo hora (HH:MM:SS)
+      if (value.match(/^\d{2}:\d{2}:\d{2}/)) {
+        return value;
+      }
+    }
+    
+    return value;
+  };
+
+  /* ======================================================
+     DESCARGA A EXCEL - INCLUYE TODOS LOS CAMPOS NECESARIOS
   ====================================================== */
   const handleDownloadExcel = async () => {
     if (!data.length) return;
@@ -53,17 +123,21 @@ const CoordinatorKpiCards = ({ data = [] }) => {
 
     // 🔥 Obtener TODOS los campos del primer objeto
     const allFields = Object.keys(data[0]);
-
-    // 🔥 Filtrar campos que NO contengan "id" NI "fotos" (insensible)
+    
+    // 🔥 Definir campos que queremos EXCLUIR explícitamente (IDs y fotos)
+    const excludeFields = [
+      'id', 'id_tarea', 'id_usuario', 'id_servicio', 'id_proceso',  // IDs
+      'fotos'  // JSON de fotos
+    ];
+    
+    // 🔥 Filtrar campos (solo excluir los explícitamente definidos)
     const fieldsToExport = allFields.filter(
-      (field) =>
-        !field.toLowerCase().includes("id") &&
-        !field.toLowerCase().includes("foto"),
+      (field) => !excludeFields.includes(field.toLowerCase())
     );
 
     // 📌 Crear encabezados formateados (reemplazar _ por espacio)
     const headers = fieldsToExport.map((field) =>
-      field.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()),
+      field.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())
     );
 
     // 📌 Encabezados con estilo minimalista
@@ -84,11 +158,26 @@ const CoordinatorKpiCards = ({ data = [] }) => {
     // 📌 Agregar datos dinámicamente
     data.forEach((item) => {
       const rowData = fieldsToExport.map((field) => {
-        const value = item[field];
+        let value = item[field];
 
-        // Formatear fechas si parecen serlo
+        // 🔥 TRATAMIENTO ESPECIAL PARA CAMPOS DE FECHA/HORA
+        if (field === 'fecha') {
+          return formatDateTime(value);
+        }
+        
+        // Para hora_entrada y hora_salida - SOLO LA HORA
+        if (field === 'hora_entrada' || field === 'hora_salida') {
+          return formatTimeOnly(value);
+        }
+        
+        // Para campos de fecha captura (si existen)
+        if (field === 'fechaCaptura' || field === 'fecha_captura') {
+          return formatDateTime(value);
+        }
+
+        // Para otros campos que sean fechas ISO
         if (typeof value === "string" && value.match(/^\d{4}-\d{2}-\d{2}T/)) {
-          return new Date(value).toLocaleDateString("es-MX");
+          return formatDateTime(value);
         }
 
         // Si es objeto o array, convertir a JSON string (para no perder info)
@@ -117,7 +206,7 @@ const CoordinatorKpiCards = ({ data = [] }) => {
         const length = cell.value ? cell.value.toString().length : 10;
         maxLength = Math.max(maxLength, length);
       });
-      column.width = Math.min(maxLength + 2, 40);
+      column.width = Math.min(maxLength + 2, 50); // Aumentado a 50 para URLs largas
     });
 
     // 📌 Generar y descargar
