@@ -142,6 +142,7 @@ const Mapa = () => {
 
         map.on('click', function (e) {
             let features = map.queryRenderedFeatures(e.point, { layers: map.getStyle().layers.map(layer => layer.id) });
+            // console.log("features ", features);
             if (features.length) {
                 features = quitarDuplicados(features);
                 if (features[0].id === undefined && !features[0].source.includes('mapbox') && !features[0].source.includes('road') && !features[0].source.includes('composite')) {
@@ -170,6 +171,7 @@ const Mapa = () => {
 
         map.on('click', 'gl-draw-polygon-fill-inactive.cold', function (e) {
             const features = map.queryRenderedFeatures(e.point, { layers: ['gl-draw-polygon-fill-inactive.cold'] });
+            // console.log("Features ", features)
             if (features.length) {
                 const clickedPolygon = features[0];
                 const id_polygon_selected = clickedPolygon.properties.id;
@@ -207,6 +209,7 @@ const Mapa = () => {
 
     const beforeCreatePolygon = (e, map) => {
         const polygon = e.features[0]; //? obtengo el poligono dibujado
+        // console.log("Polygon ", polygon)
         if (polygon) {
             const res_layers_in_map = getLayersVisiblesInMap(map);
             if (res_layers_in_map.status === 2) {
@@ -218,28 +221,75 @@ const Mapa = () => {
     }
 
 
+    // const createPolygon = (map, polygon) => {
+    //     if (!polygon) return;
+    //     setShowModalInfoPolygon(true);
+    //     if (!polygon.area) {
+    //         const layers_in_map = getLayersVisiblesInMap(map);
+    //         if (layers_in_map.status === 0) {
+    //             alert("No hay ningun layer prendido")
+    //             return;
+    //         }
+    //         const features_layer = map.getSource(layers_in_map.layers_visibles[0].source)._data.features;
+    //         const area = turf.area(polygon);
+    //         const pointsInPolygon = features_layer.filter(point => turf.booleanPointInPolygon(point, polygon));
+
+    //         const data_polygon = {
+    //             id: polygon.id, number_points: pointsInPolygon.length, points: pointsInPolygon,
+    //             area: `${((area / 1000000)).toFixed(2)} km2`, coordenadas: polygon.geometry.coordinates
+    //         }
+    //         setLastPolygonCreated(data_polygon);
+    //         return;
+    //     }
+    //     setLastPolygonCreated(polygon);
+    // }
+
     const createPolygon = (map, polygon) => {
         if (!polygon) return;
         setShowModalInfoPolygon(true);
+
         if (!polygon.area) {
             const layers_in_map = getLayersVisiblesInMap(map);
             if (layers_in_map.status === 0) {
-                alert("No hay ningun layer prendido")
+                alert("No hay ningun layer prendido");
                 return;
             }
-            const features_layer = map.getSource(layers_in_map.layers_visibles[0].source)._data.features;
+
+            // --- CORRECCIÓN AQUÍ ---
+            // En lugar de ._data.features, usamos querySourceFeatures
+            const sourceName = layers_in_map.layers_visibles[0].source;
+            const features_layer = map.querySourceFeatures(sourceName);
+
+            if (!features_layer || features_layer.length === 0) {
+                console.warn("No se encontraron features en la fuente:", sourceName);
+                return;
+            }
+
             const area = turf.area(polygon);
-            const pointsInPolygon = features_layer.filter(point => turf.booleanPointInPolygon(point, polygon));
+
+            // Validamos que el punto tenga geometría válida para evitar el error de Turf
+            const pointsInPolygon = features_layer.filter(point => {
+                if (!point.geometry || !point.geometry.coordinates) return false;
+                try {
+                    return turf.booleanPointInPolygon(point, polygon);
+                } catch (err) {
+                    return false;
+                }
+            });
 
             const data_polygon = {
-                id: polygon.id, number_points: pointsInPolygon.length, points: pointsInPolygon,
-                area: `${((area / 1000000)).toFixed(2)} km2`, coordenadas: polygon.geometry.coordinates
-            }
+                id: polygon.id,
+                number_points: pointsInPolygon.length,
+                points: pointsInPolygon,
+                area: `${((area / 1000000)).toFixed(2)} km2`,
+                coordenadas: polygon.geometry.coordinates
+            };
+
             setLastPolygonCreated(data_polygon);
             return;
         }
         setLastPolygonCreated(polygon);
-    }
+    };
 
 
     const addPolygonStorage = (polygon) => {
@@ -399,7 +449,7 @@ const Mapa = () => {
 
 
     const cleanAllPolygons = () => {
-        console.log(polygonsStorage.current);
+        // console.log(polygonsStorage.current);
         polygonsStorage.current.forEach(polygon => {
             if (polygon.marker) polygon.marker.remove();
             if (polygon.distancia && polygon.distancia !== '' && polygon.distancia !== undefined) {
