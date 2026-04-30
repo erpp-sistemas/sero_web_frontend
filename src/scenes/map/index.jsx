@@ -132,6 +132,32 @@ const Mapa = () => {
                 polygon: true,
                 trash: true
             },
+            styles: [
+                // 🔹 Relleno del polígono
+                {
+                    id: 'gl-draw-polygon-fill',
+                    type: 'fill',
+                    filter: ['all', ['==', '$type', 'Polygon']],
+                    paint: {
+                        'fill-color': '#00bcd4',
+                        'fill-opacity': 0.2
+                    }
+                },
+
+                {
+                    id: 'gl-draw-polygon-stroke',
+                    type: 'line',
+                    filter: ['all', ['==', '$type', 'Polygon']],
+                    layout: {
+                        'line-cap': 'round',
+                        'line-join': 'round'
+                    },
+                    paint: {
+                        'line-color': '#000000',
+                        'line-width': 2
+                    }
+                }
+            ]
         });
 
         mapRef.current = map;
@@ -208,8 +234,7 @@ const Mapa = () => {
     }
 
     const beforeCreatePolygon = (e, map) => {
-        const polygon = e.features[0]; //? obtengo el poligono dibujado
-        // console.log("Polygon ", polygon)
+        const polygon = e.features[0];
         if (polygon) {
             const res_layers_in_map = getLayersVisiblesInMap(map);
             if (res_layers_in_map.status === 2) {
@@ -254,9 +279,6 @@ const Mapa = () => {
                 alert("No hay ningun layer prendido");
                 return;
             }
-
-            // --- CORRECCIÓN AQUÍ ---
-            // En lugar de ._data.features, usamos querySourceFeatures
             const sourceName = layers_in_map.layers_visibles[0].source;
             const features_layer = map.querySourceFeatures(sourceName);
 
@@ -267,7 +289,6 @@ const Mapa = () => {
 
             const area = turf.area(polygon);
 
-            // Validamos que el punto tenga geometría válida para evitar el error de Turf
             const pointsInPolygon = features_layer.filter(point => {
                 if (!point.geometry || !point.geometry.coordinates) return false;
                 try {
@@ -277,10 +298,17 @@ const Mapa = () => {
                 }
             });
 
+            const uniqueFeatures = Object.values(
+                pointsInPolygon.reduce((acc, item) => {
+                    acc[item.properties.cuenta] = item;
+                    return acc;
+                }, {})
+            );
+
             const data_polygon = {
                 id: polygon.id,
-                number_points: pointsInPolygon.length,
-                points: pointsInPolygon,
+                number_points: uniqueFeatures.length,
+                points: uniqueFeatures,
                 area: `${((area / 1000000)).toFixed(2)} km2`,
                 coordenadas: polygon.geometry.coordinates
             };
