@@ -133,21 +133,29 @@ const Mapa = () => {
                 trash: true
             },
             styles: [
-                // 🔹 Relleno del polígono
                 {
-                    id: 'gl-draw-polygon-fill',
+                    id: 'gl-draw-polygon-fill-inactive',
                     type: 'fill',
-                    filter: ['all', ['==', '$type', 'Polygon']],
+                    filter: ['all', ['==', 'active', 'false'], ['==', '$type', 'Polygon']],
                     paint: {
-                        'fill-color': '#00bcd4',
+                        'fill-color': '#3bb2d0',
+                        'fill-opacity': 0.2
+                    }
+                },
+                {
+                    id: 'gl-draw-polygon-fill-active',
+                    type: 'fill',
+                    filter: ['all', ['==', 'active', 'true'], ['==', '$type', 'Polygon']],
+                    paint: {
+                        'fill-color': '#fbb03b',
                         'fill-opacity': 0.2
                     }
                 },
 
                 {
-                    id: 'gl-draw-polygon-stroke',
+                    id: 'gl-draw-polygon-stroke-inactive',
                     type: 'line',
-                    filter: ['all', ['==', '$type', 'Polygon']],
+                    filter: ['all', ['==', 'active', 'false'], ['==', '$type', 'Polygon']],
                     layout: {
                         'line-cap': 'round',
                         'line-join': 'round'
@@ -156,7 +164,74 @@ const Mapa = () => {
                         'line-color': '#000000',
                         'line-width': 2
                     }
-                }
+                },
+                {
+                    id: 'gl-draw-polygon-stroke-active',
+                    type: 'line',
+                    filter: ['all', ['==', 'active', 'true'], ['==', '$type', 'Polygon']],
+                    layout: {
+                        'line-cap': 'round',
+                        'line-join': 'round'
+                    },
+                    paint: {
+                        'line-color': '#fbb03b',
+                        'line-width': 2
+                    }
+                },
+
+                {
+                    id: 'gl-draw-polygon-and-line-vertex-halo-active',
+                    type: 'circle',
+                    filter: [
+                        'all',
+                        ['==', 'meta', 'vertex'],
+                        ['==', '$type', 'Point'],
+                        ['==', 'active', 'true']
+                    ],
+                    paint: {
+                        'circle-radius': 8,
+                        'circle-color': '#FFF'
+                    }
+                },
+                {
+                    id: 'gl-draw-polygon-and-line-vertex-active',
+                    type: 'circle',
+                    filter: [
+                        'all',
+                        ['==', 'meta', 'vertex'],
+                        ['==', '$type', 'Point'],
+                        ['==', 'active', 'true']
+                    ],
+                    paint: {
+                        'circle-radius': 5,
+                        'circle-color': '#fbb03b'
+                    }
+                },
+
+                {
+                    id: 'gl-draw-polygon-and-line-midpoint',
+                    type: 'circle',
+                    filter: [
+                        'all',
+                        ['==', 'meta', 'midpoint'],
+                        ['==', '$type', 'Point']
+                    ],
+                    paint: {
+                        'circle-radius': 4,
+                        'circle-color': '#fbb03b'
+                    }
+                },
+
+                {
+                    'id': 'gl-draw-polygon-and-line-vertex-inactive',
+                    'type': 'circle',
+                    'filter': ['all', ['==', 'meta', 'vertex'], ['==', '$type', 'Point'], ['==', 'active', 'false']],
+                    'paint': {
+                        'circle-radius': 2,
+                        'circle-color': '#3bb2d0'
+                    }
+                },
+
             ]
         });
 
@@ -271,7 +346,7 @@ const Mapa = () => {
 
     const createPolygon = (map, polygon) => {
         if (!polygon) return;
-        setShowModalInfoPolygon(true);
+        //setShowModalInfoPolygon(true);
 
         if (!polygon.area) {
             const layers_in_map = getLayersVisiblesInMap(map);
@@ -547,6 +622,12 @@ const Mapa = () => {
                 <div className="z-[100] absolute right-[20px] bottom-[75px] p-2 flex flex-col justify-center gap-3 bg-gray-600 shadow-xl shadow-slate-600 rounded-md">
                     {showToolPolygons && (
                         <>
+                            <Tooltip placement="left-start" title="Nombrar polígono seleccionado">
+                                <button className="py-2 px-2 rounded bg-cyan-600 hover:bg-cyan-500"
+                                    onClick={() => setShowModalInfoPolygon(true)} >
+                                    {getIcon('AccountCircleIcon', {})}
+                                </button>
+                            </Tooltip>
                             <Tooltip placement="left-start" title="Lista de polígonos">
                                 <button className="py-2 px-2 rounded bg-cyan-600 hover:bg-cyan-500"
                                     onClick={() => setShowModalInfoPolygons(true)} >
