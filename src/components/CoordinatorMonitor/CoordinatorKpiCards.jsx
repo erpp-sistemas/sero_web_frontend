@@ -41,73 +41,52 @@ const CoordinatorKpiCards = ({ data = [] }) => {
   ).length;
 
   /* ======================================================
-     FUNCIÓN PARA FORMATEAR FECHAS Y HORAS
-  ====================================================== */
-  
+   FUNCIÓN PARA FORMATEAR FECHAS Y HORAS
+====================================================== */
+
   // Formatear datetime completo (fecha + hora)
   const formatDateTime = (value) => {
     if (!value) return "";
-    
-    if (value instanceof Date) {
-      return value.toLocaleString("es-MX", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: false,
-      });
+
+    const date = new Date(value);
+
+    // Validar que sea una fecha válida
+    if (isNaN(date.getTime())) {
+      return value;
     }
-    
-    if (typeof value === "string" && value.match(/^\d{4}-\d{2}-\d{2}T/)) {
-      const date = new Date(value);
-      return date.toLocaleString("es-MX", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: false,
-      });
-    }
-    
-    return value;
+
+    const day = String(date.getUTCDate()).padStart(2, "0");
+    const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+    const year = date.getUTCFullYear();
+
+    const hours = String(date.getUTCHours()).padStart(2, "0");
+    const minutes = String(date.getUTCMinutes()).padStart(2, "0");
+    const seconds = String(date.getUTCSeconds()).padStart(2, "0");
+
+    return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
   };
 
   // Formatear solo hora (para hora_entrada y hora_salida)
   const formatTimeOnly = (value) => {
     if (!value) return "";
-    
-    if (value instanceof Date) {
-      return value.toLocaleTimeString("es-MX", {
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: false,
-      });
+
+    // Si ya viene en formato HH:MM:SS, la regresamos tal cual
+    if (typeof value === "string" && value.match(/^\d{2}:\d{2}:\d{2}$/)) {
+      return value;
     }
-    
-    if (typeof value === "string") {
-      // Si es datetime string ISO
-      if (value.match(/^\d{4}-\d{2}-\d{2}T/)) {
-        const date = new Date(value);
-        return date.toLocaleTimeString("es-MX", {
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-          hour12: false,
-        });
-      }
-      
-      // Si ya es solo hora (HH:MM:SS)
-      if (value.match(/^\d{2}:\d{2}:\d{2}/)) {
-        return value;
-      }
+
+    const date = new Date(value);
+
+    // Validar que sea una fecha válida
+    if (isNaN(date.getTime())) {
+      return value;
     }
-    
-    return value;
+
+    const hours = String(date.getUTCHours()).padStart(2, "0");
+    const minutes = String(date.getUTCMinutes()).padStart(2, "0");
+    const seconds = String(date.getUTCSeconds()).padStart(2, "0");
+
+    return `${hours}:${minutes}:${seconds}`;
   };
 
   /* ======================================================
@@ -123,21 +102,25 @@ const CoordinatorKpiCards = ({ data = [] }) => {
 
     // 🔥 Obtener TODOS los campos del primer objeto
     const allFields = Object.keys(data[0]);
-    
+
     // 🔥 Definir campos que queremos EXCLUIR explícitamente (IDs y fotos)
     const excludeFields = [
-      'id', 'id_tarea', 'id_usuario', 'id_servicio', 'id_proceso',  // IDs
-      'fotos'  // JSON de fotos
+      "id",
+      "id_tarea",
+      "id_usuario",
+      "id_servicio",
+      "id_proceso", // IDs
+      "fotos", // JSON de fotos
     ];
-    
+
     // 🔥 Filtrar campos (solo excluir los explícitamente definidos)
     const fieldsToExport = allFields.filter(
-      (field) => !excludeFields.includes(field.toLowerCase())
+      (field) => !excludeFields.includes(field.toLowerCase()),
     );
 
     // 📌 Crear encabezados formateados (reemplazar _ por espacio)
     const headers = fieldsToExport.map((field) =>
-      field.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())
+      field.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()),
     );
 
     // 📌 Encabezados con estilo minimalista
@@ -161,17 +144,17 @@ const CoordinatorKpiCards = ({ data = [] }) => {
         let value = item[field];
 
         // 🔥 TRATAMIENTO ESPECIAL PARA CAMPOS DE FECHA/HORA
-        if (field === 'fecha') {
+        if (field === "fecha") {
           return formatDateTime(value);
         }
-        
+
         // Para hora_entrada y hora_salida - SOLO LA HORA
-        if (field === 'hora_entrada' || field === 'hora_salida') {
+        if (field === "hora_entrada" || field === "hora_salida") {
           return formatTimeOnly(value);
         }
-        
+
         // Para campos de fecha captura (si existen)
-        if (field === 'fechaCaptura' || field === 'fecha_captura') {
+        if (field === "fechaCaptura" || field === "fecha_captura") {
           return formatDateTime(value);
         }
 
