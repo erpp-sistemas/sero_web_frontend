@@ -63,18 +63,6 @@ function SummaryTable({ data = [], onManagerSelected }) {
     );
   }
 
-  const alturaTabla = useMemo(() => {
-    const alturaHeader = 56;
-    const alturaFila = 52;
-    const margenExtra = 16;
-
-    if (data.length <= 5) {
-      return alturaHeader + data.length * alturaFila + margenExtra;
-    }
-
-    return 500;
-  }, [data.length]);
-
   return (
     <>
       <Box
@@ -82,12 +70,12 @@ function SummaryTable({ data = [], onManagerSelected }) {
         sx={{
           mt: 4,
           backgroundColor: COLOR_FONDO,
-          overflow: "hidden",
+          overflow: "visible",
         }}
       >
         <Box
           sx={{
-            height: alturaTabla,
+            height: "auto",
             width: "100%",
 
             "& .MuiDataGrid-root": {
@@ -124,16 +112,9 @@ function SummaryTable({ data = [], onManagerSelected }) {
             columns={columns}
             getRowId={(row) => row.id_usuario}
             disableRowSelectionOnClick
+            disableColumnMenu
             hideFooter
-            pageSizeOptions={[10, 25, 50]}
-            initialState={{
-              pagination: {
-                paginationModel: {
-                  page: 0,
-                  pageSize: 10,
-                },
-              },
-            }}
+            autoHeight
             sx={{
               "& .MuiDataGrid-virtualScroller": {
                 backgroundColor: COLOR_FONDO,

@@ -16,8 +16,7 @@ import FilterBar from "../../components/AssignmentManagement/FilterBar";
 import AssignmentKpiCards from "../../components/AssignmentManagement/AssignmentKpiCards";
 import SummaryTable from "../../components/AssignmentManagement/SummaryTable";
 import DialogAssignment from "../../components/AssignmentManagement/DialogAssignment";
-
-import DashboardSkeleton from "../../components/PaymentValidation/DashboardSkeleton";
+import DataGridSkeleton from "../../components/DataGrid/DataGridSkeleton";
 
 function Index() {
   /*
@@ -241,16 +240,23 @@ function Index() {
         isLoading={loading}
       />
 
-      {loading && <DashboardSkeleton />}
-
-      {!loading && summary.length > 0 && (
+      {loadingSummary ? (
         <Box sx={{ mt: 4 }}>
-          <AssignmentKpiCards data={summary} />
-          <SummaryTable
-            data={summary}
-            onManagerSelected={handleManagerSelected}
-          />
+          <AssignmentKpiCards data={[]} />
+
+          <DataGridSkeleton rows={11} />
         </Box>
+      ) : (
+        summary.length > 0 && (
+          <Box sx={{ mt: 4 }}>
+            <AssignmentKpiCards data={summary} />
+
+            <SummaryTable
+              data={summary}
+              onManagerSelected={handleManagerSelected}
+            />
+          </Box>
+        )
       )}
 
       <DialogAssignment

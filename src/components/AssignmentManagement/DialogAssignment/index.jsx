@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 
 import {
   Box,
@@ -26,6 +26,10 @@ import { DataGrid } from "@mui/x-data-grid";
 
 import buildColumns from "./buildColumns";
 
+import AssignmentOutlined from "@mui/icons-material/AssignmentOutlined";
+
+import DataGridEmptyState from "../../../components/DataGrid/DataGridEmptyState";
+
 import { tokens } from "../../../theme";
 
 function DialogAssignment({
@@ -41,11 +45,38 @@ function DialogAssignment({
 
   const colors = tokens(theme.palette.mode);
 
+  const COLOR_TEXTO = colors.grey[100];
+  const COLOR_FONDO = colors.bgContainerSecondary;
+  const COLOR_BORDE = colors.primary[500];
+  const COLOR_DISPONIBLE = colors.accentGreen[100];
+  const COLOR_ASIGNADO = colors.blueAccent[400];
+  const COLOR_MANTENIMIENTO = colors.yellowAccent[400];
+  const COLOR_BAJA = colors.redAccent[400];
+
   const [search, setSearch] = useState("");
 
   const [selectedAccounts, setSelectedAccounts] = useState([]);
 
   const [selectedDate, setSelectedDate] = useState("");
+
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const resetDialogState = useCallback(() => {
+    setSelectedAccounts([]);
+    setSelectedDate("");
+    setConfirmOpen(false);
+  }, []);
+
+  const handleClose = () => {
+    resetDialogState();
+    onClose();
+  };
+
+  useEffect(() => {
+    if (!open) {
+      resetDialogState();
+    }
+  }, [open, resetDialogState]);
 
   const filteredData = useMemo(() => {
     return data.filter((item) => {
@@ -112,17 +143,25 @@ function DialogAssignment({
     };
   }, [data]);
 
+  const NoRowsOverlay = () => (
+    <DataGridEmptyState
+      icon={<AssignmentOutlined />}
+      title="No se encontraron cuentas"
+      description="Prueba modificando el texto de búsqueda o la fecha de asignación."
+    />
+  );
+
   return (
     <Dialog
       open={open}
-      onClose={onClose}
+      onClose={handleClose}
       fullWidth
-      maxWidth="lg"
+      maxWidth="md"
       PaperProps={{
         sx: {
-          borderRadius: "14px",
+          maxHeight: "90vh",
+          borderRadius: "12px",
           overflow: "hidden",
-          backgroundColor: colors.bgContainer,
         },
       }}
     >
@@ -132,8 +171,13 @@ function DialogAssignment({
 
       <DialogTitle
         sx={{
-          px: 3,
-          py: 2,
+          backgroundColor: COLOR_FONDO,
+          color: COLOR_TEXTO,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          p: 3,
+          borderBottom: `1px solid ${COLOR_BORDE}`,
         }}
       >
         <Box
@@ -192,7 +236,13 @@ function DialogAssignment({
       {/* CONTENT */}
       {/* ===================================================== */}
 
-      <DialogContent sx={{ p: 3 }}>
+      <DialogContent
+        sx={{
+          backgroundColor: COLOR_FONDO,
+          p: 3,
+          overflow: "auto",
+        }}
+      >
         {/* Buscador */}
 
         <Box
@@ -430,7 +480,7 @@ function DialogAssignment({
                   ? "cuenta seleccionada"
                   : "cuentas seleccionadas"
               }`
-            : "Selecciona una o más cuentas para desasignarlas."}
+            : "Selecciona cuentas para desasignar."}
         </Typography>
 
         {/* Área donde irá el DataGrid */}
@@ -471,6 +521,9 @@ function DialogAssignment({
           <DataGrid
             rows={filteredData}
             columns={columns}
+            slots={{
+              noRowsOverlay: NoRowsOverlay,
+            }}
             getRowId={(row) => row.cuenta}
             loading={loading}
             checkboxSelection
@@ -500,8 +553,10 @@ function DialogAssignment({
 
       <DialogActions
         sx={{
-          px: 3,
-          py: 2,
+          backgroundColor: COLOR_FONDO,
+          p: 2,
+          borderTop: `1px solid ${COLOR_BORDE}`,
+          justifyContent: "space-between",
         }}
       >
         <Button
@@ -516,7 +571,7 @@ function DialogAssignment({
         <Button
           variant="contained"
           disabled={selectedAccounts.length === 0 || processing}
-          onClick={() => onUnassign(selectedAccounts)}
+          onClick={() => setConfirmOpen(true)}
           sx={{
             textTransform: "none",
             borderRadius: "10px",
@@ -545,6 +600,148 @@ function DialogAssignment({
               : "Desasignar cuentas"}
         </Button>
       </DialogActions>
+
+      <Dialog
+        open={confirmOpen}
+        onClose={() => !processing && setConfirmOpen(false)}
+        maxWidth="xs"
+        fullWidth
+        PaperProps={{
+          sx: {
+            maxHeight: "90vh",
+            borderRadius: "12px",
+            overflow: "hidden",
+          },
+        }}
+      >
+        <DialogContent
+          sx={{
+            backgroundColor: COLOR_FONDO,
+            p: 3,
+            overflow: "auto",
+          }}
+        >
+          <Box
+            sx={{
+              width: 54,
+              height: 54,
+              margin: "0 auto",
+              borderRadius: "14px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: colors.accentGreen[100] + "15",
+              color: colors.accentGreen[100],
+              mb: 3,
+            }}
+          >
+            <AssignmentIndOutlined />
+          </Box>
+
+          <Typography
+            variant="h6"
+            sx={{
+              fontWeight: 600,
+              mb: 2,
+            }}
+          >
+            Desasignar cuentas
+          </Typography>
+
+          <Typography
+            variant="body2"
+            sx={{
+              color: colors.grey[400],
+              mb: 1,
+              lineHeight: 1.7,
+            }}
+          >
+            Se desasignarán{" "}
+            <Typography
+              component="span"
+              sx={{
+                fontWeight: 600,
+                color: colors.grey[100],
+              }}
+            >
+              {selectedAccounts.length}{" "}
+              {selectedAccounts.length === 1 ? "cuenta" : "cuentas"}
+            </Typography>{" "}
+            del gestor{" "}
+            <Typography
+              component="span"
+              sx={{
+                fontWeight: 600,
+                color: colors.grey[100],
+              }}
+            >
+              {manager?.gestor}
+            </Typography>
+            .
+          </Typography>
+
+          <Typography
+            variant="body2"
+            sx={{
+              color: colors.grey[400],
+            }}
+          >
+            Las cuentas quedarán disponibles para una nueva asignación.
+          </Typography>
+        </DialogContent>
+
+        <DialogActions
+          sx={{
+            backgroundColor: COLOR_FONDO,
+            p: 2,
+            borderTop: `1px solid ${COLOR_BORDE}`,
+            
+          }}
+        >
+          <Button
+            disabled={processing}
+            variant="contained"
+            color="primary"
+            onClick={() => setConfirmOpen(false)}
+            sx={{
+              textTransform: "none",
+            }}
+          >
+            Cancelar
+          </Button>
+
+          <Button
+            variant="contained"
+            disabled={processing}
+            onClick={() => onUnassign(selectedAccounts)}
+            sx={{
+              textTransform: "none",
+              borderRadius: "10px",
+              backgroundColor: colors.accentGreen[100],
+              color: colors.textAccent,
+
+              "&:hover": {
+                backgroundColor: colors.accentGreen[200],
+              },
+            }}
+          >
+            {processing ? (
+              <>
+                <CircularProgress
+                  size={16}
+                  sx={{
+                    mr: 1,
+                    color: "inherit",
+                  }}
+                />
+                Desasignando...
+              </>
+            ) : (
+              "Desasignar"
+            )}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Dialog>
   );
 }

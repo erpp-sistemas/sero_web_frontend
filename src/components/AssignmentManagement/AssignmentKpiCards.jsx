@@ -1,6 +1,8 @@
 import React, { useMemo } from "react";
 
-import { Box, Typography, useTheme } from "@mui/material";
+import { Box, Tooltip, Typography, useTheme } from "@mui/material";
+
+import { alpha } from "@mui/material/styles";
 
 import { tokens } from "../../theme";
 
@@ -76,7 +78,7 @@ const AssignmentKpiCards = ({ data = [] }) => {
      CARD BASE
   ====================================================== */
 
-  const Card = ({ icon, children }) => (
+  const Card = ({ icon, iconColor, tooltip, children }) => (
     <Box
       className="p-4 rounded-xl shadow-sm"
       sx={{
@@ -85,21 +87,31 @@ const AssignmentKpiCards = ({ data = [] }) => {
         alignItems: "center",
         gap: 2,
 
-        transition: "transform .2s ease",
+        transition: "all .2s ease",
 
         "&:hover": {
           transform: "translateY(-2px)",
+          boxShadow: "0 8px 24px rgba(0,0,0,.06)",
         },
       }}
     >
-      <Box
-        sx={{
-          color: colors.grey[500],
-          fontSize: 28,
-        }}
-      >
-        {icon}
-      </Box>
+      <Tooltip title={tooltip} arrow placement="top">
+        <Box
+          sx={{
+            width: 46,
+            height: 46,
+            borderRadius: "12px",
+            backgroundColor: alpha(iconColor, 0.1),
+            color: iconColor,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+          }}
+        >
+          {icon}
+        </Box>
+      </Tooltip>
 
       <Box sx={{ flex: 1 }}>{children}</Box>
     </Box>
@@ -107,7 +119,11 @@ const AssignmentKpiCards = ({ data = [] }) => {
 
   return (
     <Box className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
-      <Card icon={<AssignmentOutlinedIcon />}>
+      <Card
+        icon={<AssignmentOutlinedIcon />}
+        iconColor={colors.accentGreen[100]}
+        tooltip="Total de cuentas asignadas según los filtros seleccionados."
+      >
         <Typography variant="h6" sx={{ fontWeight: 600 }}>
           {metrics.totalAccounts.toLocaleString()}
         </Typography>
@@ -117,7 +133,11 @@ const AssignmentKpiCards = ({ data = [] }) => {
         </Typography>
       </Card>
 
-      <Card icon={<AccessTimeOutlinedIcon />}>
+      <Card
+        icon={<AccessTimeOutlinedIcon />}
+        iconColor={colors.blueAccent[300]}
+        tooltip="Fecha y hora de la asignación más reciente registrada."
+      >
         <Typography
           variant="h6"
           sx={{
@@ -147,13 +167,22 @@ const AssignmentKpiCards = ({ data = [] }) => {
         </Typography>
       </Card>
 
-      <Card icon={<TrendingUpOutlinedIcon />}>
+      <Card
+        icon={<TrendingUpOutlinedIcon />}
+        iconColor={colors.yellowAccent[300]}
+        tooltip="Gestor con el mayor número de cuentas asignadas actualmente."
+      >
         <Typography variant="h6" sx={{ fontWeight: 600 }}>
           {metrics.managerMax?.asignaciones_activas ?? 0} cuentas
         </Typography>
 
-        <Typography variant="body2" sx={{ color: colors.grey[400] }}>
-          Mayor carga
+        <Typography
+          variant="body2"
+          sx={{
+            color: colors.grey[400],
+          }}
+        >
+          Gestor con mayor carga
         </Typography>
 
         <Typography
@@ -166,13 +195,17 @@ const AssignmentKpiCards = ({ data = [] }) => {
         </Typography>
       </Card>
 
-      <Card icon={<TrendingDownOutlinedIcon />}>
+      <Card
+        icon={<TrendingDownOutlinedIcon />}
+        iconColor={colors.blueAccent[300]}
+        tooltip="Gestor con el menor número de cuentas asignadas actualmente."
+      >
         <Typography variant="h6" sx={{ fontWeight: 600 }}>
           {metrics.managerMin?.asignaciones_activas ?? 0} cuentas
         </Typography>
 
         <Typography variant="body2" sx={{ color: colors.grey[400] }}>
-          Menor carga
+          Gestor con menor carga
         </Typography>
 
         <Typography
