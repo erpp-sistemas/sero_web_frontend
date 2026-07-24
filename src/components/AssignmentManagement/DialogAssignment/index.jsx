@@ -513,6 +513,23 @@ function DialogAssignment({
               backgroundColor: colors.primary[400] + "10",
             },
 
+            "& .MuiCheckbox-root": {
+              color: colors.grey[500],
+            },
+
+            "& .MuiCheckbox-root.Mui-checked": {
+              color: colors.accentGreen[100],
+            },
+
+            "& .MuiCheckbox-root:hover": {
+              backgroundColor: `${colors.accentGreen[100]}15`,
+            },
+
+            "& .MuiCheckbox-root.Mui-focusVisible": {
+              outline: `2px solid ${colors.accentGreen[100]}`,
+              outlineOffset: 2,
+            },
+
             "& .MuiDataGrid-footerContainer": {
               borderTop: `1px solid ${colors.borderContainer}`,
             },
@@ -695,7 +712,6 @@ function DialogAssignment({
             backgroundColor: COLOR_FONDO,
             p: 2,
             borderTop: `1px solid ${COLOR_BORDE}`,
-            
           }}
         >
           <Button
