@@ -41,6 +41,7 @@ import {
   InputLabel,
   Select,
   FormHelperText,
+  InputAdornment,
   Snackbar,
   Alert,
   CircularProgress,
@@ -75,6 +76,8 @@ import {
   AddPhotoAlternate,
   Save,
   Cancel,
+  Search,
+  Close as CloseIcon,
 } from "@mui/icons-material";
 import { tokens } from "../../../theme";
 import * as ExcelJS from "exceljs";
@@ -1705,6 +1708,7 @@ const GestorDetallesDialog = ({
 
   // 🔹 Estados principales
   const [filtroMotivo, setFiltroMotivo] = useState("TODOS");
+  const [busquedaGestion, setBusquedaGestion] = useState("");
   const [paginaGestiones, setPaginaGestiones] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [gestionExpandida, setGestionExpandida] = useState(null);
@@ -1806,35 +1810,62 @@ const GestorDetallesDialog = ({
     return COLOR_ATENCION;
   };
 
-  // 🔹 Calcular gestiones filtradas
+  // 🔹 Calcular gestiones filtradas por chip y búsqueda
   const gestionesFiltradas = useMemo(() => {
     if (!usuario?.registros) return [];
 
-    const registros = usuario.registros || [];
+    let registros = usuario.registros || [];
 
     if (filtroMotivo && filtroMotivo !== "TODOS") {
       const motivoFiltroNormalizado = normalizarMotivo(filtroMotivo);
 
-      return registros.filter(
+      registros = registros.filter(
         (registro) =>
           normalizarMotivo(registro.motivo_gestion) === motivoFiltroNormalizado,
       );
     }
 
-    return registros;
-  }, [usuario, filtroMotivo]);
+    const textoBusqueda = busquedaGestion.trim().toLowerCase();
+    if (!textoBusqueda) return registros;
 
-  // 🔹 Resetear filtro si el motivo activo ya no tiene registros
+    return registros.filter((registro) => {
+      const cuenta = (registro.cuenta || "").toString().toLowerCase();
+      const fecha = registro.fecha
+        ? new Date(registro.fecha).toLocaleDateString("es-MX", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+          })
+        : "";
+      const estado = (registro.estatus_gestion || "").toString().toLowerCase();
+      const motivo = formatMotivoGestion(
+        registro.motivo_gestion || "COMPLETA",
+      )
+        .toLowerCase();
+      const gps = registro.tieneGPS ? "si" : "no";
+      const fotos = `${
+        registro.fotosFachada ?? registro.fotos_fachada ?? 0
+      } ${registro.fotosEvidencia ?? registro.fotos_evidencia ?? 0} ${
+        registro.totalFotos ?? registro.total_fotos ?? 0
+      }`;
+
+      const haystack = [cuenta, fecha, estado, motivo, gps, fotos].join(" ");
+      return haystack.includes(textoBusqueda);
+    });
+  }, [usuario, filtroMotivo, busquedaGestion]);
+
   useEffect(() => {
-    if (
-      filtroMotivo !== "TODOS" &&
-      gestionesFiltradas.length === 0 &&
-      usuario?.registros?.length > 0
-    ) {
+    setPaginaGestiones(0);
+  }, [filtroMotivo, busquedaGestion]);
+
+  // 🔹 Mantener el chip activo aunque la búsqueda o el filtro no devuelva resultados.
+  // Si el usuario no tiene registros reales, entonces sí puede volver a TODOS.
+  useEffect(() => {
+    if (filtroMotivo !== "TODOS" && (!usuario?.registros || usuario.registros.length === 0)) {
       setFiltroMotivo("TODOS");
       setPaginaGestiones(0);
     }
-  }, [filtroMotivo, gestionesFiltradas.length, usuario?.registros?.length]);
+  }, [filtroMotivo, usuario?.registros]);
 
   // 🔹 Calcular páginas
   const paginatedGestiones = useMemo(() => {
@@ -2856,6 +2887,8 @@ const GestorDetallesDialog = ({
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
+                flexWrap: "wrap",
+                gap: 2,
                 mb: 2,
               }}
             >
@@ -2876,22 +2909,102 @@ const GestorDetallesDialog = ({
                   (Haz clic en ▶ para expandir)
                 </Typography>
               </Typography>
-              <Typography
-                variant="body2"
-                sx={{ color: colors.grey[400], fontSize: "0.875rem" }}
+
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  flexWrap: "wrap",
+                }}
               >
-                {filtroMotivo === "TODOS" ? (
-                  <>Mostrando {gestionesFiltradas.length} registros</>
-                ) : (
-                  <>
-                    Filtrado:{" "}
-                    <strong>{formatMotivoGestion(filtroMotivo)}</strong> •
-                    {gestionesFiltradas.length} de {usuario.total || 0}{" "}
-                    registros
-                  </>
-                )}
-              </Typography>
+                <TextField
+                  fullWidth
+                  size="small"
+                  variant="outlined"
+                  placeholder="Buscar cuenta, estado o motivo..."
+                  value={busquedaGestion}
+                  onChange={(event) => setBusquedaGestion(event.target.value)}
+                  InputProps={{
+                    endAdornment: (
+                      <>
+                        {busquedaGestion && (
+                          <IconButton
+                            size="small"
+                            onClick={() => setBusquedaGestion("")}
+                            aria-label="Limpiar búsqueda"
+                            sx={{
+                              color: colors.grey[400],
+                              p: 0.5,
+                              mr: 0.5,
+                              transition: "all 0.2s ease",
+                              "&:hover": {
+                                color: colors.accentGreen[100],
+                                backgroundColor: `${colors.accentGreen[100]}10`,
+                              },
+                            }}
+                          >
+                            <CloseIcon sx={{ fontSize: 16 }} />
+                          </IconButton>
+                        )}
+                        <InputAdornment position="end">
+                          <Search sx={{ color: colors.grey[300], fontSize: 20 }} />
+                        </InputAdornment>
+                      </>
+                    ),
+                  }}
+                  sx={{
+                    minWidth: { xs: "100%", sm: 260 },
+                    maxWidth: 320,
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "10px",
+                      fontSize: "0.875rem",
+                      backgroundColor: colors.bgContainer,
+                      transition:
+                        "border-color 0.2s ease, box-shadow 0.2s ease",
+
+                      "& .MuiOutlinedInput-notchedOutline": {
+                        borderColor: colors.borderContainer,
+                      },
+
+                      "&:hover .MuiOutlinedInput-notchedOutline": {
+                        borderColor: colors.accentGreen[100],
+                      },
+
+                      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                        borderColor: colors.accentGreen[200],
+                        boxShadow: "0 0 0 3px rgba(34,197,94,0.15)",
+                      },
+
+                      "& input::placeholder": {
+                        color: colors.grey[400],
+                        opacity: 1,
+                      },
+                    },
+
+                    "& .MuiInputAdornment-root": {
+                      marginRight: "8px",
+                    },
+                  }}
+                />
+              </Box>
             </Box>
+
+            <Typography
+              variant="body2"
+              sx={{ color: colors.grey[400], fontSize: "0.875rem", mb: 2 }}
+            >
+              {filtroMotivo === "TODOS" ? (
+                <>Mostrando {gestionesFiltradas.length} registros</>
+              ) : (
+                <>
+                  Filtrado:{" "}
+                  <strong>{formatMotivoGestion(filtroMotivo)}</strong> •
+                  {gestionesFiltradas.length} de {usuario.total || 0}{" "}
+                  registros
+                </>
+              )}
+            </Typography>
 
             {paginatedGestiones.length === 0 ? (
               <Box
@@ -2910,9 +3023,15 @@ const GestorDetallesDialog = ({
                   No hay gestiones para mostrar
                 </Typography>
                 <Typography variant="body2" sx={{ color: colors.grey[400] }}>
-                  {filtroMotivo !== "TODOS"
-                    ? `No hay gestiones con el filtro "${formatMotivoGestion(filtroMotivo)}"`
-                    : "Este usuario no tiene gestiones registradas"}
+                  {busquedaGestion
+                    ? `No se encontraron resultados para "${busquedaGestion}" dentro del filtro "${
+                        filtroMotivo === "TODOS"
+                          ? "Todos"
+                          : formatMotivoGestion(filtroMotivo)
+                      }".`
+                    : filtroMotivo !== "TODOS"
+                      ? `No hay gestiones con el filtro "${formatMotivoGestion(filtroMotivo)}"`
+                      : "Este usuario no tiene gestiones registradas"}
                 </Typography>
               </Box>
             ) : (
