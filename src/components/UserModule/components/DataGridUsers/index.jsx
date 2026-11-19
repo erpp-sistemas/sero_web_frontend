@@ -21,7 +21,6 @@ import FemaleIcon from "@mui/icons-material/Female";
 import {
   Alert,
   AppBar,
-  Avatar,
   Box,
   Button,
   Checkbox,
@@ -73,6 +72,8 @@ import {
   updateAccessUserById,
 } from "../../../../api/access";
 import { uploadToS3 } from "../../../../services/s3.service";
+import ImagenS3 from "../../../ImagenS3";
+import { useUrlArchivo } from "../../../../hooks/useUrlArchivo";
 import {
   getAllPlaces,
   getPlaceServiceByUserId,
@@ -265,14 +266,15 @@ const CheckCell = ({ data }) => {
 
 const AvatarImage = ({ data }) => {
   const [visibleAvatar, setVisibleAvatar] = React.useState(false);
+  // data puede ser una URL (resuelta por el backend o vieja) o una key de S3.
+  const { url } = useUrlArchivo(data);
   return (
     <>
-      <Avatar
-        onClick={() => {
-          setVisibleAvatar(true);
-        }}
-        alt="Remy Sharp"
-        src={data}
+      <ImagenS3
+        valor={data}
+        variante="avatar"
+        alt="Foto del usuario"
+        onClick={url ? () => setVisibleAvatar(true) : undefined}
       />
 
       <Viewer
@@ -280,7 +282,7 @@ const AvatarImage = ({ data }) => {
         onClose={() => {
           setVisibleAvatar(false);
         }}
-        images={[{ src: data, alt: "avatar" }]}
+        images={[{ src: url || "", alt: "avatar" }]}
       />
     </>
   );
@@ -562,13 +564,14 @@ function DataGridUsers({
     if (fileList) {
       try {
         // Now you have the File object, you can do something with it
-        if (fileList[0]) {
-          const fileUrl = await uploadToS3(fileList[0].originFileObj);
-          console.log("URL del archivo subido:", fileUrl);
+        // Solo si es un archivo nuevo (la foto actual llega como URL, sin originFileObj).
+        if (fileList[0]?.originFileObj) {
+          // Se guarda la key en usuario.foto; el backend devuelve después la URL temporal.
+          const key = await uploadToS3(fileList[0].originFileObj, "usuarios");
 
           setUserData((prevState) => ({
             ...prevState,
-            image_url: fileUrl,
+            foto: key,
           }));
         }
       } catch (error) {
@@ -1240,7 +1243,7 @@ function DataGridUsers({
         ),
         width: 60,
         editable: false,
-        renderCell: (params) => <AvatarImage data={params.row.url_image} />,
+        renderCell: (params) => <AvatarImage data={params.row.url_image} />, // URL ya resuelta por el backend
       },
       /*  {
         field: "personal_phone",
@@ -1338,6 +1341,8 @@ function DataGridUsers({
               className="textPrimary"
               onClick={() => {
                 setFileList([]);
+                // Que la foto subida para otro usuario no se mande en esta edición.
+                setUserData((prevState) => ({ ...prevState, foto: undefined }));
                 setSelectTheRowID(null);
                 handleResetStep();
 
@@ -1362,7 +1367,8 @@ function DataGridUsers({
     try {
       const response = await updateUser(idUser.id_usuario, {
         nombre: userData.nombre === "" ? selectTheRowId.name : userData.nombre,
-        url_image: userData?.image_url,
+        // Solo se manda la key si se subió una foto nueva; sin ella el backend no toca la foto.
+        ...(userData?.foto ? { foto: userData.foto } : {}),
         activo: userData.activo,
         apellido_paterno:
           userData.apellido_paterno === ""

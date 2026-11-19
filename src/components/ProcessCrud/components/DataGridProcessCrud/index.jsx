@@ -40,7 +40,7 @@ import {
 } from "@mui/x-data-grid";
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import CloseIcon from "@mui/icons-material/Close";
-import { uploadToS3 } from "../../../../services/s3.service";
+import { uploadToS3ComoUrl } from "../../../../services/s3.service";
 import { AddOutlined, Sync, SyncAltOutlined } from "@mui/icons-material";
 import { GrServices } from "react-icons/gr";
 import { FaRegCircleCheck } from "react-icons/fa6";
@@ -738,7 +738,7 @@ function DataGridProcess() {
     }
 
     try {
-      const fileUrl = await uploadToS3(file);
+      const fileUrl = await uploadToS3ComoUrl(file, "procesos");
       console.log("URL del archivo subido:", fileUrl);
 
       setSignedUrl(fileUrl);
@@ -877,7 +877,7 @@ function DataGridProcess() {
 
     try {
       // Intenta cargar el archivo a Amazon S3 y obtén la URL del archivo cargado
-      const fileUrl = await uploadToS3(file);
+      const fileUrl = await uploadToS3ComoUrl(file, "procesos");
       console.log("URL del archivo subido:", fileUrl);
 
       // Actualiza el estado 'imagen' en serviceData con la nueva URL del archivo

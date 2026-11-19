@@ -43,7 +43,7 @@ import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
 import CloseIcon from "@mui/icons-material/Close";
 
-import { uploadToS3 } from "../../../../services/s3.service";
+import { uploadToS3ComoUrl } from "../../../../services/s3.service";
 import { FaRegCircleCheck } from "react-icons/fa6";
 import { TbZoomCancel } from "react-icons/tb";
 
@@ -443,7 +443,7 @@ function DataGridServiceCrud() {
     }
 
     try {
-      const fileUrl = await uploadToS3(file);
+      const fileUrl = await uploadToS3ComoUrl(file, "servicios");
       console.log("URL del archivo subido:", fileUrl);
 
       setSignedUrl(fileUrl);
@@ -488,7 +488,7 @@ const handleFileChangeWebImage = async (event) => {
 
   try {
     // Intenta cargar el archivo a Amazon S3 y obtén la URL del archivo cargado
-    const fileUrl = await uploadToS3(file);
+    const fileUrl = await uploadToS3ComoUrl(file, "servicios");
     console.log("URL del archivo subido:", fileUrl);
 
     // Actualiza el estado 'imagen' en serviceData con la nueva URL del archivo
@@ -536,7 +536,7 @@ const handleFileChangeWebImage = async (event) => {
     }
 
     try {
-      const fileUrl = await uploadToS3(file);
+      const fileUrl = await uploadToS3ComoUrl(file, "servicios");
       console.log("URL del archivo subido:", fileUrl);
 
       setServiceData((prevData) => {

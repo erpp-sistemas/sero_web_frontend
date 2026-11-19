@@ -75,7 +75,7 @@ const FormDatosGenerales = ({ chageDatosGenerales, datosGenerales }) => {
         const file = await convertBase64ToFile(base64Image, fileList[0].name);
         // Now you have the File object, you can do something with it
         if (file) {
-          const fileUrl = await uploadToS3(file);
+          const fileUrl = await uploadToS3(file, "usuarios"); // key de S3, no URL
 
           setFotoUsuario(fileUrl);
 
@@ -157,7 +157,7 @@ const FormDatosGenerales = ({ chageDatosGenerales, datosGenerales }) => {
       const file = e.target.files[0];
 
       try {
-        const fileUrl = await uploadToS3(file);
+        const fileUrl = await uploadToS3(file, "usuarios"); // key de S3, no URL
 
         setFotoUsuario(fileUrl);
 

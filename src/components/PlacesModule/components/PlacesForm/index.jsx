@@ -36,7 +36,7 @@ import {
 } from "../../../../api/place";
 import PlaceIcon from "@mui/icons-material/Place";
 import { getPlaceAndServiceAndProcessByUser } from "../../../../api/user";
-import { uploadToS3 } from "../../../../services/s3.service";
+import { uploadToS3ComoUrl } from "../../../../services/s3.service";
 
 function PlacesForm() {
   const [fileList, setFileList] = React.useState([]);
@@ -90,7 +90,7 @@ function PlacesForm() {
         const file = await convertBase64ToFile(base64Image, fileList[0].name);
         // Now you have the File object, you can do something with it
         if (file) {
-          const fileUrl = await uploadToS3(file);
+          const fileUrl = await uploadToS3ComoUrl(file, "plazas");
           console.log("URL del archivo subido:", fileUrl);
 
           setFotoUsuario(fileUrl);
