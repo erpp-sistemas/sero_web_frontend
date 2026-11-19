@@ -30,7 +30,7 @@ import LockResetIcon from "@mui/icons-material/LockReset";
 import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
 import LocalPhoneIcon from "@mui/icons-material/LocalPhone";
 import PermPhoneMsgIcon from "@mui/icons-material/PermPhoneMsg";
-import { uploadToS3 } from "../services/s3.service";
+import { uploadToS3, subidaSoloLocal } from "../services/s3.service";
 import { getAllRoles } from "../api/rol";
 
 import { Upload } from "antd";
@@ -378,7 +378,8 @@ const FormDatosGenerales = ({ chageDatosGenerales, datosGenerales }) => {
               <Upload
               
                 style={{ backgroundColor: "red" }}
-                action="https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188"
+                // Sin envío a servicios externos: vista previa local y subida por /uploads/presign.
+                customRequest={subidaSoloLocal}
                 listType="picture-card"
                 fileList={fileList}
                 onChange={onChange}

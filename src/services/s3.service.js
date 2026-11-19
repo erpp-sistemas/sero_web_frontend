@@ -21,6 +21,15 @@ export const uploadToS3 = async (file, carpeta) => {
 }
 
 /**
+ * customRequest para <Upload> de antd: marca el archivo como listo SIN enviarlo a ningún servicio.
+ * Con ImgCrop conserva el recorte (antd reemplaza el archivo por el recortado al terminar) y genera
+ * la vista previa local (thumbUrl). La subida real la hace cada pantalla con uploadToS3.
+ */
+export const subidaSoloLocal = ({ onSuccess }) => {
+	setTimeout(() => onSuccess("ok"), 0)
+}
+
+/**
  * Comportamiento anterior para plaza, servicio y proceso: sube y devuelve una URL firmada de 7 días.
  * @param {File|Blob} file
  * @param {'plazas'|'servicios'|'procesos'} carpeta

@@ -36,7 +36,7 @@ import {
 } from "../../../../api/place";
 import PlaceIcon from "@mui/icons-material/Place";
 import { getPlaceAndServiceAndProcessByUser } from "../../../../api/user";
-import { uploadToS3ComoUrl } from "../../../../services/s3.service";
+import { uploadToS3ComoUrl, subidaSoloLocal } from "../../../../services/s3.service";
 
 function PlacesForm() {
   const [fileList, setFileList] = React.useState([]);
@@ -484,7 +484,8 @@ function PlacesForm() {
             <Box sx={{ width: "30%" }}>
               <ImgCrop rotationSlider>
                 <Upload
-                  action="https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188"
+                  // Sin envío a servicios externos: vista previa local y subida por /uploads/presign.
+                  customRequest={subidaSoloLocal}
                   listType="picture-card"
                   fileList={fileList}
                   onChange={onChange}
