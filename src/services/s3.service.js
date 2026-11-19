@@ -1,48 +1,32 @@
-import { S3Client, ListObjectsV2Command, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3"
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
-const AWS_BUCKET_NAME = "bucket-files-msg"
-const AWS_BUCKET_REGION = "us-east-2"
-const AWS_PUBLIC_KEY = "AKIAT5FEWJS6OYP6WLHR"
-const AWS_SECRET_KEY = "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"
+import { subirArchivo, obtenerUrlArchivo } from "../api/uploads"
 
-const client = new S3Client({
-	region: AWS_BUCKET_REGION,
-	credentials: {
-		accessKeyId: AWS_PUBLIC_KEY,
-		secretAccessKey: AWS_SECRET_KEY,
-	},
-})
+// Sin llaves de AWS en el navegador (S00-H0.5): todo pasa por el backend con URLs firmadas.
 
-export const listObjects = async () => {
+// Vigencia de la URL que hoy se guarda en plaza/servicio/proceso.imagen (7 días, como antes).
+// Se mantiene así hasta confirmar qué lee la app móvil (sero_movil); ver docs/PROGRESO.md.
+const VIGENCIA_URL_GUARDADA_SEGUNDOS = 7 * 24 * 60 * 60
+
+/**
+ * Sube un archivo a S3 y devuelve su key. Es lo que se guarda en la base (p. ej. usuario.foto).
+ * @param {File|Blob} file
+ * @param {'usuarios'|'plazas'|'servicios'|'procesos'|'cuentas'} carpeta
+ */
+export const uploadToS3 = async (file, carpeta) => {
 	try {
-		const command = new ListObjectsV2Command({
-			Bucket: AWS_BUCKET_NAME,
-		})
-		const response = await client.send(command)
-		response.Contents.forEach((object) => {
-			return(object.Key)
-		})
+		return await subirArchivo(file, carpeta)
 	} catch (err) {
-		console.error("Error al listar objetos:", err.stack)
+		console.error("Error al subir archivo:", err.message)
+		throw err
 	}
 }
 
-export const uploadToS3 = async (file) => {
-	try {
-		const params = {
-			Bucket: AWS_BUCKET_NAME,
-			Key: file.name,
-			Body: file,
-		}
-
-		const command = new PutObjectCommand(params)
-		await client.send(command)
-		const signer = await getSignedUrl(client, new GetObjectCommand({ Bucket: AWS_BUCKET_NAME, Key: file.name }), { expiresIn: 604800 })
-		const fileUrl = `${signer}`
-		return fileUrl
-
-	} catch (err) {
-		console.error("Error al subir archivo:", err.stack)
-		throw err
-	}
+/**
+ * Comportamiento anterior para plaza, servicio y proceso: sube y devuelve una URL firmada de 7 días.
+ * @param {File|Blob} file
+ * @param {'plazas'|'servicios'|'procesos'} carpeta
+ */
+export const uploadToS3ComoUrl = async (file, carpeta) => {
+	const key = await uploadToS3(file, carpeta)
+	const { url } = await obtenerUrlArchivo(key, { segundos: VIGENCIA_URL_GUARDADA_SEGUNDOS })
+	return url
 }

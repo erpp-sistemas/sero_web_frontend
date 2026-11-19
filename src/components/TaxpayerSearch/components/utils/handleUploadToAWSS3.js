@@ -1,41 +1,9 @@
-// import AWS from 'aws-sdk';
+// Fotografías de cuenta: hoy NO se suben a S3; solo se muestra una vista previa local (URL blob:)
+// con fecha y descripción de prueba. Las llaves y el código muerto de AWS se quitaron en S00-H0.5.
+// Subir estas fotos de verdad queda pendiente (ver docs/PROGRESO.md).
 
 const isDevelopment = true
 
-// Ejemplo de uso:
-const imageFile = "..."; // Tu archivo de imagen como un objeto ReadableStream
-const s3Bucket = "nombre-de-tu-bucket";
-const s3Key = "nombre-de-tu-imagen.jpg";
-const s3PublicKey = "Publickey";
-const s3SecretKey = "secretkey";
-const s3Region = "us-east-2";
-const uploadToAWSS3 = async ({ file, bucket, key }) => {
-  // Configuracion AWS credenciales y región
-  return;
-  AWS.config.update({
-    accessKeyId: s3PublicKey,
-    secretAccessKey: s3SecretKey,
-    region: s3Region,
-  });
-
-  const s3 = new AWS.S3();
-
-  // Parámetros para la carga de la imagen
-  const params = {
-    Bucket: bucket,
-    Key: key,
-    Body: file,
-    ACL: "public-read", // Esto hace que el objeto sea público
-  };
-
-  try {
-    await s3.upload(params).promise();
-    const imageUrl = `https://${bucket}.s3.amazonaws.com/${key}`;
-    return { url: imageUrl, name: key };
-  } catch (error) {
-    throw error;
-  }
-};
 const getCurrentDate = () => {
   const currentDate = new Date();
   const year = currentDate.getFullYear();
