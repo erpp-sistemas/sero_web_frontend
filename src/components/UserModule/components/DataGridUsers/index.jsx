@@ -2307,7 +2307,9 @@ function DataGridUsers({
                   )}  */}
 
                     <Upload
-                      action="https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188"
+                      // Sin envío a ningún servicio: el archivo se queda en el navegador (vista previa)
+                      // y fetchImage lo sube a S3 con /uploads/presign.
+                      beforeUpload={() => false}
                       listType="picture-card"
                       fileList={fileList}
                       onPreview={handlePreview}
