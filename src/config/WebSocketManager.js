@@ -1,5 +1,4 @@
 import { setSocket, addMessage } from '../redux/socketSlice';
-import { mode } from '../config/credentials'
 
 const RECONNECT_INTERVAL = 5000;
 
@@ -10,10 +9,7 @@ export const initializeWebSocket = (dispatch) => {
 
     const connect = () => {
 
-        let url;
-        (mode === 'dev')
-            ? url = 'ws://localhost:3001/ws'
-            : url = 'wss://seroapi.store/sero-web/ws';
+        const url = import.meta.env.VITE_WS_URL;
 
         socket = new WebSocket(url);
 
