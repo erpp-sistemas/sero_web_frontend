@@ -37,6 +37,7 @@ import {
 import PlaceIcon from "@mui/icons-material/Place";
 import { getPlaceAndServiceAndProcessByUser } from "../../../../api/user";
 import { uploadToS3ComoUrl, subidaSoloLocal } from "../../../../services/s3.service";
+import { SUBIDA_IMAGEN_CATALOGOS } from "../../../../config/subidas";
 
 function PlacesForm() {
   const [fileList, setFileList] = React.useState([]);
@@ -482,6 +483,8 @@ function PlacesForm() {
               />
             </Box>
             <Box sx={{ width: "30%" }}>
+              {/* Imagen de la plaza: oculta hasta H0.7 (SUBIDA_IMAGEN_CATALOGOS) */}
+              {SUBIDA_IMAGEN_CATALOGOS && (
               <ImgCrop rotationSlider>
                 <Upload
                   // Sin envío a servicios externos: vista previa local y subida por /uploads/presign.
@@ -494,6 +497,7 @@ function PlacesForm() {
                   {fileList.length < 1 && "+ Upload"}
                 </Upload>
               </ImgCrop>
+              )}
               <Box sx={{ display: "flex", flexDirection: "row" }}>
                 <Checkbox
                   onChange={handleChangeInput}

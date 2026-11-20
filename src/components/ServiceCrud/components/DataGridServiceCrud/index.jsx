@@ -44,6 +44,7 @@ import ClearIcon from "@mui/icons-material/Clear";
 import CloseIcon from "@mui/icons-material/Close";
 
 import { uploadToS3ComoUrl } from "../../../../services/s3.service";
+import { SUBIDA_IMAGEN_CATALOGOS } from "../../../../config/subidas";
 import { FaRegCircleCheck } from "react-icons/fa6";
 import { TbZoomCancel } from "react-icons/tb";
 
@@ -601,6 +602,8 @@ const handleFileChangeWebImage = async (event) => {
       ,
       , */
   }) => {
+    // Sin subida de imagen (hasta H0.7): solo se muestra la imagen guardada, sin abrir el diálogo.
+    if (!SUBIDA_IMAGEN_CATALOGOS) return data ? <Avatar alt="Imagen" src={data} /> : null;
     if (!data) {
       return (
         <IconButton
@@ -1224,6 +1227,8 @@ const handleFileChangeWebImage = async (event) => {
               </Typography>
               {/* nombre, :imagen, :activo, :orden, :icono_app_movil */}
               <Grid container spacing={2}>
+                {/* Imagen del servicio: oculto hasta H0.7 (SUBIDA_IMAGEN_CATALOGOS) */}
+                {SUBIDA_IMAGEN_CATALOGOS && (
                 <Grid
                   item
                   xs={3}
@@ -1268,6 +1273,7 @@ const handleFileChangeWebImage = async (event) => {
                     />
                   </Box>
                 </Grid>
+                )}
                 <Grid item xs={6}>
                   <TextField
                     color="secondary"
@@ -1350,6 +1356,8 @@ const handleFileChangeWebImage = async (event) => {
                   )}
                 </Grid>
 
+                {/* Icono de la app: oculto hasta H0.7 (SUBIDA_IMAGEN_CATALOGOS) */}
+                {SUBIDA_IMAGEN_CATALOGOS && (
                 <Grid
                   item
                   xs={3}
@@ -1393,6 +1401,7 @@ const handleFileChangeWebImage = async (event) => {
                     />
                   </Box>
                 </Grid>
+                )}
               </Grid>
 
               <Box

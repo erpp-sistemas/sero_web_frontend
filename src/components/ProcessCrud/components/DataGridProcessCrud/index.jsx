@@ -41,6 +41,7 @@ import {
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import CloseIcon from "@mui/icons-material/Close";
 import { uploadToS3ComoUrl } from "../../../../services/s3.service";
+import { SUBIDA_IMAGEN_CATALOGOS } from "../../../../config/subidas";
 import { AddOutlined, Sync, SyncAltOutlined } from "@mui/icons-material";
 import { GrServices } from "react-icons/gr";
 import { FaRegCircleCheck } from "react-icons/fa6";
@@ -486,6 +487,8 @@ function DataGridProcess() {
    * @returns {JSX.Element} Elemento JSX que representa la imagen de avatar.
    */
   const AvatarImage = ({ data, handleClickOpen, getDataRow }) => {
+    // Sin subida de imagen (hasta H0.7): solo se muestra la imagen guardada, sin abrir el diálogo.
+    if (!SUBIDA_IMAGEN_CATALOGOS) return <Avatar alt="Imagen" src={data} />;
     return (
       <Avatar
         onClick={() => {
@@ -1148,6 +1151,8 @@ function DataGridProcess() {
               </Typography>
 
               <Grid container spacing={2}>
+                {/* Imagen del proceso: oculto hasta H0.7 (SUBIDA_IMAGEN_CATALOGOS) */}
+                {SUBIDA_IMAGEN_CATALOGOS && (
                 <Grid
                   item
                   xs={6}
@@ -1192,6 +1197,7 @@ function DataGridProcess() {
                     />
                   </Box>
                 </Grid>
+                )}
                 <Grid item xs={6}>
                   <TextField
                     color="secondary"
