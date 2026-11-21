@@ -6,10 +6,12 @@ import mapboxgl from 'mapbox-gl'
 import { PersistGate } from 'redux-persist/integration/react';
 import { Provider } from 'react-redux'
 import { store, persistor } from './redux/store'
+import { instalarRenovacionDeFotos } from './utils/renovarFotosVencidas'
 
-//mapboxgl.accessToken = 'pk.eyJ1IjoibGVzdGF0eCIsImEiOiJjbDJoMzJrbmYwYTNrM2NteGVtMzBsODFvIn0.lTrpDiiVnBWEv141_PnuUg';
+// S01-H1.6: si una foto del sistema deja de abrir (URL firmada vencida), se pide una nueva.
+instalarRenovacionDeFotos()
+
 mapboxgl.accessToken = 'pk.eyJ1Ijoic2lzdGVtYXMyMzEyIiwiYSI6ImNsdThuaGczYTAwcnoydG54dG05OGxocXgifQ.J6tkaSWvRwfhXfiHoXzGFQ';
-//mapboxgl.accessToken = 'pk.eyJ1IjoibGVzdGF0eCIsImEiOiJjbDRxNGxvazMwMTVzM2RyemtzbDBvZnFoIn0.1Z-Eve85dnZLmkCs6BQ5Tw';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
 	<Provider store={store}>

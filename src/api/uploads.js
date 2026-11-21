@@ -11,6 +11,9 @@ export const presignUploadRequest = ({ carpeta, nombreArchivo, contentType }) =>
 export const urlArchivoRequest = (key, { segundos } = {}) =>
 	axios.get('/uploads/url', { params: segundos ? { key, segundos } : { key } })
 
+// S01-H1.6: URL nueva para una foto que ya no abre (firma vencida). Solo fotos del sistema.
+export const renovarUrlFotoRequest = (url) => axios.post('/uploads/renovar-url-foto', { url })
+
 const TIPOS = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', pdf: 'application/pdf' }
 
 // Tipo que acepta el backend; si el navegador no lo reporta, se deduce de la extensión.
