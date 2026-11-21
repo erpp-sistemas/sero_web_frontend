@@ -1,5 +1,5 @@
-// src/pages/HomeCoordination/Index.jsx
-import React, { useState, useEffect } from "react";
+// src/scenes/payment-validation/index.jsx
+import { useState, useEffect, useCallback } from "react";
 import { useSelector } from "react-redux";
 import FilterBar from "../../components/PaymentValidation/FilterBar";
 import DashboardSkeleton from "../../components/PaymentValidation/DashboardSkeleton";
@@ -7,14 +7,9 @@ import ResumenGeneral from "../../components/PaymentValidation/ResumenGeneral";
 import IndicadoresGestion from "../../components/PaymentValidation/IndicadoresGestion";
 import ResumenEstatusGestion from "../../components/PaymentValidation/ResumenEstatusGestion";
 import DistribucionMontosPorEstatus from "../../components/PaymentValidation/DistribucionMontosPorEstatus";
+import { aplicarCambioFoto } from "../../components/PaymentValidation/Shared/fotoRules";
 import { paymentValidationResultsRequest } from "../../api/payment";
-import {
-  Box,
-  Typography,
-  Alert,
-  Snackbar,
-  useTheme,
-} from "@mui/material";
+import { Box, Typography, Alert, Snackbar, useTheme } from "@mui/material";
 import { tokens } from "../../theme";
 
 function Index() {
@@ -30,9 +25,11 @@ function Index() {
     fechaFin: new Date().toISOString().split("T")[0],
   });
 
-  // 🔹 Separamos los dos arrays en estados diferentes
-  const [pagosValidos, setPagosValidos] = useState([]); // Array detallado
-  const [pagosFormateados, setPagosFormateados] = useState([]); // Array resumido
+  // Ambos formatos se actualizan juntos después de una operación de fotos.
+  const [{ pagosValidos, pagosFormateados }, setDatosPagos] = useState({
+    pagosValidos: [],
+    pagosFormateados: [],
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [snackbar, setSnackbar] = useState({
@@ -50,8 +47,7 @@ function Index() {
     try {
       setLoading(true);
       setError(null);
-      setPagosValidos([]);
-      setPagosFormateados([]);
+      setDatosPagos({ pagosValidos: [], pagosFormateados: [] });
 
       const response = await paymentValidationResultsRequest(
         values.plazaId,
@@ -59,19 +55,69 @@ function Index() {
         values.procesoId,
         values.diasRango,
         values.fechaInicio,
-        values.fechaFin
+        values.fechaFin,
       );
 
       if (response.data) {
-        // 🔹 Separamos los dos arrays de la respuesta
         const pagosValidosData = response.data[0].pagos_validos || [];
-        const pagosFormateadosData = response.data[0].pagos_validos_formated || [];
+        const pagosFormateadosData =
+          response.data[0].pagos_validos_formated || [];
 
-        setPagosValidos(JSON.parse(pagosValidosData));
-        setPagosFormateados(JSON.parse(pagosFormateadosData));        
+        const detalle = JSON.parse(pagosValidosData);
+        const resumen = JSON.parse(pagosFormateadosData);
 
-        const totalPagos = JSON.parse(pagosValidosData).length;
-        const totalResumen = JSON.parse(pagosFormateadosData).length;
+        if (import.meta.env.DEV) {
+          console.groupCollapsed("[Pagos válidos] Diagnóstico de datos y fotografías");
+          console.log("Filtros de la consulta:", values);
+          console.log("Campos de la respuesta:", Object.keys(response.data[0]));
+          console.log("Detalle completo (incluye el campo fotos):", detalle);
+          console.log("Resumen completo:", resumen);
+          console.log("Campos del detalle:", [
+            ...new Set(detalle.flatMap((registro) => Object.keys(registro))),
+          ]);
+          const registrosValidos = detalle.filter(
+            (registro) =>
+              registro["estatus de gestion valida"] === "Gestión válida" &&
+              registro.evaluacion_periodos === "PERIODO_VALIDO",
+          );
+          const gruposFotos = new Map();
+          const gestiones = new Set();
+          registrosValidos.forEach((registro) => {
+            const clave = JSON.stringify([
+              registro["foto fachada predio"],
+              registro["foto evidencia predio"],
+            ]);
+            const grupo = gruposFotos.get(clave) || {
+              fachada: registro["foto fachada predio"],
+              evidencia: registro["foto evidencia predio"],
+              registros: 0,
+              ejemplo: registro,
+            };
+            grupo.registros++;
+            gruposFotos.set(clave, grupo);
+            gestiones.add(JSON.stringify([
+              registro.cuenta,
+              registro.fecha_de_gestion,
+            ]));
+          });
+          console.table(
+            [...gruposFotos.values()].map((grupo) => ({ fachada: grupo.fachada, evidencia: grupo.evidencia, registros: grupo.registros })),
+          );
+          console.log("Muestra para revisión:", JSON.stringify({
+            totalDetalle: detalle.length,
+            registrosValidos: registrosValidos.length,
+            combinacionesCuentaFecha: gestiones.size,
+            // Una muestra por combinación de banderas, sin descartar campos.
+            muestrasDetalle: [...gruposFotos.values()].map((grupo) => grupo.ejemplo),
+            muestrasResumen: resumen.slice(0, 2),
+          }, null, 2));
+          console.groupEnd();
+        }
+
+        setDatosPagos({ pagosValidos: detalle, pagosFormateados: resumen });
+
+        const totalPagos = detalle.length;
+        const totalResumen = resumen.length;
 
         setSnackbar({
           open: true,
@@ -113,30 +159,37 @@ function Index() {
   };
 
   useEffect(() => {
-  if (error) {
-    const timer = setTimeout(() => {
-      setError(null);
-    }, 5000); // ⏱️ desaparece a los 5 segundos
-
-    return () => clearTimeout(timer);
-  }
-}, [error]);
+    if (error) {
+      const timer = setTimeout(() => {
+        setError(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
 
   const handleCloseSnackbar = (event, reason) => {
-  if (reason === "clickaway") return; // evita cierre por click fuera
-  setSnackbar({ ...snackbar, open: false });
-};
+    if (reason === "clickaway") return;
+    setSnackbar({ ...snackbar, open: false });
+  };
+
+  // Una operación confirmada actualiza ambos formatos con las mismas reglas de fotos.
+  // Los importes, períodos, fechas de gestión y estatus se conservan íntegros.
+  const onUpdatePago = useCallback((cambio) => {
+    setDatosPagos((prev) => ({
+      pagosValidos: aplicarCambioFoto(prev.pagosValidos, cambio),
+      pagosFormateados: aplicarCambioFoto(prev.pagosFormateados, cambio),
+    }));
+  }, []);
 
   return (
-    <Box className="p-4">     
-
+    <Box className="p-4">
       <FilterBar
         plazas={user.place_service_process}
         onChange={handleFilterChange}
         isLoading={loading}
       />
 
-       {loading && <DashboardSkeleton />}
+      {loading && <DashboardSkeleton />}
 
       {/* Estado de carga */}
       {loading && (
@@ -157,25 +210,19 @@ function Index() {
       {/* Área para componentes del dashboard */}
       {(pagosValidos.length > 0 || pagosFormateados.length > 0) && !loading && (
         <Box sx={{ mt: 4 }}>
-            <ResumenGeneral pagosValidos={pagosValidos} pagosFormateados={pagosFormateados}  />
-            <IndicadoresGestion pagosValidos={pagosValidos} />
-            <ResumenEstatusGestion pagosValidos={pagosValidos} />            
-            <DistribucionMontosPorEstatus pagosValidos={pagosValidos} />
-          {/* Aquí irán los componentes que vamos a agregar: */}
-          {/* - KPI Cards */}
-          {/* - Tablas de datos */}
-          {/* - Gráficos */}
-          {/* - Mapas */}
-          {/* - etc. */}
-          
-          {/* <Box sx={{ p: 3, textAlign: 'center', backgroundColor: colors.primary[400], borderRadius: 2 }}>
-            <Typography variant="h6" sx={{ color: colors.grey[200], mb: 2 }}>
-              Dashboard de Validación de Pagos
-            </Typography>
-            <Typography variant="body2" sx={{ color: colors.grey[400] }}>
-              Listo para agregar componentes con {pagosValidos.length} pagos detallados y {pagosFormateados.length} registros resumidos
-            </Typography>
-          </Box> */}
+          <ResumenGeneral
+            pagosValidos={pagosValidos}
+            pagosFormateados={pagosFormateados}
+          />
+          <IndicadoresGestion
+            pagosValidos={pagosValidos}
+            placeId={filters.plazaId}
+            servicioId={filters.servicioId}
+            userIdSession={user?.user_id || null}
+            onUpdatePago={onUpdatePago}
+          />
+          <ResumenEstatusGestion pagosValidos={pagosValidos} />
+          <DistribucionMontosPorEstatus pagosValidos={pagosValidos} />
         </Box>
       )}
 
