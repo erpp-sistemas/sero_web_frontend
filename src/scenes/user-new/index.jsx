@@ -264,7 +264,7 @@ function NewUser() {
           >
             Nuevo usuario
           </h3>
-          <p className="text-gray-400 leading-relaxed text-base">
+          <p className="text-[#50617A] leading-relaxed text-base">
             Crea nuevos usuarios con sus plazas asignadas y configura sus
             accesos al sistema de manera eficiente y organizada.
           </p>

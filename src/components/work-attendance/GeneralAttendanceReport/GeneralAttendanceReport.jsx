@@ -86,7 +86,7 @@ function GeneralAttendanceReport({
             field: key,
             headerName: "NOMBRE",
             renderHeader: () => (
-              <strong style={{ color: "#5EBFFF" }}>{"NOMBRE"}</strong>
+              <strong style={{ color: "#254061" }}>{"NOMBRE"}</strong>
             ),
             width: 210,
             editable: false,
@@ -97,7 +97,7 @@ function GeneralAttendanceReport({
             field: key,
             headerName: "FOTO",
             renderHeader: () => (
-              <strong style={{ color: "#5EBFFF" }}>{"FOTO"}</strong>
+              <strong style={{ color: "#254061" }}>{"FOTO"}</strong>
             ),
             width: 70,
             renderCell: (params) => (
@@ -110,7 +110,7 @@ function GeneralAttendanceReport({
             field: key,
             headerName: "PLAZA",
             renderHeader: () => (
-              <strong style={{ color: "#5EBFFF" }}>{"PLAZA"}</strong>
+              <strong style={{ color: "#254061" }}>{"PLAZA"}</strong>
             ),
             renderCell: (params) => (
               <Chip
@@ -140,7 +140,7 @@ function GeneralAttendanceReport({
           field: key,
           headerName: key,
           renderHeader: () => (
-            <strong style={{ color: "#5EBFFF" }}>{key}</strong>
+            <strong style={{ color: "#254061" }}>{key}</strong>
           ),
           width: 110,
           renderCell: (params) => {

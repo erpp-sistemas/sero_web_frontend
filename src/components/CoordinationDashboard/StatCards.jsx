@@ -128,10 +128,10 @@ function StatCards({
             }}
           />
           <div>
-            <h3 class="text-white text-3xl font-bold">
+            <h3 class="text-[#0F2340] text-3xl font-bold">
               {countRecords.toLocaleString()}
             </h3>
-            <p class="text-base text-gray-300 mt-2">Gestiones</p>
+            <p class="text-base text-[#50617A] mt-2">Gestiones</p>
             <div class="flex gap-3">
               <ButtonGroup
                 variant="outlined"
@@ -156,8 +156,8 @@ function StatCards({
             }}
           />
           <div>
-            <h3 class="text-white text-3xl font-bold">{countManagers}</h3>
-            <p class="text-base text-gray-300 mt-2">Gestores</p>
+            <h3 class="text-[#0F2340] text-3xl font-bold">{countManagers}</h3>
+            <p class="text-base text-[#50617A] mt-2">Gestores</p>
             <div class="flex gap-3">
               <ButtonGroup
                 variant="outlined"
@@ -180,10 +180,10 @@ function StatCards({
             }}
           />
           <div>
-            <h3 class="text-white text-3xl font-bold">
+            <h3 class="text-[#0F2340] text-3xl font-bold">
               {countLocated.toLocaleString()}
             </h3>
-            <p class="text-base text-gray-300 mt-2">Predios Localizados</p>
+            <p class="text-base text-[#50617A] mt-2">Predios Localizados</p>
             <div class="flex gap-3">
               <ButtonGroup
                 variant="outlined"
@@ -208,8 +208,8 @@ function StatCards({
             }}
           />
           <div>
-            <h3 class="text-white text-3xl font-bold">{countNotLocated}</h3>
-            <p class="text-sm text-gray-300 mt-2">Predios no localizados</p>
+            <h3 class="text-[#0F2340] text-3xl font-bold">{countNotLocated}</h3>
+            <p class="text-sm text-[#50617A] mt-2">Predios no localizados</p>
             <div class="flex gap-3">
               <ButtonGroup
                 variant="outlined"
@@ -234,8 +234,8 @@ function StatCards({
             }}
           />
           <div>
-            <h3 class="text-white text-3xl font-bold">{countNotPhoto}</h3>
-            <p class="text-sm text-gray-300 mt-2">Gestiones sin foto</p>
+            <h3 class="text-[#0F2340] text-3xl font-bold">{countNotPhoto}</h3>
+            <p class="text-sm text-[#50617A] mt-2">Gestiones sin foto</p>
             <div class="flex gap-3">
               <ButtonGroup
                 variant="outlined"

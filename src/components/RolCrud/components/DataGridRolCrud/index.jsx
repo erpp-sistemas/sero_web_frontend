@@ -425,7 +425,7 @@ function DataGridRolCrud() {
       {
         field: "nombre",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>
+          <strong style={{ color: "#254061" }}>
             {"Nombre"}
             {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
                   📃
@@ -439,7 +439,7 @@ function DataGridRolCrud() {
       {
         field: "activo",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>
+          <strong style={{ color: "#254061" }}>
             {"Estado"}
             {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
                   📃

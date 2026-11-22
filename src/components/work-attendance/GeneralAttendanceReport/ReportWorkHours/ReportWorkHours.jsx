@@ -47,7 +47,7 @@ const AttendanceHoursDataGrid = ({ rows }) => {
               field: key,
               headerName: "NOMBRE",
               renderHeader: () => (
-                <strong style={{ color: "#5EBFFF" }}>{"NOMBRE"}</strong>
+                <strong style={{ color: "#254061" }}>{"NOMBRE"}</strong>
               ),
               width: 210,
               editable: false,
@@ -58,7 +58,7 @@ const AttendanceHoursDataGrid = ({ rows }) => {
               field: key,
               headerName: "FOTO",
               renderHeader: () => (
-                <strong style={{ color: "#5EBFFF" }}>{"FOTO"}</strong>
+                <strong style={{ color: "#254061" }}>{"FOTO"}</strong>
               ),
               width: 70,
               renderCell: (params) => <AvatarImage data={params.row.imagen_url} />,
@@ -69,7 +69,7 @@ const AttendanceHoursDataGrid = ({ rows }) => {
               field: key,
               headerName: "PLAZA",
               renderHeader: () => (
-                <strong style={{ color: "#5EBFFF" }}>{"PLAZA"}</strong>
+                <strong style={{ color: "#254061" }}>{"PLAZA"}</strong>
               ),
               width: 120,
             };
@@ -78,7 +78,7 @@ const AttendanceHoursDataGrid = ({ rows }) => {
             field: key,
             headerName: key,          
             renderHeader: () => (
-              <strong style={{ color: "#5EBFFF" }}>{key}</strong>
+              <strong style={{ color: "#254061" }}>{key}</strong>
             ),
             width: 80,
           };

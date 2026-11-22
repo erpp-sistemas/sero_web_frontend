@@ -1,17 +1,14 @@
 import { useState, useEffect } from "react"
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom"
 import { CssBaseline, ThemeProvider } from "@mui/material"
-import { ColorModeContext, useMode } from "./theme"
+import { useMode } from "./theme"
 import { LocalizationProvider } from '@mui/x-date-pickers'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { esES } from '@mui/x-date-pickers/locales'
 import 'dayjs/locale/es'
 import { useSelector, useDispatch } from 'react-redux'
 import { verifyTokenRequest } from "./api/auth"
-import { Box } from '@mui/material'
-import Topbar from "./scenes/global/Topbar"
-import Sidebar from "./scenes/global/Sidebar"
-import SidebarMap from "./scenes/global/SidebarMap"
+import Armazon from "./components/armazon/Armazon"
 import Dashboard from "./scenes/dashboard-direccion"
 import Team from "./scenes/team"
 import Invoices from "./scenes/invoices"
@@ -81,13 +78,11 @@ import InventoryMonitor from './scenes/inventory-monitor'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [theme, colorMode] = useMode()
-  const [isSidebar, setIsSidebar] = useState(true)
+  const [theme] = useMode()
   const [checkingAuth, setCheckingAuth] = useState(true)
   let location = useLocation()
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const mapa_seleccionado = useSelector((state) => state.plaza_mapa)
   const user = useSelector((state) => state.user);
 
   useEffect(() => {
@@ -107,8 +102,6 @@ function App() {
       };
 
       await submenuAccessLogRequest(submenu_access_data);
-
-      console.log(user.place_service_process)
 
     } catch (error) {
       console.error('Error fetching data:', error)
@@ -164,7 +157,6 @@ function App() {
       localeText={esES.components.MuiLocalizationProvider.defaultProps.localeText}
       adapterLocale="es"
     >
-      <ColorModeContext.Provider value={colorMode}>
         <ThemeProvider theme={theme}>
           <CssBaseline />
           <Routes>
@@ -173,14 +165,7 @@ function App() {
               <Route
                 path="*"
                 element={
-                  <Box sx={{ overflowY: 'scroll', overflowX: 'hidden' }} className="app">
-                    {location.pathname !== `/map/${mapa_seleccionado.place_id}` ? (
-                      <Sidebar isSidebar={isSidebar} />
-                    ) : (
-                      <SidebarMap isSidebar={isSidebar} />
-                    )}
-                    <main className="content">
-                      <Topbar setIsSidebar={setIsSidebar} />
+                  <Armazon>
                       <Routes>
                         <Route path="/home" element={
                           user.profile === 'Coordinador' ? <HomeCoordination /> : <Home />
@@ -248,14 +233,12 @@ function App() {
                         <Route path="/coordinator-monitor" element={<CoordinationMonitor />} />
                         <Route path="/inventory-monitor" element={<InventoryMonitor />} />
                       </Routes>
-                    </main>
-                  </Box>
+                  </Armazon>
                 }
               />
             )}
           </Routes>
         </ThemeProvider>
-      </ColorModeContext.Provider>
     </LocalizationProvider>
   );
 }

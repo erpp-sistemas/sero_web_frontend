@@ -14,7 +14,7 @@ const ModalTable = ({ open, onClose, data }) => {
     { 
         field: 'account',
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"CUENTA"}</strong>
+          <strong style={{ color: "#254061" }}>{"CUENTA"}</strong>
         ),
         width: 100,
         editable: false,
@@ -22,7 +22,7 @@ const ModalTable = ({ open, onClose, data }) => {
       { 
         field: 'task_assigned',
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"TAREA ASIGNADA"}</strong>
+          <strong style={{ color: "#254061" }}>{"TAREA ASIGNADA"}</strong>
         ),
         width: 150,
         editable: false,
@@ -30,7 +30,7 @@ const ModalTable = ({ open, onClose, data }) => {
       { 
         field: 'person_assigned',
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"PERSONA ASIGNADA"}</strong>
+          <strong style={{ color: "#254061" }}>{"PERSONA ASIGNADA"}</strong>
         ),
         width: 210,
         editable: false,
@@ -38,7 +38,7 @@ const ModalTable = ({ open, onClose, data }) => {
       { 
         field: 'assignment_result',
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"RESULTADO DE LA ASIGNACION"}</strong>
+          <strong style={{ color: "#254061" }}>{"RESULTADO DE LA ASIGNACION"}</strong>
         ),
         width: 210,
         editable: false,

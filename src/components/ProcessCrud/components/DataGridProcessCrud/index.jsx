@@ -547,7 +547,7 @@ function DataGridProcess() {
       {
         field: "nombre",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>
+          <strong style={{ color: "#254061" }}>
             {"Nombre"}
             {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
               📃
@@ -560,7 +560,7 @@ function DataGridProcess() {
       {
         field: "imagen",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>
+          <strong style={{ color: "#254061" }}>
             {"Imagen"}
             {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
               📃
@@ -581,7 +581,7 @@ function DataGridProcess() {
         field: "activo",
         type: "boolean",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>
+          <strong style={{ color: "#254061" }}>
             {"Estado"}
             {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
               📃
@@ -595,7 +595,7 @@ function DataGridProcess() {
       {
         field: "procedimiento_almacenado_gestion",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>
+          <strong style={{ color: "#254061" }}>
             {"Procedimiento Almacenado"}
             {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
               📃
@@ -608,7 +608,7 @@ function DataGridProcess() {
       {
         field: "procedimiento_almacenado_gestion_grafico",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>
+          <strong style={{ color: "#254061" }}>
             {"Procedimiento Almacenado Gestion Grafico"}
             {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
               📃
@@ -621,7 +621,7 @@ function DataGridProcess() {
       {
         field: "tabla_gestion",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>
+          <strong style={{ color: "#254061" }}>
             {"Tabla Gestion"}
             {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
               📃
@@ -634,7 +634,7 @@ function DataGridProcess() {
       {
         field: "url_aplicacion_movil",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>
+          <strong style={{ color: "#254061" }}>
             {"Url Aplicacion Movil"}
             {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
               📃
@@ -648,7 +648,7 @@ function DataGridProcess() {
         field: "actions",
         type: "actions",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>
+          <strong style={{ color: "#254061" }}>
             {"Acciones"}
         
           </strong>
@@ -671,7 +671,7 @@ function DataGridProcess() {
               field: "fecha_ingreso",
               type: "dateTime",
               renderHeader: () => (
-                <strong style={{ color: "#5EBFFF" }}>
+                <strong style={{ color: "#254061" }}>
                   {"Fecha de Ingreso"}
                   
                 </strong>

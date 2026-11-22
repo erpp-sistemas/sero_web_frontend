@@ -9,7 +9,7 @@ function buildColumns() {
       minWidth: 180,
       headerAlign: 'left',
       renderHeader: () => (
-        <strong style={{ color: "#5EBFFF" }}>{"SERVICIO"}</strong>
+        <strong style={{ color: "#254061" }}>{"SERVICIO"}</strong>
       ),
     },
     { 
@@ -17,7 +17,7 @@ function buildColumns() {
       field: 'name_month',
       minWidth: 100,
       renderHeader: () => (
-        <strong style={{ color: "#5EBFFF" }}>{"MES"}</strong>
+        <strong style={{ color: "#254061" }}>{"MES"}</strong>
       ),
     },
     { 
@@ -25,7 +25,7 @@ function buildColumns() {
       field: 'year_number',
       minWidth: 100,
       renderHeader: () => (
-        <strong style={{ color: "#5EBFFF" }}>{"AÑO"}</strong>
+        <strong style={{ color: "#254061" }}>{"AÑO"}</strong>
       ),
     },
     { 
@@ -33,7 +33,7 @@ function buildColumns() {
       field: 'name_proccess',
       minWidth: 100,
       renderHeader: () => (
-        <strong style={{ color: "#5EBFFF" }}>{"PROCESO"}</strong>
+        <strong style={{ color: "#254061" }}>{"PROCESO"}</strong>
       ),
     },
     { 
@@ -41,7 +41,7 @@ function buildColumns() {
       field: 'name_task',
       minWidth: 100,
       renderHeader: () => (
-        <strong style={{ color: "#5EBFFF" }}>{"TAREA"}</strong>
+        <strong style={{ color: "#254061" }}>{"TAREA"}</strong>
       ),
     },
     { 
@@ -49,7 +49,7 @@ function buildColumns() {
       field: 'number_managements',
       minWidth: 150,
       renderHeader: () => (
-        <strong style={{ color: "#5EBFFF" }}>{"GESTIONES REALIZADAS"}</strong>
+        <strong style={{ color: "#254061" }}>{"GESTIONES REALIZADAS"}</strong>
       ),
       renderCell: (value) => (
         <Typography>

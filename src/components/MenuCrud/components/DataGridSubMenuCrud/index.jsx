@@ -1010,7 +1010,7 @@ function DataGridSubMenuCrud() {
       {
         field: "nombre",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>
+          <strong style={{ color: "#254061" }}>
             {"Nombre"}
             {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
         📃
@@ -1035,7 +1035,7 @@ function DataGridSubMenuCrud() {
         field: "id_menu_padre",
         type: "singleSelect",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>
+          <strong style={{ color: "#254061" }}>
             {"Menu Padre"}
             {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
         📃
@@ -1060,7 +1060,7 @@ function DataGridSubMenuCrud() {
       /* {
         field: "url",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>
+          <strong style={{ color: "#254061" }}>
         
           </strong>
         ),
@@ -1070,7 +1070,7 @@ function DataGridSubMenuCrud() {
      /*  {
         field: "icono",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>
+          <strong style={{ color: "#254061" }}>
             {"Icono"}
            
           </strong>
@@ -1091,7 +1091,7 @@ function DataGridSubMenuCrud() {
       {
         field: "activo",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>
+          <strong style={{ color: "#254061" }}>
             {"Estado"}
             {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
         📃
@@ -1106,7 +1106,7 @@ function DataGridSubMenuCrud() {
       {
         field: "icon_mui",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>
+          <strong style={{ color: "#254061" }}>
             {"Icon Mui"}
             {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
         📃
@@ -1129,7 +1129,7 @@ function DataGridSubMenuCrud() {
       {
         field: "route",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>
+          <strong style={{ color: "#254061" }}>
             {"Ruta"}
             {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
         📃

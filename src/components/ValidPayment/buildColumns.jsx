@@ -52,7 +52,7 @@ function buildColumns({ handleOpenModal }) {
     { 
         field: 'cuenta',
         renderHeader: () => (
-        <strong style={{ color: "#5EBFFF" }}>{"CUENTA"}</strong>
+        <strong style={{ color: "#254061" }}>{"CUENTA"}</strong>
         ),
         width: 150,
         editable: false,
@@ -60,7 +60,7 @@ function buildColumns({ handleOpenModal }) {
       { 
         field: 'propietario',
         renderHeader: () => (
-        <strong style={{ color: "#5EBFFF" }}>{"PROPIETARIO"}</strong>
+        <strong style={{ color: "#254061" }}>{"PROPIETARIO"}</strong>
         ),
         width: 300,
         editable: false,
@@ -68,7 +68,7 @@ function buildColumns({ handleOpenModal }) {
       { 
         field: 'calle',
         renderHeader: () => (
-        <strong style={{ color: "#5EBFFF" }}>{"CALLE"}</strong>
+        <strong style={{ color: "#254061" }}>{"CALLE"}</strong>
         ),
         width: 300,
         editable: false,
@@ -76,7 +76,7 @@ function buildColumns({ handleOpenModal }) {
       { 
         field: 'num_ext',
         renderHeader: () => (
-        <strong style={{ color: "#5EBFFF" }}>{"NUM EXT"}</strong>
+        <strong style={{ color: "#254061" }}>{"NUM EXT"}</strong>
         ),
         width: 150,
         editable: false,
@@ -84,7 +84,7 @@ function buildColumns({ handleOpenModal }) {
       { 
         field: 'num_int',
         renderHeader: () => (
-        <strong style={{ color: "#5EBFFF" }}>{"NUM INT"}</strong>
+        <strong style={{ color: "#254061" }}>{"NUM INT"}</strong>
         ),
         width: 150,
         editable: false,
@@ -92,7 +92,7 @@ function buildColumns({ handleOpenModal }) {
       { 
         field: 'colonia',
         renderHeader: () => (
-        <strong style={{ color: "#5EBFFF" }}>{"COLONIA"}</strong>
+        <strong style={{ color: "#254061" }}>{"COLONIA"}</strong>
         ),
         width: 150,
         editable: false,
@@ -100,7 +100,7 @@ function buildColumns({ handleOpenModal }) {
       { 
         field: 'codigo_postal',
         renderHeader: () => (
-        <strong style={{ color: "#5EBFFF" }}>{"CODIGO POSTAL"}</strong>
+        <strong style={{ color: "#254061" }}>{"CODIGO POSTAL"}</strong>
         ),
         width: 150,
         editable: false,
@@ -108,7 +108,7 @@ function buildColumns({ handleOpenModal }) {
       { 
         field: 'tarea_gestionada',
         renderHeader: () => (
-        <strong style={{ color: "#5EBFFF" }}>{"TAREA GESTIONADA"}</strong>
+        <strong style={{ color: "#254061" }}>{"TAREA GESTIONADA"}</strong>
         ),
         width: 200,
         editable: false,
@@ -150,7 +150,7 @@ function buildColumns({ handleOpenModal }) {
       { 
         field: 'nombre_gestor',
         renderHeader: () => (
-        <strong style={{ color: "#5EBFFF" }}>{"NOMBRE DE GESTOR"}</strong>
+        <strong style={{ color: "#254061" }}>{"NOMBRE DE GESTOR"}</strong>
         ),
         width: 290,
         renderCell: (params) => (
@@ -163,7 +163,7 @@ function buildColumns({ handleOpenModal }) {
       { 
         field: 'fecha_gestion',
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"FECHA DE GESTION"}</strong>
+          <strong style={{ color: "#254061" }}>{"FECHA DE GESTION"}</strong>
         ),
         width: 210,
         editable: false,
@@ -189,7 +189,7 @@ function buildColumns({ handleOpenModal }) {
       { 
         field: 'estatus_predio',
         renderHeader: () => (
-        <strong style={{ color: "#5EBFFF" }}>{"ESTATUS DEL PREDIO"}</strong>
+        <strong style={{ color: "#254061" }}>{"ESTATUS DEL PREDIO"}</strong>
         ),
         width: 200,
         editable: false,
@@ -231,7 +231,7 @@ function buildColumns({ handleOpenModal }) {
       { 
         field: 'proceso',
         renderHeader: () => (
-        <strong style={{ color: "#5EBFFF" }}>{"PROCESO"}</strong>
+        <strong style={{ color: "#254061" }}>{"PROCESO"}</strong>
         ),
         width: 200,
         editable: false,
@@ -270,7 +270,7 @@ function buildColumns({ handleOpenModal }) {
       { 
         field: 'foto_fachada_1',
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"FOTO FACHADA 1"}</strong>
+          <strong style={{ color: "#254061" }}>{"FOTO FACHADA 1"}</strong>
         ),
         width: 150,
         renderCell: (params) => (
@@ -316,7 +316,7 @@ function buildColumns({ handleOpenModal }) {
       { 
         field: 'foto_fachada_2',
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"FOTO FACHADA 2"}</strong>
+          <strong style={{ color: "#254061" }}>{"FOTO FACHADA 2"}</strong>
         ),
         width: 150,
         renderCell: (params) => (
@@ -362,7 +362,7 @@ function buildColumns({ handleOpenModal }) {
       { 
         field: 'foto_evidencia_1',
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"FOTO EVIDENCIA 1"}</strong>
+          <strong style={{ color: "#254061" }}>{"FOTO EVIDENCIA 1"}</strong>
         ),
         width: 150,
         renderCell: (params) => (
@@ -408,7 +408,7 @@ function buildColumns({ handleOpenModal }) {
       { 
         field: 'foto_evidencia_2',
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"FOTO EVIDENCIA 2"}</strong>
+          <strong style={{ color: "#254061" }}>{"FOTO EVIDENCIA 2"}</strong>
         ),
         width: 150,
         renderCell: (params) => (

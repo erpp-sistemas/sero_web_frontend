@@ -132,7 +132,7 @@ function Index() {
           >
             Listado de Inventario
           </h3>
-          <p className="text-gray-400 leading-relaxed text-base">
+          <p className="text-[#50617A] leading-relaxed text-base">
             Consulta y gestiona la información de todos los artículos de
             inventario existente.
           </p>

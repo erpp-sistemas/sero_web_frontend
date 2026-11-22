@@ -30,10 +30,10 @@ const StatCard = ({ title, value, icon: Icon, color = "#3b82f6" }) => (
   <div className="flex items-center gap-6 rounded-2xl p-4 shadow-md w-full">
     <Icon sx={{ fontSize: "2rem", color }} />
     <div>
-      <h3 className="text-white text-lg font-bold">
+      <h3 className="text-[#0F2340] text-lg font-bold">
         {value?.toLocaleString?.() ?? value}
       </h3>
-      <p className="text-base text-gray-300 mt-2">{title}</p>
+      <p className="text-base text-[#50617A] mt-2">{title}</p>
     </div>
   </div>
 );

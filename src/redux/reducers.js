@@ -1,6 +1,7 @@
 import { combineReducers } from "redux"
 import userReducer from "../features/user/userSlice"
 import placeReducer from "../features/place/placeSlice"
+import contextoReducer from "../features/contexto/contextoSlice"
 import plazaMapaReducer from "./plazaMapa.Slice"
 import featuresReducer from "./featuresSlice"
 import dialogReducer from "./dialogSlice"
@@ -42,6 +43,7 @@ import formularioSlice from "./formularioSlice.js";
 const rootReducer = combineReducers({
 	user: userReducer,
 	place: placeReducer,
+	contexto: contextoReducer,
 	plaza_mapa: plazaMapaReducer,
 	features: featuresReducer,
 	dialog: dialogReducer,

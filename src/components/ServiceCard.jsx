@@ -40,7 +40,7 @@ const ServiceCard = ({ title, subtitle, image, animation }) => {
           }}
           
       >
-        <span className='text-[#5ebfff]'>
+        <span className='text-[#254061]'>
           {title}
         </span>        
       </Title>

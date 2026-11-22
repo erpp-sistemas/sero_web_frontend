@@ -453,7 +453,7 @@ const Index = () => {
               field: key,
               headerName: key.toUpperCase(),
               renderHeader: () => (
-                <strong style={{ color: "#5EBFFF" }}>{key.toUpperCase()}</strong>
+                <strong style={{ color: "#254061" }}>{key.toUpperCase()}</strong>
               ),
               renderCell: (params) => <AvatarImage data={params.value} />,              
               width: 150,
@@ -467,7 +467,7 @@ const Index = () => {
               field: key,
               headerName: key.toUpperCase(),
               renderHeader: () => (
-                <strong style={{ color: "#5EBFFF" }}>{key.toUpperCase()}</strong>
+                <strong style={{ color: "#254061" }}>{key.toUpperCase()}</strong>
               ),
               renderCell: (params) => (
                 <Chip
@@ -488,7 +488,7 @@ const Index = () => {
               field: key,
               headerName: key.toUpperCase(),
               renderHeader: () => (
-                <strong style={{ color: "#5EBFFF" }}>{key.toUpperCase()}</strong>
+                <strong style={{ color: "#254061" }}>{key.toUpperCase()}</strong>
               ),
               renderCell: (params) => (
                 <Chip
@@ -509,7 +509,7 @@ const Index = () => {
               field: key,
               headerName: key.toUpperCase(),
               renderHeader: () => (
-                <strong style={{ color: "#5EBFFF" }}>{key.toUpperCase()}</strong>
+                <strong style={{ color: "#254061" }}>{key.toUpperCase()}</strong>
               ),
               renderCell: (params) => (
                 <Chip
@@ -529,7 +529,7 @@ const Index = () => {
             field: key,
             headerName: key.toUpperCase(),
             renderHeader: () => (
-              <strong style={{ color: "#5EBFFF" }}>{key.toUpperCase()}</strong>
+              <strong style={{ color: "#254061" }}>{key.toUpperCase()}</strong>
             ),
             width: 210,
             editable: false,

@@ -80,17 +80,17 @@ function VerticalTabs() {
 					textColor="secondary"
 					sx={{
 						"&:hover": {
-						color: "#9298E3",
+						color: "#254061",
 						},
 						"&:visited": {
-						color: "#9298E3", 
+						color: "#254061", 
 						},
 
 						"&:active": {
-						color: "#9298E3",
+						color: "#254061",
 						},
 						"&:focus": {
-						color: "#00FF00",
+						color: "#1E7A47",
 						},
 					}}
 				/>
@@ -103,17 +103,17 @@ function VerticalTabs() {
 					textColor="secondary"
 					sx={{
 						"&:hover": {
-						color: "#9298E3",
+						color: "#254061",
 						},
 						"&:visited": {
-						color: "#9298E3", 
+						color: "#254061", 
 						},
 
 						"&:active": {
-						color: "#9298E3",
+						color: "#254061",
 						},
 						"&:focus": {
-						color: "#00FF00", 
+						color: "#1E7A47", 
 						},
 					}}
 				/>
@@ -121,14 +121,14 @@ function VerticalTabs() {
 			</Tabs>
 
 			<TabPanel value={value} index={0}>
-				<Typography variant="button" gutterBottom sx={{ color: "#9298E3" }}>
+				<Typography variant="button" gutterBottom sx={{ color: "#254061" }}>
 				Administraciòn de Menus
 				</Typography>
 				<DataGridMenuCrud />
 			</TabPanel>
 
 			<TabPanel value={value} index={1}>
-				<Typography variant="button" gutterBottom sx={{ color: "#9298E3" }}>
+				<Typography variant="button" gutterBottom sx={{ color: "#254061" }}>
 				Administraciòn de SubMenus
 				</Typography>
 				<DataGridSubMenuCrud />

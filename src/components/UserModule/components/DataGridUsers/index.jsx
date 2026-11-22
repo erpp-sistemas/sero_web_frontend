@@ -1196,7 +1196,7 @@ function DataGridUsers({
       {
         field: "name",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"NOMBRE"}</strong>
+          <strong style={{ color: "#254061" }}>{"NOMBRE"}</strong>
         ),
         width: 110,
         editable: true,
@@ -1204,7 +1204,7 @@ function DataGridUsers({
       {
         field: "last_name",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"Apellido Paterno"}</strong>
+          <strong style={{ color: "#254061" }}>{"Apellido Paterno"}</strong>
         ),
         width: 105,
         editable: false,
@@ -1212,7 +1212,7 @@ function DataGridUsers({
       {
         field: "second_last_name",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"Apellido Materno"}</strong>
+          <strong style={{ color: "#254061" }}>{"Apellido Materno"}</strong>
         ),
         width: 105,
         editable: false,
@@ -1220,7 +1220,7 @@ function DataGridUsers({
       /*    {
         field: "birthdate",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"Fecha de nacimiento"}</strong>
+          <strong style={{ color: "#254061" }}>{"Fecha de nacimiento"}</strong>
         ),
         width: 120,
         editable: true,
@@ -1230,7 +1230,7 @@ function DataGridUsers({
       /*     {
         field: "sex",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"Sexo"}</strong>
+          <strong style={{ color: "#254061" }}>{"Sexo"}</strong>
         ),
         width: 60,
         editable: true,
@@ -1239,7 +1239,7 @@ function DataGridUsers({
       {
         field: "url_image",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"Foto"}</strong>
+          <strong style={{ color: "#254061" }}>{"Foto"}</strong>
         ),
         width: 60,
         editable: false,
@@ -1248,7 +1248,7 @@ function DataGridUsers({
       /*  {
         field: "personal_phone",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"Telefono Personal"}</strong>
+          <strong style={{ color: "#254061" }}>{"Telefono Personal"}</strong>
         ),
         width: 120,
         editable: true,
@@ -1259,7 +1259,7 @@ function DataGridUsers({
       /*  {
         field: "work_phone",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"Telefono Trabajo"}</strong>
+          <strong style={{ color: "#254061" }}>{"Telefono Trabajo"}</strong>
         ),
         width: 120,
         editable: true,
@@ -1268,7 +1268,7 @@ function DataGridUsers({
       {
         field: "active",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"Estado"}</strong>
+          <strong style={{ color: "#254061" }}>{"Estado"}</strong>
         ),
         width: 60,
         editable: true,
@@ -1278,7 +1278,7 @@ function DataGridUsers({
       {
         field: "user_name",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"Nombre Usuario"}</strong>
+          <strong style={{ color: "#254061" }}>{"Nombre Usuario"}</strong>
         ),
         width: 200,
         editable: true,
@@ -1287,7 +1287,7 @@ function DataGridUsers({
       /*  {
         field: "password",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"Contraseña"}</strong>
+          <strong style={{ color: "#254061" }}>{"Contraseña"}</strong>
         ),
         width: 300,
         editable: true,
@@ -1295,7 +1295,7 @@ function DataGridUsers({
       {
         field: "active_web_access",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"Accesso Web"}</strong>
+          <strong style={{ color: "#254061" }}>{"Accesso Web"}</strong>
         ),
         width: 300,
         editable: true,
@@ -1303,7 +1303,7 @@ function DataGridUsers({
       {
         field: "active_app_mobil_access",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"Acceso Mobil"}</strong>
+          <strong style={{ color: "#254061" }}>{"Acceso Mobil"}</strong>
         ),
         width: 300,
         editable: true,
@@ -1311,7 +1311,7 @@ function DataGridUsers({
       {
         field: "app_version",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"App Version"}</strong>
+          <strong style={{ color: "#254061" }}>{"App Version"}</strong>
         ),
         width: 300,
         editable: true,
@@ -1319,7 +1319,7 @@ function DataGridUsers({
       {
         field: "assigned_places",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"Plazas Asignadas"}</strong>
+          <strong style={{ color: "#254061" }}>{"Plazas Asignadas"}</strong>
         ),
         width: 360,
         editable: true,

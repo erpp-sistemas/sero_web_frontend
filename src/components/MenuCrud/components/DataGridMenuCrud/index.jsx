@@ -1021,7 +1021,7 @@ function DataGridMenuCrud() {
       {
         field: "nombre",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>
+          <strong style={{ color: "#254061" }}>
             {"Nombre"}
             {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
         📃
@@ -1034,7 +1034,7 @@ function DataGridMenuCrud() {
       /* {
         field: "id_menu_padre",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>
+          <strong style={{ color: "#254061" }}>
             {"Menu Padre"}
         
           </strong>
@@ -1045,7 +1045,7 @@ function DataGridMenuCrud() {
      /*  {
         field: "descripcion",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>
+          <strong style={{ color: "#254061" }}>
             {"Descripción"}
     
           </strong>
@@ -1057,7 +1057,7 @@ function DataGridMenuCrud() {
       {
         field: "url",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>
+          <strong style={{ color: "#254061" }}>
             {"Url"}
             {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
         📃
@@ -1070,7 +1070,7 @@ function DataGridMenuCrud() {
       {
         field: "icono",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>
+          <strong style={{ color: "#254061" }}>
             {"Icono"}
             {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
         📃
@@ -1093,7 +1093,7 @@ function DataGridMenuCrud() {
     /*   {
         field: "activo",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>
+          <strong style={{ color: "#254061" }}>
             {"Estado"}
      
           </strong>
@@ -1106,7 +1106,7 @@ function DataGridMenuCrud() {
       /* {
         field: "icon_mui",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>
+          <strong style={{ color: "#254061" }}>
             {"Icon Mui"}
           
           </strong>
@@ -1127,7 +1127,7 @@ function DataGridMenuCrud() {
      /*  {
         field: "route",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>
+          <strong style={{ color: "#254061" }}>
             {"Ruta"}
            
           </strong>

@@ -241,7 +241,7 @@ function DataGridTaskCrud() {
       {
         field: "nombre",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"Nombre"}</strong>
+          <strong style={{ color: "#254061" }}>{"Nombre"}</strong>
         ),
         width: 300,
         editable: true,
@@ -249,7 +249,7 @@ function DataGridTaskCrud() {
       {
         field: "activo",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"Activo"}</strong>
+          <strong style={{ color: "#254061" }}>{"Activo"}</strong>
         ),
         type: "boolean",
         width: 80,
@@ -261,7 +261,7 @@ function DataGridTaskCrud() {
       {
         field: "id_proceso",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>
+          <strong style={{ color: "#254061" }}>
             {"Proceso"}
             {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
                   📃
@@ -291,7 +291,7 @@ function DataGridTaskCrud() {
         field: "actions",
         type: "actions",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>
+          <strong style={{ color: "#254061" }}>
             {"Proceso"}
            
           </strong>

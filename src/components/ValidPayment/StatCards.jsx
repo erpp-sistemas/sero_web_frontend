@@ -45,8 +45,8 @@ const StatCards = ({
             }}
           />
           <div>
-            <h5 class="text-white text-3xl font-bold">{countResult}</h5>
-            <p class="text-base text-gray-300">Registros Encontrados</p>
+            <h5 class="text-[#0F2340] text-3xl font-bold">{countResult}</h5>
+            <p class="text-base text-[#50617A]">Registros Encontrados</p>
             {/* Elementos pequeños para la sección */}
             <div class="flex gap-3">
               <ButtonGroup
@@ -76,22 +76,22 @@ const StatCards = ({
         <div class="flex items-center gap-6">
           <VerifiedUser sx={{ fontSize: "6rem", color: colors.accentGreen[100] }} />
           <div>
-            <h5 class="text-white text-3xl font-bold">{countUniqueAccount}</h5>
-            <p class="text-base text-gray-300 mt-2">Cuentas Unicas</p>
+            <h5 class="text-[#0F2340] text-3xl font-bold">{countUniqueAccount}</h5>
+            <p class="text-base text-[#50617A] mt-2">Cuentas Unicas</p>
           </div>
         </div>
         <div class="flex items-center gap-6">
           <CurrencyExchange sx={{ fontSize: "6rem", color: colors.accentGreen[100] }} />
           <div>
-            <h5 class="text-white text-lg font-bold">$ {totalAmount}</h5>
-            <p class="text-base text-gray-300 mt-2">Monto Ingresado</p>
+            <h5 class="text-[#0F2340] text-lg font-bold">$ {totalAmount}</h5>
+            <p class="text-base text-[#50617A] mt-2">Monto Ingresado</p>
           </div>
         </div>
         <div class="flex items-center gap-6">
           <DateRange sx={{ fontSize: "6rem", color: colors.accentGreen[100] }} />
           <div>
-            <h5 class="text-white text-sm font-bold">{paymentDateRange}</h5>
-            <p class="text-sm text-gray-300 mt-2">Rango de fechas de pagos</p>
+            <h5 class="text-[#0F2340] text-sm font-bold">{paymentDateRange}</h5>
+            <p class="text-sm text-[#50617A] mt-2">Rango de fechas de pagos</p>
           </div>
         </div>
       </div>

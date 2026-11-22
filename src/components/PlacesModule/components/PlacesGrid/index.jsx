@@ -112,7 +112,7 @@ function PlacesGrid({setComponentesVisibility}) {
           {
             field: "nombre",
             renderHeader: () => (
-              <strong style={{ color: "#5EBFFF" }}>
+              <strong style={{ color: "#254061" }}>
                 {"Nombre"}
              
               </strong>
@@ -123,7 +123,7 @@ function PlacesGrid({setComponentesVisibility}) {
           {
             field: "imagen",
             renderHeader: () => (
-              <strong style={{ color: "#5EBFFF" }}>
+              <strong style={{ color: "#254061" }}>
                 {"Imagen"}
              
               </strong>
@@ -142,7 +142,7 @@ function PlacesGrid({setComponentesVisibility}) {
             field: "activo",
             type: "boolean",
             renderHeader: () => (
-              <strong style={{ color: "#5EBFFF" }}>
+              <strong style={{ color: "#254061" }}>
                 {"Estado"}
                 {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
                   📃
@@ -156,7 +156,7 @@ function PlacesGrid({setComponentesVisibility}) {
          /*  {
             field: "orden",
             renderHeader: () => (
-              <strong style={{ color: "#5EBFFF" }}>
+              <strong style={{ color: "#254061" }}>
                 {"Orden"}
              
               </strong>
@@ -167,7 +167,7 @@ function PlacesGrid({setComponentesVisibility}) {
           {
             field: "latitud",
             renderHeader: () => (
-              <strong style={{ color: "#5EBFFF" }}>
+              <strong style={{ color: "#254061" }}>
                 {"Latitud"}
              
               </strong>
@@ -178,7 +178,7 @@ function PlacesGrid({setComponentesVisibility}) {
           {
             field: "longitud",
             renderHeader: () => (
-              <strong style={{ color: "#5EBFFF" }}>
+              <strong style={{ color: "#254061" }}>
                 {"Longitud"}
              
               </strong>
@@ -189,7 +189,7 @@ function PlacesGrid({setComponentesVisibility}) {
           {
             field: "estado_republica",
             renderHeader: () => (
-              <strong style={{ color: "#5EBFFF" }}>
+              <strong style={{ color: "#254061" }}>
                 {"Estado de la Republica"}
              
               </strong>
@@ -200,7 +200,7 @@ function PlacesGrid({setComponentesVisibility}) {
           {
             field: "radius",
             renderHeader: () => (
-              <strong style={{ color: "#5EBFFF" }}>
+              <strong style={{ color: "#254061" }}>
                 {"Radio"}
              
               </strong>
@@ -211,7 +211,7 @@ function PlacesGrid({setComponentesVisibility}) {
          /*  {
             field: "id_plaza",
             renderHeader: () => (
-              <strong style={{ color: "#5EBFFF" }}>
+              <strong style={{ color: "#254061" }}>
                 {"Plaza"}
              
               </strong>
@@ -222,7 +222,7 @@ function PlacesGrid({setComponentesVisibility}) {
           {
             field: "id_servicio",
             renderHeader: () => (
-              <strong style={{ color: "#5EBFFF" }}>
+              <strong style={{ color: "#254061" }}>
                 {"Servicio"}
              
               </strong>
@@ -234,7 +234,7 @@ function PlacesGrid({setComponentesVisibility}) {
           {
             field: "id_proceso",
             renderHeader: () => (
-              <strong style={{ color: "#5EBFFF" }}>
+              <strong style={{ color: "#254061" }}>
                 {"Proceso"}
        
               </strong>
@@ -252,7 +252,7 @@ function PlacesGrid({setComponentesVisibility}) {
             field: "actions",
             type: "actions",
             renderHeader: () => (
-              <strong style={{ color: "#5EBFFF" }}>
+              <strong style={{ color: "#254061" }}>
                 {"Acciones"}
             
               </strong>
@@ -275,7 +275,7 @@ function PlacesGrid({setComponentesVisibility}) {
                   field: "fecha_ingreso",
                   type: "dateTime",
                   renderHeader: () => (
-                    <strong style={{ color: "#5EBFFF" }}>
+                    <strong style={{ color: "#254061" }}>
                       {"Fecha de Ingreso"}
                       
                     </strong>

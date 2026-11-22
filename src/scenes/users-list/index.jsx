@@ -721,7 +721,7 @@ function Index() {
           >
             Listado de usuarios
           </h3>
-          <p class="text-gray-400 leading-relaxed text-base">
+          <p class="leading-relaxed text-base" style={{ color: "#50617A" }}>
             Consulta y gestiona la información de todos los usuarios registrados
             en el sistema.
           </p>

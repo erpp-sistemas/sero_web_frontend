@@ -9,7 +9,7 @@ function buildColumns() {
       minWidth: 180,
       headerAlign: 'left',
       renderHeader: () => (
-        <strong style={{ color: "#5EBFFF" }}>{"SERVICIO"}</strong>
+        <strong style={{ color: "#254061" }}>{"SERVICIO"}</strong>
       ),
     },
     { 
@@ -17,7 +17,7 @@ function buildColumns() {
       field: 'name_month',
       minWidth: 100,
       renderHeader: () => (
-        <strong style={{ color: "#5EBFFF" }}>{"MES"}</strong>
+        <strong style={{ color: "#254061" }}>{"MES"}</strong>
       ),
     },
     { 
@@ -25,7 +25,7 @@ function buildColumns() {
       field: 'year_number',
       minWidth: 100,
       renderHeader: () => (
-        <strong style={{ color: "#5EBFFF" }}>{"AÑO"}</strong>
+        <strong style={{ color: "#254061" }}>{"AÑO"}</strong>
       ),
     },
     { 
@@ -33,7 +33,7 @@ function buildColumns() {
       field: 'account_debt',
       minWidth: 150,
       renderHeader: () => (
-        <strong style={{ color: "#5EBFFF" }}>{"CUENTAS CON DEUDA"}</strong>
+        <strong style={{ color: "#254061" }}>{"CUENTAS CON DEUDA"}</strong>
       ),
       renderCell: (value) => (
         <Typography>
@@ -46,7 +46,7 @@ function buildColumns() {
       field: 'amount_debt',
       minWidth: 120,
       renderHeader: () => (
-        <strong style={{ color: "#5EBFFF" }}>{"MONTO DE DEUDA"}</strong>
+        <strong style={{ color: "#254061" }}>{"MONTO DE DEUDA"}</strong>
       ),
       renderCell: (value) => (
         <Typography>
@@ -59,7 +59,7 @@ function buildColumns() {
       field: 'number_payments',
       minWidth: 120,
       renderHeader: () => (
-        <strong style={{ color: "#5EBFFF" }}>{"PAGOS REGISTRADOS"}</strong>
+        <strong style={{ color: "#254061" }}>{"PAGOS REGISTRADOS"}</strong>
       ),
       renderCell: (value) => (
         <Typography>
@@ -72,7 +72,7 @@ function buildColumns() {
       field: 'amount_paid',
       minWidth: 120,
       renderHeader: () => (
-        <strong style={{ color: "#5EBFFF" }}>{"MONTO PAGADO"}</strong>
+        <strong style={{ color: "#254061" }}>{"MONTO PAGADO"}</strong>
       ),
       renderCell: (value) => (
         <Typography>
@@ -85,7 +85,7 @@ function buildColumns() {
       field: 'number_payments_valid',
       minWidth: 120,
       renderHeader: () => (
-        <strong style={{ color: "#5EBFFF" }}>{"PAGOS REGISTRADOS VALIDOS"}</strong>
+        <strong style={{ color: "#254061" }}>{"PAGOS REGISTRADOS VALIDOS"}</strong>
       ),
       renderCell: (value) => (
         <Typography>
@@ -98,7 +98,7 @@ function buildColumns() {
       field: 'amount_paid_valid',
       minWidth: 120,
       renderHeader: () => (
-        <strong style={{ color: "#5EBFFF" }}>{"MONTO PAGADO VALIDO"}</strong>
+        <strong style={{ color: "#254061" }}>{"MONTO PAGADO VALIDO"}</strong>
       ),
       renderCell: (value) => (
         <Typography>
@@ -109,7 +109,7 @@ function buildColumns() {
     { 
       headerName: 'FECHA MÍNIMA DE PAGO',
       renderHeader: () => (
-        <strong style={{ color: "#5EBFFF" }}>{"FECHA MINIMA DE PAGO"}</strong>
+        <strong style={{ color: "#254061" }}>{"FECHA MINIMA DE PAGO"}</strong>
       ),
       field: 'minimum_date_paid',
       minWidth: 120,
@@ -117,7 +117,7 @@ function buildColumns() {
     { 
       headerName: 'FECHA MÁXIMA DE PAGO',
       renderHeader: () => (
-        <strong style={{ color: "#5EBFFF" }}>{"FECHA MAXIMO DE PAGO"}</strong>
+        <strong style={{ color: "#254061" }}>{"FECHA MAXIMO DE PAGO"}</strong>
       ),
       field: 'maximum_date_paid',
       minWidth: 120,

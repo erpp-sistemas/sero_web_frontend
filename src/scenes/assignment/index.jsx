@@ -24,6 +24,7 @@ import {workAssignmentRequest} from '../../api/assignment.js'
 import CustomAlert from '../../components/CustomAlert.jsx'
 import LoadingModal from '../../components/LoadingModal.jsx'
 import Header from '../../components/Header.jsx'
+import { colores } from '../../tema/seroTheme' // S02-H2.1: botón principal del tema nuevo
 import { DataGrid,
   GridToolbarColumnsButton,
   GridToolbarContainer,
@@ -240,7 +241,7 @@ const Index = () => {
 			{ 
 				field: 'account',
 				renderHeader: () => (
-					<strong style={{ color: "#5EBFFF" }}>{"CUENTA"}</strong>
+					<strong style={{ color: "#254061" }}>{"CUENTA"}</strong>
 				),
 				width: 100,
 				editable: false,
@@ -248,7 +249,7 @@ const Index = () => {
 			{ 
 				field: 'task_assigned',
 				renderHeader: () => (
-					<strong style={{ color: "#5EBFFF" }}>{"TAREA ASIGNADA"}</strong>
+					<strong style={{ color: "#254061" }}>{"TAREA ASIGNADA"}</strong>
 				),
 				width: 150,
 				editable: false,
@@ -256,7 +257,7 @@ const Index = () => {
 			{ 
 				field: 'person_assigned',
 				renderHeader: () => (
-					<strong style={{ color: "#5EBFFF" }}>{"PERSONA ASIGNADA"}</strong>
+					<strong style={{ color: "#254061" }}>{"PERSONA ASIGNADA"}</strong>
 				),
 				width: 210,
 				editable: false,
@@ -264,7 +265,7 @@ const Index = () => {
 			{ 
 				field: 'assignment_result',
 				renderHeader: () => (
-					<strong style={{ color: "#5EBFFF" }}>{"RESULTADO DE LA ASIGNACION"}</strong>
+					<strong style={{ color: "#254061" }}>{"RESULTADO DE LA ASIGNACION"}</strong>
 				),
 				width: 210,
 				editable: false,
@@ -545,7 +546,7 @@ const Index = () => {
 						<Button
 						variant="contained"
 						color="primary"
-						sx={{ bgcolor: 'secondary.main', '&:hover': { bgcolor: 'secondary.dark' } }}
+						sx={{ bgcolor: colores.verde, color: colores.tinta, '&:hover': { bgcolor: colores.verdeOscuro } }}
 						onClick={() => {
 							handleConvertExcelToArray();
 							

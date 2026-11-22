@@ -170,7 +170,7 @@ const Home = () => {
 					>
 
 						<ButtonGroup variant="contained" aria-label="outlined primary button group">
-							<Button sx={{ backgroundColor: colors.greenAccent[500] }}>Año</Button>
+							<Button sx={{ backgroundColor: '#17E85D', color: '#0F2340', '&:hover': { backgroundColor: '#12C94F' } }}>Año</Button>
 							<Button>Mes</Button>
 							<Button>Semana</Button>
 						</ButtonGroup>
@@ -248,7 +248,7 @@ const Home = () => {
 				<Typography
 					variant="h5"
 					sx={{ padding: "20px 30px 0 30px" }}
-					color={colors.greenAccent[500]}
+					color="#1E7A47"
 				>
 					Recaudado en plazas
 				</Typography>

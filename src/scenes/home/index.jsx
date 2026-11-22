@@ -59,7 +59,7 @@ const Index = () => {
 								}
                 }}
             >
-              <span className='text-[#5ebfff]'>
+              <span className='text-[#254061]'>
                 SISTEMA ESTRATÉGICO DE RECAUDACIÓN Y ORDENAMIENTO
               </span>
             </Typography>

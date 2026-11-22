@@ -1,4 +1,4 @@
-import { createContext, useState, useMemo } from "react";
+import { createContext, useMemo } from "react";
 import { createTheme } from "@mui/material/styles";
 
 export const tokens = (mode) => ({
@@ -139,7 +139,7 @@ export const tokens = (mode) => ({
           100: "#d0f4f5", // Muy claro
           200: "#a2e9ea",
           300: "#74dddf",
-          400: "#19b7ba", // Color principal
+          400: "#0F7F82", // S02-H2.1: más oscuro para que el texto blanco se lea (antes #19b7ba)
           500: "#138e91",
           600: "#0e6669",
           700: "#094142",
@@ -158,16 +158,16 @@ export const tokens = (mode) => ({
           900: "#ccffcc", // Verde muy claro, casi pastel
         },
         searchButton: {
-          100: "#00a884",
-          200: "#33c4a9",
+          100: "#1E7A47", // S02-H2.1: verde de texto del tema nuevo; con texto blanco se lee (5.3:1). Antes #00a884 (2.9:1)
+          200: "#186A3C",
         },
         contentSearchButton: {
           100: "#fff",
         },
         accentGreen: {
-          100: "#00a884",
-          200: "#009373",
-          300: "#007c61",
+          100: "#1E7A47", // S02-H2.1: verde de texto del tema nuevo; con texto blanco también se lee (5.3:1)
+          200: "#186A3C",
+          300: "#12572F",
         },
         accentGreenSecondary: {
           100: "#E0E0E0", // base (botón normal)
@@ -193,7 +193,7 @@ export const tokens = (mode) => ({
           100: "#0f2922",
           200: "#1e5245",
           300: "#2e7c67",
-          400: "#4cceac",
+          400: "#1E7A47", // S02-H2.1: verde de texto del tema nuevo (antes #4cceac, no se leía sobre claro)
           500: "#00ff00",
           600: "#6EBE71",
           700: "#94e2cd",
@@ -217,7 +217,7 @@ export const tokens = (mode) => ({
           300: "#3e4396",
           400: "#535ac8",
           500: "#6870fa",
-          600: "#868dfb",
+          600: "#535ac8", // S02-H2.1: más oscuro para que se lea como texto/chip en claro (antes #868dfb)
           700: "#a4a9fc",
           800: "#c3c6fd",
           900: "#e1e2fe",
@@ -269,8 +269,13 @@ export const themeSettings = (mode) => {
             primary: {
               main: colors.primary[100],
             },
+            // S02-H2.1: en claro, el verde brillante (#00ff00) no se lee como texto de botones secundarios
+            // (color="secondary"); se usa el marino del tema nuevo (docs/DESIGN.md).
             secondary: {
-              main: colors.greenAccent[500],
+              main: "#254061",
+              dark: "#0F2340",
+              light: "#EAF0F8",
+              contrastText: "#FFFFFF",
             },
             neutral: {
               dark: colors.grey[700],
@@ -281,6 +286,12 @@ export const themeSettings = (mode) => {
               default: "#F7F9F4",
             },
           }),
+    },
+    // S02-H2.1: avatar con letra (sin foto) legible en claro; antes letra casi blanca sobre gris.
+    components: {
+      MuiAvatar: {
+        styleOverrides: { colorDefault: { backgroundColor: "#EAF0F8", color: "#254061" } },
+      },
     },
     typography: {
       fontFamily: ["Source Sans Pro", "sans-serif"].join(","),
@@ -317,13 +328,13 @@ export const ColorModeContext = createContext({
   toggleColorMode: () => {},
 });
 
+// S02-H2.1: tema claro único (docs/DESIGN.md). Se quitó el botón de modo oscuro; el modo queda fijo en "light".
 export const useMode = () => {
-  const [mode, setMode] = useState("dark");
+  const mode = "light";
 
   const colorMode = useMemo(
     () => ({
-      toggleColorMode: () =>
-        setMode((prev) => (prev === "light" ? "dark" : "light")),
+      toggleColorMode: () => {},
     }),
     []
   );

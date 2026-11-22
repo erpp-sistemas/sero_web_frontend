@@ -706,7 +706,7 @@ const handleFileChangeWebImage = async (event) => {
       {
         field: "nombre",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>
+          <strong style={{ color: "#254061" }}>
             {"Nombre"}
             {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
           📃
@@ -720,7 +720,7 @@ const handleFileChangeWebImage = async (event) => {
           field: "fecha_ingreso",
           type: "dateTime",
           renderHeader: () => (
-            <strong style={{ color: "#5EBFFF" }}>
+            <strong style={{ color: "#254061" }}>
               {"Fecha de Ingreso"}
               
             </strong>
@@ -734,7 +734,7 @@ const handleFileChangeWebImage = async (event) => {
       {
         field: "imagen",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>
+          <strong style={{ color: "#254061" }}>
             {"Imagen"}
             {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
           📃
@@ -762,7 +762,7 @@ const handleFileChangeWebImage = async (event) => {
       {
         field: "icono_app_movil",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>
+          <strong style={{ color: "#254061" }}>
             {"Icono de App Movil"}
             {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
           📃
@@ -786,7 +786,7 @@ const handleFileChangeWebImage = async (event) => {
       {
         field: "activo",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>
+          <strong style={{ color: "#254061" }}>
             {"Estado"}
             {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
           📃
@@ -801,7 +801,7 @@ const handleFileChangeWebImage = async (event) => {
       {
         field: "orden",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>
+          <strong style={{ color: "#254061" }}>
             {"Orden"}
             {/*    <span role="img" aria-label="task" style={{color:"#5EBFFF"}}>
           📃
@@ -815,7 +815,7 @@ const handleFileChangeWebImage = async (event) => {
         field: "actions",
         type: "actions",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>
+          <strong style={{ color: "#254061" }}>
             {"Acciones"}
            
           </strong>

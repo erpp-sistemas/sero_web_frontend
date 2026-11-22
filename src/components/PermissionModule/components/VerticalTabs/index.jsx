@@ -64,17 +64,17 @@ function VerticalTabs() {
           textColor="secondary"
           sx={{
             "&:hover": {
-              color: "#9298E3", // Cambia "yourHoverColor" al color deseado
+              color: "#254061", // Cambia "yourHoverColor" al color deseado
             },
             "&:visited": {
-              color: "#9298E3", // Cambia "yourVisitedColor" al color deseado después de visitar el enlace
+              color: "#254061", // Cambia "yourVisitedColor" al color deseado después de visitar el enlace
             },
 
             "&:active": {
-              color: "#9298E3", // Cambia "yourActiveColor" al color deseado cuando está activa
+              color: "#254061", // Cambia "yourActiveColor" al color deseado cuando está activa
             },
             "&:focus": {
-              color: "#00FF00", // Cambia "yourFocusColor" al color deseado cuando está enfocada
+              color: "#1E7A47", // Cambia "yourFocusColor" al color deseado cuando está enfocada
             },
           }}
         />
@@ -86,17 +86,17 @@ function VerticalTabs() {
           textColor="secondary"
           sx={{
             "&:hover": {
-              color: "#9298E3", // Cambia "yourHoverColor" al color deseado
+              color: "#254061", // Cambia "yourHoverColor" al color deseado
             },
             "&:visited": {
-              color: "#9298E3", // Cambia "yourVisitedColor" al color deseado después de visitar el enlace
+              color: "#254061", // Cambia "yourVisitedColor" al color deseado después de visitar el enlace
             },
 
             "&:active": {
-              color: "#9298E3", // Cambia "yourActiveColor" al color deseado cuando está activa
+              color: "#254061", // Cambia "yourActiveColor" al color deseado cuando está activa
             },
             "&:focus": {
-              color: "#00FF00", // Cambia "yourFocusColor" al color deseado cuando está enfocada
+              color: "#1E7A47", // Cambia "yourFocusColor" al color deseado cuando está enfocada
             },
           }}
         />
@@ -108,17 +108,17 @@ function VerticalTabs() {
           textColor="secondary"
           sx={{
             "&:hover": {
-              color: "#9298E3", // Cambia "yourHoverColor" al color deseado
+              color: "#254061", // Cambia "yourHoverColor" al color deseado
             },
             "&:visited": {
-              color: "#9298E3", // Cambia "yourVisitedColor" al color deseado después de visitar el enlace
+              color: "#254061", // Cambia "yourVisitedColor" al color deseado después de visitar el enlace
             },
 
             "&:active": {
-              color: "#9298E3", // Cambia "yourActiveColor" al color deseado cuando está activa
+              color: "#254061", // Cambia "yourActiveColor" al color deseado cuando está activa
             },
             "&:focus": {
-              color: "#00FF00", // Cambia "yourFocusColor" al color deseado cuando está enfocada
+              color: "#1E7A47", // Cambia "yourFocusColor" al color deseado cuando está enfocada
             },
           }}
         />
@@ -131,17 +131,17 @@ function VerticalTabs() {
           textColor="secondary"
           sx={{
             "&:hover": {
-              color: "#9298E3", // Cambia "yourHoverColor" al color deseado
+              color: "#254061", // Cambia "yourHoverColor" al color deseado
             },
             "&:visited": {
-              color: "#9298E3", // Cambia "yourVisitedColor" al color deseado después de visitar el enlace
+              color: "#254061", // Cambia "yourVisitedColor" al color deseado después de visitar el enlace
             },
 
             "&:active": {
-              color: "#9298E3", // Cambia "yourActiveColor" al color deseado cuando está activa
+              color: "#254061", // Cambia "yourActiveColor" al color deseado cuando está activa
             },
             "&:focus": {
-              color: "#00FF00", // Cambia "yourFocusColor" al color deseado cuando está enfocada
+              color: "#1E7A47", // Cambia "yourFocusColor" al color deseado cuando está enfocada
             },
           }}
         />
@@ -152,7 +152,7 @@ function VerticalTabs() {
           <Tab label="Item Seven" {...a11yProps(6)} /> */}
       </Tabs>
       <TabPanel value={value} index={0}>
-        <Typography variant="button" gutterBottom sx={{ color: "#9298E3" }}>
+        <Typography variant="button" gutterBottom sx={{ color: "#254061" }}>
           Administraciòn de Permisos Menu
         </Typography>
         
@@ -160,18 +160,18 @@ function VerticalTabs() {
     
       </TabPanel>
       <TabPanel value={value} index={1}>
-        <Typography variant="button" gutterBottom sx={{ color: "#9298E3" }}>
+        <Typography variant="button" gutterBottom sx={{ color: "#254061" }}>
           Administraciòn de Permisos SubMenu
         </Typography>
       </TabPanel>
       <TabPanel value={value} index={2}>
-        <Typography variant="button" gutterBottom sx={{ color: "#9298E3" }}>
+        <Typography variant="button" gutterBottom sx={{ color: "#254061" }}>
           Administraciòn de Permisos Menu Usuario
         </Typography>
       </TabPanel>
 
       <TabPanel value={value} index={3}>
-        <Typography variant="button" gutterBottom sx={{ color: "#9298E3" }}>
+        <Typography variant="button" gutterBottom sx={{ color: "#254061" }}>
           Administraciòn de Permisos SubMenu Usuario
         </Typography>
       </TabPanel>

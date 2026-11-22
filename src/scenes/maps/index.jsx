@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import { getPlacesByUserId } from '../../services/place.service';
 import { useNavigate } from 'react-router-dom';
 import { getIcon } from '../../data/Icons';
+import { colores } from '../../tema/seroTheme'; // S02-H2.1: tarjetas claras del tema nuevo
 
 const Index = () => {
 
@@ -30,15 +31,20 @@ const Index = () => {
             <div className="flex justify-evenly items-center flex-wrap gap-3 mt-5 rounded-md"  >
 
                 {plazas && plazas.map(plaza => (
-                    <div key={plaza.place_id.toString()} className='p-4 w-[27%] rounded-md h-[360px] mb-5 bg-gray-700 shadow-lg opacity-75'>
+                    <div
+                        key={plaza.place_id.toString()}
+                        className='p-4 w-[27%] rounded-md h-[360px] mb-5'
+                        style={{ backgroundColor: colores.blanco, border: `1px solid ${colores.linea}`, color: colores.tinta }}
+                    >
                         <div className='h-full flex flex-col justify-between gap-4'>
-                            <div className='w-10 h-10 rounded-[50%] flex justify-center items-center bg-cyan-500' >
+                            <div className='w-10 h-10 rounded-[50%] flex justify-center items-center' style={{ backgroundColor: colores.seleccion, color: colores.marino }} >
                                 <p className='font-bold'>{plaza.name.substring(0, 1).toUpperCase()}</p>
                             </div>
                             <img className='w-[120px] mx-auto mb-[10px]' src={plaza.image} alt="" />
                             <h2 className='font-semibold text-center'>{plaza.name}</h2>
-                            <button onClick={() => navigation(`/map/${plaza.place_id}`)} className='w-full p-1 rounded-md 
-                            bg-green-500 flex justify-center items-center gap-2 text-gray-900 font-semibold'>
+                            <button onClick={() => navigation(`/map/${plaza.place_id}`)} className='w-full p-1 rounded-md
+                            flex justify-center items-center gap-2 font-semibold'
+                            style={{ backgroundColor: colores.verde, color: colores.tinta }}>
                                 {getIcon('ZoomInMapIcon', {})}
                                 Abrir mapa
                             </button>

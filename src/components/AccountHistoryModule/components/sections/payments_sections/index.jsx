@@ -14,7 +14,7 @@ function PaymentsSections() {
 		{
 			field: "reference",
 			renderHeader: () => (
-			<strong style={{ color: "#5EBFFF" }}>
+			<strong style={{ color: "#254061" }}>
 				{"Referencia "}
 			</strong>
 			),
@@ -24,7 +24,7 @@ function PaymentsSections() {
 		{
 			field: "description",
 			renderHeader: () => (
-			<strong style={{ color: "#5EBFFF" }}>
+			<strong style={{ color: "#254061" }}>
 				{"Descripciòn"}
 			</strong>
 			),
@@ -41,7 +41,7 @@ function PaymentsSections() {
 		},{
 			field: "payment_period",
 			renderHeader: () => (
-			<strong style={{ color: "#5EBFFF" }}>
+			<strong style={{ color: "#254061" }}>
 				{"Periodo de Pago "}
 			</strong>
 			),
@@ -51,7 +51,7 @@ function PaymentsSections() {
 		},{
 			field: "payment_date",
 			renderHeader: () => (
-			<strong style={{ color: "#5EBFFF" }}>
+			<strong style={{ color: "#254061" }}>
 				{"Fecha de Pago"}
 			</strong>
 			),
@@ -65,7 +65,7 @@ function PaymentsSections() {
 		{
 			field: "amount_paid",
 			renderHeader: () => (
-			<strong style={{ color: "#5EBFFF" }}>
+			<strong style={{ color: "#254061" }}>
 				{"Pago "}
 			</strong>
 			),

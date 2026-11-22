@@ -43,7 +43,7 @@ const Slider = () => {
 								}
 							}}
 						>
-							<span className='text-[#5ebfff]'>{bottom.title}</span>
+							<span className='text-[#254061]'>{bottom.title}</span>
 						</Typography>
                        
 						<Tabs
@@ -65,8 +65,8 @@ const Slider = () => {
                                         minWidth: 60,
                                         color: "text.secondary",
                                         "&.Mui-selected": {
-                                            color: "#5ebfff",
-                                            borderBottom: "2px solid #5ebfff",
+                                            color: "#254061",
+                                            borderBottom: "2px solid #254061",
                                         },
                                     }}
                                 />

@@ -42,7 +42,7 @@ function ProcessTableSection() {
 			{
 			field: "task_done",
 			renderHeader: () => (
-				<strong style={{ color: "#5EBFFF" }}>
+				<strong style={{ color: "#254061" }}>
 				{"Tarea"}
 				</strong>
 			),
@@ -67,7 +67,7 @@ function ProcessTableSection() {
 			{
 			field: "person_who_capture",
 			renderHeader: () => (
-				<strong style={{ color: "#5EBFFF" }}>
+				<strong style={{ color: "#254061" }}>
 				{"Nombre Gestor"}
 				</strong>
 			),
@@ -78,7 +78,7 @@ function ProcessTableSection() {
 			field: "date_capture",
 			type:'dateTime',
 			renderHeader: () => (
-				<strong style={{ color: "#5EBFFF" }}>
+				<strong style={{ color: "#254061" }}>
 				{"Fecha de Captura"}
 				</strong>
 			),

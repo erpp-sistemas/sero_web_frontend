@@ -82,7 +82,7 @@ function buildColumns() {
         field: "plaza",
         headerName: "PLAZA",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"PLAZA"}</strong>
+          <strong style={{ color: "#254061" }}>{"PLAZA"}</strong>
         ),
         renderCell: (params) => (
           <Chip
@@ -111,7 +111,7 @@ function buildColumns() {
         field: "fecha_captura",
         headerName: "FECHA DE CAPTURA",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"FECHA DE CAPTURA"}</strong>
+          <strong style={{ color: "#254061" }}>{"FECHA DE CAPTURA"}</strong>
         ),
         width: 160,
         renderCell: (params) => (
@@ -139,7 +139,7 @@ function buildColumns() {
         field: "tipo_checada",
         headerName: "MEDIO DE CHECADA",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"MEDIO DE CHECADA"}</strong>
+          <strong style={{ color: "#254061" }}>{"MEDIO DE CHECADA"}</strong>
         ),
         width: 200,
         renderCell: (params) => {
@@ -186,7 +186,7 @@ function buildColumns() {
         field: "hora_entrada_sistema",
         headerName: "HORA DE ENTRADA SISTEMA",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>
+          <strong style={{ color: "#254061" }}>
             {"HORA DE ENTRADA SISTEMA"}
           </strong>
         ),
@@ -228,7 +228,7 @@ function buildColumns() {
         field: "hora_entrada",
         headerName: "HORA DE ENTRADA",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"HORA DE ENTRADA"}</strong>
+          <strong style={{ color: "#254061" }}>{"HORA DE ENTRADA"}</strong>
         ),
         width: 160,
         renderCell: (params) => {
@@ -301,7 +301,7 @@ function buildColumns() {
         field: "estatus_entrada",
         headerName: "ESTATUS DE ENTRADA",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"ESTATUS DE ENTRADA"}</strong>
+          <strong style={{ color: "#254061" }}>{"ESTATUS DE ENTRADA"}</strong>
         ),
         width: 280,
         renderCell: (params) => {
@@ -377,7 +377,7 @@ function buildColumns() {
         field: "estatus_punto_entrada",
         headerName: "ESTATUS DE PUNTO DE ENTRADA",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>
+          <strong style={{ color: "#254061" }}>
             {"ESTATUS DE PUNTO DE ENTRADA"}
           </strong>
         ),
@@ -426,7 +426,7 @@ function buildColumns() {
         field: "lugar_entrada",
         headerName: "LUGAR DE ENTRADA",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"LUGAR DE ENTRADA"}</strong>
+          <strong style={{ color: "#254061" }}>{"LUGAR DE ENTRADA"}</strong>
         ),
         width: 200,
         renderCell: (params) => {
@@ -472,7 +472,7 @@ function buildColumns() {
         field: "lugar_entrada_primer_gestion",
         headerName: "LUGAR DE ENTRADA PRIMERA GESTIÓN",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>
+          <strong style={{ color: "#254061" }}>
             {"LUGAR DE ENTRADA PRIMERA GESTIÓN"}
           </strong>
         ),
@@ -520,7 +520,7 @@ function buildColumns() {
         field: "distancia_entrada",
         headerName: "DISTANCIA DE PUNTOS DE ENTRADA",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>
+          <strong style={{ color: "#254061" }}>
             {"DISTANCIA DE PUNTOS DE ENTRADA"}
           </strong>
         ),
@@ -566,7 +566,7 @@ function buildColumns() {
         field: "hora_salida_sistema",
         headerName: "HORA DE SALIDA SISTEMA",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>
+          <strong style={{ color: "#254061" }}>
             {"HORA DE SALIDA SISTEMA"}
           </strong>
         ),
@@ -609,7 +609,7 @@ function buildColumns() {
         field: "hora_salida",
         headerName: "HORA DE SALIDA",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"HORA DE SALIDA"}</strong>
+          <strong style={{ color: "#254061" }}>{"HORA DE SALIDA"}</strong>
         ),
         width: 140,
         renderCell: (params) => {
@@ -692,7 +692,7 @@ function buildColumns() {
         field: "estatus_salida",
         headerName: "ESTATUS DE SALIDA",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"ESTATUS DE SALIDA"}</strong>
+          <strong style={{ color: "#254061" }}>{"ESTATUS DE SALIDA"}</strong>
         ),
         width: 280,
         renderCell: (params) => {
@@ -774,7 +774,7 @@ function buildColumns() {
         field: "estatus_punto_salida",
         headerName: "ESTATUS DE PUNTO DE SALIDA",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>
+          <strong style={{ color: "#254061" }}>
             {"ESTATUS DE PUNTO DE SALIDA"}
           </strong>
         ),
@@ -824,7 +824,7 @@ function buildColumns() {
         field: "lugar_salida",
         headerName: "LUGAR DE SALIDA",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>{"LUGAR DE SALIDA"}</strong>
+          <strong style={{ color: "#254061" }}>{"LUGAR DE SALIDA"}</strong>
         ),
         width: 180,
         renderCell: (params) => {
@@ -870,7 +870,7 @@ function buildColumns() {
         field: "lugar_salida_ultima_gestion",
         headerName: "LUGAR DE SALIDA ULTIMA GESTIÓN",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>
+          <strong style={{ color: "#254061" }}>
             {"LUGAR DE SALIDA ULTIMA GESTIÓN"}
           </strong>
         ),
@@ -918,7 +918,7 @@ function buildColumns() {
         field: "distancia_salida",
         headerName: "DISTANCIA DE PUNTOS DE SALIDA",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>
+          <strong style={{ color: "#254061" }}>
             {"DISTANCIA DE PUNTOS DE SALIDA"}
           </strong>
         ),
@@ -964,7 +964,7 @@ function buildColumns() {
         field: "evaluacion_salida_basada_en",
         headerName: "EVALUACION DE SALIDA BASADA EN",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>
+          <strong style={{ color: "#254061" }}>
             {"EVALUACION DE SALIDA BASADA EN"}
           </strong>
         ),
@@ -1010,7 +1010,7 @@ function buildColumns() {
         field: "hora_ultima_gestion",
         headerName: "HORA DE ULTIMA GESTION",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>
+          <strong style={{ color: "#254061" }}>
             {"HORA DE ULTIMA GESTION"}
           </strong>
         ),
@@ -1056,7 +1056,7 @@ function buildColumns() {
         field: "hora_entrada_comida",
         headerName: "HORA DE SALIDA DE COMIDA",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>
+          <strong style={{ color: "#254061" }}>
             {"HORA DE ENTRADA DE COMIDA"}
           </strong>
         ),
@@ -1099,7 +1099,7 @@ function buildColumns() {
         field: "lugar_entrada_comida",
         headerName: "LUGAR DE SALIDA DE COMIDA",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>
+          <strong style={{ color: "#254061" }}>
             {"LUGAR DE ENTRADA DE COMIDA"}
           </strong>
         ),
@@ -1145,7 +1145,7 @@ function buildColumns() {
         field: "hora_salida_comida",
         headerName: "HORA DE ENTRADA DE COMIDA",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>
+          <strong style={{ color: "#254061" }}>
             {"HORA DE SALIDA DE COMIDA"}
           </strong>
         ),
@@ -1188,7 +1188,7 @@ function buildColumns() {
         field: "lugar_salida_comida",
         headerName: "LUGAR DE ENTRADA DE COMIDA",
         renderHeader: () => (
-          <strong style={{ color: "#5EBFFF" }}>
+          <strong style={{ color: "#254061" }}>
             {"LUGAR DE SALIDA DE COMIDA"}
           </strong>
         ),

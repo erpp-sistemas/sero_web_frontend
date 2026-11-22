@@ -14,7 +14,8 @@ const Header = ({ title, subtitle }) => {
       >
         {title}
       </Typography>
-      <Typography variant="h5" color={colors.greenAccent[400]}>
+      {/* S02-H2.1: verde de texto del tema nuevo (el #4cceac anterior no se leía sobre fondo claro) */}
+      <Typography variant="h5" color="#1E7A47">
         {subtitle}
       </Typography>
     </Box>
