@@ -63,7 +63,31 @@ export const seroTheme = createTheme({
 		},
 		MuiOutlinedInput: {
 			styleOverrides: {
-				root: { borderRadius: 4, '& fieldset': { borderColor: '#C9D6E8' }, '&.Mui-focused fieldset': { borderColor: '#254061', borderWidth: 1 } },
+				// Selectores completos (clase + clase + clase): con '&.Mui-focused fieldset' ganaba la regla de MUI
+				// y el foco salía verde de 2 px. DESIGN.md: borde marino de 1 px con anillo #EAF0F8.
+				root: {
+					borderRadius: 4,
+					'& .MuiOutlinedInput-notchedOutline': { borderColor: '#C9D6E8' },
+					'&.Mui-focused': { boxShadow: '0 0 0 3px #EAF0F8' },
+					'&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#254061', borderWidth: 1 },
+					'&.Mui-error .MuiOutlinedInput-notchedOutline': { borderColor: '#B42318', borderWidth: 1 },
+					'&.Mui-error.Mui-focused': { boxShadow: '0 0 0 3px #FEECEB' },
+				},
+			},
+		},
+		// Apagadores: encendido en marino (el verde por defecto de "primary" casi no se ve sobre blanco).
+		MuiSwitch: {
+			styleOverrides: {
+				switchBase: {
+					'&.Mui-checked': { color: '#FFFFFF' },
+					'&.Mui-checked + .MuiSwitch-track': { backgroundColor: '#254061', opacity: 1 },
+					'&.Mui-disabled + .MuiSwitch-track': { opacity: 0.45 },
+					'&.Mui-checked.Mui-disabled': { color: '#FFFFFF' },
+					'&.Mui-focusVisible .MuiSwitch-thumb': { outline: '2px solid #254061', outlineOffset: 2 },
+				},
+				// Apagado: gris de 3.4:1 sobre blanco (mínimo 3:1 para controles)
+				track: { backgroundColor: '#7D8DA3', opacity: 1 },
+				thumb: { boxShadow: '0 1px 2px rgba(15,35,64,.25)' },
 			},
 		},
 		MuiChip: { styleOverrides: { root: { borderRadius: 9999, fontSize: 12 } } },

@@ -50,12 +50,6 @@ const estiloInput = {
 	color: colores.tinta,
 	bgcolor: colores.blanco,
 	'& input': { height: 40, boxSizing: 'border-box', py: 0, px: 1.5 },
-	// Selectores completos: los del tema pierden contra la regla de foco por defecto de MUI (verde, 2 px).
-	'& .MuiOutlinedInput-notchedOutline': { borderColor: colores.borde },
-	'&.Mui-focused': { boxShadow: `0 0 0 3px ${colores.seleccion}` },
-	'&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: colores.marino, borderWidth: 1 },
-	'&.Mui-error .MuiOutlinedInput-notchedOutline': { borderColor: '#B42318', borderWidth: 1 },
-	'&.Mui-error.Mui-focused': { boxShadow: '0 0 0 3px #FEECEB' },
 }
 
 const Campo = ({ id, etiqueta, error, children }) => (
