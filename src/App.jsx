@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { Routes, Route, useNavigate, useLocation } from "react-router-dom"
+import { Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom"
 import { CssBaseline, ThemeProvider } from "@mui/material"
 import { useMode } from "./theme"
 import { LocalizationProvider } from '@mui/x-date-pickers'
@@ -22,15 +22,14 @@ import Geography from "./scenes/geography"
 import Calendar from "./scenes/calendar/calendar"
 import Home from './scenes/home'
 import Login from './scenes/login'
-import NewUser from './scenes/new-user'
 import MapList from './scenes/maps'
 import Map from './scenes/map'
 import Maintenance from './scenes/maintenance'
 import WorkAssignment from './scenes/assignment'
 import DashboardCoordinator from './scenes/dashboard-coordinacion'
 import Geocoding from './scenes/geocoding'
-import UsersList from './scenes/users-list'
-import UserNew from './scenes/user-new'
+import Usuarios from './scenes/usuarios' // S02-H2.4
+import EditarUsuario from './scenes/usuarios/EditarUsuario' // S02-H2.4
 import WorkAttendance from './scenes/work-attendance'
 import AccountHistory from "./scenes/account-history"
 import ValidPayment from './scenes/valid-payment'
@@ -181,7 +180,8 @@ function App() {
                         <Route path="/faq" element={<FAQ />} />
                         <Route path="/calendar" element={<Calendar />} />
                         <Route path="/geography" element={<Geography />} />
-                        <Route path="/new-user" element={<NewUser />} />
+                        {/* S02-H2.4: pantallas viejas de usuarios reemplazadas por /usuarios; las rutas viejas redirigen */}
+                        <Route path="/new-user" element={<Navigate to="/usuarios/nuevo" replace />} />
                         <Route path="/map-list" element={<MapList />} />
                         <Route path="/map/:place_id" element={<Map />} />
                         <Route path="/roles" element={<Roles />} />
@@ -196,8 +196,11 @@ function App() {
                         <Route path="/menu" element={<Menu />} />
                         <Route path="/permission" element={<Permission />} />
                         <Route path="/places" element={<Places />} />
-                        <Route path="/users-list" element={<UsersList />} />
-                        <Route path="/user-new" element={<UserNew />} />
+                        <Route path="/users-list" element={<Navigate to="/usuarios" replace />} />
+                        <Route path="/user-new" element={<Navigate to="/usuarios/nuevo" replace />} />
+                        <Route path="/usuarios" element={<Usuarios />} />
+                        <Route path="/usuarios/nuevo" element={<EditarUsuario />} />
+                        <Route path="/usuarios/:id" element={<EditarUsuario />} />
                         <Route path="/account-history" element={<AccountHistory />} />
                         <Route path="/work-attendance" element={<WorkAttendance />} />
                         <Route path="/coordination-dashboard" element={<CoordinationDashboard />} />
