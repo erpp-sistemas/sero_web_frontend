@@ -10,7 +10,7 @@ import { colores } from '../../../tema/seroTheme'
 import { ChipEstado } from './comunes'
 import { focoVisible } from './utilidades'
 
-const ExcepcionesPermisos = ({ permisos, base, excepciones, onCambiar, deshabilitado, esSuperadmin }) => {
+const ExcepcionesPermisos = ({ permisos, base, excepciones, onCambiar, deshabilitado, esSuperadmin, puedeDar }) => {
 	const [verTodos, setVerTodos] = useState(false)
 	const porCodigo = useMemo(() => new Map(permisos.map((p) => [p.codigo, p])), [permisos])
 
@@ -59,7 +59,7 @@ const ExcepcionesPermisos = ({ permisos, base, excepciones, onCambiar, deshabili
 				<Typography sx={{ fontSize: 12, color: colores.texto3, textTransform: 'uppercase', letterSpacing: '0.04em', mb: 0.5 }}>{titulo}</Typography>
 				{codigos.map((codigo) => (
 					<Box key={codigo} sx={{ display: 'flex', alignItems: 'center', gap: 1, minHeight: 36, borderBottom: `1px solid ${colores.linea}` }}>
-						<ChipEstado tipo={tipo}>{tipo === 'exito' ? 'De más' : 'De menos'}</ChipEstado>
+						<ChipEstado tipo={tipo}>{tipo === 'exito' ? 'Adicional' : 'Quitado'}</ChipEstado>
 						<Typography sx={{ fontSize: 14, color: colores.tinta, flex: 1, minWidth: 0 }}>{porCodigo.get(codigo)?.nombre ?? codigo}</Typography>
 						{!deshabilitado && (
 							<Button size="small" variant="text" onClick={() => quitar(codigo)} sx={{ height: 28, color: colores.marino, fontWeight: 400, ...focoVisible }}>
@@ -85,6 +85,9 @@ const ExcepcionesPermisos = ({ permisos, base, excepciones, onCambiar, deshabili
 				)}
 			</Box>
 
+			{excepciones.size > 0 && (
+				<Typography sx={{ fontSize: 14, color: colores.tinta, mb: 1 }}>Permisos que esta persona tiene distinto a lo que da su rol</Typography>
+			)}
 			{listaExcepciones(agregados, 'exito', 'Tiene además de su rol')}
 			{listaExcepciones(quitados, 'error', 'Su rol lo da, pero a esta persona no')}
 
@@ -114,7 +117,9 @@ const ExcepcionesPermisos = ({ permisos, base, excepciones, onCambiar, deshabili
 								const valor = efectivo(p.codigo)
 								const esExcepcion = excepciones.has(p.codigo)
 								// Superadmin: las pantallas del menú (permisos "read") no se le pueden quitar hasta H2.6
-								const bloqueado = deshabilitado || (esSuperadmin && valor && p.accion === 'read')
+								// Quien edita no puede dar un permiso que él mismo no tiene (el servidor responde 403)
+								const sinDerecho = !valor && puedeDar && !puedeDar(p.codigo)
+								const bloqueado = deshabilitado || (esSuperadmin && valor && p.accion === 'read') || sinDerecho
 								return (
 									<Box key={p.codigo} sx={{ display: 'flex', alignItems: 'center', minHeight: 36, px: 1.5, '&:hover': { bgcolor: colores.banda } }}>
 										<Checkbox
@@ -128,7 +133,7 @@ const ExcepcionesPermisos = ({ permisos, base, excepciones, onCambiar, deshabili
 										<Typography component="label" htmlFor={id} sx={{ fontSize: 14, color: colores.tinta, flex: 1, cursor: bloqueado ? 'default' : 'pointer', py: 0.5 }}>
 											{p.nombre}
 										</Typography>
-										{esExcepcion && <ChipEstado tipo={valor ? 'exito' : 'error'}>{valor ? 'De más' : 'De menos'}</ChipEstado>}
+										{esExcepcion && <ChipEstado tipo={valor ? 'exito' : 'error'}>{valor ? 'Adicional' : 'Quitado'}</ChipEstado>}
 									</Box>
 								)
 							})}
@@ -149,6 +154,7 @@ ExcepcionesPermisos.propTypes = {
 	onCambiar: PropTypes.func.isRequired,
 	deshabilitado: PropTypes.bool,
 	esSuperadmin: PropTypes.bool,
+	puedeDar: PropTypes.func,
 }
 
 export default ExcepcionesPermisos

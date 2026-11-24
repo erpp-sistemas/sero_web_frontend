@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { obtenerMisPermisosRequest } from '../api/usuariosAdmin'
 
 const useMisPermisos = () => {
-	const [estado, setEstado] = useState({ cargando: true, error: false, permisos: new Set(), idUsuario: null, idRol: null })
+	const [estado, setEstado] = useState({ cargando: true, error: false, permisos: new Set(), idUsuario: null, idRol: null, alcanceTotal: false, alcance: [] })
 
 	const cargar = useCallback(() => {
 		let vigente = true
@@ -12,7 +12,15 @@ const useMisPermisos = () => {
 		obtenerMisPermisosRequest()
 			.then(({ data }) => {
 				if (!vigente) return
-				setEstado({ cargando: false, error: false, permisos: new Set(data.permisos || []), idUsuario: data.id_usuario, idRol: data.id_rol })
+				setEstado({
+					cargando: false,
+					error: false,
+					permisos: new Set(data.permisos || []),
+					idUsuario: data.id_usuario,
+					idRol: data.id_rol,
+					alcanceTotal: Boolean(data.alcance_total),
+					alcance: data.alcance || [],
+				})
 			})
 			.catch(() => {
 				if (vigente) setEstado((e) => ({ ...e, cargando: false, error: true }))

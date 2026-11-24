@@ -57,7 +57,8 @@ Fila.propTypes = {
 	id: PropTypes.string.isRequired,
 }
 
-const ArbolAlcance = ({ arbol, seleccion, onCambiar, deshabilitado }) => {
+// permitidas: Set de claves que quien edita puede dar (null = todas). Lo ya marcado siempre se puede quitar.
+const ArbolAlcance = ({ arbol, seleccion, onCambiar, deshabilitado, permitidas = null }) => {
 	const [buscar, setBuscar] = useState('')
 	const [abiertos, setAbiertos] = useState(() => {
 		// Al entrar se abren las plazas que ya tienen algo
@@ -91,9 +92,16 @@ const ArbolAlcance = ({ arbol, seleccion, onCambiar, deshabilitado }) => {
 		return { marcadas, total: claves.length, estado: marcadas === 0 ? 'nada' : marcadas === claves.length ? 'todo' : 'parcial' }
 	}
 
+	const sePuede = (c) => !permitidas || permitidas.has(c) || seleccion.has(c)
+	// Una fila queda desactivada si no hay nada que quien edita pueda marcar o quitar en ella
+	const sinAcceso = (claves) => Boolean(permitidas) && !claves.some(sePuede)
+
 	const cambiar = (claves, marcar) => {
 		const nueva = new Set(seleccion)
-		for (const c of claves) (marcar ? nueva.add(c) : nueva.delete(c))
+		for (const c of claves) {
+			if (marcar && permitidas && !permitidas.has(c)) continue
+			marcar ? nueva.add(c) : nueva.delete(c)
+		}
 		onCambiar(nueva)
 	}
 
@@ -136,7 +144,7 @@ const ArbolAlcance = ({ arbol, seleccion, onCambiar, deshabilitado }) => {
 								onCambiar={(m) => cambiar(clavesDe(p), m)}
 								abierto={abiertoP}
 								onAlternar={filtro ? undefined : () => alternar(`p${p.id_plaza}`)}
-								deshabilitado={deshabilitado}
+								deshabilitado={deshabilitado || sinAcceso(clavesDe(p))}
 							/>
 							{abiertoP &&
 								p.servicios.map((s) => {
@@ -154,7 +162,7 @@ const ArbolAlcance = ({ arbol, seleccion, onCambiar, deshabilitado }) => {
 												onCambiar={(m) => cambiar(clavesDe(p, [s]), m)}
 												abierto={abiertoS}
 												onAlternar={filtro ? undefined : () => alternar(claveS)}
-												deshabilitado={deshabilitado}
+												deshabilitado={deshabilitado || sinAcceso(clavesDe(p, [s]))}
 											/>
 											{abiertoS &&
 												s.procesos.map((pr) => {
@@ -167,7 +175,7 @@ const ArbolAlcance = ({ arbol, seleccion, onCambiar, deshabilitado }) => {
 															etiqueta={pr.nombre}
 															estado={seleccion.has(c) ? 'todo' : 'nada'}
 															onCambiar={(m) => cambiar([c], m)}
-															deshabilitado={deshabilitado}
+															deshabilitado={deshabilitado || !sePuede(c)}
 														/>
 													)
 												})}
@@ -193,6 +201,7 @@ ArbolAlcance.propTypes = {
 	seleccion: PropTypes.instanceOf(Set).isRequired,
 	onCambiar: PropTypes.func.isRequired,
 	deshabilitado: PropTypes.bool,
+	permitidas: PropTypes.instanceOf(Set),
 }
 
 export default ArbolAlcance

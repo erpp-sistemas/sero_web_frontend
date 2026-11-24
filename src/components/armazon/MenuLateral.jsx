@@ -242,12 +242,15 @@ const MenuLateral = ({ grupos, cargando, error, cerrado, onAlternar, esMovil, ab
 		return siguiente
 	}
 
-	const alternarGrupo = (id) => setAbiertos((prev) => guardarAbiertos({ ...prev, [id]: !prev[id] }))
+	// Solo un grupo abierto a la vez: abrir uno cierra el anterior; cerrar el abierto deja todos cerrados.
+	const alternarGrupo = (id) => setAbiertos((prev) => guardarAbiertos(prev[id] ? {} : { [id]: true }))
 
-	// Al entrar a una pantalla, su grupo se abre solo; después la persona puede cerrarlo.
+	// Al entrar a una pantalla se abre su grupo (y se cierran los demás); después la persona puede cerrarlo.
 	useEffect(() => {
 		if (!grupoActivo) return
-		setAbiertos((prev) => (prev[grupoActivo] ? prev : guardarAbiertos({ ...prev, [grupoActivo]: true })))
+		setAbiertos((prev) =>
+			prev[grupoActivo] && Object.keys(prev).filter((k) => prev[k]).length === 1 ? prev : guardarAbiertos({ [grupoActivo]: true }),
+		)
 		// esActiva cambia solo al cambiar de pantalla: así se reabre al entrar a otra pantalla del mismo grupo.
 	}, [grupoActivo, esActiva])
 

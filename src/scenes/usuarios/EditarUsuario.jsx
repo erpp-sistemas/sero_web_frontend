@@ -54,6 +54,7 @@ import {
 import { Campo, ChipEstado, EncabezadoPagina, EstadoPantalla } from './componentes/comunes'
 import { claveAlcance, estiloInput, focoVisible, nombreCompleto } from './componentes/utilidades'
 import ArbolAlcance from './componentes/ArbolAlcance'
+import AvisoCambiosSinGuardar from './componentes/AvisoCambiosSinGuardar'
 import ExcepcionesPermisos from './componentes/ExcepcionesPermisos'
 
 const CORREO = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -144,7 +145,10 @@ const CampoContrasena = ({ id, valor, onCambiar, error, deshabilitado, autoCompl
 	)
 }
 
-const validar = (f, { esNuevo, usuarioOriginal }) => {
+// Lo que se compara para saber si hay cambios sin guardar (la contraseña solo cuenta si se escribió algo)
+const serializar = (f, alc, exc) => JSON.stringify({ f: { ...f, contrasena: f.contrasena ? '*' : '' }, a: [...alc].sort(), e: [...exc].sort() })
+
+const validar = (f, { esNuevo, usuarioOriginal, procesos, jefeInvalido }) => {
 	const e = {}
 	if (!f.nombre.trim()) e.nombre = 'Escribe el nombre'
 	if (!f.apellido_paterno.trim()) e.apellido_paterno = 'Escribe el apellido paterno'
@@ -158,8 +162,13 @@ const validar = (f, { esNuevo, usuarioOriginal }) => {
 	if (f.contrasena && f.contrasena.length < 8) e.contrasena = 'Al menos 8 caracteres'
 	if (f.contrasena && f.contrasena.trim() !== f.contrasena) e.contrasena = 'Sin espacios al inicio o al final'
 	if (!f.id_rol) e.id_rol = 'Elige un rol'
+	if (jefeInvalido) e.id_supervisor = 'Este jefe ya no cumple las reglas (rol o plazas). Elige otro o déjalo vacío.'
+	// Gestor (5) y Coordinador (4) trabajan en procesos: al menos uno
+	if ([4, 5].includes(Number(f.id_rol)) && procesos === 0) e.alcance = 'Un Gestor o un Coordinador necesita al menos un proceso asignado.'
 	return e
 }
+
+const nivelDeRolJefe = (catalogos, idRol) => (catalogos?.roles ?? []).find((r) => r.id_rol === idRol)?.nivel_jefe ?? null
 
 const EditarUsuario = () => {
 	const { id } = useParams()
@@ -186,7 +195,8 @@ const EditarUsuario = () => {
 	const avisoRef = useRef(null)
 
 	const puedeEditar = esNuevo ? misPermisos.tiene('usuarios.create') : misPermisos.tiene('usuarios.update')
-	const soloLectura = !puedeEditar
+	const inicialRef = useRef(serializar(formularioVacio, new Set(), new Map()))
+	const salidaPermitida = useRef(false)
 
 	useEffect(() => {
 		if (misPermisos.cargando) return undefined
@@ -199,10 +209,13 @@ const EditarUsuario = () => {
 				setCatalogos(cat.data)
 				if (usr) {
 					const u = usr.data
+					const alc = new Set(u.alcance.map((a) => claveAlcance(a.id_plaza, a.id_servicio, a.id_proceso)))
+					const exc = new Map(u.excepciones.map((x) => [x.codigo, x.concede]))
 					setOriginal(u)
 					setForm(desdeUsuario(u))
-					setAlcance(new Set(u.alcance.map((a) => claveAlcance(a.id_plaza, a.id_servicio, a.id_proceso))))
-					setExcepciones(new Map(u.excepciones.map((x) => [x.codigo, x.concede])))
+					setAlcance(alc)
+					setExcepciones(exc)
+					inicialRef.current = serializar(desdeUsuario(u), alc, exc)
 				}
 				setCarga({ cargando: false, error: null, noEncontrado: false, sinPermiso: false })
 			})
@@ -226,11 +239,75 @@ const EditarUsuario = () => {
 		setErrores((e) => (e[campo] ? { ...e, [campo]: undefined } : e))
 	}
 
+	// Nivel de quien edita: no se ofrecen roles de mayor nivel que el suyo; Superadmin solo para Superadmin.
+	// (El servidor vuelve a revisarlo y responde 403.)
+	const nivelDeRol = (idRol) => (catalogos?.roles ?? []).find((r) => r.id_rol === idRol)?.nivel ?? 0
+	const nivelActor = nivelDeRol(misPermisos.idRol)
 	const rolesDisponibles = useMemo(
-		() => (catalogos?.roles ?? []).filter((r) => !r.es_heredado || (original && original.id_rol === r.id_rol)),
-		[catalogos, original],
+		() =>
+			(catalogos?.roles ?? []).filter((r) => {
+				if (original && original.id_rol === r.id_rol) return true
+				if (r.es_heredado) return false
+				if (r.id_rol === 1 && misPermisos.idRol !== 1) return false
+				return r.nivel <= nivelActor
+			}),
+		[catalogos, original, misPermisos.idRol, nivelActor],
 	)
 	const rolElegido = (catalogos?.roles ?? []).find((r) => r.id_rol === Number(form.id_rol))
+
+	const desactivada = !esNuevo && Boolean(original) && !original.activo
+	const fueraDeNivel =
+		!esNuevo && Boolean(original) && ((original.id_rol === 1 && misPermisos.idRol !== 1) || nivelDeRol(original.id_rol) > nivelActor)
+	const soloLectura = !puedeEditar || desactivada || fueraDeNivel
+	const motivoSoloLectura = desactivada
+		? 'Persona desactivada: actívala para hacer cambios.'
+		: fueraDeNivel
+			? 'No puedes editar a alguien con un rol de mayor nivel que el tuyo.'
+			: !puedeEditar
+				? 'Solo lectura: no tienes permiso para editar usuarios.'
+				: null
+
+	// Plazas y permisos que quien edita puede dar (además de lo que la persona ya tenía)
+	const plazasDeLaPersona = useMemo(() => new Set([...alcance].map((c) => Number(c.split('-')[0]))), [alcance])
+	const alcancePermitido = useMemo(() => {
+		if (misPermisos.alcanceTotal) return null
+		const propias = (misPermisos.alcance ?? []).map((a) => claveAlcance(a.id_plaza, a.id_servicio, a.id_proceso))
+		const previas = (original?.alcance ?? []).map((a) => claveAlcance(a.id_plaza, a.id_servicio, a.id_proceso))
+		return new Set([...propias, ...previas])
+	}, [misPermisos.alcanceTotal, misPermisos.alcance, original])
+	const concedidosAntes = useMemo(() => new Set((original?.excepciones ?? []).filter((x) => x.concede).map((x) => x.codigo)), [original])
+
+	// Jefes posibles: activos, Coordinador < Gerente < Director general (de mayor nivel que el rol de la persona),
+	// que compartan al menos una plaza (Director general: todas) y sin crear ciclos. Nunca Superadmin ni Sistemas.
+	const jefesPosibles = useMemo(() => {
+		if (!rolElegido || rolElegido.sin_jefe || !catalogos) return []
+		const vigentes = catalogos.jefes_vigentes ?? {}
+		const creaCiclo = (idJefe) => {
+			let actual = idJefe
+			for (let paso = 0; paso < 50 && actual; paso += 1) {
+				if (idUsuario && actual === idUsuario) return true
+				actual = vigentes[actual] ?? null
+			}
+			return false
+		}
+		return (catalogos.jefes ?? []).filter(
+			(j) =>
+				j.id_usuario !== idUsuario &&
+				(nivelDeRolJefe(catalogos, j.id_rol) ?? 0) > (rolElegido.nivel_jefe ?? 0) &&
+				(j.id_rol === 2 || j.plazas.some((p) => plazasDeLaPersona.has(p))) &&
+				!creaCiclo(j.id_usuario),
+		)
+	}, [catalogos, rolElegido, plazasDeLaPersona, idUsuario])
+	const jefeInvalido = Boolean(form.id_supervisor) && !jefesPosibles.some((j) => j.id_usuario === form.id_supervisor)
+	const ayudaJefe = !rolElegido
+		? 'Elige primero un rol.'
+		: rolElegido.sin_jefe
+			? 'Este rol no tiene jefe directo.'
+			: plazasDeLaPersona.size === 0
+				? 'Elige primero dónde trabaja (sección 3): el jefe debe compartir al menos una plaza.'
+				: 'Coordinador, Gerente o Director general de mayor nivel, que comparta al menos una plaza. Mientras un jefe no tenga gente capturada, ve a toda la gente de sus plazas.'
+
+	const hayCambios = !carga.cargando && !soloLectura && serializar(form, alcance, excepciones) !== inicialRef.current
 	const base = useMemo(() => new Set(catalogos?.base_por_rol?.[form.id_rol] ?? []), [catalogos, form.id_rol])
 
 	// Al cambiar de rol, se quitan las excepciones que ya no difieren del nuevo rol
@@ -267,10 +344,13 @@ const EditarUsuario = () => {
 
 	const recargar = async () => {
 		const { data } = await obtenerUsuarioRequest(idUsuario)
+		const alc = new Set(data.alcance.map((a) => claveAlcance(a.id_plaza, a.id_servicio, a.id_proceso)))
+		const exc = new Map(data.excepciones.map((x) => [x.codigo, x.concede]))
 		setOriginal(data)
 		setForm(desdeUsuario(data))
-		setAlcance(new Set(data.alcance.map((a) => claveAlcance(a.id_plaza, a.id_servicio, a.id_proceso))))
-		setExcepciones(new Map(data.excepciones.map((x) => [x.codigo, x.concede])))
+		setAlcance(alc)
+		setExcepciones(exc)
+		inicialRef.current = serializar(desdeUsuario(data), alc, exc)
 		setFotoPrevia(null)
 	}
 
@@ -282,7 +362,7 @@ const EditarUsuario = () => {
 		// Los diálogos viven en un portal: su submit sube por React hasta aquí y no debe guardar el formulario.
 		if (e.target !== e.currentTarget) return
 		if (guardando) return
-		const encontrados = validar(form, { esNuevo, usuarioOriginal: original?.usuario })
+		const encontrados = validar(form, { esNuevo, usuarioOriginal: original?.usuario, procesos: alcance.size, jefeInvalido })
 		setErrores(encontrados)
 		if (Object.keys(encontrados).length) {
 			setAviso({ tipo: 'error', texto: 'Revisa los campos marcados.', validacion: true })
@@ -312,6 +392,7 @@ const EditarUsuario = () => {
 						extra = ` No se pudo dar acceso a la app: ${mensajeDeError(error)} Inténtalo desde su ficha.`
 					}
 				}
+				salidaPermitida.current = true
 				navigate(`/usuarios/${data.id_usuario}`, { replace: true, state: { aviso: `Usuario creado.${extra}` } })
 				return
 			}
@@ -413,8 +494,17 @@ const EditarUsuario = () => {
 	}
 
 	const titulo = esNuevo ? 'Nuevo usuario' : nombreCompleto(original ?? {}) || 'Usuario'
-	const jefes = (catalogos?.jefes ?? []).filter((j) => j.id_usuario !== idUsuario)
-	const jefeElegido = jefes.find((j) => j.id_usuario === form.id_supervisor) ?? (form.id_supervisor && original?.id_supervisor === form.id_supervisor ? { id_usuario: form.id_supervisor, nombre: original.supervisor, rol: '' } : null)
+	const jefeElegido = form.id_supervisor
+		? (jefesPosibles.find((j) => j.id_usuario === form.id_supervisor) ??
+			(catalogos?.jefes ?? []).find((j) => j.id_usuario === form.id_supervisor) ?? {
+				id_usuario: form.id_supervisor,
+				nombre: original?.id_supervisor === form.id_supervisor ? original.supervisor : '',
+				rol: '',
+			})
+		: null
+	// Si el jefe elegido ya no cumple, se deja en la lista para que el valor no quede huérfano (se marca con error)
+	const opcionesJefe = jefeInvalido && jefeElegido ? [...jefesPosibles, jefeElegido] : jefesPosibles
+	const soloAppConWeb = Boolean(rolElegido?.solo_app) && form.acceso_web
 
 	const plazasElegidas = useMemo(() => {
 		const ids = new Set([...alcance].map((c) => Number(c.split('-')[0])))
@@ -424,14 +514,11 @@ const EditarUsuario = () => {
 
 	// Por qué un apagador de acceso no se puede mover (se muestra debajo de él)
 	const esPropio = !esNuevo && original?.id_usuario === misPermisos.idUsuario
-	const motivoSoloLectura = soloLectura ? 'Solo lectura: no tienes permiso para editar usuarios.' : null
 	const motivoWeb = motivoSoloLectura ?? (esPropio ? 'No puedes quitarte tu propio acceso a la web.' : null)
-	const motivoApp = !SINCRONIZA_APP
-		? 'En local no se cambia el acceso a la app; pruébalo en producción.'
-		: (motivoSoloLectura ?? (!esNuevo && original && !original.activo ? 'Activa primero a la persona para darle acceso a la app.' : null))
+	const motivoApp = motivoSoloLectura ?? (!SINCRONIZA_APP ? 'En local no se cambia el acceso a la app; pruébalo en producción.' : null)
 
 	const acciones =
-		!esNuevo && original && puedeEditar ? (
+		!esNuevo && original && puedeEditar && !fueraDeNivel ? (
 			original.activo ? (
 				<Button variant="outlined" onClick={() => setDialogo('desactivar')} disabled={guardando || original.id_usuario === misPermisos.idUsuario} sx={{ color: '#B42318', borderColor: '#F3C5C1', ...focoVisible }}>
 					Desactivar
@@ -482,6 +569,17 @@ const EditarUsuario = () => {
 				{aviso && (
 					<Alert ref={avisoRef} severity={aviso.tipo} sx={{ mb: 2 }} onClose={() => setAviso(null)} role={aviso.tipo === 'error' ? 'alert' : 'status'}>
 						{aviso.texto}
+					</Alert>
+				)}
+
+				{!estadoPantalla && desactivada && (
+					<Alert severity="warning" sx={{ mb: 2 }}>
+						Esta persona está desactivada. Actívala para hacer cambios.
+					</Alert>
+				)}
+				{!estadoPantalla && !desactivada && fueraDeNivel && (
+					<Alert severity="info" sx={{ mb: 2 }}>
+						Puedes ver a esta persona, pero no editarla: su rol es de mayor nivel que el tuyo.
 					</Alert>
 				)}
 
@@ -610,10 +708,16 @@ const EditarUsuario = () => {
 										)
 									})}
 								</Box>
-								<Campo id="usuario-id_supervisor" etiqueta="Jefe directo (opcional)" ayuda="Mientras un jefe no tenga gente capturada, ve a toda la gente de sus plazas." sx={{ mt: 2.5, maxWidth: 420 }}>
+								<Campo id="usuario-id_supervisor" etiqueta="Jefe directo (opcional)" ayuda={ayudaJefe} error={errores.id_supervisor ?? (jefeInvalido ? 'Este jefe ya no cumple las reglas (rol o plazas). Elige otro o déjalo vacío.' : undefined)} sx={{ mt: 2.5, maxWidth: 420 }}>
 									<Autocomplete
 										id="usuario-id_supervisor"
-										options={jefes}
+										options={opcionesJefe}
+										openText="Abrir"
+										closeText="Cerrar"
+										clearText="Quitar jefe"
+										loadingText="Cargando…"
+										ListboxProps={{ style: { maxHeight: 264 } }}
+										slotProps={{ popper: { placement: 'bottom-start', sx: { zIndex: 1300 } }, paper: { sx: { border: `1px solid ${colores.linea}`, boxShadow: '0 8px 24px rgba(15,35,64,.10)' } } }}
 										value={jefeElegido}
 										onChange={(_, v) => poner('id_supervisor')(v?.id_usuario ?? null)}
 										getOptionLabel={(o) => o.nombre ?? ''}
@@ -626,20 +730,66 @@ const EditarUsuario = () => {
 												</Box>
 											</li>
 										)}
-										noOptionsText="Nadie coincide"
-										disabled={soloLectura}
-										renderInput={(params) => <TextField {...params} placeholder="Sin jefe directo" size="small" />}
+										noOptionsText={jefesPosibles.length ? 'Nadie coincide con lo que escribiste' : 'No hay jefes posibles con este rol y estas plazas'}
+										disabled={soloLectura || !rolElegido || rolElegido.sin_jefe}
+										renderInput={(params) => <TextField {...params} placeholder="Sin jefe directo" size="small" error={Boolean(errores.id_supervisor) || jefeInvalido} />}
 									/>
 								</Campo>
 							</Seccion>
 
 							{/* 3. Dónde trabaja */}
 							<Seccion numero={3} titulo="Dónde trabaja" descripcion="Plazas, servicios y procesos que puede ver.">
-								<ArbolAlcance arbol={catalogos?.arbol ?? []} seleccion={alcance} onCambiar={setAlcance} deshabilitado={soloLectura} />
+								<Box id="usuario-alcance" tabIndex={-1} sx={{ outline: 'none' }}>
+									{errores.alcance && (
+										<Typography role="alert" sx={{ fontSize: 12, color: '#B42318', mb: 1 }}>
+											{errores.alcance}
+										</Typography>
+									)}
+									<ArbolAlcance
+										arbol={catalogos?.arbol ?? []}
+										seleccion={alcance}
+										onCambiar={(nueva) => {
+											setAlcance(nueva)
+											setErrores((e) => (e.alcance ? { ...e, alcance: undefined } : e))
+										}}
+										deshabilitado={soloLectura}
+										permitidas={alcancePermitido}
+									/>
+								</Box>
 							</Seccion>
 
 							{/* 4. Acceso y permisos */}
 							<Seccion numero={4} titulo="Acceso y permisos" descripcion="Si entra a la web y a la app, y qué puede hacer además (o de menos) que su rol.">
+								{soloAppConWeb && (
+									<Alert
+										severity="warning"
+										sx={{ mb: 2 }}
+										action={
+											!soloLectura && (
+												<Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
+													{!esPropio && (
+														<Button size="small" variant="outlined" onClick={() => poner('acceso_web')(false)} sx={{ height: 30, bgcolor: colores.blanco }}>
+															Quitar acceso a la web
+														</Button>
+													)}
+													<Button
+														size="small"
+														variant="outlined"
+														onClick={() => {
+															document.getElementById('seccion-2')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+															document.querySelector('#usuario-id_rol input[type=radio]:checked')?.focus()
+														}}
+														sx={{ height: 30, bgcolor: colores.blanco }}
+													>
+														Cambiar el rol
+													</Button>
+												</Box>
+											)
+										}
+									>
+										El rol {rolElegido.nombre} es solo para la app, pero esta persona tiene acceso a la web.
+									</Alert>
+								)}
 								<Box sx={{ display: 'grid', gap: 1.5, mb: 3 }}>
 									<FilaApagador
 										id="usuario-acceso_web"
@@ -667,6 +817,7 @@ const EditarUsuario = () => {
 										onCambiar={setExcepciones}
 										deshabilitado={soloLectura}
 										esSuperadmin={Number(form.id_rol) === 1}
+										puedeDar={(codigo) => misPermisos.permisos.has(codigo) || base.has(codigo) || concedidosAntes.has(codigo)}
 									/>
 								) : (
 									<Typography sx={{ fontSize: 14, color: colores.texto2 }}>Elige un rol para ver sus permisos.</Typography>
@@ -680,7 +831,13 @@ const EditarUsuario = () => {
 							<Box component="ul" sx={{ m: 0, pl: 2.5, display: 'grid', gap: 1, fontSize: 14, color: colores.tinta, '& li::marker': { color: colores.texto3 } }}>
 								<li>{form.nombre.trim() ? `${nombreCompleto(form)}` : 'Sin nombre todavía'}{!esNuevo && original && !original.activo ? ' (desactivado)' : ''}.</li>
 								<li>{rolElegido ? `Es ${rolElegido.nombre}.` : 'Sin rol.'}</li>
-								<li>{form.acceso_web ? 'Puede entrar a la web' : 'No puede entrar a la web'}{(esNuevo ? form.dar_app : original?.acceso_app) ? ' y a la app.' : '; no entra a la app.'}</li>
+								<li>
+									{rolElegido?.solo_app
+										? form.acceso_web
+											? 'Su rol es solo para la app, pero tiene acceso a la web: revisa la sección 4.'
+											: `Su rol es solo para la app${(esNuevo ? form.dar_app : original?.acceso_app) ? ' y entra a la app.' : '; todavía no tiene acceso a la app.'}`
+										: `${form.acceso_web ? 'Puede entrar a la web' : 'No puede entrar a la web'}${(esNuevo ? form.dar_app : original?.acceso_app) ? ' y a la app.' : '; no entra a la app.'}`}
+								</li>
 								<li>{plazasElegidas.length ? `Trabaja en ${plazasElegidas.length === 1 ? plazasElegidas[0] : `${plazasElegidas.length} plazas`} (${alcance.size} proceso${alcance.size === 1 ? '' : 's'}).` : 'No tiene plazas asignadas.'}</li>
 								<li>{form.id_rol ? `Tiene ${totalPermisos} permisos${excepciones.size ? `, ${excepciones.size} distinto${excepciones.size === 1 ? '' : 's'} a su rol` : ', igual que su rol'}.` : 'Sin permisos.'}</li>
 								<li>{jefeElegido ? `Su jefe directo es ${jefeElegido.nombre}.` : 'Sin jefe directo.'}</li>
@@ -710,10 +867,11 @@ const EditarUsuario = () => {
 					</Box>
 				)}
 
+				<AvisoCambiosSinGuardar activo={hayCambios} salidaPermitida={salidaPermitida} />
 				<DialogoConfirmar
 					abierto={dialogo === 'desactivar'}
 					titulo="¿Desactivar a esta persona?"
-					texto={`Ya no podrá entrar a la web${original?.acceso_app ? ' ni a la app' : ''}. No se borra nada: la puedes volver a activar.`}
+					texto="Ya no podrá entrar a la web ni a la app móvil, y su sesión dejará de servir. No se borra nada: la puedes volver a activar."
 					confirmar="Desactivar"
 					peligro
 					ocupado={guardando}
@@ -907,6 +1065,9 @@ const DialogoCopiar = ({ abierto, excluir, onCerrar, onCopiar }) => {
 						isOptionEqualToValue={(o, v) => o.id_usuario === v.id_usuario}
 						noOptionsText="Nadie coincide"
 						loadingText="Cargando…"
+						openText="Abrir"
+						closeText="Cerrar"
+						clearText="Borrar"
 						renderInput={(params) => <TextField {...params} placeholder="Busca por nombre" size="small" />}
 					/>
 				</Campo>
