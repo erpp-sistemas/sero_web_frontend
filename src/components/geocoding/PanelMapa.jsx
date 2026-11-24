@@ -10,7 +10,7 @@ const PanelMapa = ({mapa,setMapa,Test}) => {
 
     // useEffect(() => {
     //    if(!mapa){
-    //     mapboxgl.accessToken = 'pk.eyJ1Ijoic2lzdGVtYXMyMzEyIiwiYSI6ImNsdThuaGczYTAwcnoydG54dG05OGxocXgifQ.J6tkaSWvRwfhXfiHoXzGFQ';
+    //     mapboxgl.accessToken = MAPBOX_TOKEN; // src/config/mapbox.js
     //   setMapa(
     //      new mapboxgl.Map({
     //         container: 'map',

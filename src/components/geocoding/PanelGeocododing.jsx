@@ -20,6 +20,7 @@ import { setCordendasComparacion } from "../../redux/dataGeocodingSlice";
 import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
 import PanelInfoMap from "./PanelInfoMap";
 import instance from "../../api/axios";
+import { MAPBOX_TOKEN } from '../../config/mapbox'
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -77,8 +78,7 @@ function FullWidthTabs() {
 
   useEffect(() => {
     mapaRef.current = null;
-    mapboxgl.accessToken =
-      "pk.eyJ1Ijoic2lzdGVtYXMyMzEyIiwiYSI6ImNsdThuaGczYTAwcnoydG54dG05OGxocXgifQ.J6tkaSWvRwfhXfiHoXzGFQ";
+    mapboxgl.accessToken = MAPBOX_TOKEN;
 
     const mapa = new mapboxgl.Map({
       container: "map",

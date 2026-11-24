@@ -7,6 +7,7 @@ import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import { useTheme } from "@mui/material";
 import { tokens } from "../../theme";
+import { MAPBOX_TOKEN } from '../../config/mapbox'
 
 const mapContainerStyle = {
   width: "100%",
@@ -88,8 +89,7 @@ const MapPositions = ({ data }) => {
       map.current.remove();
     }
 
-    mapboxgl.accessToken =
-      "pk.eyJ1Ijoic2lzdGVtYXMyMzEyIiwiYSI6ImNsdThuaGczYTAwcnoydG54dG05OGxocXgifQ.J6tkaSWvRwfhXfiHoXzGFQ";
+    mapboxgl.accessToken = MAPBOX_TOKEN;
 
     const first = lastPositions[0];
     const center = [

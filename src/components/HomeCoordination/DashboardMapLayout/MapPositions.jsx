@@ -7,6 +7,7 @@ import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import { useTheme } from "@mui/material";
 import { tokens } from "../../../theme";
+import { MAPBOX_TOKEN } from '../../../config/mapbox'
 
 const mapContainerStyle = {
   width: "100%",
@@ -108,8 +109,7 @@ const MapPositions = ({ data, selectedGestor }) => {
   useEffect(() => {
     if (!mapContainerRef.current || map.current) return;
 
-    mapboxgl.accessToken =
-      "pk.eyJ1Ijoic2lzdGVtYXMyMzEyIiwiYSI6ImNsdThuaGczYTAwcnoydG54dG05OGxocXgifQ.J6tkaSWvRwfhXfiHoXzGFQ";
+    mapboxgl.accessToken = MAPBOX_TOKEN;
 
     const first = positionsToShow[0] || { longitude: -99.1332, latitude: 19.4326 };
 

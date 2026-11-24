@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import mapboxgl from 'mapbox-gl';
+import { MAPBOX_TOKEN } from '../../../config/mapbox'
 
 // Mapbox Access Token
-mapboxgl.accessToken = 'TU_MAPBOX_API_KEY';
+mapboxgl.accessToken = MAPBOX_TOKEN;
 
 const MapBoxPosition = ({ incidencesData }) => {
   const [map, setMap] = useState(null);

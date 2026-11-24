@@ -5,6 +5,7 @@ import LogoErpp from "./assets/images/erpp.png"
 import LogoCheck from "./assets/images/marcaAgua.png"
 import Roboto from "../pdf/assets/fonts/Oswald-Regular.ttf"
 import PropTypes from 'prop-types'
+import { urlMapaEstatico } from '../../../../config/mapbox'
 
 function chunkArray(array, chunkSize) {
 	const chunkedArray = []
@@ -260,7 +261,7 @@ function Pdf({ ownerDetails, ownerHomeImages, ownerPayments, ownerActions }) {
 	}, [ownerHomeImages, setImage])
 
 	function getMap(longitude, latitude) {
-		const geo_punto = `https://api.mapbox.com/styles/v1/mapbox/light-v10/static/pin-l+000(${longitude},${latitude})/${longitude},${latitude},17,0/400x250?access_token=pk.eyJ1IjoibGVzdGF0eCIsImEiOiJjbDJoMzJrbmYwYTNrM2NteGVtMzBsODFvIn0.lTrpDiiVnBWEv141_PnuUg`
+		const geo_punto = urlMapaEstatico(latitude, longitude)
 		return geo_punto
 	}
 

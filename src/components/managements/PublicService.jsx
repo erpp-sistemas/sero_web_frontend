@@ -14,9 +14,8 @@ import {
 import { tokens } from "../../theme";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
+import { MAPBOX_TOKEN } from '../../config/mapbox'
 
-const MAPBOX_TOKEN =
-  "pk.eyJ1Ijoic2lzdGVtYXMyMzEyIiwiYSI6ImNsdThuaGczYTAwcnoydG54dG05OGxocXgifQ.J6tkaSWvRwfhXfiHoXzGFQ";
 
 const getRandomColor = () => {
   return "#" + Math.floor(Math.random() * 16777215).toString(16);
