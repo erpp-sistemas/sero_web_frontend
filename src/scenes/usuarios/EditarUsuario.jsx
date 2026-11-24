@@ -57,6 +57,9 @@ import ArbolAlcance from './componentes/ArbolAlcance'
 import AvisoCambiosSinGuardar from './componentes/AvisoCambiosSinGuardar'
 import ExcepcionesPermisos from './componentes/ExcepcionesPermisos'
 
+// Superadmin (1) y Sistemas (9): solo un Superadmin los asigna o edita (el servidor responde 403).
+const ROLES_SOLO_SUPERADMIN = [1, 9]
+
 const CORREO = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const TELEFONO = /^[0-9+\-() ]*$/
 
@@ -239,7 +242,7 @@ const EditarUsuario = () => {
 		setErrores((e) => (e[campo] ? { ...e, [campo]: undefined } : e))
 	}
 
-	// Nivel de quien edita: no se ofrecen roles de mayor nivel que el suyo; Superadmin solo para Superadmin.
+	// Nivel de quien edita: no se ofrecen roles de mayor nivel que el suyo; Superadmin y Sistemas solo para Superadmin.
 	// (El servidor vuelve a revisarlo y responde 403.)
 	const nivelDeRol = (idRol) => (catalogos?.roles ?? []).find((r) => r.id_rol === idRol)?.nivel ?? 0
 	const nivelActor = nivelDeRol(misPermisos.idRol)
@@ -248,7 +251,7 @@ const EditarUsuario = () => {
 			(catalogos?.roles ?? []).filter((r) => {
 				if (original && original.id_rol === r.id_rol) return true
 				if (r.es_heredado) return false
-				if (r.id_rol === 1 && misPermisos.idRol !== 1) return false
+				if (ROLES_SOLO_SUPERADMIN.includes(r.id_rol) && misPermisos.idRol !== 1) return false
 				return r.nivel <= nivelActor
 			}),
 		[catalogos, original, misPermisos.idRol, nivelActor],
@@ -257,12 +260,14 @@ const EditarUsuario = () => {
 
 	const desactivada = !esNuevo && Boolean(original) && !original.activo
 	const fueraDeNivel =
-		!esNuevo && Boolean(original) && ((original.id_rol === 1 && misPermisos.idRol !== 1) || nivelDeRol(original.id_rol) > nivelActor)
+		!esNuevo && Boolean(original) && ((ROLES_SOLO_SUPERADMIN.includes(original.id_rol) && misPermisos.idRol !== 1) || nivelDeRol(original.id_rol) > nivelActor)
 	const soloLectura = !puedeEditar || desactivada || fueraDeNivel
 	const motivoSoloLectura = desactivada
 		? 'Persona desactivada: actívala para hacer cambios.'
 		: fueraDeNivel
-			? 'No puedes editar a alguien con un rol de mayor nivel que el tuyo.'
+			? ROLES_SOLO_SUPERADMIN.includes(original?.id_rol)
+				? 'Solo un Superadmin puede editar a esta persona (rol Superadmin o Sistemas).'
+				: 'No puedes editar a alguien con un rol de mayor nivel que el tuyo.'
 			: !puedeEditar
 				? 'Solo lectura: no tienes permiso para editar usuarios.'
 				: null
@@ -579,7 +584,7 @@ const EditarUsuario = () => {
 				)}
 				{!estadoPantalla && !desactivada && fueraDeNivel && (
 					<Alert severity="info" sx={{ mb: 2 }}>
-						Puedes ver a esta persona, pero no editarla: su rol es de mayor nivel que el tuyo.
+						{motivoSoloLectura ? `Puedes ver a esta persona, pero no editarla. ${motivoSoloLectura}` : null}
 					</Alert>
 				)}
 
