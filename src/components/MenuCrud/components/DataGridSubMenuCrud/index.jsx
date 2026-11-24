@@ -47,6 +47,10 @@ import * as faIcons from "@fortawesome/free-solid-svg-icons";
 import * as MUIIcons from "@mui/icons-material";
 import { getAllMenus } from "../../../../api/menu";
 
+// S02-H2.6: pantalla en solo lectura (decisión 6: los menús y submenús se dan de alta por migración; esta
+// pantalla escribía en db_prueba). Sin agregar, sin editar celdas y sin cambiar íconos.
+const SOLO_LECTURA = true
+
 /**
  * Hook personalizado para simular una mutación asincrónica con datos ficticios.
  *
@@ -248,7 +252,7 @@ const FaIcon = ({
   return filteredIconName ? (
     <>
       <IconButton
-        onClick={handleClick}
+        onClick={SOLO_LECTURA ? undefined : handleClick}
         sx={{ bgcolor: randomColor }}
         size="small"
       >
@@ -278,7 +282,7 @@ const FaIcon = ({
   ) : (
     <IconButton>
       <AddOutlined
-        onClick={() => {
+        onClick={SOLO_LECTURA ? undefined : () => {
           handleOpenFontawesomeIconCatalogDialog();
           setDataRow(row);
         }}
@@ -366,7 +370,7 @@ const MUIcon = ({
   return filteredIconName ? (
     <>
       <IconButton
-        onClick={handleClick}
+        onClick={SOLO_LECTURA ? undefined : handleClick}
         sx={{ bgcolor: randomColor }}
         size="small"
       >
@@ -396,7 +400,7 @@ const MUIcon = ({
   ) : (
     <IconButton>
       <AddOutlined
-        onClick={() => {
+        onClick={SOLO_LECTURA ? undefined : () => {
           handleOpenMaterialUiIconCatalogDialog();
           setDataRowMui(row);
         }}
@@ -953,6 +957,8 @@ function DataGridSubMenuCrud() {
 
         <GridToolbarExport color="secondary" />
 
+        {!SOLO_LECTURA && (
+
         <Button
           color="secondary"
           onClick={handleOpenNewSubMenuDialog}
@@ -961,6 +967,8 @@ function DataGridSubMenuCrud() {
         >
           Agregar Nuevo SubMenu
         </Button>
+
+        )}
       </GridToolbarContainer>
     );
   }
@@ -1224,6 +1232,7 @@ function DataGridSubMenuCrud() {
         rows={rows}
         columns={buildColumns()}
         processRowUpdate={processRowUpdate}
+        isCellEditable={() => !SOLO_LECTURA}
         localeText={{
           toolbarColumns: "Columnas",
           toolbarFilters: "Filtros",

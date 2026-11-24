@@ -49,6 +49,10 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import SearchIcon from "@mui/icons-material/Search";
 
+// S02-H2.6: pantalla en solo lectura (decisión 6: los menús y submenús se dan de alta por migración; esta
+// pantalla escribía en db_prueba). Sin agregar, sin editar celdas y sin cambiar íconos.
+const SOLO_LECTURA = true
+
 /**
  * Componente Funcional FaIcon.
  *
@@ -125,7 +129,7 @@ const FaIcon = ({
   return filteredIconName ? (
     <>
       <IconButton
-        onClick={handleClick}
+        onClick={SOLO_LECTURA ? undefined : handleClick}
         sx={{ bgcolor: randomColor }}
         size="small"
       >
@@ -155,7 +159,7 @@ const FaIcon = ({
   ) : (
     <IconButton>
       <AddOutlined
-        onClick={() => {
+        onClick={SOLO_LECTURA ? undefined : () => {
           handleOpenFontawesomeIconCatalogDialog();
           setDataRow(row);
         }}
@@ -270,7 +274,7 @@ const MUIcon = ({
   return filteredIconName ? (
     <>
       <IconButton
-        onClick={handleClick}
+        onClick={SOLO_LECTURA ? undefined : handleClick}
         sx={{ bgcolor: randomColor }}
         size="small"
       >
@@ -300,7 +304,7 @@ const MUIcon = ({
   ) : (
     <IconButton>
       <AddOutlined
-        onClick={() => {
+        onClick={SOLO_LECTURA ? undefined : () => {
           handleOpenMaterialUiIconCatalogDialog();
           setDataRowMui(row);
         }}
@@ -1004,6 +1008,8 @@ function DataGridMenuCrud() {
 
         <GridToolbarExport color="secondary" />
 
+        {!SOLO_LECTURA && (
+
         <Button
           color="secondary"
           onClick={handleOpenNewMenuDialog}
@@ -1012,6 +1018,8 @@ function DataGridMenuCrud() {
         >
           Agregar Nuevo Menu
         </Button>
+
+        )}
       </GridToolbarContainer>
     );
   }
@@ -1215,6 +1223,7 @@ function DataGridMenuCrud() {
 
       <DataGrid
         processRowUpdate={processRowUpdate}
+        isCellEditable={() => !SOLO_LECTURA}
         rows={rows}
         columns={buildColumns()}
         localeText={{

@@ -30,15 +30,14 @@ import DashboardCoordinator from './scenes/dashboard-coordinacion'
 import Geocoding from './scenes/geocoding'
 import Usuarios from './scenes/usuarios' // S02-H2.4
 import EditarUsuario from './scenes/usuarios/EditarUsuario' // S02-H2.4
+import RolesPermisos from './scenes/roles-permisos' // S02-H2.6
 import WorkAttendance from './scenes/work-attendance'
 import AccountHistory from "./scenes/account-history"
 import ValidPayment from './scenes/valid-payment'
 import Task from "./scenes/task"
 import Service from "./scenes/service"
 import Process from "./scenes/process"
-import Roles from "./scenes/roles"
 import Menu from "./scenes/menu"
-import Permission from "./scenes/permission"
 import Places from "./scenes/places"
 import CoordinationDashboard from './scenes/coordination-dashboard'
 import TrafficLight from './scenes/traffic-light'
@@ -184,7 +183,8 @@ function App() {
                         <Route path="/new-user" element={<Navigate to="/usuarios/nuevo" replace />} />
                         <Route path="/map-list" element={<MapList />} />
                         <Route path="/map/:place_id" element={<Map />} />
-                        <Route path="/roles" element={<Roles />} />
+                        <Route path="/roles" element={<Navigate to="/roles-y-permisos" replace />} />
+                        <Route path="/roles-y-permisos" element={<RolesPermisos />} />
                         <Route path="/maintenance" element={<Maintenance />} />
                         <Route path="/assignment" element={<WorkAssignment />} />
                         <Route path="/dashboard-coordinator" element={<DashboardCoordinator />} />
@@ -194,7 +194,7 @@ function App() {
                         <Route path="/service" element={<Service />} />
                         <Route path="/process" element={<Process />} />
                         <Route path="/menu" element={<Menu />} />
-                        <Route path="/permission" element={<Permission />} />
+                        <Route path="/permission" element={<Navigate to="/roles-y-permisos" replace />} />
                         <Route path="/places" element={<Places />} />
                         <Route path="/users-list" element={<Navigate to="/usuarios" replace />} />
                         <Route path="/user-new" element={<Navigate to="/usuarios/nuevo" replace />} />

@@ -76,6 +76,7 @@ const formularioVacio = {
 	acceso_web: true,
 	dar_app: false,
 	id_rol: '',
+	id_rol_personalizado: '',
 	id_supervisor: null,
 	foto: null,
 }
@@ -93,6 +94,7 @@ const desdeUsuario = (u) => ({
 	acceso_web: Boolean(u.acceso_web),
 	dar_app: false,
 	id_rol: u.id_rol ?? '',
+	id_rol_personalizado: u.id_rol_personalizado ?? '',
 	id_supervisor: u.id_supervisor ?? null,
 	foto: null,
 })
@@ -313,17 +315,32 @@ const EditarUsuario = () => {
 				: 'Coordinador, Gerente o Director general de mayor nivel, que comparta al menos una plaza. Mientras un jefe no tenga gente capturada, ve a toda la gente de sus plazas.'
 
 	const hayCambios = !carga.cargando && !soloLectura && serializar(form, alcance, excepciones) !== inicialRef.current
-	const base = useMemo(() => new Set(catalogos?.base_por_rol?.[form.id_rol] ?? []), [catalogos, form.id_rol])
+	// Rol de los permisos web: el personalizado (H2.6) si tiene uno; si no, el de siempre.
+	const idRolPermisos = form.id_rol_personalizado || form.id_rol
+	const base = useMemo(() => new Set(catalogos?.base_por_rol?.[idRolPermisos] ?? []), [catalogos, idRolPermisos])
+	const personalizadosDelRol = useMemo(
+		() => (catalogos?.roles_personalizados ?? []).filter((r) => r.id_rol_base === Number(form.id_rol)),
+		[catalogos, form.id_rol],
+	)
+	const personalizadoElegido = personalizadosDelRol.find((r) => r.id_rol === Number(form.id_rol_personalizado))
 
-	// Al cambiar de rol, se quitan las excepciones que ya no difieren del nuevo rol
-	const cambiarRol = (idRol) => {
-		poner('id_rol')(idRol)
-		const nuevaBase = new Set(catalogos?.base_por_rol?.[idRol] ?? [])
+	// Al cambiar el rol (o el personalizado), se quitan las excepciones que ya no difieren de la nueva base
+	const ajustarExcepciones = (idBase) => {
+		const nuevaBase = new Set(catalogos?.base_por_rol?.[idBase] ?? [])
 		setExcepciones((ex) => {
 			const n = new Map()
 			for (const [codigo, concede] of ex) if (concede !== nuevaBase.has(codigo)) n.set(codigo, concede)
 			return n
 		})
+	}
+	const cambiarRol = (idRol) => {
+		poner('id_rol')(idRol)
+		poner('id_rol_personalizado')('') // un personalizado solo vale con su rol base
+		ajustarExcepciones(idRol)
+	}
+	const cambiarRolPersonalizado = (idRp) => {
+		poner('id_rol_personalizado')(idRp)
+		ajustarExcepciones(idRp || form.id_rol)
 	}
 
 	const cuerpo = () => ({
@@ -337,6 +354,7 @@ const EditarUsuario = () => {
 		usuario: form.usuario.trim().toLowerCase(),
 		...(form.contrasena ? { contrasena: form.contrasena } : {}),
 		id_rol: Number(form.id_rol),
+		id_rol_personalizado: form.id_rol_personalizado ? Number(form.id_rol_personalizado) : null,
 		acceso_web: form.acceso_web,
 		id_supervisor: form.id_supervisor || null,
 		alcance: [...alcance].map((c) => {
@@ -523,7 +541,8 @@ const EditarUsuario = () => {
 	const motivoApp = motivoSoloLectura ?? (!SINCRONIZA_APP ? 'En local no se cambia el acceso a la app; pruébalo en producción.' : null)
 
 	const acciones =
-		!esNuevo && original && puedeEditar && !fueraDeNivel ? (
+		// S02-H2.6: activar y desactivar piden usuarios.deactivate (decisión 5; lo tiene quien tenía usuarios.update)
+		!esNuevo && original && misPermisos.puede('usuarios', 'deactivate') && !fueraDeNivel ? (
 			original.activo ? (
 				<Button variant="outlined" onClick={() => setDialogo('desactivar')} disabled={guardando || original.id_usuario === misPermisos.idUsuario} sx={{ color: '#B42318', borderColor: '#F3C5C1', ...focoVisible }}>
 					Desactivar
@@ -713,6 +732,37 @@ const EditarUsuario = () => {
 										)
 									})}
 								</Box>
+								{rolElegido && (personalizadosDelRol.length > 0 || form.id_rol_personalizado) && (
+									<Campo
+										id="usuario-id_rol_personalizado"
+										etiqueta="Permisos web"
+										ayuda={`Un rol personalizado cambia solo lo que ve y hace en la web; para reportes, asignaciones y la app sigue siendo ${rolElegido.nombre}.`}
+										sx={{ mt: 2.5, maxWidth: 420 }}
+									>
+										<Select
+											id="usuario-id_rol_personalizado"
+											value={form.id_rol_personalizado === '' ? '' : Number(form.id_rol_personalizado)}
+											onChange={(e) => cambiarRolPersonalizado(e.target.value)}
+											displayEmpty
+											disabled={soloLectura}
+											size="small"
+											fullWidth
+											sx={{ height: 40, bgcolor: colores.blanco }}
+										>
+											<MenuItem value="">Los del rol {rolElegido.nombre}</MenuItem>
+											{personalizadosDelRol.map((r) => (
+												<MenuItem key={r.id_rol} value={r.id_rol}>
+													{r.nombre}
+												</MenuItem>
+											))}
+											{form.id_rol_personalizado && !personalizadoElegido && (
+												<MenuItem value={Number(form.id_rol_personalizado)} disabled>
+													{original?.rol_personalizado ?? 'Rol personalizado'} (inactivo)
+												</MenuItem>
+											)}
+										</Select>
+									</Campo>
+								)}
 								<Campo id="usuario-id_supervisor" etiqueta="Jefe directo (opcional)" ayuda={ayudaJefe} error={errores.id_supervisor ?? (jefeInvalido ? 'Este jefe ya no cumple las reglas (rol o plazas). Elige otro o déjalo vacío.' : undefined)} sx={{ mt: 2.5, maxWidth: 420 }}>
 									<Autocomplete
 										id="usuario-id_supervisor"
@@ -821,7 +871,7 @@ const EditarUsuario = () => {
 										excepciones={excepciones}
 										onCambiar={setExcepciones}
 										deshabilitado={soloLectura}
-										esSuperadmin={Number(form.id_rol) === 1}
+										nombreBase={personalizadoElegido?.nombre ?? rolElegido?.nombre}
 										puedeDar={(codigo) => misPermisos.permisos.has(codigo) || base.has(codigo) || concedidosAntes.has(codigo)}
 									/>
 								) : (
@@ -835,7 +885,7 @@ const EditarUsuario = () => {
 							<Typography sx={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.04em', color: colores.texto3, mb: 1.5 }}>Resumen</Typography>
 							<Box component="ul" sx={{ m: 0, pl: 2.5, display: 'grid', gap: 1, fontSize: 14, color: colores.tinta, '& li::marker': { color: colores.texto3 } }}>
 								<li>{form.nombre.trim() ? `${nombreCompleto(form)}` : 'Sin nombre todavía'}{!esNuevo && original && !original.activo ? ' (desactivado)' : ''}.</li>
-								<li>{rolElegido ? `Es ${rolElegido.nombre}.` : 'Sin rol.'}</li>
+								<li>{rolElegido ? `Es ${rolElegido.nombre}${personalizadoElegido ? `, con los permisos web de “${personalizadoElegido.nombre}”` : ''}.` : 'Sin rol.'}</li>
 								<li>
 									{rolElegido?.solo_app
 										? form.acceso_web
@@ -909,7 +959,12 @@ const EditarUsuario = () => {
 					onCerrar={() => setDialogo(null)}
 					onCopiar={(u) => {
 						const rolValido = (catalogos?.roles ?? []).find((r) => r.id_rol === u.id_rol && (!r.es_heredado || original?.id_rol === r.id_rol))
-						if (rolValido) poner('id_rol')(u.id_rol)
+						if (rolValido) {
+							poner('id_rol')(u.id_rol)
+							// El rol personalizado se copia si sigue activo (y es del mismo rol base)
+							const rp = (catalogos?.roles_personalizados ?? []).find((r) => r.id_rol === u.id_rol_personalizado && r.id_rol_base === u.id_rol)
+							poner('id_rol_personalizado')(rp ? rp.id_rol : '')
+						}
 						setAlcance(new Set(u.alcance.map((a) => claveAlcance(a.id_plaza, a.id_servicio, a.id_proceso))))
 						setExcepciones(new Map(u.excepciones.map((x) => [x.codigo, x.concede])))
 						setDialogo(null)

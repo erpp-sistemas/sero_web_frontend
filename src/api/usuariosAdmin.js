@@ -4,6 +4,9 @@ import { updateActiveUserRequest } from './auth'
 
 export const obtenerMisPermisosRequest = () => axios.get('/me/permisos')
 
+// S02-H2.6: menú lateral calculado con permisos (misma forma que /MenusUserId)
+export const obtenerMiMenuRequest = () => axios.get('/me/menu')
+
 export const obtenerCatalogosUsuariosRequest = () => axios.get('/admin/usuarios/catalogos')
 
 export const listarUsuariosRequest = ({ buscar, idRol, idPlaza, estado } = {}) =>

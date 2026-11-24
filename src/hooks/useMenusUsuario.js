@@ -1,6 +1,7 @@
-// S02-H2.1: menús del usuario (los mismos que hoy devuelve /MenusUserId) agrupados para el menú lateral y el buscador.
+// S02-H2.1 / H2.6: menús del usuario agrupados para el menú lateral y el buscador. Desde H2.6 salen de GET /me/menu
+// (calculado con permisos, misma forma que /MenusUserId); el backend solo devuelve lo que la persona puede ver.
 import { useEffect, useMemo, useState } from 'react'
-import { getMenusUserId } from '../services/menu.service'
+import { obtenerMiMenuRequest } from '../api/usuariosAdmin'
 
 // Agrupa como lo hacía el menú anterior: menús padre (parent_menu_id = 0) ordenados por "orden" y sus hijos debajo.
 export const agruparMenus = (menus) => {
@@ -37,12 +38,15 @@ const useMenusUsuario = (idUsuario) => {
 		}
 		setCargando(true)
 		setError(false)
-		getMenusUserId(idUsuario)
-			.then((res) => {
+		// idUsuario solo dispara la carga al cambiar de sesión: el backend usa la persona del token.
+		obtenerMiMenuRequest()
+			.then(({ data }) => {
 				if (!vigente) return
-				// getMenusUserId devuelve undefined si la petición falla (atrapa el error).
-				if (Array.isArray(res)) setMenus(res)
+				if (Array.isArray(data)) setMenus(data)
 				else setError(true)
+			})
+			.catch(() => {
+				if (vigente) setError(true)
 			})
 			.finally(() => vigente && setCargando(false))
 		return () => {

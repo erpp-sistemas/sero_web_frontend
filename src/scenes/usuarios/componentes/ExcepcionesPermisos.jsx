@@ -1,36 +1,32 @@
-// S02-H2.4: permisos de una persona = los de su rol + excepciones (agrega o quita).
-// Muestra arriba las excepciones (qué tiene de más y de menos) con "Quitar" y "Dejar igual que su rol";
-// abajo, todos los permisos agrupados por menú con casillas. El valor es un Map codigo → concede (true/false).
+// S02-H2.4 / H2.6: permisos de una persona = los de su rol + excepciones (agrega o quita).
+// Arriba, las excepciones (qué tiene de más y de menos) con "Quitar" y "Dejar igual que su rol"; abajo, la misma
+// cuadrícula que la matriz de roles (pantallas × acciones). El valor es un Map codigo → concede (true/false).
 import { useMemo, useState } from 'react'
 import PropTypes from 'prop-types'
-import { Box, Button, ButtonBase, Checkbox, Typography } from '@mui/material'
+import { Box, Button, ButtonBase, Typography } from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import { colores } from '../../../tema/seroTheme'
 import { ChipEstado } from './comunes'
 import { focoVisible } from './utilidades'
+import CuadriculaPermisos from '../../../components/permisos/CuadriculaPermisos'
+import { aplicarCambio, arbolDesdePermisos, dependenciasDe, nombrePermiso } from '../../../components/permisos/arbolPermisos'
 
-const ExcepcionesPermisos = ({ permisos, base, excepciones, onCambiar, deshabilitado, esSuperadmin, puedeDar }) => {
+const ExcepcionesPermisos = ({ permisos, base, excepciones, onCambiar, deshabilitado, puedeDar, nombreBase }) => {
 	const [verTodos, setVerTodos] = useState(false)
-	const porCodigo = useMemo(() => new Map(permisos.map((p) => [p.codigo, p])), [permisos])
+	const grupos = useMemo(() => arbolDesdePermisos(permisos), [permisos])
+	const deps = useMemo(() => dependenciasDe(grupos), [grupos])
+	const codigos = useMemo(() => permisos.map((p) => p.codigo), [permisos])
 
 	const efectivo = (codigo) => (excepciones.has(codigo) ? excepciones.get(codigo) : base.has(codigo))
 
-	const poner = (codigo, valor, mapa) => {
-		if (valor === base.has(codigo)) mapa.delete(codigo)
-		else mapa.set(codigo, valor)
-	}
-
+	// Marca o desmarca (con sus dependencias) y vuelve a calcular las excepciones como diferencia con el rol.
 	const cambiar = (codigo, valor) => {
-		const nuevo = new Map(excepciones)
-		poner(codigo, valor, nuevo)
-		const p = porCodigo.get(codigo)
-		// Una pantalla de submenú no se ve sin su menú: al darla, se da también el menú padre.
-		if (valor && p?.codigo_padre) {
-			const padreEfectivo = nuevo.has(p.codigo_padre) ? nuevo.get(p.codigo_padre) : base.has(p.codigo_padre)
-			if (!padreEfectivo) poner(p.codigo_padre, true, nuevo)
-		}
-		onCambiar(nuevo)
+		const actual = new Set(codigos.filter(efectivo))
+		const nuevo = aplicarCambio(actual, codigo, valor, deps)
+		const mapa = new Map([...excepciones].filter(([c]) => !codigos.includes(c))) // las de pantallas que no se muestran, intactas
+		for (const c of codigos) if (nuevo.has(c) !== base.has(c)) mapa.set(c, nuevo.has(c))
+		onCambiar(mapa)
 	}
 
 	const quitar = (codigo) => {
@@ -39,35 +35,28 @@ const ExcepcionesPermisos = ({ permisos, base, excepciones, onCambiar, deshabili
 		onCambiar(nuevo)
 	}
 
-	const grupos = useMemo(() => {
-		const lista = []
-		for (const p of permisos) {
-			let g = lista.find((x) => x.nombre === p.grupo)
-			if (!g) lista.push((g = { nombre: p.grupo, permisos: [] }))
-			g.permisos.push(p)
-		}
-		return lista
-	}, [permisos])
-
+	const nombre = (codigo) => (codigos.includes(codigo) ? nombrePermiso(codigo, grupos) : codigo)
 	const agregados = [...excepciones.entries()].filter(([, c]) => c).map(([codigo]) => codigo)
 	const quitados = [...excepciones.entries()].filter(([, c]) => !c).map(([codigo]) => codigo)
 	const total = permisos.filter((p) => efectivo(p.codigo)).length
 
-	const listaExcepciones = (codigos, tipo, titulo) =>
-		codigos.length > 0 && (
+	const listaExcepciones = (lista, tipo, titulo) =>
+		lista.length > 0 && (
 			<Box sx={{ mb: 1.5 }}>
 				<Typography sx={{ fontSize: 12, color: colores.texto3, textTransform: 'uppercase', letterSpacing: '0.04em', mb: 0.5 }}>{titulo}</Typography>
-				{codigos.map((codigo) => (
-					<Box key={codigo} sx={{ display: 'flex', alignItems: 'center', gap: 1, minHeight: 36, borderBottom: `1px solid ${colores.linea}` }}>
-						<ChipEstado tipo={tipo}>{tipo === 'exito' ? 'Adicional' : 'Quitado'}</ChipEstado>
-						<Typography sx={{ fontSize: 14, color: colores.tinta, flex: 1, minWidth: 0 }}>{porCodigo.get(codigo)?.nombre ?? codigo}</Typography>
-						{!deshabilitado && (
-							<Button size="small" variant="text" onClick={() => quitar(codigo)} sx={{ height: 28, color: colores.marino, fontWeight: 400, ...focoVisible }}>
-								Quitar
-							</Button>
-						)}
-					</Box>
-				))}
+				<Box sx={{ maxHeight: 240, overflowY: 'auto' }}>
+					{lista.map((codigo) => (
+						<Box key={codigo} sx={{ display: 'flex', alignItems: 'center', gap: 1, minHeight: 36, borderBottom: `1px solid ${colores.linea}` }}>
+							<ChipEstado tipo={tipo}>{tipo === 'exito' ? 'Adicional' : 'Quitado'}</ChipEstado>
+							<Typography sx={{ fontSize: 14, color: colores.tinta, flex: 1, minWidth: 0 }}>{nombre(codigo)}</Typography>
+							{!deshabilitado && (
+								<Button size="small" variant="text" onClick={() => quitar(codigo)} sx={{ height: 28, color: colores.marino, fontWeight: 400, ...focoVisible }}>
+									Quitar
+								</Button>
+							)}
+						</Box>
+					))}
+				</Box>
 			</Box>
 		)
 
@@ -76,7 +65,7 @@ const ExcepcionesPermisos = ({ permisos, base, excepciones, onCambiar, deshabili
 			<Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 2, mb: 1.5, flexWrap: 'wrap' }}>
 				<Typography sx={{ fontSize: 14, color: colores.texto2 }}>
 					Tiene <b style={{ fontWeight: 500, color: colores.tinta }}>{total}</b> de {permisos.length} permisos.{' '}
-					{excepciones.size === 0 ? 'Igual que su rol.' : `${excepciones.size} diferencia${excepciones.size === 1 ? '' : 's'} con su rol.`}
+					{excepciones.size === 0 ? `Igual que ${nombreBase ? `“${nombreBase}”` : 'su rol'}.` : `${excepciones.size} diferencia${excepciones.size === 1 ? '' : 's'} con ${nombreBase ? `“${nombreBase}”` : 'su rol'}.`}
 				</Typography>
 				{!deshabilitado && excepciones.size > 0 && (
 					<Button variant="outlined" size="small" onClick={() => onCambiar(new Map())} sx={{ height: 32, ...focoVisible }}>
@@ -101,44 +90,18 @@ const ExcepcionesPermisos = ({ permisos, base, excepciones, onCambiar, deshabili
 			</ButtonBase>
 
 			{verTodos && (
-				<Box sx={{ mt: 1, border: `1px solid ${colores.linea}`, borderRadius: '4px', maxHeight: 420, overflowY: 'auto' }}>
-					{esSuperadmin && (
-						<Typography sx={{ fontSize: 13, color: '#9A5B00', bgcolor: '#FFF4DE', px: 2, py: 1 }}>
-							Por ahora a un Superadmin no se le pueden quitar pantallas del menú; sí acciones como crear o editar usuarios.
-						</Typography>
-					)}
-					{grupos.map((g) => (
-						<Box key={g.nombre} sx={{ borderBottom: `1px solid ${colores.linea}`, '&:last-of-type': { borderBottom: 0 } }}>
-							<Typography sx={{ fontSize: 12, color: colores.texto3, textTransform: 'uppercase', letterSpacing: '0.04em', px: 2, pt: 1.5, pb: 0.5, bgcolor: colores.banda }}>
-								{g.nombre}
-							</Typography>
-							{g.permisos.map((p) => {
-								const id = `permiso-${p.codigo}`
-								const valor = efectivo(p.codigo)
-								const esExcepcion = excepciones.has(p.codigo)
-								// Superadmin: las pantallas del menú (permisos "read") no se le pueden quitar hasta H2.6
-								// Quien edita no puede dar un permiso que él mismo no tiene (el servidor responde 403)
-								const sinDerecho = !valor && puedeDar && !puedeDar(p.codigo)
-								const bloqueado = deshabilitado || (esSuperadmin && valor && p.accion === 'read') || sinDerecho
-								return (
-									<Box key={p.codigo} sx={{ display: 'flex', alignItems: 'center', minHeight: 36, px: 1.5, '&:hover': { bgcolor: colores.banda } }}>
-										<Checkbox
-											id={id}
-											size="small"
-											checked={valor}
-											onChange={(e) => cambiar(p.codigo, e.target.checked)}
-											disabled={bloqueado}
-											sx={{ p: 0.5, color: colores.borde, '&.Mui-checked': { color: colores.marino } }}
-										/>
-										<Typography component="label" htmlFor={id} sx={{ fontSize: 14, color: colores.tinta, flex: 1, cursor: bloqueado ? 'default' : 'pointer', py: 0.5 }}>
-											{p.nombre}
-										</Typography>
-										{esExcepcion && <ChipEstado tipo={valor ? 'exito' : 'error'}>{valor ? 'Adicional' : 'Quitado'}</ChipEstado>}
-									</Box>
-								)
-							})}
-						</Box>
-					))}
+				<Box sx={{ mt: 1.5 }}>
+					<CuadriculaPermisos
+						idTabla="permisos-persona"
+						grupos={grupos}
+						valor={efectivo}
+						onCambiar={cambiar}
+						deshabilitado={deshabilitado}
+						alto={440}
+						marca={(codigo) => (excepciones.has(codigo) ? (excepciones.get(codigo) ? 'agregado' : 'quitado') : null)}
+						// Quien edita no puede dar un permiso que él mismo no tiene (el servidor responde 403)
+						bloqueo={(codigo, valor) => (!valor && puedeDar && !puedeDar(codigo) ? 'Tú no tienes este permiso: no lo puedes dar' : null)}
+					/>
 				</Box>
 			)}
 		</Box>
@@ -147,14 +110,22 @@ const ExcepcionesPermisos = ({ permisos, base, excepciones, onCambiar, deshabili
 
 ExcepcionesPermisos.propTypes = {
 	permisos: PropTypes.arrayOf(
-		PropTypes.shape({ codigo: PropTypes.string.isRequired, nombre: PropTypes.string, grupo: PropTypes.string, codigo_padre: PropTypes.string, accion: PropTypes.string }),
+		PropTypes.shape({
+			codigo: PropTypes.string.isRequired,
+			recurso: PropTypes.string,
+			recurso_nombre: PropTypes.string,
+			recurso_tipo: PropTypes.string,
+			grupo: PropTypes.string,
+			codigo_padre: PropTypes.string,
+			accion: PropTypes.string,
+		}),
 	).isRequired,
 	base: PropTypes.instanceOf(Set).isRequired,
 	excepciones: PropTypes.instanceOf(Map).isRequired,
 	onCambiar: PropTypes.func.isRequired,
 	deshabilitado: PropTypes.bool,
-	esSuperadmin: PropTypes.bool,
 	puedeDar: PropTypes.func,
+	nombreBase: PropTypes.string,
 }
 
 export default ExcepcionesPermisos
