@@ -5,6 +5,7 @@ import tool from '../../toolkit/toolkitImpression.js'
 import ChargeCounter from '../../components/Records/chargeCounter.jsx'
 import ChargeMessage from '../../components/Records/chargeMessage.jsx'
 import ModalDelete from '../../components/Records/modalDelete.jsx'
+import usePuede from '../../hooks/usePuede'
 import { useSelector } from 'react-redux'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { useTheme } from '@mui/material/styles'
@@ -16,6 +17,9 @@ import * as XLSX from 'xlsx'
 	* @component
 */
 const Impression = () => {
+
+	// Borrar un paquete es borrado real: solo con fichas_creacion.delete (el backend también lo revisa).
+	const { puede: puedeBorrar } = usePuede('fichas_creacion', 'delete')
 
 	const [loading, setLoading] = useState(false)
 	const [cargando, setCargando] = useState(false)
@@ -420,9 +424,9 @@ const Impression = () => {
 										<Button variant="contained" onClick={handleDownload} color="success" sx={{  width:'50%', color:'white', fontWeight:'600', fontSize:'.6rem' }}>DESCARGAR</Button>
 										<Button onClick={() => createExcel()} variant="contained" sx={{ width:'50%', color:'white', fontWeight:'600', fontSize:'.6rem'}}>Crear Excel</Button>
 									</Box>
-									<Box>
+									{puedeBorrar && <Box>
 										<Button variant="outlined" onClick={() => (setId(paquete.id), setOpenDelete(true))} color="error" sx={{ background:'rgba(255, 0, 0, 0.3)', width:'50%', color:'white', fontWeight:'600', fontSize:'.6rem', mt:'10px' }}><DeleteIcon sx={{ color:'red' }} /></Button>
-									</Box>
+									</Box>}
 								</>
 							)
 							
@@ -445,14 +449,14 @@ const Impression = () => {
 
 									<Box className='records_impression__data__box' display={'flex'} justifyContent={'center'} alignItems={'center'}>
 										<Typography sx={{ fontWeight:'600', fontSize:'1.1rem', color:  isLightMode ? '#000000' : '#cff9e0' }}>Nombre de paquete:</Typography><Typography sx={{ fontSize:'1rem', textAlign:'center', }}>{paquete.nombre}</Typography>
-										<Tooltip
+										{puedeBorrar && <Tooltip
 											title={deleteText} 
 											enterDelay={100} 
 											leaveDelay={200}	
 										>
 										
 											<Button onClick={() => (setId(paquete.id), setOpenDelete(true))}  sx={{m:'0', p:'0', width:'auto', }} ><DeleteIcon sx={{color:'red'}}/></Button>
-										</Tooltip>
+										</Tooltip>}
 									</Box>
 									
 									<Box className='records_impression__data__box' display={'flex'} justifyContent={'center'} alignItems={'center'}>
@@ -510,7 +514,7 @@ const Impression = () => {
 
 			{ loading ? <ChargeCounter value={completedRequests} /> : false}
 			{ cargando ? <ChargeMessage/> : false} 
-			{ openDelete ? <ModalDelete id={id} setOpenDelete={setOpenDelete} /> : false }
+			{ openDelete && puedeBorrar ? <ModalDelete id={id} setOpenDelete={setOpenDelete} /> : false }
 
 		</Box>
 

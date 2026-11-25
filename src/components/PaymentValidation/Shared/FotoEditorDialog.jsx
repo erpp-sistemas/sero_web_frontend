@@ -326,8 +326,8 @@ const FotoEditorDialog = ({
                       <Typography variant="caption">{disponible.tipo}</Typography>
                       <Typography variant="caption">{disponible.fechaCaptura?.slice(11, 19)}</Typography>
                     </Button>
-                    <Button size="small" color="error" disabled={enviando}
-                      onClick={() => onEliminarFoto(disponible)}>Eliminar</Button>
+                    {onEliminarFoto && (<Button size="small" color="error" disabled={enviando}
+                      onClick={() => onEliminarFoto(disponible)}>Eliminar</Button>)}
                   </Box>
                 ))}
               </Box>

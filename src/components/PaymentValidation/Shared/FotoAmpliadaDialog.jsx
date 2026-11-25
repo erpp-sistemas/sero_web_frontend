@@ -172,14 +172,14 @@ const FotoAmpliadaDialog = ({
               <Edit />
             </IconButton>
           </Tooltip>
-          <Tooltip title="Eliminar foto">
+          {onDelete && (<Tooltip title="Eliminar foto">
             <IconButton
               onClick={() => onDelete(foto)}
               sx={{ color: colors.grey[100] }}
             >
               <Delete />
             </IconButton>
-          </Tooltip>
+          </Tooltip>)}
           <Tooltip title="Descargar">
             <IconButton
               onClick={() => onDownload(foto)}

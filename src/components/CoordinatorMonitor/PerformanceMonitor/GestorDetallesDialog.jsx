@@ -1,4 +1,5 @@
 // src/components/CoordinatorMonitor/GestorDetallesDialog.jsx
+import usePuede from '../../../hooks/usePuede';
 import React, {
   useState,
   useMemo,
@@ -218,14 +219,14 @@ const FotoAmpliadaDialog = ({
               <Edit />
             </IconButton>
           </Tooltip>
-          <Tooltip title="Eliminar foto">
+          {onDelete && (<Tooltip title="Eliminar foto">
             <IconButton
               onClick={() => onDelete(foto)}
               sx={{ color: colors.grey[100] }}
             >
               <Delete />
             </IconButton>
-          </Tooltip>
+          </Tooltip>)}
           <Tooltip title="Descargar">
             <IconButton
               onClick={() => onDownload(foto)}
@@ -1602,7 +1603,7 @@ const MiniGaleria = ({
           </ListItemText>
         </MenuItem>
         <Divider sx={{ backgroundColor: colors.primary[700], my: 0.5 }} />
-        <MenuItem
+        {onDeleteFoto && (<MenuItem
           onClick={handleDelete}
           sx={{
             color: colors.grey[300],
@@ -1621,7 +1622,7 @@ const MiniGaleria = ({
           >
             Eliminar
           </ListItemText>
-        </MenuItem>
+        </MenuItem>)}
       </Menu>
     </Box>
   );
@@ -1720,6 +1721,8 @@ const GestorDetallesDialog = ({
   const [modoEditor, setModoEditor] = useState(null);
   const [gestionSeleccionada, setGestionSeleccionada] = useState(null);
   const [fotoEliminar, setFotoEliminar] = useState(null);
+  // Borrar una foto es borrado real: solo con monitor_operativo.delete (el backend también lo revisa).
+  const { puede: puedeBorrar } = usePuede('monitor_operativo', 'delete');
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
   // 🔹 Estado para loading y notificaciones
@@ -3402,7 +3405,7 @@ const GestorDetallesDialog = ({
                                         }
                                       }}
                                       onEditFoto={handleEditarFoto}
-                                      onDeleteFoto={handleEliminarFoto}
+                                      onDeleteFoto={puedeBorrar ? handleEliminarFoto : undefined}
                                       onAgregarFoto={() =>
                                         handleAgregarFoto(gestion)
                                       }
@@ -3568,7 +3571,7 @@ const GestorDetallesDialog = ({
         onNext={handleNextFoto}
         onPrev={handlePrevFoto}
         onEdit={handleEditarFoto}
-        onDelete={handleEliminarFoto}
+        onDelete={puedeBorrar ? handleEliminarFoto : undefined}
         totalFotos={fotosFiltradas.length}
         index={fotoAmpliadaIndex}
       />

@@ -1,5 +1,6 @@
 // src/components/PaymentValidation/IndicadoresGestion/GestionFotosDialog.jsx
 import React, { useState, useMemo, useRef } from "react";
+import usePuede from '../../../hooks/usePuede';
 import {
   Dialog,
   DialogTitle,
@@ -110,6 +111,8 @@ const GestionFotosDialog = ({
   // Eliminar
   const [fotoEliminar, setFotoEliminar] = useState(null);
   const [registroEliminar, setRegistroEliminar] = useState(null);
+  // Borrar una foto es borrado real: solo con pagos_validos.delete (el backend también lo revisa).
+  const { puede: puedeBorrar } = usePuede('pagos_validos', 'delete');
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
   // Visor
@@ -675,7 +678,7 @@ const GestionFotosDialog = ({
             registros={registrosPaginados}
             onAgregarFoto={handleAgregarFoto}
             onEditarFoto={handleEditarFoto}
-            onEliminarFoto={handleEliminarFoto}
+            onEliminarFoto={puedeBorrar ? handleEliminarFoto : undefined}
             onFotoClick={handleFotoClick}
             COLOR_TEXTO={COLOR_TEXTO}
             COLOR_BORDE={COLOR_BORDE}
@@ -875,7 +878,7 @@ const GestionFotosDialog = ({
         tipoInicial={tipoFotoNueva}
         fotosDisponibles={fotosEditor}
         onSeleccionarFoto={setFotoEditando}
-        onEliminarFoto={(foto) => handleEliminarFoto(registroSeleccionado, foto)}
+        onEliminarFoto={puedeBorrar ? (foto) => handleEliminarFoto(registroSeleccionado, foto) : undefined}
         colors={colors}
         COLOR_TEXTO={COLOR_TEXTO}
         COLOR_FONDO={COLOR_FONDO}
@@ -924,12 +927,12 @@ const GestionFotosDialog = ({
             handleEditarFoto(registroSeleccionado, f);
           }
         }}
-        onDelete={(f) => {
+        onDelete={puedeBorrar ? (f) => {
           setFotoAmpliada(null);
           if (registroSeleccionado) {
             handleEliminarFoto(registroSeleccionado, f);
           }
-        }}
+        } : undefined}
         totalFotos={fotosAmpliadasLista.length}
         index={fotoAmpliadaIndex}
       />

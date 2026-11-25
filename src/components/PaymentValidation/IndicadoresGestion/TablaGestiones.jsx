@@ -218,7 +218,7 @@ const TablaGestiones = ({
               <Edit sx={{ fontSize: 13 }} />
             </IconButton>
           </Tooltip>
-          <Tooltip title="Eliminar foto" arrow>
+          {onEliminarFoto && (<Tooltip title="Eliminar foto" arrow>
             <IconButton
               size="small"
               onClick={() => onEliminarFoto(registro, foto)}
@@ -232,7 +232,7 @@ const TablaGestiones = ({
             >
               <Delete sx={{ fontSize: 13 }} />
             </IconButton>
-          </Tooltip>
+          </Tooltip>)}
         </Box>
       </Box>
     );
