@@ -45,7 +45,8 @@ const createRecords = async (data) => {
 		const res=await instance.post(url,data)
 		return res.status
 	}catch(error){
-		false
+		// Se devuelve el código (p. ej. 403 sin fichas_creacion.export) para que la pantalla avise.
+		return error?.response?.status ?? 0
 	}
 
 }
@@ -134,6 +135,7 @@ const updateActivePaquete = async (id) => {
 
 	} catch (error) {
 		console.error('Error fetching data:', error)
+		return { status: error?.response?.status ?? 0 }
 	}
 
 }

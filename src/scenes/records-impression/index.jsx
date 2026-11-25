@@ -1,4 +1,4 @@
-import { Box, Button, MenuItem, FormControl, InputLabel, Select, Typography, Tooltip } from '@mui/material'
+import { Alert, Box, Button, MenuItem, FormControl, InputLabel, Select, Typography, Tooltip } from '@mui/material'
 import ArticleIcon from '@mui/icons-material/Article'
 import { useEffect, useState } from 'react'
 import tool from '../../toolkit/toolkitImpression.js'
@@ -20,6 +20,9 @@ const Impression = () => {
 
 	// Borrar un paquete es borrado real: solo con fichas_creacion.delete (el backend también lo revisa).
 	const { puede: puedeBorrar } = usePuede('fichas_creacion', 'delete')
+	// Generar los PDF pide fichas_creacion.export (el backend responde 403 sin él).
+	const { puede: puedeGenerar } = usePuede('fichas_creacion', 'export')
+	const [avisoPermiso, setAvisoPermiso] = useState('')
 
 	const [loading, setLoading] = useState(false)
 	const [cargando, setCargando] = useState(false)
@@ -70,13 +73,29 @@ const Impression = () => {
 	}
 
 	const handleStartUp = async () => {
+		setAvisoPermiso('')
 		setLoading(true)
-		await tool.updateActivePaquete(idPaq)
+		const activacion = await tool.updateActivePaquete(idPaq)
+		if (activacion?.status === 403) {
+			// Sin permiso no se sigue ni se recarga: la persona ve por qué no se generó nada.
+			setLoading(false)
+			setAvisoPermiso('No tienes permiso para activar este paquete (Fichas › Creación: Editar). No se generó ninguna ficha. Pide el permiso a un administrador.')
+			return
+		}
 		const registrosArray = Object.values(registros)
 		registrosArray.sort((a, b) => a.id - b.id)
 		let id_nuevo = (totalFichas - rango)+1
+		let generadas = 0
 		for (let registro of registrosArray) {
-			await handleGeneratePDF(registro, id_nuevo)
+			const status = await handleGeneratePDF(registro, id_nuevo)
+			if (status === 403) {
+				setLoading(false)
+				setAvisoPermiso(generadas === 0
+					? 'No tienes permiso para generar fichas (Fichas › Creación: Exportar). No se generó ninguna ficha. Pide el permiso a un administrador.'
+					: `Se detuvo la generación: ya no tienes permiso para generar fichas (Fichas › Creación: Exportar). Se generaron ${generadas} de ${registrosArray.length}.`)
+				return
+			}
+			if (status === 200) generadas++
 			id_nuevo++
 		}
 		setLoading(false)
@@ -129,6 +148,7 @@ const Impression = () => {
 
 		try {
 			const status = await tool.createRecords(data)
+			if (status === 403) return status
 			if(status==200){
 				setCompletedRequests(prev => prev + 1)
 			}else if(status==400){
@@ -138,6 +158,7 @@ const Impression = () => {
 				console.error('Error:', status)
 				setCompletedRequests(prev => prev + 1)
 			}
+			return status
 		} catch (error) {
 			console.error('Error fetching data:', error)
 		}
@@ -320,6 +341,12 @@ const Impression = () => {
 			}}
 		>
 
+			{avisoPermiso && (
+				<Alert severity="error" role="alert" onClose={() => setAvisoPermiso('')} sx={{ width: '100%', mb: 2 }}>
+					{avisoPermiso}
+				</Alert>
+			)}
+
 			<Typography 
 				variant="h3"
 				fontWeight="bold"
@@ -388,7 +415,7 @@ const Impression = () => {
 
 					</Box>
 
-					{ rango > 0 ? 
+					{ rango > 0 && puedeGenerar ? 
 						<Tooltip
 							title={generarText} 
 							enterDelay={100} 
