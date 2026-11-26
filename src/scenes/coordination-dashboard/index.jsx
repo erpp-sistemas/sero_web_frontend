@@ -3,7 +3,7 @@ import { tokens } from "../../theme";
 import PlaceSelect from "../../components/select/placeSelect.jsx";
 import ServiceSelect from "../../components/select/serviceSelect";
 import ProcessSelect from "../../components/select/processSelect";
-import { Box, useTheme, Button, Typography } from "@mui/material";
+import { Alert, Box, useTheme, Button, Typography } from "@mui/material";
 import LoadingModal from "../../components/LoadingModal.jsx";
 import CustomAlert from "../../components/CustomAlert.jsx";
 import Grid from "@mui/material/Grid";
@@ -25,6 +25,18 @@ import DailyManagementNotPhoto from "../../components/CoordinationDashboard/Dail
 import BatteryMeter from "../../components/CoordinationDashboard/BatteryMeter.jsx";
 import VerifiedAddress from "../../components/CoordinationDashboard/VerifiedAddress.jsx";
 import StatCards from "../../components/CoordinationDashboard/StatCards.jsx";
+
+// Cada sección llega como JSON en texto; si viene vacía (NULL) o mal formada se usa una lista vacía.
+const leerLista = (valor) => {
+  if (Array.isArray(valor)) return valor;
+  if (typeof valor !== "string" || valor === "") return [];
+  try {
+    const datos = JSON.parse(valor);
+    return Array.isArray(datos) ? datos : [];
+  } catch {
+    return [];
+  }
+};
 
 function Index() {
   const theme = useTheme();
@@ -57,6 +69,8 @@ function Index() {
   const [batteryMeterData, setBatteryMeterData] = useState([]);
   const [verifiedAddressData, setVerifiedAddressData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  // Error de la última búsqueda: se queda visible hasta la siguiente (el aviso flotante se oculta a los 7 s).
+  const [errorConsulta, setErrorConsulta] = useState("");
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertType, setAlertType] = useState("info");
   const [alertMessage, setAlertMessage] = useState("");
@@ -116,6 +130,7 @@ function Index() {
       const typeConcept =
         selectedStartDate === selectedFinishDate ? "hour" : "month";
       setTypeDailyManagementData(typeConcept);
+      setErrorConsulta("");
       setIsLoading(true);
       const response = await coordinationDashboardRequest(
         selectedPlace,
@@ -125,29 +140,28 @@ function Index() {
         selectedFinishDate
       );
 
-      console.log(JSON.parse(response.data[0].row_one));
-      setRowOneData(JSON.parse(response.data[0].row_one));
-      setDataGridData(JSON.parse(response.data[0].DataGridManagementByManager));
-      setManagedTaskData(JSON.parse(response.data[0].ManagedTask));
-      setLocationStatusData(JSON.parse(response.data[0].LocationStatus));
-      setTypeServiceData(JSON.parse(response.data[0].TypeService));
-      setTypePropertyData(JSON.parse(response.data[0].TypeProperty));
-      setDailyManagementData(JSON.parse(response.data[0].DailyManagement));
-      setDailyWorkSummaryData(JSON.parse(response.data[0].DailyWorkSummary));
+      setRowOneData(leerLista(response.data[0].row_one));
+      setDataGridData(leerLista(response.data[0].DataGridManagementByManager));
+      setManagedTaskData(leerLista(response.data[0].ManagedTask));
+      setLocationStatusData(leerLista(response.data[0].LocationStatus));
+      setTypeServiceData(leerLista(response.data[0].TypeService));
+      setTypePropertyData(leerLista(response.data[0].TypeProperty));
+      setDailyManagementData(leerLista(response.data[0].DailyManagement));
+      setDailyWorkSummaryData(leerLista(response.data[0].DailyWorkSummary));
       setPaymentsProceduresData(
-        JSON.parse(response.data[0].PaymentsProcedures)
+        leerLista(response.data[0].PaymentsProcedures)
       );
       setPaymentsProceduresByTypeServiceData(
-        JSON.parse(response.data[0].PaymentsProceduresByTypeService)
+        leerLista(response.data[0].PaymentsProceduresByTypeService)
       );
       setPaymentsProceduresByManagerData(
-        JSON.parse(response.data[0].PaymentsProceduresByManager)
+        leerLista(response.data[0].PaymentsProceduresByManager)
       );
       setDailyManagementNotPhotoData(
-        JSON.parse(response.data[0].DailyManagementNotPhoto)
+        leerLista(response.data[0].DailyManagementNotPhoto)
       );
-      setBatteryMeterData(JSON.parse(response.data[0].BatteryMeter));
-      setVerifiedAddressData(JSON.parse(response.data[0].VerifiedAddress));
+      setBatteryMeterData(leerLista(response.data[0].BatteryMeter));
+      setVerifiedAddressData(leerLista(response.data[0].VerifiedAddress));
       setResult(response.data);
       setIsLoading(false);
       setAlertOpen(true);
@@ -155,13 +169,22 @@ function Index() {
       setAlertMessage("¡Felicidades! Se genero el proceso correctamente");
     } catch (error) {
       setIsLoading(false);
-      if (error.response.status === 400) {
-        setAlertOpen(true);
+      setResult([]);
+      setAlertOpen(true);
+      const status = error?.response?.status;
+      if (status === 400) {
         setAlertType("warning");
         setAlertMessage("¡Atencion! No se encontraron pagos");
-        setResult([]);
+      } else if (!error?.response) {
+        // Sin respuesta: el servidor cortó la consulta por tiempo (o no hubo conexión).
+        setAlertType("error");
+        setAlertMessage("La consulta tardó demasiado; prueba con un rango más corto.");
+        setErrorConsulta("La consulta tardó demasiado; prueba con un rango más corto.");
+      } else {
+        setAlertType("error");
+        setAlertMessage("No se pudo cargar el dashboard. Intenta de nuevo.");
+        setErrorConsulta("No se pudo cargar el dashboard. Intenta de nuevo.");
       }
-      setResult([]);
     }
   };
 
@@ -191,6 +214,12 @@ function Index() {
           message={alertMessage}
           onClose={setAlertOpen}
         />
+
+        {errorConsulta && (
+          <Alert severity="error" sx={{ width: "100%" }} onClose={() => setErrorConsulta("")}>
+            {errorConsulta}
+          </Alert>
+        )}
 
         <Grid container xs={12} md={12} spacing={2}>
           <Grid item xs={12} md={4}>
