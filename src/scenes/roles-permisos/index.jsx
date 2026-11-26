@@ -388,6 +388,7 @@ const RolesPermisos = () => {
 								valor={(c) => borrador.has(c)}
 								onCambiar={(codigo, v) => setBorrador((b) => aplicarCambio(b, codigo, v, deps))}
 								marca={(c) => (borrador.has(c) && !original.has(c) ? 'agregado' : !borrador.has(c) && original.has(c) ? 'quitado' : null)}
+								leyenda={{ agregado: 'Por dar al guardar', quitado: 'Por quitar al guardar', sinColor: 'Sin cambios' }}
 								bloqueo={(c, v) => (!v && !original.has(c) && !misPermisos.permisos.has(c) ? 'Tú no tienes este permiso: no lo puedes dar' : null)}
 								deshabilitado={!editable}
 							/>

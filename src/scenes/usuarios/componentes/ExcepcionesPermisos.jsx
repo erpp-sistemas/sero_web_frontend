@@ -99,6 +99,7 @@ const ExcepcionesPermisos = ({ permisos, base, excepciones, onCambiar, deshabili
 						deshabilitado={deshabilitado}
 						alto={440}
 						marca={(codigo) => (excepciones.has(codigo) ? (excepciones.get(codigo) ? 'agregado' : 'quitado') : null)}
+						leyenda={{ agregado: 'Adicional (su rol no lo da)', quitado: 'Quitado (su rol lo da, a esta persona no)', sinColor: 'Igual que su rol' }}
 						// Quien edita no puede dar un permiso que él mismo no tiene (el servidor responde 403)
 						bloqueo={(codigo, valor) => (!valor && puedeDar && !puedeDar(codigo) ? 'Tú no tienes este permiso: no lo puedes dar' : null)}
 					/>

@@ -31,14 +31,11 @@ import Geocoding from './scenes/geocoding'
 import Usuarios from './scenes/usuarios' // S02-H2.4
 import EditarUsuario from './scenes/usuarios/EditarUsuario' // S02-H2.4
 import RolesPermisos from './scenes/roles-permisos' // S02-H2.6
+import PlazasServicios from './scenes/plazas-servicios' // S02-H2.5
 import WorkAttendance from './scenes/work-attendance'
 import AccountHistory from "./scenes/account-history"
 import ValidPayment from './scenes/valid-payment'
-import Task from "./scenes/task"
-import Service from "./scenes/service"
-import Process from "./scenes/process"
 import Menu from "./scenes/menu"
-import Places from "./scenes/places"
 import CoordinationDashboard from './scenes/coordination-dashboard'
 import TrafficLight from './scenes/traffic-light'
 import SurveyReport from './scenes/survey-report'
@@ -190,12 +187,14 @@ function App() {
                         <Route path="/dashboard-coordinator" element={<DashboardCoordinator />} />
                         <Route path="/geocoding" element={<Geocoding />} />
                         <Route path="/valid-payment" element={<ValidPayment />} />
-                        <Route path="/task" element={<Task />} />
-                        <Route path="/service" element={<Service />} />
-                        <Route path="/process" element={<Process />} />
+                        {/* S02-H2.5: Plazas, Servicios, Procesos y Tareas viejas reemplazadas por /plazas-servicios; las rutas viejas redirigen */}
+                        <Route path="/plazas-servicios" element={<PlazasServicios />} />
+                        <Route path="/task" element={<Navigate to="/plazas-servicios" replace />} />
+                        <Route path="/service" element={<Navigate to="/plazas-servicios" replace />} />
+                        <Route path="/process" element={<Navigate to="/plazas-servicios" replace />} />
                         <Route path="/menu" element={<Menu />} />
                         <Route path="/permission" element={<Navigate to="/roles-y-permisos" replace />} />
-                        <Route path="/places" element={<Places />} />
+                        <Route path="/places" element={<Navigate to="/plazas-servicios" replace />} />
                         <Route path="/users-list" element={<Navigate to="/usuarios" replace />} />
                         <Route path="/user-new" element={<Navigate to="/usuarios/nuevo" replace />} />
                         <Route path="/usuarios" element={<Usuarios />} />

@@ -64,9 +64,31 @@ Celda.propTypes = {
 	onCambiar: PropTypes.func,
 }
 
+// Leyenda visible arriba de la tabla: cada marca con su muestra real (fondo + signo) y su significado.
+const Leyenda = ({ textos }) => (
+	<Box component="ul" aria-label="Qué significan las marcas" sx={{ listStyle: 'none', p: 0, m: 0, mb: 1.5, display: 'flex', flexWrap: 'wrap', gap: { xs: 1, sm: 2.5 }, fontSize: 13, color: colores.texto2 }}>
+		{['agregado', 'quitado'].map((clave) => (
+			<Box component="li" key={clave} sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+				<Box component="span" aria-hidden sx={{ width: 22, height: 20, borderRadius: '4px', bgcolor: MARCAS[clave].fondo, color: MARCAS[clave].texto, fontWeight: 500, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+					{MARCAS[clave].signo}
+				</Box>
+				{textos[clave]}
+			</Box>
+		))}
+		<Box component="li" sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+			<Box component="span" aria-hidden sx={{ width: 22, height: 20, borderRadius: '4px', border: `1px solid ${colores.linea}`, bgcolor: colores.blanco }} />
+			{textos.sinColor}
+		</Box>
+	</Box>
+)
+
+Leyenda.propTypes = {
+	textos: PropTypes.shape({ agregado: PropTypes.string, quitado: PropTypes.string, sinColor: PropTypes.string }).isRequired,
+}
+
 const visuallyHidden = { position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap' }
 
-const CuadriculaPermisos = ({ grupos, acciones = ACCIONES, valor, onCambiar, marca, bloqueo, deshabilitado, alto = 520, idTabla = 'cuadricula-permisos' }) => {
+const CuadriculaPermisos = ({ grupos, acciones = ACCIONES, valor, onCambiar, marca, bloqueo, deshabilitado, alto = 520, idTabla = 'cuadricula-permisos', leyenda }) => {
 	const [buscar, setBuscar] = useState('')
 	const columnas = useMemo(() => columnasUsadas(grupos, acciones), [grupos, acciones])
 	const visibles = useMemo(() => {
@@ -111,6 +133,7 @@ const CuadriculaPermisos = ({ grupos, acciones = ACCIONES, valor, onCambiar, mar
 				}
 				sx={{ mb: 1.5, width: { xs: '100%', sm: 320 }, height: 36, bgcolor: colores.blanco }}
 			/>
+			{leyenda && <Leyenda textos={leyenda} />}
 			<Box sx={{ border: `1px solid ${colores.linea}`, borderRadius: '4px', maxHeight: alto, overflow: 'auto', bgcolor: colores.blanco }}>
 				<Box component="table" id={idTabla} sx={{ borderCollapse: 'separate', borderSpacing: 0, width: '100%', minWidth: 160 + columnas.length * 96, fontSize: 13 }}>
 					<Box component="thead">
@@ -182,6 +205,7 @@ CuadriculaPermisos.propTypes = {
 	deshabilitado: PropTypes.bool,
 	alto: PropTypes.number,
 	idTabla: PropTypes.string,
+	leyenda: PropTypes.shape({ agregado: PropTypes.string, quitado: PropTypes.string, sinColor: PropTypes.string }),
 }
 
 export default CuadriculaPermisos
